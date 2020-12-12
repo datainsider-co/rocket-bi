@@ -1,9 +1,9 @@
-version: "3.9"
+version: "3"
 
 services:
   mysql:
     image: mysql:5.7
-    container_name: mysql
+    container_name: di-mysql
     command: mysqld --user=root --verbose
     restart: always
     volumes:     
@@ -19,12 +19,12 @@ services:
     
   ssdb:
     image: datainsiderco/ssdb:0.1
-    container_name: "ssdb"
+    container_name: ssdb
     ports:
      - "8888:8888"
     volumes:
       - ./ssdb/ssdb.conf:/usr/local/ssdb/ssdb.conf
-      - ./ssdb/:/usr/local/ssdb/
+      - ./ssdb/data:/usr/local/ssdb/var/data
 
   clickhouse:
     image: yandex/clickhouse-server:20.9.2.20
