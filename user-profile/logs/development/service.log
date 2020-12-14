@@ -1,0 +1,415 @@
+2020-12-14 02:31:53,894 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:32:06,758 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:32:06,767 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:32:07,548 INF                  MainApp$                  Process started
+2020-12-14 02:32:09,815 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:32:14,859 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:32:25,546 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:32:30,098 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:32:30,100 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:32:30,416 INF                  MainApp$                  Process started
+2020-12-14 02:32:30,931 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:32:33,119 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:32:40,031 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:32:44,960 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:32:44,962 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:32:45,415 INF                  MainApp$                  Process started
+2020-12-14 02:32:46,140 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:32:48,952 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:32:56,501 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:33:00,126 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:33:00,130 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:33:00,506 INF                  MainApp$                  Process started
+2020-12-14 02:33:01,284 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:33:03,861 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:33:12,918 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:33:18,429 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:33:18,433 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:33:18,985 INF                  MainApp$                  Process started
+2020-12-14 02:33:19,711 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:33:21,504 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:33:29,215 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:33:32,566 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:33:32,570 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:33:32,958 INF                  MainApp$                  Process started
+2020-12-14 02:33:33,528 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:33:35,277 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:33:45,016 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:33:48,649 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:33:48,650 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:33:48,927 INF                  MainApp$                  Process started
+2020-12-14 02:33:49,667 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:33:52,144 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:51:56,547 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:51:59,209 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:51:59,211 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:51:59,515 INF                  MainApp$                  Process started
+2020-12-14 02:51:59,943 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:52:01,720 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:52:07,440 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:52:10,075 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:52:10,077 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:52:10,254 INF                  MainApp$                  Process started
+2020-12-14 02:52:10,599 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:52:11,469 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:52:15,624 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:52:17,850 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:52:17,852 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:52:18,078 INF                  MainApp$                  Process started
+2020-12-14 02:52:18,493 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:52:20,062 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:52:25,100 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:52:27,667 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:52:27,668 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:52:27,936 INF                  MainApp$                  Process started
+2020-12-14 02:52:28,261 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:52:29,588 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:52:34,845 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:52:38,035 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:52:38,048 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:52:38,260 INF                  MainApp$                  Process started
+2020-12-14 02:52:38,681 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:52:39,925 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:52:45,722 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:52:48,200 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:52:48,201 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:52:48,469 INF                  MainApp$                  Process started
+2020-12-14 02:52:48,997 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:52:50,229 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:52:58,433 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:53:00,736 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:53:00,738 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:53:01,003 INF                  MainApp$                  Process started
+2020-12-14 02:53:01,441 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:53:02,852 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:53:14,248 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:53:16,343 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:53:16,345 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:53:16,869 INF                  MainApp$                  Process started
+2020-12-14 02:53:17,329 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:53:18,619 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:53:36,555 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:53:39,892 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:53:39,896 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:53:40,134 INF                  MainApp$                  Process started
+2020-12-14 02:53:40,724 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:53:41,787 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:54:12,309 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:54:14,688 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:54:14,692 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:54:14,897 INF                  MainApp$                  Process started
+2020-12-14 02:54:15,250 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:54:16,561 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:55:12,007 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:55:14,969 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:55:14,977 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:55:15,304 INF                  MainApp$                  Process started
+2020-12-14 02:55:15,886 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:55:17,194 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:55:26,515 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:55:30,352 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:55:30,355 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:55:30,706 INF                  MainApp$                  Process started
+2020-12-14 02:55:31,467 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:55:32,864 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:55:39,120 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:55:42,126 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:55:42,129 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:55:42,563 INF                  MainApp$                  Process started
+2020-12-14 02:55:43,508 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:55:45,786 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:55:52,906 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:55:56,286 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:55:56,290 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:55:56,747 INF                  MainApp$                  Process started
+2020-12-14 02:55:57,608 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:55:59,581 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:56:07,962 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:56:12,921 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:56:12,925 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:56:13,297 INF                  MainApp$                  Process started
+2020-12-14 02:56:13,940 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:56:15,475 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:56:22,851 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:56:26,567 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:56:26,571 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:56:26,963 INF                  MainApp$                  Process started
+2020-12-14 02:56:27,634 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:56:29,963 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:56:37,900 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:56:42,482 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:56:42,486 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:56:42,898 INF                  MainApp$                  Process started
+2020-12-14 02:56:43,604 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:56:46,135 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:56:57,088 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:57:01,717 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:57:01,723 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:57:02,188 INF                  MainApp$                  Process started
+2020-12-14 02:57:02,922 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:57:05,653 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:57:15,428 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:57:19,493 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:57:19,497 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:57:20,071 INF                  MainApp$                  Process started
+2020-12-14 02:57:20,903 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:57:22,766 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:57:30,091 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:57:34,194 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:57:34,199 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:57:34,730 INF                  MainApp$                  Process started
+2020-12-14 02:57:35,723 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:57:38,537 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:57:47,470 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:57:52,317 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:57:52,321 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:57:52,610 INF                  MainApp$                  Process started
+2020-12-14 02:57:53,185 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:57:55,579 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:58:06,011 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:58:12,875 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:58:12,880 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:58:13,491 INF                  MainApp$                  Process started
+2020-12-14 02:58:14,473 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:58:17,389 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:58:28,124 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:58:33,540 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:58:33,555 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:58:34,046 INF                  MainApp$                  Process started
+2020-12-14 02:58:34,837 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:58:37,466 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:58:48,103 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:58:54,780 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:58:54,793 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:58:55,298 INF                  MainApp$                  Process started
+2020-12-14 02:58:56,260 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:58:59,358 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:59:14,295 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 02:59:25,462 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 02:59:25,490 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 02:59:27,149 INF                  MainApp$                  Process started
+2020-12-14 02:59:30,846 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 02:59:37,358 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 02:59:58,719 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:00:08,323 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:00:08,328 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:00:09,407 INF                  MainApp$                  Process started
+2020-12-14 03:00:10,892 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:00:15,596 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:00:33,020 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:00:40,428 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:00:40,446 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:00:41,970 INF                  MainApp$                  Process started
+2020-12-14 03:00:43,255 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:00:47,265 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:01:02,888 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:01:10,624 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:01:10,627 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:01:11,609 INF                  MainApp$                  Process started
+2020-12-14 03:01:14,126 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:01:17,611 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:01:28,799 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:01:36,610 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:01:36,616 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:01:37,076 INF                  MainApp$                  Process started
+2020-12-14 03:01:38,095 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:01:40,514 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:01:52,738 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:01:58,746 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:01:58,749 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:01:59,218 INF                  MainApp$                  Process started
+2020-12-14 03:02:00,210 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:02:04,331 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:02:19,545 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:02:28,193 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:02:28,208 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:02:28,935 INF                  MainApp$                  Process started
+2020-12-14 03:02:30,392 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:02:35,603 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:02:48,479 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:02:54,526 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:02:54,529 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:02:55,024 INF                  MainApp$                  Process started
+2020-12-14 03:02:55,854 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:02:58,231 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:03:11,457 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:03:16,511 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:03:16,516 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:03:17,076 INF                  MainApp$                  Process started
+2020-12-14 03:03:17,992 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:03:20,376 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:03:33,286 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:03:38,386 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:03:38,405 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:03:39,873 INF                  MainApp$                  Process started
+2020-12-14 03:03:41,011 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:03:44,695 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:03:56,656 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:04:02,922 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:04:02,926 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:04:03,842 INF                  MainApp$                  Process started
+2020-12-14 03:04:04,705 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:04:07,317 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:04:19,376 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:04:25,313 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:04:25,320 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:04:25,980 INF                  MainApp$                  Process started
+2020-12-14 03:04:26,964 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:04:29,904 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:04:43,365 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:04:48,891 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:04:48,896 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:04:49,413 INF                  MainApp$                  Process started
+2020-12-14 03:04:50,355 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:04:54,086 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:05:05,456 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:05:12,468 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:05:12,471 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:05:13,053 INF                  MainApp$                  Process started
+2020-12-14 03:05:13,983 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:05:16,782 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:05:32,097 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:05:36,683 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:05:36,687 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:05:37,158 INF                  MainApp$                  Process started
+2020-12-14 03:05:37,926 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:05:40,807 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:05:56,764 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:06:02,068 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:06:02,071 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:06:02,552 INF                  MainApp$                  Process started
+2020-12-14 03:06:03,487 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:06:05,919 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:06:18,872 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:06:25,908 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:06:25,933 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:06:27,406 INF                  MainApp$                  Process started
+2020-12-14 03:06:28,783 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:06:32,052 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:06:48,118 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:06:53,753 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:06:53,758 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:06:54,914 INF                  MainApp$                  Process started
+2020-12-14 03:06:56,889 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:06:59,416 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:07:13,946 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:07:19,117 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:07:19,124 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:07:19,525 INF                  MainApp$                  Process started
+2020-12-14 03:07:20,336 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:07:22,289 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:07:32,153 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:07:36,990 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:07:36,996 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:07:37,448 INF                  MainApp$                  Process started
+2020-12-14 03:07:38,278 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:07:41,147 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:07:50,429 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:07:55,658 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:07:55,661 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:07:55,988 INF                  MainApp$                  Process started
+2020-12-14 03:07:57,863 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:07:59,559 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:08:09,242 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:08:13,548 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:08:13,550 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:08:13,970 INF                  MainApp$                  Process started
+2020-12-14 03:08:14,579 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:08:16,351 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:08:25,748 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:08:28,883 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:08:28,886 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:08:29,289 INF                  MainApp$                  Process started
+2020-12-14 03:08:29,984 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:08:32,205 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:08:44,710 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:08:49,788 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:08:49,791 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:08:50,506 INF                  MainApp$                  Process started
+2020-12-14 03:08:51,288 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:08:54,207 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:09:03,839 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:09:08,683 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:09:08,687 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:09:09,093 INF                  MainApp$                  Process started
+2020-12-14 03:09:10,321 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:09:11,858 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:09:23,895 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:09:29,338 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:09:29,346 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:09:29,816 INF                  MainApp$                  Process started
+2020-12-14 03:09:30,430 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:09:32,997 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:09:44,085 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:09:49,080 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:09:49,083 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:09:49,836 INF                  MainApp$                  Process started
+2020-12-14 03:09:51,312 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:09:53,701 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:10:02,088 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:10:06,767 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:10:06,768 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:10:07,157 INF                  MainApp$                  Process started
+2020-12-14 03:10:07,894 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:10:09,541 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:10:18,264 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:10:22,461 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:10:22,465 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:10:22,726 INF                  MainApp$                  Process started
+2020-12-14 03:10:23,308 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:10:24,977 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:10:33,338 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:10:36,880 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:10:36,882 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:10:37,270 INF                  MainApp$                  Process started
+2020-12-14 03:10:38,692 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:10:40,349 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:10:51,104 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:10:55,459 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:10:55,460 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:10:55,848 INF                  MainApp$                  Process started
+2020-12-14 03:10:56,625 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:10:58,831 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:11:12,719 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:11:17,856 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:11:17,859 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:11:18,259 INF                  MainApp$                  Process started
+2020-12-14 03:11:18,970 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:11:20,575 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:11:32,844 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:11:36,576 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:11:36,577 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:11:37,279 INF                  MainApp$                  Process started
+2020-12-14 03:11:38,431 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:11:41,811 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:11:50,758 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:11:55,589 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:11:55,591 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:11:55,816 INF                  MainApp$                  Process started
+2020-12-14 03:11:56,847 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:11:59,388 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:12:09,846 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:12:14,875 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:12:14,883 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:12:15,374 INF                  MainApp$                  Process started
+2020-12-14 03:12:16,084 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:12:18,325 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:12:27,763 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:12:31,715 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:12:31,720 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:12:32,467 INF                  MainApp$                  Process started
+2020-12-14 03:12:34,015 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:12:36,677 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:12:46,646 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:12:52,728 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:12:52,734 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:12:53,130 INF                  MainApp$                  Process started
+2020-12-14 03:12:53,783 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:12:55,688 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:13:08,766 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
+2020-12-14 03:13:12,997 INF                  HttpMuxer$                HttpMuxer[/admin/metrics.json] = com.twitter.finagle.stats.MetricsExporter(com.twitter.finagle.stats.MetricsExporter)
+2020-12-14 03:13:13,002 INF                  HttpMuxer$                HttpMuxer[/admin/per_host_metrics.json] = com.twitter.finagle.stats.HostMetricsExporter(com.twitter.finagle.stats.HostMetricsExporter)
+2020-12-14 03:13:13,398 INF                  MainApp$                  Process started
+2020-12-14 03:13:14,008 INF                  MainApp$                  Serving admin http on 0.0.0.0/0.0.0.0:9990
+2020-12-14 03:13:16,080 INF                  finagle                   Finagle version 20.4.1 (rev=8ef36629a3f48a2d6db3c2916121ff867d1dd44f) built at 20200425-220153
+2020-12-14 03:13:28,130 INF                  Slf4jBridgeUtility$       org.slf4j.bridge.SLF4JBridgeHandler installed.
