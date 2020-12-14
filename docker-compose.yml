@@ -14,14 +14,16 @@ services:
     command: /bin/bash -c "nginx -g 'daemon off;'"
     ulimits:
       nproc: 65535
-    network_mode: host
+    restart: always
+   # Doesn't work for MAC with Docker Desktop. Comment out for testing
+   # network_mode: host
   mysql:
     image: mysql:5.7
     container_name: di-mysql
     command: mysqld --user=root --verbose
     restart: always
-    volumes:     
-     - ./mysql:/var/lib/mysql
+    volumes:
+      - ./mysql:/var/lib/mysql
     ports:
       - "3306:3306"
     environment:
@@ -30,15 +32,16 @@ services:
       MYSQL_PASSWORD: "use-strong-password-here"
       MYSQL_ROOT_PASSWORD: "root-password-here"
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-    
+
   ssdb:
-    image: datainsiderco/ssdb:0.1
+    image: wendal/ssdb:latest
     container_name: ssdb
     ports:
-     - "8888:8888"
+      - "8888:8888"
     volumes:
       - ./ssdb/ssdb.conf:/usr/local/ssdb/ssdb.conf
       - ./ssdb/data:/usr/local/ssdb/var/data
+    restart: always
 
   clickhouse:
     image: yandex/clickhouse-server:20.9.2.20
@@ -59,7 +62,7 @@ services:
     restart: always
     environment:
       NAME: user-profile
-      MODE: development      
+      MODE: development
     ports:
       - "8580:8580"
       - "8589:8589"
@@ -100,7 +103,12 @@ services:
 
   datainsider-web:
     image: datainsiderco/rocket-bi-web:dev
+    container_name: di-rocket-bi-web
     restart: always
+    environment:
+      VUE_APP_API_HOST: http://localhost/api
+      VUE_APP_STATIC_HOST: http://localhost/static
+
     deploy:
       restart_policy:
         condition: on-failure

@@ -4,4 +4,4 @@ mysql
 ingestion-service/logs
 user-profile/logs
 rocket-bi-service/logs
-
+nginx_home/log
