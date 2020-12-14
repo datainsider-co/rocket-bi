@@ -1,3 +1,7 @@
 clickhouse
 mysql
 .idea
+ingestion-service/logs
+user-profile/logs
+rocket-bi-service/logs
+
