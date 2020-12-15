@@ -15,8 +15,8 @@ services:
     ulimits:
       nproc: 65535
     restart: always
-   # Doesn't work for MAC with Docker Desktop. Comment out for testing
-   # network_mode: host
+    # Doesn't work for MAC with Docker Desktop. Comment out for testing
+    # network_mode: host
   mysql:
     image: mysql:5.7
     container_name: di-mysql
@@ -39,8 +39,8 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./ssdb/ssdb.conf:/usr/local/ssdb/ssdb.conf
-      - ./ssdb/data:/usr/local/ssdb/var/data
+      - ./ssdb/ssdb.conf:/etc/ssdb.conf
+      - ./ssdb/data:/var/lib/ssdb/data
     restart: always
 
   clickhouse:
@@ -63,10 +63,6 @@ services:
     environment:
       NAME: user-profile
       MODE: development
-    ports:
-      - "8580:8580"
-      - "8589:8589"
-      - "9990:9990"
     volumes:
       - ./user-profile/conf:/app/conf
       - ./user-profile/logs:/app/logs
@@ -82,7 +78,6 @@ services:
       THRIFT_PORT: 8487
     ports:
       - "8489:8489"
-      - "8487:8487"
     volumes:
       - ./ingestion-service/conf:/app/conf
       - ./ingestion-service/logs:/app/logs
@@ -95,8 +90,6 @@ services:
       NAME: bi-service
       MODE: development
       HTTP_PORT: 8080
-    ports:
-      - "8080:8080"
     volumes:
       - ./rocket-bi-service/conf:/app/conf
       - ./rocket-bi-service/logs:/app/logs
@@ -104,19 +97,12 @@ services:
   datainsider-web:
     image: datainsiderco/rocket-bi-web:dev
     container_name: di-rocket-bi-web
-    restart: always
-    environment:
-      VUE_APP_API_HOST: http://localhost/api
-      VUE_APP_STATIC_HOST: http://localhost/static
-
     deploy:
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 30s
-    ports:
-      - 5050:8080
 
 networks:
   default:
