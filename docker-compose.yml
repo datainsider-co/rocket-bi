@@ -20,7 +20,7 @@ services:
   mysql:
     image: mysql:5.7
     container_name: di-mysql
-    command: mysqld --verbose
+    command: mysqld --user=root --verbose
     restart: always
     volumes:
       - ./mysql:/var/lib/mysql
@@ -29,7 +29,7 @@ services:
     environment:
       MYSQL_USER: "di"
       MYSQL_PASSWORD: "di@2020!"
-      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_ROOT_PASSWORD: "di@2020!"
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
 
   ssdb:

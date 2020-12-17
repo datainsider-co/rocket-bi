@@ -53,7 +53,7 @@ db {
   host = di-mysql
   port = 3306
   username = root
-  password = "root-password-here"
+  password = "di@2020!"
   retry = 5
   }
 }
@@ -121,7 +121,7 @@ database {
   mysql {
   url = "jdbc:mysql://di-mysql:3306?useLegacyDatetimeCode=false&serverTimezone=Asia/Ho_Chi_Minh"
   user = "root"
-  password = "root-password-here"
+  password = "di@2020!"
   }
 }
 ```
