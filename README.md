@@ -273,7 +273,7 @@ It will create a new database and table if the database or table is not exists y
 
 ```shell
 curl --request POST \
-  --url http://localhost/api/ingestion \
+  --url http://localhost:5050/api/ingestion \
   --header 'Content-Type: application/json' \
   --header 'DI-SERVICE-KEY: 12345678' \
   --data '{
@@ -356,7 +356,7 @@ You can delete the whole data in a specific table
 
 ```shell
 curl --request DELETE \
-  --url http://localhost/api/ingestion/shopping/purchased \
+  --url http://localhost:5050/api/ingestion/shopping/purchased \
   --header 'Content-Type: application/json' \
   --header 'DI-SERVICE-KEY: 12345678'
 ```
