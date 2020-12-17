@@ -2,7 +2,13 @@
 
 1. Checkout this repository to your local host & cd to the `rocket-bi` folder.
 2. Create a network: `docker network create di_network`
-3. Start this service: `docker-compose up -d`. Now you can access on port 5050: `http://localhost:5050/`
+3. Start this service: `docker-compose up -d`. 
+   
+Now you can access on port 5050: `http://localhost:5050/` and login using the below account:
+
+```yaml
+hello@gmail.com/123456
+```
 
 # DATABASES
 
@@ -70,7 +76,7 @@ db {
 }
 ```
 
-3. User Profile API
+3.  API
 
 This service serves Restful API and Thrift API at port: `8580` & `8589. You can change these settings as below.
 
@@ -84,6 +90,27 @@ server {
   }
 }
 ```
+
+4. Create users
+
+You can create accounts automatically by using the pre-defined users in the setting file: `conf/users.json`
+
+```json5
+[
+  {
+    "email": "hello@gmail.com",
+    "password": "123456",
+    "full_name": "User 1"
+  },
+  {
+    "email": "hello2@gmail.com",
+    "password": "123456",
+    "full_name": "User 2"
+  }
+]
+```
+
+The above example will create 2 accounts with the given information.  Then, you can use these accounts to login to this system.
 
 ### BI Service
 
