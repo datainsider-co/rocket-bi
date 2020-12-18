@@ -1,14 +1,57 @@
 # INSTALL & START
 
+You need to install docker & docker-compose on your machine. If you don't have it on your machine
+Please check it out at: [Docker](https://www.docker.com/get-started)  & [Docker Compose](https://docs.docker.com/compose/install/)
+
 1. Checkout this repository to your local host & cd to the `rocket-bi` folder.
 2. Create a network: `docker network create di_network`
 3. Start this service: `docker-compose up -d`. 
    
-Now you can access on port 5050: `http://localhost:5050/` and login using the below account:
+Now you can access on port `5050`: `http://localhost:5050/` and login by using a default account:
 
 ```yaml
 hello@gmail.com/123456
 ```
+
+## Add Accounts
+
+You can add a new account in a configuration file: `./user-profile/conf/users.json`.
+
+```yaml
+[
+  {
+    "email": "hello@gmail.com",
+    "password": "123456",
+    "full_name": "Tester"
+  }
+]
+```
+
+Where:
+  - `email`: `String` - login email -  **required**
+  - `password`: `String` - login password -  **required**
+  - `full_name`: `String` - full name -  **optional**
+
+
+Let's say, you want to add a new account for `John Smith`, `email`=`john21@gmail.com` with `password`=`as231sf`. So the configuration file should look like this
+
+File: `./user-profile/conf/users.json`.
+
+```yaml
+[
+  {
+    "email": "hello@gmail.com",
+    "password": "123456",
+    "full_name": "Tester"
+  },
+  {
+    "email": "john21@gmail.com",
+    "password": "as231sf",
+    "full_name": "John Smith"
+  }
+]
+```
+
 
 # DATABASES
 
