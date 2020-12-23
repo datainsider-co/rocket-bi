@@ -1,13 +1,11 @@
 # INSTALL & START
 
-You need to install docker & docker-compose on your machine. If you don't have it on your machine
-Please check it out at: [Docker](https://www.docker.com/get-started)  & [Docker Compose](https://docs.docker.com/compose/install/)
-
-1. Checkout this repository to your local host & cd to the `rocket-bi` folder.
-2. Create a network: `docker network create di_network`
-3. Start this service: `docker-compose up -d`. 
-   
-Now you can access on port `5050`: `http://localhost:5050/` and login by using a default account:
+1.  Install docker https://docs.docker.com/get-docker/
+2.  Install docker compose https://docs.docker.com/compose/install/
+3.  Clone this repos: `git clone https://github.com/datainsider-co/rocket-bi.git`
+4.  Create a network: `docker network create di_network`
+5.  Start this service: `docker-compose up -d`. 
+6.  Access rocket-bi service at: `http://localhost:5050/`   
 
 ```yaml
 hello@gmail.com/123456
@@ -22,7 +20,7 @@ You can add a new account in a configuration file: `./user-profile/conf/users.js
   {
     "email": "hello@gmail.com",
     "password": "123456",
-    "full_name": "Tester"
+    "full_name": "Data Insider"
   }
 ]
 ```
