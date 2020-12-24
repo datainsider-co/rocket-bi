@@ -33,8 +33,7 @@ jobs:
           sudo apt-get install -qq git
           which ssh-agent || ( apt-get install -qq openssh-client )
           eval $(ssh-agent -s)
-          echo "pk: $SSH_PRIVATE_KEY"
-          ssh-add <(echo "$SSH_PRIVATE_KEY")
+          ssh-add <(echo "${{ secrets.SSH_PRIVATE_KEY }}")
           mkdir -p ~/.ssh
           '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
           echo "SSH to server, checkout & restart docker"
