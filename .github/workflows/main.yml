@@ -30,10 +30,10 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -qq git
-          sudo 'which ssh-agent || ( apt-get install -qq openssh-client )'
-          sudo eval $(ssh-agent -s)
+          which ssh-agent || ( apt-get install -qq openssh-client )
+          eval $(ssh-agent -s)
           sudo ssh-add <(echo "$SSH_PRIVATE_KEY")
           sudo mkdir -p ~/.ssh
           sudo '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-          sudo ssh sang@34.87.37.29 "cd /data/oss/rocket-bi/ && git checkout master && git pull origin master && ./restart.sh && exit",
+          ssh sang@34.87.37.29 "cd /data/oss/rocket-bi/ && git checkout master && git pull origin master && ./restart.sh && exit",
           echo done deploy.
