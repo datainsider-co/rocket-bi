@@ -37,5 +37,5 @@ jobs:
           mkdir -p ~/.ssh
           echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
           echo "SSH to server, checkout & restart docker"
-          ssh sang@34.87.37.29 "cd /data/oss/rocket-bi/ && git checkout master && git pull origin master && ./restart.sh && exit",
+          ssh sang@34.87.37.29 "cd /data/oss/rocket-bi/ && git checkout master && git pull origin master && ./restart.sh && exit"
           echo done deploy.
