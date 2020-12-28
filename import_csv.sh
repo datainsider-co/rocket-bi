@@ -2,6 +2,7 @@
 hello="hello"
 echo $hello
 # conf
+API_HOST="http://localhost:5050/api/ingestion"
 INPUT_FILE=""
 OUTPUT_FILE="data.json"
 DELIMITER=","
@@ -9,8 +10,9 @@ DB_NAME="db_test"
 TBL_NAME="tbl_test"
 SERVICE_KEY=""
 CHUNK_SIZE=100
-while getopts k:f:s:d:t: option; do
+while getopts h:k:f:s:d:t: option; do
   case "${option}" in
+  h) API_HOST=${OPTARG} ;;
   k) SERVICE_KEY=${OPTARG} ;;
   f) INPUT_FILE=${OPTARG} ;;
   s) DELIMITER="," ;;
@@ -19,8 +21,9 @@ while getopts k:f:s:d:t: option; do
   *) ;;
   esac
 done
-echo "sk=$SERVICE_KEY"
-echo "file=$INPUT_FILE"
+echo "Endpoint=$API_HOST"
+echo "Service Key=$SERVICE_KEY"
+echo "Input CSV File=$INPUT_FILE"
 
 function show_help() {
   echo "___________________________________________"
@@ -31,6 +34,7 @@ function show_help() {
   echo "-d : Required - The target database name to write csv data to."
   echo "-t : Required - The target table name to write csv data to."
   echo "-d : Optional - The delimiter character to read & parse records from the given csv file."
+  echo "-h : Optional -  The Api Url. Default is http://localhost:5050/api/ingestion"
   echo "___________________________________________"
 }
 
@@ -109,7 +113,7 @@ function ingest_data() {
   echo "$data" >$OUTPUT_FILE
   # curl require to read from file if payload data is too large
   curl --request POST \
-    --url http://localhost:5050/api/ingestion \
+    --url $API_HOST \
     --header "Content-Type: application/json" \
     --header "DI-SERVICE-KEY: $SERVICE_KEY" \
     --data @"$OUTPUT_FILE"

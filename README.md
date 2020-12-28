@@ -11,7 +11,7 @@
 hello@gmail.com/123456
 ```
 
-## Add Accounts
+## Add New Accounts
 
 You can add a new account in a configuration file: `./user-profile/conf/users.json`.
 
@@ -20,65 +20,72 @@ You can add a new account in a configuration file: `./user-profile/conf/users.js
   {
     "email": "hello@gmail.com",
     "password": "123456",
-    "full_name": "Data Insider"
-  }
+    "full_name": "Data Insider",
+    "password_mode": "raw",
+  },
 ]
 ```
 
 Where:
 
-- `email`: `String` - login email -  **required**
-- `password`: `String` - login password -  **required**
-- `full_name`: `String` - full name -  **optional**
+- `email`: `String` - login email - **required**
+- `password`: `String` - login password - **required**
+- `full_name`: `String` - full name - **optional**
+- `password_mode`: `String` - password mode - **required** - Accept `raw` or `hash` only.
+  - `raw`: A raw password string.
+  - `hash`: SHA-256 hash string of your password.
 
-Let's say, you want to add a new account for `John Smith`, `email`=`john21@gmail.com` with `password`=`as231sf`. So the
-configuration file should look like this
+**Note**: You can generate SHA-256 hash at: https://emn178.github.io/online-tools/sha256.html
 
-File: `./user-profile/conf/users.json`.
+Let's say, you want to add a new account for `John Smith`, `email`=`john21@gmail.com` with `password`=`as231sf` in hash mode.
+
+We have SHA256 of `as231sf` is: `79743f89e5f84ac802a05795d2b21bf1eba411adaeb3766fb4c0df71cf21a865`.
+
+Then, the configuration file ( `./user-profile/conf/users.json`) should looks like below:
 
 ```yaml
 [
   {
     "email": "hello@gmail.com",
     "password": "123456",
-    "full_name": "Tester"
+    "full_name": "Tester",
+    "password_mode": "raw",
   },
   {
     "email": "john21@gmail.com",
-    "password": "as231sf",
-    "full_name": "John Smith"
-  }
+    "password": "79743f89e5f84ac802a05795d2b21bf1eba411adaeb3766fb4c0df71cf21a865",
+    "full_name": "John Smith",
+    "password_mode": "hash",
+  },
 ]
 ```
 
 ## DI Service Key
 
-In order to ingest data, you need to have a `service key`.
-
-You can config it at `./ingestion-service/conf/production.conf`. Default value is `12345678`
+In order to ingest data, you need to have a `service key`. You can find it at `./ingestion-service/conf/production.conf`. Default value is `12345678`
 
 ```yaml
 service_key = 12345678
 ```
-
 
 ## Ingest Data
 
 - Method: `POST`
 - Endpoint: `/api/ingestion`
 - Headers:
-    + DI-SERVICE-KEY: Your service key
+
+  - DI-SERVICE-KEY: Your service key
 
 - Body: A JSONObject
-    + `db_name`: Database name - Only [a-zA-Z0-9] character.
-    + `tbl_name`: Table name
-    + `records`: An array of map with the key is your property's name and the value is its value.
+
+  - `db_name`: Database name - Only [a-zA-Z0-9] character.
+  - `tbl_name`: Table name
+  - `records`: An array of map with the key is your property's name and the value is its value.
 
 - Example CURL:
 
 The following example will ingest data to database `shopping` and table `purchased`. It will create a new database and
 table if the database or table is not exists yet.
-
 
 ```shell
 curl --request POST \
@@ -140,12 +147,12 @@ curl --request POST \
 
 ```json5
 {
-  "total_records": 5,
-  "total_invalid_records": 0,
-  "total_invalid_fields": 0,
-  "total_skipped_records": 0,
-  "total_inserted_records": 5,
-  "total_failed_records": 0
+  total_records: 5,
+  total_invalid_records: 0,
+  total_invalid_fields: 0,
+  total_skipped_records: 0,
+  total_inserted_records: 5,
+  total_failed_records: 0,
 }
 ```
 
@@ -156,12 +163,13 @@ You can delete the whole data in a specific table
 - Method: `DELETE`
 - Endpoint: `/api/ingestion/:db/:tbl`
 - Headers:
-    + DI-SERVICE-KEY: Your service key to ingest/delete data
+  - DI-SERVICE-KEY: Your service key to ingest/delete data
 - Route params:
-    + `db`: The database name
-    + `tbl`: Table name
 
-- Example Curl's request:
+  - `db`: The database name
+  - `tbl`: Table name
+
+- Example cURL:
 
 ```shell
 curl --request DELETE \
