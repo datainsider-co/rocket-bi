@@ -65,6 +65,9 @@ services:
     volumes:
       - ./user-profile/conf:/app/conf
       - ./user-profile/logs:/app/logs
+    depends_on:
+      - mysql
+      - ssdb
 
   ingestion_service:
     image: datainsiderco/ingestion-service:0.1
@@ -78,6 +81,10 @@ services:
     volumes:
       - ./ingestion-service/conf:/app/conf
       - ./ingestion-service/logs:/app/logs
+    depends_on:
+      - mysql
+      - ssdb
+      - clickhouse
 
   bi_service:
     image: datainsiderco/rocket-bi-service:0.1
@@ -90,6 +97,10 @@ services:
     volumes:
       - ./rocket-bi-service/conf:/app/conf
       - ./rocket-bi-service/logs:/app/logs
+    depends_on:
+      - mysql
+      - ssdb
+      - clickhouse
 
   datainsider-web:
     image: datainsiderco/rocket-bi-web:dev
