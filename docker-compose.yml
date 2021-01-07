@@ -85,6 +85,7 @@ services:
       - mysql
       - ssdb
       - clickhouse
+      - di-user-profile
 
   bi_service:
     image: datainsiderco/rocket-bi-service:0.1
@@ -101,6 +102,7 @@ services:
       - mysql
       - ssdb
       - clickhouse
+      - di-user-profile
 
   datainsider-web:
     image: datainsiderco/rocket-bi-web:dev
