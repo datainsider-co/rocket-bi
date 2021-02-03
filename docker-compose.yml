@@ -5,7 +5,7 @@ services:
     image: nginx:latest
     container_name: nginx
     ports:
-      - 5050:80
+      - 80:80
     volumes:
       - ./nginx_home/conf.d/:/etc/nginx/conf.d/
       - ./nginx_home/nginx.conf/:/etc/nginx/nginx.conf
@@ -56,7 +56,7 @@ services:
       - 9000:9000
 
   di-user-profile:
-    image: datainsiderco/user-profile:0.1
+    image: datainsiderco/user-profile:dev
     container_name: di-user-profile
     restart: always
     environment:
@@ -70,7 +70,7 @@ services:
       - ssdb
 
   ingestion_service:
-    image: datainsiderco/ingestion-service:0.1
+    image: datainsiderco/ingestion-service:dev
     container_name: di-ingestion-service
     restart: always
     environment:
@@ -88,7 +88,7 @@ services:
       - di-user-profile
 
   bi_service:
-    image: datainsiderco/rocket-bi-service:0.1
+    image: datainsiderco/rocket-bi-service:dev
     container_name: di-rocket-bi-service
     restart: always
     environment:
