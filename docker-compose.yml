@@ -14,14 +14,13 @@ services:
     command: /bin/bash -c "nginx -g 'daemon off;'"
     ulimits:
       nproc: 65535
-    restart: always
+    restart: on-failure
     # Doesn't work for MAC with Docker Desktop. Comment out for testing
     # network_mode: host
   mysql:
     image: mysql:5.7
     container_name: di-mysql
     command: mysqld --user=root --verbose
-    restart: always
     volumes:
       - ./mysql:/var/lib/mysql
     ports:
@@ -31,6 +30,7 @@ services:
       MYSQL_PASSWORD: "di@2020!"
       MYSQL_ROOT_PASSWORD: "di@2020!"
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    restart: on-failure
 
   ssdb:
     image: wendal/ssdb:latest
@@ -40,12 +40,17 @@ services:
     volumes:
       - ./ssdb/ssdb.conf:/etc/ssdb.conf
       - ./ssdb/data:/var/lib/ssdb/data
-    restart: always
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
 
   clickhouse:
     image: yandex/clickhouse-server:20.9.2.20
     container_name: clickhouse_server_di
-    restart: always
     ulimits:
       nproc: 65535
       nofile: 262144
@@ -54,25 +59,40 @@ services:
     ports:
       - 8123:8123
       - 9000:9000
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
 
   di-user-profile:
-    image: datainsiderco/user-profile:0.1
+    image: datainsiderco/user-profile:dev
     container_name: di-user-profile
-    restart: always
     environment:
       NAME: user-profile
       MODE: production
     volumes:
       - ./user-profile/conf:/app/conf
       - ./user-profile/logs:/app/logs
+    ports:
+      - 8580:8580
+      - 8589:8589
     depends_on:
       - mysql
       - ssdb
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
 
   ingestion_service:
     image: datainsiderco/ingestion-service:0.1
     container_name: di-ingestion-service
-    restart: always
     environment:
       NAME: ingestion-service
       MODE: production
@@ -86,11 +106,17 @@ services:
       - ssdb
       - clickhouse
       - di-user-profile
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
 
   bi_service:
     image: datainsiderco/rocket-bi-service:0.1
     container_name: di-rocket-bi-service
-    restart: always
     environment:
       NAME: bi-service
       MODE: production
@@ -103,10 +129,18 @@ services:
       - ssdb
       - clickhouse
       - di-user-profile
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
 
   datainsider-web:
     image: datainsiderco/rocket-bi-web:dev
     container_name: di-rocket-bi-web
+    restart: on-failure
     deploy:
       restart_policy:
         condition: on-failure

@@ -1,0 +1,5 @@
+[0m2021.01.25 14:16:32 INFO  Started: Metals version 0.9.10 in workspace '/Volumes/Data/docker/rocket-bi' for client vscode 1.52.1.[0m
+[0m2021.01.25 14:16:35 INFO  time: initialize in 3.27s[0m
+[0m2021.01.25 14:16:39 WARN  Build server is not auto-connectable.[0m
+[0m2021.01.25 14:16:39 WARN  no build tool detected in workspace '/Volumes/Data/docker/rocket-bi'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+[0m2021.01.25 14:50:03 INFO  shutting down Metals[0m
