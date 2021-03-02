@@ -91,7 +91,7 @@ services:
         window: 60s
 
   ingestion_service:
-    image: datainsiderco/ingestion-service:0.1
+    image: datainsiderco/ingestion-service:dev
     container_name: di-ingestion-service
     environment:
       NAME: ingestion-service
@@ -115,7 +115,7 @@ services:
         window: 60s
 
   bi_service:
-    image: datainsiderco/rocket-bi-service:0.1
+    image: datainsiderco/rocket-bi-service:dev
     container_name: di-rocket-bi-service
     environment:
       NAME: bi-service
