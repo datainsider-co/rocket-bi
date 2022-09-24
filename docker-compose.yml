@@ -43,7 +43,7 @@ services:
     restart: always
 
   user_profile:
-    image: registry.gitlab.com/datainsider/user-profile:dev
+    image: registry.gitlab.com/datainsider/user-profile:local
     container_name: rocket-user-profile
     restart: always
     environment:
@@ -57,7 +57,7 @@ services:
       - ssdb
 
   ingestion_service:
-    image: registry.gitlab.com/datainsider/ingestion-service:dev
+    image: registry.gitlab.com/datainsider/ingestion-service:local
     container_name: rocket-ingestion-service
     restart: always
     environment:
@@ -75,7 +75,7 @@ services:
       - user_profile
 
   bi_service:
-    image: registry.gitlab.com/datainsider/bi-service:dev
+    image: registry.gitlab.com/datainsider/bi-service:local
     container_name: rocket-bi-service
     restart: always
     environment:
@@ -92,7 +92,7 @@ services:
       - user_profile
 
   web:
-    image: registry.gitlab.com/datainsider/web:dev
+    image: registry.gitlab.com/datainsider/web:local
     container_name: rocket-web
     deploy:
       restart_policy:
