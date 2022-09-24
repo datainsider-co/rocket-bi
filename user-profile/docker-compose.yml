@@ -14,4 +14,4 @@ services:
 networks:
   default:
     external:
-      name: di_network
+      name: rocket_network
