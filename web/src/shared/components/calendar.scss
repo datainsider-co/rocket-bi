@@ -1,0 +1,99 @@
+@import '~@/themes/scss/mixin.scss';
+
+.input-calendar {
+  @include regular-text;
+  width: calc(100% - 8px);
+  font-size: 13.5px;
+  letter-spacing: 0.2px;
+  color: var(--text-color);
+  height: 40px;
+  background-color: var(--primary--root);
+  border: transparent;
+  padding-right: 0;
+  padding-left: 8px;
+  box-sizing: content-box;
+  border-radius: 4px;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.vc-container.vc-bg-gray-900 {
+  background-color: var(--secondary) !important;
+  //color: var(--accent-text-color) !important;
+}
+.vc-border {
+  border: 0;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.16), 0 4px 4px 0 rgba(0, 0, 0, 0.16);
+}
+.di-date-picker {
+  ::v-deep {
+    .vc-popover-caret {
+      display: none;
+    }
+    .vc-text-white {
+      color: var(--secondary) !important;
+    }
+    .vc-container.vc-bg-gray-900 {
+      background-color: var(--secondary) !important;
+      //color: var(--accent-text-color) !important;
+    }
+    .vc-border {
+      border: 0;
+      box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.16), 0 4px 4px 0 rgba(0, 0, 0, 0.16);
+    }
+  }
+}
+::v-deep {
+  @import '~@/themes/scss/calendar/new-custom-vcalendar.scss';
+
+  .di-date-picker {
+    .vc-container.vc-bg-gray-900 {
+      background-color: var(--secondary) !important;
+      //color: var(--accent-text-color) !important;
+    }
+  }
+
+  i {
+    right: 9px;
+    top: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .vc-grid-container.grid {
+    padding: 16px;
+    width: 321px;
+  }
+
+  .vc-arrows-container {
+    margin-top: 16px;
+  }
+
+  .vc-font-bold {
+    color: var(--accent-text-color);
+  }
+
+  .di-calendar-input-container {
+    //background-color: var(--secondary);
+    .icon-title {
+      display: none;
+    }
+    padding: 0;
+
+    img {
+      display: none;
+    }
+
+    input {
+      width: 100%;
+      margin: 0;
+      height: 40px;
+      border-radius: 4px;
+      background-color: var(--input-background-color, #333645);
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+  //}
+}

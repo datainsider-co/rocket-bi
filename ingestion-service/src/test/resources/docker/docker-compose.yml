@@ -1,0 +1,64 @@
+version: '3.5'
+services:
+  zookeeper:
+    image: zookeeper:3.5
+    hostname: zookeeper
+
+  clickhouse:
+    image: yandex/clickhouse-server:21.9.2.17
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - ${PWD}/clickhouse-server/conf:/etc/clickhouse-server
+
+  ssdb:
+    image: wendal/ssdb:latest
+    volumes:
+      - ./ssdb/ssdb.conf
+      - ./ssdb/data
+    ports:
+      - "8888:8888"
+    restart: on-failure
+
+  mysql:
+    image: mysql:5.7
+    command: mysqld --user=root --verbose
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_USER: "di"
+      MYSQL_PASSWORD: "di@2020!"
+      MYSQL_ROOT_PASSWORD: "di@2020!"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    restart: on-failure
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server
+    user: root
+    ports:
+      - "1433:1433"
+    environment:
+      - SA_PASSWORD=di@123456
+      - ACCEPT_EULA=Y
+
+  postgres:
+    image: postgres:12
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: thien_vi
+      POSTGRES_USER: tvc12
+      POSTGRES_PASSWORD: di@123456
+      PGDATA: /var/lib/postgresql/data
+  vertica:
+    environment:
+      APP_DB_USER: "vertica"
+      APP_DB_PASSWORD: "di@2020!"
+      TZ: "Asia/Ho_Chi_Minh"
+    image: vertica/vertica-ce:11.1.1-0
+    ports:
+      - "5433:5433"
+      - "5444:5444"
+    deploy:
+      mode: global

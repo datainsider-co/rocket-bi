@@ -1,0 +1,13 @@
+@import '~@/themes/scss/mixin.scss';
+
+.row-config-container {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 16px;
+}
+
+.group-config {
+  > .label {
+    font-size: 14px !important;
+  }
+}

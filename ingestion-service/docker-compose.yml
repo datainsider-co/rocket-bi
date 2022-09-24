@@ -1,0 +1,21 @@
+version: '3'
+services:
+  ingestion_service:
+    image: registry.gitlab.com/datainsider/ingestion-service:dev
+    container_name: di-ingestion-service
+    restart: always
+    environment:
+      NAME: ingestion-service
+      MODE: production
+      HTTP_PORT: 8489
+      THRIFT_PORT: 8487
+    ports:
+      - "8489:8489"
+      - "8487:8487"
+    volumes:
+      - ./conf:/app/conf
+      - ./logs:/app/logs
+networks:
+  default:
+    external:
+      name: di_network

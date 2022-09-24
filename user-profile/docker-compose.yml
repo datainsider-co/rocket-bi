@@ -1,0 +1,17 @@
+version: '3.5'
+services:
+  user-profile:
+    image: registry.gitlab.com/datainsider/user-profile:dev
+    container_name: di-user-profile
+    restart: always
+    environment:
+      NAME: user-profile
+      MODE: production
+    volumes:
+      - ./conf:/app/conf
+      - ./logs:/app/logs
+
+networks:
+  default:
+    external:
+      name: di_network

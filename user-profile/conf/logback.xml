@@ -1,0 +1,126 @@
+<configuration>
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+
+    <!-- ===================================================== -->
+    <!-- Common Config -->
+    <!-- ===================================================== -->
+
+    <!-- JUL/JDK14 to Logback bridge -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <!-- Service Log (Rollover every 50MB, max 11 logs) -->
+    <appender name="SERVICE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/${mode}/service.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>logs/${mode}/service.log.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>10</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>50MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%date %.-3level %-16X{traceId} %-25logger{0} %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Access Log (Rollover every 50MB, max 11 logs) -->
+    <appender name="ACCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/${mode}/access.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>logs/${mode}/access.log.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>10</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>50MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%msg %X{traceId}%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="SendCodeViaEmail" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/${mode}/send_code_email.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>logs/${mode}/send_code_email.log.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>10</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>50MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%msg %X{traceId}%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="SendCodeViaSMS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/${mode}/send_code_sms.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>logs/${mode}/send_code_sms.log.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>10</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>10MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%date %.-3level %-16X{traceId} %-25logger{0} %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ===================================================== -->
+    <!-- Primary Async Appenders -->
+    <!-- ===================================================== -->
+
+    <property name="async_queue_size" value="${queue.size:-1024}"/>
+    <property name="async_max_flush_time" value="${max.flush.time:-0}"/>
+
+    <appender name="ASYNC-SERVICE" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>${async_queue_size}</queueSize>
+        <maxFlushTime>${async_max_flush_time}</maxFlushTime>
+        <appender-ref ref="SERVICE"/>
+    </appender>
+
+    <appender name="ASYNC-ACCESS" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>${async_queue_size}</queueSize>
+        <maxFlushTime>${async_max_flush_time}</maxFlushTime>
+        <appender-ref ref="ACCESS"/>
+    </appender>
+
+    <!-- ===================================================== -->
+    <!-- Package Config -->
+    <!-- ===================================================== -->
+
+    <!-- Root Config -->
+    <root level="${log_level:-INFO}">
+        <appender-ref ref="ASYNC-SERVICE"/>
+    </root>
+
+    <!-- Access Logging Http -->
+    <logger name="com.twitter.com.twitter.com.twitter.finatra.http.filters.AccessLoggingFilter"
+            level="INFO"
+            additivity="false">
+        <appender-ref ref="ASYNC-ACCESS"/>
+    </logger>
+
+    <!-- Access Logging Thrift -->
+    <logger name="com.twitter.com.twitter.com.twitter.finatra.thrift.filters.AccessLoggingFilter"
+            level="INFO"
+            additivity="false">
+        <appender-ref ref="ASYNC-ACCESS"/>
+    </logger>
+
+    <!-- Phone Logging -->
+    <logger name="SendCodeViaEmailLogger" level="DEBUG" additivity="false">
+        <appender-ref ref="SendCodeViaEmail"/>
+    </logger>
+
+    <logger name="SendCodeViaSMSLogger" level="DEBUG" additivity="false">
+        <appender-ref ref="SendCodeViaSMS"/>
+    </logger>
+
+</configuration>

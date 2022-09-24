@@ -1,0 +1,18 @@
+version: '3.5'
+services:
+  clickhouse:
+    image: yandex/clickhouse-server:21.9.2.17
+
+  ssdb:
+    image: wendal/ssdb:latest
+    restart: on-failure
+
+  mysql:
+    image: mysql:5.7
+    command: mysqld --user=root --verbose
+    environment:
+      MYSQL_USER: "di"
+      MYSQL_PASSWORD: "di@2020!"
+      MYSQL_ROOT_PASSWORD: "di@2020!"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    restart: on-failure
