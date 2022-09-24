@@ -1,0 +1,6 @@
+**/target
+**/dist
+**/logs
+**/log
+**/data
+*.idea
