@@ -1,0 +1,56 @@
+import '@/screens/DataIngestion/components/DataSourceConfigForm/scss/form.scss';
+import { BFormInput, BFormTextarea } from 'bootstrap-vue';
+import { DataSourceFormRender } from '@/screens/DataIngestion/FormBuilder/DataSourceFormRender';
+import { DataSourceInfo } from '@core/DataIngestion/Domain/DataSource/DataSourceInfo';
+import { BigQuerySourceInfo } from '@core/DataIngestion/Domain/DataSource/BigQuerySourceInfo';
+import { BigQuerySourceInfoV2 } from '@core/DataIngestion/Domain/DataSource/BigQuerySourceInfoV2';
+import { GA4SourceInfo } from '@core/DataIngestion/Domain/DataSource/GA4SourceInfo';
+
+export class Ga4SourceFormRender implements DataSourceFormRender {
+  private ga4SourceInfo: GA4SourceInfo;
+
+  constructor(ga4SourceInfo: GA4SourceInfo) {
+    this.ga4SourceInfo = ga4SourceInfo;
+  }
+
+  private get displayName() {
+    return this.ga4SourceInfo.displayName;
+  }
+
+  private set displayName(value: string) {
+    this.ga4SourceInfo.displayName = value;
+  }
+
+  private get accessToken() {
+    return this.ga4SourceInfo.accessToken;
+  }
+
+  private set accessToken(value: string) {
+    this.ga4SourceInfo.accessToken = value;
+  }
+
+  private get refreshToken() {
+    return this.ga4SourceInfo.refreshToken;
+  }
+
+  private set refreshToken(value: string) {
+    this.ga4SourceInfo.refreshToken = value;
+  }
+
+  renderForm(h: any): any {
+    return (
+      <div>
+        <div class="form-item d-flex w-100 justify-content-center align-items-center">
+          <div class="title">Display name:</div>
+          <div class="input">
+            <BFormInput id="input-display-name" placeholder="Input display name" autocomplete="off" v-model={this.displayName}></BFormInput>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  createDataSourceInfo(): DataSourceInfo {
+    return BigQuerySourceInfoV2.fromObject(this.ga4SourceInfo);
+  }
+}

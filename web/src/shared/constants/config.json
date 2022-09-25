@@ -1,0 +1,9 @@
+{
+  "login": {
+    "isShowHint": false,
+    "account": {
+      "username": "demo@datainsider.co",
+      "password": "demo@123"
+    }
+  }
+}

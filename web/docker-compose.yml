@@ -1,0 +1,17 @@
+version: '3.7'
+services:
+  di_web:
+    image: registry.gitlab.com/datainsider/web:local
+    container_name: rocket-web
+    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 30s
+
+networks:
+  default:
+    external:
+      name: rocket_network

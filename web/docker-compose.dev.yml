@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  datainsider-web-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - ./node_modules:/app/node_modules
+    ports:
+      - '8080:8080'

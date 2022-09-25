@@ -1,0 +1,115 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 12/31/20, 4:33 PM
+ */
+
+@import '~@/themes/scss/mixin.scss';
+@import '~bootstrap/scss/bootstrap-grid';
+
+.filter-popover-area {
+  padding: 16px 20px 16px 16px;
+  box-sizing: content-box;
+  background-color: var(--menu-background-color);
+  color: var(--text-color);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.16);
+  border-radius: 4px;
+  z-index: 12120;
+  max-width: 380px;
+  min-width: 380px;
+
+  @include media-breakpoint-down(xs) {
+    max-width: 298px;
+    min-width: 265px;
+    padding: 2px 4px 2px 2px;
+  }
+
+  @include media-breakpoint-down(sm) {
+    max-width: 300px;
+    min-width: 265px;
+    padding: 4px 8px 4px 4px;
+  }
+
+  ::v-deep {
+    .arrow {
+      display: none;
+    }
+
+    .popover-body {
+      padding: 0 !important;
+    }
+  }
+
+  .filter-popover-header {
+    color: var(--text-color);
+
+    > .popover-title {
+      @include semi-bold-text();
+      font-size: 14px;
+      letter-spacing: 0.6px;
+    }
+
+    > .dropdown-border {
+      border-radius: 4px;
+      color: var(--text-color);
+      border: solid 1px rgba(#9799ab, 0.5);
+      margin-top: 0;
+
+      ::v-deep {
+        button {
+          height: 26px;
+          background-color: inherit;
+          width: fit-content;
+
+          > div {
+            height: 24px;
+            width: 112px;
+          }
+        }
+      }
+    }
+  }
+
+  .filter-popover-body {
+    margin-top: 24px;
+    margin-bottom: 24px;
+
+    @include media-breakpoint-down(xs) {
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    @include media-breakpoint-down(sm) {
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+  }
+
+  .filter-popover-footer {
+    @include regular-text();
+    letter-spacing: 0.18px;
+    font-size: 14px;
+
+    .btn-ghost {
+      padding: 8px;
+      margin: -8px;
+
+      i[class~='di-icon-delete'] {
+        //color: var(--text-color);
+        font-size: 16px;
+      }
+
+      :hover {
+        color: var(--danger);
+      }
+    }
+
+    > .button-bar {
+      .di-button {
+        &[border-accent] {
+          padding: 13px 15px;
+        }
+        padding: 13px 27px;
+      }
+    }
+  }
+}

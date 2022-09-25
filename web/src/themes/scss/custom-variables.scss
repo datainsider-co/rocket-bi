@@ -1,0 +1,42 @@
+// custom color for dark table
+$table-color: $primary-text-color !default;
+$table-border-width: 0.5px !default;
+$table-dark-hover-bg: $primaryColor !default;
+$table-border-color: $primaryColor !default;
+$table-dark-active-bg: $primaryColor !default;
+$table-dark-border-color: $primaryColor !default;
+$table-active-bg: $primaryColor !default;
+$table-dark-color: $primary-text-color !default;
+
+// custom input
+$input-color: $primary-text-color;
+$input-border-color: $input-background-color;
+$input-bg: $input-background-color;
+$input-box-shadow: 0;
+$input-border-width: 0;
+$input-padding-x: 8;
+// custom select
+$custom-select-color: $primary-text-color;
+$custom-select-bg: $primaryColor;
+$custom-select-background: $primaryColor;
+$custom-select-font-family: $roboto-font-family;
+$custom-select-font-size: 14px;
+$custom-select-focus-border-color: $widgetColor;
+$custom-select-focus-box-shadow: none;
+$custom-select-border-color: $widgetColor;
+// popover
+$popover-border-radius: 4px;
+$popover-box-shadow: var(--menu-shadow);
+$popover-bg: var(--menu-background-color);
+$popover-border-color: var(--menu-background-color);
+//tooltip
+$tooltip-bg: var(--menu-background-color);
+$tooltip-border-radius: 4px;
+$tooltip-color: var(--text-color);
+
+// switch
+$custom-switch-width: 2rem !default;
+$custom-control-indicator-border-color: $primaryColor;
+$custom-control-indicator-bg: $neutralColor;
+$custom-control-indicator-size: 1rem !default;
+$custom-switch-indicator-border-radius: 15px !default;

@@ -1,0 +1,49 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "ESNext",
+    "strict": true,
+    "jsx": "preserve",
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "downlevelIteration": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": false,
+    "baseUrl": ".",
+    "types": [
+      "webpack-env",
+      "mocha",
+      "chai",
+      "lodash",
+      "highcharts",
+      "vuelidate",
+      "gapi",
+      "gapi.auth2",
+      "gapi.client",
+      "gapi.client.drive",
+      "gapi.client.sheets",
+      "gapi.client.analytics",
+      "gapi.client.analyticsadmin",
+      "gapi.client.analyticsdata",
+      "gapi.client.analyticsreporting",
+      "@types/color",
+      "moment",
+      "@types/rx",
+      "di-web-analytics"
+    ],
+    "noEmit": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@core/*": ["di_core/*"],
+      "@chart/*": ["src/shared/components/charts/*"],
+      "@filter/*": ["src/screens/DashboardDetail/components/WidgetContainer/filters/*"]
+    },
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost", "webworker"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx", "di_core*/**/*.ts"],
+  "exclude": ["node_modules"]
+}

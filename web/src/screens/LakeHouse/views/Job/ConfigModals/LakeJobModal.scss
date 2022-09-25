@@ -1,0 +1,254 @@
+@import '~@/themes/scss/mixin.scss';
+
+.input {
+  margin-top: 16px;
+}
+
+.modal-title {
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: 0.4px;
+  color: var(--text-color);
+  height: 28px;
+  margin-bottom: 4px;
+}
+
+.modal-sub-title {
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.4px;
+  color: var(--secondary-text-color);
+}
+
+.btn-close {
+  top: 12px;
+  right: 12px;
+
+  .title {
+    width: 0;
+  }
+}
+
+.status-error {
+  color: var(--warning);
+}
+
+.status-success {
+  color: var(--success);
+}
+
+.form-item + .form-item {
+  margin-top: 8px;
+}
+
+#cancel-button {
+  margin-right: 8px;
+}
+
+.custom-footer {
+  .di-button {
+    width: 82px;
+    height: 26px;
+  }
+}
+
+.job-form-container {
+  width: 518px;
+  border-top: 1px solid var(--primary);
+
+  @media screen and (max-width: 600px) {
+    width: 95vw;
+  }
+
+  .__view {
+    width: unset !important;
+  }
+
+  .job-form-scroll-body {
+    $title-width: 107px;
+    max-height: 420px !important;
+    margin-bottom: 8px;
+
+    .jdbc-job-section {
+      background: var(--secondary);
+      border-radius: 4px;
+      padding: 0;
+    }
+
+    .job-config-item {
+      display: flex;
+      align-items: start;
+      flex-direction: column;
+      margin-bottom: 16px;
+
+      .title {
+        @include regular-text-14();
+        letter-spacing: 0.23px;
+        color: var(text-color);
+        margin-bottom: 12px;
+      }
+
+      //
+      //&:last-child {
+      //  margin-bottom: 12px;
+      //}
+
+      .input {
+        width: 100%;
+        margin-top: 0 !important;
+
+        input {
+          height: 34px;
+          padding: 0 16px;
+          font-size: 12px;
+          color: var(text-color);
+          letter-spacing: 0.17px;
+
+          ::-webkit-input-placeholder,
+          :-ms-input-placeholder,
+          ::placeholder {
+            @include regular-text-14();
+            letter-spacing: 0.18px;
+            color: var(--text-disabled-color, #bebebe) !important;
+          }
+        }
+
+        .form-check-input {
+          width: 16px;
+          cursor: default;
+        }
+      }
+
+      .text-connection {
+        color: var(--accent);
+      }
+
+      .accordion-toggle {
+        -webkit-transition: height 0.1s linear;
+        -moz-transition: height 0.1s linear;
+        -ms-transition: height 0.1s linear;
+        -o-transition: height 0.1s linear;
+        transition: height 0.1s linear;
+      }
+
+      .height-empty {
+        height: 0;
+      }
+
+      .empty-item {
+        height: 82px;
+      }
+    }
+
+    .job-form-item + .job-form-item {
+      margin-top: 16px;
+    }
+
+    .lake-scheduler-form {
+      padding-top: 0;
+
+      ::v-deep {
+        label,
+        .text {
+          color: var(--text-color) !important;
+          opacity: 1 !important;
+        }
+        .job-scheduler-form-group.pt-2 {
+          padding-top: 0 !important;
+        }
+
+        .job-scheduler-form-group {
+          margin-bottom: 16px;
+          align-items: start;
+
+          > label {
+            margin-bottom: 12px;
+          }
+
+          .select-container {
+            width: 100%;
+            margin: 0;
+          }
+
+          #job-scheduler-type {
+            > div {
+              height: 34px;
+            }
+          }
+
+          .frequency-options {
+            > label:first-child {
+              width: $title-width !important;
+            }
+          }
+
+          .frequency-setting {
+            display: unset;
+
+            > label {
+              margin-bottom: 12px;
+              color: var(--text-color);
+            }
+
+            .frequency-radio-item {
+              width: 100%;
+              .bv-no-focus-ring {
+                width: 100%;
+                justify-content: space-between;
+              }
+            }
+          }
+        }
+      }
+
+      .run-only-once {
+        margin-left: 0;
+
+        .job-scheduler-form-group {
+          display: flex;
+          flex-direction: column;
+          text-align: left;
+
+          label {
+            width: 100%;
+          }
+
+          .input-container {
+            width: 100%;
+
+            .input-calendar {
+              padding-left: 16px;
+              width: calc(100% - 16px);
+              margin-left: 4px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+::v-deep {
+  .modal-dialog {
+    width: fit-content;
+    margin: auto;
+  }
+
+  .modal-body {
+    width: 518px;
+    padding: 16px 0;
+    background: var(--secondary);
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+    z-index: 10 !important;
+
+    @media screen and (max-width: 600px) {
+      width: 95vw;
+    }
+  }
+
+  .modal-footer {
+    height: 0;
+    padding: 0;
+  }
+}

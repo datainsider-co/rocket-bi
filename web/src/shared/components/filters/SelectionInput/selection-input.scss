@@ -1,0 +1,80 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 12/31/20, 10:44 AM
+ */
+
+@import '~@/themes/scss/mixin.scss';
+
+.select-input-area {
+  .select-container {
+    margin-top: 0;
+  }
+
+  .form-control {
+    width: calc(100% - 16px);
+    height: 40px;
+    padding: 0 8px;
+  }
+
+  .input-calendar {
+    @include regular-text;
+    width: calc(100% - 8px);
+    letter-spacing: 0.2px;
+    color: var(--text-color);
+    height: 40px;
+    background-color: var(--input-background-color, #333645);
+    border: transparent;
+    padding-left: 8px;
+    padding-right: 0;
+    border-radius: 4px;
+  }
+
+  ::v-deep {
+    .select-area-popover {
+      .select-popover ul {
+        max-height: 400px;
+      }
+    }
+  }
+}
+
+::v-deep {
+  @import '~@/themes/scss/calendar/new-custom-vcalendar.scss';
+
+  //.vc-grid-container {
+  //  width: 321px;
+  //}
+
+  .vc-font-bold {
+    color: var(--accent-text-color);
+  }
+
+  .di-calendar-input-container {
+    //background-color: var(--secondary);
+    .icon-title {
+      display: none;
+    }
+
+    padding: 0;
+
+    span {
+      width: 100%;
+    }
+
+    img {
+      display: none;
+    }
+
+    input {
+      width: calc(100% - 8px);
+      margin: 0;
+      height: 40px;
+      font-size: 13.5px;
+      padding-left: 8px;
+      border-radius: 4px;
+      background-color: var(--input-background-color, #333645);
+      padding-right: 0;
+      text-align: start;
+    }
+  }
+}
