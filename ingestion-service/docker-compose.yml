@@ -1,8 +1,8 @@
 version: '3'
 services:
   ingestion_service:
-    image: registry.gitlab.com/datainsider/ingestion-service:dev
-    container_name: di-ingestion-service
+    image: registry.gitlab.com/datainsider/ingestion-service:local
+    container_name: rocket-ingestion-service
     restart: always
     environment:
       NAME: ingestion-service
