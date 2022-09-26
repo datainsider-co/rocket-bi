@@ -1,16 +1,12 @@
 package datainsider.ingestion
 
 import com.twitter.inject.Test
-import datainsider.analytics.controller.http.request.{BatchTrackingRequest, TrackingRequest}
 import datainsider.client.util.JsonParser
-import datainsider.ingestion.controller.http.requests.{CreateApiKeyRequest, InitSyncRequest}
-import datainsider.ingestion.domain.ApiKeyTypes
+import datainsider.ingestion.controller.http.requests.InitSyncRequest
 import datainsider.ingestion.util.TimeUtils
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import java.time.{LocalDate, LocalDateTime}
-import java.time.format.DateTimeFormatter
 import java.util.TimeZone
 
 /**
@@ -135,14 +131,6 @@ class TimeUtilsTest extends Test {
 
     println(isVisible(name))
 
-  }
-
-  test("test json create key") {
-    val request = CreateApiKeyRequest(keyType = ApiKeyTypes.Analytics, 1L, "tracking key", None, None, null)
-    println(JsonParser.toJson(request))
-
-    val trackingRequest = TrackingRequest(trackingApiKey = "asd", "purchase", null)
-    println(JsonParser.toJson(trackingRequest))
   }
 
   test("json") {

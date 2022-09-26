@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>datainsider</groupId>
-    <artifactId>ingestion-service</artifactId>
+    <artifactId>schema-service</artifactId>
     <version>1.0</version>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -337,7 +337,7 @@
                 <directory>conf</directory>
             </resource>
             <resource>
-                <directory>sql</directory>
+                <directory>src/main/resources/sql</directory>
             </resource>
         </resources>
 

@@ -124,3 +124,11 @@ class RefreshSchemaWorkerImpl @Inject()(
     systemInfo.sources.nonEmpty && (refreshBy == RefreshBy.System || systemInfo.currentRefreshStatus != RefreshStatus.Running)
   }
 }
+
+class MockRefreshSchemaWorker extends RefreshSchemaWorker {
+  override def start(): Unit = {}
+
+  override def stop(): Unit = {}
+
+  override def refreshSchema(orgId: Long, refreshBy: RefreshBy): Future[Boolean] = Future.value(true)
+}

@@ -3,22 +3,17 @@ package datainsider.ingestion.controller.thrift
 import com.twitter.finatra.thrift.Controller
 import com.twitter.inject.Logging
 import com.twitter.scrooge.{Request, Response}
-import datainsider.analytics.service.tracking.ApiKeyService
-import datainsider.analytics.service.{ReportSchemaService, TrackingSchemaService}
 import datainsider.client.util.JsonParser
 import datainsider.ingestion.domain.TableSchema
-import datainsider.ingestion.domain.thrift.{TEventDetailSchemaMapResult, TEventDetailSchemaResult}
-import datainsider.ingestion.service.{FileSyncInfoService, SchemaService, TSchemaService}
 import datainsider.ingestion.service.TSchemaService.{GetExpressions, _}
+import datainsider.ingestion.service.{FileSyncInfoService, SchemaService, TSchemaService}
 import datainsider.ingestion.util.ClickHouseUtils
-import datainsider.ingestion.util.ThriftImplicits.{ScroogeResponseLike, ScroogeResponseStringLike}
+import datainsider.ingestion.util.ThriftImplicits.ScroogeResponseStringLike
 
 import javax.inject.Inject
 
 case class TSchemaController @Inject() (
     schemaService: SchemaService,
-    apiKeyService: ApiKeyService,
-    trackingSchemaService: TrackingSchemaService,
     fileSyncInfoService: FileSyncInfoService
 ) extends Controller(TSchemaService)
     with Logging {
@@ -45,48 +40,6 @@ case class TSchemaController @Inject() (
       .map(_.toScroogeResponse)
   }
 
-  handle(GetAnalyticsDatabaseSchema).withFn { request: Request[GetAnalyticsDatabaseSchema.Args] =>
-    trackingSchemaService
-      .getTrackingDb(request.args.organizationId)
-      .map(JsonParser.toJson(_))
-      .map(_.toScroogeResponse)
-  }
-
-  handle(GetAnalyticsUserProfileSchema).withFn { request: Request[GetAnalyticsUserProfileSchema.Args] =>
-    trackingSchemaService
-      .getUserProfileSchema(request.args.organizationId)
-      .map(JsonParser.toJson(_))
-      .map(_.toScroogeResponse)
-  }
-
-  handle(GetAnalyticsEventSchema).withFn { request: Request[GetAnalyticsEventSchema.Args] =>
-    trackingSchemaService
-      .getEventSchema(request.args.organizationId)
-      .map(JsonParser.toJson(_))
-      .map(_.toScroogeResponse)
-  }
-
-  handle(GetAnalyticsEventDetailSchema).withFn { request: Request[GetAnalyticsEventDetailSchema.Args] =>
-    trackingSchemaService
-      .getEventDetailSchema(request.args.organizationId, request.args.event)
-      .map {
-        case Some(schema) => TEventDetailSchemaResult(0, Some(JsonParser.toJson(schema)))
-        case _            => TEventDetailSchemaResult(0, None)
-      }
-      .map(_.toScroogeResponse)
-  }
-
-  handle(MultiGetAnalyticsEventDetailSchema).withFn { request: Request[MultiGetAnalyticsEventDetailSchema.Args] =>
-    trackingSchemaService
-      .multiGetEventDetailSchema(request.args.organizationId, request.args.events)
-      .map(dataMap => {
-        val result = dataMap.map {
-          case (event, schema) => event -> JsonParser.toJson(schema)
-        }
-        TEventDetailSchemaMapResult(0, Some(result))
-      })
-      .map(_.toScroogeResponse)
-  }
 
   handle(CreateOrMergeTableSchema).withFn { request: Request[CreateOrMergeTableSchema.Args] =>
     val tableSchema = JsonParser.fromJson[TableSchema](request.args.schema)
@@ -139,23 +92,6 @@ case class TSchemaController @Inject() (
         request.args.message
       )
       .map(Response(_))
-  }
-
-  handle(MergeEventDetailSchema).withFn { request: Request[MergeEventDetailSchema.Args] =>
-    val eventProperties = JsonParser.fromJson[Map[String, Any]](request.args.propertiesAsJson)
-    trackingSchemaService
-      .mergeEventDetailSchema(request.args.organizationId, request.args.event, eventProperties)
-      .map(JsonParser.toJson(_))
-      .map(_.toScroogeResponse)
-  }
-
-  handle(GetApiKey).withFn { request: Request[GetApiKey.Args] =>
-    val apiKey: String = request.args.apiKey
-    apiKeyService
-      .getApiKey(apiKey)
-      .map(Response(_))
-      .map(JsonParser.toJson(_))
-      .map(_.toScroogeResponse)
   }
 
   handle(MergeSchemaByProperties).withFn { request: Request[MergeSchemaByProperties.Args] =>

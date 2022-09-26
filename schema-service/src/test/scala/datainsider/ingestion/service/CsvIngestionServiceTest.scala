@@ -2,11 +2,10 @@ package datainsider.ingestion.service
 
 import com.twitter.inject.app.TestInjector
 import com.twitter.inject.{Injector, IntegrationTest}
+import datainsider.client.filter.MockUserContext
 import datainsider.client.module.MockCaasClientModule
-import datainsider.client.util.{HttpClient, JsonParser}
 import datainsider.ingestion.domain._
-import datainsider.ingestion.module.TestModule
-import datainsider.module.MockHadoopFileClientModule
+import datainsider.ingestion.module.{MockHadoopFileClientModule, TestModule}
 
 import java.io.{BufferedReader, File, FileReader}
 import scala.collection.mutable.ArrayBuffer
@@ -40,26 +39,16 @@ class CsvIngestionServiceTest extends IntegrationTest {
       csvSetting = csvSetting
     )
 
-    val a = HttpClient.post(s"$host/ingestion/csv/detect", JsonParser.toJson(request))
-    println(a)
-
-    //    val csvSchemaResponse: CsvSchemaResponse = Await.result(csvIngestionService.detectSchema(request))
-    val csvSchemaResponse = JsonParser.fromJson[CsvSchemaResponse](a.data.toString)
+    val csvSchemaResponse: CsvSchemaResponse = await(csvIngestionService.detectSchema(request))
     csvSchema = csvSchemaResponse.schema
-    //    println(csvSchema)
+    println(csvSchema)
   }
 
   test("test register schema") {
     val tableSchema = csvSchema.copy(dbName = dbName, name = tblName)
-    //    val registerResponse = Await.result(
-    //      csvIngestionService.registerSchema(RegisterCsvSchemaRequest(apiKey, tableSchema))
-    //    )
-    val a = HttpClient.post(
-      s"$host/ingestion/csv/schema",
-      JsonParser.toJson(RegisterCsvSchemaRequest(tableSchema))
-    )
-    println(a)
-    //    println(registerResponse)
+    val registerCsvSchemaRequest = RegisterCsvSchemaRequest(tableSchema, MockUserContext.getLoggedInRequest(0L, "root"))
+    val registerResponse = await(csvIngestionService.registerSchema(registerCsvSchemaRequest))
+    println(registerResponse)
   }
 
   test("test ingest csv") {
@@ -68,13 +57,12 @@ class CsvIngestionServiceTest extends IntegrationTest {
     val csvData = ArrayBuffer.empty[String]
 
     def ingestData(): Unit = {
-      val ingestRequest = IngestCsvRequest(dbName, tblName, csvSetting, csvData.mkString("\n"))
-//      val ingestResponse = Await.result(csvIngestionService.ingestBatch(ingestRequest))
+      val ingestRequest = IngestCsvRequest(dbName, tblName, csvSetting, csvData.mkString("\n"), MockUserContext.getLoggedInRequest(0L, "root"))
+      val ingestResponse = await(csvIngestionService.ingestCsv(ingestRequest))
       val begin = System.currentTimeMillis()
-      val a = HttpClient.post(s"$host/ingestion/csv", JsonParser.toJson(ingestRequest))
-      println(a + s" time: ${System.currentTimeMillis() - begin} ms")
+      println(s" time: ${System.currentTimeMillis() - begin} ms")
       csvData.clear()
-//      println(ingestResponse)
+      println(ingestResponse)
     }
 
     var line: String = null

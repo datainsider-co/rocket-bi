@@ -1,6 +1,6 @@
 package datainsider.ingestion.module
 
-import com.google.inject.{Inject, Provides, Singleton}
+import com.google.inject.{Provides, Singleton}
 import com.twitter.inject.TwitterModule
 import datainsider.client.util.{NativeJdbcClient, ZConfig}
 import datainsider.ingestion.repository.{MySqlShareRepository, ShareRepository}

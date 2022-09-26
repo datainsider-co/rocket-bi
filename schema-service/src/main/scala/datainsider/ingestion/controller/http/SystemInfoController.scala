@@ -5,7 +5,7 @@ import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import datainsider.client.filter.PermissionFilter
 import datainsider.client.filter.UserContext.UserContextSyntax
-import datainsider.ingestion.controller.http.requests.{TestConnectionRequest}
+import datainsider.ingestion.controller.http.requests.TestConnectionRequest
 import datainsider.ingestion.domain.RefreshBy
 import datainsider.ingestion.service.{RefreshSchemaWorker, SystemService}
 import datainsider.profiler.Profiler

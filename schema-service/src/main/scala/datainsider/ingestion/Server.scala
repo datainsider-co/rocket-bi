@@ -1,44 +1,22 @@
 package datainsider.ingestion
 
-import akka.actor.ActorRef
 import com.google.inject.Module
-import com.google.inject.name.Names
 import com.google.inject.util.Modules
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.filters.CommonFilters
 import com.twitter.finatra.http.routing.HttpRouter
 import com.twitter.finatra.thrift.ThriftServer
 import com.twitter.finatra.thrift.routing.ThriftRouter
-import com.twitter.util.{Await, Future}
-import datainsider.analytics.controller.http.ApiKeyController
-import datainsider.analytics.module.{SqlScriptModule, TrackingModule}
-import datainsider.analytics.service.TrackingSchemaService
-import datainsider.analytics.service.tracking.ApiKeyService
+import com.twitter.util.Await
 import datainsider.client.filter.{LicenceFilter, LoggedInUserParser, MustLoggedInFilter}
-import datainsider.client.module.{
-  CaasClientModule,
-  HadoopFileClientModule,
-  MockCaasClientModule,
-  MockHadoopFileClientModule
-}
-import datainsider.client.service.OrgClientService
-import datainsider.client.util.{JsonParser, ZConfig}
-import datainsider.data_cook.controller.http.{EtlController, EtlShareController}
-import datainsider.data_cook.module.{DataCookJobModule, DataCookModule, DataCookSqlScriptModule, DataCookTestModule}
+import datainsider.client.module.{CaasClientModule, HadoopFileClientModule, MockCaasClientModule}
+import datainsider.client.util.ZConfig
 import datainsider.ingestion.controller.http._
 import datainsider.ingestion.controller.http.filter._
 import datainsider.ingestion.controller.thrift.TSchemaController
-import datainsider.ingestion.domain.{ApiKeyInfo, ApiKeyTypes, CsvSetting, RateLimitingInfo, TableSchema}
-import datainsider.ingestion.module.{
-  ActorModule,
-  MainModule,
-  RefreshSchemaModule,
-  MockRefreshSchemaModule,
-  ShareModule,
-  TestModule
-}
+import datainsider.ingestion.domain.CsvSetting
+import datainsider.ingestion.module.{MainModule, MockRefreshSchemaModule, ShareModule, SqlScriptModule, TestModule}
 import datainsider.ingestion.service.CsvReader
-import datainsider.ingestion.util.Implicits.FutureEnhance
 
 object MainApp extends Server
 
@@ -56,8 +34,6 @@ class TestServer extends HttpServer {
         super.modules ++ Seq(
           MockCaasClientModule,
           TestModule,
-          DataCookTestModule,
-          TrackingModule,
           MockRefreshSchemaModule
         ): _*
       )
@@ -82,8 +58,6 @@ class TestServer extends HttpServer {
       .add[SchemaController]
       .add[ShareController]
       .add[IngestionController]
-      .add[MustLoggedInFilter, EtlController]
-      .add[MustLoggedInFilter, EtlShareController]
       .add[MustLoggedInFilter, SystemInfoController]
       .exceptionMapper[CaseClassExceptionMapping]
       .exceptionMapper[JsonParseExceptionMapping]
@@ -104,16 +78,12 @@ class Server extends HttpServer with ThriftServer {
 
   override def modules: Seq[Module] = {
     Seq(
-      MockCaasClientModule,
+      CaasClientModule,
       MainModule,
-      TrackingModule,
       SqlScriptModule,
       ShareModule,
-      DataCookModule,
-      DataCookSqlScriptModule,
-      DataCookJobModule,
-      MockHadoopFileClientModule,
-      RefreshSchemaModule
+      HadoopFileClientModule
+//      RefreshSchemaModule
     )
   }
 
@@ -129,19 +99,12 @@ class Server extends HttpServer with ThriftServer {
       .add[SchemaController]
       .add[ShareController]
       .add[IngestionController]
-      .add[MustLoggedInFilter, EtlController]
-      .add[MustLoggedInFilter, EtlShareController]
-      .add[MustLoggedInFilter, SystemInfoController]
+//      .add[MustLoggedInFilter, SystemInfoController]
       .exceptionMapper[CaseClassExceptionMapping]
       .exceptionMapper[JsonParseExceptionMapping]
       .exceptionMapper[CommonExceptionMapping]
-
-    configureTrackingAndAnalyticHttp(router)
   }
 
-  private def configureTrackingAndAnalyticHttp(router: HttpRouter): Unit = {
-    router.add[MustLoggedInFilter, ApiKeyController]
-  }
 
   override protected def configureThrift(router: ThriftRouter): Unit = {
     router
@@ -152,50 +115,8 @@ class Server extends HttpServer with ThriftServer {
   protected override def postWarmup(): Unit = {
     super.postWarmup()
     warmupCsvReader()
-    for {
-      _ <- initTrackingAndAnalyticSchema()
-      _ <- createDefaultTrackingApiKey()
-    } yield Unit
   }
 
-  /**
-    *
-    * Pre init database schema for report: Clickhouse & SSDB
-    *
-    * @return
-    */
-  private def initTrackingAndAnalyticSchema(): Future[Seq[Unit]] = {
-    val trackingSchemaService = injector.instance[TrackingSchemaService]
-    val organizationService = injector.instance[OrgClientService]
-
-    val orgIds: Seq[Long] = organizationService.getAllOrganizations(0, 1000).syncGet().data.map(_.organizationId)
-    Future.traverseSequentially(orgIds)(orgId =>
-      trackingSchemaService.initialize(orgId).rescue {
-        case e: Throwable =>
-          error(s"error when init tracking schema for organization $orgId", e)
-          Future.Unit
-      }
-    )
-
-  }
-
-  private def createDefaultTrackingApiKey(): Future[Boolean] = {
-    val apiKeyService = injector.instance[ApiKeyService]
-    val apiKey = ZConfig.getString("tracking.default_api_key")
-
-    apiKeyService.addApiKey(
-      ApiKeyInfo(
-        ApiKeyTypes.Tracking,
-        apiKey,
-        0L,
-        RateLimitingInfo(),
-        name = None,
-        description = None,
-        updatedTime = Some(System.currentTimeMillis()),
-        createdTime = Some(System.currentTimeMillis())
-      )
-    )
-  }
 
   private def warmupCsvReader(): Unit = {
     try {

@@ -6,14 +6,8 @@ import datainsider.authorization.domain.PermissionProviders
 import datainsider.client.domain.user.UserProfile
 import datainsider.client.exception._
 import datainsider.client.service.{OrgAuthorizationClientService, ProfileClientService}
-import datainsider.data_cook.domain.Ids.OrganizationId
 import datainsider.ingestion.controller.http.requests._
-import datainsider.ingestion.controller.http.responses.{
-  FullSchemaInfo,
-  ListDatabaseResponse,
-  ShortSchemaInfo,
-  TableExpressionsResponse
-}
+import datainsider.ingestion.controller.http.responses.{FullSchemaInfo, ListDatabaseResponse, ShortSchemaInfo, TableExpressionsResponse}
 import datainsider.ingestion.domain.Types.DBName
 import datainsider.ingestion.domain._
 import datainsider.ingestion.misc.ColumnDetector
@@ -90,7 +84,7 @@ trait SchemaService {
 
   def createTableSchema(request: CreateTableFromQueryRequest): Future[TableSchema]
 
-  def createTableSchema(organizationId: OrganizationId, tableFromQueryInfo: TableFromQueryInfo): Future[TableSchema]
+  def createTableSchema(organizationId: Long, tableFromQueryInfo: TableFromQueryInfo): Future[TableSchema]
 
   def detectAdhocTableSchema(request: DetectAdhocTableSchemaRequest): Future[TableSchema]
 
@@ -291,15 +285,11 @@ case class SchemaServiceImpl @Inject() (
     schemaRepository
       .getDatabaseSchema(organizationId, dbName)
       .map(_.removeTemporaryTable())
-      .map(_.migrateCalculatedColumns())
   }
 
-  override def getDatabaseSchemas(organizationId: OrganizationId, dbNames: Seq[DBName]): Future[Seq[FullSchemaInfo]] = {
+  override def getDatabaseSchemas(organizationId: Long, dbNames: Seq[DBName]): Future[Seq[FullSchemaInfo]] = {
     for {
-      databases <-
-        schemaRepository
-          .getDatabaseSchemas(organizationId, dbNames)
-          .map(_.map(_.removeTemporaryTable()).map(_.migrateCalculatedColumns()))
+      databases <- schemaRepository.getDatabaseSchemas(organizationId, dbNames).map(_.map(_.removeTemporaryTable()))
       response <- toFullSchemaInfo(organizationId, databases)
     } yield response
   }
@@ -465,7 +455,7 @@ case class SchemaServiceImpl @Inject() (
   }
 
   override def createTableSchema(
-      organizationId: OrganizationId,
+      organizationId: Long,
       tableFromQueryInfo: TableFromQueryInfo
   ): Future[TableSchema] =
     Profiler("[SchemaService]::createTableSchema") {
@@ -488,7 +478,7 @@ case class SchemaServiceImpl @Inject() (
   }
 
   private def getTableSchemaFromQuery(
-      organizationId: OrganizationId,
+      organizationId: Long,
       tableFromQueryInfo: TableFromQueryInfo,
       existingExpressions: Map[String, String]
   ): Future[TableSchema] =
@@ -607,7 +597,7 @@ case class SchemaServiceImpl @Inject() (
     * filter permitted database
     */
   override def getPermittedDatabase(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbNames: Seq[DBName],
       username: String
   ): Future[Seq[String]] = {
@@ -689,7 +679,7 @@ case class SchemaServiceImpl @Inject() (
   }
 
   override def optimizeTable(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       tblName: String,
       primaryKeys: Array[String],
@@ -713,7 +703,7 @@ case class SchemaServiceImpl @Inject() (
   }
 
   override def mergeSchemaByProperties(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       tblName: String,
       properties: Map[String, Any]

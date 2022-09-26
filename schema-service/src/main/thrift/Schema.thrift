@@ -9,16 +9,6 @@ service TSchemaService {
 
     string getTableSchema(i64 organizationId, string dbName, string tblName)
 
-    string getAnalyticsDatabaseSchema(i64 organizationId)
-
-    string getAnalyticsUserProfileSchema(i64 organizationId)
-
-    string getAnalyticsEventSchema(i64 organizationId)
-
-    SchemaDT.TEventDetailSchemaResult getAnalyticsEventDetailSchema(i64 organizationId, string event)
-
-    SchemaDT.TEventDetailSchemaMapResult multiGetAnalyticsEventDetailSchema(i64 organizationId, list<string> events)
-
     void createOrMergeTableSchema(string schema)
 
     void ensureDatabaseCreated(i64 organizationId, string name, optional string displayName)
@@ -35,11 +25,6 @@ service TSchemaService {
     string verify(1: i64 syncId,2: string fileName)
 
     bool recordHistory(1: i64 historyId, 2: string fileName, 3: i64 fileSize, 4: bool isSuccess, 5: string message)
-
-    # tracking api
-    string getApiKey(string apiKey)
-
-    string mergeEventDetailSchema(i64 organizationId, string event, string propertiesAsJson)
 
     # table expressions
 

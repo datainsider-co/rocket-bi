@@ -1,13 +1,11 @@
 package datainsider.ingestion.repository
 
-import com.twitter.inject.{Injector, IntegrationTest, Test}
 import com.twitter.inject.app.TestInjector
+import com.twitter.inject.{Injector, IntegrationTest}
 import com.twitter.util.Await
-import datainsider.analytics.module.TrackingModule
 import datainsider.client.module.MockCaasClientModule
 import datainsider.ingestion.domain._
-import datainsider.ingestion.module.MainModule
-import datainsider.module.MockHadoopFileClientModule
+import datainsider.ingestion.module.{MainModule, MockHadoopFileClientModule}
 import education.x.commons.SsdbKVS
 import org.nutz.ssdb4j.spi.SSDB
 
@@ -15,8 +13,7 @@ import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 
 class CsvInfoRepositoryTest extends IntegrationTest {
 
-  override val injector: Injector =
-    TestInjector(MainModule, MockCaasClientModule, TrackingModule, MockHadoopFileClientModule)
+  override val injector: Injector = TestInjector(MainModule, MockCaasClientModule, MockHadoopFileClientModule)
       .newInstance()
   val client: SSDB = injector.instance[SSDB]
   implicit val ec: ExecutionContextExecutor = ExecutionContext.global

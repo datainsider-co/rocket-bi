@@ -3,14 +3,12 @@ package datainsider.ingestion.controller.http.requests
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.annotations.{QueryParam, RouteParam}
-import com.twitter.finatra.validation.constraints.{Min, NotEmpty, Pattern}
+import com.twitter.finatra.validation.constraints.{NotEmpty, Pattern}
 import datainsider.client.filter.LoggedInRequest
 import datainsider.client.filter.UserContext.UserContextSyntax
-import datainsider.client.util.ZConfig
-import datainsider.data_cook.domain.Ids.OrganizationId
 import datainsider.ingestion.domain.TableType.TableType
 import datainsider.ingestion.domain.Types.DBName
-import datainsider.ingestion.domain.{Column, DatabaseSchema, TableSchema, TableType, TableTypeRef}
+import datainsider.ingestion.domain._
 import datainsider.ingestion.util.ClickHouseUtils
 import datainsider.ingestion.util.Implicits.ImplicitString
 
@@ -242,7 +240,7 @@ case class TableFromQueryInfo(
     })
   }
 
-  def toTableSchema(organizationId: OrganizationId, columns: Array[Column]): TableSchema = {
+  def toTableSchema(organizationId: Long, columns: Array[Column]): TableSchema = {
     val newColumns: Array[Column] = applyAliasDisplayNames(columns, aliasColumnDisplayNames)
     TableSchema(
       name = tblName,

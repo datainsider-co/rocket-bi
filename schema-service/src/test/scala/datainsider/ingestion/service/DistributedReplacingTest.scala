@@ -1,15 +1,13 @@
 package datainsider.ingestion.service
 
-import com.twitter.inject.{Injector, IntegrationTest, Test}
+import com.twitter.inject.{Injector, IntegrationTest}
 import datainsider.client.module.MockCaasClientModule
 import datainsider.client.util.{JdbcClient, NativeJdbcClient, ZConfig}
-import datainsider.data_cook.engine.DiTestInjector
-import datainsider.data_cook.module.DataCookTestModule
 import datainsider.ingestion.domain._
 import datainsider.ingestion.misc.ClickHouseDDLConverter
 import datainsider.ingestion.misc.JdbcClient.Record
-import datainsider.ingestion.module.TestModule
-import datainsider.ingestion.repository.{DDLExecutorImpl, DDLExecutor}
+import datainsider.ingestion.module.{DiTestInjector, TestModule}
+import datainsider.ingestion.repository.{DDLExecutor, DDLExecutorImpl}
 import org.scalatest.BeforeAndAfterAll
 
 import java.sql.ResultSet
@@ -21,7 +19,7 @@ import scala.util.control.Breaks.{break, breakable}
   * @created 12/28/2021 - 5:14 PM
   */
 class DistributedReplacingTest extends IntegrationTest with BeforeAndAfterAll {
-  override protected val injector: Injector = DiTestInjector(TestModule, MockCaasClientModule, DataCookTestModule).newInstance()
+  override protected val injector: Injector = DiTestInjector(TestModule, MockCaasClientModule).newInstance()
   var ddlExecutor: DDLExecutor = null
   var client: JdbcClient = null
 

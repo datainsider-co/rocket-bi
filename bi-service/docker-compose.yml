@@ -1,7 +1,7 @@
 version: '3'
 services:
   bi_service:
-    image: registry.gitlab.com/datainsider/bi-service:local
+    image: registry.gitlab.com/datainsider/bi-service:oss
     container_name: rocket-bi-service
     restart: always
     environment:

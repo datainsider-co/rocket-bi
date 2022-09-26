@@ -6,8 +6,7 @@ import datainsider.client.module.MockCaasClientModule
 import datainsider.client.util.{JdbcClient, JsonParser, ZConfig}
 import datainsider.ingestion.domain._
 import datainsider.ingestion.misc.ClickHouseDDLConverter
-import datainsider.ingestion.module.TestModule
-import datainsider.module.MockHadoopFileClientModule
+import datainsider.ingestion.module.{MockHadoopFileClientModule, TestModule}
 
 /**
   * created 2022-07-18 2:02 PM

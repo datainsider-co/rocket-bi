@@ -30,6 +30,8 @@ services:
       MODE: production
     volumes:
       - ./caas-service/logs:/app/logs
+    ports:
+      - 8580:8580
     depends_on:
       - mysql
       - ssdb
@@ -68,8 +70,10 @@ services:
       - caas_service
 
   web:
-    image: registry.gitlab.com/datainsider/web:1.4.16.1
+    image: registry.gitlab.com/datainsider/web:oss
     container_name: rocket-web
+    ports:
+      - 5050:8080
     deploy:
       restart_policy:
         condition: on-failure

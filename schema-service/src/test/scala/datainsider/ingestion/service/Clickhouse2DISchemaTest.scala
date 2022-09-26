@@ -7,9 +7,8 @@ import datainsider.client.module.MockCaasClientModule
 import datainsider.client.util.JdbcClient
 import datainsider.ingestion.domain.RefreshStatus.RefreshStatus
 import datainsider.ingestion.domain.{DatabaseSchema, SystemInfo}
-import datainsider.ingestion.module.TestModule
+import datainsider.ingestion.module.{MockHadoopFileClientModule, TestModule}
 import datainsider.ingestion.repository.{ClickhouseMetaDataHandlerImpl, SchemaMetadataStorage}
-import datainsider.module.MockHadoopFileClientModule
 
 /**
   * created 2022-07-19 2:03 PM

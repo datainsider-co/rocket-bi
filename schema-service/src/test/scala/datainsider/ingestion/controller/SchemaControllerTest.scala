@@ -4,48 +4,58 @@ import com.twitter.finagle.http.Status
 import com.twitter.finatra.http.EmbeddedHttpServer
 import com.twitter.inject.Injector
 import com.twitter.inject.app.TestInjector
-import com.twitter.inject.server.FeatureTest
+import com.twitter.inject.server.{EmbeddedTwitterServer, FeatureTest}
 import datainsider.ingestion.TestServer
 import datainsider.ingestion.domain.DatabaseSchema
 import datainsider.ingestion.module.TestModule
 import datainsider.ingestion.repository.SchemaRepository
+import org.scalatest.BeforeAndAfterAll
 
-class SchemaControllerTest extends FeatureTest {
-  override val server = new EmbeddedHttpServer(new TestServer)
+class SchemaControllerTest extends FeatureTest with BeforeAndAfterAll{
+  protected override val server = new EmbeddedHttpServer(new TestServer)
 
-  override def injector: Injector = TestInjector(TestModule).newInstance()
-  val schemaRepository: SchemaRepository = injector.instance[SchemaRepository]
+  val schemaRepository: SchemaRepository = server.injector.instance[SchemaRepository]
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    schemaRepository.createDatabase(
-      DatabaseSchema(
-        name = "db_test_1",
-        organizationId = 1,
-        displayName = "Db test 1",
-        creatorId = "abc",
-        createdTime = 0,
-        updatedTime = 0,
-        tables = Seq()
-      )
-    )
-    schemaRepository.createDatabase(
-      DatabaseSchema(
-        name = "db_test_2",
-        organizationId = 1,
-        displayName = "Db test 2",
-        creatorId = "abc",
-        createdTime = 0,
-        updatedTime = 0,
-        tables = Seq()
-      )
-    )
+    try {
+      await(schemaRepository.createDatabase(
+        DatabaseSchema(
+          name = "db_test_1",
+          organizationId = 1,
+          displayName = "Db test 1",
+          creatorId = "abc",
+          createdTime = 0,
+          updatedTime = 0,
+          tables = Seq()
+        )
+      ))
+      await(schemaRepository.createDatabase(
+        DatabaseSchema(
+          name = "db_test_2",
+          organizationId = 1,
+          displayName = "Db test 2",
+          creatorId = "abc",
+          createdTime = 0,
+          updatedTime = 0,
+          tables = Seq()
+        )
+      ))
+    } catch {
+      case ex: Throwable => println(ex)
+    }
   }
 
   override def afterAll(): Unit = {
     super.afterAll()
-    schemaRepository.dropDatabase(1, "db_test_1")
-    schemaRepository.dropDatabase(1, "db_test_2")
+
+    try {
+      await(schemaRepository.dropDatabase(1, "db_test_1"))
+      await(schemaRepository.dropDatabase(1, "db_test_2"))
+    } catch {
+      case ex: Throwable => println(ex)
+    }
+
   }
 
   //Must post column before delete
@@ -63,16 +73,14 @@ class SchemaControllerTest extends FeatureTest {
 //    assert(r.getContentString() != null)
 //  }
 
-  // Todo: fix test case after add json utils into project
   test("Soft delete database") {
-    val r = server.httpPut(
+    val response = server.httpPut(
       path = "/databases/db_test_1/remove",
-      putBody = """
-          |{
-          |   "organization_id": 1
-          |}
-          |""".stripMargin
+      putBody = "",
+      andExpect = Status.Ok
     )
+    assert(response.getContentString() != null)
+    assert(response.getContentString() == "true")
   }
 
   test("List my database") {

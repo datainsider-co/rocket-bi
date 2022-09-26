@@ -258,17 +258,6 @@ case class TableSchema(
   def toWillCardField: Field = {
     ViewField(toAliasView, "*", "")
   }
-
-  // for back-compatibility with before v1.4.16
-  def migrateCalculatedColumns: TableSchema = {
-    val oldCalculatedCols: Seq[Column] = columns.filter(c => c.defaultExpression.isDefined)
-
-    copy(
-      columns = columns.filterNot(c => oldCalculatedCols.contains(c)),
-      calculatedColumns =
-        if (this.calculatedColumns != null) this.calculatedColumns ++ oldCalculatedCols else oldCalculatedCols
-    )
-  }
 }
 
 @SerialVersionUID(20200715L)
@@ -307,11 +296,6 @@ case class DatabaseSchema(
 
   def removeTemporaryTable(): DatabaseSchema = {
     copy(tables = tables.filter(!_.isTemporary))
-  }
-
-  // for back-compatibility with before v1.4.16
-  def migrateCalculatedColumns(): DatabaseSchema = {
-    copy(tables = tables.map(_.migrateCalculatedColumns))
   }
 }
 

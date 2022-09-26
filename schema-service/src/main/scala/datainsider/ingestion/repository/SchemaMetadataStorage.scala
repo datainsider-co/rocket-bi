@@ -2,7 +2,6 @@ package datainsider.ingestion.repository
 
 import com.twitter.util.Future
 import datainsider.client.exception._
-import datainsider.data_cook.domain.Ids.OrganizationId
 import datainsider.ingestion.domain.{Column, DatabaseSchema, DatabaseShortInfo, TableSchema}
 import datainsider.ingestion.util.Implicits.ScalaFutureLike
 import education.x.commons.{KVS, SsdbSortedSet}
@@ -408,7 +407,7 @@ case class SchemaMetadataStorageImpl(client: SSDB, dbKVS: KVS[String, DatabaseSc
   }
 
   override def getExpressionColumn(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       tblName: String,
       columnName: String
@@ -481,7 +480,7 @@ case class SchemaMetadataStorageImpl(client: SSDB, dbKVS: KVS[String, DatabaseSc
   }
 
   override def addCalculatedColumn(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       tblName: String,
       newCalcColumn: Column
@@ -500,7 +499,7 @@ case class SchemaMetadataStorageImpl(client: SSDB, dbKVS: KVS[String, DatabaseSc
     } yield r
 
   override def updateCalculatedColumn(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       tblName: String,
       newCalcColumn: Column
@@ -522,7 +521,7 @@ case class SchemaMetadataStorageImpl(client: SSDB, dbKVS: KVS[String, DatabaseSc
   }
 
   override def dropCalculatedColumn(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       tblName: String,
       columnName: String
@@ -541,7 +540,7 @@ case class SchemaMetadataStorageImpl(client: SSDB, dbKVS: KVS[String, DatabaseSc
       r <- addTable(organizationId, dbName, newTableSchema)
     } yield r
 
-  private def getTableSchema(organizationId: OrganizationId, dbName: String, tblName: String): Future[TableSchema] = {
+  private def getTableSchema(organizationId: Long, dbName: String, tblName: String): Future[TableSchema] = {
     for {
       dbSchema <- getDatabaseSchema(organizationId, dbName)
       tableSchema = dbSchema.findTableAsOption(tblName) match {

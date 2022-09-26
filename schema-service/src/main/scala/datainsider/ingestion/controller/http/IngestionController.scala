@@ -5,33 +5,9 @@ import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import datainsider.client.filter.PermissionFilter
 import datainsider.ingestion.controller.http.filter.{ApiKeyFilter, ServiceKeyFilter}
-import datainsider.ingestion.controller.http.requests.{
-  ClearTableRequest,
-  EndSyncRequest,
-  EnsureSparkSchemaRequest,
-  IngestFakeDataRequest,
-  IngestRequest,
-  InitSyncRequest,
-  OptimizeTableRequest,
-  RecordFileHistory,
-  VerifySyncRequest
-}
-import datainsider.ingestion.domain.{
-  DetectCsvSchemaRequest,
-  IngestBatchRequest,
-  IngestCsvRequest,
-  OldCsvRegisterRequest,
-  OldCsvUploadRequest,
-  RegisterCsvSchemaRequest
-}
-import datainsider.ingestion.service.{
-  CsvIngestionService,
-  FileSyncHistoryService,
-  FileSyncInfoService,
-  IngestionService,
-  OldCsvUploadService,
-  SchemaService
-}
+import datainsider.ingestion.controller.http.requests._
+import datainsider.ingestion.domain._
+import datainsider.ingestion.service._
 import datainsider.profiler.Profiler
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -4,7 +4,7 @@ import com.twitter.inject.Logging
 import com.twitter.util.Future
 import datainsider.client.domain.lakehouse.LakeColumn
 import datainsider.client.exception.DbNotFoundError
-import datainsider.data_cook.domain.Ids.OrganizationId
+
 import datainsider.ingestion.controller.http.requests.{
   ClearTableRequest,
   EnsureSparkSchemaRequest,

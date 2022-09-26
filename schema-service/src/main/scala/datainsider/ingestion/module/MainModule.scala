@@ -2,9 +2,9 @@ package datainsider.ingestion.module
 
 import com.google.inject.Provides
 import com.twitter.inject.TwitterModule
-import datainsider.client.util.{HikariClient, JdbcClient, JsonParser, ZConfig}
+import datainsider.client.util.{HikariClient, JdbcClient, ZConfig}
 import datainsider.ingestion.controller.http.requests.CreateDBRequest
-import datainsider.ingestion.domain.{ClickhouseConnectionSetting, CsvUploadInfo}
+import datainsider.ingestion.domain.CsvUploadInfo
 import datainsider.ingestion.misc._
 import datainsider.ingestion.repository._
 import datainsider.ingestion.service._
@@ -14,8 +14,6 @@ import org.nutz.ssdb4j.spi.SSDB
 
 import javax.inject.{Named, Singleton}
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
-import scala.io.{BufferedSource, Source}
-import scala.util.Try
 
 object MainModule extends TwitterModule {
 
@@ -49,64 +47,21 @@ object MainModule extends TwitterModule {
   @Singleton
   @Provides
   @Named("clickhouse")
-  def providesClickHouseClient(clickhouseConnSetting: Option[ClickhouseConnectionSetting]): JdbcClient = {
-    if (clickhouseConnSetting.isDefined) {
-      
-       info(s"""
-           |Clickhouse datasource from setting file:
-           |URL: ${clickhouseConnSetting.get.toJdbcUrl}
-           |User: ${clickhouseConnSetting.get.username}
-           |Password: ${clickhouseConnSetting.get.password}
-           |""".stripMargin)
+  def providesClickHouseClient(): JdbcClient = {
+    val driverClass: String = ZConfig.getString("db.clickhouse.driver_class")
+    val jdbcUrl: String = ZConfig.getString("db.clickhouse.url")
+    val user: String = ZConfig.getString("db.clickhouse.user")
+    val password: String = ZConfig.getString("db.clickhouse.password")
 
+    info(s"""
+        |Clickhouse datasource:
+        |Driver: $driverClass
+        |URL: $jdbcUrl
+        |User: $user
+        |Password: $password
+        |""".stripMargin)
 
-
-      HikariClient(
-        clickhouseConnSetting.get.toJdbcUrl,
-        clickhouseConnSetting.get.username,
-        clickhouseConnSetting.get.password
-      )
-
-    } else {
-      val driverClass: String = ZConfig.getString("db.clickhouse.driver_class")
-      val jdbcUrl: String = ZConfig.getString("db.clickhouse.url")
-      val user: String = ZConfig.getString("db.clickhouse.user")
-      val password: String = ZConfig.getString("db.clickhouse.password")
-
-      info(s"""
-           |Clickhouse datasource:
-           |Driver: $driverClass
-           |URL: $jdbcUrl
-           |User: $user
-           |Password: $password
-           |""".stripMargin)
-
-      HikariClient(jdbcUrl, user, password)
-    }
-  }
-
-  @Provides
-  @Singleton
-  def provideClickhouseConnectionSetting(): Option[ClickhouseConnectionSetting] = {
-    Try {
-      val source: BufferedSource = Source.fromFile("clickhouse_connection_settings.json")
-
-      val settingJson: String = {
-        try source.getLines().mkString
-        finally source.close()
-      }
-
-      val settingsMap = JsonParser.fromJson[Map[String, String]](settingJson)
-
-      ClickhouseConnectionSetting(
-        host = settingsMap.getOrElse("host", ""),
-        username = settingsMap.getOrElse("username", ""),
-        password = settingsMap.getOrElse("password", ""),
-        httpPort = settingsMap.getOrElse("http_port", "0").toInt,
-        tcpPort = settingsMap.getOrElse("tcp_port", "0").toInt,
-        clusterName = settingsMap.getOrElse("cluster_name", "")
-      )
-    }.toOption
+    HikariClient(jdbcUrl, user, password)
   }
 
   @Provides
@@ -127,15 +82,8 @@ object MainModule extends TwitterModule {
 
   @Singleton
   @Provides
-  def providesDDLExecutor(
-      @Named("clickhouse") client: JdbcClient,
-      clickhouseConnSetting: Option[ClickhouseConnectionSetting]
-  ): DDLExecutor = {
-    val clusterName: String = if (clickhouseConnSetting.isDefined) {
-      clickhouseConnSetting.get.clusterName
-    } else {
-      ZConfig.getString("db.clickhouse.cluster_name")
-    }
+  def providesDDLExecutor(@Named("clickhouse") client: JdbcClient): DDLExecutor = {
+    val clusterName: String = ZConfig.getString("db.clickhouse.cluster_name")
     DDLExecutorImpl(client, ClickHouseDDLConverter(), clusterName)
   }
 

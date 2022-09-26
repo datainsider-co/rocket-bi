@@ -5,10 +5,9 @@ import com.twitter.inject.{Injector, IntegrationTest}
 import datainsider.client.module.MockCaasClientModule
 import datainsider.client.util.JsonParser
 import datainsider.ingestion.domain._
-import datainsider.ingestion.module.TestModule
+import datainsider.ingestion.module.{MockHadoopFileClientModule, TestModule}
 import datainsider.ingestion.repository.{DDLExecutor, DataRepository}
 import datainsider.ingestion.util.Implicits._
-import datainsider.module.MockHadoopFileClientModule
 import org.scalatest.BeforeAndAfterAll
 
 import java.{util => ju}

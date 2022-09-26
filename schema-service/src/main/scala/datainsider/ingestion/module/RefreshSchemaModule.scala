@@ -3,7 +3,7 @@ package datainsider.ingestion.module
 import com.google.inject.Provides
 import com.twitter.inject.{Injector, TwitterModule}
 import datainsider.client.util.ZConfig
-import datainsider.ingestion.domain.{ClickhouseConnectionSetting, ClickhouseSource, SystemInfo}
+import datainsider.ingestion.domain.{ClickhouseSource, SystemInfo}
 import datainsider.ingestion.repository.{SchemaMetadataStorage, SystemRepository, SystemRepositoryImpl}
 import datainsider.ingestion.service.{RefreshSchemaWorker, RefreshSchemaWorkerImpl, SystemService, SystemServiceImpl}
 import education.x.commons.SsdbKVS
@@ -35,25 +35,14 @@ object RefreshSchemaModule extends TwitterModule {
 
   @Singleton
   @Provides
-  def providesSystemRepository(
-      client: SSDB,
-      clickhouseConnSetting: Option[ClickhouseConnectionSetting]
-  ): SystemRepository = {
+  def providesSystemRepository(client: SSDB): SystemRepository = {
     val systemInfoDatabase = SsdbKVS[String, SystemInfo](s"di.system.info", client)
 
-    val clickhouseSource = if (clickhouseConnSetting.isDefined) {
-      val jdbcUrl: String = clickhouseConnSetting.get.toJdbcUrl
-      val user: String = clickhouseConnSetting.get.username
-      val password: String = clickhouseConnSetting.get.password
-      val clusterName: String = clickhouseConnSetting.get.clusterName
-      ClickhouseSource(jdbcUrl, user, password, clusterName)
-    } else {
-      val jdbcUrl: String = ZConfig.getString("db.clickhouse.url")
-      val user: String = ZConfig.getString("db.clickhouse.user")
-      val password: String = ZConfig.getString("db.clickhouse.password")
-      val clusterName: String = ZConfig.getString("db.clickhouse.cluster_name")
-      ClickhouseSource(jdbcUrl, user, password, clusterName)
-    }
+    val jdbcUrl: String = ZConfig.getString("db.clickhouse.url")
+    val user: String = ZConfig.getString("db.clickhouse.user")
+    val password: String = ZConfig.getString("db.clickhouse.password")
+    val clusterName: String = ZConfig.getString("db.clickhouse.cluster_name")
+    val clickhouseSource = ClickhouseSource(jdbcUrl, user, password, clusterName)
 
     new SystemRepositoryImpl(clickhouseSource, systemInfoDatabase)
   }

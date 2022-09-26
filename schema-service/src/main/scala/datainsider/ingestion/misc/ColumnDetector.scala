@@ -1,10 +1,11 @@
 package datainsider.ingestion.misc
 
-import datainsider.analytics.misc.ColumnDetector.createColumn
 import datainsider.ingestion.domain._
 import datainsider.ingestion.util.Implicits.ImplicitString
 import datainsider.ingestion.util.TimeUtils
 
+// fixme
+@deprecated("remove")
 object ColumnDetector {
 
   case class DetectionResult(columns: Seq[Column], unknownColumns: Seq[Column])

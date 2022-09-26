@@ -2,13 +2,7 @@ package datainsider.ingestion.controller.http
 
 import com.twitter.finatra.http.Controller
 import datainsider.client.filter.PermissionFilter
-import datainsider.ingestion.controller.http.filter.SchemaFilter.{EditSchemaAccessFilter, ViewSchemaAccessFilter}
-import datainsider.ingestion.controller.http.requests.{
-  GetResourceSharingInfoRequest,
-  MultiUpdateResourceSharingRequest,
-  RevokeDatabasePermissionsRequest,
-  ShareWithUserRequest
-}
+import datainsider.ingestion.controller.http.requests.{GetResourceSharingInfoRequest, MultiUpdateResourceSharingRequest, RevokeDatabasePermissionsRequest, ShareWithUserRequest}
 import datainsider.ingestion.service.ShareService
 import datainsider.profiler.Profiler
 

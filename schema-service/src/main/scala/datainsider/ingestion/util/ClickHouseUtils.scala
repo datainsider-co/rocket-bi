@@ -2,19 +2,9 @@ package datainsider.ingestion.util
 
 import datainsider.client.domain.Implicits.VALUE_NULL
 import datainsider.client.util.ZConfig
-import datainsider.data_cook.domain.Ids.OrganizationId
-import datainsider.ingestion.domain.Types.DBName
-import datainsider.ingestion.domain.{
-  ArrayColumn,
-  Column,
-  DateColumn,
-  DateTime64Column,
-  DateTimeColumn,
-  NestedColumn,
-  StringColumn
-}
-import datainsider.ingestion.util.SqlRegex.SqlRegex
+import datainsider.ingestion.domain._
 import datainsider.ingestion.misc.JdbcClient.Record
+import datainsider.ingestion.util.SqlRegex.SqlRegex
 
 import java.sql.{ResultSet, Timestamp}
 import java.text.SimpleDateFormat
@@ -34,7 +24,7 @@ object SqlRegex extends Enumeration {
 }
 
 /** *
-  */
+ */
 object ClickHouseUtils {
   val SINGLE_TENANT_ID = 0L
   val sqlClauseRegexes: Array[SqlRegex] = Array(
@@ -50,16 +40,16 @@ object ClickHouseUtils {
   private val previewPrefixDbName = ZConfig.getString("data_cook.preview_prefix_db_name", "preview_etl")
 
   /**
-    * example: org1_preview_etl_1 | org1_etl_123 | etl_123
-    */
+   * example: org1_preview_etl_1 | org1_etl_123 | etl_123
+   */
   val ETL_DATABASE_PATTERN = s"^(?:org\\d+_)?(?:${prefixDbName}|${previewPrefixDbName})_\\d+$$"
   // pattern
   val PREVIEW_ETL_DATABASE_PATTERN = s"^(?:org(\\d+)_)?${previewPrefixDbName}_\\d+$$"
 
   /**
-    * get org id from dbName, if not matching rule return SINGLE_TENANT_ID
-    */
-  def getPreviewEtlOrgId(dbName: DBName): OrganizationId = {
+   * get org id from dbName, if not matching rule return SINGLE_TENANT_ID
+   */
+  def getPreviewEtlOrgId(dbName: String): Long = {
     val orgId: Option[Long] = PREVIEW_ETL_DATABASE_PATTERN.r.findFirstMatchIn(dbName) match {
       case Some(matcher) if (matcher.group(1) != null) => Some(matcher.group(1).toLong)
       case _                                           => None
@@ -68,12 +58,12 @@ object ClickHouseUtils {
   }
 
   /**
-    * for single tenant version (organizationId is always 0) do not add prefix: "org_"
-    * @param organizationId organization id
-    * @param name name of db
-    */
+   * for single tenant version (organizationId is always 0) do not add prefix: "org_"
+   * @param organizationId organization id
+   * @param name name of db
+   */
   // TODO: If change format in here, check regex of ETL_DATABASE_PATTERN & PREVIEW_ETL_DATABASE_PATTERN
-  def buildDatabaseName(organizationId: OrganizationId, name: String): String = {
+  def buildDatabaseName(organizationId: Long, name: String): String = {
     if (organizationId == SINGLE_TENANT_ID) {
       name
     } else {
@@ -81,7 +71,7 @@ object ClickHouseUtils {
     }
   }
 
-  def removeDatabasePrefix(organizationId: OrganizationId, dbName: DBName) = {
+  def removeDatabasePrefix(organizationId: Long, dbName: String) = {
     dbName.replaceFirst(s"org${organizationId}_", "")
   }
 
@@ -113,11 +103,11 @@ object ClickHouseUtils {
   }
 
   /**
-    * Normalize and convert the given record to the corresponding data types using its schema
-    * @param columns
-    * @param record
-    * @return
-    */
+   * Normalize and convert the given record to the corresponding data types using its schema
+   * @param columns
+   * @param record
+   * @return
+   */
   def normalizeToCorrespondingType(columns: Seq[Column], record: Record): Record = {
     def convertNestedValues(column: NestedColumn, values: Seq[Any]): Seq[Any] = {
       values
@@ -152,24 +142,23 @@ object ClickHouseUtils {
   }
 
   def normalizeToCorrespondingType(data: Any): Any = {
-    import scala.jdk.CollectionConverters.seqAsJavaListConverter
     data match {
-//      case v: Seq[_]      => new ClickHouseArray(v.asJava.toArray)
-//      case v: Array[_]    => new ClickHouseArray(v.toSeq.asJava.toArray)
-//      case v: Iterable[_] => new ClickHouseArray(v.toSeq.asJava.toArray)
-//      case v: Iterator[_] => new ClickHouseArray(v.toSeq.asJava.toArray)
+      //      case v: Seq[_]      => new ClickHouseArray(v.asJava.toArray)
+      //      case v: Array[_]    => new ClickHouseArray(v.toSeq.asJava.toArray)
+      //      case v: Iterable[_] => new ClickHouseArray(v.toSeq.asJava.toArray)
+      //      case v: Iterator[_] => new ClickHouseArray(v.toSeq.asJava.toArray)
       case v: Boolean => if (v) 1 else 0
       case v          => v
     }
   }
 
   /**
-    * return starting index of specific clause
-    *
-    * @param sql      sql to be adjust
-    * @param sqlRegex : regex of search clause
-    * @return Some(i) if exist else none (i: starting index of clause)
-    */
+   * return starting index of specific clause
+   *
+   * @param sql      sql to be adjust
+   * @param sqlRegex : regex of search clause
+   * @return Some(i) if exist else none (i: starting index of clause)
+   */
   def findClause(sql: String, sqlRegex: Regex): Option[Int] = {
     sqlRegex.findFirstMatchIn(sql.toLowerCase()).map(_.start)
   }
@@ -193,8 +182,8 @@ object ClickHouseUtils {
   }
 
   /**
-    * return position of clause or the next possible position of specific clause (if clause not exists)
-    */
+   * return position of clause or the next possible position of specific clause (if clause not exists)
+   */
   def findAppropriatePos(sql: String, target: Regex): Int = {
     sqlClauseRegexes
       .slice(sqlClauseRegexes.indexOf(target), sqlClauseRegexes.length)

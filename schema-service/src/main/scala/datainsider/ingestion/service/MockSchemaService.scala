@@ -2,7 +2,7 @@ package datainsider.ingestion.service
 
 import com.twitter.util.Future
 import datainsider.client.exception.NotFoundError
-import datainsider.data_cook.domain.Ids.OrganizationId
+
 import datainsider.ingestion.controller.http.requests._
 import datainsider.ingestion.controller.http.responses.{FullSchemaInfo, ListDatabaseResponse, TableExpressionsResponse}
 import datainsider.ingestion.domain.Types.DBName
@@ -250,7 +250,7 @@ case class MockSchemaService() extends SchemaService {
   override def createTableSchemaIfNotExists(table: TableSchema): Future[TableSchema] = ???
 
   override def createTableSchema(
-      organizationId: OrganizationId,
+      organizationId: Long,
       tableFromQueryInfo: TableFromQueryInfo
   ): Future[TableSchema] = ???
 
@@ -263,16 +263,16 @@ case class MockSchemaService() extends SchemaService {
     * filter permitted database
     */
   override def getPermittedDatabase(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbNames: Seq[String],
       username: String
   ): Future[Seq[String]] = ???
 
-  override def getDatabaseSchemas(organizationId: OrganizationId, dbNames: Seq[DBName]): Future[Seq[FullSchemaInfo]] =
+  override def getDatabaseSchemas(organizationId: Long, dbNames: Seq[DBName]): Future[Seq[FullSchemaInfo]] =
     Future.value(Seq())
 
   override def optimizeTable(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       tblName: String,
       primaryKeys: Array[String],
@@ -280,7 +280,7 @@ case class MockSchemaService() extends SchemaService {
   ): Future[Boolean] = Future.True
 
   override def mergeSchemaByProperties(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       tblName: String,
       properties: Map[String, Any]

@@ -2,7 +2,7 @@ package datainsider.ingestion.service
 
 import com.twitter.util.Future
 import com.twitter.util.logging.Logging
-import datainsider.data_cook.domain.Ids.OrganizationId
+
 import datainsider.ingestion.domain.RefreshStatus.RefreshStatus
 import datainsider.ingestion.domain._
 import datainsider.ingestion.repository.{ClickhouseMetaDataHandler, SchemaMetadataStorage}
@@ -21,7 +21,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Class dam nhiem vu lay schema tu clickhouse convert ve schema cua DI System
   */
 class Clickhouse2DISchema(
-   organizationId: OrganizationId,
+   organizationId: Long,
    clickhouseMetaDataHandler: ClickhouseMetaDataHandler,
    storage: SchemaMetadataStorage,
    refreshConfig: RefreshConfig,
@@ -54,7 +54,7 @@ class Clickhouse2DISchema(
   /**
     * Drop all unknown databases in di-system
     */
-  private def dropUnknownDatabase(organizationId: OrganizationId, clickhouseDbNames: Seq[String]): Unit = {
+  private def dropUnknownDatabase(organizationId: Long, clickhouseDbNames: Seq[String]): Unit = {
     try {
       val databaseSchemas: Seq[DatabaseSchema] = storage.getDatabases(organizationId).syncGet()
       val unknownDatabases = databaseSchemas.map(_.name).diff(clickhouseDbNames)
@@ -67,7 +67,7 @@ class Clickhouse2DISchema(
   }
 
   private def ensureDatabase(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       clickhouseTableSchemas: Seq[TableSchema]
   ): Unit = {

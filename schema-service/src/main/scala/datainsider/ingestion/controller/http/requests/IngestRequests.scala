@@ -5,10 +5,10 @@ import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.annotations.RouteParam
 import com.twitter.finatra.validation.constraints.{NotEmpty, Pattern}
 import datainsider.client.domain.org.Organization
-import datainsider.ingestion.domain.SparkDataType.{BooleanType, DateType, DoubleType, FloatType, IntegerType, LongType, ShortType, StringType, TimestampType}
-import datainsider.ingestion.domain.{BoolColumn, Column, DateColumn, DateTime64Column, DoubleColumn, FloatColumn, Int32Column, Int64Column, SparkColumn, SparkWriteMode, SparkWriteModeRef, StringColumn, TableSchema, TableTypeRef}
+import datainsider.ingestion.domain.SparkDataType._
 import datainsider.ingestion.domain.SparkWriteMode.SparkWriteMode
 import datainsider.ingestion.domain.TableType.TableType
+import datainsider.ingestion.domain._
 import datainsider.ingestion.service.GeneratedColumn
 import datainsider.ingestion.util.ClickHouseUtils
 import datainsider.ingestion.util.Implicits.ImplicitString
@@ -63,16 +63,21 @@ case class EnsureSparkSchemaRequest(
   def toColumns(columns: Seq[SparkColumn]): Seq[Column] = {
     columns.map(column =>
       column.dataType match {
-        case BooleanType                   => BoolColumn(column.name, column.name, defaultValue = Some(false), isNullable = column.isNullable)
-        case IntegerType                   => Int32Column(column.name, column.name, defaultValue = Some(0), isNullable = column.isNullable)
-        case LongType                      => Int64Column(column.name, column.name, defaultValue = Some(0L), isNullable = column.isNullable)
-        case FloatType                     => FloatColumn(column.name, column.name, defaultValue = Some(0.0f), isNullable = column.isNullable)
-        case DoubleType                    => DoubleColumn(column.name, column.name, defaultValue = Some(0.0), isNullable = column.isNullable)
-        case StringType                    => StringColumn(column.name, column.name, defaultValue = Some(""), isNullable = column.isNullable)
-        case DateType                      => DateColumn(column.name, column.name, isNullable = column.isNullable)
-        case TimestampType                 => DateTime64Column(column.name, column.name, isNullable = column.isNullable)
-        case ShortType                     => Int32Column(column.name, column.name, defaultValue = Some(0), isNullable = column.isNullable)
-        case _                             => StringColumn(column.name, column.name, defaultValue = Some(""), isNullable = column.isNullable)
+        case BooleanType =>
+          BoolColumn(column.name, column.name, defaultValue = Some(false), isNullable = column.isNullable)
+        case IntegerType =>
+          Int32Column(column.name, column.name, defaultValue = Some(0), isNullable = column.isNullable)
+        case LongType => Int64Column(column.name, column.name, defaultValue = Some(0L), isNullable = column.isNullable)
+        case FloatType =>
+          FloatColumn(column.name, column.name, defaultValue = Some(0.0f), isNullable = column.isNullable)
+        case DoubleType =>
+          DoubleColumn(column.name, column.name, defaultValue = Some(0.0), isNullable = column.isNullable)
+        case StringType =>
+          StringColumn(column.name, column.name, defaultValue = Some(""), isNullable = column.isNullable)
+        case DateType      => DateColumn(column.name, column.name, isNullable = column.isNullable)
+        case TimestampType => DateTime64Column(column.name, column.name, isNullable = column.isNullable)
+        case ShortType     => Int32Column(column.name, column.name, defaultValue = Some(0), isNullable = column.isNullable)
+        case _             => StringColumn(column.name, column.name, defaultValue = Some(""), isNullable = column.isNullable)
       }
     )
   }
@@ -118,9 +123,9 @@ case class IngestFakeDataRequest(
 )
 
 case class OptimizeTableRequest(
-                                 organizationId: Long,
-                                 @NotEmpty @Pattern(regexp = "\\w+") dbName: String,
-                                 @NotEmpty @Pattern(regexp = "\\w+") tblName: String,
-                                 primaryKeys: Array[String] = Array.empty,
-                                 isUseFinal: Boolean = true
-                               )
+    organizationId: Long,
+    @NotEmpty @Pattern(regexp = "\\w+") dbName: String,
+    @NotEmpty @Pattern(regexp = "\\w+") tblName: String,
+    primaryKeys: Array[String] = Array.empty,
+    isUseFinal: Boolean = true
+)

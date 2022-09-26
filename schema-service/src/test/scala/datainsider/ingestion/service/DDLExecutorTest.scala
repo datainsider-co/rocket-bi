@@ -4,12 +4,10 @@ import com.twitter.inject.{Injector, IntegrationTest}
 import com.twitter.util.Future
 import datainsider.client.module.MockCaasClientModule
 import datainsider.client.util.{NativeJdbcClient, ZConfig}
-import datainsider.data_cook.engine.DiTestInjector
-import datainsider.data_cook.module.DataCookTestModule
 import datainsider.ingestion.domain._
 import datainsider.ingestion.misc.ClickHouseDDLConverter
-import datainsider.ingestion.module.TestModule
-import datainsider.ingestion.repository.{DDLExecutorImpl, DDLExecutor}
+import datainsider.ingestion.module.{DiTestInjector, TestModule}
+import datainsider.ingestion.repository.{DDLExecutor, DDLExecutorImpl}
 import datainsider.ingestion.util.Implicits.FutureEnhance
 import org.scalatest.BeforeAndAfterAll
 
@@ -18,7 +16,7 @@ import org.scalatest.BeforeAndAfterAll
   * @since 7/10/20
  **/
 class DDLExecutorTest extends IntegrationTest with BeforeAndAfterAll {
-  override protected val injector: Injector = DiTestInjector(TestModule, MockCaasClientModule, DataCookTestModule).newInstance()
+  override protected val injector: Injector = DiTestInjector(TestModule, MockCaasClientModule).newInstance()
 
   var ddlExecutor: DDLExecutor = null
 

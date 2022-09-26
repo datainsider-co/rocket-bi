@@ -2,15 +2,13 @@ package datainsider.ingestion.repository
 
 import com.twitter.util.Future
 import com.twitter.util.logging.Logging
-import datainsider.analytics.misc.ColumnDetector
-import datainsider.analytics.misc.ColumnDetector.RawColumnData
 import datainsider.client.exception._
-import datainsider.data_cook.domain.Ids.OrganizationId
 import datainsider.ingestion.controller.http.requests.{CreateTableRequest, DeleteColumnRequest}
 import datainsider.ingestion.domain._
-import datainsider.ingestion.util.{ClickHouseUtils, TableExpressionUtils}
+import datainsider.ingestion.util.ColumnDetector.RawColumnData
 import datainsider.ingestion.util.Implicits.ImplicitString
 import datainsider.ingestion.util.ImplicitsFunc._
+import datainsider.ingestion.util.{ClickHouseUtils, ColumnDetector, TableExpressionUtils}
 import datainsider.profiler.Profiler
 
 import java.sql.ResultSetMetaData
@@ -291,7 +289,7 @@ case class SchemaRepositoryImpl(
     }
   }
 
-  override def overrideTblSchema(organizationId: OrganizationId, tableSchema: TableSchema): Future[TableSchema] = {
+  override def overrideTblSchema(organizationId: Long, tableSchema: TableSchema): Future[TableSchema] = {
     for {
       isViewTable <- getTable(organizationId, tableSchema.dbName, tableSchema.name).map(schema => {
         if (schema.getTableType != TableType.View) {
@@ -636,7 +634,7 @@ case class SchemaRepositoryImpl(
   }
 
   override def createCalcColumn(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       tblName: String,
       newCalcColumn: Column
@@ -650,7 +648,7 @@ case class SchemaRepositoryImpl(
   }
 
   override def updateCalcColumn(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       tblName: String,
       newCalcColumn: Column
@@ -663,7 +661,7 @@ case class SchemaRepositoryImpl(
     }
 
   override def deleteCalcColumn(
-      organizationId: OrganizationId,
+      organizationId: Long,
       dbName: String,
       tblName: String,
       columnName: String

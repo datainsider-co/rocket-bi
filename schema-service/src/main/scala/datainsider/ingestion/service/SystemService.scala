@@ -123,3 +123,54 @@ class SystemServiceImpl(systemRepository: SystemRepository, timeoutMs: Int = 300
     } yield result
   }
 }
+
+class MockSystemService extends SystemService {
+    override def getSystemInfo(orgId: Long, forceGetStatus: Boolean = false): Future[SystemInfo] = {
+        Future.value(
+        SystemInfo(
+            orgId = orgId,
+            sources = Seq.empty,
+            refreshConfig = RefreshConfig(Seq.empty),
+            status = SystemStatus.Healthy,
+            currentRefreshStatus = RefreshStatus.Init,
+            lastRefreshStatus = None,
+            lastRefreshBy = None,
+            lastRefreshErrorMsg = None,
+            lastRefreshTime = None
+        )
+        )
+    }
+
+    override def updateSystemInfo(
+        orgId: Long,
+        sources: Seq[ClickhouseSource],
+        refreshConfig: Option[RefreshConfig]
+    ): Future[SystemInfo] = {
+        Future.value(
+        SystemInfo(
+            orgId = orgId,
+            sources = sources,
+            refreshConfig = refreshConfig.getOrElse(RefreshConfig(Seq.empty)),
+            status = SystemStatus.Healthy,
+            currentRefreshStatus = RefreshStatus.Init,
+            lastRefreshStatus = None,
+            lastRefreshBy = None,
+            lastRefreshErrorMsg = None,
+            lastRefreshTime = None
+        )
+        )
+    }
+
+    override def testConnection(orgId: Long, sourceConfig: ClickhouseSource): Future[TestConnectionResponse] = {
+        Future.value(TestConnectionResponse(true, None))
+    }
+
+    override def updateSystemInfo(
+        orgId: Long,
+        refreshStatus: RefreshStatus,
+        errorMsg: Option[String],
+        refreshBy: RefreshBy
+    ): Future[Unit] = {
+        Future.Unit
+    }
+}
