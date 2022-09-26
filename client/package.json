@@ -37,7 +37,7 @@
     "konva": "7",
     "leader-line-new": "^1.1.9",
     "lodash": "^4.17.15",
-    "moment": "^2.29.0",
+    "moment": "^2.29.4",
     "monaco-editor": "^0.19.3",
     "monaco-editor-vue": "^1.0.10",
     "monaco-editor-webpack-plugin": "1.9.1",
