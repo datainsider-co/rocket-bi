@@ -15,7 +15,7 @@ export abstract class APIKeyRepository {
 }
 
 export class APIKeyRepositoryImpl extends APIKeyRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
 
   create(request: CreateApiKeyRequest): Promise<ApiKeyResponse> {

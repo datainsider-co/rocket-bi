@@ -32,8 +32,6 @@ import { DevModule } from '@core/modules/dev.module';
 
 export class TestModule extends DevModule {
   configuration(): void {
-    Container.bindName(DIKeys.initProject).to('Hello world');
-
     Container.bind(DashboardRepository)
       .to(DashboardRepositoryImpl)
       .scope(Scope.Singleton);
@@ -60,8 +58,8 @@ export class TestModule extends DevModule {
       .to(PermissionTokenImpl)
       .scope(Scope.Singleton);
 
-    Container.bindName(DIKeys.noAuthService).to(this.buildNoAuthenticationService());
-    Container.bindName(DIKeys.authService).to(this.buildNoAuthenticationService());
+    Container.bindName(DIKeys.NoAuthService).to(this.buildNoAuthenticationService());
+    Container.bindName(DIKeys.AuthService).to(this.buildNoAuthenticationService());
 
     Container.bind(CookieManger)
       .to(CookieMangerImpl)
@@ -71,5 +69,3 @@ export class TestModule extends DevModule {
       .scope(Scope.Singleton);
   }
 }
-
-export const testModule = new TestModule();

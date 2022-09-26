@@ -12,7 +12,7 @@ export abstract class OrganizationPermissionRepository {
 }
 
 export class OrganizationPermissionRepositoryImpl extends OrganizationPermissionRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
 
   isAllow(...usages: Usage[]): Promise<boolean[]> {

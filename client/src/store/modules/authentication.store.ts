@@ -36,10 +36,10 @@ export class AuthenticationStore extends VuexModule {
   googleOauthConfig: GoogleOauthConfig | null = null;
   userProfile: UserProfile = UserProfile.unknown();
 
-  @InjectValue(DIKeys.noAuthService)
+  @InjectValue(DIKeys.NoAuthService)
   private noAuthenticationService!: AuthenticationService;
 
-  @InjectValue(DIKeys.authService)
+  @InjectValue(DIKeys.AuthService)
   private authenticationService!: AuthenticationService;
 
   @Inject

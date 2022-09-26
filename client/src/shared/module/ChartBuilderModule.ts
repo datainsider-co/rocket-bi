@@ -215,7 +215,7 @@ export class ChartBuilderModule implements BaseModule {
   private bindCompareResolver() {
     const builders = new Map<VizSettingType, CompareBuilder>();
     builders.set(VizSettingType.NumberSetting, new NumberCompareBuilder()).set(VizSettingType.SeriesSetting, new SeriesCompareBuilder());
-    Container.bindName(DIKeys.compareBuilder).to(builders);
+    Container.bindName(DIKeys.CompareBuilder).to(builders);
   }
 
   private bindCustomRenderService(): void {

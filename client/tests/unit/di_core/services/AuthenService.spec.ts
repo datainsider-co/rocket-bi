@@ -1,15 +1,15 @@
-import { expect } from 'chai';
-import { DevModule, DI, DIKeys, TestHttpModule, testModule } from '@core/modules';
+import { DI, DIKeys, TestModule } from '@core/modules';
 import { AuthenticationService } from '@core/services/authentication.service';
 import { RandomUtils } from '@/utils';
+import { HttpTestModule } from '@core/modules/http.test.modules';
 
 describe('DashboardService with data from server', () => {
   let noAuthenticationService: AuthenticationService;
   const emailName = RandomUtils.nextInt();
 
   before(() => {
-    DI.init([new TestHttpModule(), new DevModule(), testModule]);
-    noAuthenticationService = DI.get(DIKeys.noAuthService);
+    DI.init([new HttpTestModule(), new TestModule()]);
+    noAuthenticationService = DI.get(DIKeys.NoAuthService);
   });
   // it('Test login ', async () => {
   //   const login = await noAuthenticationService.login('thien0@dev.datainsider.com', '123456', true);

@@ -8,9 +8,8 @@ import { DIKeys } from '@core/modules';
 import { BaseClient } from '@core/services/base.service';
 import { VisualizationResponse } from '@core/domain/Response';
 import { QueryRequest } from '@core/domain/Request';
-import PivotSetting from '@/shared/Settings/PivotTable/PivotSetting.vue';
 import { PivotTableQuerySetting, QuerySetting, RawQuerySetting, TableQueryChartSetting, UserProfile } from '@core/domain';
-import { JsonUtils, Log } from '@core/utils';
+import { JsonUtils } from '@core/utils';
 
 export abstract class QueryRepository {
   abstract query(request: QueryRequest): Promise<VisualizationResponse>;
@@ -18,13 +17,11 @@ export abstract class QueryRepository {
 }
 
 export class QueryRepositoryImpl implements QueryRepository {
-  private apiPath = '/chart';
-
-  constructor(@InjectValue(DIKeys.authClient) private baseClient: BaseClient) {}
+  constructor(private baseClient: BaseClient) {}
 
   query(request: QueryRequest): Promise<VisualizationResponse> {
     const jsonParser: ((data: string) => any) | undefined = this.getJsonParser(request.querySetting);
-    return this.baseClient.post(`${this.apiPath}/query`, request, void 0, void 0, jsonParser).then(obj => VisualizationResponse.fromObject(obj));
+    return this.baseClient.post(`/chart/query`, request, void 0, void 0, jsonParser).then(obj => VisualizationResponse.fromObject(obj));
   }
 
   queryWithUser(request: QueryRequest, userProfile: UserProfile): Promise<VisualizationResponse> {

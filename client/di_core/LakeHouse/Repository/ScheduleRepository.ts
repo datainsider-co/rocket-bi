@@ -26,7 +26,7 @@ export abstract class ScheduleRepository {
 }
 
 export class ScheduleRepositoryImpl extends ScheduleRepository {
-  @InjectValue(DIKeys.LakeHouseClient)
+  @InjectValue(DIKeys.SchedulerClient)
   private readonly client!: BaseClient;
 
   getPeriodicQueryInfo(queryId: string): Promise<GetPeriodicQueryResponse> {

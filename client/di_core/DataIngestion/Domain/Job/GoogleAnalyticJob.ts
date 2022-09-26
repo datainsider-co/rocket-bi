@@ -8,12 +8,20 @@ import { JobId, SourceId } from '@core/domain';
 import { DataDestination, DataSourceInfo, JobStatus, JobType, SyncMode } from '@core/DataIngestion';
 import { MetricInfo } from '@core/DataIngestion/Domain/Job/MetricInfo';
 import { DimensionInfo } from '@core/DataIngestion/Domain/Job/DimensionInfo';
-import { Job } from '../Job';
+import { Job } from './Job';
 import { TimeScheduler } from '@/screens/DataIngestion/components/JobSchedulerForm/SchedulerTime/TimeScheduler';
 import { SchedulerOnce } from '@/screens/DataIngestion/components/JobSchedulerForm/SchedulerTime/SchedulerOnce';
 import { SchedulerName } from '@/shared/enums/SchedulerName';
-import { GaDateRange } from '@core/DataIngestion/Domain/Job/GoogleAnalytic/GaDateRange';
-import { GaDate } from '@core/DataIngestion/Domain/Job/GoogleAnalytic/GaDate';
+
+export interface GaDateRanges {
+  startDate: GaDate | Date | string;
+  endDate: GaDate | Date | string;
+}
+
+export enum GaDate {
+  Today = 'today',
+  Yesterday = 'yesterday'
+}
 
 export class GoogleAnalyticJob implements Job {
   className = JobName.GoogleAnalyticJob;
@@ -34,7 +42,7 @@ export class GoogleAnalyticJob implements Job {
   syncMode: SyncMode;
 
   viewId: string | undefined;
-  dateRanges: GaDateRange[];
+  dateRanges: GaDateRanges[];
   metrics: MetricInfo[];
   dimensions: DimensionInfo[];
   sorts: string[];
@@ -59,7 +67,7 @@ export class GoogleAnalyticJob implements Job {
     currentSyncStatus: JobStatus,
 
     viewId: string,
-    dateRanges: GaDateRange[],
+    dateRanges: GaDateRanges[],
     metrics: MetricInfo[],
     dimensions: DimensionInfo[],
     sorts: string[],

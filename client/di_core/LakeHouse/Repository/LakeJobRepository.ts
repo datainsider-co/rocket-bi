@@ -7,7 +7,6 @@ import { ListingResponse } from '@core/DataIngestion';
 import { BaseResponse } from '@core/DataIngestion/Domain/Response/BaseResponse';
 import { LakeJobResponse } from '@core/LakeHouse/Domain/LakeJob/LakeJobResponse';
 import { LakeJobHistory } from '@core/LakeHouse/Domain/LakeJob/LakeJobHistory';
-import { Log } from '@core/utils';
 import { ListingRequest } from '@core/LakeHouse/Domain/Request/ListingRequest/ListingRequest';
 import { ForceMode } from '@core/LakeHouse/Domain/LakeJob/ForceMode';
 
@@ -22,26 +21,25 @@ export abstract class LakeJobRepository {
   abstract cancel(jobId: JobId): Promise<boolean>;
 }
 export class LakeJobRepositoryImpl extends LakeJobRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.SchedulerClient)
   private readonly httpClient!: BaseClient;
-  private apiPath = '/scheduler/lake/job';
 
   create(job: LakeJob): Promise<LakeJob> {
     return this.httpClient
-      .post<LakeJob>(`${this.apiPath}/create`, { job: job })
+      .post<LakeJob>(`/scheduler/lake/job/create`, { job: job })
       .then(response => response);
   }
 
   delete(jobId: JobId): Promise<boolean> {
-    return this.httpClient.delete<BaseResponse>(`${this.apiPath}/${jobId}`).then(response => response.success);
+    return this.httpClient.delete<BaseResponse>(`/scheduler/lake/job/${jobId}`).then(response => response.success);
   }
 
   get(jobId: JobId): Promise<LakeJobResponse> {
-    return this.httpClient.get(`${this.apiPath}/${jobId}`).then(response => LakeJobResponse.fromObject(response));
+    return this.httpClient.get(`/scheduler/lake/job/${jobId}`).then(response => LakeJobResponse.fromObject(response));
   }
 
   list(request: ListingRequest): Promise<ListingResponse<LakeJobResponse>> {
-    return this.httpClient.post<ListingResponse<LakeJobResponse>>(`${this.apiPath}/list`, request).then(async response => {
+    return this.httpClient.post<ListingResponse<LakeJobResponse>>(`/scheduler/lake/job/list`, request).then(async response => {
       const lakeJobResponses = response.data.map(lakeJobResponse => {
         return LakeJobResponse.fromObject(lakeJobResponse);
       });
@@ -58,7 +56,7 @@ export class LakeJobRepositoryImpl extends LakeJobRepository {
 
   update(job: LakeJob): Promise<boolean> {
     return this.httpClient
-      .put<BaseResponse>(`${this.apiPath}/${job.jobId}`, { job: job })
+      .put<BaseResponse>(`/scheduler/lake/job/${job.jobId}`, { job: job })
       .then(response => response.success);
   }
 

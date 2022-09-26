@@ -12,7 +12,7 @@ export abstract class ActivityRepository {
 }
 
 export class ActivityRepositoryImpl extends ActivityRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.BiClient)
   private httpClient!: BaseClient;
 
   getUserActivities(request: GetUserActivityRequest): Promise<PageResult<UserActivity>> {

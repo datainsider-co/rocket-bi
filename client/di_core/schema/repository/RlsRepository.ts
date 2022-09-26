@@ -13,7 +13,7 @@ export abstract class RlsRepository {
 }
 
 export class RlsRepositoryIml extends RlsRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.BiClient)
   private httpClient!: BaseClient;
 
   listPolicies(dbName?: string, tblName?: string): Promise<PageResult<RlsPolicy>> {

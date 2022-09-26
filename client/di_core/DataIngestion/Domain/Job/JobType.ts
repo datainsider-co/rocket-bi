@@ -8,7 +8,6 @@ export enum JobType {
   GenericJdbc = 'GenericJdbc',
   GoogleSheet = 'Google_Sheets',
   GoogleCredential = 'Google_Analytics',
-  GA4 = 'Ga4',
   Mongo = 'MongoDb',
   BigQuery = 'Bigquery',
   Shopify = 'Shopify',

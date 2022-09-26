@@ -4,8 +4,6 @@
   "rootOrigin": "https://hello.datainsider.co",
   "sheetUrl": "https://hello.datainsider.co/gauthen/google-sheet",
   "gaUrl": "https://hello.datainsider.co/gauthen/google-analytic",
-  "ga4Url": "https://hello.datainsider.co/gauthen/ga4",
   "sheetScope": "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly",
-  "gaScope": "profile https://www.googleapis.com/auth/analytics.readonly",
-  "ga4Scope": "profile https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/analytics.edit"
+  "gaScope": "profile https://www.googleapis.com/auth/analytics.readonly"
 }

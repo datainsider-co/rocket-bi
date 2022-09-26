@@ -84,12 +84,12 @@ export function outputProfilerData(data: ProfileOutputData[], totalCpu: number, 
 }
 
 function isEnabled(): boolean {
-  const profiler: Profiler = Container.getValue(DIKeys.profiler) as Profiler;
+  const profiler: Profiler = Container.getValue(DIKeys.Profiler) as Profiler;
   return profiler.isEnabled();
 }
 
 function record(key: string | symbol, time: number) {
-  const profiler: Profiler = Container.getValue(DIKeys.profiler) as Profiler;
+  const profiler: Profiler = Container.getValue(DIKeys.Profiler) as Profiler;
 
   profiler.record(key, time);
 }

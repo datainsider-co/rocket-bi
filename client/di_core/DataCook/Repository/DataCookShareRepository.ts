@@ -19,7 +19,7 @@ export abstract class DataCookShareRepository {
 }
 
 export class DataCookShareRepositoryImpl extends DataCookShareRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.DataCookClient)
   private readonly httpClient!: BaseClient;
 
   getResourceInfo(id: string): Promise<ResourceInfo> {

@@ -3,10 +3,10 @@ import { Container, Scope } from 'typescript-ioc';
 import { DI, DIKeys } from './di';
 import {
   DashboardRepository,
+  DashboardRepositoryImpl,
   DirectoryRepository,
   GeolocationRepository,
   HttpAuthenticationRepository,
-  DashboardRepositoryImpl,
   HttpDirectoryRepository,
   HttpGeolocationRepository,
   HttpPermissionToken,
@@ -49,106 +49,12 @@ import {
   UserProfileService,
   UserProfileServiceImpl
 } from '@core/services';
-import { ClientBuilders, ClientWithoutWorkerBuilders } from '@core/misc/client_builder';
 import { HttpPermissionRepository, PermissionRepository } from '../repositories/permission.repository';
 import { PermissionService, PermissionServiceImpl } from '../services/permission.service';
-import { Log } from '@core/utils';
-
-export class HttpModule extends BaseModule {
-  configuration(): void {
-    switch (process.env.NODE_ENV) {
-      case 'production':
-        Container.bindName(DIKeys.apiHost).to('/api');
-        Container.bindName(DIKeys.staticHost).to('/static');
-        Container.bindName(DIKeys.lakeApiHost).to('/api/lake');
-        break;
-      default:
-        Container.bindName(DIKeys.apiHost).to('http://dev.datainsider.co/api');
-        Container.bindName(DIKeys.lakeApiHost).to('http://dev.datainsider.co/api/lake');
-        Container.bindName(DIKeys.staticHost).to(process.env.VUE_APP_STATIC_HOST);
-    }
-
-    Container.bindName(DIKeys.noAuthClient).to(this.buildNoAuthClient());
-    Container.bindName(DIKeys.authClient).to(this.buildAuthClient());
-    Container.bindName(DIKeys.guest).to(this.buildGuestClient());
-    Container.bindName(DIKeys.LakeHouseClient).to(this.buildLakeHouseClient());
-  }
-
-  buildNoAuthClient(): BaseClient {
-    return ClientBuilders.defaultBuilder()
-      .withBaseUrl(Container.getValue(DIKeys.apiHost))
-      .withTimeout((process.env.VUE_APP_TIME_OUT as any) || 30000)
-      .build();
-  }
-
-  buildAuthClient(): BaseClient {
-    const apiHost = Container.getValue(DIKeys.apiHost);
-    Log.debug('DevModule::', 'buildAuthClient:: with API HOST:', apiHost);
-    return ClientBuilders.authAndTokenBuilder()
-      .withBaseUrl(apiHost)
-      .withTimeout((process.env.VUE_APP_TIME_OUT as any) || 30000)
-      .build();
-  }
-
-  buildGuestClient(): BaseClient {
-    const apiHost = Container.getValue(DIKeys.apiHost);
-    Log.debug('DevModule::', 'buildGuestClient:: with API HOST:', apiHost);
-    return ClientBuilders.authBuilder()
-      .withBaseUrl(apiHost)
-      .withTimeout((process.env.VUE_APP_TIME_OUT as any) || 30000)
-      .build();
-  }
-
-  buildLakeHouseClient(): BaseClient {
-    const apiHost = Container.getValue(DIKeys.lakeApiHost);
-    Log.debug('DevModule::', 'buildLakeHouseClient:: with API HOST:', apiHost);
-    return ClientBuilders.lakeHouseBuilder()
-      .withBaseUrl(apiHost)
-      .withTimeout((process.env.VUE_APP_TIME_OUT as any) || 30000)
-      .build();
-  }
-}
-
-export class TestHttpModule extends BaseModule {
-  configuration(): void {
-    Container.bindName(DIKeys.apiHost).to('https://dev.datainsider.co/api');
-    Container.bindName(DIKeys.apiHost).to('https://explorer.datainsider.co/api');
-    Container.bindName(DIKeys.staticHost).to(process.env.VUE_APP_STATIC_HOST);
-
-    Container.bindName(DIKeys.noAuthClient).to(this.buildNoAuthClient());
-    Container.bindName(DIKeys.authClient).to(this.buildAuthClient());
-    Container.bindName(DIKeys.guest).to(this.buildGuestClient());
-  }
-
-  buildNoAuthClient(): BaseClient {
-    return ClientWithoutWorkerBuilders.defaultBuilder()
-      .withBaseUrl(Container.getValue(DIKeys.apiHost))
-      .withTimeout((process.env.VUE_APP_TIME_OUT as any) || 30000)
-      .build();
-  }
-
-  buildAuthClient(): BaseClient {
-    const apiHost = Container.getValue(DIKeys.apiHost);
-    Log.debug('DevModule::', 'buildAuthClient:: with API HOST:', apiHost);
-    return ClientWithoutWorkerBuilders.authAndTokenBuilder()
-      .withBaseUrl(apiHost)
-      .withTimeout((process.env.VUE_APP_TIME_OUT as any) || 30000)
-      .build();
-  }
-
-  buildGuestClient(): BaseClient {
-    const apiHost = Container.getValue(DIKeys.apiHost);
-    Log.debug('DevModule::', 'buildGuestClient:: with API HOST:', apiHost);
-    return ClientWithoutWorkerBuilders.authBuilder()
-      .withBaseUrl(apiHost)
-      .withTimeout((process.env.VUE_APP_TIME_OUT as any) || 30000)
-      .build();
-  }
-}
 
 export class DevModule extends BaseModule {
   configuration(): void {
-    Container.bindName(DIKeys.profiler).to(this.buildProfiler());
+    Container.bindName(DIKeys.Profiler).to(this.buildProfiler());
 
     Container.bind(DashboardRepository)
       .to(DashboardRepositoryImpl)
@@ -183,9 +89,8 @@ export class DevModule extends BaseModule {
       .to(PermissionTokenImpl)
       .scope(Scope.Singleton);
 
-    Container.bindName(DIKeys.noAuthService).to(this.buildNoAuthenticationService());
-    Container.bindName(DIKeys.authService).to(this.buildAuthenticationService());
-    Container.bindName(DIKeys.guestService).to(this.buildGuestService());
+    Container.bindName(DIKeys.NoAuthService).to(this.buildNoAuthenticationService());
+    Container.bindName(DIKeys.AuthService).to(this.buildAuthenticationService());
 
     Container.bind(CookieManger)
       .to(CookieMangerImpl)
@@ -237,25 +142,20 @@ export class DevModule extends BaseModule {
   }
 
   buildNoAuthenticationService() {
-    const noAuthClient = DI.get<BaseClient>(DIKeys.noAuthClient);
-    const authenticationRepository = new HttpAuthenticationRepository(noAuthClient);
+    // fixme: check again
+    const caasClient = DI.get<BaseClient>(DIKeys.CaasClient);
+    const authenticationRepository = new HttpAuthenticationRepository(caasClient);
     return new AuthenticationServiceImpl(authenticationRepository);
   }
 
   buildAuthenticationService() {
-    const authClient = DI.get<BaseClient>(DIKeys.authClient);
-    const authenticationRepository = new HttpAuthenticationRepository(authClient);
-    return new AuthenticationServiceImpl(authenticationRepository);
-  }
-
-  buildGuestService() {
-    const guest = DI.get<BaseClient>(DIKeys.guest);
-    const authenticationRepository = new HttpAuthenticationRepository(guest);
+    const caasClient = DI.get<BaseClient>(DIKeys.CaasClient);
+    const authenticationRepository = new HttpAuthenticationRepository(caasClient);
     return new AuthenticationServiceImpl(authenticationRepository);
   }
 
   private bindQueryService() {
-    const client = DI.get<BaseClient>(DIKeys.authClient);
+    const client = DI.get<BaseClient>(DIKeys.BiClient);
     const queryRepository = new QueryRepositoryImpl(client);
     const queryService = new QueryServiceImpl(queryRepository);
     Container.bind(QueryService)

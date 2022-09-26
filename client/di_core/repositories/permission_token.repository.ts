@@ -21,7 +21,7 @@ export abstract class PermissionTokenRepository {
 }
 
 export class HttpPermissionToken extends PermissionTokenRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
   private apiPath = '/permission_tokens';
 

@@ -23,7 +23,7 @@ export abstract class EventRepository {
 }
 
 export class EventRepositoryImpl extends EventRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CdpClient)
   private httpClient!: BaseClient;
 
   init(request: InitEventExplorerRequest): Promise<InitEventExplorerResponse> {

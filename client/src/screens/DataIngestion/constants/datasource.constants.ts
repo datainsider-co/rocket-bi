@@ -48,11 +48,6 @@ export const ALL_DATASOURCE: ItemData[] = [
     type: DataSourceType.GoogleAnalytics
   },
   {
-    title: 'Google Analytics 4',
-    src: 'ic_ga.png',
-    type: DataSourceType.GA4
-  },
-  {
     title: 'Csv',
     src: 'ic_csv.png',
     type: 'csv'

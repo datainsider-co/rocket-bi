@@ -14,7 +14,7 @@ export abstract class RelationshipRepository {
 }
 
 export class RelationshipRepositoryImpl extends RelationshipRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.BiClient)
   private httpClient!: BaseClient;
 
   @Inject

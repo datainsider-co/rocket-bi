@@ -20,7 +20,7 @@ export abstract class TrackingProfileRepository {
 }
 
 export class TrackingProfileRepositoryImpl extends TrackingProfileRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
   private apiPath = '/analytics/profiles';
 

@@ -8,11 +8,10 @@ export abstract class AdminSettingRepository {
 }
 
 export class AdminSettingRepositoryIml extends AdminSettingRepository {
-  apiPath = 'admin/setting';
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
 
   updateLoginMethods(request: OauthConfigResponse): Promise<OauthConfigResponse> {
-    return this.httpClient.put(`${this.apiPath}/login_methods`, request);
+    return this.httpClient.put(`admin/setting/login_methods`, request);
   }
 }

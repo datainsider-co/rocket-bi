@@ -28,7 +28,7 @@ import VueVirtualScroller from 'vue-virtual-scroller';
 // CSS
 import '@/themes/app.scss';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
-import { DevModule, DI, DIKeys, HttpModule, ProdModule, TestHttpModule } from '@core/modules';
+import { DevModule, DI, DIKeys, ProdModule } from '@core/modules';
 import Highcharts from 'highcharts';
 import Mustache from 'mustache';
 import { UserManagementModule } from '@core/admin/UserManagementModule';
@@ -51,6 +51,8 @@ import { LakeHouseModule } from '@core/LakeHouse/Module/LakeHouseModule';
 import DiAnalytics from 'di-web-analytics';
 import { ClickhouseConfigModule } from '@core/ClickhouseConfig/Module/ClickhouseConfigModule';
 import { RelationshipModule } from '@core/DataRelationship';
+import { HttpModule } from '@core/modules/http.modules';
+import { HttpTestModule } from '@core/modules/http.test.modules';
 
 HighchartsCustomEvents(Highcharts as any);
 
@@ -77,7 +79,7 @@ switch (process.env.NODE_ENV) {
     break;
   case 'test':
     DI.init([
-      new TestHttpModule(),
+      new HttpTestModule(),
       new ProdModule(),
       new TrackingModule(),
       new ChartBuilderModule(),
@@ -117,7 +119,7 @@ switch (process.env.NODE_ENV) {
 }
 
 // Attach profiler to Window.profiler
-DomUtils.bind('profiler', Container.getValue(DIKeys.profiler));
+DomUtils.bind('profiler', Container.getValue(DIKeys.Profiler));
 DomUtils.bind('highcharts', Highcharts);
 DomUtils.bind('Mustache', Mustache);
 

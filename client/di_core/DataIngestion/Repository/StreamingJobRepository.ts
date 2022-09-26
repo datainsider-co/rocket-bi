@@ -24,7 +24,7 @@ export abstract class StreamingJobRepository {
 }
 
 export class StreamingJobRepositoryImpl extends StreamingJobRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.RelayClient)
   private readonly httpClient!: BaseClient;
 
   create(request: CreateStreamingJobRequest): Promise<KafkaStreamingJob> {

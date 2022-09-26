@@ -20,7 +20,7 @@ export abstract class CustomerRepository {
 }
 
 export class CustomerRepositoryImpl extends CustomerRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CdpClient)
   private readonly httpClient!: BaseClient;
 
   get(id: string): Promise<CustomerInfo> {

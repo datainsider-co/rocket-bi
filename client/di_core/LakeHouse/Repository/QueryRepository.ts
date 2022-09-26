@@ -27,7 +27,7 @@ export abstract class QueryRepository {
 }
 
 export class QueryRepositoryImpl extends QueryRepository {
-  @InjectValue(DIKeys.LakeHouseClient)
+  @InjectValue(DIKeys.LakeClient)
   private readonly client!: BaseClient;
 
   action(action: QueryAction, request: QueryRequest): Promise<any> {

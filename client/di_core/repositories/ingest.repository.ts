@@ -9,7 +9,7 @@ abstract class IngestRepository {
 }
 
 class HttpIngestRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
   private apiPath = '/log';
 

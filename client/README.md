@@ -10,18 +10,7 @@
 yarn
 yarn serve
 ```
-
-#### 🚛 Docker (Include auto hot reload)
-
-```sh
-yarn
-chmod u+x dev.sh
-./dev.sh
-```
-
-```
-port 8080
-```
+Open web with link: http://localhost:8080
 
 #### 🧪 Run your unit tests
 
@@ -32,13 +21,12 @@ yarn test
 ### 🔌 Deploy production
 
 ```sh
-chmod u+x prod.sh
-./prod.sh
+chmod u+x build_docker_image.sh
+./build_docker_image.sh
+docker-compose up -d
 ```
 
-```
-port: 5050
-```
+Open web with link: http://localhost:5050
 
 ### 🐛 Problem
 

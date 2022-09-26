@@ -1,5 +1,6 @@
 import { S3Job } from '@core/DataIngestion';
-import { GoogleAnalyticJob } from '@core/DataIngestion/Domain/Job/GoogleAnalytic/GoogleAnalyticJob';
+import { GoogleAnalyticJob } from '@core/DataIngestion/Domain/Job/GoogleAnalyticJob';
+
 import { JobName } from '@core/DataIngestion/Domain/Job/JobName';
 import { JobId, SourceId } from '@core/domain';
 import { TimeScheduler } from '@/screens/DataIngestion/components/JobSchedulerForm/SchedulerTime/TimeScheduler';
@@ -19,7 +20,6 @@ import { UnsupportedSourceInfo } from '@core/DataIngestion/Domain/DataSource/Uns
 import { GenericJdbcJob } from '@core/DataIngestion/Domain/Job/GenericJdbcJob';
 import { MongoJob } from '@core/DataIngestion/Domain/Job/MongoJob';
 import { ShopifyJob } from '@core/DataIngestion/Domain/Job/ShopifyJob';
-import { GA4Job } from '@core/DataIngestion/Domain/Job/GA4/GA4Job';
 
 export enum SyncMode {
   FullSync = 'FullSync',
@@ -76,8 +76,6 @@ export abstract class Job {
         return BigQueryJob.fromObject(obj);
       case JobName.GoogleAnalyticJob:
         return GoogleAnalyticJob.fromObject(obj);
-      case JobName.GA4Job:
-        return GA4Job.fromObject(obj);
       case JobName.GoogleSheetJob:
         return GoogleSheetJob.fromObject(obj);
       case JobName.ShopifyJob:
@@ -112,8 +110,6 @@ export abstract class Job {
         return ShopifyJob.default(dataSource);
       case DataSourceType.S3:
         return S3Job.default(dataSource);
-      case DataSourceType.GA4:
-        return GA4Job.default();
       default:
         return UnsupportedJob.default(dataSource);
     }
@@ -149,7 +145,6 @@ export abstract class Job {
         return 'ic_google_sheet_small.png';
       //todo: icon gg analytic
       case JobName.GoogleAnalyticJob:
-      case JobName.GA4Job:
         return 'ic_ga_small.png';
       case JobName.Jdbc:
         return DataSourceInfo.dataSourceIcon(rowData.sourceType);
@@ -244,7 +239,6 @@ export class JobInfo {
       case JobName.BigQueryJob:
       case JobName.ShopifyJob:
       case JobName.S3Job:
-      case JobName.GA4Job:
         return DataSourceInfo.fromDataSource(obj.source);
       default:
         return UnsupportedSourceInfo.fromObject(obj.source);

@@ -11,14 +11,9 @@
       :avoid-adding-duplicates="avoidDuplicate"
       :allow-edit-tags="allowEitTags"
       :add-on-key="addOnKey"
-      :disabled="disabled || isLoading"
       :is-duplicate="isDuplicate"
       @tags-changed="handleTagsChanged"
     />
-    <div class="loading-icon-container">
-      <i v-if="isLoading" alt="loading" class="loading-icon fa fa-spin fa-spinner text-muted"></i>
-    </div>
-
     <BPopover
       :show.sync="isShowSuggestion"
       placement="bottom"
@@ -106,12 +101,6 @@ export default class TagsInput extends Vue {
   @Prop({ type: Function, required: false })
   private readonly isDuplicate!: Function;
 
-  @Prop({ default: false, type: Boolean })
-  private readonly disabled!: boolean;
-
-  @Prop({ default: false, type: Boolean })
-  private readonly isLoading!: boolean;
-
   private get tags() {
     Log.debug('Tags::', this.defaultTags);
     return this.defaultTags.map((data: any) => {
@@ -197,20 +186,6 @@ export default class TagsInput extends Vue {
 @import '~@/themes/scss/_button.scss';
 
 .vue-tags-input-container {
-  position: relative;
-
-  .loading-icon-container {
-    position: absolute;
-    right: 16px;
-    top: 0;
-    height: 100%;
-    .loading-icon {
-      display: flex;
-      align-items: center;
-      height: 100%;
-    }
-  }
-
   .popover-reference {
     display: none;
   }

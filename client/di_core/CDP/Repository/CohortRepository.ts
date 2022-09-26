@@ -32,13 +32,12 @@ export abstract class CohortRepository {
   ): Promise<RetentionAnalysisResponse>;
 }
 export class CohortRepositoryImpl extends CohortRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CdpClient)
   private httpClient!: BaseClient;
-  private apiCohort = 'cdp/cohorts';
 
   createCohortFilter(cohortFilter: CohortBasicInfo): Promise<CohortInfo> {
     return this.httpClient
-      .post<CohortInfo>(`${this.apiCohort}`, cohortFilter)
+      .post<CohortInfo>(`cdp/cohorts`, cohortFilter)
       .then(r => CohortInfo.fromObject(r))
       .catch(e => {
         Log.error('CdpRepositoryImpl::createCohortFilter::exception::', e);
@@ -47,7 +46,7 @@ export class CohortRepositoryImpl extends CohortRepository {
   }
 
   updateCohortFilter(id: number, cohortFilter: CohortBasicInfo): Promise<boolean> {
-    return this.httpClient.put<boolean>(`${this.apiCohort}/${id}`, cohortFilter).catch(e => {
+    return this.httpClient.put<boolean>(`cdp/cohorts/${id}`, cohortFilter).catch(e => {
       Log.error('CdpRepositoryImpl::createCohortFilter::exception::', e);
       throw new DIException(e.message);
     });
@@ -55,7 +54,7 @@ export class CohortRepositoryImpl extends CohortRepository {
 
   deleteCohortFilter(id: number): Promise<boolean> {
     return this.httpClient
-      .delete<boolean>(`${this.apiCohort}`, { ids: [id] })
+      .delete<boolean>(`cdp/cohorts`, { ids: [id] })
       .catch(e => {
         Log.error('CdpRepositoryImpl::updateCohortFilter::exception::', e);
         throw new DIException(e.message);
@@ -64,7 +63,7 @@ export class CohortRepositoryImpl extends CohortRepository {
 
   getCohortInfo(id: number): Promise<CohortInfo> {
     return this.httpClient
-      .get<CohortInfo>(`${this.apiCohort}/${id}`)
+      .get<CohortInfo>(`cdp/cohorts/${id}`)
       .then(res => CohortInfo.fromObject(res))
       .catch(e => {
         Log.error('CdpRepositoryImpl::getCohortFilter::exception::', e);
@@ -74,7 +73,7 @@ export class CohortRepositoryImpl extends CohortRepository {
 
   getListCohortFilter(from: number, size: number): Promise<PageResult<CohortInfo>> {
     return this.httpClient
-      .get<ListingResponse<CohortInfo>>(this.apiCohort, { from, size })
+      .get<ListingResponse<CohortInfo>>('cdp/cohorts', { from, size })
       .then(
         resp =>
           new ListingResponse<CohortInfo>(
@@ -95,7 +94,7 @@ export class CohortRepositoryImpl extends CohortRepository {
   ///TODO: ADD API here
   multiDeleteCohort(ids: number[]): Promise<boolean> {
     return this.httpClient
-      .delete<boolean>(`${this.apiCohort}`, { ids: ids })
+      .delete<boolean>(`cdp/cohorts`, { ids: ids })
       .catch(e => {
         Log.error('CdpRepositoryImpl::updateCohortFilter::exception::', e);
         throw new DIException(e.message);
@@ -110,7 +109,7 @@ export class CohortRepositoryImpl extends CohortRepository {
     timeMetric: TimeMetric
   ): Promise<RetentionAnalysisResponse> {
     return this.httpClient
-      .post(`${this.apiCohort}/analyze`, {
+      .post(`cdp/cohorts/analyze`, {
         startEvent: startEventName,
         returnEvent: returnEventName,
         cohortFilter: cohortFilter,

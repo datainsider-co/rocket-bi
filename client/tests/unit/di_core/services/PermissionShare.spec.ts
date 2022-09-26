@@ -1,13 +1,13 @@
 import { PermissionTokenService } from '@core/services';
-import { DevModule, DI, TestHttpModule, testModule } from '@core/modules';
-import { expect } from 'chai';
+import { DI, TestModule } from '@core/modules';
 import { Log } from '@core/utils';
+import { HttpTestModule } from '@core/modules/http.test.modules';
 
 describe('Permission service for share link', () => {
   let permissionTokenService: PermissionTokenService;
 
   before(() => {
-    DI.init([new TestHttpModule(), new DevModule(), testModule]);
+    DI.init([new HttpTestModule(), new TestModule()]);
     permissionTokenService = DI.get<PermissionTokenService>(PermissionTokenService);
     Log.debug('permissionTokenService is PermissionTokenService::', permissionTokenService instanceof PermissionTokenService);
   });

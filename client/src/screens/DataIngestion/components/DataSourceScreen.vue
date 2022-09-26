@@ -98,7 +98,7 @@ import { StringUtils } from '@/utils/string.utils';
 import { TableTooltipUtils } from '@chart/CustomTable/TableTooltipUtils';
 import { DataSources, DataSourceType, FormMode, Job, JobInfo, S3Job, S3SourceInfo, SortRequest } from '@core/DataIngestion';
 import { DataSourceInfo } from '@core/DataIngestion/Domain/DataSource/DataSourceInfo';
-import { GoogleAnalyticJob } from '@core/DataIngestion/Domain/Job/GoogleAnalytic/GoogleAnalyticJob';
+import { GoogleAnalyticJob } from '@core/DataIngestion/Domain/Job/GoogleAnalyticJob';
 import { DataSourceResponse } from '@core/DataIngestion/Domain/Response/DataSourceResponse';
 import { DIException, SortDirection, SourceId } from '@core/domain';
 import { UnsupportedException } from '@core/domain/Exception/UnsupportedException';
@@ -109,7 +109,6 @@ import { cloneDeep } from 'lodash';
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import DocumentModal from './DocumentModal.vue';
 import { GoogleAuthenticationType } from '@/shared/components/GoogleAuthen/enum/GoogleAuthenticationType';
-import { GA4Job } from '@core/DataIngestion/Domain/Job/GA4/GA4Job';
 
 @Component({
   components: {
@@ -331,15 +330,11 @@ export default class DataSourceScreen extends Vue {
           break;
         }
         case 'sheet': {
-          await this.handleSelectGoogleSourceType(`${this.googleConfig.sheetUrl}?redirect=${window.location.origin}&scope=${this.googleConfig.sheetScope}`);
+          this.handleSelectGoogleSheets();
           break;
         }
         case DataSourceType.GoogleAnalytics: {
-          await this.handleSelectGoogleSourceType(`${this.googleConfig.gaUrl}?redirect=${window.location.origin}&scope=${this.googleConfig.gaScope}`);
-          break;
-        }
-        case DataSourceType.GA4: {
-          await this.handleSelectGoogleSourceType(`${this.googleConfig.ga4Url}?redirect=${window.location.origin}&scope=${this.googleConfig.ga4Scope}`);
+          await this.handleSelectGoogleAnalytics();
           break;
         }
         case DataSourceType.S3: {
@@ -587,10 +582,10 @@ export default class DataSourceScreen extends Vue {
   private async handleCatchAuthResponse(event: MessageEvent) {
     try {
       this.verifyMessage(event);
-      Log.debug('DataSourceScreen::handleCatchAuthResponse::event::', event);
+      // Log.debug('DataSourceScreen::handleCatchAuthResponse::event::', event);
       await this.handleMessageData(event);
     } catch (e) {
-      Log.debug('DataSourceScreen::handleCatchAuthResponse::error::', e.message);
+      // Log.debug('DataSourceScreen::handleCatchAuthResponse::error::', e.message);
       PopupUtils.showError(e.message);
     }
   }
@@ -609,18 +604,10 @@ export default class DataSourceScreen extends Vue {
   private async handleMessageData(event: MessageEvent) {
     const responseType = event.data?.responseType ?? GoogleAuthenticationType.NotFound;
     const authorizeResponse: gapi.auth2.AuthorizeResponse | null = event.data?.authResponse ?? null;
-
     if (authorizeResponse) {
-      Log.debug('DataSourceScreen::handleMessageData::event::', event);
-      Log.debug('DataSourceScreen::handleMessageData::authorizeResponse::', event.data);
       switch (responseType as GoogleAuthenticationType) {
         case GoogleAuthenticationType.GoogleAnalytic: {
           this.handleGoogleAnalyticMessage(authorizeResponse.access_token, authorizeResponse.code);
-          break;
-        }
-        case GoogleAuthenticationType.GA4: {
-          Log.debug('DataSourceScreen::handleMessageData::GA4Case::');
-          this.handleGA4Message(authorizeResponse.access_token, authorizeResponse.code);
           break;
         }
         case GoogleAuthenticationType.GoogleSheet: {
@@ -633,28 +620,9 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private async handleSelectGoogleSourceType(windowUrl: string) {
-    try {
-      this.addMessageEvent();
-      this.openWindow(windowUrl);
-    } catch (err) {
-      PopupUtils.showError(err.message);
-      Log.error('DataSourceScreen::handleSelectGoogleSourceType::error::', err);
-    }
-  }
-
   private handleGoogleAnalyticMessage(accessToken: string, authorizationCode: string) {
     const dataSource: DataSourceInfo = DataSourceInfo.default(DataSourceType.GoogleAnalytics);
     const job = GoogleAnalyticJob.default()
-      .setAccessToken(accessToken)
-      .setAuthorizationCode(authorizationCode);
-    Log.debug('DataSourceScreen::handleSelectGoogleAnalytics::GoogleAnalyticJob::', job);
-    this.openJobConfigModal(new JobInfo(job, dataSource));
-  }
-
-  private handleGA4Message(accessToken: string, authorizationCode: string) {
-    const dataSource: DataSourceInfo = DataSourceInfo.default(DataSourceType.GA4);
-    const job = GA4Job.default()
       .setAccessToken(accessToken)
       .setAuthorizationCode(authorizationCode);
     Log.debug('DataSourceScreen::handleSelectGoogleAnalytics::GoogleAnalyticJob::', job);

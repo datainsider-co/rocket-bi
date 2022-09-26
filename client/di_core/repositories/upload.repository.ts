@@ -8,7 +8,7 @@ export abstract class UploadRepository {
 }
 
 export class HttpUploadRepository extends UploadRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
   private apiPath = '/upload';
 

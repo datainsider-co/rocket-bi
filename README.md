@@ -11,17 +11,31 @@ To learn more about DataInsider's stack and RocketBi's features, see our documen
 
 ##### Run RocketBI locally
 
-To try out RocketBI on your machine, the best way is using our pre-built Docker
+To try out RocketBI on your machine, the best way is using our pre-built Docker images.
 
-1. Start RocketBi-Server
+1. Open docker directory:
+```
+cd docker/
+```
+
+2. Update `clickhouse_connection_settings.json` with your clickhouse's host, port, username, password and cluster name.
 
 
-2. Start RocketBI-Web
+3. Start RocketBI with docker-compose:
+```
+docker-compose up -d
+```
 
-
-3. Explore Your Data
+4. Explore your data:
+- Open browser and go to `localhost` to enter the web UI.
+- Login to RocketBI with this default account:
+```
+username: hello@gmail.com
+password: 123456
+```
 
 ### Build from source
+
 
 
 

@@ -556,10 +556,6 @@ export default class MultiJobCreationModal extends Vue {
           case DataSources.GoogleServiceAccountSource:
             await this.handleSelectGoogleServiceAccountSource(item.source);
             break;
-          case DataSources.GA4Source:
-            //todo:fixhere
-            // await this.handleSelectGoogleServiceAccountSource(item.source);
-            break;
           case DataSources.MongoDbSource:
             await this.handleSelectMongoSource(item.source);
             break;

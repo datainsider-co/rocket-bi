@@ -89,7 +89,7 @@ export abstract class SchemaRepository {
 }
 
 export class SchemaRepositoryImpl extends SchemaRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
   private apiPath = '/databases';
 

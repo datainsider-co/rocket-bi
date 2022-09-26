@@ -42,7 +42,7 @@ export abstract class TableManagementRepository {
 }
 
 export class TableManagementRepositoryImpl extends TableManagementRepository {
-  @InjectValue(DIKeys.LakeHouseClient)
+  @InjectValue(DIKeys.LakeClient)
   private readonly client!: BaseClient;
 
   action(action: TableAction, request: TableManagerRequest): Promise<any> {

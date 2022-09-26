@@ -38,26 +38,25 @@ export abstract class JobRepository {
 }
 
 export class JobRepositoryImpl extends JobRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.SchedulerClient)
   private readonly httpClient!: BaseClient;
-  private readonly apiPath = 'scheduler/job';
 
   create(request: Job): Promise<JobInfo> {
-    return this.httpClient.post(`${this.apiPath}/create`, { job: request }, void 0, headerScheduler).then(jobInfo => JobInfo.fromObject(jobInfo));
+    return this.httpClient.post(`scheduler/job/create`, { job: request }, void 0, headerScheduler).then(jobInfo => JobInfo.fromObject(jobInfo));
   }
 
   list(request: ListingRequest): Promise<ListingResponse<JobInfo>> {
     return this.httpClient
-      .post<any>(`${this.apiPath}/list`, request, void 0, headerScheduler)
+      .post<any>(`scheduler/job/list`, request, void 0, headerScheduler)
       .then(response => new ListingResponse<JobInfo>(this.parseToListJob(response.data), response.total));
   }
 
   delete(jobId: JobId): Promise<boolean> {
-    return this.httpClient.delete<boolean>(`${this.apiPath}/${jobId}`, void 0, void 0, headerScheduler);
+    return this.httpClient.delete<boolean>(`scheduler/job/${jobId}`, void 0, void 0, headerScheduler);
   }
 
   update(id: JobId, job: Job): Promise<boolean> {
-    return this.httpClient.put<boolean>(`${this.apiPath}/${id}`, { job: job }, void 0, headerScheduler);
+    return this.httpClient.put<boolean>(`scheduler/job/${id}`, { job: job }, void 0, headerScheduler);
   }
 
   testConnection(job: Job): Promise<BaseResponse> {
@@ -77,7 +76,7 @@ export class JobRepositoryImpl extends JobRepository {
   }
 
   multiCreate(request: Job, tables: string[]): Promise<boolean> {
-    return this.httpClient.post(`${this.apiPath}/multi_create`, { baseJob: request, tableNames: tables }, void 0, headerScheduler);
+    return this.httpClient.post(`scheduler/job/multi_create`, { baseJob: request, tableNames: tables }, void 0, headerScheduler);
   }
 }
 

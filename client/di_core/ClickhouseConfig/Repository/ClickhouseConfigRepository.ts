@@ -15,7 +15,7 @@ export abstract class ClickhouseConfigRepository {
 }
 
 export class ClickhouseConfigRepositoryImpl extends ClickhouseConfigRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.SchemaClient)
   private httpClient!: BaseClient;
 
   refreshSchema(): Promise<boolean> {

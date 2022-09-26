@@ -42,7 +42,7 @@ export abstract class FileBrowserRepository {
 }
 
 export class FileBrowserRepositoryImpl extends FileBrowserRepository {
-  @InjectValue(DIKeys.LakeHouseClient)
+  @InjectValue(DIKeys.LakeClient)
   private readonly httpClient!: BaseClient;
 
   action(action: FileAction, request: LakeHouseRequest): Promise<any> {

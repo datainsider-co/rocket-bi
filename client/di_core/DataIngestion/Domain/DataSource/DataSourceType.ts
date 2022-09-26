@@ -7,7 +7,6 @@ export enum DataSourceType {
   BigQueryV2 = 'BigQueryV2',
   PostgreSql = 'Postgres',
   GoogleAnalytics = 'GoogleAnalytics',
-  GA4 = 'Ga4',
   GoogleSheet = 'GoogleSheet',
   Others = 'Others',
   GenericJdbc = 'GenericJdbc',

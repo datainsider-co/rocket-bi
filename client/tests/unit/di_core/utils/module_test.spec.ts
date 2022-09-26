@@ -1,13 +1,11 @@
-import { DevModule, DI, testModule } from '@core/modules';
+import { DevModule, DI, TestModule } from '@core/modules';
 import { expect } from 'chai';
 import { DashboardService } from '@core/services/DashboardService';
-import { DIKeys } from '@core/modules/di';
 import { Log } from '@core/utils';
 
 describe('Dependence Injection', () => {
   before(() => {
-    DI.init([new DevModule(), testModule]);
-    Log.debug('module_test.spec::', DI.get(DIKeys.apiHost));
+    DI.init([new DevModule(), new TestModule()]);
   });
 
   it('should get value existed in DI', () => {

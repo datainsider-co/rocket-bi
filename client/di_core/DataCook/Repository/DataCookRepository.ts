@@ -64,61 +64,60 @@ export abstract class DataCookRepository {
 }
 
 export class DataCookRepositoryImpl extends DataCookRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.DataCookClient)
   private httpClient!: BaseClient;
-  private api = '/data_cook';
 
   getListMyEtl(request: GetListEtlRequest): Promise<ListingResponse<EtlJobInfo>> {
-    return this.httpClient.post<ListingResponse<EtlJobInfo>>(`${this.api}/my_etl`, request);
+    return this.httpClient.post<ListingResponse<EtlJobInfo>>(`/data_cook/my_etl`, request);
   }
   getListSharedEtl(request: GetListEtlRequest): Promise<ListingResponse<EtlJobInfo>> {
-    return this.httpClient.post<ListingResponse<EtlJobInfo>>(`${this.api}/shared`, request);
+    return this.httpClient.post<ListingResponse<EtlJobInfo>>(`/data_cook/shared`, request);
   }
   getListArchivedEtl(request: GetListEtlRequest): Promise<ListingResponse<EtlJobInfo>> {
-    return this.httpClient.post<ListingResponse<EtlJobInfo>>(`${this.api}/trash`, request);
+    return this.httpClient.post<ListingResponse<EtlJobInfo>>(`/data_cook/trash`, request);
   }
   getEtl(id: number): Promise<EtlJobInfo> {
-    return this.httpClient.get<EtlJobInfo>(`${this.api}/${id}`).then(EtlJobInfo.fromObject);
+    return this.httpClient.get<EtlJobInfo>(`/data_cook/${id}`).then(EtlJobInfo.fromObject);
   }
   createEtl(etlInfo: EtlJobRequest): Promise<EtlJobInfo> {
-    return this.httpClient.post<EtlJobInfo>(`${this.api}/create`, etlInfo);
+    return this.httpClient.post<EtlJobInfo>(`/data_cook/create`, etlInfo);
   }
   updateEtl(id: number, etlInfo: EtlJobRequest): Promise<boolean> {
-    return this.httpClient.put<boolean>(`${this.api}/${id}`, etlInfo);
+    return this.httpClient.put<boolean>(`/data_cook/${id}`, etlInfo);
   }
   archiveEtl(id: number): Promise<boolean> {
-    return this.httpClient.delete<boolean>(`${this.api}/${id}`);
+    return this.httpClient.delete<boolean>(`/data_cook/${id}`);
   }
   hardDeleteEtl(id: number): Promise<boolean> {
-    return this.httpClient.delete<boolean>(`${this.api}/trash/${id}`);
+    return this.httpClient.delete<boolean>(`/data_cook/trash/${id}`);
   }
   restoreEtl(id: number): Promise<boolean> {
-    return this.httpClient.post<boolean>(`${this.api}/trash/${id}/restore`);
+    return this.httpClient.post<boolean>(`/data_cook/trash/${id}/restore`);
   }
   checkProgressId(id: number, progressId: number): Promise<CheckProgressResponse> {
-    return this.httpClient.get<CheckProgressResponse>(`${this.api}/${id}/${progressId}/check`).then(CheckProgressResponse.fromObject);
+    return this.httpClient.get<CheckProgressResponse>(`/data_cook/${id}/${progressId}/check`).then(CheckProgressResponse.fromObject);
   }
   preview(id: number, operator: EtlOperator, force: boolean): Promise<PreviewEtlOperatorResponse> {
     return this.httpClient
-      .post<PreviewEtlOperatorResponse>(`${this.api}/${id}/preview`, { operator, force })
+      .post<PreviewEtlOperatorResponse>(`/data_cook/${id}/preview`, { operator, force })
       .then(PreviewEtlOperatorResponse.fromObject);
   }
   multiPreview(id: number, operators: EtlOperator[], force: boolean): Promise<MultiPreviewEtlOperatorResponse> {
     return this.httpClient
-      .post<MultiPreviewEtlOperatorResponse>(`${this.api}/${id}/preview_sync`, { operators, force })
+      .post<MultiPreviewEtlOperatorResponse>(`/data_cook/${id}/preview_sync`, { operators, force })
       .then(MultiPreviewEtlOperatorResponse.fromObject);
   }
   getListEtlHistory(request: GetListEtlRequest): Promise<ListingResponse<EtlJobHistory>> {
     return this.httpClient
-      .post<ListingResponse<EtlJobHistory>>(`${this.api}/history`, request)
+      .post<ListingResponse<EtlJobHistory>>(`/data_cook/history`, request)
       .then(resp => new ListingResponse<EtlJobHistory>(resp.data.map(EtlJobHistory.fromObject), resp.total));
   }
   getDatabaseName(id: number): Promise<EtlDatabaseNameResponse> {
-    return this.httpClient.get<EtlDatabaseNameResponse>(`${this.api}/${id}/preview/database_name`).then(EtlDatabaseNameResponse.fromObject);
+    return this.httpClient.get<EtlDatabaseNameResponse>(`/data_cook/${id}/preview/database_name`).then(EtlDatabaseNameResponse.fromObject);
   }
   parseQuery(id: number, fields: NormalFieldConfiguration[], extraFields: ExpressionFieldConfiguration[]): Promise<ParseQueryResponse> {
     return this.httpClient
-      .post<ParseQueryResponse>(`${this.api}/${id}/view_query`, {
+      .post<ParseQueryResponse>(`/data_cook/${id}/view_query`, {
         fields,
         extraFields
       })
@@ -135,11 +134,11 @@ export class DataCookRepositoryImpl extends DataCookRepository {
   // }
 
   forceRun(jobId: JobId, date: number, mode: ForceMode): Promise<BaseResponse> {
-    return this.httpClient.put(`${this.api}/${jobId}/force_run`, { atTime: date, mode: mode }, void 0);
+    return this.httpClient.put(`/data_cook/${jobId}/force_run`, { atTime: date, mode: mode }, void 0);
   }
 
   cancel(jobId: JobId): Promise<BaseResponse> {
-    return this.httpClient.put(`${this.api}/${jobId}/kill`, {}, void 0);
+    return this.httpClient.put(`/data_cook/${jobId}/kill`, {}, void 0);
   }
 
   listThirdPartyDatabase(configuration: ThirdPartyPersistConfiguration): Promise<ListingResponse<ThirdPartyDatabase>> {

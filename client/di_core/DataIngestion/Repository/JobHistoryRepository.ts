@@ -24,11 +24,10 @@ export abstract class JobHistoryRepository {
 }
 
 export class JobHistoryRepositoryImpl implements JobHistoryRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.SchedulerClient)
   private readonly httpClient!: BaseClient;
-  private readonly apiPath = 'scheduler/history';
 
   list(request: ListingRequest): Promise<ListingResponse<JobHistory>> {
-    return this.httpClient.post<ListingResponse<JobHistory>>(`${this.apiPath}/list`, request);
+    return this.httpClient.post<ListingResponse<JobHistory>>(`scheduler/history/list`, request);
   }
 }

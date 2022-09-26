@@ -14,21 +14,20 @@ export abstract class PermissionAdminRepository {
 }
 
 export class PermissionAdminRepositoryImpl implements PermissionAdminRepository {
-  private readonly apiPath = '/admin/permissions';
-
-  constructor(@InjectValue(DIKeys.authClient) private httpClient: BaseClient) {}
+  @InjectValue(DIKeys.CaasClient)
+  private httpClient!: BaseClient;
 
   getAllPermissions(username: string): Promise<string[]> {
-    return this.httpClient.get(`${this.apiPath}/${username}`);
+    return this.httpClient.get(`/admin/permissions/${username}`);
   }
 
   changePermissions(request: ChangePermissionRequest): Promise<boolean> {
-    return this.httpClient.put(`${this.apiPath}/${request.username}/change`, request);
+    return this.httpClient.put(`/admin/permissions/${request.username}/change`, request);
   }
 
   isPermitted(request: IsPermittedPermissionRequest): Promise<PermittedResponse> {
     return this.httpClient.post(
-      `${this.apiPath}/${request.username}/is_permitted`,
+      `/admin/permissions/${request.username}/is_permitted`,
       request,
       undefined,
       undefined,

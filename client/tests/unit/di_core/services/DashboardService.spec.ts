@@ -1,17 +1,12 @@
-import { DevModule, DI, TestHttpModule, testModule } from '@core/modules';
-import { DashboardService, DashboardServiceImpl } from '@core/services/DashboardService';
-import { expect } from 'chai';
-import { DateFilter, Position } from '@core/domain/Model';
-import { CreateDashboardRequest } from '@core/domain/Request';
-import { Log } from '@core/utils';
-import { HttpClientWithoutWorker } from '@core/services/base.service';
-import { AuthenticationService } from '@core/services';
+import { DevModule, DI, TestModule } from '@core/modules';
+import { DashboardService } from '@core/services/DashboardService';
+import { HttpTestModule } from '@core/modules/http.test.modules';
 
 describe('DashboardService with data from server', () => {
   let dashboardService: DashboardService;
 
   before(() => {
-    DI.init([new TestHttpModule(), new DevModule(), testModule]);
+    DI.init([new HttpTestModule(), new TestModule()]);
     dashboardService = DI.get<DashboardService>(DashboardService);
     // const authService = DI.get<AuthenticationService>(AuthenticationService);
     // Log.debug('dashboardService is DashboardServiceImpl::', dashboardService instanceof DashboardServiceImpl);

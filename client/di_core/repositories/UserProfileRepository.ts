@@ -19,7 +19,7 @@ export abstract class UserProfileRepository {
 }
 
 export class UserProfileRepositoryImpl extends UserProfileRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
   private basePath = '/user/profile/me';
 

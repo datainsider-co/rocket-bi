@@ -1,7 +1,7 @@
 import { JobFormRender } from '@/screens/DataIngestion/FormBuilder/JobFormRender';
 import { Job } from '@core/DataIngestion/Domain/Job/Job';
 import { BFormInput } from 'bootstrap-vue';
-import { GoogleAnalyticJob } from '@core/DataIngestion/Domain/Job/GoogleAnalytic/GoogleAnalyticJob';
+import { GaDate, GoogleAnalyticJob } from '@core/DataIngestion/Domain/Job/GoogleAnalyticJob';
 import DiDropdown from '@/shared/components/Common/DiDropdown/DiDropdown.vue';
 import { IdGenerator } from '@/utils/id_generator';
 import { DropdownData } from '@/shared/components/Common/DiDropdown';
@@ -28,7 +28,6 @@ import { Track } from '@/shared/anotation';
 import { Inject } from 'typescript-ioc';
 import { SchemaService } from '@core/schema/service/SchemaService';
 import { EventBus } from '@/EventBus/EventBus';
-import { GaDate } from '@core/DataIngestion/Domain/Job/GoogleAnalytic/GaDate';
 
 enum GaDateMode {
   Today = 'Today',

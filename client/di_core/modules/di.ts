@@ -18,17 +18,19 @@ export abstract class DI {
 }
 
 export enum DIKeys {
-  initProject = 'init_project',
-  guest = 'guest',
-  profiler = 'profiler',
-  noAuthClient = 'no_auth_client',
-  authClient = 'auth_client',
-  apiHost = 'api_host',
-  lakeApiHost = 'lake_api_host',
-  staticHost = 'static_host',
-  noAuthService = 'no_auth_service',
-  authService = 'auth_service',
-  guestService = 'guest_service',
-  compareBuilder = 'compare_builder',
-  LakeHouseClient = 'lake_house_client'
+  CaasClient = 'caas_client',
+  BiClient = 'bi_client',
+  SchemaClient = 'schema_client',
+  LakeClient = 'lake_client',
+  CdpClient = 'cdp_client',
+  StaticClient = 'static_client',
+  DataCookClient = 'data_cook_client',
+  BillingClient = 'billing_client',
+  WorkerClient = 'worker_client',
+  SchedulerClient = 'scheduler_client',
+  RelayClient = 'relay_client',
+  Profiler = 'profiler',
+  NoAuthService = 'no_auth_service',
+  AuthService = 'auth_service',
+  CompareBuilder = 'compare_builder'
 }

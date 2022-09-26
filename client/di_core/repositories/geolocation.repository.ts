@@ -12,15 +12,14 @@ export abstract class GeolocationRepository {
 }
 
 export class HttpGeolocationRepository extends GeolocationRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.BiClient)
   private httpClient!: BaseClient;
-  private apiPath = '/geolocation';
 
   listAreas(): Promise<GeoArea[]> {
-    return this.httpClient.get<GeoArea[]>(`${this.apiPath}/areas`);
+    return this.httpClient.get<GeoArea[]>(`/geolocation/areas`);
   }
 
   list(geoArea: GeoArea): Promise<Geolocation[]> {
-    return this.httpClient.post<Geolocation[]>(`${this.apiPath}/list`, geoArea);
+    return this.httpClient.post<Geolocation[]>(`/geolocation/list`, geoArea);
   }
 }

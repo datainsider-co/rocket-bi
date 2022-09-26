@@ -22,8 +22,6 @@ import { OracleSourceInfo } from '@core/DataIngestion/Domain/DataSource/OracleSo
 import { RedshiftSourceInfo } from '@core/DataIngestion/Domain/DataSource/RedshiftSourceInfo';
 import { ShopifySourceInfo } from '@core/DataIngestion/Domain/DataSource/ShopifySourceInfo';
 import { UnsupportedException } from '@core/domain/Exception/UnsupportedException';
-import { Ga4SourceFormRender } from '@/screens/DataIngestion/FormBuilder/RenderImpl/SourceFormRender/Ga4SourceFormRender';
-import { GA4SourceInfo } from '@core/DataIngestion/Domain/DataSource/GA4SourceInfo';
 
 export class DataSourceFormFactory {
   createRender(dataSource: DataSourceInfo): DataSourceFormRender {
@@ -48,8 +46,6 @@ export class DataSourceFormFactory {
         return new PostgreSqlDataSourceFormRender(dataSource as RedshiftSourceInfo);
       case DataSourceType.GoogleAnalytics:
         return new GoogleAnalyticsSourceFormRender(dataSource as GoogleAnalyticsSourceInfo);
-      case DataSourceType.GA4:
-        return new Ga4SourceFormRender(dataSource as GA4SourceInfo);
       case DataSourceType.MongoDB: {
         return new MongoDBDataSourceFormRender(dataSource as MongoDBSourceInfo);
       }

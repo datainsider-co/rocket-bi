@@ -1,6 +1,4 @@
 import { DIException } from '@core/domain';
-import { GA4Metric } from '@core/DataIngestion/Domain/Job/GA4/GA4Mertric';
-import { Ga4Dimension } from '@core/DataIngestion/Domain/Job/GA4/Ga4Dimension';
 
 export abstract class GoogleUtils {
   static setupGoogleDriveClient(apiKey: string, accessToken: string) {
@@ -102,53 +100,10 @@ export abstract class GoogleUtils {
     });
   }
 
-  static async loadGA4Client(apiKey: string, accessToken: string) {
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    gapi.client.setToken({ access_token: accessToken });
-    gapi.client.setApiKey(apiKey);
-    await Promise.all([
-      gapi.client.load('https://analyticsreporting.googleapis.com/$discovery/rest?version=v4', 'v4'),
-      gapi.client.load('https://analyticsdata.googleapis.com/$discovery/rest', ''),
-      gapi.client.load('https://analyticsadmin.googleapis.com/$discovery/rest', '')
-    ]);
-  }
-
-  static getDimensionsAndMetrics(propertyName: string): gapi.client.Request<gapi.client.analyticsdata.Metadata> {
-    return gapi.client.analyticsdata.properties.getMetadata({
-      name: propertyName + '/metadata'
-    });
-  }
-
   static getGoogleAnalyticViewProperty(accountId: string, webPropertyId: string): Promise<gapi.client.Response<gapi.client.analytics.Profiles>> {
     return gapi.client.analytics.management.profiles.list({
       accountId: accountId,
       webPropertyId: webPropertyId
-    });
-  }
-
-  //require load google analytic client before
-  static getGA4AccountSummarizes() {
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    return gapi.client.analyticsadmin.accountSummaries.list({});
-  }
-
-  static compatibleDimensionsAndMetrics(
-    property: string,
-    dimensions: Ga4Dimension[],
-    metrics: GA4Metric[]
-  ): Promise<gapi.client.Response<gapi.client.analyticsdata.CheckCompatibilityResponse>> {
-    return gapi.client.request({
-      path: `https://content-analyticsdata.googleapis.com/v1beta/${property}:checkCompatibility`,
-      method: 'POST',
-      body: JSON.stringify({
-        property: property,
-        dimensions: dimensions.map(dimension => {
-          return { name: dimension.name };
-        }),
-        metrics: metrics.map(metric => {
-          return { name: metric.name };
-        })
-      })
     });
   }
 }

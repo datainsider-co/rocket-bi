@@ -46,9 +46,8 @@ export abstract class DataSourceRepository {
 }
 
 export class DataSourceRepositoryImpl extends DataSourceRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.SchedulerClient)
   private readonly httpClient!: BaseClient;
-  private apiPath = '/scheduler/source';
 
   testConnection(dataSourceInfo: DataSourceInfo): Promise<BaseResponse> {
     return this.httpClient.post(`worker/source/test`, dataSourceInfo.toDataSource(), void 0, headerScheduler);
@@ -56,7 +55,7 @@ export class DataSourceRepositoryImpl extends DataSourceRepository {
 
   create(dataSourceInfo: DataSourceInfo): Promise<DataSourceInfo> {
     return this.httpClient
-      .post<DataSource>(`${this.apiPath}/create`, { dataSource: dataSourceInfo.toDataSource() }, void 0, headerScheduler)
+      .post<DataSource>(`/scheduler/source/create`, { dataSource: dataSourceInfo.toDataSource() }, void 0, headerScheduler)
       .then(response => DataSourceInfo.fromDataSource(response));
   }
 
@@ -76,7 +75,7 @@ export class DataSourceRepositoryImpl extends DataSourceRepository {
 
   list(request: ListingRequest): Promise<ListingResponse<DataSourceResponse>> {
     return this.httpClient
-      .post<any>(`${this.apiPath}/list`, request, void 0, headerScheduler)
+      .post<any>(`/scheduler/source/list`, request, void 0, headerScheduler)
       .then(response => new ListingResponse<DataSourceResponse>(this.parseToDataSourceResponses(response.data), response.total))
       .catch(e => {
         Log.error('DataSourceRepository::list::exception::', e.message);
@@ -85,11 +84,11 @@ export class DataSourceRepositoryImpl extends DataSourceRepository {
   }
 
   delete(id: SourceId): Promise<boolean> {
-    return this.httpClient.delete(`${this.apiPath}/${id}`, void 0, void 0, headerScheduler);
+    return this.httpClient.delete(`/scheduler/source/${id}`, void 0, void 0, headerScheduler);
   }
 
   update(id: SourceId, dataSourceInfo: DataSourceInfo): Promise<boolean> {
-    return this.httpClient.put(`${this.apiPath}/${id}`, { dataSource: dataSourceInfo.toDataSource() }, void 0, headerScheduler);
+    return this.httpClient.put(`/scheduler/source/${id}`, { dataSource: dataSourceInfo.toDataSource() }, void 0, headerScheduler);
   }
 
   private parseToDataSourceResponses(dataSources: any[]): DataSourceResponse[] {

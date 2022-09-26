@@ -34,7 +34,7 @@ export abstract class UserAdminRepository {
 }
 
 export class UserAdminRepositoryImpl extends UserAdminRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
   private apiPath = '/admin/users/';
 

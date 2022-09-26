@@ -43,39 +43,37 @@ export abstract class DashboardRepository {
 }
 
 export class DashboardRepositoryImpl extends DashboardRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.BiClient)
   private httpClient!: BaseClient;
-  private apiPath = '/dashboards';
-  private apiChartPath = '/chart';
 
   get(id: DashboardId): Promise<Dashboard> {
-    return this.httpClient.get<Dashboard>(`${this.apiPath}/${id}`).then(item => Dashboard.fromObject(item));
+    return this.httpClient.get<Dashboard>(`/dashboards/${id}`).then(item => Dashboard.fromObject(item));
   }
 
   create(request: CreateDashboardRequest | CreateQueryRequest): Promise<Dashboard> {
-    return this.httpClient.post<Dashboard>(`${this.apiPath}/create`, request).then(item => Dashboard.fromObject(item));
+    return this.httpClient.post<Dashboard>(`/dashboards/create`, request).then(item => Dashboard.fromObject(item));
   }
 
   rename(id: DashboardId, toName: string): Promise<boolean> {
     return this.httpClient
-      .put(`${this.apiPath}/${id}/rename`, {
+      .put(`/dashboards/${id}/rename`, {
         toName: toName
       })
       .then(_ => true);
   }
 
   delete(id: DashboardId): Promise<boolean> {
-    return this.httpClient.delete(`${this.apiPath}/${id}`).then(_ => true);
+    return this.httpClient.delete(`/dashboards/${id}`).then(_ => true);
   }
 
   getWidget(id: DashboardId, widgetId: WidgetId): Promise<Widget> {
-    return this.httpClient.get(`${this.apiPath}/${id}/widgets/${widgetId}`).then(item => Widget.fromObject(item));
+    return this.httpClient.get(`/dashboards/${id}/widgets/${widgetId}`).then(item => Widget.fromObject(item));
   }
 
   createWidget(dashboardId: DashboardId, widget: Widget, position: Position): Promise<Widget> {
     Log.debug('createWidget', widget);
     return this.httpClient
-      .post<Widget>(`${this.apiPath}/${dashboardId}/widgets/create`, {
+      .post<Widget>(`/dashboards/${dashboardId}/widgets/create`, {
         widget: widget,
         position: position
       })
@@ -84,7 +82,7 @@ export class DashboardRepositoryImpl extends DashboardRepository {
 
   editWidget(dashboardId: DashboardId, widgetId: WidgetId, widget: Widget): Promise<boolean> {
     return this.httpClient
-      .put(`${this.apiPath}/${dashboardId}/widgets/${widgetId}/edit`, {
+      .put(`/dashboards/${dashboardId}/widgets/${widgetId}/edit`, {
         dashboardId: dashboardId,
         widgetId: widgetId,
         widget: widget
@@ -94,31 +92,31 @@ export class DashboardRepositoryImpl extends DashboardRepository {
 
   resizeWidgets(dashboardId: DashboardId, positions: DIMap<Position>): Promise<boolean> {
     return this.httpClient
-      .put(`${this.apiPath}/${dashboardId}/widgets/resize`, {
+      .put(`/dashboards/${dashboardId}/widgets/resize`, {
         positions: positions
       })
       .then(_ => true);
   }
 
   deleteWidget(dashboardId: DashboardId, widgetId: WidgetId): Promise<boolean> {
-    return this.httpClient.delete(`${this.apiPath}/${dashboardId}/widgets/${widgetId}`).then(_ => true);
+    return this.httpClient.delete(`/dashboards/${dashboardId}/widgets/${widgetId}`).then(_ => true);
   }
 
   editMainDateFilter(dashboardId: DashboardId, mainDateFilter: MainDateFilter): Promise<boolean> {
-    return this.httpClient.put(`${this.apiPath}/${dashboardId}/main_date_filter/edit`, { mainDateFilter: mainDateFilter }).then(_ => true);
+    return this.httpClient.put(`/dashboards/${dashboardId}/main_date_filter/edit`, { mainDateFilter: mainDateFilter }).then(_ => true);
   }
 
   removeMainDateFilter(dashboardId: DashboardId): Promise<boolean> {
-    return this.httpClient.put(`${this.apiPath}/${dashboardId}/main_date_filter/edit`, { mainDateFilter: null }).then(_ => true);
+    return this.httpClient.put(`/dashboards/${dashboardId}/main_date_filter/edit`, { mainDateFilter: null }).then(_ => true);
   }
 
   share(dashboardId: DashboardId): Promise<PermissionTokenResponse> {
-    return this.httpClient.post<PermissionTokenResponse>(`${this.apiPath}/${dashboardId}/share`, { actions: ['view'] });
+    return this.httpClient.post<PermissionTokenResponse>(`/dashboards/${dashboardId}/share`, { actions: ['view'] });
   }
 
   editSetting(dashboardId: DashboardId, setting: DashboardSetting): Promise<DashboardSetting> {
     return this.httpClient
-      .put(`${this.apiPath}/${dashboardId}`, {
+      .put(`/dashboards/${dashboardId}`, {
         setting: setting
       })
       .then(_ => setting);
@@ -133,10 +131,10 @@ export class DashboardRepositoryImpl extends DashboardRepository {
   }
 
   refresh(dashboardId: DashboardId): Promise<boolean> {
-    return this.httpClient.post(`${this.apiPath}/${dashboardId}/refresh_boost`).then(_ => true);
+    return this.httpClient.post(`/dashboards/${dashboardId}/refresh_boost`).then(_ => true);
   }
 
   edit(id: DashboardId, dashboard: Dashboard): Promise<Dashboard> {
-    return this.httpClient.put<Dashboard>(`${this.apiPath}/${id}`, dashboard).then(item => Dashboard.fromObject(item));
+    return this.httpClient.put<Dashboard>(`/dashboards/${id}`, dashboard).then(item => Dashboard.fromObject(item));
   }
 }

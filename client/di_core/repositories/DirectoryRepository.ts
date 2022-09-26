@@ -46,87 +46,86 @@ export abstract class DirectoryRepository {
 }
 
 export class HttpDirectoryRepository extends DirectoryRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.BiClient)
   private httpClient!: BaseClient;
-  private apiPath = '/directories';
 
   get(id: DirectoryId): Promise<Directory> {
-    return this.httpClient.get<Directory>(`${this.apiPath}/${id}`);
+    return this.httpClient.get<Directory>(`/directories/${id}`);
   }
 
   create(request: CreateDirectoryRequest): Promise<Directory> {
-    return this.httpClient.post<Directory>(`${this.apiPath}/create`, request);
+    return this.httpClient.post<Directory>(`/directories/create`, request);
   }
 
   list(id: DirectoryId, sort: DirectoryPagingRequest): Promise<Directory[]> {
-    return this.httpClient.post<Directory[]>(`${this.apiPath}/${id}/list`, sort);
+    return this.httpClient.post<Directory[]>(`/directories/${id}/list`, sort);
   }
 
   listSharedWithMe(id: DirectoryId, sort: DirectoryPagingRequest): Promise<Directory[]> {
-    return this.httpClient.post<Directory[]>(`${this.apiPath}/${id}/list/shared`, sort);
+    return this.httpClient.post<Directory[]>(`/directories/${id}/list/shared`, sort);
   }
 
   quickList(request: ListDirectoryRequest): Promise<PageResult<Directory>> {
-    return this.httpClient.post<PageResult<Directory>>(`${this.apiPath}/quick_list`, request);
+    return this.httpClient.post<PageResult<Directory>>(`/directories/quick_list`, request);
   }
 
   rename(id: DirectoryId, toName: string): Promise<boolean> {
     return this.httpClient
-      .put(`${this.apiPath}/${id}/rename`, {
+      .put(`/directories/${id}/rename`, {
         toName: toName
       })
       .then(_ => true);
   }
 
   delete(id: DirectoryId): Promise<boolean> {
-    return this.httpClient.delete(`${this.apiPath}/${id}`).then(_ => true);
+    return this.httpClient.delete(`/directories/${id}`).then(_ => true);
   }
 
   move(id: DirectoryId, toParentId: DirectoryId): Promise<boolean> {
     return this.httpClient
-      .put(`${this.apiPath}/${id}/move`, {
+      .put(`/directories/${id}/move`, {
         toParentId: toParentId
       })
       .then(_ => true);
   }
 
   softDelete(id: DirectoryId): Promise<boolean> {
-    return this.httpClient.put(`${this.apiPath}/${id}/remove`).then(_ => true);
+    return this.httpClient.put(`/directories/${id}/remove`).then(_ => true);
   }
 
   hardRemove(id: DirectoryId): Promise<boolean> {
-    return this.httpClient.delete(`${this.apiPath}/trash/${id}/delete`).then(_ => true);
+    return this.httpClient.delete(`/directories/trash/${id}/delete`).then(_ => true);
   }
 
   restore(id: DirectoryId): Promise<boolean> {
-    return this.httpClient.put(`${this.apiPath}/${id}/restore`).then(_ => true);
+    return this.httpClient.put(`/directories/${id}/restore`).then(_ => true);
   }
 
   getParents(id: DirectoryId): Promise<ListParentsResponse> {
-    return this.httpClient.get<ListParentsResponse>(`${this.apiPath}/${id}/parents`);
+    return this.httpClient.get<ListParentsResponse>(`/directories/${id}/parents`);
   }
 
   getRootDir(): Promise<Directory> {
-    return this.httpClient.get<Directory>(`${this.apiPath}/root`);
+    return this.httpClient.get<Directory>(`/directories/root`);
   }
 
   listRecent(sort: DirectoryPagingRequest): Promise<Directory[]> {
-    return this.httpClient.post<Directory[]>(`${this.apiPath}/recent`, sort);
+    return this.httpClient.post<Directory[]>(`/directories/recent`, sort);
   }
 
   listStar(sort: DirectoryPagingRequest): Promise<Directory[]> {
-    return this.httpClient.post<Directory[]>(`${this.apiPath}/star`, sort);
+    return this.httpClient.post<Directory[]>(`/directories/star`, sort);
   }
 
   listTrash(sort: DirectoryPagingRequest): Promise<Directory[]> {
-    return this.httpClient.post<Directory[]>(`${this.apiPath}/trash`, sort);
+    return this.httpClient.post<Directory[]>(`/directories/trash`, sort);
   }
 
   star(directoryId: DirectoryId): Promise<void> {
-    return this.httpClient.post<void>(`${this.apiPath}/${directoryId}/star`, void 0, void 0, void 0, data => data);
+    return this.httpClient.post<void>(`/directories/${directoryId}/star`, void 0, void 0, void 0, data => data);
   }
 
   removeStar(directoryId: DirectoryId): Promise<void> {
-    return this.httpClient.post<void>(`${this.apiPath}/${directoryId}/unstar`, void 0, void 0, void 0, data => data);
+    return this.httpClient.post<void>(`/directories/${directoryId}/unstar`, void 0, void 0, void 0, data => data);
   }
 }

@@ -19,8 +19,6 @@ import { UnsupportedSourceInfo } from '@core/DataIngestion/Domain/DataSource/Uns
 import { JdbcUrlSourceInfo } from '@core/DataIngestion/Domain/DataSource/JdbcUrlSourceInfo';
 import { ShopifySourceInfo } from '@core/DataIngestion/Domain/DataSource/ShopifySourceInfo';
 import { ShopifySource } from '@core/DataIngestion/Domain/Response/ShopifySource';
-import { GA4SourceInfo } from '@core/DataIngestion/Domain/DataSource/GA4SourceInfo';
-import { GA4Source } from '@core/DataIngestion/Domain/Response/GA4Source';
 
 export abstract class DataSourceInfo {
   static readonly DEFAULT_ID = -1;
@@ -40,8 +38,6 @@ export abstract class DataSourceInfo {
         return MSSqlSourceInfo.fromObject(obj);
       case DataSourceType.BigQueryV2:
         return BigQuerySourceInfoV2.fromObject(obj);
-      case DataSourceType.GA4:
-        return GA4SourceInfo.fromObject(obj);
       case DataSourceType.BigQuery:
         return BigQuerySourceInfo.fromObject(obj);
       case DataSourceType.Redshift:
@@ -81,8 +77,6 @@ export abstract class DataSourceInfo {
         return ShopifySourceInfo.fromShopifySource(obj as ShopifySource);
       case DataSources.S3Source:
         return S3SourceInfo.fromS3Source(obj as S3Source);
-      case DataSources.GA4Source:
-        return GA4SourceInfo.fromGA4Source(obj as GA4Source);
       default:
         return UnsupportedSourceInfo.fromObject(obj);
     }
@@ -146,8 +140,6 @@ export abstract class DataSourceInfo {
         return 'ic_shopify_small.png';
       case DataSourceType.S3:
         return 'ic_s3_small.png';
-      case DataSourceType.GA4:
-        return 'ic_ga_small.png';
       default:
         return 'ic_default.svg';
     }

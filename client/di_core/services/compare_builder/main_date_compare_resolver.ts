@@ -18,7 +18,7 @@ export class MainDateCompareResolver implements CompareResolver {
   private currentRange!: DateRange;
   private compareRange!: DateRange;
 
-  @InjectValue(DIKeys.compareBuilder)
+  @InjectValue(DIKeys.CompareBuilder)
   private builders!: Map<string, CompareBuilder>;
 
   withChartType(chartType: VizSettingType): MainDateCompareResolver {

@@ -7,7 +7,6 @@ import { DataSources, DataSourceType, JdbcSource, MongoDBSource, S3Source } from
 import { GoogleServiceAccountSource } from '@core/DataIngestion/Domain/Response/GoogleServiceAccountSource';
 import { ShopifySource } from '@core/DataIngestion/Domain/Response/ShopifySource';
 import { UnsupportedSource } from '@core/DataIngestion/Domain/Response/UnsupportedSource';
-import { GA4Source } from '@core/DataIngestion/Domain/Response/GA4Source';
 
 export abstract class DataSource {
   abstract readonly className: DataSources;
@@ -27,8 +26,6 @@ export abstract class DataSource {
         return ShopifySource.fromObject(obj);
       case DataSources.S3Source:
         return S3Source.fromObject(obj);
-      case DataSources.GA4Source:
-        return GA4Source.fromObject(obj);
       default:
         return UnsupportedSource.fromObject(obj);
     }

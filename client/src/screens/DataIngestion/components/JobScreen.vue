@@ -330,7 +330,6 @@ export default class JobScreen extends Vue {
         this.jobConfigModal.show(async job => {
           await this.submitJob(job);
           await this.handleLoadJobs();
-          this.jobConfigModal.closeModal();
         });
     }
   }

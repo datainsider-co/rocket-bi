@@ -17,7 +17,7 @@ export abstract class OrganizationRepository {
 }
 
 export class OrganizationRepositoryImpl extends OrganizationRepository {
-  @InjectValue(DIKeys.authClient)
+  @InjectValue(DIKeys.BillingClient)
   private httpClient!: BaseClient;
 
   getPlan(): Promise<PlanInfo> {

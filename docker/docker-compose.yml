@@ -1,21 +1,6 @@
 version: "3"
 
-services:
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    ports:
-      - 80:80
-    volumes:
-      - ./nginx_home/conf.d/:/etc/nginx/conf.d/
-      - ./nginx_home/nginx.conf/:/etc/nginx/nginx.conf
-      - ./nginx_home/log/:/var/log/nginx/
-      - ./nginx_home/html:/var/www/html/public
-    command: /bin/bash -c "nginx -g 'daemon off;'"
-    ulimits:
-      nproc: 65535
-    restart: always
-  
+services: 
   mysql:
     image: mysql:5.7
     container_name: rocket-mysql
@@ -23,9 +8,6 @@ services:
     restart: always
     volumes:
       - ./mysql/data:/var/lib/mysql
-      - ./mysql/conf:/etc/mysql/conf.d
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_USER: "di"
       MYSQL_PASSWORD: "di@2020!"
@@ -35,30 +17,26 @@ services:
   ssdb:
     image: wendal/ssdb:latest
     container_name: rocket-ssdb
-    ports:
-      - "8888:8888"
     volumes:
-      - ./ssdb/ssdb.conf:/etc/ssdb.conf
       - ./ssdb/data:/var/lib/ssdb/data
     restart: always
 
-  user_profile:
-    image: registry.gitlab.com/datainsider/user-profile:local
-    container_name: rocket-user-profile
+  caas_service:
+    image: registry.gitlab.com/datainsider/user-profile:oss
+    container_name: rocket-caas-service
     restart: always
     environment:
       NAME: user-profile
       MODE: production
     volumes:
-      - ./user-profile/conf:/app/conf
-      - ./user-profile/logs:/app/logs
+      - ./caas-service/logs:/app/logs
     depends_on:
       - mysql
       - ssdb
 
-  ingestion_service:
-    image: registry.gitlab.com/datainsider/ingestion-service:local
-    container_name: rocket-ingestion-service
+  schema_service:
+    image: registry.gitlab.com/datainsider/ingestion-service:oss
+    container_name: rocket-schema-service
     restart: always
     environment:
       NAME: ingestion-service
@@ -66,16 +44,15 @@ services:
       HTTP_PORT: 8489
       THRIFT_PORT: 8487
     volumes:
-      - ./ingestion-service/conf:/app/conf
-      - ./ingestion-service/logs:/app/logs
+      - ./schema-service/logs:/app/logs
       - ./clickhouse_connection_settings.json:/app/clickhouse_connection_settings.json:ro
     depends_on:
       - mysql
       - ssdb
-      - user_profile
+      - caas_service
 
   bi_service:
-    image: registry.gitlab.com/datainsider/bi-service:local
+    image: registry.gitlab.com/datainsider/bi-service:oss
     container_name: rocket-bi-service
     restart: always
     environment:
@@ -83,16 +60,15 @@ services:
       MODE: production
       HTTP_PORT: 8080
     volumes:
-      - ./bi-service/conf:/app/conf
       - ./bi-service/logs:/app/logs
       - ./clickhouse_connection_settings.json:/app/clickhouse_connection_settings.json:ro
     depends_on:
       - mysql
       - ssdb
-      - user_profile
+      - caas_service
 
   web:
-    image: registry.gitlab.com/datainsider/web:local
+    image: registry.gitlab.com/datainsider/web:1.4.16.1
     container_name: rocket-web
     deploy:
       restart_policy:

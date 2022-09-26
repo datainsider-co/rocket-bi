@@ -1,17 +1,15 @@
 import { SchemaService, SchemaServiceImpl } from '@core/schema/service/SchemaService';
-import { DevModule, DI, TestHttpModule, testModule } from '@core/modules';
-import { expect } from 'chai';
-import { DatabaseCreateRequest, CreateTableRequest } from '@core/domain/Request';
-import { DatabaseInfo, DatabaseSchema, DateTimeColumn, Int32Column, StringColumn, TableSchema } from '@core/domain/Model';
+import { DevModule, DI, TestModule } from '@core/modules';
 import { RandomUtils } from '@/utils';
 import { Log } from '@core/utils';
 import { SchemaModule } from '@core/schema/module/SchemaModule';
+import { HttpTestModule } from '@core/modules/http.test.modules';
 
 describe('Schema service for db listing', () => {
   let schemaService: SchemaService;
 
   before(() => {
-    DI.init([new TestHttpModule(), new DevModule(), new SchemaModule(), testModule]);
+    DI.init([new HttpTestModule(), new DevModule(), new SchemaModule(), new TestModule()]);
     schemaService = DI.get<SchemaService>(SchemaService);
     Log.debug('schemaService is SchemaServiceImpl::', schemaService instanceof SchemaServiceImpl);
   });
