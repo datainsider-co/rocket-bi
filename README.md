@@ -1,51 +1,50 @@
-= Rocket BI
+# Rocket BI
 
-RocketBi is the self-service, web-based business intelligent product tailor-made for analytical databases. RocketBI is the core product of DataInsider stack. 
-You can use RocketBI to analyze, visualize, and collaborate with each other. 
+RocketBi is a self-service, web-based business intelligent product tailor-made for analytical databases. RocketBI is the core product of DataInsider stack. 
+You can use RocketBI to analyze, visualize, and easily collaborate with your friends. 
 
 To learn more about DataInsider's stack and RocketBi's features, see our documentation
 
-[[get-started]]
-== Get started
+
+## Get started
 
 
-=== Run RocketBI locally
+### Run RocketBI locally
 
 To try out RocketBI on your machine, the best way is using our pre-built Docker
 
 
-**Start RocketBi-Server**
+#### Start RocketBi-Server
 
 
-**Start RocketBI-Web**
+#### Start RocketBI-Web
 
 
-** Explore Your Data**
-
-
-[[upgrade]]
-== Upgrade
+#### Explore Your Data
 
 
 
-[[build-source]]
-== Build from source
+## Upgrade
 
 
 
-[[docs]]
-== Documentation
 
-For the complete documentation visit https://docs.datainsider.co/[datainsider.co]
+## Build from source
 
 
-[[contribute]]
-== Contribute
 
-For contribution guidelines, see xref:CONTRIBUTING.md[CONTRIBUTING]. 
+## Documentation
 
-[[questions]]
-== Questions? Problems? Suggestions?
+For the complete documentation visit [datainsider.co](https://docs.datainsider.co/)
+
+
+
+## Contribute
+
+For contribution guidelines, see [CONTRIBUTING](/contributing.md)
+
+
+## Questions? Problems? Suggestions?
 
 * To report a bug or request a feature, create a
-https://github.com/datainsider-co/rocket-bi/issues/new [Issue]. Please make it easy for people to reproduce your issue. 
+[Issue](https://github.com/datainsider-co/rocket-bi/issues/new) . Please make it easy for people to reproduce your issue. 
