@@ -6,45 +6,37 @@ You can use RocketBI to analyze, visualize, and easily collaborate with your fri
 To learn more about DataInsider's stack and RocketBi's features, see our documentation
 
 
-## Get started
+### Get started
 
 
-### Run RocketBI locally
+##### Run RocketBI locally
 
 To try out RocketBI on your machine, the best way is using our pre-built Docker
 
-
-#### Start RocketBi-Server
-
-
-#### Start RocketBI-Web
+1. Start RocketBi-Server
 
 
-#### Explore Your Data
+2. Start RocketBI-Web
 
 
+3. Explore Your Data
 
-## Upgrade
+### Build from source
 
 
 
-
-## Build from source
-
-
-
-## Documentation
+### Documentation
 
 For the complete documentation visit [datainsider.co](https://docs.datainsider.co/)
 
 
 
-## Contribute
+### Contribute
 
-For contribution guidelines, see [CONTRIBUTING](/contributing.md)
+For contribution guidelines, see [contributing](/contributing.md)
 
 
-## Questions? Problems? Suggestions?
+### Questions? Problems? Suggestions?
 
 * To report a bug or request a feature, create a
 [Issue](https://github.com/datainsider-co/rocket-bi/issues/new) . Please make it easy for people to reproduce your issue. 
