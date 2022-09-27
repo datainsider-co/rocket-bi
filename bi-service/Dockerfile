@@ -10,12 +10,9 @@ ENV THRIFT_PORT 8084
 COPY ./dist /app/dist
 COPY ./cmd /app/cmd
 COPY ./conf /app/conf
-COPY ./runservice /app/runservice
 COPY ./entrypoint.sh /app/entrypoint.sh
 
-VOLUME ["/app/conf"]
 VOLUME ["/app/logs"]
-VOLUME ["/app/cmd"]
 
 EXPOSE $HTTP_PORT
 EXPOSE $THRIFT_PORT

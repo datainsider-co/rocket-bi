@@ -13,9 +13,7 @@ COPY ./sql /app/sql
 COPY ./cmd /app/cmd
 COPY ./entrypoint.sh /app/entrypoint.sh
 
-VOLUME ["/app/conf"]
 VOLUME ["/app/logs"]
-VOLUME ["/app/cmd"]
 
 EXPOSE $HTTP_PORT
 EXPOSE $THRIFT_PORT

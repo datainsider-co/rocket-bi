@@ -1,9 +1,9 @@
 FROM openjdk:8-jre
 #EVN vars
-ENV NAME ""
+ENV NAME schema-service
 ENV MODE development
-ENV HTTP_PORT 0
-ENV THRIFT_PORT 0
+ENV HTTP_PORT 8489
+ENV THRIFT_PORT 8487
 
 RUN mkdir -p /app
 
@@ -25,9 +25,9 @@ COPY ./cmd /app/cmd
 COPY ./entrypoint.sh /app/entrypoint.sh
 
 WORKDIR /app
-# set the startup command to execute the jar
-VOLUME ["/app/conf"]
+
 VOLUME ["/app/logs"]
+
 EXPOSE $HTTP_PORT
 EXPOSE $THRIFT_PORT
 
