@@ -21,7 +21,6 @@ RUN apt-get install -y zip
 
 COPY ./dist /app/dist
 COPY ./conf /app/conf
-COPY src/main/resources/sql /app/sql
 COPY ./cmd /app/cmd
 COPY ./entrypoint.sh /app/entrypoint.sh
 
@@ -29,7 +28,6 @@ WORKDIR /app
 # set the startup command to execute the jar
 VOLUME ["/app/conf"]
 VOLUME ["/app/logs"]
-VOLUME ["/app/sql"]
 EXPOSE $HTTP_PORT
 EXPOSE $THRIFT_PORT
 

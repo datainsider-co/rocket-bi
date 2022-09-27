@@ -1,1 +1,1 @@
-#@namespace scala datainsider.ingestion.domain.thrift
+#@namespace scala datainsider.schema.domain.thrift

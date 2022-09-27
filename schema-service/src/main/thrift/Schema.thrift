@@ -1,4 +1,4 @@
-#@namespace scala datainsider.ingestion.service
+#@namespace scala datainsider.schema.service
 include "SchemaDT.thrift"
 
 service TSchemaService {

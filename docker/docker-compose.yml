@@ -37,11 +37,11 @@ services:
       - ssdb
 
   schema_service:
-    image: registry.gitlab.com/datainsider/ingestion-service:oss
+    image: registry.gitlab.com/datainsider/schema-service:oss
     container_name: rocket-schema-service
     restart: always
     environment:
-      NAME: ingestion-service
+      NAME: schema-service
       MODE: production
       HTTP_PORT: 8489
       THRIFT_PORT: 8487

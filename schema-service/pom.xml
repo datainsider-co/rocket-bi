@@ -12,7 +12,7 @@
         <encoding>UTF-8</encoding>
         <scala.version>2.12.12</scala.version>
         <finatra.version>20.5.0</finatra.version>
-        <mainClass>datainsider.ingestion.MainApp</mainClass>
+        <mainClass>datainsider.schema.MainApp</mainClass>
     </properties>
     <dependencies>
         <!--        <dependency>-->
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.28</version>
+            <version>8.0.19</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.clickhouse/clickhouse-jdbc -->
@@ -148,7 +148,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.0</version>
+            <version>1.1.7</version>
         </dependency>
         <!-- TypeSafe -->
         <dependency>
@@ -298,7 +298,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.3.7</version>
+            <version>42.2.21</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.sendgrid/sendgrid-java -->
         <dependency>
@@ -337,7 +337,7 @@
                 <directory>conf</directory>
             </resource>
             <resource>
-                <directory>src/main/resources/sql</directory>
+                <directory>src/main/resources</directory>
             </resource>
         </resources>
 
