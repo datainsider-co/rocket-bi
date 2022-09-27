@@ -8,53 +8,64 @@
       :blur="handleUnFocus"
       :toggleSearch="toggleSearch"
     >
-      <div class="header-bar d-flex justify-content-between align-items-center">
-        <div v-if="showSelectTabControl" class="d-flex flex-row h-100 w-100 align-items-center">
-          <div
-            class="cursor-pointer source-item"
-            :class="{ 'di-active': displayListing === DisplayListings.Database }"
-            @click="setDisplayListing(DisplayListings.Database)"
-          >
-            <i class="di-icon-database icon-title" />
-            <label class="cursor-pointer">
+      <slot name="header-bar">
+        <div class="header-bar d-flex justify-content-between align-items-center">
+          <div v-if="showSelectTabControl" class="d-flex flex-row h-100 w-100 align-items-center">
+            <div
+              class="cursor-pointer source-item"
+              :class="{ 'di-active': displayListing === DisplayListings.Database }"
+              @click="setDisplayListing(DisplayListings.Database)"
+            >
+              <i class="di-icon-database icon-title" />
+              <label class="cursor-pointer">
+                <slot name="database-title">Database</slot>
+              </label>
+            </div>
+            <div
+              class="cursor-pointer source-item"
+              :class="{ 'di-active': displayListing === DisplayListings.TabControl }"
+              @click="setDisplayListing(DisplayListings.TabControl)"
+            >
+              <i class="di-icon-filter-control icon-title" />
+              <label class="cursor-pointer">
+                Chart Control
+              </label>
+            </div>
+          </div>
+          <div v-else class="source-item">
+            <i class="di-icon-database icon-title"></i>
+            <label class="unselectable">
               Database
             </label>
           </div>
-          <div
-            class="cursor-pointer source-item"
-            :class="{ 'di-active': displayListing === DisplayListings.TabControl }"
-            @click="setDisplayListing(DisplayListings.TabControl)"
-          >
-            <i class="di-icon-filter-control icon-title" />
-            <label class="cursor-pointer">
-              Chart Control
-            </label>
-          </div>
         </div>
-        <div v-else class="source-item">
-          <i class="di-icon-database icon-title"></i>
-          <label class="unselectable">
-            <div>Database</div>
-          </label>
-        </div>
-      </div>
+      </slot>
     </slot>
     <div class="d-flex flex-column database-listing">
-      <div class="database-selector " v-if="showSelectDatabase && displayListing === DisplayListings.Database">
-        <DiDropdown
-          canHideOtherPopup
-          class="selector"
-          v-if="!enableSearch"
-          :id="genDropdownId('databases')"
-          v-model="databaseSelected"
-          :data="databaseInfos"
-          labelProps="displayName"
-          placeholder="Select database"
-          valueProps="name"
-        >
-        </DiDropdown>
-        <DiSearchInput class="w-100" v-if="enableSearch" :border="true" v-model="keyword" @blur="handleUnFocus" @change="handleUnFocus" />
-        <div v-else class="ml-2 icon-button cursor-pointer" @click="toggleSearch">
+      <div class="database-selector " v-if="displayListing === DisplayListings.Database">
+        <slot name="database-selector" v-if="!enableSearch && showSelectDatabase">
+          <DiDropdown
+            canHideOtherPopup
+            class="selector mr-2"
+            :id="genDropdownId('databases')"
+            v-model="databaseSelected"
+            :data="databaseInfos"
+            labelProps="displayName"
+            placeholder="Select database"
+            valueProps="name"
+          >
+          </DiDropdown>
+        </slot>
+        <DiSearchInput
+          v-if="enableSearch || !showSelectDatabase"
+          class="w-100"
+          placeholder="Search tables & columns..."
+          :border="true"
+          v-model="keyword"
+          @blur="handleUnFocus"
+          @change="handleUnFocus"
+        />
+        <div v-else class="ml-auto icon-button cursor-pointer" @click="toggleSearch">
           <img src="@/assets/icon/ic_search.svg" alt="" />
         </div>
       </div>

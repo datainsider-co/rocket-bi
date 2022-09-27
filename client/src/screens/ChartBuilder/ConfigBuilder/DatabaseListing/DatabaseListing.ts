@@ -157,7 +157,7 @@ export default class DatabaseListing extends Vue {
   }
 
   private get tableSchemas(): SlTreeNodeModel<TableSchema>[] {
-    if (this.enableSearch && StringUtils.isNotEmpty(this.keyword)) {
+    if ((this.enableSearch || !this.showSelectDatabase) && StringUtils.isNotEmpty(this.keyword)) {
       return _BuilderTableSchemaStore.searchTablesAndColumns(this.keyword);
     } else {
       return _BuilderTableSchemaStore.tableSchemas;
@@ -533,6 +533,6 @@ export default class DatabaseListing extends Vue {
   }
 
   private get searchPlaceHolder(): string {
-    return this.displayListing === DisplayListing.Database ? 'Search tables' : 'Search tab controls';
+    return this.displayListing === DisplayListing.Database ? 'Search tables & columns' : 'Search tab controls';
   }
 }

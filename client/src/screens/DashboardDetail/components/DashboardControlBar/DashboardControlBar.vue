@@ -21,7 +21,7 @@
       <DiIconTextButton v-if="showResetFilters" :id="genBtnId('reset-filter')" title="Reset Filters" @click="resetFilter">
         <i class="di-icon-reset icon-title"></i>
       </DiIconTextButton>
-      <SelectFieldButton id="add-filter" :dashboardId="dashboardId" title="Add Filter">
+      <SelectFieldButton id="add-filter" :dashboardId="dashboardId" :is-show-reset-filter-button="showResetFilters" title="Add Filter">
         <template #icon>
           <i class="di-icon-filter icon-title"></i>
         </template>

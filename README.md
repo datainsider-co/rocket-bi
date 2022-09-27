@@ -27,7 +27,7 @@ docker-compose up -d
 ```
 
 4. Explore your data:
-- Open browser and go to `localhost` to enter the web UI.
+- Open browser and go to `localhost:5050` to enter the web UI.
 - Login to RocketBI with this default account:
 ```
 username: hello@gmail.com

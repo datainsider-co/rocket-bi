@@ -36,7 +36,6 @@ export class MockOrganizationPermissionService extends OrganizationPermissionSer
   async isAllow(...usages: Usage[]): Promise<Map<UsageClassName, boolean>> {
     return new Map([
       [UsageClassName.ClickhouseConfigUsage, true],
-      [UsageClassName.DataCookUsage, true],
       [UsageClassName.DataRelationshipUsage, true]
     ]);
   }

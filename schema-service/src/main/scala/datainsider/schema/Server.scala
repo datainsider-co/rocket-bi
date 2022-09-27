@@ -9,7 +9,12 @@ import com.twitter.finatra.thrift.ThriftServer
 import com.twitter.finatra.thrift.routing.ThriftRouter
 import com.twitter.util.Await
 import datainsider.client.filter.{LicenceFilter, LoggedInUserParser, MustLoggedInFilter}
-import datainsider.client.module.{CaasClientModule, HadoopFileClientModule, MockCaasClientModule}
+import datainsider.client.module.{
+  CaasClientModule,
+  HadoopFileClientModule,
+  MockCaasClientModule,
+  MockHadoopFileClientModule
+}
 import datainsider.client.util.ZConfig
 import datainsider.schema.controller.http._
 import datainsider.schema.controller.http.filter._
@@ -74,8 +79,8 @@ class Server extends HttpServer with ThriftServer {
       MainModule,
       SqlScriptModule,
       ShareModule,
-      HadoopFileClientModule
-//      RefreshSchemaModule
+      MockHadoopFileClientModule,
+      RefreshSchemaModule
     )
   }
 
@@ -94,12 +99,11 @@ class Server extends HttpServer with ThriftServer {
       .filter[CORSFilter](beforeRouting = true)
       .filter[CommonFilters]
       .filter[LoggedInUserParser]
-      .filter[LicenceFilter]
       .add[PingController]
       .add[SchemaController]
       .add[ShareController]
       .add[IngestionController]
-      //      .add[MustLoggedInFilter, SystemInfoController]
+      .add[MustLoggedInFilter, SystemInfoController]
       .exceptionMapper[CaseClassExceptionMapping]
       .exceptionMapper[JsonParseExceptionMapping]
       .exceptionMapper[CommonExceptionMapping]

@@ -1,6 +1,6 @@
 <!-- eslint-disable max-len -->
 <template>
-  <div class="select-container" :class="{ open: isDropdownOpen }">
+  <div class="select-container" :class="{ open: isDropdownOpen }" :title="label || placeholder">
     <div v-click-outside="hideDropdown" class="relative">
       <span :id="dropdownButtonId" ref="dropdown">
         <slot :id="id" :disabled="disabled" :onToggleDropdown="toggleDropdown" :title="label || placeholder" name="dropdown-button">
@@ -92,6 +92,7 @@
                       role="option"
                       tabindex="0"
                       @click.prevent="select(item)"
+                      :title="getLabel(item)"
                     >
                       <div>
                         <slot name="option-item" v-bind="{ item, isSelected, getLabel }">

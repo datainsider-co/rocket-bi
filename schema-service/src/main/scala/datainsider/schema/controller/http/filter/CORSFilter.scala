@@ -11,7 +11,7 @@ import com.twitter.finagle.http.filter.Cors.{HttpFilter, Policy}
 class CORSFilter
     extends HttpFilter(
       Policy(
-        allowsOrigin = { origin => Some(origin) },
+        allowsOrigin = { _ => Some("*") },
         allowsMethods = { _ => Some(Seq("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")) },
         allowsHeaders = { _ =>
           {

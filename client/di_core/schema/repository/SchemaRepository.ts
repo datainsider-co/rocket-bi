@@ -89,13 +89,12 @@ export abstract class SchemaRepository {
 }
 
 export class SchemaRepositoryImpl extends SchemaRepository {
-  @InjectValue(DIKeys.CaasClient)
+  @InjectValue(DIKeys.SchemaClient)
   private httpClient!: BaseClient;
-  private apiPath = '/databases';
 
   createDatabase(request: DatabaseCreateRequest): Promise<DatabaseInfo> {
     return this.httpClient
-      .post<DatabaseInfo>(`${this.apiPath}`, request, undefined, {
+      .post<DatabaseInfo>(`/databases`, request, undefined, {
         'DI-SERVICE-KEY': '123' // TODO: change this later
       })
       .then(obj => DatabaseInfo.fromObject(obj));
@@ -103,7 +102,7 @@ export class SchemaRepositoryImpl extends SchemaRepository {
 
   getDatabases(): Promise<DatabaseInfo[]> {
     return this.httpClient
-      .get<DatabaseInfo[]>(`${this.apiPath}`, undefined, {
+      .get<DatabaseInfo[]>(`/databases`, undefined, {
         'DI-SERVICE-KEY': '123'
       })
       .then(list => list.map(obj => DatabaseInfo.fromObject(obj)));
@@ -111,7 +110,7 @@ export class SchemaRepositoryImpl extends SchemaRepository {
 
   getDatabaseSchema(dbName: string): Promise<DatabaseSchema> {
     return this.httpClient
-      .get<DatabaseSchema>(`${this.apiPath}/${dbName}`, undefined, {
+      .get<DatabaseSchema>(`/databases/${dbName}`, undefined, {
         'DI-SERVICE-KEY': '123'
       })
       .then(obj => DatabaseSchema.fromObject(obj));
@@ -119,122 +118,118 @@ export class SchemaRepositoryImpl extends SchemaRepository {
 
   getListDatabaseSchema(dbNames: string[]): Promise<FullSchemaInfo[]> {
     return this.httpClient
-      .post<FullSchemaInfo[]>(`${this.apiPath}/multi_gets`, { dbNames: dbNames }, {})
+      .post<FullSchemaInfo[]>(`/databases/multi_gets`, { dbNames: dbNames }, {})
       .then(list => list.map(obj => FullSchemaInfo.fromObject(obj)));
   }
 
   dropDatabase(dbName: string): Promise<boolean> {
-    return this.httpClient.put(`${this.apiPath}/${dbName}/remove`, undefined, undefined, {
+    return this.httpClient.put(`/databases/${dbName}/remove`, undefined, undefined, {
       'DI-SERVICE-KEY': '123'
     });
   }
 
   deleteDatabase(dbName: string): Promise<boolean> {
-    return this.httpClient.delete(`${this.apiPath}/${dbName}`, undefined, undefined, {
+    return this.httpClient.delete(`/databases/${dbName}`, undefined, undefined, {
       'DI-SERVICE-KEY': '123'
     });
   }
 
   createTable(request: CreateTableRequest): Promise<TableSchema> {
     return this.httpClient
-      .post<TableSchema>(`${this.apiPath}/${request.dbName}/tables`, request, undefined, {
+      .post<TableSchema>(`/databases/${request.dbName}/tables`, request, undefined, {
         'DI-SERVICE-KEY': '123'
       })
       .then(obj => TableSchema.fromObject(obj));
   }
 
   dropTable(dbName: string, tblName: string): Promise<boolean> {
-    return this.httpClient.delete(`${this.apiPath}/${dbName}/tables/${tblName}`, { adminSecretKey: 12345678 }, undefined, {
+    return this.httpClient.delete(`/databases/${dbName}/tables/${tblName}`, { adminSecretKey: 12345678 }, undefined, {
       'DI-SERVICE-KEY': '123'
     });
   }
 
   createColumn(request: CreateColumnRequest): Promise<TableSchema> {
-    return this.httpClient
-      .post(`${this.apiPath}/${request.dbName}/tables/${request.tblName}/column`, request)
-      .then((resp: any) => TableSchema.fromObject(resp));
+    return this.httpClient.post(`/databases/${request.dbName}/tables/${request.tblName}/column`, request).then((resp: any) => TableSchema.fromObject(resp));
   }
 
   createMeasureColumn(request: CreateColumnRequest): Promise<TableSchema> {
     return this.httpClient
-      .post(`${this.apiPath}/${request.dbName}/tables/${request.tblName}/expr_column`, request)
+      .post(`/databases/${request.dbName}/tables/${request.tblName}/expr_column`, request)
       .then((resp: any) => TableSchema.fromObject(resp));
   }
 
   detectExpressionType(request: DetectExpressionTypeRequest): Promise<ColumnType> {
-    return this.httpClient.post<ColumnType>(`${this.apiPath}/${request.dbName}/tables/${request.tblName}/expression`, request);
+    return this.httpClient.post<ColumnType>(`/databases/${request.dbName}/tables/${request.tblName}/expression`, request);
   }
   detectAggregateExpressionType(request: DetectExpressionTypeRequest): Promise<ColumnType> {
-    return this.httpClient.post<ColumnType>(`${this.apiPath}/${request.dbName}/tables/${request.tblName}/aggregate_expression`, request);
+    return this.httpClient.post<ColumnType>(`/databases/${request.dbName}/tables/${request.tblName}/aggregate_expression`, request);
   }
 
   createTableFromQuery(request: TableCreationFromQueryRequest): Promise<TableSchema> {
     return this.httpClient
-      .post(`${this.apiPath}/${request.dbName}/tables/from_query`, { ...request, adminSecretKey: 12345678 })
+      .post(`/databases/${request.dbName}/tables/from_query`, { ...request, adminSecretKey: 12345678 })
       .then(response => TableSchema.fromObject(response as TableSchema));
   }
 
   restoreDatabase(dbName: string): Promise<boolean> {
-    return this.httpClient.put(`${this.apiPath}/${dbName}/restore`);
+    return this.httpClient.put(`/databases/${dbName}/restore`);
   }
 
   updateColumn(request: UpdateColumnRequest): Promise<TableSchema> {
-    return this.httpClient.put<any>(`${this.apiPath}/${request.dbName}/tables/${request.tblName}/column`, request).then(table => TableSchema.fromObject(table));
+    return this.httpClient.put<any>(`/databases/${request.dbName}/tables/${request.tblName}/column`, request).then(table => TableSchema.fromObject(table));
   }
 
   updateMeasurementColumn(request: UpdateColumnRequest): Promise<TableSchema> {
-    return this.httpClient
-      .put<any>(`${this.apiPath}/${request.dbName}/tables/${request.tblName}/expr_column`, request)
-      .then(table => TableSchema.fromObject(table));
+    return this.httpClient.put<any>(`/databases/${request.dbName}/tables/${request.tblName}/expr_column`, request).then(table => TableSchema.fromObject(table));
   }
 
   deleteCalculatedColumn(request: DeleteColumnRequest): Promise<TableSchema> {
-    return this.httpClient.delete(`${this.apiPath}/${request.dbName}/tables/${request.tblName}/columns/${request.columnName}`);
+    return this.httpClient.delete(`/databases/${request.dbName}/tables/${request.tblName}/columns/${request.columnName}`);
   }
 
   deleteMeasurementColumn(request: DeleteColumnRequest): Promise<TableSchema> {
-    return this.httpClient.delete(`${this.apiPath}/${request.dbName}/tables/${request.tblName}/expr_column/${request.columnName}`);
+    return this.httpClient.delete(`/databases/${request.dbName}/tables/${request.tblName}/expr_column/${request.columnName}`);
   }
 
   getListDatabase(from: number, size: number): Promise<ListingResponse<ShortSchemaInfo>> {
-    return this.httpClient.get(`${this.apiPath}/my_data?from=${from}&size=${size}`);
+    return this.httpClient.get(`/databases/my_data?from=${from}&size=${size}`);
   }
 
   getListTrashDatabase(from: number, size: number): Promise<ListingResponse<ShortSchemaInfo>> {
-    return this.httpClient.get(`${this.apiPath}/trash?from=${from}&size=${size}`);
+    return this.httpClient.get(`/databases/trash?from=${from}&size=${size}`);
   }
 
   getSharedUsers(dbName: string): Promise<ResourceInfo> {
-    return this.httpClient.get(`${this.apiPath}/${dbName}/share/list`).then(response => ResourceInfo.fromObject(response));
+    return this.httpClient.get(`/databases/${dbName}/share/list`).then(response => ResourceInfo.fromObject(response));
   }
 
   shareDatabasePermission(request: ShareWithUserRequest): Promise<Map<string, boolean>> {
-    return this.httpClient.post(`${this.apiPath}/${request.resourceId}/share`, request).then(resp => new Map(Object.entries(resp as any)));
+    return this.httpClient.post(`/databases/${request.resourceId}/share`, request).then(resp => new Map(Object.entries(resp as any)));
   }
 
   updateUsersPermission(request: UpdateShareRequest): Promise<Map<string, boolean>> {
-    return this.httpClient.put(`${this.apiPath}/${request.resourceId}/share/update`, request).then(resp => new Map(Object.entries(resp as any)));
+    return this.httpClient.put(`/databases/${request.resourceId}/share/update`, request).then(resp => new Map(Object.entries(resp as any)));
   }
 
   revokeUsersPermission(request: RevokeShareRequest): Promise<Map<string, boolean>> {
-    return this.httpClient.delete(`${this.apiPath}/${request.resourceId}/share/revoke`, request).then(resp => new Map(Object.entries(resp as any)));
+    return this.httpClient.delete(`/databases/${request.resourceId}/share/revoke`, request).then(resp => new Map(Object.entries(resp as any)));
   }
 
   updateDatabase(request: UpdateDatabaseSchema): Promise<DatabaseSchema> {
-    return this.httpClient.put(`${this.apiPath}/${request.dbSchema.name}`, request).then(obj => DatabaseSchema.fromObject(obj as DatabaseSchema));
+    return this.httpClient.put(`/databases/${request.dbSchema.name}`, request).then(obj => DatabaseSchema.fromObject(obj as DatabaseSchema));
   }
 
   updateTable(request: UpdateTableSchemaRequest): Promise<TableSchema> {
     return this.httpClient
-      .put(`${this.apiPath}/${request.tableSchema.dbName}/tables/${request.tableSchema.name}`, request)
+      .put(`/databases/${request.tableSchema.dbName}/tables/${request.tableSchema.name}`, request)
       .then(obj => TableSchema.fromObject(obj as TableSchema));
   }
   getTable(databaseName: string, tableName: string): Promise<TableSchema> {
-    return this.httpClient.get(`${this.apiPath}/${databaseName}/tables/${tableName}`).then(obj => TableSchema.fromObject(obj as TableSchema));
+    return this.httpClient.get(`/databases/${databaseName}/tables/${tableName}`).then(obj => TableSchema.fromObject(obj as TableSchema));
   }
 
   updateTableName(dbName: string, oldTbName: string, newName: string): Promise<boolean> {
-    return this.httpClient.put(`${this.apiPath}/${dbName}/tables/${oldTbName}/name`, { newName: newName });
+    return this.httpClient.put(`/databases/${dbName}/tables/${oldTbName}/name`, { newName: newName });
   }
 
   detectTableSchema(query: string): Promise<TableSchema> {
@@ -245,17 +240,15 @@ export class SchemaRepositoryImpl extends SchemaRepository {
 
   createCalculatedColumn(request: CreateColumnRequest): Promise<TableSchema> {
     return this.httpClient
-      .post(`${this.apiPath}/${request.dbName}/tables/${request.tblName}/calc_column`, request)
+      .post(`/databases/${request.dbName}/tables/${request.tblName}/calc_column`, request)
       .then((resp: any) => TableSchema.fromObject(resp));
   }
 
   deleteCalculated(request: DeleteColumnRequest): Promise<TableSchema> {
-    return this.httpClient.delete(`${this.apiPath}/${request.dbName}/tables/${request.tblName}/calc_column/${request.columnName}`);
+    return this.httpClient.delete(`/databases/${request.dbName}/tables/${request.tblName}/calc_column/${request.columnName}`);
   }
 
   updateCalculatedColumn(request: UpdateColumnRequest): Promise<TableSchema> {
-    return this.httpClient
-      .put<any>(`${this.apiPath}/${request.dbName}/tables/${request.tblName}/calc_column`, request)
-      .then(table => TableSchema.fromObject(table));
+    return this.httpClient.put<any>(`/databases/${request.dbName}/tables/${request.tblName}/calc_column`, request).then(table => TableSchema.fromObject(table));
   }
 }

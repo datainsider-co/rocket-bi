@@ -34,7 +34,7 @@
     </vuescroll>
     <div v-if="isShowResetFilterButton" class="custom-button-reset">
       <DiButton :id="genBtnId('reset-filter')" textStyle="unselectable" title="Reset Filters" @click="resetFilter">
-        <i class="icon-title di-icon-reset"></i>
+        <i class="icon-title di-icon-reset mr-2"></i>
       </DiButton>
     </div>
   </div>
@@ -151,7 +151,7 @@ export default class FieldListingSearchable extends Vue {
     ::v-deep {
       > div {
         justify-content: center;
-        padding: 0;
+        //padding: 0;
 
         > div {
           color: var(--text-color);
