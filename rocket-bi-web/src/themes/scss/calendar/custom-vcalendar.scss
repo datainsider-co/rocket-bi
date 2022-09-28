@@ -1,0 +1,162 @@
+// calendar arrows
+.vc-arrows-container {
+  padding: 0px 10px !important;
+}
+
+// calendar header
+.vc-header {
+  padding: 0px 10px !important;
+}
+
+// reset button
+.vc-reset [role='button'],
+.vc-reset button {
+  cursor: pointer;
+  border-radius: 9999px;
+  background-color: var(--vc-reset, #434653);
+  width: 22px;
+  height: 22px;
+  margin-right: 12px;
+  margin-top: 5px;
+}
+
+.vc-svg-icon {
+  width: 16px;
+  height: 16px;
+}
+
+// height of input
+.vc-appearance-none {
+  height: 34px;
+  @include regular-text;
+  font-family: Barlow !important;
+  font-size: 12px;
+  letter-spacing: 0.17px;
+  padding-left: 16px;
+}
+
+// title of calendar
+.vc-title {
+  @include bold-text;
+  font-size: 16px;
+  letter-spacing: 0.63px;
+}
+
+// days and weeks padding
+.vc-weeks {
+  padding: 8px 12px 0px 0px !important;
+}
+
+// weekday
+.vc-weekday {
+  @include bold-text;
+  font-size: 15.7px;
+  line-height: 1.21;
+  text-align: center;
+}
+
+// day num
+.vc-day-content {
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-align: center;
+}
+
+/* background */
+.vc-bg-gray-900 {
+  background-color: var(--secondary) !important;
+}
+
+.vc-grid-cell {
+  margin: 5px 0px 0px 0px;
+}
+
+.vc-text-gray-200 {
+  background-color: transparent !important;
+  color: var(--text-color) !important;
+}
+
+.vc-rounded-lg {
+  border-radius: 8px !important;
+}
+
+.vc-border-gray-700 {
+  border-color: var(--secondary) !important;
+}
+
+/* color for week */
+.vc-text-blue-200 {
+  color: var(--accent) !important;
+}
+
+.vc-bg-blue-500 {
+  background-color: var(--accent) !important;
+}
+
+.vc-rounded-lg {
+  border-radius: 2px !important;
+}
+
+/* background popover months*/
+.vc-bg-white {
+  background-color: var(--primary) !important;
+}
+
+/* color for text in input */
+.vc-text-gray-800 {
+  color: var(--text-color) !important;
+}
+
+/* color for disable days*/
+.vc-text-gray-600 {
+  color: var(--text-color-button) !important;
+}
+
+/* color for select range */
+.vc-bg-blue-800 {
+  background-color: var(--accent) !important;
+  opacity: 0.2 !important;
+}
+
+.vc-border-gray-100 {
+  border-color: var(--primary) !important;
+}
+
+.vc-text-gray-900 {
+  color: var(--text-color) !important;
+}
+
+.hover\:vc-bg-gray-200:hover {
+  background-color: var(--primary) !important;
+  color: var(--text-color) !important;
+}
+
+.focus\:vc-border-blue-400:focus {
+  border-color: transparent !important;
+}
+
+.vc-border-blue-500 {
+  border-color: var(--accent) !important;
+}
+
+.vc-text-blue-600 {
+  color: var(--accent) !important;
+}
+
+// calendar border
+.vc-border {
+  border-width: 0px !important;
+  box-shadow: none !important;
+  border-radius: 4px;
+}
+
+.vc-font-bold,
+.vc-font-medium {
+  opacity: 1 !important;
+}
+
+/* hover title */
+.hover\:vc-opacity-75:hover {
+  opacity: 1 !important;
+}

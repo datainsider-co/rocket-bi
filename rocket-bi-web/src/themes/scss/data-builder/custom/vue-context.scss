@@ -1,0 +1,64 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 8/20/21, 11:51 AM
+ */
+
+.v-context {
+  &,
+  & ul {
+    background-clip: padding-box;
+    display: block;
+    margin: 0;
+    padding: 0px;
+    min-width: 82px;
+    z-index: 1500;
+    position: fixed;
+    list-style: none;
+    box-sizing: border-box;
+    max-height: calc(100% - 50px);
+    overflow-y: auto;
+
+    > li {
+      margin: 0;
+      position: relative;
+
+      > a {
+        display: block;
+        padding: 8px;
+        font-weight: 400;
+        color: var(--secondary-text-color);
+        text-decoration: none;
+        white-space: nowrap;
+        background-color: transparent;
+        border: 0;
+
+        &:hover,
+        &:focus {
+          text-decoration: none;
+          color: var(--text-color);
+          background-color: var(--active-color);
+        }
+
+        &:focus {
+          outline: 0;
+        }
+      }
+    }
+
+    &:focus {
+      outline: 0;
+    }
+  }
+
+  &__sub {
+    > a:after {
+      content: '\203A';
+      float: right;
+      padding-left: 1rem;
+    }
+
+    > ul {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,33 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 9/3/21, 3:41 PM
+ */
+
+.comparison-number-widget {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-items: center;
+  justify-content: center;
+  padding: 16px;
+
+  > .table-chart-header-content {
+    width: 100%;
+    overflow: hidden;
+    margin: 0 0 12px;
+    min-height: unset;
+
+    > .description-chart {
+      display: none;
+    }
+  }
+
+  > .comparison-title {
+    margin-bottom: 8px;
+  }
+
+  > .display-value {
+    margin-bottom: 12px;
+  }
+}

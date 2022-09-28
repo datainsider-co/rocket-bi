@@ -1,0 +1,85 @@
+@import '~@/themes/scss/mixin.scss';
+@import '~@/themes/scss/di-variables.scss';
+
+.detail-file {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  width: 100%;
+
+  > header {
+    align-items: center;
+    background: var(--data-source-item-bg);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: end;
+    padding: 15px;
+
+    span {
+      @include regular-text(0.23px, var(--secondary-text-color));
+    }
+
+    @media screen and (max-width: 865px) {
+      span {
+        display: none;
+      }
+    }
+
+    > div.detail-file--header-right {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: end;
+      --panel-background-color: transparent;
+
+      > div.detail-file--header-right-icon-bar {
+        margin-left: 24px;
+
+        > i {
+          font-size: 18px;
+        }
+
+        > i + i {
+          margin-left: 16px;
+        }
+      }
+    }
+  }
+
+  &--text {
+    flex: 1;
+    margin: 16px;
+    overflow: hidden;
+
+    .file-content {
+      font-size: 14px;
+      @include regular-text(0.23px, var(--secondary-text-color));
+      text-align: left;
+
+      p {
+        margin-bottom: 0;
+
+        samp {
+          cursor: text;
+          @include regular-text(0.23px, var(--secondary-text-color));
+          font-size: 16px;
+          line-height: 1.8;
+          font-family: $roboto-font-family;
+          white-space: pre;
+        }
+      }
+    }
+  }
+
+  &--parquet {
+    overflow: hidden;
+    flex: 1;
+  }
+  &--video {
+    overflow: hidden;
+    flex: 1;
+  }
+}

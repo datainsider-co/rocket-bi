@@ -1,0 +1,45 @@
+//container,header
+.vc-container {
+  font-family: $roboto-font-family !important;
+}
+
+.vc-bg-gray-900,
+.vc-text-gray-200 {
+  background-color: var(--primary) !important;
+}
+
+//popover background
+.vc-rounded-lg {
+  background-color: var(--primary) !important;
+}
+
+.vc-border {
+  border-color: var(--primary) !important;
+  border-radius: 6px;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.16), 0 4px 4px 0 rgba(0, 0, 0, 0.16);
+}
+
+.vc-leading-snug {
+  color: var(--text-color) important;
+}
+
+//title
+.vc-text-lg {
+  font-size: 14px;
+  letter-spacing: 0.6px;
+}
+
+.vc-font-bold {
+  color: var(--text-color);
+  opacity: 0.5;
+}
+
+//days
+
+//date
+.vc-font-medium {
+  opacity: 0.5;
+}
+
+.vc-bg-gray-200:hover {
+}

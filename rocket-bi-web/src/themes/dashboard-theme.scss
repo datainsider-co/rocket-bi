@@ -1,0 +1,325 @@
+body {
+  --min-background-color: #f2f2f7;
+  --max-background-color: #f2f2f7;
+  --header-bar-background-color: #597fff;
+  --header-icon-active-color: #597fff;
+  --header-text-active-color: #597fff;
+  --chart-background-color: #fff;
+}
+
+@mixin light-variable() {
+  // tab
+  --tab-widget-background-active: var(--secondary);
+  --tab-widget-background-deactive: #f9f9fb;
+  --tab-border-color: #f0f0f0;
+}
+
+@mixin dark-variable() {
+  --chart-background-color: #00000019;
+  --dashboard-input-background-color: #00000019;
+
+  --text-color: #fff;
+  --secondary-text-color: #eaeaea;
+  --hover-color: #00000019;
+  // tooltip
+  --tooltip-background-color: #333645;
+  --tooltip-color: #eaeaea;
+  // table
+  --header-background-color: #131d26;
+  --table-header-color: #eaeaea;
+  --row-even-background-color: #0000001a;
+  --row-even-color: #eaeaea;
+  --row-odd-background-color: #00000033;
+  --row-odd-color: #eaeaea;
+  --total-background-color: #00000033;
+
+  --scrollbar-background: #ffffff33;
+  --scrollbar-hover: #ffffff66;
+  --table-grid-line-color: #0000001a;
+  //icon
+  --toggle-color: #ffffff19;
+
+  --filter-color: #0000004d;
+  --icon-color: #9799ac;
+  // tab
+  --tab-filter-background-active: var(--accent);
+  --tab-filter-background-de-active: var(--hover-color);
+  --tab-filter-active: var(--white);
+  --tab-filter-de-active: var(--text-color);
+  --tab-filter-dropdown-background: rgba(0, 0, 0, 0.2);
+
+  // tab widget
+  --tab-widget-background-active: var(--accent);
+  --tab-widget-background-deactive: #00000019;
+  --tab-border-color: #0000001a;
+}
+
+body[dashboard-theme='light-default'] #app,
+body[dashboard-theme='light-default'] div[widget-preview-area] {
+  @include light-variable();
+
+  --min-background-color: #f2f2f7;
+  --max-background-color: #f2f2f7;
+  --accent: #597fff;
+  --accent-hover-color: #3463ff;
+  --accent-active-color: #4160c2;
+  --header-bar-background-color: var(--accent);
+  --filter-accent-bg: var(--accent);
+  --filter-accent-color: #fff;
+  --accent-text-color: #fff;
+  --menu-background-color: #fff;
+  --dashboard-panel-background-color: #fff;
+
+  --builder-panel-border: solid 1px #e2e2eb;
+  --header-icon-active-color: var(--accent);
+  --header-text-active-color: var(--accent);
+  --header-active-background-color: #fff;
+  --header-background-color: #f5f5f5;
+  --matching-header-color: #f5f5f5;
+}
+
+body[dashboard-theme='anzac'] #app,
+body[dashboard-theme='anzac'] div[widget-preview-area] {
+  @include light-variable();
+
+  --min-background-color: #f2f2f7;
+  --max-background-color: #f2f2f7;
+  --accent: #e3a845;
+  --accent-hover-color: #e8b766;
+  --accent-active-color: #e79e25;
+  --header-bar-background-color: var(--accent);
+  --filter-accent-bg: var(--accent);
+  --filter-accent-color: #fff;
+  --accent-text-color: #fff;
+  --menu-background-color: #fff;
+  --dashboard-panel-background-color: #fff;
+
+  --builder-panel-border: solid 1px #e2e2eb;
+  --header-icon-active-color: var(--accent);
+  --header-text-active-color: var(--accent);
+  --header-active-background-color: #fff;
+  --header-background-color: #f5f5f5;
+  --matching-header-color: #f5f5f5;
+}
+
+body[dashboard-theme='electric-violet'] #app,
+body[dashboard-theme='electric-violet'] div[widget-preview-area] {
+  @include light-variable();
+
+  --min-background-color: #f2f2f7;
+  --max-background-color: #f2f2f7;
+  --accent: #a51adf;
+  --accent-hover-color: #ab3cda;
+  --accent-active-color: #9d0fd9;
+  --header-bar-background-color: var(--accent);
+  --filter-accent-bg: var(--accent);
+  --filter-accent-color: #fff;
+  --accent-text-color: #fff;
+  --menu-background-color: #fff;
+  --dashboard-panel-background-color: #fff;
+
+  --builder-panel-border: solid 1px #e2e2eb;
+  --header-icon-active-color: var(--accent);
+  --header-text-active-color: var(--accent);
+  --header-active-background-color: #fff;
+  --header-background-color: #f5f5f5;
+  --matching-header-color: #f5f5f5;
+}
+
+body[dashboard-theme='curious-blue'] #app,
+body[dashboard-theme='curious-blue'] div[widget-preview-area] {
+  @include light-variable();
+
+  --min-background-color: #f2f2f7;
+  --max-background-color: #f2f2f7;
+  --accent: #1a86df;
+  --accent-hover-color: #3a95e0;
+  --accent-active-color: #097fe0;
+  --header-bar-background-color: var(--accent);
+  --filter-accent-bg: var(--accent);
+  --filter-accent-color: #fff;
+  --accent-text-color: #fff;
+  --menu-background-color: #fff;
+  --dashboard-panel-background-color: #fff;
+
+  --builder-panel-border: solid 1px #e2e2eb;
+  --header-icon-active-color: var(--accent);
+  --header-text-active-color: var(--accent);
+  --header-active-background-color: #fff;
+  --header-background-color: #f5f5f5;
+  --matching-header-color: #f5f5f5;
+}
+
+body[dashboard-theme='ebony-clay'] #app,
+body[dashboard-theme='ebony-clay'] div[widget-preview-area] {
+  @include light-variable();
+
+  --min-background-color: #f2f2f7;
+  --max-background-color: #f2f2f7;
+  --accent: #222e38;
+  --accent-hover-color: #3d5365;
+  --accent-active-color: #182027;
+  --header-bar-background-color: var(--accent);
+  --filter-accent-bg: var(--accent);
+  --filter-accent-color: #fff;
+  --accent-text-color: #fff;
+  --menu-background-color: #fff;
+  --dashboard-panel-background-color: #fff;
+
+  --builder-panel-border: solid 1px #e2e2eb;
+  --header-icon-active-color: var(--accent);
+  --header-text-active-color: var(--accent);
+  --header-active-background-color: #fff;
+  --header-background-color: #f5f5f5;
+  --matching-header-color: #f5f5f5;
+}
+
+body[dashboard-theme='dark-default'] #app,
+body[dashboard-theme='dark-default'] div[widget-preview-area] {
+  @include dark-variable();
+
+  --min-background-color: #202f3e;
+  --max-background-color: #202f3e;
+  --accent: #597fff;
+  --accent-hover-color: #4b6ee1;
+  --accent-active-color: #4160c2;
+  --dashboard-panel-background-color: rgba(0, 0, 0, 0.1);
+  --filter-accent-bg: #fff;
+  --filter-accent-color: #000;
+  --accent-text-color: #fff;
+  --header-bar-background-color: rgba(0, 0, 0, 0.3);
+  --menu-background-color: #16212b;
+  --builder-panel-border: unset;
+  --header-icon-active-color: #fff;
+  --header-text-active-color: #fff;
+  --header-active-background-color: var(--accent);
+  --header-background-color: #0000004d;
+  --matching-header-color: #121a22;
+
+  --dashboard-gradient-background-color: #16212b;
+}
+
+body[dashboard-theme='clear-sky'] #app,
+body[dashboard-theme='clear-sky'] div[widget-preview-area] {
+  @include dark-variable();
+
+  --min-background-color: #4e63ab;
+  --max-background-color: #243265;
+  --accent: #597fff;
+  --accent-hover-color: #4b6ee1;
+  --accent-active-color: #4160c2;
+  --dashboard-panel-background-color: rgba(0, 0, 0, 0.1);
+  --header-bar-background-color: rgba(0, 0, 0, 0.3);
+  --filter-accent-bg: #fff;
+  --filter-accent-color: #000;
+  --accent-text-color: #fff;
+  --menu-background-color: #223060;
+  --matching-header-color: #182243;
+  --builder-panel-border: unset;
+  --header-icon-active-color: #fff;
+  --header-text-active-color: #fff;
+  --header-active-background-color: var(--accent);
+  --header-background-color: #0000004d;
+  --dashboard-gradient-background-color: #223060;
+}
+
+body[dashboard-theme='deep-sea-space'] #app,
+body[dashboard-theme='deep-sea-space'] div[widget-preview-area] {
+  @include dark-variable();
+
+  --min-background-color: #4e8aab;
+  --max-background-color: #244d65;
+  --accent: #597fff;
+  --accent-hover-color: #4b6ee1;
+  --accent-active-color: #4160c2;
+  --dashboard-panel-background-color: rgba(0, 0, 0, 0.1);
+  --header-bar-background-color: rgba(0, 0, 0, 0.3);
+  --filter-accent-bg: #fff;
+  --filter-accent-color: #000;
+  --accent-text-color: #fff;
+  --menu-background-color: #224960;
+  --matching-header-color: #183343;
+  --builder-panel-border: unset;
+  --header-icon-active-color: #fff;
+  --header-text-active-color: #fff;
+  --header-active-background-color: var(--accent);
+  --header-background-color: #0000004d;
+
+  --dashboard-gradient-background-color: #224960;
+}
+
+body[dashboard-theme='lawrencium'] #app,
+body[dashboard-theme='lawrencium'] div[widget-preview-area] {
+  @include dark-variable();
+
+  --min-background-color: #634eab;
+  --max-background-color: #243365;
+  --accent: #597fff;
+  --accent-hover-color: #4b6ee1;
+  --accent-active-color: #4160c2;
+  --dashboard-panel-background-color: rgba(0, 0, 0, 0.1);
+  --header-bar-background-color: rgba(0, 0, 0, 0.3);
+  --filter-accent-bg: #fff;
+  --filter-accent-color: #000;
+  --accent-text-color: #fff;
+  --menu-background-color: #223160;
+  --matching-header-color: #182243;
+  --builder-panel-border: unset;
+  --header-icon-active-color: #fff;
+  --header-text-active-color: #fff;
+  --header-active-background-color: var(--accent);
+  --header-background-color: #0000004d;
+
+  --dashboard-gradient-background-color: #223160;
+}
+
+body[dashboard-theme='dark'] #app,
+body[dashboard-theme='dark'] div[widget-preview-area] {
+  @include dark-variable();
+
+  --min-background-color: #3b425c;
+  --max-background-color: #212638;
+  --accent: #597fff;
+  --accent-hover-color: #4b6ee1;
+  --accent-active-color: #4160c2;
+  --dashboard-panel-background-color: rgba(0, 0, 0, 0.1);
+  --header-bar-background-color: rgba(0, 0, 0, 0.3);
+  --filter-accent-bg: #fff;
+  --filter-accent-color: #000;
+  --accent-text-color: #fff;
+  --menu-background-color: #1f2435;
+  --matching-header-color: #161925;
+  --builder-panel-border: unset;
+  --header-icon-active-color: #fff;
+  --header-text-active-color: #fff;
+  --header-active-background-color: var(--accent);
+  --header-background-color: #0000004d;
+
+  --dashboard-gradient-background-color: #1f2435;
+}
+
+body div[builder-default-style] {
+  --data-builder-bg: #f2f2f7;
+  --builder-panel-bg: #fff;
+  --menu-background-color: #fff;
+
+  --filter-accent-bg: var(--accent--root);
+  --filter-accent-color: #fff;
+}
+
+body .filter-popover-area-default-style {
+  @include light-variable();
+
+  --menu-background-color: #fff;
+  --accent: #597fff;
+  --accent-active-color: #4160c2;
+  --header-bar-background-color: var(--accent);
+  --filter-accent-bg: var(--accent);
+  --filter-accent-color: #fff;
+  --accent-text-color: #fff;
+  --text-color: var(--text-color--root);
+  --secondary-text-color: var(--secondary-text-color--root);
+  --dashboard-panel-background-color: #fff;
+  --accent-hover-color: #4b6ee1;
+  --hover-color: #f9faff;
+}

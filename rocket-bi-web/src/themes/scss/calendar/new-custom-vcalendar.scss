@@ -1,0 +1,306 @@
+.vc-container.vc-text-gray-200 {
+  color: var(--text-color--root) !important;
+}
+
+// calendar border
+.calendar-picker.vc-container.vc-border {
+  border-color: var(--calendar-bg) !important;
+  border-radius: 4px;
+  border: 0;
+  box-shadow: none;
+}
+
+.calendar-picker.vc-container.vc-rounded-lg {
+  border-radius: 4px !important;
+  background: var(--calendar-bg) !important;
+}
+
+/* background */
+.di-date-picker {
+  .vc-popover-caret {
+    display: none;
+  }
+  //vc-container vc-reset vc-text-gray-200 vc-bg-gray-900 vc-border vc-border-gray-700 vc-rounded-lg
+  .vc-container.vc-bg-gray-900 {
+    background-color: var(--calendar-bg) !important;
+    //color: var(--accent-text-color) !important;
+  }
+
+  .vc-border {
+    border: 0;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.16), 0 4px 4px 0 rgba(0, 0, 0, 0.16);
+  }
+
+  vc-text-white {
+    color: var(--secondary) !important;
+  }
+}
+
+.vc-container {
+  .vc-grid-cell {
+    .vc-text-blue-200 {
+      color: var(--secondary-text-color--root) !important;
+      font-weight: 500;
+      line-height: 1.21;
+      font-size: 15.7px;
+    }
+    .vc-text-blue-100 {
+      color: var(--text-color--root) !important;
+    }
+  }
+
+  .vc-container .vc-text-white {
+    color: var(--text-color--root) !important;
+  }
+
+  // calendar arrows
+  .vc-arrows-container {
+    padding: 0px 10px !important;
+  }
+
+  // calendar header
+  .vc-header {
+    padding: 0px 10px !important;
+  }
+
+  // reset button
+  .vc-arrows-container {
+    *[role='button'],
+    * button {
+      cursor: pointer;
+      border-radius: 9999px;
+      background-color: var(--secondary-2);
+      width: 22px;
+      height: 22px;
+      //margin-right: 12px;
+      margin-top: 5px;
+      path {
+        fill: var(--secondary-text-color--root);
+      }
+      .hover\:vc-bg-gray-200:hover {
+        opacity: 0.5;
+      }
+    }
+  }
+  .vc-nav-arrow[role='button'],
+  .vc-nav-arrow button {
+    cursor: pointer;
+    border-radius: 9999px;
+    background-color: var(--secondary-2);
+    width: 22px;
+    height: 22px;
+    //margin-right: 12px;
+    margin-top: 5px;
+  }
+
+  .vc-svg-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  // height of input
+  .vc-appearance-none {
+    height: 34px;
+    @include regular-text;
+    font-family: Barlow !important;
+    font-size: 12px;
+    letter-spacing: 0.17px;
+    padding-left: 16px;
+  }
+
+  // title of calendar
+  .vc-title {
+    @include regular-text();
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.63px;
+  }
+
+  // days and weeks padding
+  .vc-weeks {
+    padding: 22px 0 0px 0px !important;
+  }
+
+  // weekday
+  .vc-weekday {
+    @include bold-text;
+    font-size: 15.7px;
+    line-height: 1.21;
+    text-align: center;
+  }
+
+  // day num
+  .vc-day-content {
+    font-size: 14.5px;
+    font-weight: 500;
+    letter-spacing: normal;
+    text-align: center;
+  }
+
+  .vc-grid-cell {
+    margin: 5px 0px 0px 0px;
+  }
+
+  .vc-title-layout {
+    //background: var(--secondary) !important;
+  }
+
+  .vc-border-gray-700 {
+    //border-color: var(--secondary) !important;
+  }
+
+  .vc-text-gray-200 {
+    color: var(--text-color--root) !important;
+  }
+
+  /* color for week */
+  .vc-text-blue-200 {
+    color: var(--accent) !important;
+  }
+
+  .vc-bg-blue-500 {
+    background-color: var(--accent) !important;
+    //color: var(--accent-text-color) !important;
+  }
+
+  .vc-rounded-lg {
+    border-radius: 2px !important;
+  }
+
+  /* background popover months*/
+  .vc-bg-white {
+    //background-color: var(--calendar-bg) !important;
+  }
+
+  /* color for text in input */
+  .vc-text-gray-800 {
+    color: var(--text-color--root) !important;
+  }
+
+  /* color for disable days*/
+  .vc-text-gray-600 {
+    color: #bebebe;
+  }
+
+  /* color for select range */
+  .vc-bg-blue-800 {
+    background-color: var(--accent) !important;
+    opacity: 0.2 !important;
+  }
+
+  .vc-border-gray-100 {
+    border-color: var(--calendar-bg) !important;
+  }
+
+  .vc-text-gray-900 {
+    color: var(--accent-text-color) !important;
+  }
+
+  //.hover\:vc-bg-gray-200:hover {
+  //background-color: var(--calendar-bg) !important;
+  //color: var(--text-color--root) !important;
+  //}
+
+  //month hover button
+  .vc-popover-content-wrapper {
+    .hover\:vc-bg-gray-200:hover {
+      //background-color: var(--hover-color) !important;
+    }
+
+    .vc-bg-blue-500 {
+      background-color: var(--accent) !important;
+      color: var(--accent-text-color) !important;
+    }
+  }
+
+  .focus\:vc-border-blue-400 {
+    border-color: transparent !important;
+  }
+
+  .vc-border-blue-500 {
+    border-color: var(--accent) !important;
+  }
+
+  .vc-text-blue-600 {
+    color: var(--accent) !important;
+  }
+
+  .vc-font-bold,
+  .vc-font-medium {
+    opacity: 1 !important;
+  }
+
+  /* hover title */
+  .hover\:vc-opacity-75:hover {
+    opacity: 1 !important;
+  }
+
+  /*month select popover*/
+  .vc-popover-content {
+    border-radius: 4px !important;
+    box-shadow: var(--menu-shadow) !important;
+    border: var(--menu-border);
+    //month button current
+    .vc-border-blue-500 {
+      border-radius: 13.5px;
+    }
+
+    .vc-nav-arrow {
+      background-color: var(--secondary-2) !important;
+      &:hover {
+        opacity: 0.5;
+      }
+    }
+
+    //.hover\:vc-bg-gray-200:hover{
+    //  opacity: 0.5;
+    //}
+
+    //month button select
+    .focus\:vc-border-blue-400 {
+      border-radius: 13.5px;
+    }
+
+    .hover\:vc-bg-gray-200:hover {
+      background-color: var(--hover-color);
+    }
+
+    .vc-leading-snug {
+      background-color: var(--accent-text-color);
+      font-size: 16px;
+      @include regular-text();
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    //month button
+    .vc-w-12 {
+      width: 93px;
+      height: 27px;
+    }
+  }
+
+  .highlight {
+    color: var(--accent-text-color) !important;
+    border: 0;
+  }
+
+  .normal-text-color {
+    color: var(--text-color--root);
+  }
+
+  .vc-title {
+    color: var(--secondary-text-color--root) !important;
+  }
+
+  .vc-nav-title {
+    color: var(--secondary-text-color--root) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.63px;
+    cursor: pointer;
+  }
+
+  .highlight-solid {
+    border: 3px solid var(--accent);
+  }
+}

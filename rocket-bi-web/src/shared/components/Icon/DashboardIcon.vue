@@ -1,0 +1,26 @@
+<template>
+  <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" fill-rule="evenodd">
+      <path
+        d="M22.448 0H1.552C.696 0 0 .77 0 1.715v20.57C0 23.231.696 24 1.552 24h20.896c.856 0 1.552-.77 1.552-1.715V1.715C24 .769 23.304 0 22.448 0z"
+        fill="#4F65B2"
+        fill-rule="nonzero"
+      />
+      <path d="M5 7v13H2V7h3zm4 4v9H6v-9h3zm4 3v6h-3v-6h3zm4 3v3h-3v-3h3zm4 1v2h-3v-2h3z" fill="#FFF" />
+      <g fill="#5AE8FF" fill-rule="nonzero">
+        <path d="M20.153 4.919c.572.77.88 1.699.88 2.675 0 .918-.282 1.823-.809 2.574l-2.901-2.9V3.164a4.525 4.525 0 0 1 2.83 1.754z" />
+        <path
+          d="M13.352 4.412a4.464 4.464 0 0 1 2.392-1.247v4.43c0 .208.084.41.232.557l3.132 3.133c-.75.525-1.64.81-2.574.81a4.505 4.505 0 0 1-4.5-4.5 4.47 4.47 0 0 1 1.318-3.183z"
+        />
+      </g>
+    </g>
+  </svg>
+</template>
+
+<script lang="ts">
+import Component from 'vue-class-component';
+import Vue from 'vue';
+
+@Component
+export default class DashboardIcon extends Vue {}
+</script>
