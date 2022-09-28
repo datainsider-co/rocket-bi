@@ -1,0 +1,304 @@
+@import 'vue-select/src/scss/vue-select.scss';
+@import '~@/themes/scss/di-variables.scss';
+@import '~@/themes/scss/custom-variables';
+@import '~bootstrap/scss/variables';
+
+@import '~@/themes/scss/mixin';
+@import '~bootstrap/scss/mixins';
+
+@import '~bootstrap/scss/root';
+@import '~bootstrap/scss/reboot';
+@import '~bootstrap/scss/type';
+@import '~bootstrap/scss/images';
+@import '~bootstrap/scss/code';
+@import '~bootstrap/scss/grid';
+@import '~bootstrap/scss/tables';
+@import '~bootstrap/scss/forms';
+@import '~bootstrap/scss/buttons';
+@import '~bootstrap/scss/transitions';
+@import '~bootstrap/scss/dropdown';
+@import '~bootstrap/scss/button-group';
+@import '~bootstrap/scss/input-group';
+@import '~bootstrap/scss/custom-forms';
+@import '~bootstrap/scss/nav';
+@import '~bootstrap/scss/navbar';
+@import '~bootstrap/scss/card';
+@import '~bootstrap/scss/breadcrumb';
+@import '~bootstrap/scss/pagination';
+@import '~bootstrap/scss/badge';
+@import '~bootstrap/scss/jumbotron';
+@import '~bootstrap/scss/alert';
+@import '~bootstrap/scss/progress';
+@import '~bootstrap/scss/media';
+@import '~bootstrap/scss/list-group';
+@import '~bootstrap/scss/close';
+@import '~bootstrap/scss/modal';
+@import '~bootstrap/scss/tooltip';
+@import '~bootstrap/scss/popover';
+@import '~bootstrap/scss/carousel';
+@import '~bootstrap/scss/spinners';
+@import '~bootstrap/scss/utilities';
+@import '~bootstrap/scss/print';
+@import '~bootstrap-vue';
+
+// todo: Apply theme, always below bootstrap import
+@import '~@/themes/animation/ic-fade.scss';
+@import '~@/themes/animation/header-fade.scss';
+@import '~@/themes/scss/utilities.scss';
+@import '~@/themes/scss/browsers-behavior.scss';
+@import '~@/themes/scss/button';
+@import '~@/themes/scss/custom-boostrap-class.scss';
+@import '~@/themes/scss/di-loading.scss';
+@import '~@/themes/scss/_input_placeholder.scss';
+@import '~@/themes/scss/_toast.scss';
+@import '~bootstrap/scss/toasts';
+
+@import '~@/themes/fonts.scss';
+@import '~nprogress/nprogress.css';
+@import '~@/themes/scss/_cursor.css';
+@import '~@/themes/scss/custom-split-panel.scss';
+
+// import custom theme here
+@import '~@/themes/app-theme.scss';
+@import '~@/themes/dashboard-theme.scss';
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  font-family: $roboto-font-family;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  background-color: #f2f2f7;
+}
+
+body {
+  font-family: $roboto-font-family;
+  background-color: #f2f2f7;
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+
+  &.swal2-height-auto {
+    height: unset !important;
+  }
+}
+
+body:not(.modal-open) {
+  padding-right: 0px !important;
+}
+
+a,
+button,
+span,
+div {
+  font-family: $roboto-font-family;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @include regular-text;
+  display: flex;
+  align-items: center;
+  font-family: $roboto-font-family;
+  color: var(--text-color);
+  text-align: center;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.td-text-style-primary {
+  @include semi-bold-text;
+  font-size: 14px !important;
+  word-break: break-all;
+}
+
+.td-text-style-default {
+  @include regular-text;
+  font-size: 14px !important;
+  letter-spacing: 0.6px !important;
+  word-break: break-all;
+}
+
+.td-text-style-12px {
+  @include regular-text;
+  font-size: 12px !important;
+  letter-spacing: 0.6px !important;
+  word-break: break-all;
+}
+
+.td-text-style-16px {
+  @include regular-text;
+  font-size: 16px !important;
+  letter-spacing: 0.27px !important;
+  color: var(--text-color);
+  word-break: break-all;
+}
+
+.th-text-style {
+  @include bold-text;
+  font-size: 12px !important;
+  letter-spacing: 0.2px;
+}
+
+.thead-hidden {
+  display: none !important;
+}
+
+.primary-background-color {
+  background-color: $primaryColor !important;
+}
+
+.table-td-background-color-active {
+  background-color: #000 !important;
+}
+
+tr {
+  height: 48px !important;
+}
+
+td {
+  position: relative !important;
+}
+
+tr:last-of-type td::after {
+  content: none !important;
+}
+
+.td-disable-after::after {
+  content: none !important;
+}
+
+.table thead th {
+  vertical-align: middle !important;
+}
+
+.table th,
+.table td {
+  vertical-align: middle !important;
+}
+
+.widget-chart-container {
+  height: 100%;
+  width: 100%;
+}
+
+.highcharts-drillup-button > text {
+  color: $white !important;
+  fill: $white !important;
+}
+
+.display-error {
+  @include regular-text();
+  font-size: 14px;
+  color: var(--danger);
+}
+
+#nprogress .bar {
+  background: var(--accent) !important;
+  height: 1px !important;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px var(--accent), 0 0 5px var(--accent) !important;
+}
+
+#nprogress .spinner-icon {
+  border-top-color: var(--accent) !important;
+  border-left-color: var(--accent) !important;
+}
+
+.btn-icon {
+  padding: 8px;
+  box-sizing: content-box;
+  border-radius: 4px;
+  opacity: 0.6;
+}
+
+.error {
+  @include regular-text();
+  font-size: 14px;
+  color: var(--danger);
+}
+
+.status-loading {
+  color: #e6e6e6;
+  background-color: var(--dashboard-panel-background-color, var(--hover-color));
+}
+
+//.__panel {
+//  height: calc(100% + 18px) !important;
+//}
+
+.secondary-chart-background-color {
+  background-color: var(--secondary) !important;
+}
+
+.primary-chart-background-color {
+  background-color: var(--primary) !important;
+}
+
+.highcharts-container {
+  .highcharts-title,
+  .highcharts-subtitle {
+    text-transform: unset !important;
+  }
+}
+
+.title-chart {
+  @include regular-text;
+  font-size: 20px;
+  font-weight: 300;
+  letter-spacing: 0.86px;
+  text-transform: unset;
+}
+
+.filter-chart {
+  @include regular-text;
+  font-size: 14px;
+}
+
+.description-chart {
+  @include regular-text;
+  opacity: 0.8;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  text-transform: unset;
+}
+
+.columns-resize-bar:hover,
+.resizing {
+  background-color: var(--accent);
+}
+
+iframe {
+  height: 100%;
+  width: 100%;
+  border: none;
+  background-color: transparent;
+}
+
+.choice-item {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  width: max-content;
+
+  > div {
+    margin-left: 8px;
+  }
+}
+
+.font-weight-semi-bold {
+  font-weight: 500 !important;
+}

@@ -1,0 +1,32 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 7/12/21, 4:15 PM
+ */
+
+.tab-display-row {
+  > .horizon-tab-filter-info {
+    flex-shrink: 1;
+    //overflow: hidden;
+    max-width: 80%;
+  }
+
+  > .tab-selection-fit-content {
+    flex: 3;
+  }
+}
+
+.tab-filter-scroller {
+  height: unset !important;
+
+  &.scroll-row {
+    height: 43px !important;
+  }
+
+  .__view {
+    min-height: unset !important;
+  }
+
+  .__bar-is-horizontal {
+    bottom: -5px !important;
+  }
+}

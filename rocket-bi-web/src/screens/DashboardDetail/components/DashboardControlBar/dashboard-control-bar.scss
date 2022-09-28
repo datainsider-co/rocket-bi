@@ -1,0 +1,88 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 5/25/21, 5:40 PM
+ */
+@import '~@/themes/scss/mixin.scss';
+
+.dashboard-control-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+
+  > div + div {
+    margin-left: 4px;
+  }
+
+  .view-action-bar,
+  .edit-action-bar {
+    display: flex;
+
+    > div + div {
+      margin-left: 4px;
+    }
+
+    #boost-label {
+      @include bold-text-14();
+      color: var(--accent);
+      margin-left: 2px;
+      &.di-disable {
+        opacity: 0.6;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+    }
+  }
+
+  .ic-exit-fullscreen {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    height: 24px;
+    width: 24px;
+  }
+
+  .rls-view-as {
+    height: 28px;
+  }
+
+  @media screen and (max-width: 600px) {
+    .di-btn-icon-text span {
+      display: none;
+    }
+
+    .di-button .title {
+      display: none;
+    }
+  }
+}
+
+#dashboard-options-menu {
+  background: none;
+  border: none;
+  margin-top: 4px !important;
+  max-width: unset;
+  //padding: 0 !important;
+
+  .arrow {
+    display: none;
+  }
+  .popover-body {
+    background: var(--menu-background-color);
+    border: var(--menu-border);
+    box-shadow: var(--menu-shadow);
+    border-radius: 4px;
+    height: auto;
+    min-width: 150px;
+    padding: 0 !important;
+    width: fit-content;
+
+    .di-button,
+    .di-btn-icon-text {
+      padding: 16px;
+      height: unset;
+    }
+  }
+}

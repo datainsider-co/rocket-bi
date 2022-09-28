@@ -1,0 +1,17 @@
+.animation-transition-general {
+  @include transitions($general-transition-time, $transition-ease);
+}
+
+.modal.show .modal-dialog {
+  position: relative;
+  // allow clicks to pass through for custom click handling to close modal
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+code {
+  color: $pink;
+}

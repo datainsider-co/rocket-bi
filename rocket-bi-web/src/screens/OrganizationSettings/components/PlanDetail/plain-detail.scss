@@ -1,0 +1,141 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 9/6/21, 6:04 PM
+ */
+
+@import '~@/themes/scss/mixin.scss';
+
+.org-settings-content {
+  flex: 1;
+  text-align: left;
+  background: var(--secondary);
+  padding: 24px;
+  border-radius: 4px;
+
+  &-header {
+    &-title div {
+      @include medium-text();
+      color: var(--text-color);
+      text-transform: uppercase;
+    }
+    margin-bottom: 16px;
+  }
+  .plan-detail {
+    border-radius: 12px;
+    padding: 24px;
+    background-image: linear-gradient(118deg, var(--plan-bg-from), var(--plan-bg-to));
+    text-align: left;
+    position: relative;
+    margin-bottom: 24px;
+    color: var(--secondary);
+
+    &-title {
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 1;
+      letter-spacing: 1.03px;
+      margin-bottom: 10px;
+    }
+
+    &-desc {
+      opacity: var(--normal-opacity);
+      color: var(--secondary-2);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    &-icon {
+      position: absolute;
+      right: 24px;
+      top: 24px;
+      width: 135px;
+      height: 97px;
+      object-fit: contain;
+      object-position: right;
+    }
+
+    &-body {
+      &-content {
+        display: flex;
+        flex-direction: row;
+
+        &-item {
+          padding: 16px;
+          border: solid 1px rgba(255, 255, 255, 0.2);
+          border-left-width: 0;
+
+          &:first-child {
+            border-left-width: 1px;
+          }
+
+          label {
+            line-height: 1;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: normal;
+          }
+
+          & > div {
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: 1.03px;
+            text-align: justify;
+          }
+        }
+      }
+    }
+  }
+
+  .org-overview {
+    background-color: var(--secondary-2);
+    display: flex;
+    flex-direction: column;
+    padding: 0 24px;
+    border-radius: 12px;
+
+    &-item {
+      display: flex;
+      border-bottom: 1px solid #f0f0f0;
+      padding: 15px 0;
+      align-items: center;
+      text-align: left;
+      min-height: 90px;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &-label {
+        margin-right: 10px;
+        width: 180px;
+        @include medium-text();
+        @media screen and (max-width: 600px) {
+          width: 80px;
+        }
+      }
+
+      &-content {
+        flex: 1;
+        @include regular-text();
+        font-size: 14px;
+        color: var(--secondary-text-color);
+      }
+
+      &-action {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        > .di-button {
+          width: 190px;
+          height: 42px;
+
+          @media screen and (max-width: 600px) {
+            width: 150px;
+          }
+        }
+      }
+    }
+  }
+}
