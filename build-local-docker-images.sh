@@ -46,8 +46,8 @@ fi
 cd $DIR
 if [[ "x$BUILD" == "xtrue" ]]; then
     echo "Building images..."
-    docker build --no-cache -f ${DIR}/user-profile/Dockerfile -t registry.gitlab.com/datainsider/user-profile:${TAG} ${DIR}/user-profile
-    docker build --no-cache -f ${DIR}/bi-service/Dockerfile -t registry.gitlab.com/datainsider/bi-service:${TAG} ${DIR}/bi-service
-    docker build --no-cache -f ${DIR}/ingestion-service/Dockerfile -t registry.gitlab.com/datainsider/ingestion-service:${TAG} ${DIR}/ingestion-service
-    docker build --no-cache -f ${DIR}/web/Dockerfile -t registry.gitlab.com/datainsider/web:${TAG} ${DIR}/web
+    docker build --no-cache -f ${DIR}/caas-service/Dockerfile -t datainsiderco/caas-service:${TAG} ${DIR}/caas-service
+    docker build --no-cache -f ${DIR}/bi-service/Dockerfile -t datainsiderco/bi-service:${TAG} ${DIR}/bi-service
+    docker build --no-cache -f ${DIR}/schema-service/Dockerfile -t datainsiderco/schema-service:${TAG} ${DIR}/schema-service
+    docker build --no-cache -f ${DIR}/rocket-bi-web/Dockerfile -t datainsiderco/rocket-bi-web:${TAG} ${DIR}/rocket-bi-web
 fi

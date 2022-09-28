@@ -1,6 +1,6 @@
 version: "3"
 
-services: 
+services:
   mysql:
     image: mysql:5.7
     container_name: rocket-mysql
@@ -74,7 +74,7 @@ services:
       - caas_service
 
   web:
-    image: datainsiderco/web:oss
+    image: datainsiderco/rocket-bi-web:oss
     container_name: rocket-web
     ports:
       - 5050:8080
