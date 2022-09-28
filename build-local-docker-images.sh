@@ -49,5 +49,5 @@ if [[ "x$BUILD" == "xtrue" ]]; then
     docker build --no-cache -f ${DIR}/user-profile/Dockerfile -t registry.gitlab.com/datainsider/user-profile:${TAG} ${DIR}/user-profile
     docker build --no-cache -f ${DIR}/bi-service/Dockerfile -t registry.gitlab.com/datainsider/bi-service:${TAG} ${DIR}/bi-service
     docker build --no-cache -f ${DIR}/ingestion-service/Dockerfile -t registry.gitlab.com/datainsider/ingestion-service:${TAG} ${DIR}/ingestion-service
-    docker build --no-cache -f ${DIR}/web/Dockerfile -t registry.gitlab.com/datainsider/web:${TAG} ${DIR}/web
+    docker build --no-cache -f ${DIR}/rocket-bi-web/Dockerfile -t registry.gitlab.com/datainsider/web:${TAG} ${DIR}/web
 fi
