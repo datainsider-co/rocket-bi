@@ -1,4 +1,4 @@
-import { VisualizationResponse } from '@core/domain/Response';
+import { VisualizationResponse } from '@core/common/domain/response';
 import Mustache from 'mustache';
 import Highcharts from 'highcharts';
 import { CRenderContent, CRenderPage } from '@chart/custom/RenderController';

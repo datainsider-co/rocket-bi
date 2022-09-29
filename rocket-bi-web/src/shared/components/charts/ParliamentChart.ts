@@ -4,18 +4,18 @@
  */
 
 import { Component, Ref, Watch } from 'vue-property-decorator';
-import { ClassProfiler } from '@/shared/profiler/annotation';
+import { ClassProfiler } from '@/shared/profiler/Annotation';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart';
-import { ChartOption, DIException, ParliamentChartOption, ParliamentDisplayType, ParliamentQuerySetting, SeriesTwoResponse } from '@core/domain';
+import { ChartOption, DIException, ParliamentChartOption, ParliamentDisplayType, ParliamentQuerySetting, SeriesTwoResponse } from '@core/common/domain';
 import { RenderController } from '@chart/custom/RenderController';
 import Highcharts, { Series } from 'highcharts';
 import { isNumber, merge } from 'lodash';
 import { HighchartUtils, MetricNumberMode } from '@/utils';
-import { NumberFormatter, RangeData } from '@core/services';
-import { DI } from '@core/modules';
+import { NumberFormatter, RangeData } from '@core/common/services';
+import { Di } from '@core/common/modules';
 import { PageRenderService } from '@chart/custom/PageRenderService';
 import { RenderProcessService } from '@chart/custom/RenderProcessService';
-import { InvalidDataException } from '@core/domain/Exception/InvalidDataException';
+import { InvalidDataException } from '@core/common/domain/exception/InvalidDataException';
 import { Log } from '@core/utils';
 import { DataLabelFormatterMode } from '@chart/PieChart';
 
@@ -113,8 +113,8 @@ export default class ParliamentChart extends BaseHighChartWidget<SeriesTwoRespon
   }
 
   protected createRenderController(): RenderController<SeriesTwoResponse> {
-    const pageRenderService = DI.get(PageRenderService);
-    const processRenderService = DI.get(RenderProcessService);
+    const pageRenderService = Di.get(PageRenderService);
+    const processRenderService = Di.get(RenderProcessService);
     return new RenderController(pageRenderService, processRenderService);
   }
 

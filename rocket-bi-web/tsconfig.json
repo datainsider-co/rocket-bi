@@ -27,6 +27,9 @@
       "gapi.client.drive",
       "gapi.client.sheets",
       "gapi.client.analytics",
+      "gapi.client.analyticsadmin",
+      "gapi.client.analyticsdata",
+      "gapi.client.analyticsreporting",
       "@types/color",
       "moment",
       "@types/rx",
@@ -35,12 +38,12 @@
     "noEmit": true,
     "paths": {
       "@/*": ["src/*"],
-      "@core/*": ["di_core/*"],
+      "@core/*": ["di-core/*"],
       "@chart/*": ["src/shared/components/charts/*"],
-      "@filter/*": ["src/screens/DashboardDetail/components/WidgetContainer/filters/*"]
+      "@filter/*": ["src/screens/dashboard-detail/components/widget-container/filters/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost", "webworker"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx", "di_core*/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx", "di-core*/**/*.ts"],
   "exclude": ["node_modules"]
 }

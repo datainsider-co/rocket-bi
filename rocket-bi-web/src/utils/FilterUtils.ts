@@ -3,17 +3,15 @@ import {
   Condition,
   ConditionType,
   DynamicValueCondition,
-  DynamicFilter,
   Equal,
   FieldRelatedCondition,
   Filterable,
   NestedCondition,
   TableColumn,
-  ValueCondition,
   VizSettingType
-} from '@core/domain/Model';
-import { QuerySetting } from '@core/domain/Model/Query/QuerySetting';
-import { ListUtils } from '@/utils/list.utils';
+} from '@core/common/domain/model';
+import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
+import { ListUtils } from '@/utils/ListUtils';
 
 export abstract class FilterUtils {
   static getFilterColumn(querySetting: QuerySetting): TableColumn | undefined {

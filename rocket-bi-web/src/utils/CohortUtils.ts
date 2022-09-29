@@ -1,4 +1,4 @@
-import { CohortType } from '@core/CDP';
+import { CohortType } from '@core/cdp';
 
 export abstract class CohortUtils {
   static isMultiCohort(type: CohortType | undefined | null): boolean {

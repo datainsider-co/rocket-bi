@@ -8,10 +8,10 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import UserItem from '@/shared/components/UserItem.vue';
-import { ResourceType } from '@/utils/permission_utils';
+import { ResourceType } from '@/utils/PermissionUtils';
 import { ActionNode } from '@/shared';
 import { PermissionProviders } from '@core/admin/domain/permissions/PermissionProviders';
-import { SharedUserInfo } from '@core/domain/Response/ResouceSharing/SharedUserInfo';
+import { SharedUserInfo } from '@core/common/domain/response/resouce-sharing/SharedUserInfo';
 
 @Component({
   components: { UserItem }

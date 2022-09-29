@@ -148,4 +148,4 @@ export default class CalendarContextMenu extends Vue {
 }
 </script>
 
-<style lang="scss" scoped src="./calendar.scss" />
+<style lang="scss" scoped src="./CalendarContextMenu.scss" />

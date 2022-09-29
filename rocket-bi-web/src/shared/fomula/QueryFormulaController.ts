@@ -1,9 +1,9 @@
-import { Column, DatabaseSchema, TableSchema } from '@core/domain/Model';
+import { Column, DatabaseSchema, TableSchema } from '@core/common/domain/model';
 import { FormulaController } from '@/shared/fomula/FormulaController';
-import { FunctionInfo } from '@/screens/ChartBuilder/ConfigBuilder/DatabaseListing/FormulaSuggestionStore';
-import { SQLConfig } from '@/shared/fomula/ClickHouse/LanguageConfig';
-import { BaseSqlLanguage } from '@/shared/fomula/ClickHouse/LanguageTokenizer';
-import { ClickHouseCompletionItemProvider } from '@/shared/fomula/ClickHouse/ClickHouseCompletionItemProvider';
+import { FunctionInfo } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
+import { SQLConfig } from '@/shared/fomula/clickhouse/LanguageConfig';
+import { BaseSqlLanguage } from '@/shared/fomula/clickhouse/LanguageTokenizer';
+import { ClickHouseCompletionItemProvider } from '@/shared/fomula/clickhouse/ClickHouseCompletionItemProvider';
 import { editor, languages } from 'monaco-editor';
 import IMonarchLanguage = languages.IMonarchLanguage;
 

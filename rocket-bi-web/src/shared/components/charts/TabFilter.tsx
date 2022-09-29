@@ -1,18 +1,18 @@
 import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
 import { DefaultFilterValue, Direction, SelectOption, TabFilterDisplay, TableSettingColor } from '@/shared';
 import { BaseChartWidget, PropsBaseChart } from '@chart/BaseChart';
-import { Condition, TabFilterOption, TabFilterQuerySetting, TableColumn } from '@core/domain/Model';
-import { TableResponse } from '@core/domain/Response/Query/TableResponse';
-import { WidgetRenderer } from './WidgetRenderer';
-import { BaseWidget } from '@/screens/DashboardDetail/components/WidgetContainer/BaseWidget';
-import { DefaultTabFilter } from '@chart/WidgetRenderer/DefaultTabFilter';
-import { IdGenerator } from '@/utils/id_generator';
-import '@/shared/components/charts/Table/table.style.scss';
-import './tab-filter.scss';
+import { Condition, TabFilterOption, TabFilterQuerySetting, TableColumn } from '@core/common/domain/model';
+import { TableResponse } from '@core/common/domain/response/query/TableResponse';
+import { WidgetRenderer } from './widget-renderer';
+import { BaseWidget } from '@/screens/dashboard-detail/components/widget-container/BaseWidget';
+import { DefaultTabFilter } from '@chart/widget-renderer/DefaultTabFilter';
+import { IdGenerator } from '@/utils/IdGenerator';
+import '@chart/table/TableStyle.scss';
+import './TabFilter.scss';
 import { ConditionUtils, Log } from '@core/utils';
-import { _ConfigBuilderStore } from '@/screens/ChartBuilder/ConfigBuilder/ConfigBuilderStore';
+import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import { compact, toNumber } from 'lodash';
-import { PopupUtils } from '@/utils/popup.utils';
+import { PopupUtils } from '@/utils/PopupUtils';
 import TabSelection from '@/shared/components/TabSelection.vue';
 import { ListUtils } from '@/utils';
 
@@ -107,7 +107,7 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
   }
 
   private getTabMode(query: TabFilterQuerySetting) {
-    if (query.enableDynamicFunction()) {
+    if (query.enableFunctionControl()) {
       return TabMode.DynamicFunction;
     }
     return TabMode.Filter;

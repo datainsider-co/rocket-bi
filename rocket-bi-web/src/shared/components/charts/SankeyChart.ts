@@ -1,19 +1,19 @@
 import { Component, Ref, Watch } from 'vue-property-decorator';
 import Highcharts, { TooltipFormatterContextObject } from 'highcharts';
-import { ChartOption, ChartOptionData, SankeyChartOption } from '@core/domain/Model';
+import { ChartOption, ChartOptionData, SankeyChartOption } from '@core/common/domain/model';
 import { HighchartUtils, MetricNumberMode } from '@/utils';
 import { merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
-import { ClassProfiler } from '@/shared/profiler/annotation';
-import { DIException } from '@core/domain/Exception';
-import { SeriesTwoResponse } from '@core/domain/Response';
+import { ClassProfiler } from '@/shared/profiler/Annotation';
+import { DIException } from '@core/common/domain/exception';
+import { SeriesTwoResponse } from '@core/common/domain/response';
 import { RenderController } from '@chart/custom/RenderController';
-import { DI } from '@core/modules';
+import { Di } from '@core/common/modules';
 import { PageRenderService } from '@chart/custom/PageRenderService';
 import { RenderProcessService } from '@chart/custom/RenderProcessService';
-import { NumberFormatter, RangeData } from '@core/services/formatter';
+import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
 import { Log } from '@core/utils';
-import { SankeyQuerySetting } from '@core/domain/Model/Query/Implement/SankeyQuerySetting';
+import { SankeyQuerySetting } from '@core/common/domain/model/query/implement/SankeyQuerySetting';
 
 @Component({
   props: PropsBaseChart
@@ -159,8 +159,8 @@ export default class HighchartsSankeyChart extends BaseHighChartWidget<SeriesTwo
   }
 
   private createRenderController(): RenderController<SeriesTwoResponse> {
-    const pageRenderService = DI.get(PageRenderService);
-    const processRenderService = DI.get(RenderProcessService);
+    const pageRenderService = Di.get(PageRenderService);
+    const processRenderService = Di.get(RenderProcessService);
     return new RenderController(pageRenderService, processRenderService);
   }
 

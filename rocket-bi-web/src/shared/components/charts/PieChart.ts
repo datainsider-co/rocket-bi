@@ -1,20 +1,20 @@
 import Highcharts, { Point } from 'highcharts';
 import { Component, Ref, Watch } from 'vue-property-decorator';
-import { ChartOption, ChartOptionData, PieChartOption, PieQuerySetting } from '@core/domain/Model';
+import { ChartOption, ChartOptionData, PieChartOption, PieQuerySetting } from '@core/common/domain/model';
 import { merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
-import { ClassProfiler } from '@/shared/profiler/annotation';
-import { DIException } from '@core/domain/Exception';
-import { SeriesTwoResponse } from '@core/domain/Response';
+import { ClassProfiler } from '@/shared/profiler/Annotation';
+import { DIException } from '@core/common/domain/exception';
+import { SeriesTwoResponse } from '@core/common/domain/response';
 import { HighchartUtils, MetricNumberMode } from '@/utils';
 import { RenderController } from '@chart/custom/RenderController';
-import { DI } from '@core/modules';
+import { Di } from '@core/common/modules';
 import { PageRenderService } from '@chart/custom/PageRenderService';
 import { RenderProcessService } from '@chart/custom/RenderProcessService';
-import { DashboardEvents } from '@/screens/DashboardDetail/enums/DashboardEvents';
-import { NumberFormatter, RangeData } from '@core/services/formatter';
+import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
+import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
 import { JsonUtils, Log } from '@core/utils';
-import { CrossFilterData } from '@/screens/DashboardDetail/stores';
+import { CrossFilterData } from '@/screens/dashboard-detail/stores';
 
 export enum DataLabelFormatterMode {
   NameAndPercent = 'NameAndPercent',
@@ -177,8 +177,8 @@ export default class PieChart extends BaseHighChartWidget<SeriesTwoResponse, Pie
   }
 
   private createRenderController(): RenderController<SeriesTwoResponse> {
-    const pageRenderService = DI.get(PageRenderService);
-    const processRenderService = DI.get(RenderProcessService);
+    const pageRenderService = Di.get(PageRenderService);
+    const processRenderService = Di.get(RenderProcessService);
     return new RenderController(pageRenderService, processRenderService);
   }
 

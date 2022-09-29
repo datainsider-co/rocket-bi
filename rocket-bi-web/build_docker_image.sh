@@ -1,2 +1,4 @@
 #!/bin/sh
-docker build --no-cache -t registry.gitlab.com/datainsider/web:oss .
+git pull
+
+docker build --no-cache -t registry.gitlab.com/datainsider/web:dev .

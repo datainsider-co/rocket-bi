@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { Variant } from '@/utils/popup.utils';
+import { Variant } from '@/utils/PopupUtils';
 
 @Component
 export default class ToastHeader extends Vue {

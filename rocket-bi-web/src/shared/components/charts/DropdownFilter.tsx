@@ -1,12 +1,12 @@
 import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
 import { SelectOption } from '@/shared';
 import { BaseChartWidget, PropsBaseChart } from '@chart/BaseChart';
-import { DropdownChartOption, DropdownQuerySetting } from '@core/domain/Model';
-import { TableResponse } from '@core/domain/Response/Query/TableResponse';
-import { WidgetRenderer } from './WidgetRenderer';
-import { BaseWidget } from '@/screens/DashboardDetail/components/WidgetContainer/BaseWidget';
-import { DefaultDropDownFilter } from '@chart/WidgetRenderer/DefaultDropDownFilter';
-import { PopupUtils } from '@/utils/popup.utils';
+import { DropdownChartOption, DropdownQuerySetting } from '@core/common/domain/model';
+import { TableResponse } from '@core/common/domain/response/query/TableResponse';
+import { WidgetRenderer } from './widget-renderer';
+import { BaseWidget } from '@/screens/dashboard-detail/components/widget-container/BaseWidget';
+import { DefaultDropDownFilter } from '@chart/widget-renderer/DefaultDropDownFilter';
+import { PopupUtils } from '@/utils/PopupUtils';
 
 @Component({
   props: PropsBaseChart

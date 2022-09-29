@@ -1,4 +1,4 @@
-import { Column, ColumnType } from '@core/domain/Model';
+import { Column, ColumnType } from '@core/common/domain/model';
 
 export abstract class IconUtils {
   /**

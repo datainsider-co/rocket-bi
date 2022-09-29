@@ -1,9 +1,0 @@
-{
-  "clientId": "969057219172-r1iu7q1u7hd1rpavp7rd5vokkrlh7f9n.apps.googleusercontent.com",
-  "apiKey": "AIzaSyCUDLAWXb82bS-1SO0U3LnFlXm28g6nMpQ",
-  "rootOrigin": "https://hello.datainsider.co",
-  "sheetUrl": "https://hello.datainsider.co/gauthen/google-sheet",
-  "gaUrl": "https://hello.datainsider.co/gauthen/google-analytic",
-  "sheetScope": "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly",
-  "gaScope": "profile https://www.googleapis.com/auth/analytics.readonly"
-}

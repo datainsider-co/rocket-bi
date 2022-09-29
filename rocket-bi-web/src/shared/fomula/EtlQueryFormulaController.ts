@@ -1,7 +1,7 @@
-import { DatabaseSchema } from '@core/domain/Model';
-import { FunctionInfo } from '@/screens/ChartBuilder/ConfigBuilder/DatabaseListing/FormulaSuggestionStore';
+import { DatabaseSchema } from '@core/common/domain/model';
+import { FunctionInfo } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
 import { QueryFormulaController } from '@/shared/fomula/QueryFormulaController';
-import { EtlCompletionItemProvider } from '@/shared/fomula/ClickHouse/EtlCompletionItemProvider';
+import { EtlCompletionItemProvider } from '@/shared/fomula/clickhouse/EtlCompletionItemProvider';
 
 export class EtlQueryFormulaController extends QueryFormulaController {
   constructor(allFunctions: FunctionInfo[], databaseSchemas: DatabaseSchema[] = []) {

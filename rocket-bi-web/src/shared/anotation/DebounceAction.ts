@@ -3,7 +3,7 @@
  * @created: 5/7/21, 5:48 PM
  */
 
-import { getOriginalFunction } from '@/shared/profiler/annotation';
+import { getOriginalFunction } from '@/shared/profiler/Annotation';
 import { TimeoutUtils } from '@/utils';
 import { Log } from '@core/utils';
 

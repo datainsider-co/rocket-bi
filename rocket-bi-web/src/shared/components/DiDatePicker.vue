@@ -122,5 +122,5 @@ export default class DiDatePicker extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import './calendar.scss';
+@import 'CalendarContextMenu';
 </style>

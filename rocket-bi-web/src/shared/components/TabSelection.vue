@@ -129,4 +129,4 @@ export default class TabSelection extends Vue {
 }
 </script>
 
-<style lang="scss" scoped src="./tab-selection.scss"></style>
+<style lang="scss" scoped src="./TabSelection.scss"></style>

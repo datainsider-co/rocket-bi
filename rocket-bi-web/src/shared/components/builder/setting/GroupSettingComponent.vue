@@ -30,7 +30,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { SettingItem } from '@/shared/models';
 import { ChartUtils } from '@/utils';
-import { MethodProfiler } from '@/shared/profiler/annotation';
+import { MethodProfiler } from '@/shared/profiler/Annotation';
 
 @Component
 export default class GroupSettingComponent extends Vue {

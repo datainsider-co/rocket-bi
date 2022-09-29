@@ -1,5 +1,5 @@
 import Vue, { PluginObject } from 'vue';
-import LoadingDirective from '@/shared/directives/Loading/Loading.directive';
+import LoadingDirective from '@/shared/directives/loading/LoadingDirective';
 
 type DirectiveOptions = {};
 

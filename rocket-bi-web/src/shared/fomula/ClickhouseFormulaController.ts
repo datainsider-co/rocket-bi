@@ -3,8 +3,8 @@
  * @created: 5/5/21, 2:57 PM
  */
 
-import { FormulaSuggestionModule, FunctionInfo } from '@/screens/ChartBuilder/ConfigBuilder/DatabaseListing/FormulaSuggestionStore';
-import { Column } from '@core/domain/Model';
+import { FormulaSuggestionModule, FunctionInfo } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
+import { Column } from '@core/common/domain/model';
 import { FormulaController } from '@/shared/fomula/FormulaController';
 import { Log } from '@core/utils';
 import { FormulaUtils } from '@/shared/fomula/FormulaUtils';

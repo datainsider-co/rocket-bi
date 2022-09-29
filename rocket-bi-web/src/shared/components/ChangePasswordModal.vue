@@ -65,11 +65,11 @@
 <script lang="ts">
 import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
 import DiCustomModal from './DiCustomModal.vue';
-import DiCustomCenterModal from '@/screens/DataIngestion/components/DiCustomCenterModal.vue';
-import InputPass from '@/screens/Login/components/InputComponents/InputPass.vue';
+import DiCustomCenterModal from '@/screens/data-ingestion/components/DiCustomCenterModal.vue';
+import InputPass from '@/screens/login/components/input-components/InputPass.vue';
 import { minLength, required, sameAs } from 'vuelidate/lib/validators';
 import { Log } from '@core/utils';
-import { AuthenticationModule } from '@/store/modules/authentication.store';
+import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { AtomicAction } from '@/shared/anotation/AtomicAction';
 import { Status } from '@/shared';
 

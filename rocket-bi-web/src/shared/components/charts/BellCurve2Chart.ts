@@ -2,16 +2,16 @@ import { Component, Ref, Watch } from 'vue-property-decorator';
 import Highcharts, { TooltipFormatterContextObject } from 'highcharts';
 import { merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
-import { DIException } from '@core/domain/Exception';
-import { BellCurve2QuerySetting, BellCurveChartOption2, ChartOption, ChartOptionData, TextSetting } from '@core/domain/Model';
-import { SeriesOneResponse } from '@core/domain/Response';
+import { DIException } from '@core/common/domain/exception';
+import { BellCurve2QuerySetting, BellCurveChartOption2, ChartOption, ChartOptionData, TextSetting } from '@core/common/domain/model';
+import { SeriesOneResponse } from '@core/common/domain/response';
 import { HighchartUtils, MetricNumberMode } from '@/utils';
 import { RenderController } from '@chart/custom/RenderController';
 import { PageRenderService } from '@chart/custom/PageRenderService';
-import { DI } from '@core/modules';
+import { Di } from '@core/common/modules';
 import { RenderProcessService } from '@chart/custom/RenderProcessService';
 import { Log } from '@core/utils';
-import { NumberFormatter, RangeData } from '@core/services/formatter';
+import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
 
 @Component({
   props: PropsBaseChart
@@ -217,8 +217,8 @@ export default class BellCurve2Chart extends BaseHighChartWidget<SeriesOneRespon
   }
 
   private createRenderController(): RenderController<SeriesOneResponse> {
-    const pageRenderService = DI.get(PageRenderService);
-    const processRenderService = DI.get(RenderProcessService);
+    const pageRenderService = Di.get(PageRenderService);
+    const processRenderService = Di.get(RenderProcessService);
     return new RenderController(pageRenderService, processRenderService);
   }
 

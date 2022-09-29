@@ -5,25 +5,25 @@
 
 import { Component, Ref, Watch } from 'vue-property-decorator';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart';
-import { ClassProfiler } from '@/shared/profiler/annotation';
-import { MapItem, MapResponse } from '@core/domain/Response';
-import { ChartOption, MapChartChartOption, MapQuerySetting } from '@core/domain/Model';
-import { DIException } from '@core/domain/Exception';
+import { ClassProfiler } from '@/shared/profiler/Annotation';
+import { MapItem, MapResponse } from '@core/common/domain/response';
+import { ChartOption, MapChartChartOption, MapQuerySetting } from '@core/common/domain/model';
+import { DIException } from '@core/common/domain/exception';
 import Highcharts from 'highcharts/highmaps';
 import mapInit from 'highcharts/modules/map';
 import { cloneDeep, merge } from 'lodash';
 import { HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
 import { RenderController } from '@chart/custom/RenderController';
-import { DI } from '@core/modules';
+import { Di } from '@core/common/modules';
 import { PageRenderService } from '@chart/custom/PageRenderService';
 import { RenderProcessService } from '@chart/custom/RenderProcessService';
 import { Log } from '@core/utils';
 import { DebounceAction } from '@/shared/anotation/DebounceAction';
 import { Series, TooltipFormatterContextObject } from 'highcharts';
-import { DashboardEvents } from '@/screens/DashboardDetail/enums/DashboardEvents';
-import { NumberFormatter, RangeData } from '@core/services';
-import { CrossFilterData } from '@/screens/DashboardDetail/stores';
-import { GeolocationModule } from '@/store/modules/data_builder/geolocation.store';
+import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
+import { NumberFormatter, RangeData } from '@core/common/services';
+import { CrossFilterData } from '@/screens/dashboard-detail/stores';
+import { GeolocationModule } from '@/store/modules/data-builder/GeolocationStore';
 
 mapInit(Highcharts);
 
@@ -204,8 +204,8 @@ export default class MapChart extends BaseHighChartWidget<MapResponse, MapChartC
   }
 
   private createRenderController(): RenderController<MapResponse> {
-    const pageRenderService = DI.get(PageRenderService);
-    const processRenderService = DI.get(RenderProcessService);
+    const pageRenderService = Di.get(PageRenderService);
+    const processRenderService = Di.get(RenderProcessService);
     return new RenderController(pageRenderService, processRenderService);
   }
 

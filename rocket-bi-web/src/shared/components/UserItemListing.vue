@@ -26,7 +26,7 @@
 <script lang="ts">
 import { Component, Prop, PropSync, Vue } from 'vue-property-decorator';
 import UserItem from '@/shared/components/UserItem.vue';
-import { UserProfile } from '@core/domain/Model';
+import { UserProfile } from '@core/common/domain/model';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { Status, VerticalScrollConfigs } from '@/shared';
 

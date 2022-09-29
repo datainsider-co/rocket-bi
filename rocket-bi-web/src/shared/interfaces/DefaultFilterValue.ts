@@ -1,4 +1,4 @@
-import { Condition, TableColumn } from '@core/domain';
+import { Condition, TableColumn } from '@core/common/domain';
 
 export interface DefaultFilterValue {
   value?: any;

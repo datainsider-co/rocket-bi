@@ -22,7 +22,7 @@
 <script lang="ts">
 import { Component, Model, Prop, Vue } from 'vue-property-decorator';
 import { TimeoutUtils } from '@/utils';
-import { StringUtils } from '@/utils/string.utils';
+import { StringUtils } from '@/utils/StringUtils';
 
 @Component({
   inheritAttrs: true

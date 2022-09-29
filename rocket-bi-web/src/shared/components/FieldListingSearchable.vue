@@ -42,11 +42,11 @@
 
 <script lang="ts">
 import { Component, Emit, Inject, Prop, Vue } from 'vue-property-decorator';
-import DiButton from '@/shared/components/Common/DiButton.vue';
+import DiButton from '@/shared/components/common/DiButton.vue';
 import { GroupedField } from '@/shared';
 import { ListUtils, SchemaUtils } from '@/utils';
 import FieldListingItem from '@/shared/components/FieldListingItem.vue';
-import { FieldDetailInfo } from '@core/domain/Model/Function/FieldDetailInfo';
+import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
 
 @Component({
   components: { FieldListingItem, DiButton }

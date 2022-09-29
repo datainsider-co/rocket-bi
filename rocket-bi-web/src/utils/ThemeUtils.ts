@@ -4,9 +4,8 @@
  */
 
 import { _ThemeStore, DiTheme } from '@/store/modules/ThemeStore';
-import { UserProfile } from '@core/domain';
-import { get } from 'lodash';
-import { DashboardThemeType } from '@core/domain/Model/Dashboard/Setting/DashboardThemeType';
+import { UserProfile } from '@core/common/domain';
+import { DashboardThemeType } from '@core/common/domain/model/dashboard/setting/DashboardThemeType';
 
 export class ThemeUtils {
   static THEME_KEY = 'diTheme';
@@ -44,6 +43,7 @@ export class ThemeUtils {
       return JSON.parse(themeAsString);
     }
   }
+
   // fixme: force light theme
   static getThemeName(userProfile: UserProfile): DiTheme {
     // const themeName = get(userProfile.properties, ThemeUtils.THEME_KEY, 'light');

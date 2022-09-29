@@ -1,16 +1,16 @@
 import { ChartType } from '@/shared';
-import { MethodProfiler } from '@/shared/profiler/annotation';
+import { MethodProfiler } from '@/shared/profiler/Annotation';
 import { ChartUtils, DateTimeFormatter, HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
-import { StringUtils } from '@/utils/string.utils';
+import { StringUtils } from '@/utils/StringUtils';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
 import { PageRenderService } from '@chart/custom/PageRenderService';
 import { RenderController } from '@chart/custom/RenderController';
 import { RenderProcessService } from '@chart/custom/RenderProcessService';
-import { DIException } from '@core/domain/Exception';
-import { ChartOption, ChartOptionData, LineStockChartOption, SeriesQuerySetting } from '@core/domain/Model';
-import { SeriesOneResponse } from '@core/domain/Response';
-import { DI } from '@core/modules';
-import { NumberFormatter, RangeData } from '@core/services/formatter';
+import { DIException } from '@core/common/domain/exception';
+import { ChartOption, ChartOptionData, LineStockChartOption, SeriesQuerySetting } from '@core/common/domain/model';
+import { SeriesOneResponse } from '@core/common/domain/response';
+import { Di } from '@core/common/modules';
+import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
 import { Log } from '@core/utils';
 import Highcharts, { TooltipFormatterContextObject } from 'highcharts';
 import Highstock from 'highcharts/highstock';
@@ -268,8 +268,8 @@ export default class LineStockChart extends BaseHighChartWidget<SeriesOneRespons
   }
 
   private createRenderController(): RenderController<SeriesOneResponse> {
-    const pageRenderService = DI.get(PageRenderService);
-    const processRenderService = DI.get(RenderProcessService);
+    const pageRenderService = Di.get(PageRenderService);
+    const processRenderService = Di.get(RenderProcessService);
     return new RenderController(pageRenderService, processRenderService);
   }
 

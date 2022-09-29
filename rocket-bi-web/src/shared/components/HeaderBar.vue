@@ -156,13 +156,13 @@
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
-import { AuthenticationModule } from '@/store/modules/authentication.store';
+import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { OauthType, Routers } from '@/shared';
-import DiButton from '@/shared/components/Common/DiButton.vue';
+import DiButton from '@/shared/components/common/DiButton.vue';
 import { Log } from '@core/utils';
 import ChangePasswordModal from '@/shared/components/ChangePasswordModal.vue';
-import { DI } from '@core/modules';
-import { DataManager, UserProfileService } from '@core/services';
+import { Di } from '@core/common/modules';
+import { DataManager, UserProfileService } from '@core/common/services';
 import DataWarehouseIcon from '@/shared/components/Icon/DataWarehouseIcon.vue';
 import DatabaseIcon from '@/shared/components/Icon/DatabaseIcon.vue';
 import CustomerSettingIcon from '@/shared/components/Icon/CustomerSettingIcon.vue';
@@ -170,13 +170,13 @@ import DashboardSettingIcon from '@/shared/components/Icon/DashboardSettingIcon.
 import SettingIcon from '@/shared/components/Icon/SettingIcon.vue';
 import { Inject } from 'typescript-ioc';
 import { Location } from 'vue-router';
-import { DatabaseSchemaModule } from '@/store/modules/data_builder/DatabaseSchemaStore';
+import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
 import LakeHouseIcon from '@/shared/components/Icon/LakeHouseIcon.vue';
 import CaretDownIcon from '@/shared/components/Icon/CaretDownIcon.vue';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
-import { UserProfile } from '@core/domain';
-import { _BuilderTableSchemaStore } from '@/store/modules/data_builder/BuilderTableSchemaStore';
-import OrganizationPermissionModule from '@/store/modules/organization_permission.store';
+import { UserProfile } from '@core/common/domain';
+import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
+import OrganizationPermissionModule from '@/store/modules/OrganizationPermissionStore';
 
 interface RouterNode {
   label: string;
@@ -313,7 +313,7 @@ export default class HeaderBar extends Vue {
   }
 
   private isShowChangePasswordOption(): boolean {
-    const dataManager = DI.get(DataManager);
+    const dataManager = Di.get(DataManager);
     return dataManager.getLoginType() === OauthType.DEFAULT;
   }
 

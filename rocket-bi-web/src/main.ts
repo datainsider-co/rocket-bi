@@ -17,9 +17,9 @@ import Directives from '@/shared/directives';
 import App from './App.vue';
 // STORES
 import store from './store';
-import { AuthenticationModule } from '@/store/modules/authentication.store';
+import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 // ROUTERS
-import router from './router/router';
+import router from './router/Router';
 // COMMON
 import { ComponentUtils, DomUtils } from '@/utils';
 import { DefaultScrollConfig } from '@/shared';
@@ -28,31 +28,31 @@ import VueVirtualScroller from 'vue-virtual-scroller';
 // CSS
 import '@/themes/app.scss';
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
-import { DevModule, DI, DIKeys, ProdModule } from '@core/modules';
+import { DevModule, Di, DIKeys, ProductionModule } from '@core/common/modules';
 import Highcharts from 'highcharts';
 import Mustache from 'mustache';
 import { UserManagementModule } from '@core/admin/UserManagementModule';
-import { TrackingModule } from '@core/tracking/tracking.module';
-import { ShareModule } from '@core/share/share.module';
+import { TrackingModule } from '@core/tracking/TrackingModule';
+import { ShareModule } from '@core/share/ShareModule';
 import { SchemaModule } from '@core/schema/module/SchemaModule';
-import { GenIdMethods } from '@/utils/id_generator';
+import { GenIdMethods } from '@/utils/IdGenerator';
 import HighchartsCustomEvents from 'highcharts-custom-events';
 import { LogLevel } from '@core/utils/Log';
-import CommonComponentPlugin from '@/shared/components/Common/install';
-import { DataIngestionModule } from '@core/DataIngestion/Module/DataIngestionModule';
-import DiUploadDocumentPlugin from '@/screens/DataIngestion/components/DiUploadDocument';
-import DiUploadGoogleSheetPlupin from '@/screens/DataIngestion/components/DiUploadGoogleSheet';
+import CommonComponentPlugin from '@/shared/components/common/install';
+import { DataIngestionModule } from '@core/data-ingestion/module/DataIngestionModule';
+import DiUploadDocumentPlugin from '@/screens/data-ingestion/components/di-upload-document';
+import DiUploadGoogleSheetPlupin from '@/screens/data-ingestion/components/di-upload-google-sheet';
 import DiIcons from '@/shared/components/Icon/install';
-import { OrganizationModule } from '@core/Organization';
-import { DataManager } from '@core/services';
-import { CdpModule } from '@core/CDP';
-import { DataCookModule } from '@core/DataCook';
-import { LakeHouseModule } from '@core/LakeHouse/Module/LakeHouseModule';
+import { OrganizationModule } from '@core/organization';
+import { DataManager } from '@core/common/services';
+import { CdpModule } from '@core/cdp';
+import { DataCookModule } from '@core/data-cook';
+import { LakeHouseModule } from '@core/lake-house/module/LakeHouseModule';
 import DiAnalytics from 'di-web-analytics';
-import { ClickhouseConfigModule } from '@core/ClickhouseConfig/Module/ClickhouseConfigModule';
-import { RelationshipModule } from '@core/DataRelationship';
-import { HttpModule } from '@core/modules/http.modules';
-import { HttpTestModule } from '@core/modules/http.test.modules';
+import { ClickhouseConfigModule } from '@core/clickhouse-config/module/ClickhouseConfigModule';
+import { RelationshipModule } from '@core/data-relationship';
+import { HttpModule } from '@core/common/modules/HttpModule';
+import { HttpTestModule } from '@core/common/modules/TestHttpModule';
 
 HighchartsCustomEvents(Highcharts as any);
 
@@ -60,9 +60,9 @@ switch (process.env.NODE_ENV) {
   case 'production':
     DomUtils.bind('logLevel', LogLevel.Error);
     window.dumpLog = false;
-    DI.init([
+    Di.init([
       new HttpModule(),
-      new ProdModule(),
+      new ProductionModule(),
       new TrackingModule(),
       new ChartBuilderModule(),
       new UserManagementModule(),
@@ -78,9 +78,9 @@ switch (process.env.NODE_ENV) {
     ]);
     break;
   case 'test':
-    DI.init([
+    Di.init([
       new HttpTestModule(),
-      new ProdModule(),
+      new ProductionModule(),
       new TrackingModule(),
       new ChartBuilderModule(),
       new UserManagementModule(),
@@ -100,7 +100,7 @@ switch (process.env.NODE_ENV) {
   default:
     DomUtils.bind('logLevel', LogLevel.All);
     window.dumpLog = true;
-    DI.init([
+    Di.init([
       new HttpModule(),
       new DevModule(),
       new TrackingModule(),
@@ -167,7 +167,7 @@ switch (process.env.NODE_ENV) {
       headers: {
         'DI-SERVICE-KEY': '12345678',
         // sửa lỗi không thể tạo mới database khi upload csv (chỉ bị trên mode debug
-        Authorization: DI.get(DataManager).getSession()
+        Authorization: Di.get(DataManager).getSession()
       },
       componentName: 'DiUploadComponent',
       chunkSize: 1000000 //1MB
@@ -177,7 +177,7 @@ switch (process.env.NODE_ENV) {
       headers: {
         'DI-SERVICE-KEY': '12345678',
         // sửa lỗi không thể tạo mới database khi upload csv (chỉ bị trên mode debug
-        Authorization: DI.get(DataManager).getSession()
+        Authorization: Di.get(DataManager).getSession()
       },
       componentName: 'DiUploadGoogleSheetComponent',
       chunkSize: 1000000 //1MB

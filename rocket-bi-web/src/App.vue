@@ -9,16 +9,16 @@
 <script lang="ts">
 import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
 import { _ThemeStore } from '@/store/modules/ThemeStore';
-import { PopupUtils } from '@/utils/popup.utils';
-import ConfirmationModal from '@/screens/Confirmation/view/ConfirmationModal.vue';
-import { Modals } from '@/utils/modals';
-import { TableTooltipUtils } from '@chart/CustomTable/TableTooltipUtils';
+import { PopupUtils } from '@/utils/PopupUtils';
+import ConfirmationModal from '@/screens/confirmation/view/ConfirmationModal.vue';
+import { Modals } from '@/utils/Modals';
+import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
 import { ThemeUtils } from '@/utils/ThemeUtils';
 import { Log } from '@core/utils/Log';
-import { AuthenticationModule } from '@/store/modules/authentication.store';
-import { StringUtils } from '@/utils/string.utils';
+import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
+import { StringUtils } from '@/utils/StringUtils';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
-import OrganizationPermissionModule from '@/store/modules/organization_permission.store';
+import OrganizationPermissionModule from '@/store/modules/OrganizationPermissionStore';
 
 @Component({
   components: { ConfirmationModal }

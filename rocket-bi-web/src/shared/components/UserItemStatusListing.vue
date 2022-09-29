@@ -29,11 +29,11 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import UserItemStatus from './UserItemStatus.vue';
-import { ResourceType } from '@/utils/permission_utils';
+import { ResourceType } from '@/utils/PermissionUtils';
 import { Config } from 'vuescroll';
-import { UserProfile } from '@core/domain/Model';
+import { UserProfile } from '@core/common/domain/model';
 import { ActionNode, VerticalScrollConfigs } from '@/shared';
-import { SharedUserInfo } from '@core/domain/Response/ResouceSharing/SharedUserInfo';
+import { SharedUserInfo } from '@core/common/domain/response/resouce-sharing/SharedUserInfo';
 
 @Component({
   components: { UserItemStatus }

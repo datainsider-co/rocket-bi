@@ -471,7 +471,7 @@
 
 "@babel/plugin-syntax-object-rest-spread@^7.8.0":
   version "7.8.3"
-  resolved "https://registry.npmjs.org/@babel/plugin-syntax-object-rest-spread/-/plugin-syntax-object-rest-spread-7.8.3.tgz#60e225edcbd98a640332a2e72dd3e66f1af55871"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-object-rest-spread/-/plugin-syntax-object-rest-spread-7.8.3.tgz#60e225edcbd98a640332a2e72dd3e66f1af55871"
   integrity sha512-XoqMijGZb9y3y2XskN+P1wUGiVwWZ5JmoDRwx5+3GmEplNyVM2s2Dg8ILFQm8rWM48orGy5YpI5Bl8U1y7ydlA==
   dependencies:
     "@babel/helper-plugin-utils" "^7.8.0"
@@ -958,6 +958,37 @@
   dependencies:
     "@types/gapi.client" "*"
 
+"@maxim_mazurok/gapi.client.analyticsadmin-v1alpha@latest":
+  version "0.0.20220915"
+  resolved "https://registry.yarnpkg.com/@maxim_mazurok/gapi.client.analyticsadmin-v1alpha/-/gapi.client.analyticsadmin-v1alpha-0.0.20220915.tgz#e7a8c13078f0472c6ad09dfc1437fe649d00e9da"
+  integrity sha512-8YsR+W8F9p2XbsYmlIomE/rhkRWWRjHD9wME16ihy9ppLMzGq3KWximZph5ceSGOWhZpCLS8+m5Sc8U6Q8wI8Q==
+  dependencies:
+    "@types/gapi.client" "*"
+    "@types/gapi.client.discovery" "*"
+
+"@maxim_mazurok/gapi.client.analyticsdata@latest":
+  version "1.0.20220810"
+  resolved "https://registry.yarnpkg.com/@maxim_mazurok/gapi.client.analyticsdata/-/gapi.client.analyticsdata-1.0.20220810.tgz#95072fa8420fead2b484279e1d1592d5533175b0"
+  integrity sha512-a9IFWvAgsq15/BuzyS/T7aMzveFDc9pj5PIJhHNSqK6EfzFLWd6zv6kdYx2hvl2G5yNpsg/wz7Jdg3nBfh/1SQ==
+  dependencies:
+    "@types/gapi.client" "*"
+
+"@maxim_mazurok/gapi.client.analyticsreporting-v4@latest":
+  version "0.0.20220816"
+  resolved "https://registry.yarnpkg.com/@maxim_mazurok/gapi.client.analyticsreporting-v4/-/gapi.client.analyticsreporting-v4-0.0.20220816.tgz#672cb39ec822d0d24df54b79a7833fc569309142"
+  integrity sha512-qGpCYH/08NlP3q2Wm1i2p+nTp5332qskkyZpRaqgCyuatePqBxqzv3nFWSmVo2bBBnQtge9rcew0x5wdvRwQww==
+  dependencies:
+    "@types/gapi.client" "*"
+    "@types/gapi.client.discovery" "*"
+
+"@maxim_mazurok/gapi.client.discovery-v1@latest":
+  version "0.0.20200806"
+  resolved "https://registry.yarnpkg.com/@maxim_mazurok/gapi.client.discovery-v1/-/gapi.client.discovery-v1-0.0.20200806.tgz#c257738ef5bbf9fefa5b10b0decd444a5f3328b4"
+  integrity sha512-0pZtrElj8bc0YROIo7nH8VVvks/iww/L68l7r74oC9+ksSVO3Lum1zUR8dXTvJ7TqLGaNYiiNaUZianK6doh/w==
+  dependencies:
+    "@types/gapi.client" "*"
+    "@types/gapi.client.discovery" "*"
+
 "@maxim_mazurok/gapi.client.drive@latest":
   version "3.0.20210829"
   resolved "https://registry.npmjs.org/@maxim_mazurok/gapi.client.drive/-/gapi.client.drive-3.0.20210829.tgz#3e5ac40d98b3087090f990ac3e264a4d6436f46d"
@@ -1169,6 +1200,34 @@
   integrity sha512-VQu2EeVeU9py88uf7KVPcA2FJypKVeUODvJv6/mkRh05gZH2UDOSvTu4xOnAHZgG2RCk+3+3j51SYh2WMuZwfw==
   dependencies:
     "@maxim_mazurok/gapi.client.analytics" latest
+
+"@types/gapi.client.analyticsadmin@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/gapi.client.analyticsadmin/-/gapi.client.analyticsadmin-1.0.1.tgz#a428d5a29dd4e16fdf8e8ea6c2753711d3f11d79"
+  integrity sha512-JCoYgXR7ke6DQ49O5KwVs2Ca15MIbJ3NLocumd4j/bz6tYkw8POkCAiMe9zJTdpUDmQQ1cgg73HAQnk1OV6plA==
+  dependencies:
+    "@maxim_mazurok/gapi.client.analyticsadmin-v1alpha" latest
+
+"@types/gapi.client.analyticsdata@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/gapi.client.analyticsdata/-/gapi.client.analyticsdata-1.0.0.tgz#8ebe1204452f48d09f6e4796f0fbae21734e71d7"
+  integrity sha512-fQZfy0zGxMSZWxTjnveJgJn1Xwu4MCopTd13socv3Yht5OmHC8VWmTWjoe7hNJ0byrkZ1bUyPtfEmDzIPe2iUA==
+  dependencies:
+    "@maxim_mazurok/gapi.client.analyticsdata" latest
+
+"@types/gapi.client.analyticsreporting@v4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@types/gapi.client.analyticsreporting/-/gapi.client.analyticsreporting-4.0.4.tgz#814e3fd6100786d81459da581aaac2f17d076b52"
+  integrity sha512-OC5OveuRy0cM6N1OWToMBUEtDovvUEUlQRb6WjOcJqjJOmtfJNi/hcOHXp02dvtiOTIEdquYTfenypiOjeqBWw==
+  dependencies:
+    "@maxim_mazurok/gapi.client.analyticsreporting-v4" latest
+
+"@types/gapi.client.discovery@*":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@types/gapi.client.discovery/-/gapi.client.discovery-1.0.8.tgz#8a52ea339546c73054ef1b3d90fbf007a4191651"
+  integrity sha512-cYVp7ISY2oqH/cHIfLVjppJo7xmMiY/RhMVN0O/6Z+X3grwojmuDIHcUw/C1F31/zFpFWDSjaPkwNP0aKIbbcw==
+  dependencies:
+    "@maxim_mazurok/gapi.client.discovery-v1" latest
 
 "@types/gapi.client.drive@^3.0.13":
   version "3.0.13"
@@ -3899,8 +3958,8 @@ camel-case@3.0.x:
 
 camelcase@^4.0.0:
   version "4.1.0"
-  resolved "https://registry.npmjs.org/camelcase/-/camelcase-4.1.0.tgz#d545635be1e33c542649c69173e5de6acfae34dd"
-  integrity sha1-1UVjW+HjPFQmScaRc+Xeas+uNN0=
+  resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-4.1.0.tgz#d545635be1e33c542649c69173e5de6acfae34dd"
+  integrity sha512-FxAv7HpHrXbh3aPo4o2qxHay2lkLY3x5Mw3KeE4KQE8ysVfziWeRZDwcjauvwBSGEC/nXUPzZy8zeh4HokqOnw==
 
 camelcase@^5.0.0, camelcase@^5.3.1:
   version "5.3.1"
@@ -8281,8 +8340,8 @@ lodash.mapvalues@^4.6.0:
 
 lodash.memoize@^4.1.2:
   version "4.1.2"
-  resolved "https://registry.npmjs.org/lodash.memoize/-/lodash.memoize-4.1.2.tgz#bcc6c49a42a2840ed997f323eada5ecd182e0bfe"
-  integrity sha1-vMbEmkKihA7Zl/Mj6tpezRguC/4=
+  resolved "https://registry.yarnpkg.com/lodash.memoize/-/lodash.memoize-4.1.2.tgz#bcc6c49a42a2840ed997f323eada5ecd182e0bfe"
+  integrity sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==
 
 lodash.merge@^4.6.2:
   version "4.6.2"
@@ -8388,7 +8447,7 @@ lru-cache@^5.1.1:
 
 make-dir@^2.0.0:
   version "2.1.0"
-  resolved "https://registry.npmjs.org/make-dir/-/make-dir-2.1.0.tgz#5f0310e18b8be898cc07009295a30ae41e91e6f5"
+  resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-2.1.0.tgz#5f0310e18b8be898cc07009295a30ae41e91e6f5"
   integrity sha512-LS9X+dc8KLxXCb8dni79fLIIUA5VyZoyjSMCwTluaXA0o27cCK0bhXkpgw+sTXVpPy/lSO57ilRixqk0vDmtRA==
   dependencies:
     pify "^4.0.1"
@@ -10169,8 +10228,8 @@ pretty-time@^1.1.0:
 
 pretty@^2.0.0:
   version "2.0.0"
-  resolved "https://registry.npmjs.org/pretty/-/pretty-2.0.0.tgz#adbc7960b7bbfe289a557dc5f737619a220d06a5"
-  integrity sha1-rbx5YLe7/iiaVX3F9zdhmiINBqU=
+  resolved "https://registry.yarnpkg.com/pretty/-/pretty-2.0.0.tgz#adbc7960b7bbfe289a557dc5f737619a220d06a5"
+  integrity sha512-G9xUchgTEiNpormdYBl+Pha50gOUovT18IvAe7EYMZ1/f9W/WWMPRn+xI68yXNMUk3QXHDwo/1wV/4NejVNe1w==
   dependencies:
     condense-newlines "^0.2.1"
     extend-shallow "^2.0.1"
@@ -10907,7 +10966,7 @@ sass@^1.26.5:
 
 sax@~1.2.4:
   version "1.2.4"
-  resolved "https://registry.npmjs.org/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
+  resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
 saxes@^3.1.9:
@@ -11663,8 +11722,8 @@ strip-indent@^2.0.0:
 
 strip-json-comments@2.0.1, strip-json-comments@~2.0.1:
   version "2.0.1"
-  resolved "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
-  integrity sha1-PFMZQukIwml8DsNEhYwobHygpgo=
+  resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
+  integrity sha512-4gB8na07fecVVkOI6Rs4e7T6NOTki5EmL7TUduTs6bu3EdnSycntVJ4re8kgZA+wx9IueI2Y11bfbgwtzuE0KQ==
 
 strip-json-comments@^3.0.1:
   version "3.1.1"
@@ -12649,7 +12708,7 @@ vue-template-compiler@^2.6.11:
 
 vue-template-es2015-compiler@^1.9.0:
   version "1.9.1"
-  resolved "https://registry.npmjs.org/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
+  resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
 
 vue-virtual-scroller@^1.0.10:

@@ -1,13 +1,13 @@
 import { merge } from 'lodash';
 import Highcharts from 'highcharts';
 import { Component, Prop, Ref, Watch } from 'vue-property-decorator';
-import { DIException } from '@core/domain/Exception';
+import { DIException } from '@core/common/domain/exception';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
-import { ChartOption, ChartOptionData, DrilldownChartOption, DrilldownQueryChartSetting } from '@core/domain/Model';
-import { DrilldownResponse } from '@core/domain/Response/Query/DrilldownResponse';
+import { ChartOption, ChartOptionData, DrilldownChartOption, DrilldownQueryChartSetting } from '@core/common/domain/model';
+import { DrilldownResponse } from '@core/common/domain/response/query/DrilldownResponse';
 import { HighchartUtils, MetricNumberMode } from '@/utils';
 import { RenderController } from '@chart/custom/RenderController';
-import { DI } from '@core/modules';
+import { Di } from '@core/common/modules';
 import { PageRenderService } from '@chart/custom/PageRenderService';
 import { RenderProcessService } from '@chart/custom/RenderProcessService';
 import { Log } from '@core/utils';
@@ -151,8 +151,8 @@ export default class DrilldownChart extends BaseHighChartWidget<DrilldownRespons
   }
 
   private createRenderController(): RenderController<DrilldownResponse> {
-    const pageRenderService = DI.get(PageRenderService);
-    const processRenderService = DI.get(RenderProcessService);
+    const pageRenderService = Di.get(PageRenderService);
+    const processRenderService = Di.get(RenderProcessService);
     return new RenderController(pageRenderService, processRenderService);
   }
 

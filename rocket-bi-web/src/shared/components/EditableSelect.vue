@@ -96,7 +96,7 @@ export default class EditableSelect extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '~@/shared/components/charts/CustomTable/default-table.style';
+@import '~@chart/custom-table/DefaultTableStyle';
 
 .autocomplete {
   display: inline-block;

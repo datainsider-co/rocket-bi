@@ -28,11 +28,11 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Ref, Vue } from 'vue-property-decorator';
-import DynamicFilterPanel from '@/shared/components/filters/DynamicFilterPanel/DynamicFilterPanel.vue';
-import { DynamicFilter } from '@core/domain/Model';
+import DynamicFilterPanel from '@/shared/components/filters/dynamic-filter-panel/DynamicFilterPanel.vue';
+import { DynamicFilter } from '@core/common/domain/model';
 import { ListUtils } from '@/utils';
 import { CollapseTransition, FadeTransition } from 'vue2-transitions';
-import { IdGenerator } from '@/utils/id_generator';
+import { IdGenerator } from '@/utils/IdGenerator';
 
 @Component({
   components: {

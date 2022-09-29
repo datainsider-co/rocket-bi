@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import store from '@/store';
-import { Stores } from '@/shared/enums/stores.enum';
-import { DashboardThemeType } from '@core/domain/Model/Dashboard/Setting/DashboardThemeType';
+import { Stores } from '@/shared/enums/Stores';
+import { DashboardThemeType } from '@core/common/domain/model/dashboard/setting/DashboardThemeType';
 import { ColorUtils } from '@/utils/ColorUtils';
 import { Log } from '@core/utils/Log';
 
@@ -10,7 +10,7 @@ export type DiTheme = 'light' | 'dark' | 'custom';
 
 @Module({ store: store, name: Stores.themeStore, dynamic: true, namespaced: true })
 class ThemeStore extends VuexModule {
-  private static readonly DASHBOARD_THEME_AS_MAP = require('@/screens/DashboardDetail/Theme/DashboardTheme.json');
+  private static readonly DASHBOARD_THEME_AS_MAP = require('@/screens/dashboard-detail/theme/DashboardTheme.json');
   private allowApplyMainTheme = true;
 
   currentThemeName: DiTheme = 'light';

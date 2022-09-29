@@ -5,8 +5,7 @@
 
 import ColorScale from 'color-scales';
 import Color from 'color';
-import { Log } from '@core/utils/Log';
-import { StringUtils } from '@/utils/string.utils';
+import { StringUtils } from '@/utils/StringUtils';
 
 export class ColorUtils {
   /**
@@ -49,6 +48,7 @@ export class ColorUtils {
     const color = new Color(hex);
     return color.alpha() === 0;
   }
+
   // getColorFromCssVariable(var(--primary)) => #fff
   static getColorFromCssVariable(color: string, defaultValue = '#ffffff') {
     const colorRegex = /var\(\s*([-#\w]+)(,.*)?\)/;

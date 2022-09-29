@@ -1,6 +1,5 @@
-import { RandomUtils } from '@/utils/random.utils';
-import { StringUtils } from '@/utils/string.utils';
-import { Log } from '@core/utils';
+import { RandomUtils } from '@/utils/RandomUtils';
+import { StringUtils } from '@/utils/StringUtils';
 
 type IconType = 'di-icon-edit' | 'di-icon-delete';
 
