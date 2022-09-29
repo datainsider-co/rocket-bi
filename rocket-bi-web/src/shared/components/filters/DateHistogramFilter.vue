@@ -12,13 +12,13 @@
 </template>
 <script lang="ts">
 import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator';
-import SelectionInput from '@/shared/components/filters/SelectionInput/SelectionInput.vue';
+import SelectionInput from '@/shared/components/filters/selection-input/SelectionInput.vue';
 import { DateHistogramConditionTypes, FilterConstants, FilterSelectOption, InputType, StringConditionTypes } from '@/shared';
-import { FilterProp } from '@/shared/components/filters/filter_prop.abstract';
+import { FilterProp } from '@/shared/components/filters/FilterProp';
 import { ListUtils } from '@/utils';
-import { FieldDetailInfo } from '@core/domain/Model/Function/FieldDetailInfo';
-import { TabControlData } from '@core/domain';
-import { ValueType } from '@/shared/components/filters/SelectionInput/ValueType.enum';
+import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
+import { TabControlData } from '@core/common/domain';
+import { ValueType } from '@/shared/components/filters/selection-input/ValueType';
 
 @Component({
   components: { SelectionInput }

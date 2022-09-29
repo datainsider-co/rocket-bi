@@ -1,19 +1,19 @@
 import Highcharts, { TooltipFormatterContextObject } from 'highcharts';
 import { Component, Ref, Watch } from 'vue-property-decorator';
-import { ChartOption, ChartOptionData, DIMap, EqualValue, StackedChartOption, StackedQuerySetting, TextSetting } from '@core/domain/Model';
+import { ChartOption, ChartOptionData, DIMap, EqualValue, StackedChartOption, StackedQuerySetting, TextSetting } from '@core/common/domain/model';
 import { get, merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
-import { ClassProfiler } from '@/shared/profiler/annotation';
-import { DIException } from '@core/domain/Exception';
+import { ClassProfiler } from '@/shared/profiler/Annotation';
+import { DIException } from '@core/common/domain/exception';
 import { ChartUtils, HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
-import { SeriesOneResponse } from '@core/domain/Response';
+import { SeriesOneResponse } from '@core/common/domain/response';
 import { RenderController } from '@chart/custom/RenderController';
-import { DI } from '@core/modules';
+import { Di } from '@core/common/modules';
 import { PageRenderService } from '@chart/custom/PageRenderService';
 import { RenderProcessService } from '@chart/custom/RenderProcessService';
-import { NumberFormatter, RangeData } from '@core/services/formatter';
+import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
 import { Log } from '@core/utils';
-import { StringUtils } from '@/utils/string.utils';
+import { StringUtils } from '@/utils/StringUtils';
 
 @Component({
   props: PropsBaseChart
@@ -322,8 +322,8 @@ export default class StackingSeriesChart extends BaseHighChartWidget<SeriesOneRe
   }
 
   private createRenderController(): RenderController<SeriesOneResponse> {
-    const pageRenderService = DI.get(PageRenderService);
-    const processRenderService = DI.get(RenderProcessService);
+    const pageRenderService = Di.get(PageRenderService);
+    const processRenderService = Di.get(RenderProcessService);
     return new RenderController(pageRenderService, processRenderService);
   }
 

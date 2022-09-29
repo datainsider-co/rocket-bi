@@ -6,8 +6,8 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator';
 import { SelectOption } from '@/shared';
-import DiButton from '@/shared/components/Common/DiButton.vue';
-import { IdGenerator } from '@/utils/id_generator';
+import DiButton from '@/shared/components/common/DiButton.vue';
+import { IdGenerator } from '@/utils/IdGenerator';
 
 @Component({
   components: { DiButton }

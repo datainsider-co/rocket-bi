@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { ActionType } from '@/utils/permission_utils';
+import { ActionType } from '@/utils/PermissionUtils';
 
 @Component
 export default class PermissionWidget extends Vue {

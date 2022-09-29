@@ -38,24 +38,24 @@
 import { Component, Prop, PropSync, Ref, Vue, Watch } from 'vue-property-decorator';
 import { CheckboxGroupOption, DateHistogramConditionTypes, FilterConstants, FilterSelectOption, InputType, Status, StringConditionTypes } from '@/shared';
 import MultiSelection from '@/shared/components/MultiSelection.vue';
-import { FilterProp } from '@/shared/components/filters/filter_prop.abstract';
+import { FilterProp } from '@/shared/components/filters/FilterProp';
 import { ListUtils } from '@/utils';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
-import SelectionInput from '@/shared/components/filters/SelectionInput/SelectionInput.vue';
+import SelectionInput from '@/shared/components/filters/selection-input/SelectionInput.vue';
 import { CollapseTransition } from 'vue2-transitions';
-import { QueryProfileBuilder, QueryService } from '@core/services';
-import { DI } from '@core/modules';
-import { QueryRequest } from '@core/domain/Request';
+import { QueryProfileBuilder, QueryService } from '@core/common/services';
+import { Di } from '@core/common/modules';
+import { QueryRequest } from '@core/common/domain/request';
 import DILoadMore from '@/shared/components/DILoadMore.vue';
-import { QuerySetting } from '@core/domain/Model/Query/QuerySetting';
-import { AbstractTableResponse } from '@core/domain/Response/Query/AbstractTableResponse';
-import { FieldDetailInfo } from '@core/domain/Model/Function/FieldDetailInfo';
-import { StringUtils } from '@/utils/string.utils';
+import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
+import { AbstractTableResponse } from '@core/common/domain/response/query/AbstractTableResponse';
+import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
+import { StringUtils } from '@/utils/StringUtils';
 import { isString } from 'lodash';
-import { DIException, TabControlData } from '@core/domain';
+import { DIException, TabControlData } from '@core/common/domain';
 import { Log } from '@core/utils';
-import { DashboardModule } from '@/screens/DashboardDetail/stores';
-import { ValueType } from '@/shared/components/filters/SelectionInput/ValueType.enum';
+import { DashboardModule } from '@/screens/dashboard-detail/stores';
+import { ValueType } from '@/shared/components/filters/selection-input/ValueType';
 
 @Component({
   components: { SelectionInput, StatusWidget, MultiSelection, CollapseTransition, DILoadMore }
@@ -163,7 +163,7 @@ export default class SelectionFilter extends Vue implements FilterProp {
   }
 
   private getQuerySetting(): QuerySetting {
-    const queryProfileBuilder: QueryProfileBuilder = DI.get(QueryProfileBuilder);
+    const queryProfileBuilder: QueryProfileBuilder = Di.get(QueryProfileBuilder);
     return queryProfileBuilder.buildQueryForStringData([this.profileField]);
   }
 
@@ -200,7 +200,7 @@ export default class SelectionFilter extends Vue implements FilterProp {
   }
 
   private loadChartQueryResponse(from: number, size: number): Promise<AbstractTableResponse> {
-    const dashboardService: QueryService = DI.get(QueryService);
+    const dashboardService: QueryService = Di.get(QueryService);
     const request = QueryRequest.fromQuery(this.getQuerySetting(), from, size, DashboardModule.id);
     return dashboardService.query(request).then(r => r as AbstractTableResponse);
   }

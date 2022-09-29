@@ -27,18 +27,18 @@
 </template>
 <script lang="ts">
 import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator';
-import SelectionInput from '@/shared/components/filters/SelectionInput/SelectionInput.vue';
+import SelectionInput from '@/shared/components/filters/selection-input/SelectionInput.vue';
 import { FilterConstants, FilterSelectOption, InputType, NumberConditionTypes, Status } from '@/shared';
-import { FilterProp } from '@/shared/components/filters/filter_prop.abstract';
+import { FilterProp } from '@/shared/components/filters/FilterProp';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
-import { QueryProfileBuilder, QueryService } from '@core/services';
-import { DI } from '@core/modules';
-import { FieldDetailInfo } from '@core/domain/Model/Function/FieldDetailInfo';
-import { QueryRequest } from '@core/domain/Request';
-import { AbstractTableResponse } from '@core/domain/Response/Query/AbstractTableResponse';
+import { QueryProfileBuilder, QueryService } from '@core/common/services';
+import { Di } from '@core/common/modules';
+import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
+import { QueryRequest } from '@core/common/domain/request';
+import { AbstractTableResponse } from '@core/common/domain/response/query/AbstractTableResponse';
 import { Log } from '@core/utils';
-import { DashboardModule } from '@/screens/DashboardDetail/stores';
-import { TabControlData } from '@core/domain';
+import { DashboardModule } from '@/screens/dashboard-detail/stores';
+import { TabControlData } from '@core/common/domain';
 
 @Component({
   components: { StatusWidget, SelectionInput }
@@ -66,7 +66,7 @@ export default class NumberFilter extends Vue implements FilterProp {
   private values: string[] = [];
 
   private get previewMinMaxAvgRequest(): QueryRequest {
-    const queryProfileBuilder: QueryProfileBuilder = DI.get(QueryProfileBuilder);
+    const queryProfileBuilder: QueryProfileBuilder = Di.get(QueryProfileBuilder);
     return queryProfileBuilder.buildQueryMinMaxAvgRequest(this.profileField, DashboardModule.id);
   }
 
@@ -114,7 +114,7 @@ export default class NumberFilter extends Vue implements FilterProp {
   }
 
   private async handleLoadMinMaxAvg() {
-    const dashboardService: QueryService = DI.get(QueryService);
+    const dashboardService: QueryService = Di.get(QueryService);
     try {
       const previewChartQuery: AbstractTableResponse = await dashboardService.query(this.previewMinMaxAvgRequest).then(r => r as AbstractTableResponse);
       this.records = previewChartQuery?.records[0] ?? FilterConstants.DEFAULT_RECORD_VALUE;

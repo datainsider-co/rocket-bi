@@ -1,20 +1,20 @@
 import { Routers } from '@/shared/enums/Routers';
 import { Route } from 'vue-router';
-import { DIException } from '@core/domain/Exception';
+import { DIException } from '@core/common/domain/exception';
 import { isNumber, isString } from 'lodash';
-import { StringUtils } from '@/utils/string.utils';
-import { DI } from '@core/modules';
-import { DataManager } from '@core/services';
-import { SecurityUtils } from './security.utils';
-import router from '@/router/router';
-import { DynamicFilter } from '@core/domain';
-import { ListUtils } from '@/utils/list.utils';
+import { StringUtils } from '@/utils/StringUtils';
+import { Di } from '@core/common/modules';
+import { DataManager } from '@core/common/services';
+import { SecurityUtils } from './SecurityUtils';
+import router from '@/router/Router';
+import { DynamicFilter } from '@core/common/domain';
+import { ListUtils } from '@/utils/ListUtils';
 import { RawLocation } from 'vue-router/types/router';
 //@ts-ignored
 import path from 'path';
 import { Log } from '@core/utils';
-import { IdGenerator } from '@/utils/id_generator';
-import { AuthenticationModule } from '@/store/modules/authentication.store';
+import { IdGenerator } from '@/utils/IdGenerator';
+import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 
 export default class ParamInfo {
   name: string;
@@ -54,7 +54,7 @@ export class RouterUtils {
   ]);
 
   private static get dataManager(): DataManager {
-    return DI.get(DataManager);
+    return Di.get(DataManager);
   }
 
   static readonly rootRoute = new Set<string>([Routers.baseRoute]);

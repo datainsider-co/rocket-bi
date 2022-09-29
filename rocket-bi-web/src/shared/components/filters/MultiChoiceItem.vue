@@ -13,7 +13,7 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator';
 import { SelectOption } from '@/shared';
-import DiButton from '@/shared/components/Common/DiButton.vue';
+import DiButton from '@/shared/components/common/DiButton.vue';
 @Component({})
 export default class MultiChoiceItem extends Vue {
   @Prop({ required: true })

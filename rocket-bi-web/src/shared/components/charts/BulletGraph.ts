@@ -1,16 +1,16 @@
 import Highcharts, { Series, TooltipFormatterContextObject } from 'highcharts';
 import { Component, Ref, Watch } from 'vue-property-decorator';
-import { BulletChartOption, ChartOption, GaugeQuerySetting } from '@core/domain/Model';
-import { DIException } from '@core/domain/Exception';
+import { BulletChartOption, ChartOption, GaugeQuerySetting } from '@core/common/domain/model';
+import { DIException } from '@core/common/domain/exception';
 import { isNaN, isNumber, merge, toNumber } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
-import { SeriesOneResponse, SeriesTwoResponse } from '@core/domain/Response';
+import { SeriesOneResponse, SeriesTwoResponse } from '@core/common/domain/response';
 import { HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
 import { RenderController } from '@chart/custom/RenderController';
-import { DI } from '@core/modules';
+import { Di } from '@core/common/modules';
 import { PageRenderService } from '@chart/custom/PageRenderService';
 import { RenderProcessService } from '@chart/custom/RenderProcessService';
-import { NumberFormatter, RangeData } from '@core/services/formatter';
+import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
 import { Log } from '@core/utils';
 import { FormatterMode } from '@chart/GaugeChart';
 
@@ -193,8 +193,8 @@ export default class BulletGraph extends BaseHighChartWidget<SeriesOneResponse, 
   }
 
   private createRenderController(): RenderController<SeriesTwoResponse> {
-    const pageRenderService = DI.get(PageRenderService);
-    const processRenderService = DI.get(RenderProcessService);
+    const pageRenderService = Di.get(PageRenderService);
+    const processRenderService = Di.get(RenderProcessService);
     return new RenderController(pageRenderService, processRenderService);
   }
 

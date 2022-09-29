@@ -22,7 +22,7 @@ import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { DataFlavor } from '@/shared';
 import { Drop } from 'vue-drag-drop';
 import { Log } from '@core/utils';
-import { DynamicConditionWidget } from '@core/domain';
+import { DynamicConditionWidget } from '@core/common/domain';
 
 @Component({
   components: {

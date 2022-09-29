@@ -3,16 +3,16 @@
  * @created: 5/12/21, 3:23 PM
  */
 
-import { FunctionInfo } from '@/screens/ChartBuilder/ConfigBuilder/DatabaseListing/FormulaSuggestionStore';
-import { Column, DatabaseSchema, TableSchema } from '@core/domain/Model';
+import { FunctionInfo } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
+import { Column, DatabaseSchema, TableSchema } from '@core/common/domain/model';
 import { isString } from 'lodash';
 import { editor, languages, Position, Token } from 'monaco-editor';
-import { StringUtils } from '@/utils/string.utils';
+import { StringUtils } from '@/utils/StringUtils';
 import CompletionItem = languages.CompletionItem;
-import { TokenInfo } from '@/shared/fomula/ClickHouse/ClickHouseCompletionItemProvider';
+import { TokenInfo } from '@/shared/fomula/clickhouse/ClickHouseCompletionItemProvider';
 import { Log } from '@core/utils';
-import { TableInfo } from '@core/LakeHouse';
-import { IdGenerator } from '@/utils/id_generator';
+import { TableInfo } from '@core/lake-house';
+import { IdGenerator } from '@/utils/IdGenerator';
 
 export class FormulaUtils {
   static FieldRank = '1';

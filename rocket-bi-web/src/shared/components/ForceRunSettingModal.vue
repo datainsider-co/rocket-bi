@@ -32,12 +32,12 @@
   </EtlModal>
 </template>
 <script lang="ts">
-import EtlModal from '@/screens/DataCook/components/EtlModal/EtlModal.vue';
+import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import { Log } from '@core/utils';
-import { LakeJob } from '@core/LakeHouse/Domain/LakeJob/LakeJob';
-import { Job } from '@core/DataIngestion';
-import { EtlJobInfo } from '@core/DataCook';
+import { LakeJob } from '@core/lake-house/domain/lake-job/LakeJob';
+import { Job } from '@core/data-ingestion';
+import { EtlJobInfo } from '@core/data-cook';
 import { DateUtils } from '@/utils';
 @Component({
   components: { EtlModal }
@@ -141,7 +141,7 @@ export default class ForceRunSettingModal extends Vue {
   width: 321px;
   align-self: center;
 }
-@import '~@/shared/components/calendar.scss';
+@import '~@/shared/components/CalendarContextMenu.scss';
 .force-run-setting-modal {
   ::v-deep {
     .modal-content {

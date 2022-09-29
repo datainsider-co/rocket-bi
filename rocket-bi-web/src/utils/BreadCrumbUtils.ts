@@ -1,8 +1,8 @@
-import { ListParentsResponse } from '@core/domain/Response';
+import { ListParentsResponse } from '@core/common/domain/response';
 import { Breadcrumbs } from '@/shared/models';
-import { ListUtils } from '@/utils/list.utils';
+import { ListUtils } from '@/utils/ListUtils';
 import { RouterUtils } from '@/utils/RouterUtils';
-import router from '@/router/router';
+import router from '@/router/Router';
 
 export enum BreadcrumbMode {
   Shortly = 'shortly',

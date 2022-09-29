@@ -1,4 +1,4 @@
-import { VisualizationResponse } from '@core/domain/Response';
+import { VisualizationResponse } from '@core/common/domain/response';
 import { PageRenderService } from '@chart/custom/PageRenderService';
 import { RandomUtils } from '@/utils';
 import { RenderProcessService } from '@chart/custom/RenderProcessService';

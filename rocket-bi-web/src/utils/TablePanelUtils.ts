@@ -3,16 +3,11 @@
  * @created: 5/28/21, 4:43 PM
  */
 
-/*
- * @author: tvc12 - Thien Vi
- * @created: 5/28/21, 4:41 PM
- */
-
-import { IdGenerator } from '@/utils/id_generator';
-import { TableColumn } from '@core/domain/Model';
+import { IdGenerator } from '@/utils/IdGenerator';
+import { TableColumn } from '@core/common/domain/model';
 import { SettingItem } from '@/shared/models';
 import { SettingItemType } from '@/shared';
-import { ColorConfig } from '@core/domain/Model/ChartOption/ExtraSetting/ColorConfig';
+import { ColorConfig } from '@core/common/domain/model/chart-option/extra-setting/ColorConfig';
 
 export class TablePanelUtils {
   static readonly PREFIX_KEY = 'valueColors';

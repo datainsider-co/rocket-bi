@@ -82,7 +82,7 @@ const BellCurve2Chart = () => import(/* webpackChunkName: "charts" */ './BellCur
 const GaugeChart = () => import(/* webpackChunkName: "charts" */ './GaugeChart');
 const TreeMapChart = () => import(/* webpackChunkName: "charts" */ './TreeMapChart');
 // const HighchartsTreeMapLevelChart = () => import(/* webpackChunkName: "charts" */ './TreeMapLevelChart.js');
-const KPIWidget = () => import(/* webpackChunkName: "charts" */ './NumberWidget/NumberWidget');
+const KPIWidget = () => import(/* webpackChunkName: "charts" */ './number-widget/NumberWidget');
 // const TableChart = () => import(/* webpackChunkName: "charts" */ './TableChart/TableChart');
 const WordCloudChart = () => import(/* webpackChunkName: "charts" */ './WordCloudChart');
 const StackingSeriesChart = () => import(/* webpackChunkName: "charts" */ './StackingSeriesChart');
@@ -93,10 +93,10 @@ const DropdownFilter = () => import(/* webpackChunkName: "filters" */ './Dropdow
 const TabFilter = () => import(/* webpackChunkName: "filters" */ './TabFilter');
 const SpiderWebChart = () => import(/* webpackChunkName: "filters" */ './SpiderWebChart');
 const SankeyChart = () => import(/* webpackChunkName: "filters" */ './SankeyChart');
-const SlicerFilter = () => import(/* webpackChunkName: "filters" */ './SlicerFilter/SlicerFilter');
+const SlicerFilter = () => import(/* webpackChunkName: "filters" */ './slicer-filter/SlicerFilter');
 // const DateFilter = () => import(/* webpackChunkName: "filters" */ './DateFilter/DateFilter');
-const DateFilter2 = () => import(/* webpackChunkName: "filters" */ './DateFilter/DateFilter2');
-const InputFilter = () => import(/* webpackChunkName: "filters" */ './InputFilter/InputFilter');
+const DateFilter2 = () => import(/* webpackChunkName: "filters" */ './date-filter/DateFilter2');
+const InputFilter = () => import(/* webpackChunkName: "filters" */ './input-filter/InputFilter');
 const BulletGraph = () => import(/* webpackChunkName: "filters" */ './BulletGraph');
 const LineStockChart = () => import(/* webpackChunkName: "filters" */ './LineStockChart');
 const MeasureControl = () => import(/* webpackChunkName: "filters" */ './MeasureControl');

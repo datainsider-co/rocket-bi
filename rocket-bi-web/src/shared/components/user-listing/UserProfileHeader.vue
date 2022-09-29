@@ -37,17 +37,17 @@
 <script lang="ts">
 import { Component, Emit, Prop, Provide, Ref, Vue } from 'vue-property-decorator';
 import { mapState } from 'vuex';
-import EditColumns from '@/screens/TrackingProfile/components/TrackingProfile/EditColumns.vue';
+import EditColumns from '@/screens/tracking-profile/components/tracking-profile/EditColumns.vue';
 import FieldListingSearchable from '@/shared/components/FieldListingSearchable.vue';
-import TableActionsMenu from '@/screens/TrackingProfile/components/TrackingProfile/TableActionsMenu.vue';
-import DiButton from '@/shared/components/Common/DiButton.vue';
+import TableActionsMenu from '@/screens/tracking-profile/components/tracking-profile/TableActionsMenu.vue';
+import DiButton from '@/shared/components/common/DiButton.vue';
 import { ListUtils } from '@/utils';
 import { ContextMenuItem, GroupedField, Stores, TableActionsMenuItem } from '@/shared';
-import { FieldDetailInfo } from '@core/domain/Model/Function/FieldDetailInfo';
-import { ProfileModule } from '@/screens/TrackingProfile/store/profile.store';
+import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
+import { ProfileModule } from '@/screens/tracking-profile/store/ProfileStore';
 import { GroupFieldBuilder } from '@core/schema/service/GroupFieldBuilder';
 import { DateFieldFilter, NumberFieldFilter, TextFieldFilter } from '@core/schema/service/FieldFilter';
-import { IdGenerator } from '@/utils/id_generator';
+import { IdGenerator } from '@/utils/IdGenerator';
 
 @Component({
   components: {

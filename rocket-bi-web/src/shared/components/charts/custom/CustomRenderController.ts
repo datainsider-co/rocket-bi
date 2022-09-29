@@ -8,7 +8,7 @@
  * @created: 1/18/21, 5:56 PM
  */
 
-import { VisualizationResponse } from '@core/domain/Response';
+import { VisualizationResponse } from '@core/common/domain/response';
 
 export abstract class CustomRenderController<VizResponse extends VisualizationResponse> {
   private timer?: number | undefined;

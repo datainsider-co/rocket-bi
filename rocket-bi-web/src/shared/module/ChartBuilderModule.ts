@@ -1,4 +1,4 @@
-import { BaseModule, DIKeys } from '@core/modules';
+import { BaseModule, DIKeys } from '@core/common/modules';
 import { Container, Scope } from 'typescript-ioc';
 import { ChartType, DateConditionTypes, DateHistogramConditionTypes, DateTypes } from '@/shared';
 import {
@@ -63,7 +63,7 @@ import {
   VizSettingResolverBuilder,
   WordCloudQuerySettingHandler,
   WordCloudVizSettingHandler
-} from '@/shared/Resolver';
+} from '@/shared/resolver';
 import {
   CompareBuilder,
   DashboardSettingVersionBuilder,
@@ -71,21 +71,21 @@ import {
   DefaultDashboardSettingConvertor,
   NumberCompareBuilder,
   SeriesCompareBuilder
-} from '@core/services';
-import { VizSettingType } from '@core/domain/Model';
+} from '@core/common/services';
+import { VizSettingType } from '@core/common/domain/model';
 import { DefaultRenderProcessService, RenderProcessService } from '@chart/custom/RenderProcessService';
 import { PageRenderService, PageRenderServiceImpl } from '@chart/custom/PageRenderService';
 import { BodyHTMLRender } from '@chart/custom/render/HTMLRender';
 import { CssRenderImpl } from '@chart/custom/render/CSSRender';
 import { JSRenderImpl } from '@chart/custom/render/JSRender';
-import { FunctionConvertResolver } from '@/screens/ChartBuilder/ConfigBuilder/FunctionConvertor/FunctionConvertResolver';
-import { BubbleFunctionConvertor } from '@/screens/ChartBuilder/ConfigBuilder/FunctionConvertor/BubbleFunctionConvertor';
-import { FunctionConvertBuilder } from '@/screens/ChartBuilder/ConfigBuilder/FunctionConvertor/FunctionConvertBuilder';
-import { ScatterFunctionConvertor } from '@/screens/ChartBuilder/ConfigBuilder/FunctionConvertor/ScatterFunctionConvertor';
-import { TableFunctionConvertor } from '@/screens/ChartBuilder/ConfigBuilder/FunctionConvertor/TableFunctionConvertor';
-import { QuerySettingResolver } from '@/shared/Resolver/QuerySettingResolver/QuerySettingResolver';
-import { QuerySettingResolverBuilder } from '@/shared/Resolver/QuerySettingResolver/QuerySettingResolverBuilder';
-import { DateConditionBuilder, DateHistogramConditionCreator } from '@chart/DateFilter/DateHistogramConditonBuilder/DateHistogramConditionBuilder';
+import { FunctionConvertResolver } from '@/screens/chart-builder/config-builder/function-convertor/FunctionConvertResolver';
+import { BubbleFunctionConvertor } from '@/screens/chart-builder/config-builder/function-convertor/BubbleFunctionConvertor';
+import { FunctionConvertBuilder } from '@/screens/chart-builder/config-builder/function-convertor/FunctionConvertBuilder';
+import { ScatterFunctionConvertor } from '@/screens/chart-builder/config-builder/function-convertor/ScatterFunctionConvertor';
+import { TableFunctionConvertor } from '@/screens/chart-builder/config-builder/function-convertor/TableFunctionConvertor';
+import { QuerySettingResolver } from '@/shared/resolver/query-setting-resolver/QuerySettingResolver';
+import { QuerySettingResolverBuilder } from '@/shared/resolver/query-setting-resolver/QuerySettingResolverBuilder';
+import { DateConditionBuilder, DateHistogramConditionCreator } from '@chart/date-filter/date-histogram-conditon-builder/DateHistogramConditionBuilder';
 
 export class ChartBuilderModule implements BaseModule {
   configuration(): void {

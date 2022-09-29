@@ -3,9 +3,9 @@
  * @created: 5/7/21, 5:48 PM
  */
 
-import { getOriginalFunction } from '@/shared/profiler/annotation';
+import { getOriginalFunction } from '@/shared/profiler/Annotation';
 import { isFunction } from 'lodash';
-import { DI } from '@core/modules';
+import { Di } from '@core/common/modules';
 import { TrackingService } from '@core/tracking/service';
 import { Log } from '@core/utils';
 
@@ -45,7 +45,7 @@ function execute(originalFunction: Function, option: EventOption) {
     const that = this;
     try {
       const newProperties = getFinalProperties(that, option.properties ?? {}, args);
-      DI.get(TrackingService).track(option.name ?? '', newProperties);
+      Di.get(TrackingService).track(option.name ?? '', newProperties);
     } catch (e) {
       Log.error('TrackAnotation::execute::error::', e.message);
     }

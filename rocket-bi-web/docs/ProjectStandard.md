@@ -10,12 +10,12 @@
   - File .ts sử dụng dạng **LoginScreen.ts**
   - File .vue sử dụng dạng **LoginScreen.vue**
 
-### Import trong di_core
+### Import trong di-core
 
 - Interface hoặc abstract: phải có _fromObject_ và sử dụng import tương đối `~@core/`
 
 ```ts
-import { BoolColumn } from '@core/domain/Model';
+import { BoolColumn } from '@core/common/domain/Model';
 export abstract class Column {
   static fromObject(obj: any): Column | undefined {
     switch (obj.className) {
@@ -32,7 +32,7 @@ export abstract class Column {
 - Với lớp implement: sử dụng import tuyệt đối với interface hoặc abstract
 
 ```ts
-import { Column } from '@core/domain/Model/Column/Column';
+import { Column } from '@core/common/domain/Model/Column/Column';
 
 export class BoolColumn extends Column {
   static fromObject(obj: BoolColumn): BoolColumn {
@@ -43,25 +43,25 @@ export class BoolColumn extends Column {
 ```
 
 - Nếu bị lỗi import thì sử dụng import càng gần với file đó nhất. Ví dụ file QuerySetting.ts
-  - Dùng `@core/domain/Modal` hơn là dùng `@core/domain`
+  - Dùng `@core/common/domain/Modal` hơn là dùng `@core/common/domain`
 
-### File index trong di_core
+### File index trong di-core
 
 - Không được define bất cứ method, function, class nào trong install.ts
 - Sử dụng `yarn create:index [path]` để tạo thư mục index
 
 ```sh
-# tạo file index cho di_core/domain và sub folder
-yarn create:index di_core/domain
+# tạo file index cho di-core/domain và sub folder
+yarn create:index di-core/domain
 ```
 
-- Khi sử dụng core thì chỉ cần `import { /// } from '@core/domain'`;
+- Khi sử dụng core thì chỉ cần `import { /// } from '@core/common/domain'`;
 
 ### Quy chuẩn đặt tên tests
 
 - File test phải có đuôi là `[Name]Test.ts` ex: `CookieTest.ts`
 - Test services sẽ đặt trong file servies, tương tự với respository và utils
 - Nếu test của từng submodule sẽ phải đưa vào trong module đó. Ví dụ test **Login** của module **Authentication** thì
-  folder sẽ là `di_core/Authentication/Services/LoginTest.ts`
+  folder sẽ là `di-core/Authentication/Services/LoginTest.ts`
 - **describe** trong test sẽ diễn tả là test 1 feature lớn ví dụ `Test Cookie Manager`
 - **it** diễn tả một case sẽ diễn ra ví dụ `should remove value in cookie successful`

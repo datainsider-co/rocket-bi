@@ -12,7 +12,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { UserProfile } from '@core/domain/Model';
+import { UserProfile } from '@core/common/domain/model';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 
 @Component

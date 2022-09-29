@@ -19,8 +19,8 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Emit, Ref } from 'vue-property-decorator';
-import { GenericColumn } from '@core/domain/Model/Column/Implement/GenericColumn';
-import { EditableColumn } from '@core/domain/Model/Column/Implement/EditableColumn';
+import { GenericColumn } from '@core/common/domain/model/column/implement/GenericColumn';
+import { EditableColumn } from '@core/common/domain/model/column/implement/EditableColumn';
 
 @Component
 export default class EditableColumnFormInput extends Vue {

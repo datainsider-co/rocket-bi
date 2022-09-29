@@ -4,12 +4,11 @@
 
 ### ✈ Getting started
 
-#### 🔭 Without docker
-
 ```sh
 yarn
 yarn serve
 ```
+
 Open web with link: http://localhost:8080
 
 #### 🧪 Run your unit tests
