@@ -110,3 +110,29 @@ For contribution guidelines, see [contributing](/contributing.md).
 
 * To report a bug or request a feature, create a
   [Issue](https://github.com/datainsider-co/rocket-bi/issues/new). Please make it easy for people to reproduce your issue.
+  
+### Examlpe: 
+
+Adhoc-Query to explore data & quickly build visualization. There is also supported functions & autocompletion for sql query. 
+
+![adhoc-query](https://user-images.githubusercontent.com/1466544/193296046-71bd45c9-cbd3-4550-ba35-cf417b499a64.gif)
+
+Drag-n-Drop Dashboard Builder 
+
+![chart-builder](https://user-images.githubusercontent.com/1466544/193296123-f03db4d9-f86d-4d7a-8046-97aa07d5fb05.gif)
+
+
+Drilldown your data 
+
+![drill-down](https://user-images.githubusercontent.com/1466544/193295771-1a7dc0a4-9fa6-48f8-a4cb-019c8a3c3183.gif)
+
+No Code ETL data
+
+![datacook](https://user-images.githubusercontent.com/1466544/193295814-447a184e-b0e7-4884-8c0f-b0234185895d.gif)
+
+Share & Collaboration 
+
+![share](https://user-images.githubusercontent.com/1466544/193295850-79b18ac6-9dd6-4cb1-8515-9b4a69ed6f29.gif)
+
+
+.. and more 
