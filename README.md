@@ -12,14 +12,22 @@ To learn more about DataInsider's stack and RocketBi's features, see our documen
 
 To try out RocketBI on your machine, the best way is using our pre-built Docker images.
 
-1. Open docker directory:
+1. Get our docker-compose file:
 
 ```bash
-cd docker/
+wget https://raw.githubusercontent.com/datainsider-co/rocket-bi/main/docker/docker-compose.yml
 ```
 
-2. Update `clickhouse_connection_settings.json` with your clickhouse's host, port, username, password and cluster name.
+2. Create a `.env` file with the following fields and fill those with your clickhouse's host, port, username, password and cluster name:
 
+```
+CLICKHOUSE_HOST: ""
+CLICKHOUSE_HTTP_PORT: 8123
+CLICKHOUSE_TCP_PORT: 9000
+CLICKHOUSE_USERNAME: "default"
+CLICKHOUSE_PASSWORD: ""
+CLICKHOUSE_CLUSTER_NAME: ""
+```
 
 3. Start RocketBI with docker-compose:
 
@@ -111,13 +119,13 @@ For contribution guidelines, see [contributing](/contributing.md).
 * To report a bug or request a feature, create a
   [Issue](https://github.com/datainsider-co/rocket-bi/issues/new). Please make it easy for people to reproduce your issue.
   
-### Examlpe: 
+### ExampLe: 
 
 Adhoc-Query to explore data & quickly build visualization. There is also supported functions & autocompletion for sql query. 
 
 ![adhoc-query](https://user-images.githubusercontent.com/1466544/193296046-71bd45c9-cbd3-4550-ba35-cf417b499a64.gif)
 
-Drag-n-Drop Dashboard Builder 
+Drag-n-Drop Chart Builder 
 
 ![chart-builder](https://user-images.githubusercontent.com/1466544/193296123-f03db4d9-f86d-4d7a-8046-97aa07d5fb05.gif)
 
