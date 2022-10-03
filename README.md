@@ -18,7 +18,7 @@ To try out RocketBI on your machine, the best way is using our pre-built Docker 
 wget https://raw.githubusercontent.com/datainsider-co/rocket-bi/main/docker/docker-compose.yml
 ```
 
-2. Create a `.env` file with the following fields and fill those with your clickhouse's host, port, username, password and cluster name:
+2. Create a `.env` file in the same directory with the downloaded docker-compose file, add the following fields and fill those with your clickhouse's host, port, username, password and cluster name:
 
 ```
 CLICKHOUSE_HOST: ""

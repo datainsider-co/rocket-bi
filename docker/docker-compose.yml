@@ -7,7 +7,7 @@ services:
     command: mysqld --user=root --verbose
     restart: always
     volumes:
-      - ./mysql/data:/var/lib/mysql
+      - /var/lib/mysql
     environment:
       MYSQL_USER: "di"
       MYSQL_PASSWORD: "di@2020!"
@@ -18,7 +18,7 @@ services:
     image: wendal/ssdb:latest
     container_name: rocket-ssdb
     volumes:
-      - ./ssdb/data:/var/lib/ssdb/data
+      - /var/lib/ssdb/data
     restart: always
 
   caas_service:
@@ -29,7 +29,7 @@ services:
       NAME: user-profile
       MODE: production
     volumes:
-      - ./caas-service/logs:/app/logs
+      - /app/logs
     ports:
       - 8580:8580
     depends_on:
@@ -54,7 +54,7 @@ services:
     ports:
       - 8489:8489
     volumes:
-      - ./schema-service/logs:/app/logs
+      - /app/logs
     depends_on:
       - mysql
       - ssdb
@@ -77,7 +77,7 @@ services:
       CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
       CLICKHOUSE_CLUSTER_NAME: "${CLICKHOUSE_CLUSTER_NAME}"
     volumes:
-      - ./bi-service/logs:/app/logs
+      - /app/logs
     depends_on:
       - mysql
       - ssdb
