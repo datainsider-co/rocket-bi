@@ -92,7 +92,9 @@ class SqlBuilder(sqlParser: SqlParser) {
       case f: SelectExpr =>
         selectFields += sqlParser.selectWithAliasName(f)
 
-      case _ => throw new ClassNotFoundException(s"object query function: $function not found.")
+      case f: DynamicFunction =>
+        addFunction(f.finalFunction.getOrElse(f.baseFunction))
+
     }
   }
 

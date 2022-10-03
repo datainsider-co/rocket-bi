@@ -348,28 +348,41 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
       baseOrderFunctions: Array[OrderBy],
       isPriorityAggFn: Boolean
   ): Array[OrderBy] = {
-    val groupOrderBy = groupFunctions.zipWithIndex
+    val groupOrderBys: Array[OrderBy] = groupFunctions.zipWithIndex
       .map {
         case (f, i) =>
           if (i != groupFunctions.length - 1) {
-            baseOrderFunctions.find(orderBy => orderBy.function == f) match {
+            baseOrderFunctions.find(orderBy => isFuncAppliedByOrderBy(orderBy, f)) match {
               case Some(x) => x
               case None    => OrderBy(f)
             }
           } else {
-            baseOrderFunctions.find(orderBy => orderBy.function == f) match {
+            baseOrderFunctions.find(orderBy => isFuncAppliedByOrderBy(orderBy, f)) match {
               case Some(x) => x
               case None    => null
             }
           }
       }
       .filter(f => f != null)
+
     val aggFnOrderBy = baseOrderFunctions.filter(f => isAggregateFunction(f.function))
     val firstAggFnIndex = baseOrderFunctions.indexWhere(f => isAggregateFunction(f.function))
-    if (isPriorityAggFn || firstAggFnIndex == 0)
-      aggFnOrderBy ++ groupOrderBy
-    else
-      groupOrderBy ++ aggFnOrderBy
+
+    if (isPriorityAggFn || firstAggFnIndex == 0) {
+      aggFnOrderBy ++ groupOrderBys
+    } else {
+      groupOrderBys ++ aggFnOrderBy
+    }
+  }
+
+  private def isFuncAppliedByOrderBy(orderBy: OrderBy, targetFunc: Function): Boolean = {
+    orderBy.function match {
+      case dynamicFunc: DynamicFunction =>
+        val finalOrderByFunc = dynamicFunc.finalFunction.getOrElse(dynamicFunc.baseFunction)
+
+        finalOrderByFunc == targetFunc
+      case _ => orderBy.function == targetFunc
+    }
   }
 
   private def buildObjectQueryWith(

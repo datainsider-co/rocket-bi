@@ -55,6 +55,8 @@ object BIServiceModule extends TwitterModule {
   @Named("clickhouse")
   def provideClickhouseClient(clickhouseConnSetting: Option[ClickhouseConnectionSetting]): JdbcClient = {
     if (clickhouseConnSetting.isDefined) {
+      info(s"Read clickhouse connection setting from env: ${clickhouseConnSetting.get}")
+
       HikariClient(
         clickhouseConnSetting.get.toJdbcUrl,
         clickhouseConnSetting.get.username,
@@ -62,6 +64,8 @@ object BIServiceModule extends TwitterModule {
       )
     } else {
       val jdbcUrl: String = ZConfig.getString("database.clickhouse.url")
+      info(s"Read clickhouse connection setting from file: $jdbcUrl")
+
       val user: String = ZConfig.getString("database.clickhouse.user")
       val password: String = ZConfig.getString("database.clickhouse.password")
       HikariClient(jdbcUrl, user, password)
@@ -73,22 +77,15 @@ object BIServiceModule extends TwitterModule {
   @Singleton
   def provideClickhouseConnectionSetting(): Option[ClickhouseConnectionSetting] = {
     Try {
-      val source: BufferedSource = Source.fromFile("clickhouse_connection_settings.json")
-
-      val settingJson: String = {
-        try source.getLines().mkString
-        finally source.close()
-      }
-
-      val settingsMap = JsonParser.fromJson[Map[String, String]](settingJson)
+      require(sys.env("CLICKHOUSE_HOST").nonEmpty, "clickhouse host can not be empty")
 
       ClickhouseConnectionSetting(
-        host = settingsMap.getOrElse("host", ""),
-        username = settingsMap.getOrElse("username", ""),
-        password = settingsMap.getOrElse("password", ""),
-        httpPort = settingsMap.getOrElse("http_port", "0").toInt,
-        tcpPort = settingsMap.getOrElse("tcp_port", "0").toInt,
-        clusterName = settingsMap.getOrElse("cluster_name", "")
+        host = sys.env("CLICKHOUSE_HOST"),
+        httpPort = sys.env("CLICKHOUSE_HTTP_PORT").toInt,
+        tcpPort = sys.env("CLICKHOUSE_TCP_PORT").toInt,
+        username = sys.env("CLICKHOUSE_USERNAME"),
+        password = sys.env("CLICKHOUSE_PASSWORD"),
+        clusterName = sys.env.getOrElse("CLICKHOUSE_CLUSTER_NAME", "")
       )
     }.toOption
   }

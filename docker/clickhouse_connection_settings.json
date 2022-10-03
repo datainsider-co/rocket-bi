@@ -1,8 +1,0 @@
-{
-  "host": "clickhouse_server",
-  "username": "default",
-  "password": "",
-  "http_port": 8123,
-  "tcp_port": 9000,
-  "cluster_name": "company_cluster"
-}

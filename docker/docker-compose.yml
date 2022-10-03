@@ -45,11 +45,16 @@ services:
       MODE: production
       HTTP_PORT: 8489
       THRIFT_PORT: 8487
+      CLICKHOUSE_HOST: "${CLICKHOUSE_HOST}"
+      CLICKHOUSE_HTTP_PORT: "${CLICKHOUSE_HTTP_PORT}"
+      CLICKHOUSE_TCP_PORT: "${CLICKHOUSE_TCP_PORT}"
+      CLICKHOUSE_USERNAME: "${CLICKHOUSE_USERNAME}"
+      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
+      CLICKHOUSE_CLUSTER_NAME: "${CLICKHOUSE_CLUSTER_NAME}"
     ports:
       - 8489:8489
     volumes:
       - ./schema-service/logs:/app/logs
-      - ./clickhouse_connection_settings.json:/app/clickhouse_connection_settings.json:ro
     depends_on:
       - mysql
       - ssdb
@@ -65,9 +70,14 @@ services:
       NAME: bi-service
       MODE: production
       HTTP_PORT: 8080
+      CLICKHOUSE_HOST: "${CLICKHOUSE_HOST}"
+      CLICKHOUSE_HTTP_PORT: "${CLICKHOUSE_HTTP_PORT}"
+      CLICKHOUSE_TCP_PORT: "${CLICKHOUSE_TCP_PORT}"
+      CLICKHOUSE_USERNAME: "${CLICKHOUSE_USERNAME}"
+      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
+      CLICKHOUSE_CLUSTER_NAME: "${CLICKHOUSE_CLUSTER_NAME}"
     volumes:
       - ./bi-service/logs:/app/logs
-      - ./clickhouse_connection_settings.json:/app/clickhouse_connection_settings.json:ro
     depends_on:
       - mysql
       - ssdb

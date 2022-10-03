@@ -106,6 +106,7 @@ case class ObjectQuery(
 
     functions.foreach {
       case f: FieldRelatedFunction => tableViews ++= getTableViewFromField(f.field)
+      case f: DynamicFunction      => tableViews ++= getTblViewsFromFunctions(f.finalFunction.toSeq)
       case _                       =>
     }
 

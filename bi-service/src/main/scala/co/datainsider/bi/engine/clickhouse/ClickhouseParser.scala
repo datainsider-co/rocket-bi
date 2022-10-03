@@ -323,9 +323,10 @@ object ClickhouseParser extends SqlParser {
 
   def toAliasName(controlFunction: ControlFunction): String = {
     controlFunction match {
-      case f: SelectNull => "null"
-      case f: SelectExpr => f.aliasName.getOrElse(s"expr_${this.hashCode().toChar.toInt}")
-      case f: CountAll   => f.aliasName.getOrElse(s"count_all_${this.hashCode().toChar.toInt}")
+      case f: SelectNull      => "null"
+      case f: SelectExpr      => f.aliasName.getOrElse(s"expr_${this.hashCode().toChar.toInt}")
+      case f: CountAll        => f.aliasName.getOrElse(s"count_all_${this.hashCode().toChar.toInt}")
+      case f: DynamicFunction => toAliasName(f.finalFunction.getOrElse(f.baseFunction))
     }
   }
 
