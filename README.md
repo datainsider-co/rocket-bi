@@ -12,6 +12,10 @@ To learn more about DataInsider's stack and RocketBi's features, see our documen
 
 To try out RocketBI on your machine, the best way is using our pre-built Docker images.
 
+Prerequisites:
+- docker engine 19.0+
+- docker-compose 2.0+
+
 1. Get our docker-compose file:
 
 ```bash
@@ -21,12 +25,12 @@ wget https://raw.githubusercontent.com/datainsider-co/rocket-bi/main/docker/dock
 2. Create a `.env` file in the same directory with the downloaded docker-compose file, add the following fields and fill those with your clickhouse's host, port, username, password and cluster name:
 
 ```
-CLICKHOUSE_HOST: ""
-CLICKHOUSE_HTTP_PORT: 8123
-CLICKHOUSE_TCP_PORT: 9000
-CLICKHOUSE_USERNAME: "default"
-CLICKHOUSE_PASSWORD: ""
-CLICKHOUSE_CLUSTER_NAME: ""
+CLICKHOUSE_HOST:""
+CLICKHOUSE_HTTP_PORT:8123
+CLICKHOUSE_TCP_PORT:9000
+CLICKHOUSE_USERNAME:"default"
+CLICKHOUSE_PASSWORD:""
+CLICKHOUSE_CLUSTER_NAME:""
 ```
 
 3. Start RocketBI with docker-compose:
@@ -123,24 +127,47 @@ For contribution guidelines, see [contributing](/contributing.md).
 
 Adhoc-Query to explore data & quickly build visualization. There is also supported functions & autocompletion for sql query. 
 
-![adhoc-query](https://user-images.githubusercontent.com/1466544/193296046-71bd45c9-cbd3-4550-ba35-cf417b499a64.gif)
+![adhoc query](https://user-images.githubusercontent.com/19279051/193552439-9bc97cc4-d599-4a82-835d-c958932296eb.jpg)
+
 
 Drag-n-Drop Chart Builder 
 
-![chart-builder](https://user-images.githubusercontent.com/1466544/193296123-f03db4d9-f86d-4d7a-8046-97aa07d5fb05.gif)
+![chart builder](https://user-images.githubusercontent.com/19279051/193552493-290051b8-0056-449a-aa8f-6dcf639892e4.jpg)
+
+
+Interactive Dashboard
+
+![dashboard](https://user-images.githubusercontent.com/19279051/193552728-758d5501-e36e-424b-9232-7a2ab8a6f340.jpg)
+
+
+Apply filter to Dashboard
+
+![dash filter](https://user-images.githubusercontent.com/19279051/193552790-e0491b21-c57e-42e7-83d8-28db01f1b6bc.jpg)
+
+
+Add Control to Chart
+
+![chart control](https://user-images.githubusercontent.com/19279051/193552863-9e189c20-512b-4c86-bf17-795c85877ef9.jpg)
 
 
 Drilldown your data 
 
-![drill-down](https://user-images.githubusercontent.com/1466544/193295771-1a7dc0a4-9fa6-48f8-a4cb-019c8a3c3183.gif)
+![drill down](https://user-images.githubusercontent.com/19279051/193552519-221865d5-2adb-4624-8bd1-ac8c72d7cffd.jpg)
+
 
 No Code ETL data
 
-![datacook](https://user-images.githubusercontent.com/1466544/193295814-447a184e-b0e7-4884-8c0f-b0234185895d.gif)
+![no code etl](https://user-images.githubusercontent.com/19279051/193552548-93816afc-9fba-4549-931b-5b097604652a.jpg)
+
+
+Row-Level Security
+
+![rls](https://user-images.githubusercontent.com/19279051/193552945-6fd9175f-08a6-405f-a358-dcfa87957998.jpg)
+
 
 Share & Collaboration 
 
-![share](https://user-images.githubusercontent.com/1466544/193295850-79b18ac6-9dd6-4cb1-8515-9b4a69ed6f29.gif)
+![share](https://user-images.githubusercontent.com/19279051/193552578-59c9f5a6-095d-405f-832e-5b7133bc0d2e.jpg)
 
 
 .. and more 
