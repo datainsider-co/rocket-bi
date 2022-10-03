@@ -1,0 +1,84 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 12/10/20, 12:06 PM
+ */
+
+//@import '~@/themes/scss/di-variables.scss';
+//@import '~@/themes/scss/mixin.scss';
+@import '~@chart/custom-table/DefaultTableStyle';
+
+.scroll-area {
+  height: 100% !important;
+}
+
+.table-chart-container {
+  padding: 15px;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+}
+
+.table-chart-table-content {
+  overflow: hidden !important;
+  //border: 1px solid var(--table-border-color);
+  flex-grow: 2;
+}
+
+.table-chart-pagination-content {
+  width: 100%;
+  align-items: center;
+  max-height: 25px;
+  min-height: 25px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.per-page-content {
+  display: flex;
+  flex-direction: row;
+  font-weight: normal;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: normal;
+  letter-spacing: 0.2px;
+  cursor: default;
+  color: var(--table-header-color, $default-text-color);
+  font-size: 12px;
+  align-items: center;
+  text-align: center;
+  margin-right: 15px;
+}
+
+.table-pagination {
+  align-items: center;
+}
+
+ul {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.tab-filter-container {
+  width: 100%;
+  display: flex;
+  height: fit-content;
+}
+
+.horizon-tab-filter-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.vert-tab-filter-info {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 8px;
+}
