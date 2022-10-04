@@ -1,6 +1,6 @@
 # Rocket BI
 
-RocketBi is a self-service, web-based business intelligent product tailor-made for analytical databases. RocketBI is the core product of DataInsider
+RocketBI is a self-service, web-based business intelligent product tailor-made for analytical databases. RocketBI is the core product of DataInsider
 stack.
 You can use RocketBI to analyze, visualize, and easily collaborate with your friends.
 
@@ -22,18 +22,20 @@ Prerequisites:
 wget https://raw.githubusercontent.com/datainsider-co/rocket-bi/main/docker/docker-compose.yml
 ```
 
-2. Create a `.env` file in the same directory with the downloaded docker-compose file, add the following fields and fill those with your clickhouse's host, port, username, password and cluster name:
+2. Create a `.env` file in the same directory with the downloaded file, add and fill in the following fields with your clickhouse server information:
 
 ```
-CLICKHOUSE_HOST:""
-CLICKHOUSE_HTTP_PORT:8123
-CLICKHOUSE_TCP_PORT:9000
-CLICKHOUSE_USERNAME:"default"
-CLICKHOUSE_PASSWORD:""
-CLICKHOUSE_CLUSTER_NAME:""
+CLICKHOUSE_HOST: "172.17.0.1"
+CLICKHOUSE_HTTP_PORT: 8123
+CLICKHOUSE_TCP_PORT: 9000
+CLICKHOUSE_USERNAME: "default"
+CLICKHOUSE_PASSWORD: ""
+CLICKHOUSE_CLUSTER_NAME: ""
 ```
 
-3. Start RocketBI with docker-compose:
+**NOTE:** If you're installing RocketBI on the same host with your clickhouse-server, please use `172.17.0.1` as  your CLICKHOUSE_HOST instead of `localhost` for docker to resolve host correctly.
+
+3. Start RocketBI:
 
 ```bash
 docker-compose up -d
@@ -49,7 +51,7 @@ username: hello@gmail.com
 password: 123456
 ```
 
-- Begin by creating a dashboard and adding desired charts into it.
+- Begin by creating a dashboard and using drag-n-drop tool to explore your data.
 
 ### Build from source:
 
@@ -123,7 +125,7 @@ For contribution guidelines, see [contributing](/contributing.md).
 * To report a bug or request a feature, create a
   [Issue](https://github.com/datainsider-co/rocket-bi/issues/new). Please make it easy for people to reproduce your issue.
   
-### ExampLe: 
+### Example: 
 
 Adhoc-Query to explore data & quickly build visualization. There is also supported functions & autocompletion for sql query. 
 
