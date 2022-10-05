@@ -28,8 +28,6 @@ services:
     environment:
       NAME: user-profile
       MODE: production
-    volumes:
-      - /app/logs
     ports:
       - 8580:8580
     depends_on:
@@ -40,21 +38,15 @@ services:
     image: datainsiderco/schema-service:oss
     container_name: rocket-schema-service
     restart: always
+    env_file:
+      - .clickhouse.env
     environment:
       NAME: schema-service
       MODE: production
       HTTP_PORT: 8489
       THRIFT_PORT: 8487
-      CLICKHOUSE_HOST: "${CLICKHOUSE_HOST}"
-      CLICKHOUSE_HTTP_PORT: "${CLICKHOUSE_HTTP_PORT}"
-      CLICKHOUSE_TCP_PORT: "${CLICKHOUSE_TCP_PORT}"
-      CLICKHOUSE_USERNAME: "${CLICKHOUSE_USERNAME}"
-      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
-      CLICKHOUSE_CLUSTER_NAME: "${CLICKHOUSE_CLUSTER_NAME}"
     ports:
       - 8489:8489
-    volumes:
-      - /app/logs
     depends_on:
       - mysql
       - ssdb
@@ -66,18 +58,12 @@ services:
     restart: always
     ports:
       - 8080:8080
+    env_file:
+      - .clickhouse.env
     environment:
       NAME: bi-service
       MODE: production
       HTTP_PORT: 8080
-      CLICKHOUSE_HOST: "${CLICKHOUSE_HOST}"
-      CLICKHOUSE_HTTP_PORT: "${CLICKHOUSE_HTTP_PORT}"
-      CLICKHOUSE_TCP_PORT: "${CLICKHOUSE_TCP_PORT}"
-      CLICKHOUSE_USERNAME: "${CLICKHOUSE_USERNAME}"
-      CLICKHOUSE_PASSWORD: "${CLICKHOUSE_PASSWORD}"
-      CLICKHOUSE_CLUSTER_NAME: "${CLICKHOUSE_CLUSTER_NAME}"
-    volumes:
-      - /app/logs
     depends_on:
       - mysql
       - ssdb
