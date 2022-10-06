@@ -120,6 +120,9 @@ For contribution guidelines, see [contributing](/contributing.md).
   
 ### Example: 
 
+![Animation](https://user-images.githubusercontent.com/19279051/194230899-e9911c22-93a8-465f-ab2d-09d59c0095e9.gif)
+
+
 Adhoc-Query to explore data & quickly build visualization. There is also supported functions & autocompletion for sql query. 
 
 ![adhoc query](https://user-images.githubusercontent.com/19279051/193552439-9bc97cc4-d599-4a82-835d-c958932296eb.jpg)
