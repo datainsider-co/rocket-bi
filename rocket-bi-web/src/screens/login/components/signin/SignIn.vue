@@ -48,7 +48,7 @@ export default class SignIn extends Vue {
   isErrorEmail = true;
   isErrorPassword = true;
   errorMessage = '';
-  clientId = process.env.VUE_APP_GOOGLE_CLIENT_ID;
+  clientId = window.appConfig.VUE_APP_GOOGLE_CLIENT_ID;
 
   get getCursorStyle(): string {
     return AuthenticationModule.authStatus == AuthenticationStatus.Authenticating ? 'wait' : '';

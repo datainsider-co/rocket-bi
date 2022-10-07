@@ -30,6 +30,10 @@
     <link href="<%= webpackConfig.output.publicPath %>fonts/fontawesome/css/v5.0.6.min.css" rel="stylesheet" />
     <link href="<%= webpackConfig.output.publicPath %>fonts/data-insider-icon/style.css?v=1.2.6" rel="stylesheet" />
     <script type="text/javascript" src="https://apis.google.com/js/client.js"></script>
+    <script type="text/javascript">
+      var cachebuster = Math.round(new Date().getTime() / 1000);
+      document.write('<scr' + 'ipt type="text/javascript" src="<%= BASE_URL %>config/<%= NODE_ENV %>.js?cb=' + cachebuster + '"></scr' + 'ipt>');
+    </script>
   </head>
 
   <body>

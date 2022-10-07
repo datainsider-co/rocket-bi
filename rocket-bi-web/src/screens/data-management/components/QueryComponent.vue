@@ -412,7 +412,7 @@ export default class QueryComponent extends Vue {
     try {
       this.disablePagination = this.isLimitQuery;
       const isSelectAllText = this.editorController.isSelectingAll();
-      const query = isSelectAllText ? this.query : this.editorController.getSelectedText();
+      const query = isSelectAllText ? this.currentQuery : this.editorController.getSelectedText();
       const adhoc = new AdHocAnalysisInfo(this.buildAdhocChart(query));
       const pagination = this.disablePagination ? Pagination.defaultPagination() : void 0;
       await this.renderChart(adhoc.chartInfo, pagination);

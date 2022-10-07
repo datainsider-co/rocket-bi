@@ -3,12 +3,12 @@ import { RouterUtils } from '@/utils/RouterUtils';
 
 export abstract class UrlUtils {
   static getFullUrl(path: string): string {
-    const staticHost = process.env.VUE_APP_STATIC_API_URL;
+    const staticHost = window.appConfig.VUE_APP_STATIC_API_URL;
     return staticHost + path;
   }
 
   static getFullMediaUrl(path: string): string {
-    const staticHost = process.env.VUE_APP_LAKE_API_URL;
+    const staticHost = window.appConfig.VUE_APP_LAKE_API_URL;
     return `${staticHost}/file/view/media?path=${path}`;
   }
 
@@ -35,7 +35,7 @@ export abstract class UrlUtils {
   }
 
   static getDownloadURL(path: string) {
-    const staticHost = process.env.VUE_APP_LAKE_API_URL;
+    const staticHost = window.appConfig.VUE_APP_LAKE_API_URL;
     return `${staticHost}/file/download?path=${path}`;
   }
 }

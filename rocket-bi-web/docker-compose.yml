@@ -1,9 +1,11 @@
 version: '3.7'
 services:
   di_web:
-    image: registry.gitlab.com/datainsider/web:dev
+    image: datainsiderco/rocket-bi-web:oss
     container_name: di-web
     restart: always
+    volumes:
+      - ./public/config:/app/config
     deploy:
       restart_policy:
         condition: on-failure

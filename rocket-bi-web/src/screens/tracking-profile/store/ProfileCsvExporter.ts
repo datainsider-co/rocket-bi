@@ -23,7 +23,7 @@ export class ProfileCsvExporter extends CsvExporter {
     return await DIWorkers.downloadCsvData(
       {
         name: `user_profile_${new Date(Date.now()).toLocaleString()}`,
-        maxSizeInBytes: process.env.VUE_APP_EXPORT_MAX_FILE_SIZE as any,
+        maxSizeInBytes: window.appConfig.VUE_APP_EXPORT_MAX_FILE_SIZE as any,
         request: new TrackingProfileSearchRequest(this.query, this.filterRequests),
         from: 0,
         batchSize: 500

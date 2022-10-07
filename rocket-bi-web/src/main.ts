@@ -1,6 +1,6 @@
 import Vue from 'vue';
 // LIBS
-import { Component } from 'vue-property-decorator';
+import { Component, Watch } from 'vue-property-decorator';
 import { Container } from 'typescript-ioc';
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
 import responsive from 'vue-responsive';
@@ -163,7 +163,7 @@ switch (process.env.NODE_ENV) {
   }
   default:
     Vue.use(DiUploadDocumentPlugin, {
-      api: 'http://dev.datainsider.co/api',
+      api: window.appConfig.VUE_APP_SCHEMA_API_URL,
       headers: {
         'DI-SERVICE-KEY': '12345678',
         // sửa lỗi không thể tạo mới database khi upload csv (chỉ bị trên mode debug
@@ -173,7 +173,7 @@ switch (process.env.NODE_ENV) {
       chunkSize: 1000000 //1MB
     });
     Vue.use(DiUploadGoogleSheetPlupin, {
-      api: 'http://dev.datainsider.co/api',
+      api: window.appConfig.VUE_APP_SCHEMA_API_URL,
       headers: {
         'DI-SERVICE-KEY': '12345678',
         // sửa lỗi không thể tạo mới database khi upload csv (chỉ bị trên mode debug

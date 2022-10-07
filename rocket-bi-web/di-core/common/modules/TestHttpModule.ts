@@ -7,7 +7,7 @@ import { Log } from '@core/utils';
 
 export class HttpTestModule extends BaseModule {
   configuration(): void {
-    const timeout: number = process.env.VUE_APP_TIME_OUT || 30000;
+    const timeout: number = window.appConfig.VUE_APP_TIME_OUT || 30000;
     const caasApiUrl = process.env.VUE_APP_CAAS_API_URL;
     Container.bindName(DIKeys.CaasClient).to(this.buildClient(caasApiUrl, timeout));
 

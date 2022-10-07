@@ -25,7 +25,7 @@ export default class ShopifyIntegrationStep1 extends Vue {
   }
 
   private get scopes(): string {
-    return process.env.VUE_APP_SHOPIFY_SCOPE;
+    return window.appConfig.VUE_APP_SHOPIFY_SCOPE ?? '';
   }
 
   created() {

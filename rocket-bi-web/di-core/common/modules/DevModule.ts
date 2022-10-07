@@ -135,7 +135,7 @@ export class DevModule extends BaseModule {
 
   buildProfiler(): Profiler {
     const profiler = new InMemoryProfiler();
-    if (process.env.VUE_APP_PROFILER_ENABLED ?? false) {
+    if (window.appConfig.VUE_APP_PROFILER_ENABLED ?? false) {
       profiler.start();
     }
     return profiler as Profiler;

@@ -235,7 +235,7 @@ function wrapMethod(target: object, key: PropertyKey, descriptor: TypedPropertyD
 
 export function ClassProfiler(option?: ClassProfilerAnnotationOption) {
   return (target: any) => {
-    if (!process.env.VUE_APP_PROFILER_ENABLED) {
+    if (!window.appConfig.VUE_APP_PROFILER_ENABLED) {
       return;
     }
     const ctor = target as any;
@@ -252,7 +252,7 @@ export function ClassProfiler(option?: ClassProfilerAnnotationOption) {
 
 export function MethodProfiler(option?: MethodProfilerAnnotationOption) {
   return (target: any, key: string | symbol, descriptor: TypedPropertyDescriptor<any>) => {
-    if (!process.env.VUE_APP_PROFILER_ENABLED) {
+    if (!window.appConfig.VUE_APP_PROFILER_ENABLED) {
       return;
     }
     if (key && descriptor) {

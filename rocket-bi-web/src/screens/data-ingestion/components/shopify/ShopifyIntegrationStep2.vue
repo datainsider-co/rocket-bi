@@ -97,7 +97,7 @@ export default class ShopifyIntegrationStep2 extends Vue implements RouterEnteri
   }
 
   private get apiVersion(): string {
-    return process.env.VUE_APP_SHOPIFY_API_VERSION;
+    return window.appConfig.VUE_APP_SHOPIFY_API_VERSION ?? '';
   }
 
   mounted() {
