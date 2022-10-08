@@ -16,7 +16,7 @@ Prerequisites:
 - docker engine 19.0+
 - docker-compose 2.0+
 
-1. Prepare:
+**1. Prepare:**
 
 ```bash
 wget https://raw.githubusercontent.com/datainsider-co/rocket-bi/main/docker/docker-compose.yml
@@ -28,7 +28,8 @@ Edit `.clickhouse.env` with your clickhouse server's host, port, username, passw
 
 **NOTE:** If you're installing RocketBI on the same host with your clickhouse-server, please use `172.17.0.1` as  your CLICKHOUSE_HOST instead of `localhost` for docker to resolve hosts correctly.
 
-1.1. (Optional) Install sample clickhouse:
+*1.2. (Optional) Install sample clickhouse:*
+
 If you don't have clickhouse access at the moment, you can still try RocketBI by installing our sample clickhouse instance by running the following commands:
 ```
 wget https://raw.githubusercontent.com/datainsider-co/rocket-bi/main/docker/sample_clickhouse_cluster.zip
@@ -41,6 +42,7 @@ docker-compose up -d
 
 ./import_sample_data.sh
 
+cd -
 ```
 
 If the commands run successfully, you will have access to an instance of clickhouse cluster locally with the following information:
@@ -54,13 +56,13 @@ CLICKHOUSE_CLUSTER_NAME: ""
 ```
 
 
-2. Start RocketBI:
+**2. Start RocketBI:**
 
 ```bash
 docker-compose up -d
 ```
 
-3. Explore your data:
+**3. Explore your data:**
 
 - Open browser and go to `localhost:5050` to enter the web UI.
 - Login to RocketBI with this default account:
