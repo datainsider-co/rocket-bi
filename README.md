@@ -43,6 +43,7 @@ docker-compose up -d
 ./import_sample_data.sh
 
 cd -
+
 ```
 
 If the commands run successfully, you will have access to an instance of clickhouse cluster locally with the following information:
