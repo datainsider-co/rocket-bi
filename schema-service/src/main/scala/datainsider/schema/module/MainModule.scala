@@ -2,7 +2,7 @@ package datainsider.schema.module
 
 import com.google.inject.Provides
 import com.twitter.inject.TwitterModule
-import datainsider.client.util.{HikariClient, JdbcClient, JsonParser, ZConfig}
+import datainsider.client.util.{HikariClient, JdbcClient, ZConfig}
 import datainsider.schema.controller.http.requests.CreateDBRequest
 import datainsider.schema.domain.{ClickhouseConnectionSetting, CsvUploadInfo}
 import datainsider.schema.misc._
@@ -14,7 +14,6 @@ import org.nutz.ssdb4j.spi.SSDB
 
 import javax.inject.{Named, Singleton}
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
-import scala.io.{BufferedSource, Source}
 import scala.util.Try
 
 object MainModule extends TwitterModule {
@@ -117,9 +116,16 @@ object MainModule extends TwitterModule {
 
   @Singleton
   @Provides
-  def providesDDLExecutor(@Named("clickhouse") client: JdbcClient): DDLExecutor = {
-    val clusterName: String = ZConfig.getString("db.clickhouse.cluster_name")
-    DDLExecutorImpl(client, ClickHouseDDLConverter(), clusterName)
+  def providesDDLExecutor(
+      @Named("clickhouse") client: JdbcClient,
+      clickhouseConnSetting: Option[ClickhouseConnectionSetting]
+  ): DDLExecutor = {
+    if (clickhouseConnSetting.isDefined) {
+      DDLExecutorImpl(client, ClickHouseDDLConverter(), clickhouseConnSetting.get.clusterName)
+    } else {
+      val clusterName: String = ZConfig.getString("db.clickhouse.cluster_name")
+      DDLExecutorImpl(client, ClickHouseDDLConverter(), clusterName)
+    }
   }
 
   @Singleton
