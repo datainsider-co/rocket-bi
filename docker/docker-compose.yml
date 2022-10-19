@@ -7,7 +7,7 @@ services:
     command: mysqld --user=root --verbose
     restart: always
     volumes:
-      - ${PWD}/data/mysql:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
     environment:
       MYSQL_USER: "di"
       MYSQL_PASSWORD: "di@2020!"
@@ -18,7 +18,7 @@ services:
     image: wendal/ssdb:latest
     container_name: rocket-ssdb
     volumes:
-      - ${PWD}/data/ssdb:/var/lib/ssdb/data
+      - ssdb-data:/var/lib/ssdb/data
     restart: always
 
   caas_service:
@@ -80,6 +80,10 @@ services:
         delay: 5s
         max_attempts: 3
         window: 30s
+
+volumes:
+  mysql-data:
+  ssdb-data:
 
 networks:
   rocket_network:

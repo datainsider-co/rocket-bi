@@ -61,7 +61,7 @@ export const BaseSqlLanguage: monaco.languages.IMonarchLanguage = {
       // [/[;,.]/, 'delimiter'],
       // [/[()]/, '@brackets'],
       [
-        /[\w-_@#$]+/,
+        /[\d\w-_@#$]+/,
         {
           cases: {
             '@keywords': 'keyword',
@@ -90,8 +90,8 @@ export const BaseSqlLanguage: monaco.languages.IMonarchLanguage = {
     ],
     numbers: [
       [/0[xX][0-9a-fA-F]*/, 'number'],
-      [/[$][+-]*\d*(\.\d*)?/, 'number'],
-      [/((\d+(\.\d*)?)|(\.\d+))([eE][-+]?\d+)?/, 'number']
+      [/[$][+-]*\d*(\.\d*)?\b/, 'number'],
+      [/((\d+(\.\d*)?)|(\.\d+))([eE][-+]?\d+)?\b/, 'number']
     ],
     strings: [[/'/, { token: 'string', next: '@string' }]],
     string: [

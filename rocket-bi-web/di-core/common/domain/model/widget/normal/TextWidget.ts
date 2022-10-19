@@ -30,8 +30,8 @@ export class TextWidget extends Widget {
         id: -1,
         name: '',
         description: '',
-        textColor: 'var(--text-color)'
-        // background: ''
+        textColor: 'var(--text-color)',
+        backgroundColor: 'var(--input-background-color)'
       },
       '',
       '12px',
