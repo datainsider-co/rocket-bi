@@ -6,10 +6,10 @@
       </slot>
     </template>
     <template slot="header-action">
-      <DiButton :border="borderCancel" :class="{ border: borderCancel }" class="mr-3" @click.prevent="cancel">
+      <DiButton :border="borderCancel" :class="{ border: borderCancel }" class="cancel-button mr-3" @click.prevent="cancel">
         {{ backName }}
       </DiButton>
-      <button :disabled="loading || disabled" class="btn btn-sm btn-primary px-3" @click.prevent="submit">
+      <button :disabled="loading || disabled" class="submit-button btn btn-sm btn-primary px-3" @click.prevent="submit">
         <i v-if="loading" class="fa fa-spin fa-spinner"></i>
         {{ actionName }}
       </button>

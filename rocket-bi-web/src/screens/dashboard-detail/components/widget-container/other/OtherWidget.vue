@@ -1,7 +1,7 @@
 <template>
   <div v-b-hover="handleHover" class="overflow-hidden h-100">
     <template v-if="isText">
-      <div :class="[paddingClass, scrollClass]" class="d-flex flex-row align-items-center h-100 w-100">
+      <div :style="{ background: widget.backgroundColor }" :class="[paddingClass, scrollClass]" class="d-flex flex-row align-items-center h-100 w-100">
         <TextViewer :class="textClass" :widget="widget" />
         <template v-if="showEditComponent">
           <b-icon-three-dots-vertical v-show="isShowEdit" class="ml-auto btn-icon btn-ghost di-popup ic-16 mr-1" @click.prevent="clickSeeMore">

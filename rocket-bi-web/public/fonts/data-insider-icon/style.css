@@ -1,8 +1,8 @@
 @font-face {
   font-family: 'data-insider-icon';
-  src: url('fonts/data-insider-icon.eot?fxcfzm');
-  src: url('fonts/data-insider-icon.eot?fxcfzm#iefix') format('embedded-opentype'), url('fonts/data-insider-icon.ttf?fxcfzm') format('truetype'),
-    url('fonts/data-insider-icon.woff?fxcfzm') format('woff'), url('fonts/data-insider-icon.svg?fxcfzm#data-insider-icon') format('svg');
+  src: url('fonts/data-insider-icon.eot?pgyk86');
+  src: url('fonts/data-insider-icon.eot?pgyk86#iefix') format('embedded-opentype'), url('fonts/data-insider-icon.ttf?pgyk86') format('truetype'),
+    url('fonts/data-insider-icon.woff?pgyk86') format('woff'), url('fonts/data-insider-icon.svg?pgyk86#data-insider-icon') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -404,4 +404,10 @@
 }
 .di-icon-filter-control:before {
   content: '\e97e';
+}
+.di-icon-text:before {
+  content: '\e97f';
+}
+.di-icon-code:before {
+  content: '\e980';
 }

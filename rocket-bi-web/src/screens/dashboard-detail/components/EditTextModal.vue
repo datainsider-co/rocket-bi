@@ -1,24 +1,29 @@
 <template>
-  <BModal id="editTextModal" ref="editTextModal" centered ok-title="Save" cancel-title="Cancel" title="add text" class="rounded" size="lg" @ok="handleClickOk">
-    <template v-slot:modal-header="{ close }">
-      <h6 class="modal-title">Add text</h6>
-      <button type="button" class="close btn-ghost" @click.prevent="close()" aria-label="Close">
-        <BIconX class="button-x" />
-      </button>
-    </template>
-    <template v-slot:default="{ ok }">
-      <PreviewText :widget="textWidget" @change="handlePreviewTextChanged" @submit="ok()" />
-    </template>
-  </BModal>
+  <EtlModal
+    builder-default-style
+    id="edit-text-modal"
+    ref="editTextModal"
+    :width="1068"
+    borderCancel
+    centered
+    actionName="Save"
+    title="Add text"
+    @submit="handleClickOk"
+    @hidden="reset"
+  >
+    <PreviewText ref="previewText" />
+  </EtlModal>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Ref } from 'vue-property-decorator';
 import { TextWidget } from '@core/common/domain/model';
+import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
 import PreviewText from '@/screens/dashboard-detail/components/PreviewText.vue';
+import { Log } from '@core/utils';
 
 @Component({
-  components: { PreviewText }
+  components: { EtlModal, PreviewText }
 })
 export default class EditTextModal extends Vue {
   textWidget = TextWidget.empty();
@@ -28,48 +33,57 @@ export default class EditTextModal extends Vue {
     editTextModal: any;
   };
 
-  handlePreviewTextChanged(textWidget: TextWidget) {
-    this.textWidget = textWidget;
-  }
+  @Ref()
+  private previewText!: PreviewText;
 
   show(textWidget: TextWidget, isEdit: boolean) {
     this.textWidget = textWidget;
     this.isEdit = isEdit;
     this.$refs.editTextModal.show();
+    this.previewText.init(textWidget);
+  }
+
+  protected reset() {
+    Log.debug('EditTextModal::reset::');
+    this.isEdit = false;
+    this.textWidget = TextWidget.empty();
+  }
+
+  hide() {
+    this.$refs.editTextModal.hide();
   }
 
   handleClickOk(): void {
+    const textWidget = this.previewText.textWidget;
     if (this.isEdit) {
-      this.$emit('onEditText', this.textWidget);
+      this.$emit('onEditText', textWidget);
     } else {
-      this.$emit('onCreateText', this.textWidget);
+      this.$emit('onCreateText', textWidget);
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '~@/themes/scss/di-variables.scss';
-.modal-title {
-  font-size: 24px;
-  line-height: 1.17;
-  letter-spacing: 0.2px;
-  color: var(--secondary-text-color);
-}
-.button-x {
-  color: $greyTextColor;
-}
 
-h6 {
-  font-size: 14px;
-}
+#edit-text-modal {
+  .modal-content {
+    .modal-header {
+      .cancel-button {
+        color: var(--accent) !important;
+        &[border] {
+          border: 1px solid var(--accent) !important;
+        }
+        min-width: 80px;
+        height: 26px;
+      }
 
-::v-deep .btn {
-  padding: 0.5rem 5rem !important;
-  font-size: 14px;
-}
-.modal-header .close {
-  padding: 4px;
-  margin: -2px;
+      .submit-button {
+        min-width: 80px;
+        height: 26px;
+      }
+    }
+  }
 }
 </style>

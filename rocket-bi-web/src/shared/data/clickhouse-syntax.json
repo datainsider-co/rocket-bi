@@ -1,0 +1,4544 @@
+{
+  "Conditional": [
+    {
+      "name": "if",
+      "title": "if( condition, then, else )",
+      "description": "If the condition cond evaluates to a non-zero value, returns the result of the expression then, and the result of the expression else, if present, is skipped. If the cond is zero or NULL, then the result of the then expression is skipped and the result of the else expression, if present, is returned.",
+      "example": "if( 2 > 1, 'value A', 'value B')"
+    },
+    {
+      "name": "Ternary Operator",
+      "title": "condition ? then : else",
+      "description": "It works same as if function.",
+      "example": "2 > 1 ? 'value A' : 'value B'"
+    },
+    {
+      "name": "multiIf",
+      "title": "multiIf( condition_1, then_1, condition_2, then_2,..., else)",
+      "description": "It works same as if function. ",
+      "example": "age_group = multiIf( [age] < 20, '<20', [age] < 30, '20-30', '>30')"
+    },
+    {
+      "name": "case",
+      "title": "CASE x WHEN a THEN b WHEN a2 THEN b2 ELSE c",
+      "description": "It works same as multiIf function. "
+    }
+  ],
+  "Keyword": [
+    {
+      "name": "on",
+      "description": ""
+    },
+    {
+      "name": "all",
+      "description": ""
+    },
+    {
+      "name": "by",
+      "description": ""
+    },
+    {
+      "name": "array",
+      "description": ""
+    },
+    {
+      "name": "select",
+      "description": ""
+    },
+    {
+      "name": "distinct",
+      "description": ""
+    },
+    {
+      "name": "format",
+      "description": ""
+    },
+    {
+      "name": "from",
+      "description": ""
+    },
+    {
+      "name": "group",
+      "description": ""
+    },
+    {
+      "name": "having",
+      "description": ""
+    },
+    {
+      "name": "into",
+      "description": ""
+    },
+    {
+      "name": "join",
+      "description": ""
+    },
+    {
+      "name": "left",
+      "description": ""
+    },
+    {
+      "name": "right",
+      "description": ""
+    },
+    {
+      "name": "inner",
+      "description": ""
+    },
+    {
+      "name": "outer",
+      "description": ""
+    },
+    {
+      "name": "outfile",
+      "description": ""
+    },
+    {
+      "name": "offset",
+      "description": ""
+    },
+    {
+      "name": "limit",
+      "description": ""
+    },
+    {
+      "name": "prewhere",
+      "description": ""
+    },
+    {
+      "name": "sample",
+      "description": ""
+    },
+    {
+      "name": "union",
+      "description": ""
+    },
+    {
+      "name": "where",
+      "description": ""
+    },
+    {
+      "name": "with",
+      "description": ""
+    },
+    {
+      "name": "is",
+      "description": ""
+    },
+    {
+      "name": "null",
+      "description": ""
+    },
+    {
+      "name": "not",
+      "description": ""
+    },
+    {
+      "name": "exists",
+      "description": ""
+    },
+    {
+      "name": "user",
+      "description": ""
+    },
+    {
+      "name": "watch",
+      "description": ""
+    },
+    {
+      "name": "except",
+      "description": ""
+    },
+    {
+      "name": "intersect",
+      "description": ""
+    },
+    {
+      "name": "order",
+      "description": ""
+    },
+    {
+      "name": "between",
+      "description": ""
+    },
+    {
+      "name": "and",
+      "description": ""
+    },
+    {
+      "name": "in",
+      "description": ""
+    },
+    {
+      "name": "or",
+      "description": ""
+    },
+    {
+      "name": "xor",
+      "description": ""
+    },
+    {
+      "name": "case",
+      "description": ""
+    },
+    {
+      "name": "when",
+      "description": ""
+    },
+    {
+      "name": "as",
+      "description": ""
+    },
+    {
+      "name": "over",
+      "description": ""
+    },
+    {
+      "name": "desc",
+      "description": ""
+    },
+    {
+      "name": "asc",
+      "description": ""
+    }
+  ],
+  "JSON": [
+    {
+      "name": "visitParamHas",
+      "title": "visitParamHas(field, name)",
+      "description": "Checks whether there is a field with the name name.",
+      "example": "visitParamHas(students, 'class')"
+    },
+    {
+      "name": "visitParamExtractUInt",
+      "title": "visitParamExtractUInt(params, name)",
+      "description": "Parses UInt64 from the value of the field named name.",
+      "example": "visitParamExtractUInt(students, 'age')"
+    },
+    {
+      "name": "simpleJSONExtractUInt",
+      "title": "simpleJSONExtractUInt(params, name)",
+      "description": "Parses UInt64 from the value of the field named name.",
+      "example": "simpleJSONExtractUInt(students, 'age')"
+    },
+    {
+      "name": "visitParamExtractInt",
+      "title": "visitParamExtractInt(params, name)",
+      "description": "Parses Int64 from the value of the field named name.",
+      "example": "visitParamExtractInt(students, 'age')"
+    },
+    {
+      "name": "simpleJSONExtractInt",
+      "title": "simpleJSONExtractInt(params, name)",
+      "description": "Parses Int64 from the value of the field named name.",
+      "example": "simpleJSONExtractInt(students, 'age')"
+    },
+    {
+      "name": "visitParamExtractFloat",
+      "title": "visitParamExtractFloat(params, name)",
+      "description": "Parses Float64 from the value of the field named name.",
+      "example": "visitParamExtractFloat(students, 'height')"
+    },
+    {
+      "name": "simpleJSONExtractFloat",
+      "title": "simpleJSONExtractFloat(params, name)",
+      "description": "Parses Float64 from the value of the field named name.",
+      "example": "simpleJSONExtractFloat(students, 'height')"
+    },
+    {
+      "name": "visitParamExtractBool",
+      "title": "visitParamExtractBool(params, name)",
+      "description": "Parses a true/false value. The result is UInt8.",
+      "example": "simpleJSONExtractFloat(students, 'age')"
+    },
+    {
+      "name": "simpleJSONExtractBool",
+      "title": "simpleJSONExtractBool(params, name)",
+      "description": "Parses a true/false value. The result is UInt8.",
+      "example": "simpleJSONExtractBool(students, 'age')"
+    },
+    {
+      "name": "visitParamExtractRaw",
+      "title": "visitParamExtractRaw(params, name)",
+      "description": "Returns the value of a field, including separators.",
+      "example": "visitParamExtractRaw('{\"abc\":{\"def\":[1,2,3]}}', 'abc') = '{\"def\":[1,2,3]}';"
+    },
+    {
+      "name": "visitParamExtractString",
+      "title": "visitParamExtractString(params, name)",
+      "description": "Parses the string in double quotes. The value is unescaped. If unescaping failed, it returns an empty string.",
+      "example": "visitParamExtractString('{\"abc\":\"\\\\u263a\"}', 'abc') = '☺';"
+    },
+    {
+      "name": "isValidJSON",
+      "title": "isValidJSON(json)",
+      "description": "Checks that passed string is a valid json.",
+      "example": "SELECT isValidJSON('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}') = 1"
+    },
+    {
+      "name": "JSONHas",
+      "title": "JSONHas(json[, indices_or_keys]…)",
+      "description": "If the value exists in the JSON document, 1 will be returned. If the value does not exist, 0 will be returned.",
+      "example": "SELECT JSONHas('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}', 'b') = 1"
+    },
+    {
+      "name": "JSONLength",
+      "title": "JSONLength(json[, indices_or_keys]…)",
+      "description": "Return the length of a JSON array or a JSON object. If the value does not exist or has a wrong type, 0 will be returned.",
+      "example": "SELECT JSONLength('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}', 'b') = 3"
+    },
+    {
+      "name": "JSONType",
+      "title": "JSONType(json[, indices_or_keys]…)",
+      "description": "Return the type of a JSON value. If the value does not exist, Null will be returned.",
+      "example": "SELECT JSONType('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}', 'a') = 'String'"
+    },
+    {
+      "name": "JSONExtractUInt",
+      "title": "JSONExtractUInt(json[, indices_or_keys]…)",
+      "description": "Parses a JSON and extract a value. These functions are similar to visitParam functions. If the value does not exist or has a wrong type, 0 will be returned.",
+      "example": "SELECT JSONExtractUInt('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}', 'b', -1) = 300"
+    },
+    {
+      "name": "JSONExtractInt",
+      "title": "JSONExtractInt(json[, indices_or_keys]…)",
+      "description": "Parses a JSON and extract a value. These functions are similar to visitParam functions. If the value does not exist or has a wrong type, 0 will be returned.",
+      "example": "SELECT JSONExtractInt('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}', 'b', 1) = -100"
+    },
+    {
+      "name": "JSONExtractFloat",
+      "title": "JSONExtractFloat(json[, indices_or_keys]…)",
+      "description": "Parses a JSON and extract a value. These functions are similar to visitParam functions. If the value does not exist or has a wrong type, 0 will be returned.",
+      "example": "SELECT JSONExtractFloat('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}', 'b', 2) = 200.0"
+    },
+    {
+      "name": "JSONExtractBool",
+      "title": "JSONExtractBool(json[, indices_or_keys]…)",
+      "description": "Parses a JSON and extract a value. These functions are similar to visitParam functions. If the value does not exist or has a wrong type, 0 will be returned.",
+      "example": "SELECT JSONExtractBool('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}', 'b', 2) = 1"
+    },
+    {
+      "name": "JSONExtractString",
+      "title": "JSONExtractString(json[, indices_or_keys]…)",
+      "description": "Parses a JSON and extract a string. This function is similar to visitParamExtractString functions. If the value does not exist or has a wrong type, an empty string will be returned. The value is unescaped. If unescaping failed, it returns an empty string.",
+      "example": "SELECT JSONExtractString('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}', 'a') = 'hello'"
+    },
+    {
+      "name": "JSONExtract",
+      "title": "JSONExtract(json[, indices_or_keys]…, Return_type)",
+      "description": "Parses a JSON and extract a value of the given ClickHouse data type. This is a generalization of the previous JSONExtract<type> functions.\nThis means\nJSONExtract(..., 'String') returns exactly the same as JSONExtractString(),\nJSONExtract(..., 'Float64') returns exactly the same as JSONExtractFloat().",
+      "example": "SELECT JSONExtract('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}', 'Tuple(String, Array(Float64))') = ('hello',[-100,200,300])"
+    },
+    {
+      "name": "JSONExtractKeysAndValues",
+      "title": "JSONExtractKeysAndValues(json[, indices_or_keys…], Value_type)",
+      "description": "Parses key-value pairs from a JSON where the values are of the given ClickHouse data type.",
+      "example": "SELECT JSONExtractKeysAndValues('{\"x\": {\"a\": 5, \"b\": 7, \"c\": 11}}', 'x', 'Int8') = [('a',5),('b',7),('c',11)];"
+    },
+    {
+      "name": "JSONExtractKeys",
+      "title": "JSONExtractKeys(json[, a, b, c...])",
+      "description": "Parses a JSON string and extracts the keys.",
+      "example": "SELECT JSONExtractKeys('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}');"
+    },
+    {
+      "name": "JSONExtractRaw",
+      "title": "JSONExtractRaw(json[, indices_or_keys]…)",
+      "description": "Returns a part of JSON as unparsed string.\n\nIf the part does not exist or has a wrong type, an empty string will be returned.",
+      "example": "SELECT JSONExtractRaw('{\"a\": \"hello\", \"b\": [-100, 200.0, 300]}', 'b') = '[-100, 200.0, 300]';"
+    },
+    {
+      "name": "JSONExtractArrayRaw",
+      "title": "JSONExtractArrayRaw(json[, indices_or_keys…])",
+      "description": "Returns an array with elements of JSON array, each represented as unparsed string.\n\nIf the part does not exist or isn’t array, an empty array will be returned.",
+      "example": "SELECT JSONExtractArrayRaw('{\"a\": \"hello\", \"b\": [-100, 200.0, \"hello\"]}', 'b') = ['-100', '200.0', '\"hello\"'];"
+    },
+    {
+      "name": "JSONExtractKeysAndValuesRaw",
+      "title": "JSONExtractKeysAndValuesRaw(json[, p, a, t, h])",
+      "description": "Extracts raw data from a JSON object.",
+      "example": "SELECT JSONExtractKeysAndValuesRaw('{\"a\": [-100, 200.0], \"b\":{\"c\": {\"d\": \"hello\", \"f\": \"world\"}}}');"
+    },
+    {
+      "name": "JSON_EXISTS",
+      "title": "JSON_EXISTS(json, path)",
+      "description": "If the value exists in the JSON document, 1 will be returned.\n\nIf the value does not exist, 0 will be returned.",
+      "example": "SELECT JSON_EXISTS('{\"hello\":1}', '$.hello');"
+    },
+    {
+      "name": "JSON_QUERY",
+      "title": "JSON_QUERY(json, path)",
+      "description": "Parses a JSON and extract a value as JSON array or JSON object.\n\nIf the value does not exist, an empty string will be returned.",
+      "example": "SELECT JSON_QUERY('{\"hello\":\"world\"}', '$.hello');"
+    },
+    {
+      "name": "JSON_VALUE",
+      "title": "JSON_VALUE(json, path)",
+      "description": "Parses a JSON and extract a value as JSON scalar.\n\nIf the value does not exist, an empty string will be returned.",
+      "example": "SELECT JSON_VALUE('{\"array\":[[0, 1, 2, 3, 4, 5], [0, -1, -2, -3, -4, -5]]}', '$.array[*][0 to 2, 4]');"
+    },
+    {
+      "name": "toJSONString",
+      "title": "toJSONString(value)",
+      "description": "Serializes a value to its JSON representation. Various data types and nested structures are supported.",
+      "example": "SELECT toJSONString(map('key1', 1, 'key2', 2));"
+    }
+  ],
+  "Arithmetic": [
+    {
+      "name": "plus",
+      "title": "plus(a, b), a + b operator",
+      "description": "Calculates the sum of the numbers.You can also add integer numbers with a date or date and time. In the case of a date, adding an integer means adding the corresponding number of days. For a date with time, it means adding the corresponding number of seconds."
+    },
+    {
+      "name": "minus",
+      "title": "minus(a, b), a - b operator",
+      "description": "Calculates the difference. The result is always signed.You can also calculate integer numbers from a date or date with time. The idea is the same – see above for ‘plus’."
+    },
+    {
+      "name": "multiply",
+      "title": "multiply(a, b), a * b operator",
+      "description": "Calculates the product of the numbers."
+    },
+    {
+      "name": "divide",
+      "title": "divide(a, b), a / b operator",
+      "description": "Calculates the quotient of the numbers. The result type is always a floating-point type. It is not integer division. For integer division, use the ‘intDiv’ function.When dividing by zero you get ‘inf’, ‘-inf’, or ‘nan’."
+    },
+    {
+      "name": "intDiv",
+      "title": "intDiv(a, b)",
+      "description": "Calculates the quotient of the numbers. Divides into integers, rounding down (by the absolute value). An exception is thrown when dividing by zero or when dividing a minimal negative number by minus one."
+    },
+    {
+      "name": "intDivOrZero",
+      "title": "Differs from ‘intDiv’ in that it returns zero when dividing by zero or when dividing a minimal negative number by minus one.",
+      "description": ""
+    },
+    {
+      "name": "modulo",
+      "title": "modulo(a, b), a % b operator",
+      "description": "Calculates the remainder after division. If arguments are floating-point numbers, they are pre-converted to integers by dropping the decimal portion. The remainder is taken in the same sense as in C++. Truncated division is used for negative numbers. An exception is thrown when dividing by zero or when dividing a minimal negative number by minus one."
+    },
+    {
+      "name": "moduloOrZero",
+      "title": "moduloOrZero(a, b)",
+      "description": "Differs from modulo in that it returns zero when the divisor is zero."
+    },
+    {
+      "name": "negate",
+      "title": "negate(a), -a operator",
+      "description": "Calculates a number with the reverse sign. The result is always signed."
+    },
+    {
+      "name": "abs",
+      "title": "abs(a)",
+      "description": "Calculates the absolute value of the number (a). That is, if a < 0, it returns -a. For unsigned types it doesn’t do anything. For signed integer types, it returns an unsigned number."
+    },
+    {
+      "name": "gcd",
+      "title": "gcd(a, b)",
+      "description": "Returns the greatest common divisor of the numbers. An exception is thrown when dividing by zero or when dividing a minimal negative number by minus one."
+    },
+    {
+      "name": "lcm",
+      "title": "lcm(a, b)",
+      "description": "Returns the least common multiple of the numbers. An exception is thrown when dividing by zero or when dividing a minimal negative number by minus one."
+    }
+  ],
+  "Array": [
+    {
+      "name": "empty",
+      "title": "",
+      "description": "Returns 1 for an empty array, or 0 for a non-empty array. The result type is UInt8. The function also works for strings."
+    },
+    {
+      "name": "notEmpty",
+      "title": "",
+      "description": "Returns 0 for an empty array, or 1 for a non-empty array. The result type is UInt8. The function also works for strings."
+    },
+    {
+      "name": "length",
+      "title": "",
+      "description": "Returns the number of items in the array. The result type is UInt64. The function also works for strings."
+    },
+    {
+      "name": "emptyArrayUInt8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayUInt16",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayUInt32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayUInt64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayInt8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayInt16",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayInt32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayInt64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayFloat32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayFloat32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayDate",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayDateTime",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "emptyArrayToSingle",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "range",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "array",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayConcat",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "has",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "hasAll",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "hasAny",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "hasSubstr",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "indexOf",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayCount",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "countEqual",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayEnumerate",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayEnumerateUniq",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayPopBack",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayPopFront",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayPushBack",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayPushFront",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayResize",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arraySlice",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arraySort",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayReverseSort",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayUniq",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayJoin",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayDifference",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayDistinct",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayEnumerateDense",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayIntersect",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayReduce",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayReduceInRanges",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayReverse",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reverse",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayFlatten",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayCompact",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayZip",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayAUC",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayMap",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayFilter",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayFill",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayReverseFill",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arraySplit",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayReverseSplit",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayExists",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayAll",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayFirst",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayFirstIndex",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayMin",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayMax",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arraySum",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayAvg",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayCumSum",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayCumSumNonNegative",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayProduct",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayProduct",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Conversion": [
+    {
+      "name": "toInt8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt16",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt128",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt256",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt8OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt16OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt32OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt64OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt128OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt256OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt8OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt16OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt32OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt64OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt128OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInt256OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt16",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt128",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt256",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt16OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt32OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt64OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt128OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt256OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt16OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt32OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt64OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt128OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUInt256OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toFloat32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toFloat64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toFloat32OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toFloat64OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toFloat32OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toFloat64OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDate",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDateOrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDateOrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDateTime",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDateTimeOrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDateTimeOrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal128",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal256",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal32OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal64OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal128OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal256OrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal32OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal64OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal128OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toDecimal256OrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toFixedString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toStringCutToZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsUInt8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsUInt16",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsUInt32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsUInt64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsInt8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsInt16",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsInt32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsInt64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsFloat32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsFloat64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsDate",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsDateTime",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsFixedString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpretAsUUID",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "reinterpret",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "CAST",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "accurateCast",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "accurateCastOrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toInterval",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTimeBestEffort",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTime32BestEffort",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTimeBestEffortUS",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTimeBestEffortOrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTimeBestEffortOrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTimeBestEffortOrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTime32BestEffortOrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTimeBestEffortUSOrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTimeBestEffortUSOrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTime64BestEffort",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTime64BestEffortOrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "parseDateTime64BestEffortOrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toLowCardinality",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUnixTimestamp64Milli",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUnixTimestamp64Micro",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUnixTimestamp64Nano",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "fromUnixTimestamp64Milli",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "fromUnixTimestamp64Micro",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "fromUnixTimestamp64Nano",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "formatRow",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "formatRowNoNewline",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toIntervalYear",
+      "title": "toIntervalYear(number)",
+      "description": "Converts a Number type argument to an Interval data type.",
+      "example": "SELECT toDate(toDate('2020-01-01') + toIntervalYear(7))\n//2027-01-01"
+    },
+    {
+      "name": "toIntervalQuarter",
+      "title": "toIntervalQuarter(number)",
+      "description": "Converts a Number type argument to an Interval data type.",
+      "example": "SELECT toDate(toDate('2020-01-01') + toIntervalQuarter(6))\n//2021-07-01"
+    },
+    {
+      "name": "toIntervalMonth",
+      "title": "toIntervalMonth(number)",
+      "description": "Converts a Number type argument to an Interval data type.",
+      "example": "SELECT toDate(toDate('2020-01-01') + toIntervalMonth(6))\n//2020-07-01"
+    },
+    {
+      "name": "toIntervalWeek",
+      "title": "toIntervalWeek(number)",
+      "description": "Converts a Number type argument to an Interval data type.",
+      "example": "SELECT toDate(toDate('2020-01-01') + toIntervalWeek(6))\n//2020-02-12"
+    },
+    {
+      "name": "toIntervalDay",
+      "title": "toIntervalDay(number)",
+      "description": "Converts a Number type argument to an Interval data type.",
+      "example": "SELECT toDate(toDate('2020-01-01') + toIntervalDay(6))\n//2020-01-07"
+    },
+    {
+      "name": "toIntervalHour",
+      "title": "toIntervalHour(number)",
+      "description": "Converts a Number type argument to an Interval data type.",
+      "example": "SELECT toDateTime(toDate('2020-01-01') + toIntervalHour(6))\n//2020-01-01T06:00"
+    },
+    {
+      "name": "toIntervalMinute",
+      "title": "toIntervalMinute(number)",
+      "description": "Converts a Number type argument to an Interval data type.",
+      "example": "SELECT toDateTime(toDate('2020-01-01') + toIntervalMinute(6))\n//2020-01-01T00:06"
+    },
+    {
+      "name": "toIntervalSecond",
+      "title": "toIntervalSecond(number)",
+      "description": "Converts a Number type argument to an Interval data type.",
+      "example": "SELECT toDateTime(toDate('2020-01-01') + toIntervalSecond(6))\n//2020-01-01T00:00:06"
+    }
+  ],
+  "Searching in string": [
+    {
+      "name": "position",
+      "title": "position(haystack, needle [, start_pos]),\n position(needle in haystack)",
+      "description": "Searches for the substring `needle` in the string `haystack`.Returns the position (in bytes) of the found substring in the string, starting from 1.",
+      "example": "position('Hello, world!', '!') = 13"
+    },
+    {
+      "name": "locate",
+      "title": "locate(haystack, needle [, start_pos])",
+      "description": "Searches for the substring `needle` in the string `haystack`.Returns the position (in bytes) of the found substring in the string, starting from 1.",
+      "example": "locate('Hello, world!', '!') = 13"
+    },
+    {
+      "name": "positionCaseInsensitive",
+      "title": "positionCaseInsensitive(haystack, needle[, start_pos])",
+      "description": "The same as position returns the position (in bytes) of the found substring in the string, starting from 1. Use the function for a case-insensitive search. Works under the assumption that the string contains a set of bytes representing a single-byte encoded text. If this assumption is not met and a character can’t be represented using a single byte, the function doesn’t throw an exception and returns some unexpected result. If character can be represented using two bytes, it will use two bytes and so on.",
+      "example": "positionCaseInsensitive('Hello, world!', 'hello') = 1"
+    },
+    {
+      "name": "positionUTF8",
+      "title": "positionUTF8(haystack, needle[, start_pos])",
+      "description": "Returns the position (in Unicode points) of the found substring in the string, starting from 1.",
+      "example": "positionUTF8('Hello, world!', '!') = 13"
+    },
+    {
+      "name": "positionCaseInsensitiveUTF8",
+      "title": "positionCaseInsensitiveUTF8(haystack, needle[, start_pos])",
+      "description": "same as positionUTF8 but is case-insensitive",
+      "example": "positionCaseInsensitiveUTF8('Hello, world!', '!') = 13"
+    },
+    {
+      "name": "multiSearchAllPositions",
+      "title": "multiSearchAllPositions(haystack, [needle1, needle2, ..., needlen])",
+      "description": "The same as position but returns Array of positions (in bytes) of the found corresponding substrings in the string. Positions are indexed starting from 1.",
+      "example": "multiSearchAllPositions('Hello, world!', ['!', 'world']) = [13, 8]"
+    },
+    {
+      "name": "multiSearchAllPositionsUTF8",
+      "title": "multiSearchAllPositionsUTF8(haystack, [needle1, needle2, ..., needlen])",
+      "description": "The same as position but returns Array of positions (in Unicode points) of the found corresponding substrings in the string. Positions are indexed starting from 1.",
+      "example": "multiSearchAllPositionsUTF8('Hello, world!', ['!', 'world']) = [13, 8]"
+    },
+    {
+      "name": "multiSearchFirstIndex",
+      "title": "multiSearchFirstIndex(haystack, [needle1, needle2, ..., needlen])",
+      "description": "Returns the index i (starting from 1) of the leftmost found needle i in the string haystack and 0 otherwise.",
+      "example": "multiSearchFirstIndex('Hello, world!', ['!', 'world']) = 1"
+    },
+    {
+      "name": "multiSearchAny",
+      "title": "multiSearchAny(haystack, [needle1, needle2, ..., needlen])",
+      "description": "Returns 1, if at least one string needle i matches the string haystack and 0 otherwise.",
+      "example": "multiSearchAny('Hello, world!', ['!', 'test']) = 1"
+    },
+    {
+      "name": "match",
+      "title": "match(haystack, pattern)",
+      "description": "Checks whether the string matches the pattern regular expression. ",
+      "example": "match('Hello World 12', '[0-9]') = 1"
+    },
+    {
+      "name": "multiMatchAny",
+      "title": "multiMatchAny(haystack, [pattern1, pattern2, …, patternn])",
+      "description": "The same as match, but returns 0 if none of the regular expressions are matched and 1 if any of the patterns matches. It uses hyperscan library. For patterns to search substrings in a string, it is better to use multiSearchAny since it works much faster.",
+      "example": "multiMatchAny('Hello World',['[0-9]','[a-z]') = 1"
+    },
+    {
+      "name": "multiMatchAnyIndex",
+      "title": "multiMatchAnyIndex(haystack, [pattern1, pattern2, …, patternn])",
+      "description": "The same as multiMatchAny, but returns any index that matches the haystack.",
+      "example": "multiMatchAnyIndex('Hello World',['[0-9]','[a-z]') = 2"
+    },
+    {
+      "name": "multiMatchAllIndices",
+      "title": "multiMatchAllIndices(haystack, [pattern1, pattern2, …, patternn])",
+      "description": "The same as multiMatchAny, but returns the array of all indicies that match the haystack in any order.",
+      "example": "multiMatchAllIndices('Hello World',['[0-9]','[a-z]') = 2"
+    },
+    {
+      "name": "multiFuzzyMatchAny",
+      "title": "multiFuzzyMatchAny(haystack, distance, [pattern1, pattern2, …, patternn])",
+      "description": "The same as multiMatchAny, but returns 1 if any pattern matches the haystack within a constant edit distance. This function relies on the experimental feature of hyperscan library, and can be slow for some corner cases. The performance depends on the edit distance value and patterns used, but it's always more expensive compared to a non-fuzzy variants.",
+      "example": ""
+    },
+    {
+      "name": "multiFuzzyMatchAnyIndex",
+      "title": "multiFuzzyMatchAnyIndex(haystack, distance, [pattern1, pattern2, …, patternn])",
+      "description": "The same as multiFuzzyMatchAny, but returns any index that matches the haystack within a constant edit distance.",
+      "example": ""
+    },
+    {
+      "name": "multiFuzzyMatchAllIndices",
+      "title": "multiFuzzyMatchAllIndices(haystack, distance, [pattern1, pattern2, …, patternn])",
+      "description": "The same as multiFuzzyMatchAny, but returns the array of all indices in any order that match the haystack within a constant edit distance.",
+      "example": ""
+    },
+    {
+      "name": "extract",
+      "title": "extract(haystack, pattern)",
+      "description": "Extracts a fragment of a string using a regular expression. If ‘haystack’ doesn’t match the ‘pattern’ regex, an empty string is returned. If the regex doesn’t contain subpatterns, it takes the fragment that matches the entire regex. Otherwise, it takes the fragment that matches the first subpattern.",
+      "example": "SELECT extract('Hello World 12', '[a-z]+') = 'ello'"
+    },
+    {
+      "name": "extractAll",
+      "title": "extractAll(haystack, pattern)",
+      "description": "Extracts all the fragments of a string using a regular expression. If ‘haystack’ doesn’t match the ‘pattern’ regex, an empty string is returned. Returns an array of strings consisting of all matches to the regex. In general, the behavior is the same as the ‘extract’ function (it takes the first subpattern, or the entire expression if there isn’t a subpattern).",
+      "example": "SELECT extract('Hello World 12', '[a-z]+') = ['ello', 'orld']"
+    },
+    {
+      "name": "extractAllGroupsHorizontal",
+      "title": "extractAllGroupsHorizontal(haystack, pattern)",
+      "description": "Matches all groups of the haystack string using the pattern regular expression. Returns an array of arrays, where the first array includes all fragments matching the first group, the second array - matching the second group, etc.",
+      "example": "SELECT extractAllGroupsHorizontal('abc=111, def=222, ghi=333', '(\"[^\"]+\"|\\\\w+)=(\"[^\"]+\"|\\\\w+)')\n//[['abc','def','ghi'],['111','222','333']]"
+    },
+    {
+      "name": "extractAllGroupsVertical",
+      "title": "extractAllGroupsVertical(haystack, pattern)",
+      "description": "Matches all groups of the haystack string using the pattern regular expression. Returns an array of arrays, where each array includes matching fragments from every group. Fragments are grouped in order of appearance in the haystack.",
+      "example": "SELECT extractAllGroupsVertical('abc=111, def=222, ghi=333', '(\"[^\"]+\"|\\\\w+)=(\"[^\"]+\"|\\\\w+)')\n//[['abc','111'],['def','222'],['ghi','333']] "
+    },
+    {
+      "name": "like",
+      "title": "like(haystack, pattern),",
+      "description": "Checks whether a string matches a simple regular expression.The regular expression can contain the metasymbols `%` and `_`.`%` indicates any quantity of any bytes (including zero characters).",
+      "example": "SELECT like('a%b', '%')\n//1"
+    },
+    {
+      "name": "notLike",
+      "title": "notLike(haystack, pattern)",
+      "description": "The same thing as ‘like’, but negative",
+      "example": "SELECT like('a%b', '%')\n//0"
+    },
+    {
+      "name": "ilike",
+      "title": "ilike(haystack,pattern)",
+      "description": "Case insensitive variant of like function",
+      "example": "SELECT ilike('abc','__c')\n//1"
+    },
+    {
+      "name": "ngramDistance",
+      "title": "ngramDistance(haystack, needle)",
+      "description": "Calculates the 4-gram distance between haystack and needle: counts the symmetric difference between two multisets of 4-grams and normalizes it by the sum of their cardinalities",
+      "example": "SELECT ngramDistance('Hello World', 'ello')\n//0.78"
+    },
+    {
+      "name": "ngramSearch",
+      "title": "ngramSearch(haystack, needle)",
+      "description": "Same as ngramDistance but calculates the non-symmetric difference between needle and haystack – the number of n-grams from needle minus the common number of n-grams normalized by the number of needle n-grams. The closer to one, the more likely needle is in the haystack. Can be useful for fuzzy string search.",
+      "example": "SELECT ngramDistance('Hello World', 'ello')\n//0.78"
+    },
+    {
+      "name": "countSubstrings",
+      "title": "countSubstrings(haystack, needle[, start_pos])",
+      "description": "Returns the number of substring occurrences.",
+      "example": "SELECT countSubstrings('aaaa', 'aa')\n//2"
+    },
+    {
+      "name": "countSubstringsCaseInsensitive",
+      "title": "countSubstringsCaseInsensitive(haystack, needle[, start_pos])",
+      "description": "same as countSubstrings but case insensitive.",
+      "example": "SELECT countSubstringsCaseInsensitive('abc', 'Bc')\n//1"
+    },
+    {
+      "name": "countSubstringsCaseInsensitiveUTF8",
+      "title": "countSubstringsCaseInsensitiveUTF8(haystack, needle[, start_pos])",
+      "description": "Returns the number of substring occurrences in UTF-8 case-insensitive.",
+      "example": "SELECT countSubstringsCaseInsensitiveUTF8('абв', 'A')\n//1"
+    },
+    {
+      "name": "countMatches",
+      "title": "countMatches(haystack, pattern)",
+      "description": "Returns the number of regular expression matches for a pattern in a haystack.",
+      "example": "SELECT countMatches('foobar.com', 'o+')\n//2"
+    }
+  ],
+  "Replace in Strings": [
+    {
+      "name": "replaceOne",
+      "title": "replaceOne(haystack, pattern, replacement)",
+      "description": "Replaces the first occurrence, if it exists, of the ‘pattern’ substring in ‘haystack’ with the ‘replacement’ substring. Hereafter, ‘pattern’ and ‘replacement’ must be constants.",
+      "example": "SELECT replaceOne('Hello World', 'o', 'x')\n//Hellx World"
+    },
+    {
+      "name": "replaceAll",
+      "title": "replaceAll(haystack, pattern, replacement)",
+      "description": "Replaces all occurrences of the ‘pattern’ substring in ‘haystack’ with the ‘replacement’ substring.",
+      "example": "SELECT replaceAll('Hello World', 'o', 'x')\n//Hellx Wxrld"
+    },
+    {
+      "name": "replace",
+      "title": "replace(haystack, pattern, replacement)",
+      "description": "Replaces all occurrences of the ‘pattern’ substring in ‘haystack’ with the ‘replacement’ substring.",
+      "example": "SELECT replace('Hello World', 'o', 'x')\n//Hellx Wxrld"
+    },
+    {
+      "name": "replaceRegexpOne",
+      "title": "replaceRegexpOne(haystack, pattern, replacement)",
+      "description": "Replacement using the ‘pattern’ regular expression. A re2 regular expression. Replaces only the first occurrence, if it exists. A pattern can be specified as ‘replacement’. This pattern can include substitutions \\0-\\9. The substitution \\0 includes the entire regular expression. Substitutions \\1-\\9 correspond to the subpattern numbers.To use the \\ character in a template, escape it using \\. Also keep in mind that a string literal requires an extra escape.",
+      "example": "SELECT replaceRegexpOne('Hello, World!', '.*', '\\0\\0')\n//Hello, World!Hello, World!"
+    },
+    {
+      "name": "replaceRegexpAll",
+      "title": "replaceRegexpAll(haystack, pattern, replacement)",
+      "description": "This does the same thing, but replaces all the occurrences. Example:",
+      "example": "SELECT replaceRegexpAll('Hello, World!', '.', '\\0\\0')\n//HHeelllloo,,  WWoorrlldd!!"
+    },
+    {
+      "name": "regexpQuoteMeta",
+      "title": "regexpQuoteMeta(string)",
+      "description": "The function adds a backslash before some predefined characters in the string. Predefined characters: \\0, \\, |, (, ), ^, $, ., [, ], ?, *, +, {, :, -. This implementation slightly differs from re2::RE2::QuoteMeta. It escapes zero byte as \\0 instead of \\x00 and it escapes only required characters. For more information, see the link: RE2.",
+      "example": "SELECT regexpQuoteMeta('Hello, World!*')\n//Hello, World!\\*"
+    }
+  ],
+  "Files": [
+    {
+      "name": "file",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Mathematical": [
+    {
+      "name": "e",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "exp",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "log",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ln",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "exp2",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "log2",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "exp10",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "log10",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "sqrt",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cbrt",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "erf",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "erfc",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "lgamma",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "tgamma",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "sin",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cos",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "tan",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "asin",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "acos",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "atan",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "pow",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "power",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "intExp2",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "intExp10",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cosh",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "acosh",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "sinh",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "asinh",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "atanh",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "atan2",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "hypot",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "log1p",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "sign",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Rounding": [
+    {
+      "name": "floor",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ceil",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ceiling",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "trunc",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "truncate",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "round",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "roundBankers",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "roundToExp2",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "roundDuration",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "roundAge",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "roundDown",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Working with maps": [
+    {
+      "name": "map",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "mapAdd",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "mapSubtract",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "mapPopulateSeries",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "mapContains",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "mapKeys",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "mapValues",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Splitting and Merging Strings and Arrays": [
+    {
+      "name": "splitByChar",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "splitByString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "arrayStringConcat",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "alphaTokens",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "extractAllGroups",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Bit": [
+    {
+      "name": "bitAnd",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitOr",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitXor",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitNot",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitShiftLeft",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitShiftRight",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitRotateLeft",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitRotateRight",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitTest",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitTestAll",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitTestAny",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitCount",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitHammingDistance",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Bitmap": [
+    {
+      "name": "bitmapBuild",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapToArray",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapSubsetInRange",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapSubsetLimit",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapContains",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapHasAny",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapHasAll",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapCardinality",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapMin",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapMax",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapTransform",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapAnd",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapOr",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapXor",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapAndnot",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapAndCardinality",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapOrCardinality",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmapAndnotCardinality",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Hash": [
+    {
+      "name": "halfMD5",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "MD5",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "sipHash64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "sipHash128",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cityHash64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "intHash32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "intHash64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "SHA1",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "SHA224",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "SHA256",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "URLHash",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "farmFingerprint64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "farmHash64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "javaHash",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "javaHashUTF16LE",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "hiveHash",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "metroHash64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "jumpConsistentHash",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "murmurHash2_32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "murmurHash2_64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "gccMurmurHash",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "murmurHash3_32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "murmurHash3_64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "murmurHash3_128",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "xxHash32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "xxHash64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ngramSimHash",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ngramSimHashCaseInsensitive",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ngramSimHashUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ngramSimHashCaseInsensitiveUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleSimHash",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleSimHashCaseInsensitive",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleSimHashUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleSimHashCaseInsensitiveUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ngramMinHashUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ngramMinHashCaseInsensitiveUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ngramMinHashArg",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ngramMinHashArgCaseInsensitive",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ngramMinHashArgUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ngramMinHashArgCaseInsensitiveUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleMinHash",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleMinHashCaseInsensitive",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleMinHashUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleMinHashCaseInsensitiveUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleMinHashArg",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleMinHashArgCaseInsensitive",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleMinHashArgUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "wordShingleMinHashArgCaseInsensitiveUTF8",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Random Numbers And Strings": [
+    {
+      "name": "rand",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "rand32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "rand64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "randConstant",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "randomString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "randomFixedString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "randomPrintableASCII",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "randomStringUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "fuzzBits",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Encoding": [
+    {
+      "name": "char",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "hex",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "unhex",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "UUIDStringToNum",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "UUIDNumToString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmaskToList",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bitmaskToArray",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "UUID": [
+    {
+      "name": "generateUUIDv4",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUUID",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUUIDOrNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toUUIDOrZero",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "UUIDStringToNum",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "UUIDNumToString",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "URLs": [
+    {
+      "name": "protocol",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "domain",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "domainWithoutWWW",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "topLevelDomain",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "firstSignificantSubdomain",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cutToFirstSignificantSubdomain",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cutToFirstSignificantSubdomainWithWWW",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cutToFirstSignificantSubdomainCustom",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cutToFirstSignificantSubdomainCustomWithWWW",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "firstSignificantSubdomainCustom",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "port",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "path",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "pathFull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "queryString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "fragment",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "queryStringAndFragment",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "extractURLParameter",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "extractURLParameters",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "extractURLParameterNames",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "URLHierarchy",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "URLPathHierarchy",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "decodeURLComponent",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "netloc",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cutWWW",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cutQueryString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cutFragment",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cutQueryStringAndFragment",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cutURLParameter",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "IP Addresses": [
+    {
+      "name": "IPv4NumToString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "IPv4StringToNum",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "IPv4NumToStringClassC",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "IPv6NumToString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "IPv6StringToNum",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "IPv4ToIPv6",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "cutIPv6",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "IPv4CIDRToRange",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "IPv6CIDRToRange",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toIPv4",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toIPv6",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "isIPv4String",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "isIPv6String",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "isIPAddressInRange",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "External Dictionaries": [
+    {
+      "name": "dictGet",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictHas",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetHierarchy",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictIsIn",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetInt8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetInt16",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetInt32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetInt64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetUInt8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetUInt16",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetUInt32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetUInt64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetFloat32",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetFloat64",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetDate",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetDateTime",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetUUID",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dictGetString",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Geographical Coordinates": [
+    {
+      "name": "greatCircleDistance",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "greatCircleAngle",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "pointInEllipses",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "pointInPolygon",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "GeoHash": [
+    {
+      "name": "geohashEncode",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "geohashDecode",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "geohashesInBox",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "H3 Indexes": [
+    {
+      "name": "h3IsValid",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "h3GetResolution",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "h3EdgeAngle",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "h3EdgeLengthM",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "geoToH3",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "h3kRing",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "h3GetBaseCell",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "h3HexAreaM2",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "h3IndexesAreNeighbors",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "h3ToChildren",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "h3ToParent",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "h3ToString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "stringToH3",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "h3GetResolution",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Nullable": [
+    {
+      "name": "isNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "isNotNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "coalesce",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ifNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "nullIf",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "assumeNotNull",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toNullable",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Machine Learning": [
+    {
+      "name": "stochasticLinearRegression",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "stochasticLogisticRegression",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bayesAB",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "evalMLMethod",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Introspection": [
+    {
+      "name": "addressToLine",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "addressToSymbol",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "demangle",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "tid",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "logTrace",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Tuples": [
+    {
+      "name": "tuple",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "tupleElement",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "untuple",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "tupleHammingDistance",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Encryption": [
+    {
+      "name": "encrypt",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "aes_encrypt_mysql",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "decrypt",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "aes_decrypt_mysql",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Other": [
+    {
+      "name": "hostName",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "getMacro",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "FQDN",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "basename",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "visibleWidth",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toTypeName",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "blockSize",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "byteSize",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "materialize",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ignore",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "sleep",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "sleepEachRow",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "currentDatabase",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "currentUser",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "isConstant",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "isFinite",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "isInfinite",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "ifNotFinite",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "isNaN",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "hasColumnInTable",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "bar",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "transform",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "transform",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "formatReadableSize",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "formatReadableQuantity",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "formatReadableTimeDelta",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "least",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "greatest",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "uptime",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "version",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "blockNumber",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "rowNumberInBlock",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "rowNumberInAllBlocks",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "neighbor",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "runningDifference",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "runningDifferenceStartingWithFirstValue",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "runningConcurrency",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "MACNumToString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "MACStringToNum",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "MACStringToOUI",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "getSizeOfEnumType",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "blockSerializedSize",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "toColumnTypeName",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "dumpColumnStructure",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "defaultValueOfArgumentType",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "defaultValueOfTypeName",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "indexHint",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "replicate",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "filesystemAvailable",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "filesystemFree",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "filesystemCapacity",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "finalizeAggregation",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "runningAccumulate",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "joinGet",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "modelEvaluate",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "throwIf",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "identity",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "randomPrintableASCII",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "randomString",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "randomStringUTF8",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "getSetting",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "isDecimalOverflow",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "countDigits",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "errorCodeToName",
+      "title": "",
+      "description": ""
+    },
+    {
+      "name": "tcpPort",
+      "title": "",
+      "description": ""
+    }
+  ],
+  "Aggregate Functions": [
+    {
+      "name": "count",
+      "title": "count(expr)",
+      "description": "Counts the number of rows or not-NULL values.",
+      "example": "SELECT count() FROM t"
+    },
+    {
+      "name": "sum",
+      "title": "sum(expr)",
+      "description": "Calculates the sum. Only works for numbers.",
+      "example": "SELECT sum(profile) FROM t"
+    },
+    {
+      "name": "min",
+      "title": "min(expr)",
+      "description": "Aggregate function that calculates the minimum across a group of values.",
+      "example": "SELECT min(salary) FROM employees;"
+    },
+    {
+      "name": "max",
+      "title": "max(expr)",
+      "description": "Aggregate function that calculates the maximum across a group of values.",
+      "example": "SELECT max(salary) FROM employees;"
+    },
+    {
+      "name": "avg",
+      "title": "avg(expr)",
+      "description": "Aggregate function that calculates the maximum across a group of values. Returned value: \nThe arithmetic mean, always as Float64.\n NaN if the input parameter x is empty.",
+      "example": "SELECT avg(profit) employees "
+    },
+    {
+      "name": "any",
+      "title": "any(expr)",
+      "description": "Selects the first encountered value. The query can be executed in any order and even in a different order each time, so the result of this function is indeterminate. To get a determinate result, you can use the ‘min’ or ‘max’ function instead of ‘any’.",
+      "example": "SELECT any(name) employees "
+    },
+    {
+      "name": "stddevPop",
+      "title": "stddevPop(expr)",
+      "description": "The result is equal to the square root of varPop.",
+      "example": "select stddevPop(123)"
+    },
+    {
+      "name": "stddevPopStable",
+      "title": "stddevPopStable(expr)",
+      "description": "The result is equal to the square root of varPop.",
+      "example": "select stddevPopStable(123)"
+    },
+    {
+      "name": "stddevSamp",
+      "title": "stddevSamp(expr)",
+      "description": "The result is equal to the square root of varSamp.",
+      "example": "select stddevSamp(123)"
+    },
+    {
+      "name": "stddevSampStable",
+      "title": "stddevSampStable(expr)",
+      "description": "The result is equal to the square root of varSamp.",
+      "example": "select stddevSampStable(123)"
+    },
+    {
+      "name": "varPop",
+      "title": "varPop(expr)",
+      "description": "Calculates the amount Σ((x - x̅)^2) / n, where n is the sample size and x̅is the average value of x.",
+      "example": "select varPop(123)"
+    },
+    {
+      "name": "varPopStable",
+      "title": "varPopStable(expr)",
+      "description": "Calculates the amount Σ((x - x̅)^2) / n, where n is the sample size and x̅is the average value of x.",
+      "example": "select varPopStable(123)"
+    },
+    {
+      "name": "varSamp",
+      "title": "varSamp(expr)",
+      "description": "Calculates the amount Σ((x - x̅)^2) / (n - 1), where n is the sample size and x̅is the average value of x.",
+      "example": "select varSamp(123)"
+    },
+    {
+      "name": "covarPop",
+      "title": "covarPop(x, y)",
+      "description": "Calculates the value of Σ((x - x̅)(y - y̅)) / n.",
+      "example": "select covarPop(12, 10)"
+    },
+    {
+      "name": "covarPopStable",
+      "title": "covarPopStable(x, y)",
+      "description": "Calculates the value of Σ((x - x̅)(y - y̅)) / n.",
+      "example": "select covarPopStable(12, 10)"
+    },
+    {
+      "name": "covarSamp",
+      "title": "covarSamp(x, y)",
+      "description": "Calculates the value of Σ((x - x̅)(y - y̅)) / (n - 1).",
+      "example": "select covarSamp(12, 12)"
+    },
+    {
+      "name": "covarSampStable",
+      "title": "covarSampStable(x, y)",
+      "description": "Calculates the value of Σ((x - x̅)(y - y̅)) / (n - 1).",
+      "example": "select covarSampStable(12, 12)"
+    },
+    {
+      "name": "anyHeavy",
+      "title": "anyHeavy(column)",
+      "description": "Selects a frequently occurring value using the heavy hitters algorithm. If there is a value that occurs more than in half the cases in each of the query’s execution threads, this value is returned. Normally, the result is nondeterministic.",
+      "example": "SELECT anyHeavy(AirlineID) FROM ontime"
+    },
+    {
+      "name": "anyLast",
+      "title": "anyLast(column)",
+      "description": "Selects the last value encountered. The result is just as indeterminate as for the any function.",
+      "example": "SELECT anyLast(x) FROM values('x Int64', 1, 2, 3, 4)"
+    },
+    {
+      "name": "argMin",
+      "title": "argMin(arg, val)",
+      "description": "Calculates the arg value for a minimum val value. If there are several different values of arg for minimum values of val, returns the first of these values encountered.",
+      "example": "SELECT argMin(user, salary) FROM salary"
+    },
+    {
+      "name": "avgWeighted",
+      "title": "avgWeighted(x, weight)",
+      "description": "Calculates the weighted arithmetic mean.",
+      "example": "SELECT avgWeighted(x, w)\nFROM values('x Int8, w Int8', (4, 1), (1, 0), (10, 2))"
+    },
+    {
+      "name": "topK",
+      "title": "topK(N)(column)",
+      "description": "Returns an array of the approximately most frequent values in the specified column. The resulting array is sorted in descending order of approximate frequency of values (not by the values themselves).\n\nImplements the Filtered Space-Saving algorithm for analyzing TopK, based on the reduce-and-combine algorithm from Parallel Space Saving.",
+      "example": "SELECT topK(3)(x) FROM values('x Int8', 1, 5, 3, 4, 6)"
+    },
+    {
+      "name": "topKWeighted",
+      "title": "topKWeighted(N)(column)",
+      "description": "Returns an array of the approximately most frequent values in the specified column. The resulting array is sorted in descending order of approximate frequency of values (not by the values themselves). Additionally, the weight of the value is taken into account.",
+      "example": "SELECT topKWeighted(10)(number, number) FROM numbers(1000)"
+    },
+    {
+      "name": "groupArray",
+      "title": "groupArray(x)",
+      "description": "Creates an array of argument values. Values can be added to the array in any (indeterminate) order.",
+      "example": "select id, groupArray(10)(name) from default.ck group by id;"
+    },
+    {
+      "name": "groupUniqArray",
+      "title": "groupUniqArray(x)",
+      "description": "Creates an array from different argument values. Memory consumption is the same as for the uniqExact function.",
+      "example": "select id, groupUniqArray(name) from default.ck group by id;"
+    },
+    {
+      "name": "groupArrayInsertAt",
+      "title": "groupArrayInsertAt(default_x, size)(x, pos)",
+      "description": "Inserts a value into the array at the specified position.",
+      "example": "SELECT groupArrayInsertAt(toString(number), number * 2) FROM numbers(5)"
+    },
+    {
+      "name": "groupArrayMovingAvg",
+      "title": "groupArrayMovingAvg(numbers_for_summing)",
+      "description": "The function can take the window size as a parameter. If left unspecified, the function takes the window size equal to the number of rows in the column.",
+      "example": "SELECT\n    groupArrayMovingAvg(int) AS I,\n    groupArrayMovingAvg(float) AS F,\n    groupArrayMovingAvg(dec) AS D\nFROM t"
+    },
+    {
+      "name": "sumWithOverflow",
+      "title": "sumWithOverflow(column)",
+      "description": "Computes the sum of the numbers, using the same data type for the result as for the input parameters. If the sum exceeds the maximum value for this data type, it is calculated with overflow.\n\nOnly works for numbers.",
+      "example": "select sumWithOverflow(number) from numbers(100)"
+    },
+    {
+      "name": "sumMap",
+      "title": "sumMap(key, value) or sumMap(Tuple(key, value))",
+      "description": "Totals the value array according to the keys specified in the key array.\n\nPassing tuple of keys and values arrays is a synonym to passing two arrays of keys and values.\n\nThe number of elements in key and value must be the same for each row that is totaled.\n\nReturns a tuple of two arrays: keys in sorted order, and values \u200B\u200Bsummed for the corresponding keys.",
+      "example": "SELECT\n    timeslot,\n    sumMap(statusMap.status, statusMap.requests),\n    sumMap(statusMapTuple)\nFROM sum_map\nGROUP BY timeslot"
+    },
+    {
+      "name": "minMap",
+      "title": "minMap(key, value) or minMap(Tuple(key, value))",
+      "description": "Calculates the minimum from value array according to the keys specified in the key array.\n\nPassing a tuple of keys and value \u200B\u200Barrays is identical to passing two arrays of keys and values.\n\nThe number of elements in key and value must be the same for each row that is totaled.\n\nReturns a tuple of two arrays: keys in sorted order, and values calculated for the corresponding keys.",
+      "example": "SELECT minMap(a, b)\nFROM values('a Array(Int32), b Array(Int64)', ([1, 2], [2, 2]), ([2, 3], [1, 1]))"
+    },
+    {
+      "name": "maxMap",
+      "title": "maxMap(key, value) or maxMap(Tuple(key, value))",
+      "description": "Calculates the maximum from value array according to the keys specified in the key array.\n\nPassing a tuple of keys and value arrays is identical to passing two arrays of keys and values.\n\nThe number of elements in key and value must be the same for each row that is totaled.\n\nReturns a tuple of two arrays: keys and values calculated for the corresponding keys.",
+      "example": "SELECT maxMap(a, b)\nFROM values('a Array(Int32), b Array(Int64)', ([1, 2], [2, 2]), ([2, 3], [1, 1]))"
+    },
+    {
+      "name": "skewSamp",
+      "title": "skewSamp(expr)",
+      "description": "Computes the sample skewness of a sequence.\n\nIt represents an unbiased estimate of the skewness of a random variable if passed values form its sample.",
+      "example": "SELECT skewSamp(value) FROM series_with_value_column;"
+    },
+    {
+      "name": "skewPop",
+      "title": "skewPop(expr)",
+      "description": "Computes the skewness of a sequence.",
+      "example": "SELECT skewPop(value) FROM series_with_value_column"
+    },
+    {
+      "name": "kurtSamp",
+      "title": "kurtSamp(expr)",
+      "description": "Computes the sample kurtosis of a sequence.\n\nIt represents an unbiased estimate of the kurtosis of a random variable if passed values form its sample.",
+      "example": "SELECT kurtSamp(value) FROM series_with_value_column;"
+    },
+    {
+      "name": "kurtPop",
+      "title": "kurtPop(expr)",
+      "description": "Computes the kurtosis of a sequence.",
+      "example": "SELECT kurtPop(value) FROM series_with_value_column;"
+    },
+    {
+      "name": "uniq",
+      "title": "uniq(x[, ...])",
+      "description": "Calculates the approximate number of different values of the argument.",
+      "example": "SELECT uniq(name) FROM t"
+    },
+    {
+      "name": "uniqExact",
+      "title": "uniqExact(x[, ...])",
+      "description": "Calculates the exact number of different argument values.",
+      "example": "SELECT uniqExact(name) FROM t"
+    },
+    {
+      "name": "uniqCombined",
+      "title": "uniqCombined(HLL_precision)(x[, ...])",
+      "description": "Calculates the approximate number of different argument values",
+      "example": "SELECT uniqCombined(name) FROM t"
+    },
+    {
+      "name": "uniqCombined64",
+      "title": "uniqCombined64(HLL_precision)(x[, ...])",
+      "description": "Same as uniqCombined, but uses 64-bit hash for all data types.",
+      "example": "SELECT uniqCombined64(name) FROM t"
+    },
+    {
+      "name": "uniqHLL12",
+      "title": "uniqHLL12(x[, ...])",
+      "description": "Calculates the approximate number of different argument values, using the HyperLogLog algorithm.",
+      "example": "SELECT uniqHLL12(name) FROM t"
+    },
+    {
+      "name": "quantile",
+      "title": "quantile(level)(expr)",
+      "description": "Computes an approximate quantile of a numeric data sequence.\n\nThis function applies reservoir sampling with a reservoir size up to 8192 and a random number generator for sampling. The result is non-deterministic. To get an exact quantile, use the quantileExact function.\n\nWhen using multiple quantile* functions with different levels in a query, the internal states are not combined (that is, the query works less efficiently than it could). In this case, use the quantiles function.\n\nNote that for an empty numeric sequence, quantile will return NaN, but its quantile* variants will return either NaN or a default value for the sequence type, depending on the variant.",
+      "example": "SELECT quantile(val) FROM t"
+    },
+    {
+      "name": "quantiles",
+      "title": "quantiles(level1, level2, …)(x)",
+      "description": "These functions calculate all the quantiles of the listed levels in one pass, and return an array of the resulting values.",
+      "example": "SELECT quantiles(0)(a) FROM values('a Int64', 1, 2, 3, 4, 5, 100)"
+    },
+    {
+      "name": "quantilesExactExclusive",
+      "title": "quantilesExactExclusive(level1, level2, ...)(expr)",
+      "description": "Exactly computes the quantiles of a numeric data sequence.\n\nTo get exact value, all the passed values \u200B\u200Bare combined into an array, which is then partially sorted. Therefore, the function consumes O(n) memory, where n is a number of values that were passed. However, for a small number of values, the function is very effective.\n\nThis function is equivalent to PERCENTILE.EXC Excel function, (type R6).\n\nWorks more efficiently with sets of levels than quantileExactExclusive.",
+      "example": "SELECT quantilesExactExclusive(0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 0.999)(number) FROM numbers(1000)"
+    },
+    {
+      "name": "quantilesExactInclusive",
+      "title": "quantilesExactInclusive(level1, level2, ...)(expr)",
+      "description": "Exactly computes the quantiles of a numeric data sequence.\n\nTo get exact value, all the passed values \u200B\u200Bare combined into an array, which is then partially sorted. Therefore, the function consumes O(n) memory, where n is a number of values that were passed. However, for a small number of values, the function is very effective.\n\nThis function is equivalent to PERCENTILE.INC Excel function, (type R7).\n\nWorks more efficiently with sets of levels than quantileExactInclusive.",
+      "example": "SELECT quantilesExactInclusive(0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 0.999)(number) FROM numbers(1000)"
+    },
+    {
+      "name": "quantileExact",
+      "title": "quantileExact(level)(expr)",
+      "description": "Exactly computes the quantile of a numeric data sequence.\n\nTo get exact value, all the passed values \u200B\u200Bare combined into an array, which is then partially sorted. Therefore, the function consumes O(n) memory, where n is a number of values that were passed. However, for a small number of values, the function is very effective.\n\nWhen using multiple quantile* functions with different levels in a query, the internal states are not combined (that is, the query works less efficiently than it could). In this case, use the quantiles function.",
+      "example": "SELECT quantileExact(number) FROM numbers(10)"
+    },
+    {
+      "name": "quantileExactLow",
+      "title": "quantileExactLow(level)(expr)",
+      "description": "Similar to quantileExact, this computes the exact quantile of a numeric data sequence.\n\nTo get the exact value, all the passed values are combined into an array, which is then fully sorted. The sorting algorithm's complexity is O(N·log(N)), where N = std::distance(first, last) comparisons.\n\nThe return value depends on the quantile level and the number of elements in the selection, i.e. if the level is 0.5, then the function returns the lower median value for an even number of elements and the middle median value for an odd number of elements. Median is calculated similarly to the median_low implementation which is used in python.\n\nFor all other levels, the element at the index corresponding to the value of level * size_of_array is returned.",
+      "example": "SELECT quantileExactLow(number) FROM numbers(10)"
+    },
+    {
+      "name": "quantileExactHigh",
+      "title": "quantileExactHigh(level)(expr)",
+      "description": "Similar to quantileExact, this computes the exact quantile of a numeric data sequence.\n\nAll the passed values are combined into an array, which is then fully sorted, to get the exact value. The sorting algorithm's complexity is O(N·log(N)), where N = std::distance(first, last) comparisons.\n\nThe return value depends on the quantile level and the number of elements in the selection, i.e. if the level is 0.5, then the function returns the higher median value for an even number of elements and the middle median value for an odd number of elements. Median is calculated similarly to the median_high implementation which is used in python. For all other levels, the element at the index corresponding to the value of level * size_of_array is returned.\n\nThis implementation behaves exactly similar to the current quantileExact implementation.\n\nWhen using multiple quantile* functions with different levels in a query, the internal states are not combined (that is, the query works less efficiently than it could). In this case, use the quantiles function.",
+      "example": "SELECT quantileExactHigh(number) FROM numbers(10)"
+    },
+    {
+      "name": "quantileExactExclusive",
+      "title": "quantileExactExclusive(level)(expr)",
+      "description": "Exactly computes the quantile of a numeric data sequence.\n\nTo get exact value, all the passed values \u200B\u200Bare combined into an array, which is then partially sorted. Therefore, the function consumes O(n) memory, where n is a number of values that were passed. However, for a small number of values, the function is very effective.\n\nThis function is equivalent to PERCENTILE.EXC Excel function, (type R6).\n\nWhen using multiple quantileExactExclusive functions with different levels in a query, the internal states are not combined (that is, the query works less efficiently than it could). In this case, use the quantilesExactExclusive function.",
+      "example": "SELECT quantileExactExclusive(0.6)(number) FROM numbers(1000)"
+    },
+    {
+      "name": "quantileExactInclusive",
+      "title": "quantileExactInclusive(level)(expr)",
+      "description": "Exactly computes the quantile of a numeric data sequence.\n\nTo get exact value, all the passed values \u200B\u200Bare combined into an array, which is then partially sorted. Therefore, the function consumes O(n) memory, where n is a number of values that were passed. However, for a small number of values, the function is very effective.\n\nThis function is equivalent to PERCENTILE.INC Excel function, (type R7).\n\nWhen using multiple quantileExactInclusive functions with different levels in a query, the internal states are not combined (that is, the query works less efficiently than it could). In this case, use the quantilesExactInclusive function.",
+      "example": "SELECT quantileExactInclusive(0.6)(number) FROM  numbers(19999)"
+    },
+    {
+      "name": "quantileExactWeighted",
+      "title": "quantileExactWeighted(level)(expr, weight)",
+      "description": "Exactly computes the quantile of a numeric data sequence, taking into account the weight of each element.\n\nTo get exact value, all the passed values \u200B\u200Bare combined into an array, which is then partially sorted. Each value is counted with its weight, as if it is present weight times. A hash table is used in the algorithm. Because of this, if the passed values \u200B\u200Bare frequently repeated, the function consumes less RAM than quantileExact. You can use this function instead of quantileExact and specify the weight 1.\n\nWhen using multiple quantile* functions with different levels in a query, the internal states are not combined (that is, the query works less efficiently than it could). In this case, use the quantiles function.",
+      "example": "SELECT quantileExactWeighted(n, val) FROM t"
+    },
+    {
+      "name": "quantileTiming",
+      "title": "quantileTiming(level)(expr)",
+      "description": "With the determined precision computes the quantile of a numeric data sequence.\n\nThe result is deterministic (it does not depend on the query processing order). The function is optimized for working with sequences which describe distributions like loading web pages times or backend response times.\n\nWhen using multiple quantile* functions with different levels in a query, the internal states are not combined (that is, the query works less efficiently than it could). In this case, use the quantiles function.",
+      "example": "SELECT quantileTiming(number) FROM numbers(1000)"
+    },
+    {
+      "name": "quantileTimingWeighted",
+      "title": "quantileTimingWeighted(level)(expr, weight)",
+      "description": "With the determined precision computes the quantile of a numeric data sequence according to the weight of each sequence member.\n\nThe result is deterministic (it does not depend on the query processing order). The function is optimized for working with sequences which describe distributions like loading web pages times or backend response times.\n\nWhen using multiple quantile* functions with different levels in a query, the internal states are not combined (that is, the query works less efficiently than it could). In this case, use the quantiles function.",
+      "example": "SELECT quantileTimingWeighted(response_time, weight) FROM t"
+    },
+    {
+      "name": "quantilesTimingWeighted",
+      "title": "quantilesTimingWeighted(level)(expr, weight)",
+      "description": "Same as quantileTimingWeighted, but accept multiple parameters with quantile levels and return an Array filled with many values of that quantiles.",
+      "example": "SELECT quantilesTimingWeighted(0,5, 0.99)(response_time, weight) FROM t\n"
+    }
+  ],
+  "Data Types": [
+    {
+      "name": "UInt8",
+      "title": "Int8",
+      "description": "[-128 : 127]"
+    },
+    {
+      "name": "Int16",
+      "title": "Int16",
+      "description": "[-32768 : 32767]"
+    },
+    {
+      "name": "Int32",
+      "title": "Int32",
+      "description": "[-2147483648 : 2147483647]"
+    },
+    {
+      "name": "Int64",
+      "title": "Int64",
+      "description": "[-9223372036854775808 : 9223372036854775807]"
+    },
+    {
+      "name": "Int128",
+      "title": "Int128",
+      "description": "[-170141183460469231731687303715884105728 : 170141183460469231731687303715884105727]"
+    },
+    {
+      "name": "Int256",
+      "title": "Int256",
+      "description": "[-57896044618658097711785492504343953926634992332820282019728792003956564819968 : 57896044618658097711785492504343953926634992332820282019728792003956564819967]\n"
+    },
+    {
+      "name": "UInt8",
+      "title": "UInt8",
+      "description": "[0 : 255]"
+    },
+    {
+      "name": "UInt16",
+      "title": "UInt16",
+      "description": "[0 : 65535]"
+    },
+    {
+      "name": "UInt32",
+      "title": "UInt32",
+      "description": "[0 : 4294967295]"
+    },
+    {
+      "name": "UInt64",
+      "title": "UInt64",
+      "description": "[0 : 18446744073709551615]"
+    },
+    {
+      "name": "UInt128",
+      "title": "UInt128",
+      "description": "[0 : 340282366920938463463374607431768211455]"
+    },
+    {
+      "name": "UInt256",
+      "title": "UInt256",
+      "description": "[0 : 115792089237316195423570985008687907853269984665640564039457584007913129639935]"
+    },
+    {
+      "name": "Float32",
+      "title": "Float32",
+      "description": ""
+    },
+    {
+      "name": "Float64",
+      "title": "Float64",
+      "description": ""
+    },
+    {
+      "name": "Decimal32",
+      "title": "Decimal32",
+      "description": "S(synonym): [0, P], P(precision): [ 1 : 9 ],Range Decimal32(S):( -1 * 10^(9 - S), 1 * 10^(9 - S) )"
+    },
+    {
+      "name": "Decimal64",
+      "title": "Decimal64",
+      "description": "S(synonym): [0, P], P(precision): [ 10 : 18 ],Range Decimal64(S):( -1 * 10^(18 - S), 1 * 10^(18 - S) )"
+    },
+    {
+      "name": "Decimal128",
+      "title": "Decimal128",
+      "description": "S(synonym): [0, P], P(precision): [ 19 : 38 ],Range Decimal128(S):( -1 * 10^(38 - S), 1 * 10^(38 - S) )"
+    },
+    {
+      "name": "Decimal256",
+      "title": "Decimal256",
+      "description": "S(synonym): [0, P], P(precision): [ 39 : 76 ],Range Decimal256(S):( -1 * 10^(76 - S), 1 * 10^(76 - S) )"
+    },
+    {
+      "name": "Bool",
+      "title": "Bool",
+      "description": "true(1), false(0)"
+    },
+    {
+      "name": "String",
+      "title": "String",
+      "description": "Strings of an arbitrary length. The length is not limited. The value can contain an arbitrary set of bytes, including null bytes."
+    },
+    {
+      "name": "Date",
+      "title": "Date",
+      "description": "Supported range of values: [1970-01-01, 2149-06-06]."
+    },
+    {
+      "name": "Date32",
+      "title": "Date32",
+      "description": "A date. Supports the date range same with Datetime64. Stored in four bytes as the number of days since 1925-01-01. Allows storing values till 2283-11-11."
+    },
+    {
+      "name": "Datetime",
+      "title": "Datetime",
+      "description": "Allows to store an instant in time, that can be expressed as a calendar date and a time of a day. Supported range of values: [1970-01-01 00:00:00, 2106-02-07 06:28:15]."
+    },
+    {
+      "name": "Datetime64",
+      "title": "Datetime64",
+      "description": "Allows to store an instant in time, that can be expressed as a calendar date and a time of a day. Supported range of values: [1925-01-01 00:00:00, 2283-11-11 23:59:59.99999999] "
+    }
+  ],
+  "String": [
+    {
+      "name": "empty",
+      "title": "empty(string): int",
+      "description": "Returns 1 for an empty string or 0 for a non-empty string.",
+      "example": "empty('HelloWorld') == 0"
+    },
+    {
+      "name": "notEmpty",
+      "title": "notEmpty(string): int",
+      "description": "Returns 0 for an empty string or 1 for a non-empty string.",
+      "example": "notEmpty('Hello World') == 1"
+    },
+    {
+      "name": "length",
+      "title": "length(string): long",
+      "description": "Returns the length of a string in bytes (not in characters, and not in code points).",
+      "example": "length('Hello World') == 11"
+    },
+    {
+      "name": "lengthUTF8",
+      "title": "lengthUTF8(string): long",
+      "description": "Returns the length of a string in Unicode code points (not in characters).",
+      "example": "length('Hello World') == 11"
+    },
+    {
+      "name": "char_length",
+      "title": "char_length(string): long",
+      "description": "Returns the length of a string in Unicode code points (not in characters)",
+      "example": "char_length('Hello World') == 11"
+    },
+    {
+      "name": "character_length",
+      "title": "character_length(string): long",
+      "description": "Returns the length of a string in Unicode code points (not in characters).",
+      "example": "character_length('Hello World') == 11"
+    },
+    {
+      "name": "leftPad",
+      "title": "leftPad(string, int[, string]): string",
+      "description": "Pads the current string from the left with spaces or a specified string (multiple times, if needed) until the resulting string reaches the given length. Similarly to the MySQL LPAD function.",
+      "example": "leftPad('abc', 7, '*') == '****abc', leftPad('def', 7) == 'def'"
+    },
+    {
+      "name": "leftPadUTF8",
+      "title": "leftPadUTF8(string,int[, string])",
+      "description": "Pads the current string from the left with spaces or a specified string (multiple times, if needed) until the resulting string reaches the given length. Similarly to the MySQL LPAD function. While in the leftPad function the length is measured in bytes, here in the leftPadUTF8 function it is measured in code points.",
+      "example": "leftPadUTF8('абвг', 7, '*') == '***абвг', leftPadUTF8('дежз', 7) == 'дежз'"
+    },
+    {
+      "name": "rightPad",
+      "title": "rightPad(string, int[, string]): string",
+      "description": "Pads the current string from the right with spaces or a specified string (multiple times, if needed) until the resulting string reaches the given length. Similarly to the MySQL RPAD function.",
+      "example": "rightPad('abc', 7, '*') == 'abc****', rightPad('abc', 7) == 'abc'"
+    },
+    {
+      "name": "rightPadUTF8",
+      "title": "rightPadUTF8(string,int[, string])",
+      "description": "Pads the current string from the right with spaces or a specified string (multiple times, if needed) until the resulting string reaches the given length. Similarly to the MySQL RPAD function. While in the rightPad function the length is measured in bytes, here in the rightPadUTF8 function it is measured in code points.",
+      "example": "rightPadUTF8('абвг', 7, '*') == 'абвг***', rightPadUTF8('абвг', 7) == 'абвг'"
+    },
+    {
+      "name": "lower",
+      "title": "lower(string): string",
+      "description": "Converts ASCII Latin symbols in a string to lowercase.",
+      "example": "lower('Hello World') == 'hello world'"
+    },
+    {
+      "name": "lcase",
+      "title": "lcase(string): string",
+      "description": "Converts ASCII Latin symbols in a string to lowercase.",
+      "example": "lcase('Hello World') == 'hello world'"
+    },
+    {
+      "name": "upper",
+      "title": "upper(string): string",
+      "description": "Converts ASCII Latin symbols in a string to uppercase.",
+      "example": "upper('Hello World') == HELLO WORLD"
+    },
+    {
+      "name": "ucase",
+      "title": "ucase(string): string",
+      "description": "Converts ASCII Latin symbols in a string to uppercase.",
+      "example": "ucase('Hello World') == HELLO WORLD"
+    },
+    {
+      "name": "lowerUTF8",
+      "title": "lowerUTF8(string): string",
+      "description": "Converts a string to lowercase, assuming the string contains a set of bytes that make up a UTF-8 encoded text.",
+      "example": "lowerUTF8('Hello World') == 'hello world'"
+    },
+    {
+      "name": "upperUTF8",
+      "title": "upperUTF8(string): string",
+      "description": "Converts a string to uppercase, assuming the string contains a set of bytes that make up a UTF-8 encoded text.",
+      "example": "upperUTF8('Hello World') == HELLO WORLD"
+    },
+    {
+      "name": "isValidUTF8",
+      "title": "isValidUTF8(string): int",
+      "description": "Returns 1, if the set of bytes is valid UTF-8 encoded, otherwise 0."
+    },
+    {
+      "name": "toValidUTF8",
+      "title": "toValidUTF8(string): string",
+      "description": "Replaces invalid UTF-8 characters by the � (U+FFFD) character. All running in a row invalid characters are collapsed into the one replacement character.",
+      "example": "toValidUTF8('a����b') == 'a�b'"
+    },
+    {
+      "name": "repeat",
+      "title": "repeat(string, int)",
+      "description": "Repeats a string as many times as specified and concatenates the replicated values as a single string",
+      "example": "repeat('abc',2) == abcabc"
+    },
+    {
+      "name": "reverse",
+      "title": "reverse(string): string",
+      "description": "Reverses the string (as a sequence of bytes).",
+      "example": "reverse('abc') == 'cba'"
+    },
+    {
+      "name": "reverseUTF8",
+      "title": "reverseUTF8(string): string",
+      "description": "Reverses a sequence of Unicode code points, assuming that the string contains a set of bytes representing a UTF-8 text. Otherwise, it does something else (it does not throw an exception).",
+      "example": ""
+    },
+    {
+      "name": "format",
+      "description": "Formatting constant pattern with the string listed in the arguments. `pattern` is a simplified Python format pattern. Format string contains “replacement fields” surrounded by curly braces `{}`. Anything that is not contained in braces is considered literal text, which is copied unchanged to the output. If you need to include a brace character in the literal text, it can be escaped by doubling: `{{` and `}}`. Field names can be numbers (starting from zero) or empty (then they are treated as consequence numbers).",
+      "example": "format('{1} {0} {1}', 'World', 'Hello') = Hello World Hello"
+    },
+    {
+      "name": "concat",
+      "title": "concat(string1, string2, ...)",
+      "description": "Concatenates the strings listed in the arguments, without a separator.",
+      "example": "concat('Hello',' ','World') = 'Hello World'"
+    },
+    {
+      "name": "concatAssumeInjective",
+      "title": "concatAssumeInjective(string1, string2, ...)",
+      "description": "Same as concat, the difference is that you need to ensure that concat(s1, s2, ...) → sn is injective, it will be used for optimization of GROUP BY. The function is named “injective” if it always returns different result for different values of arguments. In other words: different arguments never yield identical result."
+    },
+    {
+      "name": "substring",
+      "title": "substring(s, offset, length)",
+      "description": "Returns a substring starting with the byte from the ‘offset’ index that is ‘length’ bytes long. Character indexing starts from one . The ‘offset’ and ‘length’ arguments must be constants.",
+      "example": "substring('Hello World', 1, 5) == 'Hello'"
+    },
+    {
+      "name": "mid",
+      "title": "mid(s, offset, length)",
+      "description": "Returns a substring starting with the byte from the ‘offset’ index that is ‘length’ bytes long. Character indexing starts from one . The ‘offset’ and ‘length’ arguments must be constants.",
+      "example": "mid('Hello World', 1, 5) == 'Hello'"
+    },
+    {
+      "name": "substr",
+      "title": "substr(s, offset, length)",
+      "description": "Returns a substring starting with the byte from the ‘offset’ index that is ‘length’ bytes long. Character indexing starts from one . The ‘offset’ and ‘length’ arguments must be constants.",
+      "example": "substr('Hello World', 1, 5) == 'Hello'"
+    },
+    {
+      "name": "substringUTF8",
+      "title": "substringUTF8(s, offset, length)",
+      "description": "The same as ‘substring’, but for Unicode code points. "
+    },
+    {
+      "name": "appendTrailingCharIfAbsent",
+      "title": "appendTrailingCharIfAbsent(s, c)",
+      "description": "If the ‘s’ string is non-empty and does not contain the ‘c’ character at the end, it appends the ‘c’ character to the end.",
+      "example": "appendTrailingCharIfAbsent('string', 'c') == 'stringc'"
+    },
+    {
+      "name": "convertCharset",
+      "title": "convertCharset(s, from, to)",
+      "description": "Returns the string ‘s’ that was converted from the encoding in ‘from’ to the encoding in ‘to’.",
+      "example": "convertCharset('data-insider', 'utf-8', 'utf-16') == '��data-insider'"
+    },
+    {
+      "name": "TO_BASE64",
+      "title": "TO_BASE64(s)",
+      "description": "Encodes string into base64",
+      "example": "TO_BASE64('data-insider') == 'ZGF0YS1pbnNpZGVy'"
+    },
+    {
+      "name": "base64Encode",
+      "title": "base64Encode(s)",
+      "description": "Encodes string into base64",
+      "example": "base64Encode('data-insider') == 'ZGF0YS1pbnNpZGVy'"
+    },
+    {
+      "name": "base64Decode",
+      "title": "base64Decode(s)",
+      "description": "Decode base64-encoded string ‘s’ into original string. In case of failure raises an exception.",
+      "example": "base64Decode('ZGF0YS1pbnNpZGVy') == 'data-insider'"
+    },
+    {
+      "name": "FROM_BASE64",
+      "title": "FROM_BASE64(s)",
+      "description": "Decode base64-encoded string ‘s’ into original string. In case of failure raises an exception.",
+      "example": "FROM_BASE64('ZGF0YS1pbnNpZGVy') == 'data-insider'"
+    },
+    {
+      "name": "tryBase64Decode",
+      "title": "tryBase64Decode(s)",
+      "description": "Similar to base64Decode, but in case of error an empty string would be returned.",
+      "example": "tryBase64Decode('ZGF0YS1pbnNpZGVy') == 'data-insider'"
+    },
+    {
+      "name": "endsWith",
+      "title": "endsWith(s, suffix)",
+      "description": "Returns whether to end with the specified suffix. Returns 1 if the string ends with the specified suffix, otherwise it returns 0.",
+      "example": "endsWith ('Data Insider', 'Insider') == 1"
+    },
+    {
+      "name": "startsWith",
+      "title": "startsWith(str, prefix)",
+      "description": "Returns 1 whether string starts with the specified prefix, otherwise it returns 0.",
+      "example": "startsWith('Data Insider', 'Data') == 1"
+    },
+    {
+      "name": "trim",
+      "title": "trim([[LEADING|TRAILING|BOTH] trim_character FROM] input_string)",
+      "description": "Removes all specified characters from the start or end of a string.By default removes all consecutive occurrences of common whitespace (ASCII character 32) from both ends of a string.",
+      "example": "trim(BOTH ' ()' FROM '(   Hello, world!   )') = Hello, world!"
+    },
+    {
+      "name": "trimLeft",
+      "title": "trimLeft(input_string)",
+      "description": "Removes all consecutive occurrences of common whitespace (ASCII character 32) from the beginning of a string. It doesn’t remove other kinds of whitespace characters (tab, no-break space, etc.).",
+      "example": "trimLeft('     Hello, world!     ') == 'Hello, world!     '"
+    },
+    {
+      "name": "trimRight",
+      "title": "trimRight(input_string)",
+      "description": "Removes all consecutive occurrences of common whitespace (ASCII character 32) from the end of a string. It doesn’t remove other kinds of whitespace characters (tab, no-break space, etc.).",
+      "example": "trimRight('     Hello, world!     ') == '     Hello, world!'"
+    },
+    {
+      "name": "trimBoth",
+      "title": "trimBoth(input_string)",
+      "description": "Removes all consecutive occurrences of common whitespace (ASCII character 32) from the end of a string. It doesn’t remove other kinds of whitespace characters (tab, no-break space, etc.).",
+      "example": "trimBoth('     Hello, world!     ') == 'Hello, world!'"
+    },
+    {
+      "name": "CRC32",
+      "title": "CRC32(s)",
+      "description": "Returns the CRC32 checksum of a string, using CRC-32-IEEE 802.3 polynomial and initial value 0xffffffff.",
+      "example": "CRC32 ('Data Insider') == 1716011347"
+    },
+    {
+      "name": "CRC32IEEE",
+      "title": "CRC32IEEE(s)",
+      "description": "Returns the CRC32 checksum of a string, using CRC-32-IEEE 802.3 polynomial.",
+      "example": "CRC32IEEE ('Data Insider') == 496863036"
+    },
+    {
+      "name": "CRC64",
+      "title": "CRC64(s)",
+      "description": "Returns the CRC64 checksum of a string, using CRC-64-ECMA polynomial.",
+      "example": "CRC64('Data Insider') == 8923905652228474000"
+    },
+    {
+      "name": "normalizeQuery",
+      "title": "normalizeQuery(s)",
+      "description": "Replaces literals, sequences of literals and complex aliases with placeholders.",
+      "example": "normalizeQuery('[1, 2, 3, x]') == '[?.., x]'"
+    },
+    {
+      "name": "normalizedQueryHash",
+      "title": "normalizedQueryHash(string)",
+      "description": "Returns identical 64bit hash values without the values of literals for similar queries. It helps to analyze query log.",
+      "example": "normalizedQueryHash('SELECT 1 AS `xyz`') == 8735023017302213000"
+    },
+    {
+      "name": "normalizeUTF8NFC",
+      "title": "normalizeUTF8NFC(string)",
+      "description": "Converts a string to NFC normalized form, assuming the string contains a set of bytes that make up a UTF-8 encoded text.",
+      "example": "SELECT length('â'), normalizeUTF8NFC('â') AS nfc, length(nfc) AS nfc_len \n//2 â 2"
+    },
+    {
+      "name": "normalizeUTF8NFD",
+      "title": "normalizeUTF8NFD(string)",
+      "description": "Converts a string to NFD normalized form, assuming the string contains a set of bytes that make up a UTF-8 encoded text.",
+      "example": "SELECT length('â'), normalizeUTF8NFD('â') AS nfd, length(nfd) AS nfd_len \n//2 â 3 "
+    },
+    {
+      "name": "normalizeUTF8NFKC",
+      "title": "normalizeUTF8NFKC(string)",
+      "description": "Converts a string to NFKC normalized form, assuming the string contains a set of bytes that make up a UTF-8 encoded text.",
+      "example": "SELECT length('â'), normalizeUTF8NFKC('â') AS nfkc, length(nfkc) AS nfkc_len \n//2 â 2 "
+    },
+    {
+      "name": "normalizeUTF8NFKD",
+      "title": "normalizeUTF8NFKD(string)",
+      "description": "Converts a string to NFKD normalized form, assuming the string contains a set of bytes that make up a UTF-8 encoded text.",
+      "example": "SELECT length('â'), normalizeUTF8NFKD('â') AS nfkd, length(nfkd) AS nfkd_len\n//2 â 3 "
+    },
+    {
+      "name": "encodeXMLComponent",
+      "title": "encodeXMLComponent(s)",
+      "description": "Escapes characters to place string into XML text node or attribute.",
+      "example": "SELECT encodeXMLComponent('Hello, \"world\"!') \n//Hello, &quot;world&quot;!"
+    },
+    {
+      "name": "decodeXMLComponent",
+      "title": "decodeXMLComponent(s)",
+      "description": "Replaces XML predefined entities with characters. Predefined entities are &quot; &amp; &apos; &gt; &lt;This function also replaces numeric character references with Unicode characters. Both decimal (like &#10003;) and hexadecimal (&#x2713;) forms are supported.",
+      "example": "SELECT decodeXMLComponent('Hello, &quot;world&quot;!')\n//Hello, \"world\"!"
+    },
+    {
+      "name": "extractTextFromHTML",
+      "title": "extractTextFromHTML(htmlString)",
+      "description": "A function to extract text from HTML or XHTML. It does not necessarily 100% conform to any of the HTML, XML or XHTML standards, but the implementation is reasonably accurate and it is fast. The rules are the following: https://clickhouse.com/docs/en/sql-reference/functions/string-functions#extracttextfromhtml",
+      "example": "SELECT extractTextFromHTML(' <p> A text <i>with</i><b>tags</b>. <!-- comments --> </p> ')\n//A text with tags ."
+    }
+  ],
+  "Date": [
+    {
+      "name": "timeZone",
+      "title": "timeZone",
+      "description": "Returns the timezone of the server. If it is executed in the context of a distributed table, then it generates a normal column with values relevant to each shard. Otherwise it produces a constant value.",
+      "example": "SELECT timeZone()\n//UTC"
+    },
+    {
+      "name": "toTimeZone",
+      "title": "toTimeZone(date_or_datetime, timezone)",
+      "description": "Convert time or date and time to(DateTime64) the specified time zone(string).",
+      "example": "SELECT toDateTime('2019-01-01 00:00:00', 'UTC') AS time_utc,\ntoTimeZone(time_utc, 'Asia/Yekaterinburg'),\ntoTimeZone(time_utc, 'US/Samoa')\n//2019-01-01T00:00Z\n2019-01-01T05:00+05:00\n2018-12-31T13:00-11:00"
+    },
+    {
+      "name": "timeZoneOf",
+      "title": "timeZoneOf(datetime)",
+      "description": "Returns the timezone name of DateTime or DateTime64 data types.",
+      "example": "SELECT timeZoneOf(now())\n//UTC"
+    },
+    {
+      "name": "timeZoneOffset",
+      "title": "timeZoneOffset(datetime)",
+      "description": "Returns a timezone offset in seconds from UTC.",
+      "example": "SELECT toDateTime('2021-04-21 10:20:30', 'America/New_York') AS Time, toTypeName(Time) AS Type,\ntimeZoneOffset(Time) AS Offset_in_seconds\n//2021-04-21T10:20:30-04:00\nDateTime('America/New_York')\n-14400"
+    },
+    {
+      "name": "toYear",
+      "title": "toYear(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the year number (AD).",
+      "example": "SELECT  toYear(now())\n//2022"
+    },
+    {
+      "name": "YEAR",
+      "title": "YEAR(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the year number (AD).",
+      "example": "SELECT  YEAR(now())\n//2022"
+    },
+    {
+      "name": "toQuarter",
+      "title": "toQuarter(date_or_datetime)",
+      "description": "Converts a date or date with time to a UInt8 number containing the quarter number.",
+      "example": "SELECT toQuarter(toDateTime('2022-06-23T11:16:17'))\n//2"
+    },
+    {
+      "name": "QUARTER",
+      "title": "QUARTER(date_or_datetime)",
+      "description": "Converts a date or date with time to a UInt8 number containing the quarter number.",
+      "example": "SELECT QUARTER(toDateTime('2022-06-23T11:16:17'))\n//2"
+    },
+    {
+      "name": "toMonth",
+      "title": "toMonth(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the month number (1-12).",
+      "example": "SELECT  toMonth(toDateTime('2022-06-23T11:16:17'))\n//6"
+    },
+    {
+      "name": "MONTH",
+      "title": "MONTH(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the month number (1-12).",
+      "example": "SELECT  MONTH(toDateTime('2022-06-23T11:16:17'))\n//6"
+    },
+    {
+      "name": "toDayOfYear",
+      "title": "toDayOfYear(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the number of the day of the year (1-366).",
+      "example": "SELECT  toDayOfYear(toDateTime('2022-06-23T11:16:17'))\n//174"
+    },
+    {
+      "name": "DAYOFYEAR",
+      "title": "DAYOFYEAR(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the number of the day of the year (1-366).",
+      "example": "SELECT  DAYOFYEAR(toDateTime('2022-06-23T11:16:17'))\n//174"
+    },
+    {
+      "name": "toDayOfMonth",
+      "title": "toDayOfMonth(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the number of the day of the month (1-31).",
+      "example": "SELECT  toDayOfMonth(toDateTime('2022-06-23T11:16:17'))\n//23"
+    },
+    {
+      "name": "DAYOFMONTH",
+      "title": "DAYOFMONTH(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the number of the day of the month (1-31).",
+      "example": "SELECT  DAYOFMONTH(toDateTime('2022-06-23T11:16:17'))\n//23"
+    },
+    {
+      "name": "DAY",
+      "title": "DAY(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the number of the day of the month (1-31).",
+      "example": "SELECT  DAY(toDateTime('2022-06-23T11:16:17'))\n//23"
+    },
+    {
+      "name": "toDayOfWeek",
+      "title": "toDayOfWeek(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the number of the day of the week (Monday is 1, and Sunday is 7).",
+      "example": "SELECT  toDayOfWeek(toDateTime('2022-06-23T11:16:17'))\n//4"
+    },
+    {
+      "name": "DAYOFWEEK",
+      "title": "DAYOFWEEK(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the number of the day of the week (Monday is 1, and Sunday is 7).",
+      "example": "SELECT  DAYOFWEEK(toDateTime('2022-06-23T11:16:17'))\n//4"
+    },
+    {
+      "name": "toHour",
+      "title": "toHour(datetime)",
+      "description": "Converts a date with time to a  number containing the number of the hour in 24-hour time (0-23)",
+      "example": "SELECT  toHour(toDateTime('2022-06-23T11:16:17'))\n//11"
+    },
+    {
+      "name": "HOUR",
+      "title": "HOUR(datetime)",
+      "description": "Converts a date with time to a  number containing the number of the hour in 24-hour time (0-23)",
+      "example": "SELECT  HOUR(toDateTime('2022-06-23T11:16:17'))\n//11"
+    },
+    {
+      "name": "MINUTE",
+      "title": "MINUTE(datetime)",
+      "description": "Converts a date with time to a number containing the number of the minute of the hour (0-59).",
+      "example": "SELECT  MINUTE(toDateTime('2022-06-23T11:16:17'))\n//16"
+    },
+    {
+      "name": "toMinute",
+      "title": "toMinute(datetime)",
+      "description": "Converts a date with time to a number containing the number of the minute of the hour (0-59).",
+      "example": "SELECT  toMinute(toDateTime('2022-06-23T11:16:17'))\n//16"
+    },
+    {
+      "name": "toSecond",
+      "title": "toSecond(datetime)",
+      "description": "Converts a date with time to a UInt8 number containing the number of the second in the minute (0-59).Leap seconds are not accounted for.",
+      "example": "SELECT  toSecond(toDateTime('2022-06-23T11:16:17'))\n//17"
+    },
+    {
+      "name": "SECOND",
+      "title": "SECOND(datetime)",
+      "description": "Converts a date with time to a UInt8 number containing the number of the second in the minute (0-59).Leap seconds are not accounted for.",
+      "example": "SELECT  SECOND(toDateTime('2022-06-23T11:16:17'))\n//17"
+    },
+    {
+      "name": "toUnixTimestamp",
+      "title": "toUnixTimestamp(value, [timezone])",
+      "description": "For DateTime argument: converts value(datetime or string with timezone) to the number with type UInt32 -- Unix Timestamp ",
+      "example": "SELECT toUnixTimestamp('2017-11-05 08:07:47', 'Asia/Tokyo'),toUnixTimestamp(toDateTime('2022-06-23T11:16:17')) \n//1509836867 1655982977"
+    },
+    {
+      "name": "toStartOfYear",
+      "title": "toStartOfYear(date_or_datetime)",
+      "description": "Rounds down a date or date with time to the first day of the year.Returns the date.",
+      "example": "SELECT  toStartOfYear(toDateTime('2022-06-23T11:16:17'))\n//2022-01-01"
+    },
+    {
+      "name": "toStartOfISOYear",
+      "title": "toStartOfISOYear(date_or_datetime)",
+      "description": "Rounds down a date or date with time to the first day of ISO year.Returns the date.",
+      "example": "SELECT  toStartOfISOYear(toDateTime('2022-06-23T11:16:17'))\n//2022-01-03"
+    },
+    {
+      "name": "toStartOfQuarter",
+      "title": "toStartOfQuarter(date_or_datetime)",
+      "description": "Rounds down a date or date with time to the first day of the quarter.The first day of the quarter is either 1 January, 1 April, 1 July, or 1 October.Returns the date.",
+      "example": "SELECT  toStartOfQuarter(toDateTime('2022-06-23T11:16:17'))\n//2022-04-01"
+    },
+    {
+      "name": "toStartOfMonth",
+      "title": "toStartOfMonth(date_or_datetime)",
+      "description": "Rounds down a date or date with time to the first day of the month.Returns the date.",
+      "example": "SELECT  toStartOfMonth(toDateTime('2022-06-23T11:16:17'))\n//2022-06-01"
+    },
+    {
+      "name": "toMonday",
+      "title": "toMonday(date_or_datetime)",
+      "description": "Rounds down a date or date with time to the nearest Monday.Returns the date.",
+      "example": "SELECT  toMonday(toDateTime('2022-06-23T11:16:17'))\n//2022-06-20"
+    },
+    {
+      "name": "toStartOfWeek",
+      "title": "toStartOfWeek(date_or_datetime[,mode)",
+      "description": "Rounds down a date or date with time to the nearest Sunday or Monday by mode.Returns the date.The mode argument works exactly like the mode argument to toWeek(). For the single-argument syntax, a mode value of 0 is used.",
+      "example": "SELECT  toStartOfWeek(toDateTime('2022-06-23T11:16:17'))\n//2022-06-19"
+    },
+    {
+      "name": "toStartOfDay",
+      "title": "toStartOfDay(datetime)",
+      "description": "Rounds down a date with time to the start of the day.",
+      "example": "SELECT  toStartOfDay(toDateTime('2022-06-23T11:16:17'))\n//2022-06-23T00:00"
+    },
+    {
+      "name": "toStartOfHour",
+      "title": "toStartOfHour(datetime)",
+      "description": "Rounds down a date with time to the start of the hour.",
+      "example": "SELECT  toStartOfHour(toDateTime('2022-06-23T11:16:17'))\n//2022-06-23T11:00"
+    },
+    {
+      "name": "toStartOfMinute",
+      "title": "toStartOfMinute(datetime)",
+      "description": "Rounds down a date with time to the start of the minute.",
+      "example": "SELECT  toStartOfMinute(toDateTime('2022-06-23T11:16:17'))\n//2022-06-23T11:16"
+    },
+    {
+      "name": "toStartOfSecond",
+      "title": "toStartOfSecond(value, [timezone])",
+      "description": "Truncates sub-seconds.If timezone is not specified, the function uses the timezone of the value(DateTime64) parameter.",
+      "example": "SELECT toStartOfSecond(toDateTime64('2022-06-23T11:16:17', 3))\n//2022-06-23T11:16:17"
+    },
+    {
+      "name": "toStartOfFiveMinute",
+      "title": "toStartOfFiveMinutes(datetime)",
+      "description": "Rounds down a date with time to the start of the five-minute interval.",
+      "example": "SELECT toStartOfFiveMinute(toDateTime('2022-06-23T11:16:17'))\n//2022-06-23T11:15"
+    },
+    {
+      "name": "toStartOfTenMinutes",
+      "title": "toStartOfTenMinutes(datetime)",
+      "description": "Rounds down a date with time to the start of the ten-minute interval.",
+      "example": "SELECT toStartOfTenMinutes(toDateTime('2022-06-23T11:16:17'))\n//2022-06-23T11:10"
+    },
+    {
+      "name": "toStartOfFifteenMinutes",
+      "title": "toStartOfFifteenMinutes(datetime)",
+      "description": "Rounds down the date with time to the start of the fifteen-minute interval.",
+      "example": "SELECT toStartOfFifteenMinutes(toDateTime('2022-06-23T11:16:17'))\n//2022-06-23T11:15"
+    },
+    {
+      "name": "toStartOfInterval",
+      "title": "toStartOfInterval(time_or_data, INTERVAL x unit [, time_zone])",
+      "description": "This is a generalization of other functions named toStartOf*. For example,toStartOfInterval(t, INTERVAL 1 year) returns the same as toStartOfYear(t)",
+      "example": "select toStartOfInterval(toDateTime('2022-06-23T11:16:17'), INTERVAL 1 month)\n//2022-06-01"
+    },
+    {
+      "name": "toTime",
+      "title": "toTime(datetime)",
+      "description": "Converts a date with time to a certain fixed date, while preserving the time.",
+      "example": "SELECT toTime(toDateTime('2022-06-23T11:16:17'))\n//1970-01-02T11:16:17"
+    },
+    {
+      "name": "toRelativeYearNum",
+      "title": "toRelativeYearNum(datetime)",
+      "description": "Converts a date with time or date to the number of the year, starting from a certain fixed point in the past.",
+      "example": "SELECT toRelativeYearNum(toDateTime('2022-06-23T11:16:17'))\n//2022"
+    },
+    {
+      "name": "toRelativeQuarterNum",
+      "title": "toRelativeQuarterNum(datetime)",
+      "description": "Converts a date with time or date to the number of the quarter, starting from a certain fixed point in the past.",
+      "example": "SELECT toRelativeQuarterNum(toDateTime('2022-06-23T11:16:17'))\n//8089"
+    },
+    {
+      "name": "toRelativeMonthNum",
+      "title": "toRelativeMonthNum(date_or_datetime)",
+      "description": "Converts a date with time or date to the number of the month, starting from a certain fixed point in the past.",
+      "example": "SELECT toRelativeMonthNum(toDateTime('2022-06-23T11:16:17'))\n//24270"
+    },
+    {
+      "name": "toRelativeWeekNum",
+      "title": "toRelativeWeekNum(date_or_datetime)",
+      "description": "Converts a date with time or date to the number of the week, starting from a certain fixed point in the past.",
+      "example": "SELECT toRelativeWeekNum(toDateTime('2022-06-23T11:16:17'))\n//2738"
+    },
+    {
+      "name": "toRelativeDayNum",
+      "title": "toRelativeDayNum(date_or_datetime)",
+      "description": "Converts a date with time or date to the number of the day, starting from a certain fixed point in the past.",
+      "example": "SELECT toRelativeDayNum(toDateTime('2022-06-23T11:16:17'))\n//19166"
+    },
+    {
+      "name": "toRelativeHourNum",
+      "title": "toRelativeHourNum(date_or_datetime)",
+      "description": "Converts a date with time or date to the number of the hour, starting from a certain fixed point in the past.",
+      "example": "SELECT toRelativeHourNum(toDateTime('2022-06-23T11:16:17'))\n//459995"
+    },
+    {
+      "name": "toRelativeMinuteNum",
+      "title": "toRelativeMinuteNum(date_or_datetime)",
+      "description": "Converts a date with time or date to the number of the minute, starting from a certain fixed point in the past.",
+      "example": "SELECT toRelativeMinuteNum(toDateTime('2022-06-23T11:16:17'))\n//27599716"
+    },
+    {
+      "name": "toRelativeSecondNum",
+      "title": "toRelativeSecondNum(date_or_datetime)",
+      "description": "Converts a date with time or date to the number of the second, starting from a certain fixed point in the past.",
+      "example": "SELECT toRelativeSecondNum(toDateTime('2022-06-23T11:16:17'))\n//1655982977"
+    },
+    {
+      "name": "toISOYear",
+      "title": "toISOYear(date_or_date_time)",
+      "description": "Converts a date or date with time to a number containing the ISO Year number.",
+      "example": "SELECT toISOYear(toDateTime('2022-06-23T11:16:17'))\n//2022"
+    },
+    {
+      "name": "toISOWeek",
+      "title": "toISOWeek(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the ISO Week number.",
+      "example": "SELECT toISOWeek(toDateTime('2022-06-23T11:16:17'))\n//25"
+    },
+    {
+      "name": "toWeek",
+      "title": "toWeek(date, [, mode][, Timezone])",
+      "description": "This function returns the week number for date or datetime. The following describes how the mode argument works: https://clickhouse.com/docs/en/sql-reference/functions/date-time-functions#toweekdatemode",
+      "example": "SELECT toWeek(toDateTime('2022-06-23T11:16:17'), 3)\n//25"
+    },
+    {
+      "name": "toYearWeek",
+      "title": "toYearWeek(date[,mode])",
+      "description": "Returns year and week for a date. The year in the result may be different from the year in the date argument for the first and the last week of the year.The mode argument works exactly like the mode argument to toWeek(). For the single-argument syntax, a mode value of 0 is used.",
+      "example": "SELECT toYearWeek(toDateTime('2022-06-23T11:16:17'), 3)\n//202225"
+    },
+    {
+      "name": "date_trunc",
+      "title": "date_trunc(unit, value[, timezone])",
+      "description": "Truncates date and time data to the specified part of date. unit is second, minute, hour, day, week, month, quarter or year.",
+      "example": "SELECT date_trunc('hour', toDateTime('2022-06-23T11:16:17'))\n//2022-06-23T11:00"
+    },
+    {
+      "name": "date_add",
+      "title": "date_add(unit, value, date)",
+      "description": "Adds the time interval or date interval to the provided date or date with time.",
+      "example": "SELECT date_add(YEAR, 3, toDate('2018-01-01'))\n//2021-01-01"
+    },
+    {
+      "name": "date_diff",
+      "title": "date_diff('unit', startdate, enddate, [timezone])",
+      "description": "Returns the difference between two dates or dates with time values.",
+      "example": "select dateDiff('hour', toDateTime('2018-01-01 22:00:00'), toDateTime('2018-01-02 23:00:00'))\n//25"
+    },
+    {
+      "name": "date_sub",
+      "title": "date_sub(unit, value, date)",
+      "description": "Subtracts the time interval or date interval from the provided date or date with time.",
+      "example": "select date_sub(YEAR, 3, toDate('2018-01-01'))\n//2015-01-01"
+    },
+    {
+      "name": "timestamp_add",
+      "title": "timestamp_add(date, INTERVAL value unit)",
+      "description": "Adds the specified time value with the provided date or date time value.",
+      "example": "select timestamp_add(toDate('2018-01-01'), INTERVAL 3 MONTH)\n//2018-04-01"
+    },
+    {
+      "name": "timestamp_sub",
+      "title": "timestamp_sub(unit, value, date)",
+      "description": "Subtracts the time interval from the provided date or date with time.",
+      "example": "select timestamp_sub(MONTH, 5, toDateTime('2018-12-18 01:02:03'))\n//2018-07-18T01:02:03"
+    },
+    {
+      "name": "now",
+      "title": "now([timezone])",
+      "description": "Returns the current date and time.",
+      "example": "select now()\n//2020-10-17 07:42:09"
+    },
+    {
+      "name": "today",
+      "title": "today",
+      "description": "Accepts zero arguments and returns the current date at one of the moments of request execution.The same as ‘toDate(now())’.",
+      "example": "select today()\n//2022-06-24"
+    },
+    {
+      "name": "yesterday",
+      "title": "yesterday",
+      "description": "Accepts zero arguments and returns yesterday’s date at one of the moments of request execution.The same as ‘today() - 1’.",
+      "example": "select yesterday()\n//2022-06-23"
+    },
+    {
+      "name": "timeSlot",
+      "title": "timeSlot(time_or_datetime)",
+      "description": "Rounds the time to the half hour.",
+      "example": "SELECT timeSlot(toDateTime('2022-06-23T11:16:17'))()\n//2022-06-23T11:00"
+    },
+    {
+      "name": "toYYYYMM",
+      "title": "toYYYYMM(date_or_datetime)",
+      "description": "Converts a date or date with time to a number containing the year and month number (YYYY * 100 + MM).",
+      "example": "SELECT toYYYYMM(toDateTime('2022-06-23T11:16:17'))\n//202206"
+    },
+    {
+      "name": "toYYYYMMDD",
+      "title": "toYYYYMMDD(date_or_datetime)",
+      "description": "Converts a date or date with time to a UInt32 number containing the year and month number (YYYY * 10000 + MM * 100 + DD).",
+      "example": "SELECT toYYYYMMDD(toDateTime('2022-06-23T11:16:17'))\n//20220623"
+    },
+    {
+      "name": "toYYYYMMDDhhmmss",
+      "title": "toYYYYMMDDhhmmss(date_or_datetime)",
+      "description": "Converts a date or date with time to a UInt64 number containing the year and month number (YYYY * 10000000000 + MM * 100000000 + DD * 1000000 + hh * 10000 + mm * 100 + ss).",
+      "example": "SELECT toYYYYMMDDhhmmss(toDateTime('2022-06-23T11:16:17'))\n//20220623111617"
+    },
+    {
+      "name": "addYears",
+      "title": "addYears(date_or_datetime, int)",
+      "description": "Function adds a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime. ",
+      "example": "SELECT addYears(toDate('2018-01-01'), 2)\n//2020-01-01"
+    },
+    {
+      "name": "addMonths",
+      "title": "addMonths(date_or_datetime, int)",
+      "description": "Function adds a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime. ",
+      "example": "SELECT addMonths(toDate('2018-01-01'), 2)\n//2018-03-01"
+    },
+    {
+      "name": "addWeeks",
+      "title": "addWeeks(date_or_datetime, int)",
+      "description": "Function adds a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime. ",
+      "example": "SELECT addWeeks(toDate('2018-01-01'), 2)\n//2018-01-15"
+    },
+    {
+      "name": "addDays",
+      "title": "addDays(date_or_datetime, int)",
+      "description": "Function adds a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime. ",
+      "example": "SELECT addDays(toDate('2018-01-01'), 2)\n//2018-01-03"
+    },
+    {
+      "name": "addHours",
+      "title": "addHours(date_or_datetime, int)",
+      "description": "Function adds a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime. ",
+      "example": "SELECT addHours(toDate('2018-01-01'), 2)\n//2018-01-01T02:00"
+    },
+    {
+      "name": "addMinutes",
+      "title": "addMinutes(date_or_datetime, int)",
+      "description": "Function adds a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime. ",
+      "example": "SELECT addMinutes(toDate('2018-01-01'), 2)\n//2018-01-01T00:02"
+    },
+    {
+      "name": "addSeconds",
+      "title": "addSeconds(date_or_datetime, int)",
+      "description": "Function adds a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime. ",
+      "example": "SELECT addSeconds(toDate('2018-01-01'), 2)\n//2018-01-01T00:00:02"
+    },
+    {
+      "name": "addQuarters",
+      "title": "addQuarters(date_or_datetime, int)",
+      "description": "Function adds a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime. ",
+      "example": "SELECT addQuarters(toDate('2018-01-01'), 2)\n//2018-07-01"
+    },
+    {
+      "name": "subtractYears",
+      "title": "subtractYears(date_or_datetime, int)",
+      "description": "Function subtract a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime.",
+      "example": "SELECT subtractYears(toDate('2018-01-01'), 2)\n//2016-01-01"
+    },
+    {
+      "name": "subtractMonths",
+      "title": "subtractMonths(date_or_datetime, int)",
+      "description": "Function subtract a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime.",
+      "example": "SELECT subtractMonths(toDate('2018-01-01'), 2)\n//2017-11-01"
+    },
+    {
+      "name": "subtractWeeks",
+      "title": "subtractWeeks(date_or_datetime, int)",
+      "description": "Function subtract a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime.",
+      "example": "SELECT subtractWeeks(toDate('2018-01-01'), 2)\n//2017-12-18"
+    },
+    {
+      "name": "subtractDays",
+      "title": "subtractDays(date_or_datetime, int)",
+      "description": "Function subtract a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime.",
+      "example": "SELECT subtractDays(toDate('2018-01-01'), 2)\n//2017-12-30"
+    },
+    {
+      "name": "subtractHours",
+      "title": "subtractHours(date_or_datetime, int)",
+      "description": "Function subtract a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime.",
+      "example": "SELECT subtractHours(toDate('2018-01-01'), 2)\n//2017-12-31T22:00"
+    },
+    {
+      "name": "subtractMinutes",
+      "title": "subtractMinutes(date_or_datetime, int)",
+      "description": "Function subtract a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime.",
+      "example": "SELECT subtractMinutes(toDate('2018-01-01'), 2)\n//2017-12-31T23:58"
+    },
+    {
+      "name": "subtractSeconds",
+      "title": "subtractSeconds(date_or_datetime, int)",
+      "description": "Function subtract a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime.",
+      "example": "SELECT subtractSeconds(toDate('2018-01-01'), 2)\n//2017-12-31T23:59:58"
+    },
+    {
+      "name": "subtractQuarters",
+      "title": "subtractQuarters(date_or_datetime, int)",
+      "description": "Function subtract a Date/DateTime interval to a Date/DateTime and then return the Date/DateTime.",
+      "example": "SELECT subtractQuarters(toDate('2018-01-01'), 2)\n//2017-07-01"
+    },
+    {
+      "name": "formatDateTime",
+      "title": "formatDateTime(Time, Format\\[, Timezone\\])",
+      "description": "Returns time and date values according to the determined format. To know more about format, check the link: https://clickhouse.com/docs/en/sql-reference/functions/date-time-functions#formatdatetime",
+      "example": "SELECT formatDateTime(toDate('2010-01-04'), '%g')\n//10"
+    },
+    {
+      "name": "formatDateTime",
+      "title": "formatDateTime(Time, Format\\[, Timezone\\])",
+      "description": "Returns time and date values according to the determined format. To know more about Format, check the link: https://clickhouse.com/docs/en/sql-reference/functions/date-time-functions#formatdatetime",
+      "example": "SELECT formatDateTime(toDate('2010-01-04'), '%D')\n//01/04/10"
+    },
+    {
+      "name": "dateName",
+      "title": "dateName(date_part, date)",
+      "description": "Returns specified part of date. date_part possible values: 'year', 'quarter', 'month', 'week', 'dayofyear', 'day', 'weekday', 'hour', 'minute', 'second'.",
+      "example": "SELECT dateName('year',toDateTime('2021-04-14 11:22:33'))\n//2021"
+    },
+    {
+      "name": "FROM_UNIXTIME",
+      "title": "FROM_UNIXTIME(timestamp)",
+      "description": "Function converts Unix timestamp to a calendar date and a time of a day. When there is only a single argument of Integer type, it acts in the same way as toDateTime and return DateTime type.",
+      "example": "SELECT FROM_UNIXTIME(423543535)\n//1983-06-04 10:58:55"
+    },
+    {
+      "name": "toModifiedJulianDay",
+      "title": "toModifiedJulianDay(date)",
+      "description": "Converts a Proleptic Gregorian calendar date in text form YYYY-MM-DD to a Modified Julian Day number in Int32. This function supports date from 0000-01-01 to 9999-12-31. It raises an exception if the argument cannot be parsed as a date, or the date is invalid.",
+      "example": "SELECT toModifiedJulianDay('2020-01-01')\n//58849"
+    },
+    {
+      "name": "toModifiedJulianDayOrNull",
+      "title": "toModifiedJulianDayOrNull(string_or_fixed_string)",
+      "description": "Similar to toModifiedJulianDay(), but instead of raising exceptions it returns NULL.",
+      "example": "SELECT toModifiedJulianDayOrNull('2020-01-01')\n//58849"
+    },
+    {
+      "name": "fromModifiedJulianDay",
+      "title": "fromModifiedJulianDay(string_or_fixed_string)",
+      "description": "Converts a Modified Julian Day number to a Proleptic Gregorian calendar date in text form YYYY-MM-DD. This function supports day number from -678941 to 2973119 (which represent 0000-01-01 and 9999-12-31 respectively). It raises an exception if the day number is outside of the supported range.",
+      "example": "SELECT fromModifiedJulianDay(58849)\n//2020-01-01"
+    },
+    {
+      "name": "fromModifiedJulianDayOrNull",
+      "title": "fromModifiedJulianDay(string_or_fixed_string)",
+      "description": "Similar to fromModifiedJulianDayOrNull(), but instead of raising exceptions it returns NULL.",
+      "example": "SELECT fromModifiedJulianDayOrNull(58849)\n//2020-01-01"
+    }
+  ]
+}

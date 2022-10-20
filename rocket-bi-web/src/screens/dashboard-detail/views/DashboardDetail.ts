@@ -246,6 +246,7 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
             widgetId: textWidget.id,
             widget: textWidget
           });
+          this.editTextModal.hide();
         }
       } catch (ex) {
         this.showError('Edit text failure! Try again later', ex);
@@ -256,6 +257,7 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
   handleCreateText(textWidget: TextWidget) {
     if (StringUtils.isNotEmpty(textWidget.content)) {
       WidgetModule.handleCreateTextWidget(textWidget).catch(ex => this.showError('Create text failure! Try again later', ex));
+      this.editTextModal.hide();
     }
   }
 

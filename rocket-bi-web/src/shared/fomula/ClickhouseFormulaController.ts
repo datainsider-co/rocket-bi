@@ -99,7 +99,7 @@ export class ClickhouseFormulaController implements FormulaController {
       tokenizer: {
         root: [
           [
-            /[a-z_$][\w$]*/,
+            /[0-9a-z_$][\w$]*/,
             {
               cases: {
                 '@keywords': 'keyword',
@@ -110,9 +110,9 @@ export class ClickhouseFormulaController implements FormulaController {
           [/\[.*?]/, 'field'],
 
           // numbers
-          [/\d*\.\d+([eE][-+]?\d+)?/, 'number.float'],
+          [/\d*\.\d+([eE][-+]?\d+)?\b/, 'number.float'],
           [/0[xX][0-9a-fA-F]+/, 'number.hex'],
-          [/\d+/, 'number'],
+          [/\d+\b/, 'number'],
 
           // delimiter: after number because of .\d floats
           [/[;,.]/, 'delimiter']
