@@ -1,6 +1,15 @@
 import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
 import { BaseWidget } from '@/screens/dashboard-detail/components/widget-container/BaseWidget';
-import { ChartInfo, Condition, DateSelectFilterOption, FilterMode, FilterRequest, GroupTableResponse, InputControlQuerySetting } from '@core/common/domain';
+import {
+  ChartInfo,
+  Condition,
+  DateSelectFilterOption,
+  FilterMode,
+  FilterRequest,
+  GroupTableResponse,
+  InputControlQuerySetting,
+  MainDateMode
+} from '@core/common/domain';
 import { WidgetRenderer } from '@chart/widget-renderer';
 import { ConditionData, DateHistogramConditionTypes, InputType, TableSettingColor } from '@/shared';
 import { ConditionBuilder } from '@core/common/services';
@@ -11,6 +20,8 @@ import moment from 'moment/moment';
 import { DateUtils, ListUtils } from '@/utils';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { DefaultDateFilter2 } from '@chart/date-filter/DefaultDateFilter2';
+import { DateFilterUtils } from '@chart/date-filter/DateFilterUtils';
+import { DateFilterData } from '@chart/date-filter/DateFilterData';
 
 enum DateFilterMode {
   DynamicValues = 'DynamicValues',
@@ -62,7 +73,7 @@ export default class DateFilter2 extends BaseWidget {
   @Inject({ default: undefined })
   private onChangeDynamicValues?: (values: string[]) => void;
 
-  currentDates: string[] = this.getDateSelected();
+  filterData: DateFilterData = this.getDateSelected();
 
   resize(): void {
     //Todo: Add resize method
@@ -85,13 +96,13 @@ export default class DateFilter2 extends BaseWidget {
   get containerClass(): any {
     if (this.id == -2) {
       if (this.backgroundColor) {
-        return `p-3 flex-column`;
+        return `p-2 flex-column`;
       } else {
         return `tab-filter-container${TableSettingColor.secondaryBackgroundColor}`;
       }
     } else if (this.isPreview) {
       if (this.backgroundColor) {
-        return `flex-column`;
+        return `p-2 flex-column`;
       } else {
         return `tab-filter-container${TableSettingColor.secondaryBackgroundColor}`;
       }
@@ -134,6 +145,7 @@ export default class DateFilter2 extends BaseWidget {
   private handleDateFilterSelected(dates: string[]) {
     const subType = DateHistogramConditionTypes.betweenAndIncluding;
     const filterRequest: FilterRequest | undefined = ListUtils.isEmpty(dates) ? void 0 : this.buildFilterRequest(dates, subType);
+    Log.debug('handleDateFilterSelected::', dates, filterRequest);
     if (this.isPreview) {
       //In Data builder
       this.saveTempSelectedValue(filterRequest?.condition ?? void 0);
@@ -155,8 +167,9 @@ export default class DateFilter2 extends BaseWidget {
     }
   }
 
-  handleDatesSelected(dates: string[]) {
-    this.saveFilterDate(dates);
+  handleDatesSelected(dates: string[], dateMode: MainDateMode) {
+    this.saveFilterDate(dates, dateMode);
+    Log.debug('handleDatesSelected', dates, dateMode);
     const mode = this.getMode(this.query);
     switch (mode) {
       case DateFilterMode.DynamicValues:
@@ -170,7 +183,7 @@ export default class DateFilter2 extends BaseWidget {
 
   private saveTempSelectedValue(condition: Condition | undefined) {
     _ConfigBuilderStore.setTempFilterValue({
-      value: this.currentDates,
+      value: this.filterData,
       conditions: condition
     });
   }
@@ -199,17 +212,34 @@ export default class DateFilter2 extends BaseWidget {
     return void 0;
   }
 
-  private saveFilterDate(dates: string[]) {
-    this.currentDates = dates;
+  private saveFilterDate(dates: string[], mode: MainDateMode) {
+    this.filterData = {
+      dates: dates,
+      mode: mode
+    };
+  }
+  @Watch('setting.options', { deep: true })
+  onSettingChanged() {
+    this.filterData = this.getDateSelected();
   }
 
-  getDateSelected(): string[] {
+  getDateSelected(): DateFilterData {
+    const defaultValue: any = this.setting.options.default?.setting?.value;
     const isUsingDefault = this.setting.options.default?.setting?.value != null;
-    Log.debug('getDateSelected', this.setting.options.default?.setting);
-    if (isUsingDefault) {
-      return this.setting.options.default?.setting?.value;
+    Log.debug('getDateSelected::', defaultValue, isUsingDefault);
+    if (isUsingDefault && Array.isArray(defaultValue)) {
+      return {
+        dates: this.setting.options.default?.setting?.value,
+        mode: MainDateMode.custom
+      };
+    } else if (isUsingDefault && DateFilterUtils.isDateFilterData(defaultValue)) {
+      const dates: string[] = DateFilterUtils.calculatedDates(defaultValue);
+      return {
+        dates: dates,
+        mode: defaultValue.mode
+      };
     } else {
-      return [];
+      return DateFilterUtils.defaultDateFilterData;
     }
   }
 

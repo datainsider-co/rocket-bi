@@ -42,6 +42,6 @@ export class DefaultDateFilter2 implements WidgetRenderer<DateFilter2> {
   }
 
   private renderFilter(widget: DateFilter2, h: any) {
-    return <DateSelectFilter2 dates={widget.currentDates} onSelected={widget.handleDatesSelected} />;
+    return <DateSelectFilter2 filterData={widget.filterData} onSelected={widget.handleDatesSelected} />;
   }
 }

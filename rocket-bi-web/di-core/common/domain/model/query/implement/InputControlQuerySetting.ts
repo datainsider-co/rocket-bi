@@ -10,7 +10,7 @@ import { Condition, Function, getFiltersAndSorts, InlineSqlView, OrderBy, QueryS
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 import { StringUtils } from '@/utils/StringUtils';
 import { ListUtils } from '@/utils';
-import { isArray, isString } from 'lodash';
+import { get, isArray, isString } from 'lodash';
 import { SlicerRange } from '@/shared';
 
 export class InputControlQuerySetting extends QuerySetting<InputFilterOption> implements DynamicValues {
@@ -99,6 +99,24 @@ export class InputControlQuerySetting extends QuerySetting<InputFilterOption> im
     if (isArray(defaultValues)) {
       return defaultValues;
     }
+    if (this.isDateFilterData(defaultValues)) {
+      return get(defaultValues, 'dates', []);
+    }
     return [];
+  }
+
+  getDefaultSize(): [number, number] {
+    const vizSettingType = this.getChartOption()?.className;
+    if (vizSettingType === VizSettingType.SlicerFilterSetting) {
+      return [12, 4];
+    }
+    if (vizSettingType === VizSettingType.DateSelectFilterSetting) {
+      return [12, 3];
+    }
+    return [12, 2];
+  }
+
+  private isDateFilterData(obj: any) {
+    return !!obj?.dates && !!obj?.mode;
   }
 }

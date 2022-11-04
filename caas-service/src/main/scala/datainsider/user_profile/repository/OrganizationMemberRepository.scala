@@ -11,6 +11,7 @@ import datainsider.client.util.JdbcClient
 import java.sql.ResultSet
 import scala.collection.mutable.ListBuffer
 
+@deprecated("use UserProfileRepository instead", "2022-09-15")
 trait OrganizationMemberRepository {
 
   def isExists(organizationId: Long, username: String): Boolean

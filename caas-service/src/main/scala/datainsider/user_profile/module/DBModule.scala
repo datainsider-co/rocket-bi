@@ -90,7 +90,7 @@ object DBTestModule extends TwitterModule {
   mysqlContainer.withDatabaseName(ZConfig.getString("test_db.mysql.dbname"))
   mysqlContainer.start()
 
-  val testContainer = new DockerComposeContainer(new File("./env/test/docker-compose.yml"))
+  val testContainer = new DockerComposeContainer(new File(getClass.getClassLoader.getResource("docker/docker-compose.yml").getPath))
   testContainer.withExposedService("ssdb", 8888)
 
   testContainer.start()

@@ -9,16 +9,16 @@ import com.twitter.finatra.jackson.ScalaObjectMapper
 import com.twitter.inject.Logging
 
 case class ApiError(
-                     code: Int,
-                     reason: String,
-                     message: String,
-                     data: Option[Any] = None
-                   )
+    code: Int,
+    reason: String,
+    message: String,
+    cause: Option[String] = None
+)
 
-class CustomResponseWriterImpl @Inject()(
-                                          mapper: ScalaObjectMapper
-                                        ) extends DefaultMessageBodyWriter
-  with Logging {
+class CustomResponseWriterImpl @Inject() (
+    mapper: ScalaObjectMapper
+) extends DefaultMessageBodyWriter
+    with Logging {
   override def write(obj: Any): WriterResponse = {
     obj match {
       case ex: Throwable =>

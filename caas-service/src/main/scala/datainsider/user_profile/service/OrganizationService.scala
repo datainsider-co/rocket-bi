@@ -1,25 +1,23 @@
 package datainsider.user_profile.service
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.twitter.finatra.json.utils.JsonDiffUtil
 import com.twitter.inject.Logging
 import com.twitter.util.{Future, Return, Throw}
 import datainsider.admin.service.AdminUserService
-import datainsider.client.domain.org.{OrgMember, Organization}
-import datainsider.client.exception.{BadRequestError, InternalError}
+import datainsider.client.domain.org.Organization
+import datainsider.client.exception.{BadRequestError, InternalError, NotFoundError}
 import datainsider.client.util.ZConfig
-import datainsider.user_profile.controller.http.request.{CreateOrganizationRequest, RegisterOrgRequest}
-import datainsider.user_profile.domain.Implicits._
-import datainsider.user_profile.repository.{OrganizationMemberRepository, OrganizationRepository}
-import education.x.commons.{I32IdGenerator, SsdbKVS}
 import datainsider.user_caas.domain.Page
 import datainsider.user_caas.repository.UserRepository
+import datainsider.user_profile.controller.http.request.{CreateOrganizationRequest, RegisterOrgRequest}
+import datainsider.user_profile.domain.Implicits._
+import datainsider.user_profile.repository.OrganizationRepository
 import datainsider.user_profile.service.verification.ChannelService
-import datainsider.user_profile.util.{JsonParser, Utils}
+import datainsider.user_profile.util.JsonParser
+import education.x.commons.I32IdGenerator
 import org.nutz.ssdb4j.spi.SSDB
-import scalaj.http.{Http, HttpRequest, HttpResponse}
+import scalaj.http.{Http, HttpResponse}
 
-import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -40,17 +38,22 @@ trait OrganizationService {
 
   def isOrganizationMember(organizationId: Long, username: String): Future[Boolean]
 
+  @deprecated("unused method", "since 2022-09-14")
   def removeMember(organizationId: Long, username: String): Future[Boolean]
 
+  @deprecated("unused method", "since 2022-09-14")
   def addMember(organizationId: Long, username: String, addBy: String): Future[Boolean]
 
+  @deprecated("unused method, method incompatible sass", "since 2022-09-14")
   def getJoinedOrganizationIds(username: String): Future[Seq[Long]]
 
+  @deprecated("unused method", "since 2022-09-14")
   def getJoinedOrganizations(username: String): Future[Seq[Organization]]
 
+  @deprecated("unused method", "since 2022-09-14")
   def getAllOrganizations(from: Int, size: Int): Future[Page[Organization]]
 
-  def getWithDomain(domain: String): Future[Option[Organization]]
+  def getWithDomain(domain: String): Future[Organization]
 
   /**
     * check if email already exists
@@ -68,14 +71,15 @@ trait OrganizationService {
   def updateDomain(orgId: Long, subDomain: String): Future[Boolean]
 }
 
-case class OrganizationServiceImpl @Inject() (
+case class OrganizationServiceImpl (
     idGenerator: I32IdGenerator,
     organizationRepository: OrganizationRepository,
     userRepository: UserRepository,
     adminUserService: AdminUserService,
     client: SSDB,
     dnsService: DnsService,
-    emailChannel: ChannelService
+    emailChannel: ChannelService,
+    defaultOrganizationId: Long
 ) extends OrganizationService
     with Logging {
 
@@ -98,8 +102,8 @@ case class OrganizationServiceImpl @Inject() (
   }
 
   private def buildAndCreateOrganization(request: CreateOrganizationRequest): Future[Organization] = {
-    val organization = request.buildOrganization
-    val isCreated = organizationRepository.insertOrganization(request.buildOrganization)
+    val organization = request.buildOrganization()
+    val isCreated = organizationRepository.insertOrganization(organization)
     if (isCreated) organization
     else throw InternalError(s"Fail to create organization: $organization")
   }
@@ -198,10 +202,25 @@ case class OrganizationServiceImpl @Inject() (
       organizationRepository.getAllOrganizations(from, size)
     }
 
-  override def getWithDomain(domain: String): Future[Option[Organization]] =
-    Future {
-      organizationRepository.getWith(domain)
+  override def getWithDomain(domain: String): Future[Organization] = Future {
+      organizationRepository.getWith(domain) match {
+        case Some(organization) => organization
+        case None               =>
+          logger.debug(s"Organization with domain $domain not found, use default organization")
+          getDefaultOrganization()
+      }
     }
+
+  /**
+   * get organization default for single tenant
+   */
+  @throws[NotFoundError]("if organization not found")
+  private def getDefaultOrganization(): Organization = {
+    organizationRepository.getOrganization(defaultOrganizationId) match {
+      case Some(organization) => organization
+      case None               => throw NotFoundError(s"Organization not found")
+    }
+  }
 
   override def register(request: RegisterOrgRequest): Future[Organization] = {
     for {

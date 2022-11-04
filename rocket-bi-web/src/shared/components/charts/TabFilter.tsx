@@ -15,6 +15,7 @@ import { compact, toNumber } from 'lodash';
 import { PopupUtils } from '@/utils/PopupUtils';
 import TabSelection from '@/shared/components/TabSelection.vue';
 import { ListUtils } from '@/utils';
+import { StringUtils } from '@/utils/StringUtils';
 
 enum TabMode {
   DynamicFunction = 'DynamicFunction',
@@ -44,6 +45,8 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
 
   private selected: Set<any> = this.getSelected();
 
+  keyword = '';
+
   get direction(): Direction {
     return this.setting.options.direction ?? Direction.row;
   }
@@ -62,8 +65,8 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
   get containerStyle() {
     const alignKey = this.direction == Direction.column ? 'justify-content' : 'align-self';
     return {
-      '--background-color': this.backgroundColor,
-      // '--text-color': this.setting.options.textColor,
+      'background-color': 'transparent',
+      color: this.setting.options.textColor,
       // [alignKey]: this.setting.options.align ?? 'center',
       '--background-active': this.activeColor,
       '--background-de-active': this.deActiveColor
@@ -91,12 +94,12 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
   }
 
   //
-  // get selectionStyle() {
-  //   return {
-  //     '--background-color': this.backgroundColor
-  //     // '--text-color': this.textColor
-  //   };
-  // }
+  get selectionStyle() {
+    return {
+      '--background-color': this.backgroundColor,
+      '--text-color': this.textColor
+    };
+  }
 
   get titleStyle() {
     return {
@@ -115,32 +118,42 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
 
   private buildFunctionOptions(query: TabFilterQuerySetting) {
     return new Map(
-      query.values.map((value, index) => {
-        const id = this.buildId(value, index);
-        return [
-          id,
-          {
-            displayName: value.name,
-            id: id
-          }
-        ];
-      })
-    );
+      // @ts-ignore
+      query.values
+        .map((value, index) => {
+          const id = this.buildId(value, index);
+          return [
+            id,
+            {
+              displayName: value.name,
+              id: id
+            }
+          ];
+        })
+        .filter(option => {
+          // @ts-ignore
+          return StringUtils.isIncludes(this.keyword, `${option[1].displayName}`);
+        })
+        // @ts-ignore
+        .sort((a, b) => StringUtils.compare(a[1].displayName, b[1].displayName))
+    ) as Map<string, SelectOption>;
   }
 
   private buildFilterOptions(response: TableResponse) {
     const haveLabelColumn: boolean = response.headers.length === 2;
     const valueIndex = haveLabelColumn ? TabFilter.VALUE_INDEX : TabFilter.DISPLAY_INDEX;
-    const options: [string, { displayName: any; id: string }][] = response.records.map(row => {
-      return [
-        row[valueIndex],
-        {
-          displayName: row[TabFilter.DISPLAY_INDEX],
-          id: row[valueIndex]
-        }
-      ];
-    });
-
+    const options: [string, { displayName: any; id: string }][] = response.records
+      .map(row => {
+        return [
+          row[valueIndex],
+          {
+            displayName: row[TabFilter.DISPLAY_INDEX],
+            id: row[valueIndex]
+          }
+        ];
+      })
+      .filter(option => StringUtils.isIncludes(this.keyword, `${option[1].displayName}`))
+      .sort((a, b) => StringUtils.compare(`${a[1].displayName}`, `${b[1].displayName}`)) as [string, { displayName: any; id: string }][];
     return new Map([[TabSelection.OPTION_SHOW_ALL.id, TabSelection.OPTION_SHOW_ALL], ...options]);
   }
 
@@ -165,11 +178,11 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
 
   get containerClass(): any {
     if (this.isPreview) {
-      const background = this.backgroundColor ? `${TableSettingColor.secondaryBackgroundColor}` : '';
+      const background = this.backgroundColor ? '' : `${TableSettingColor.secondaryBackgroundColor}`;
       const padding = this.id === -2 ? 'p-2' : '';
-      return `tab-filter-container ${this.directionClass} ${background} ${padding}`;
+      return `tab-filter-container ${background} ${padding}`;
     }
-    return `tab-filter-container ${this.directionClass}`;
+    return `tab-filter-container pt-2`;
   }
 
   get isFreezeTitle(): boolean {
@@ -177,17 +190,17 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
   }
 
   get infoClass(): string {
+    const margin = 'mb-2';
     switch (this.direction) {
       case Direction.row:
-        return 'horizon-tab-filter-info';
+        return `horizon-tab-filter-info ${margin}`;
       case Direction.column:
-        return 'vert-tab-filter-info';
+        return `vert-tab-filter-info ${margin}`;
     }
   }
 
   get filterClass(): string {
-    const margin = this.direction === Direction.column ? '' : 'ml-1';
-    return this.showEditComponent ? `disable ${margin}` : `${margin}`;
+    return this.showEditComponent ? `disable` : ``;
   }
 
   private handleFilterChanged(items: Set<any>) {
@@ -376,5 +389,9 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
 
   private getIndex(key: string): number {
     return toNumber(ListUtils.getLast(key.split('_')));
+  }
+
+  handleChangeKeyword(text: string) {
+    this.keyword = text;
   }
 }

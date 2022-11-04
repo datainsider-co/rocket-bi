@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   di_web:
-    image: datainsiderco/rocket-bi-web:oss
+    image: datainsiderco/rocket-bi-web:main
     container_name: di-web
     restart: always
     volumes:

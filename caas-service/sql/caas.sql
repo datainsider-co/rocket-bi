@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `user`
 
 CREATE TABLE IF NOT EXISTS `organization`
 (
+    `licence_key` varchar(255) DEFAULT NULL,
     `organization_id` bigint(20) NOT NULL,
     `owner`           varchar(255) NOT NULL,
     `name`            varchar(255) NOT NULL,
@@ -32,6 +33,8 @@ CREATE TABLE IF NOT EXISTS `organization`
     `report_time_zone_id`   varchar(255) DEFAULT 'Asia/Saigon',
     `thumbnail_url`   varchar(255) DEFAULT NULL,
     `created_time`    bigint(20) NOT NULL DEFAULT '0',
+    `updated_time`    bigint(20) DEFAULT NULL,
+    `updated_by`    varchar(255) DEFAULT NULL,
     PRIMARY KEY (`organization_id`),
     KEY               `FK_organization_0` (`owner`),
     CONSTRAINT `FK_organization_0` FOREIGN KEY (`owner`) REFERENCES `user` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -140,11 +143,11 @@ CREATE TABLE IF NOT EXISTS `api_key`
 --- create root user of single tenant organization;
 --- password reminder: first ever password used for hello account;
 INSERT IGNORE INTO `user` (organization_id, username, password, is_active, created_time)
-VALUES(0, 'root', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 1, 1636362901000);
+VALUES(0, 'root', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 1, unix_timestamp(now()) * 1000);
 
 --- create single tenant organization;
-INSERT IGNORE INTO `organization` (organization_id, name, owner, domain, is_active, report_time_zone_id, thumbnail_url, created_time)
-VALUES (0, 'Data Insider', 'root', '', 1, 'Asia/Saigon', NULL, 1636362901000);
+INSERT IGNORE INTO `organization` (organization_id, name, owner, domain, is_active, report_time_zone_id, thumbnail_url, created_time, updated_time, updated_by, licence_key)
+VALUES (0, 'Data Insider', 'root', '', 1, 'Asia/Saigon', NULL, unix_timestamp(now()) * 1000, unix_timestamp(now()) * 1000, 'root', UUID());
 
 --- add root user permission;
 INSERT IGNORE INTO `user_permissions` (organization_id, username, permission)
@@ -152,7 +155,7 @@ VALUES(0, 'root', '0:*:*:*');
 
 --- add root user profile;
 INSERT IGNORE INTO `user_profile`(organization_id, username, full_name, email, created_time, updated_time)
-VALUES(0, 'root', 'root', 'hello@gmail.com', 1636362901000, 1636362901000);
+VALUES(0, 'root', 'root', 'hello@gmail.com', unix_timestamp(now()) * 1000, unix_timestamp(now()) * 1000);
 
 --- insert supported login methods;
 INSERT IGNORE INTO `login_method_provider` (oauth_type, organization_id, oauth_config)

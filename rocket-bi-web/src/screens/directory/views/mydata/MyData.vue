@@ -63,7 +63,7 @@ export default class MyData extends Vue {
   private sortBy = '';
   private sortDirection = SortDirection.Desc;
   @Prop()
-  private readonly handler!: DirectoryListingHandler;
+  readonly handler!: DirectoryListingHandler;
 
   private get rootRoute() {
     const rootName = this.handler.getRootName();
@@ -152,7 +152,7 @@ export default class MyData extends Vue {
     this.isMobile = ChartUtils.isMobile();
   }
 
-  private createPaginationRequest(): DirectoryPagingRequest {
+  public createPaginationRequest(): DirectoryPagingRequest {
     if (this.sortBy) {
       return new DirectoryPagingRequest({
         sorts: [
@@ -273,7 +273,7 @@ export default class MyData extends Vue {
       },
       {
         icon: 'di-icon-setting',
-        click: (row: RowData) => this.$root.$emit(DirectoryListingEvents.ShowMenuSettingDirectory, row)
+        click: (row: RowData) => this.$root.$emit(DirectoryListingEvents.ShowMenuSettingDirectory, row, this.handler.getRootName())
       }
     ]);
   }

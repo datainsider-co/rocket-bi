@@ -1,4 +1,4 @@
-import { Component, Prop, Watch } from 'vue-property-decorator';
+import { Component, Inject, Prop, Provide, Watch } from 'vue-property-decorator';
 import Konva from 'konva';
 import { Log } from '@core/utils';
 import { PRIMARY_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
@@ -12,7 +12,7 @@ import { LLConnection } from '@/screens/dashboard-detail/components/relationship
 import { KonvaNodeEvent } from 'konva/types/types';
 import { StringUtils } from '@/utils/StringUtils';
 
-@Component({})
+@Component
 export default class TableSchemaItem extends DiagramItem {
   private isExpanded = false;
 
@@ -25,9 +25,8 @@ export default class TableSchemaItem extends DiagramItem {
   @Prop({ required: false, default: [] })
   private relatedColumns!: Column[];
 
-  private columnId(dbName: string, tblName: string, colName: string) {
-    return [dbName, tblName, colName].join('_');
-  }
+  @Inject('columnId')
+  private columnId!: (dbName: string, tblName: string, colName: string) => string;
 
   public hideTable() {
     this.isExpanded = false;

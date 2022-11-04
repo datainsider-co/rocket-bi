@@ -8,9 +8,10 @@ export abstract class PositionUtils {
     if (TabWidget.isTabWidget(widget)) {
       return new Position(-1, -1, 24, 16, 1);
     } else if (ChartInfo.isChartInfo(widget)) {
-      const [width, height] = widget.setting.getChartOption()?.className
-        ? SizeAsMap.get(widget.setting.getChartOption()?.className!) ?? DefaultSize
-        : DefaultSize;
+      const [width, height] = widget.setting.getDefaultSize();
+      // const [width, height] = widget.setting.getChartOption()?.className
+      //   ? SizeAsMap.get(widget.setting.getChartOption()?.className!) ?? DefaultSize
+      //   : DefaultSize;
       return new Position(-1, -1, width, height, 1);
     } else {
       return new Position(-1, -1, 8, 3, 1);

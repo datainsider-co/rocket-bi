@@ -22,7 +22,7 @@ services:
     restart: always
 
   caas_service:
-    image: datainsiderco/caas-service:oss
+    image: datainsiderco/caas-service:main
     container_name: rocket-caas-service
     restart: always
     environment:
@@ -35,7 +35,7 @@ services:
       - ssdb
 
   schema_service:
-    image: datainsiderco/schema-service:oss
+    image: datainsiderco/schema-service:main
     container_name: rocket-schema-service
     restart: always
     env_file:
@@ -53,7 +53,7 @@ services:
       - caas_service
 
   bi_service:
-    image: datainsiderco/bi-service:oss
+    image: datainsiderco/bi-service:main
     container_name: rocket-bi-service
     restart: always
     ports:
@@ -70,7 +70,7 @@ services:
       - caas_service
 
   web:
-    image: datainsiderco/rocket-bi-web:oss
+    image: datainsiderco/rocket-bi-web:main
     container_name: rocket-web
     ports:
       - 5050:8080

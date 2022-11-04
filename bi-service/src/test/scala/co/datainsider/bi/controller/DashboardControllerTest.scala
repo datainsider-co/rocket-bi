@@ -25,6 +25,8 @@ class DashboardControllerTest extends FeatureTest with BeforeAndAfterAll {
       from = 1,
       size = 100
     )
+    println(Serializer.toJson(request))
+
     val response = server.httpPost(
       s"$apiPath/list_drill_through",
       postBody = Serializer.toJson(request),

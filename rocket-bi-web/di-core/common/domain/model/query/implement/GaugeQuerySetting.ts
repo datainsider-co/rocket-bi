@@ -12,6 +12,7 @@ import {
   OrderBy,
   QuerySettingType,
   TableColumn,
+  VizSettingType,
   WidgetId
 } from '@core/common/domain/model';
 import { QuerySetting } from '../QuerySetting';
@@ -59,5 +60,13 @@ export class GaugeQuerySetting extends QuerySetting<GaugeChartOption> {
     if (this.legend) {
       this.legend = ConfigDataUtils.replaceDynamicFunction(this.legend, functions);
     }
+  }
+
+  getDefaultSize(): [number, number] {
+    const vizSettingClassName = this.getChartOption()?.className;
+    if (vizSettingClassName === VizSettingType.BulletSetting) {
+      return [16, 8];
+    }
+    return super.getDefaultSize();
   }
 }

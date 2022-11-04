@@ -24,9 +24,9 @@ export abstract class DashboardOptions {
   // static readonly ADD_DYNAMIC_CONTROL = 'Add tab';
 }
 
-export const DefaultSize = [16, 10];
+export const DefaultSize: [number, number] = [16, 10];
 export const SizeAsMap = new Map([
-  [VizSettingType.TabFilterSetting, [12, 2]],
+  [VizSettingType.TabFilterSetting, [12, 5]],
   [VizSettingType.SlicerFilterSetting, [12, 4]],
   [VizSettingType.DateSelectFilterSetting, [12, 2]],
   [VizSettingType.NumberSetting, [8, 8]],

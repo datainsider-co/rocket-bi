@@ -64,8 +64,9 @@ ul {
 
 .tab-filter-container {
   width: 100%;
+  height: 100%;
   display: flex;
-  height: fit-content;
+  flex-direction: column;
 }
 
 .horizon-tab-filter-info {

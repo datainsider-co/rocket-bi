@@ -3,11 +3,7 @@ package datainsider.user_profile.controller
 import datainsider.client.domain.user.LoginResult
 import datainsider.login_provider.controller.DataInsiderServer
 import datainsider.user_caas.service.UserService
-import datainsider.user_profile.controller.http.request.{
-  ChangeUserPasswordRequest,
-  LoginByEmailPassRequest,
-  RegisterRequest
-}
+import datainsider.user_profile.controller.http.request.{ChangeUserPasswordRequest, LoginByEmailPassRequest, RegisterRequest}
 import datainsider.user_profile.util.JsonParser
 import org.apache.http.HttpStatus
 import org.scalatest.BeforeAndAfterAll
@@ -26,13 +22,12 @@ class AdminUserControllerTest extends DataInsiderServer with BeforeAndAfterAll {
   override def afterAll(): Unit = {
     super.afterAll()
     val userService: UserService = injector.instance[UserService]
-    userService.deleteUser(organizationId = 1L, username = username)
+    await(userService.deleteUser(organizationId = 0L, username = username))
   }
 
   test("create user") {
     val createUserRequest = JsonParser.toJson(RegisterRequest(username, "123", "trung hau"))
-    val response =
-      server.httpPost("/admin/users/create", postBody = createUserRequest, headers = Map("Authorization" -> getToken()))
+    val response = server.httpPost("/admin/users/create", postBody = createUserRequest, headers = Map("Authorization" -> getToken()))
     assertResult(HttpStatus.SC_OK)(response.statusCode)
   }
 

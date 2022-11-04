@@ -28,7 +28,7 @@ object LicenceUtils extends Logging {
       val keyFactory = KeyFactory.getInstance("RSA")
       keyFactory.generatePublic(keySpec)
     } catch {
-      case e: Throwable => throw new Exception("invalid public key")
+      case e: Throwable => throw new Exception("invalid public key", e)
     }
   }
 

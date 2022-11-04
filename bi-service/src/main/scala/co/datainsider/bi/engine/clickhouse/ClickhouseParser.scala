@@ -409,7 +409,7 @@ object ClickhouseParser extends SqlParser {
         case None    => toValueStr(value, fieldType)
       }
     } catch {
-      case e: Throwable => throw UnsupportedError(s"fail to parse $value to sql")
+      case e: Throwable => throw UnsupportedError(s"fail to parse $value to sql", e)
     }
   }
 

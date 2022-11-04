@@ -184,18 +184,18 @@ class SqlBuilder(sqlParser: SqlParser) {
     */
   private def buildFromClause(): String = {
     if (joinFields.nonEmpty) {
-      var fromClause = getSqlView(joinFields(0).leftViewName) // init
+      var curView = getSqlView(joinFields(0).leftViewName) // init
       val knownViews = mutable.Set[String](joinFields(0).leftViewName)
 
       joinFields.foreach(join => {
         var notChanged = true
 
         if (!knownViews.contains(join.leftViewName)) {
-          fromClause += s"\n  ${join.joinType.toString} join ${getSqlView(join.leftViewName)} on ${join.conditionStr}"
+          curView += s"\n  ${join.joinType.toString} join ${getSqlView(join.leftViewName)} on ${join.conditionStr}"
           knownViews += join.leftViewName
           notChanged = false
         } else if (!knownViews.contains(join.rightViewName)) {
-          fromClause += s"\n  ${join.joinType.toString} join ${getSqlView(join.rightViewName)} on ${join.conditionStr}"
+          curView += s"\n  ${join.joinType.toString} join ${getSqlView(join.rightViewName)} on ${join.conditionStr}"
           knownViews += join.rightViewName
           notChanged = false
         }
@@ -203,7 +203,7 @@ class SqlBuilder(sqlParser: SqlParser) {
         if (notChanged) throw BadRequestError("invalid join clause")
       })
 
-      fromClause
+      curView
 
     } else {
       if (fromFields.size > 1) {

@@ -2,7 +2,7 @@
   <PanelHeader ref="panel" header="Tab controls" target-id="data-point-tab">
     <div class="data-point-tab">
       <DropdownSetting
-        v-if="enableDirectionSetting"
+        v-if="enableDirectionSetting && !isDropdown"
         id="direction-tab"
         :options="directionOptions"
         :value="direction"
@@ -41,6 +41,17 @@
           @onChanged="handleActivateColorChanged"
         />
       </div>
+      <ToggleSetting v-if="!isDropdown" id="enable-search-setting" :value="enableSearch" label="Enable search" @onChanged="handleSearchChanged" />
+      <InputSetting
+        v-if="!isDropdown"
+        :disabled="enableSearch"
+        id="search-holder-setting"
+        class="mb-2"
+        size="full"
+        :value="searchPlaceholder"
+        label="Search placeholder"
+        @onChanged="handleSearchPlaceHolderChanged"
+      />
       <DefaultValueSetting :setting="setting.default" @onReset="handleResetDefaultValue" @onSaved="handleSetDefaultValue" />
       <RevertButton class="mb-3 pr-3" style="text-align: right" @click="handleRevert" />
     </div>
@@ -190,6 +201,8 @@ export default class TabFilterControlTab extends Vue {
     settingAsMap.set('deActiveColor', this.defaultSetting.deActiveColor);
     settingAsMap.set('choiceActiveColor', this.defaultSetting.activeColor);
     settingAsMap.set('choiceDeActiveColor', this.defaultSetting.deActiveColor);
+    settingAsMap.set('search.enabled', true);
+    settingAsMap.set('search.placeholder', 'Search...');
     settingAsMap.set('default.setting', null);
     this.$emit('onMultipleChanged', settingAsMap);
   }
@@ -212,6 +225,22 @@ export default class TabFilterControlTab extends Vue {
       default:
         return true;
     }
+  }
+
+  private get enableSearch(): boolean {
+    return this.setting?.search?.enabled ?? true;
+  }
+
+  private get searchPlaceholder(): string {
+    return this.setting?.search?.placeholder ?? 'Search...';
+  }
+
+  private handleSearchChanged(enabled: boolean) {
+    this.$emit('onChanged', 'search.enabled', enabled);
+  }
+
+  private handleSearchPlaceHolderChanged(text: string) {
+    this.$emit('onChanged', 'search.placeholder', text);
   }
 }
 </script>

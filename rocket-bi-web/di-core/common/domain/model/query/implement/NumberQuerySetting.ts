@@ -79,4 +79,8 @@ export class NumberQuerySetting extends QuerySetting<NumberChartOption> implemen
   setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
+
+  getDefaultSize(): [number, number] {
+    return [8, 8];
+  }
 }

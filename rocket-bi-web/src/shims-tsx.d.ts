@@ -25,6 +25,7 @@ declare global {
     $: any;
     dataLayer: object[];
     appConfig: AppConfig;
+    testConfig: AppConfig;
   }
 
   export interface AppConfig {
@@ -46,5 +47,12 @@ declare global {
     VUE_APP_WORKER_API_URL: string;
     VUE_APP_SCHEDULER_API_URL: string;
     VUE_APP_RELAY_API_URL: string;
+
+    VUE_APP_IS_DISABLE_LAKE_HOUSE: boolean;
+    VUE_APP_IS_DISABLE_CDP: boolean;
+    VUE_APP_IS_DISABLE_INGESTION: boolean;
+    VUE_APP_IS_DISABLE_USER_ACTIVITIES: boolean;
+    VUE_APP_IS_ENABLE_CLICKHOUSE_CONFIG: boolean;
+    VUE_APP_IS_DISABLE_BILLING: boolean;
   }
 }

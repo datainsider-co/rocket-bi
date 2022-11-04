@@ -42,6 +42,7 @@
           </div>
           <div class="login-screen-left-panel-body-form-action">
             <DiButton
+              id="google-login-btn"
               v-if="isActiveGoogleLogin"
               :disabled="isLoginLoading"
               border
@@ -51,7 +52,14 @@
             >
               <img class="mr-2" id="ic_google" src="@/assets/icon/ic_google.svg" />
             </DiButton>
-            <DiButton :isLoading="isLoginLoading" class="login-screen-left-panel-body-form-action-login" primary title="Login" @click="handleLogin" />
+            <DiButton
+              id="basic-login-btn"
+              :isLoading="isLoginLoading"
+              class="login-screen-left-panel-body-form-action-login"
+              primary
+              title="Login"
+              @click="handleLogin"
+            />
           </div>
           <div v-if="!isLoginLoading" class="login-screen-left-panel-body-form-error display-error">
             <template v-if="$v.email.$error">

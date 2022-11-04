@@ -5,10 +5,9 @@ import co.datainsider.bi.domain.Directory.{MyData, Shared}
 import co.datainsider.bi.domain.Ids.DirectoryId
 import co.datainsider.bi.domain.query.event.{ActionType, ResourceType}
 import co.datainsider.bi.domain.request._
-import co.datainsider.bi.service.{DashboardFieldService, DashboardService, DirectoryService, RecentDirectoryService}
-import co.datainsider.share.domain.response.PageResult
+import co.datainsider.bi.service.{DashboardFieldService, DashboardService, DirectoryService}
 import com.google.inject.Inject
-import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import com.twitter.util.Future
 import datainsider.authorization.filters.{DashboardAccessFilters, WidgetAccessFilters}

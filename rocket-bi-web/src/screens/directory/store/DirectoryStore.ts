@@ -290,6 +290,13 @@ export default class DirectoryStore extends VuexModule {
       .finally(() => LoaderModule.finishLoading());
   }
 
+  @Action
+  async moveDirectory(payload: { id: DirectoryId; parentId: DirectoryId }) {
+    LoaderModule.startLoading();
+    await DirectoryStore.getDirectoryService().move(payload.id, payload.parentId);
+    LoaderModule.finishLoading();
+  }
+
   @Mutation
   setErrorMessage(newMessage: string) {
     this.errorMessage = newMessage;

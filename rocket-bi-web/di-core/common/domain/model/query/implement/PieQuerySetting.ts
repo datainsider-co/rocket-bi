@@ -98,4 +98,7 @@ export class PieQuerySetting extends QuerySetting<PieChartOption> implements Fil
     this.legend = ConfigDataUtils.replaceDynamicFunction(this.legend, functions);
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
+  getDefaultSize(): [number, number] {
+    return [10, 10];
+  }
 }

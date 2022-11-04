@@ -33,10 +33,6 @@ class OrganizationParser @Inject() (organizationService: OrganizationService) ex
 
   private def getOrgFromDomain(domain: String): Future[Organization] =
     Profiler(s"[Filter] ${this.getClass.getSimpleName}::getOrgFromDomain") {
-      val defaultOrg = Organization(0L, "root", "DataInsider", "", isActive = true)
-      organizationService.getWithDomain(domain) map {
-        case Some(org) => org
-        case None      => defaultOrg
-      }
+      organizationService.getWithDomain(domain)
     }
 }

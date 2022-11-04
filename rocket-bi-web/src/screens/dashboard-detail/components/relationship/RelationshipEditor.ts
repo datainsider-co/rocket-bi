@@ -186,12 +186,14 @@ export default class RelationshipEditor extends Mixins(SplitPanelMixin) {
     return this.handler.className === RelationshipType.Dashboard;
   }
 
+  @Provide('tableId')
   private tableId(dbName: string, tblName: string) {
-    return [dbName, tblName].join('_');
+    return StringUtils.toSnakeCase([dbName, tblName].join('_'));
   }
 
+  @Provide('columnId')
   private columnId(dbName: string, tblName: string, colName: string) {
-    return [this.tableId(dbName, tblName), colName].join('_');
+    return StringUtils.toSnakeCase([this.tableId(dbName, tblName), colName].join('_'));
   }
 
   private getTablePosition(dbName: string, tblName: string, tableIndex: number) {

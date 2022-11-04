@@ -49,6 +49,7 @@ import {
 import { Log } from '@core/utils';
 import { InlineSqlView } from '@core/common/domain/model/query/InlineSqlView';
 import { FilterUtils, ListUtils } from '@/utils';
+import { DefaultSize } from '@/shared';
 
 export const getFiltersAndSorts: (obj: QuerySetting) => [Condition[], OrderBy[]] = (obj: QuerySetting): [Condition[], OrderBy[]] => {
   const filters: Condition[] = obj.filters?.map(filter => Condition.fromObject(filter)) ?? [];
@@ -265,5 +266,11 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
 
   canQuery(): boolean {
     return true;
+  }
+
+  ///Fist value is Width
+  ///Second value is Height
+  getDefaultSize(): [number, number] {
+    return DefaultSize;
   }
 }

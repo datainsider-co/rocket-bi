@@ -21,7 +21,7 @@
         </DiIconTextButton>
       </div>
     </div>
-    <FieldManagement ref="fieldManagement" :model="model" :view-mode="viewMode" />
+    <FieldManagement :status="status.Loaded" ref="fieldManagement" :model="model" :view-mode="viewMode" />
   </div>
 </template>
 
@@ -38,6 +38,7 @@ import { DataManagementModule } from '@/screens/data-management/store/DataManage
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
+import { Status } from '@/shared';
 
 @Component({
   components: {
@@ -47,6 +48,8 @@ import { TrackEvents } from '@core/tracking/enum/TrackEvents';
   }
 })
 export default class FieldCreationManagement extends Vue {
+  private readonly status = Status;
+
   @Prop({ type: Object, required: false })
   private model?: DataSchemaModel;
 

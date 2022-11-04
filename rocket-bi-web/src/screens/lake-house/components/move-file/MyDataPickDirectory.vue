@@ -48,8 +48,14 @@ export default class MyDataPickDirectory extends Vue {
   private listIgnoreClassForContextMenu = ['action-more'];
   private parentDirectory: { id: DirectoryId; name: string } = { id: DefaultDirectoryId.MyData, name: 'My data' };
   private currentDirectory: { id: DirectoryId; name: string } = { id: DefaultDirectoryId.MyData, name: 'My data' };
-  private loadHandler: DirectoryListingHandler = new MyDataDirectoryListingHandler();
+  // private loadHandler: DirectoryListingHandler = new MyDataDirectoryListingHandler();
   private rootId: DirectoryId = DefaultDirectoryId.MyData;
+
+  private excludeDirectoryIds: DirectoryId[] = [];
+
+  private currentDirectories: Directory[] = [];
+
+  private data?: any = null;
 
   @Inject
   private readonly directoryService!: DirectoryService;
@@ -61,7 +67,7 @@ export default class MyDataPickDirectory extends Vue {
   private readonly vueContext!: ContextMenu;
 
   private get directories(): Directory[] {
-    return this.loadHandler.directories.filter(directory => directory.directoryType === DirectoryType.Directory);
+    return this.currentDirectories.filter(directory => directory.directoryType === DirectoryType.Directory && !this.excludeDirectoryIds.includes(directory.id));
   }
 
   private async handleBackDirectory(id: DirectoryId) {
@@ -72,17 +78,21 @@ export default class MyDataPickDirectory extends Vue {
     }
   }
 
-  private async loadDirectoryListing(id: DirectoryId, pagination: DirectoryPagingRequest) {
+  private async handleLoadDirectoryListing(id: DirectoryId, pagination: DirectoryPagingRequest) {
     this.$nextTick(async () => {
       try {
         this.moveFile.showLoading();
-        await this.loadHandler.loadDirectoryListing(id, pagination);
+        await this.loadDirectories(id, pagination);
         this.moveFile.showLoaded();
       } catch (e) {
         Log.error('MyDataPickFile::loadDirectoryListing::error::', e.message);
         this.moveFile.showError(e.message);
       }
     });
+  }
+
+  private async loadDirectories(id: DirectoryId, pagination: DirectoryPagingRequest) {
+    this.currentDirectories = await this.directoryService.list(id, pagination);
   }
 
   private showContextMenu(event: Event) {
@@ -93,14 +103,19 @@ export default class MyDataPickDirectory extends Vue {
     this.vueContext.hide();
   }
 
-  async show(event: Event) {
+  async show(event: Event, excludeDirectoryIds?: DirectoryId[], data?: any) {
     setTimeout(async () => {
       try {
-        // event.stopPropagation();
+        if (excludeDirectoryIds) {
+          this.excludeDirectoryIds = excludeDirectoryIds;
+        }
+        if (data) {
+          this.data = data;
+        }
         this.showContextMenu(event);
         await this.initData();
         const pagination = DirectoryPagingRequest.default();
-        await this.loadDirectoryListing(this.currentDirectory.id, pagination);
+        await this.handleLoadDirectoryListing(this.currentDirectory.id, pagination);
       } catch (e) {
         Log.error('LakeExplorerMoveFile::handleShowPopover::error::', e.message);
       }
@@ -120,7 +135,7 @@ export default class MyDataPickDirectory extends Vue {
       const isRoot = directory.id === DefaultDirectoryId.MyData;
       if (!isRoot) {
         const pagination = DirectoryPagingRequest.default();
-        await this.loadDirectoryListing(directory.id, pagination);
+        await this.handleLoadDirectoryListing(directory.id, pagination);
         this.updateCurrentDirectory(directory);
       }
     } catch (e) {
@@ -130,7 +145,7 @@ export default class MyDataPickDirectory extends Vue {
 
   private async handlePickFolder(id: DirectoryId) {
     try {
-      this.$emit('selectDirectory', id);
+      this.$emit('selectDirectory', id, this.data);
     } catch (e) {
       const ex = DIException.fromObject(e);
       this.showError(ex);

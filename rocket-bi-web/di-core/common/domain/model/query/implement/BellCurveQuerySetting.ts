@@ -20,7 +20,7 @@ import {
 } from '@core/common/domain/model';
 import { isEqual } from 'lodash';
 import { QuerySetting } from '../QuerySetting';
-import { ZoomData } from '@/shared';
+import { DefaultSize, ZoomData } from '@/shared';
 import { Log } from '@core/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 

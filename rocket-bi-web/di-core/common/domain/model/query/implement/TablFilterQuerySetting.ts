@@ -3,17 +3,7 @@
  * @created: 5/29/21, 4:36 PM
  */
 
-import {
-  ChartOption,
-  ConditionType,
-  FilterRequest,
-  DynamicFunction,
-  HistogramChartOption,
-  In,
-  VizSettingType,
-  WidgetId,
-  FunctionControl
-} from '@core/common/domain';
+import { ChartOption, ConditionType, FilterRequest, FunctionControl, In, VizSettingType, WidgetId } from '@core/common/domain';
 import { Log } from '@core/utils';
 import { QuerySetting } from '../QuerySetting';
 import {
@@ -30,6 +20,7 @@ import {
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 import { toNumber } from 'lodash';
 import { ListUtils } from '@/utils';
+import { Direction, TabFilterDisplay } from '@/shared';
 
 export class TabFilterQuerySetting extends QuerySetting<TabFilterOption> implements Filterable, FunctionControl {
   readonly className = QuerySettingType.TabControl;
@@ -126,5 +117,21 @@ export class TabFilterQuerySetting extends QuerySetting<TabFilterOption> impleme
 
   static getIndex(key: string): number {
     return toNumber(ListUtils.getLast(key.split('_')));
+  }
+
+  getDefaultSize(): [number, number] {
+    const displayAs: TabFilterDisplay | undefined = this.getChartOption()?.options.displayAs;
+    const direction: Direction = this.getChartOption()?.options.direction ?? Direction.row;
+    switch (displayAs) {
+      case TabFilterDisplay.normal:
+      case TabFilterDisplay.singleChoice:
+      case TabFilterDisplay.multiChoice:
+        return direction === Direction.column ? [12, 8] : [12, 5];
+      case TabFilterDisplay.dropDown:
+      case TabFilterDisplay.flat:
+        return [12, 3];
+      default:
+        return super.getDefaultSize();
+    }
   }
 }

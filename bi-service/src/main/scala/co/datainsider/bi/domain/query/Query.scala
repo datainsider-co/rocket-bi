@@ -48,7 +48,7 @@ case class SqlQuery(
       TableExpressionUtils.findFromClause(query).map(resp => TableView(resp._1, resp._2))
     } catch {
       case e: Throwable =>
-        error(s"find dbName.tblName failed with exception: ${e}")
+        error(s"allQueryViews::find dbName.tblName failed with exception", e)
         Seq.empty
     }
   }

@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   user-profile:
-    image: registry.gitlab.com/datainsider/user-profile:local
+    image: datainsiderco/caas-service:main
     container_name: rocket-user-profile
     restart: always
     environment:

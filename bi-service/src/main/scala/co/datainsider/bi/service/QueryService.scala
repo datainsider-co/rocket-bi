@@ -107,7 +107,7 @@ class QueryServiceImpl @Inject() (
         baseQuery,
         userProfile.map(_.username),
         limit,
-        request.filterRequests,
+        if (request.querySetting.isInstanceOf[FilterSetting]) Array.empty else request.filterRequests,
         relationshipInfo,
         rlsPolicies,
         Some(QueryContext(tableExpressions))

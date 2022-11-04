@@ -50,7 +50,7 @@ import { DateTimeFormatter, ListUtils } from '@/utils';
 import EmptyDirectory from '@/screens/dashboard-detail/components/EmptyDirectory.vue';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import { ClickhouseSource } from '@core/clickhouse-config/domain/ClickhouseSource';
-import { ClickhouseConfigService, RefreshStatus, SystemInfo, SystemStatus } from '@core/clickhouse-config';
+import { ClickhouseConfigService, RefreshBy, RefreshStatus, SystemInfo, SystemStatus } from '@core/clickhouse-config';
 import { Inject } from 'typescript-ioc';
 import ClickhouseSourceModal from '@/screens/organization-settings/views/clickhouse-config/ClickhouseSourceModal.vue';
 import { UpdateSystemInfoRequest } from '@core/clickhouse-config/request';
@@ -132,7 +132,8 @@ export default class ClickhouseConfig extends Vue {
         key: 'lastRefreshBy',
         label: 'Last Refresh By',
         customRenderBodyCell: new CustomCell(rowData => {
-          return HtmlElementRenderUtils.renderText(StringUtils.camelToCapitalizedStr(this.systemInfo.lastRefreshBy as string), 'span', 'text-truncate');
+          const lastRefreshBy = this.systemInfo?.lastRefreshBy ? StringUtils.camelToCapitalizedStr(this.systemInfo.lastRefreshBy as string) : RefreshBy.System;
+          return HtmlElementRenderUtils.renderText(StringUtils.camelToCapitalizedStr(lastRefreshBy), 'span', 'text-truncate');
         }),
         disableSort: true,
         width: (this.cellWidth * 2) / 3

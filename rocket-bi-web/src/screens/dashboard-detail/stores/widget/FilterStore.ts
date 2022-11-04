@@ -335,6 +335,7 @@ export class FilterStore extends VuexModule {
   addFilterWidget(widget: ChartInfo): Promise<void> {
     const isFilter: boolean = ChartInfo.isChartInfo(widget) && FilterUtils.isFilter(widget);
     const hasDefault: boolean = widget.setting.getChartOption()?.options?.default?.setting?.conditions != undefined;
+    Log.debug('addFilterWidget::', widget, isFilter, hasDefault);
     if (isFilter && hasDefault) {
       const condition: Condition = Condition.fromObject(widget.setting.getChartOption()?.options?.default?.setting?.conditions);
       const filterRequests = new FilterRequest(widget.id, condition);

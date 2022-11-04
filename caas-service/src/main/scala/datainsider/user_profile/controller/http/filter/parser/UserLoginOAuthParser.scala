@@ -49,13 +49,10 @@ class UserLoginOAuthParser @Inject() (
       val oAuthBodyRequest = JsonParser.fromJson[UserOAuthRequestBody](request.contentString)
       val reqDomain: String = request.headerMap.get("Host").get
 
-      val orgId: Long = organizationService.getWithDomain(reqDomain).syncGet() match {
-        case Some(org) => org.organizationId
-        case None      => 0L // 0 is single tenant orgId
-      }
       for {
         // get oauth info
         // valid oauth data
+        orgId <- organizationService.getWithDomain(reqDomain).map(_.organizationId)
         oauthInfo <- orgOAuthorizationProvider.getOAuthInfo(
           orgId,
           oAuthBodyRequest.oauthType,

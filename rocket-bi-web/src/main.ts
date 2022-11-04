@@ -144,17 +144,16 @@ Vue.use(Button);
 Vue.use(CommonComponentPlugin);
 Vue.use(DiIcons);
 Vue.use(Directives);
-
 switch (process.env.NODE_ENV) {
   case 'production': {
     Vue.use(DiUploadDocumentPlugin, {
-      api: '/api',
+      api: window.appConfig.VUE_APP_SCHEMA_API_URL,
       headers: { 'DI-SERVICE-KEY': '12345678' },
       componentName: 'DiUploadComponent',
       chunkSize: 1000000 //1MB
     });
     Vue.use(DiUploadGoogleSheetPlupin, {
-      api: '/api',
+      api: window.appConfig.VUE_APP_SCHEMA_API_URL,
       headers: { 'DI-SERVICE-KEY': '12345678' },
       componentName: 'DiUploadGoogleSheetComponent',
       chunkSize: 1000000 //1MB

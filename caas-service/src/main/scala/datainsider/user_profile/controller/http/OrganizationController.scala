@@ -48,9 +48,9 @@ class OrganizationController @Inject() (organizationService: OrganizationService
 
   filter[MustLoggedInFilter]
     .filter[CanGetOrganizationFilter]
-    .get(s"/organizations/:organization_id") { request: Request =>
+    .get(s"/organizations/me") { request: Request =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::/organizations/:organization_id") {
-        val organizationId = request.getLongParam("organization_id")
+        val organizationId = request.currentOrganizationId.get
         organizationService.getOrganization(organizationId).map {
           case Some(organization) => organization
           case _                  => throw OrganizationNotFoundError(s"this organization is not found: $organizationId")

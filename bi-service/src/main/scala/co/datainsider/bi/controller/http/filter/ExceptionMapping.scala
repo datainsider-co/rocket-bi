@@ -9,15 +9,18 @@ import com.twitter.finatra.http.response.ResponseBuilder
 import com.twitter.finatra.jackson.caseclass.exceptions.CaseClassMappingException
 import com.twitter.inject.Logging
 import datainsider.client.exception.{DIErrorReason, DIException}
+
 import javax.inject.Inject
+import scala.util.Try
+
 /**
- * @author anhlt
- */
+  * @author anhlt
+  */
 @Singleton
 class CommonExceptionMapping @Inject() (
-                                         response: ResponseBuilder
-                                       ) extends ExceptionMapper[Throwable]
-  with Logging {
+    response: ResponseBuilder
+) extends ExceptionMapper[Throwable]
+    with Logging {
   override def toResponse(request: Request, ex: Throwable): Response = {
     logError(ex)
     val error = ex match {
@@ -26,7 +29,7 @@ class CommonExceptionMapping @Inject() (
           e.getStatus.code,
           e.reason,
           e.getMessage,
-          None
+          Try(e.getCause.getMessage).toOption
         )
       case _ =>
         ApiError(
@@ -42,11 +45,12 @@ class CommonExceptionMapping @Inject() (
     error(s"${ex.getClass.getName}: ${ex.getMessage}", ex)
   }
 }
+
 @Singleton
 class CaseClassExceptionMapping @Inject() (
-                                            response: ResponseBuilder
-                                          ) extends ExceptionMapper[CaseClassMappingException]
-  with Logging {
+    response: ResponseBuilder
+) extends ExceptionMapper[CaseClassMappingException]
+    with Logging {
   override def toResponse(request: Request, throwable: CaseClassMappingException): Response = {
     error("", throwable)
     response.badRequest.json(
@@ -60,9 +64,9 @@ class CaseClassExceptionMapping @Inject() (
 }
 @Singleton
 class JsonParseExceptionMapping @Inject() (
-                                            response: ResponseBuilder
-                                          ) extends ExceptionMapper[JsonParseException]
-  with Logging {
+    response: ResponseBuilder
+) extends ExceptionMapper[JsonParseException]
+    with Logging {
   override def toResponse(request: Request, ex: JsonParseException): Response = {
     error(s"JsonParseExceptionMapping: ${ex.getMessage}", ex)
     response.badRequest.json(

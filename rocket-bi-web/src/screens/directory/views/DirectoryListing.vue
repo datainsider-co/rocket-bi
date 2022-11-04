@@ -20,6 +20,8 @@
     <DirectoryCreate ref="mdCreateDirectory" />
     <DirectoryRename ref="mdRenameDirectory" />
     <DiShareModal ref="mdShareDirectory" />
+
+    <MyDataPickDirectory ref="directoryPicker" @selectDirectory="handleMoveToDirectory" />
   </LayoutWrapper>
 </template>
 
@@ -34,7 +36,7 @@ import { ResourceType } from '@/utils/PermissionUtils';
 import { Log } from '@core/utils';
 import { DirectoryModule } from '@/screens/directory/store/DirectoryStore';
 import { PopupUtils } from '@/utils/PopupUtils';
-import { ContextMenuItem, CreateDirectoryMenuItem, DirectoryMenuItem, Routers } from '@/shared';
+import { ContextMenuItem, CreateDirectoryMenuItem, DirectoryMenuItem, Routers, Status } from '@/shared';
 import { RouterEnteringHook } from '@/shared/components/vue-hook/RouterEnteringHook';
 import { Route } from 'vue-router';
 import { NavigationGuardNext } from 'vue-router/types/router';
@@ -53,6 +55,7 @@ import { LayoutSidebar, LayoutWrapper } from '@/shared/components/layout-wrapper
 import PopoverV2 from '@/shared/components/common/popover-v2/PopoverV2.vue';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Track } from '@/shared/anotation';
+import MyDataPickDirectory from '@/screens/lake-house/components/move-file/MyDataPickDirectory.vue';
 
 export enum DirectoryListingEvents {
   ShowMenuCreateDirectory = 'show-menu-create-directory',
@@ -69,7 +72,8 @@ export enum DirectoryListingEvents {
     DiShareModal,
     LayoutWrapper,
     LayoutSidebar,
-    PopoverV2
+    PopoverV2,
+    MyDataPickDirectory
   }
 })
 export default class DirectoryListing extends Vue implements RouterEnteringHook {
@@ -95,6 +99,9 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
 
   @Ref()
   private readonly layoutWrapper!: LayoutWrapper;
+
+  @Ref()
+  private readonly directoryPicker!: MyDataPickDirectory;
 
   private get navItems(): NavigationItem[] {
     return [
@@ -163,9 +170,9 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
     this.showContextMenu(items, 'create-directory', event);
   }
 
-  showMenuSettingDirectory(item: Directory) {
+  showMenuSettingDirectory(item: Directory, routerName: Routers) {
     // this.tblDirectoryListing.selectRow(index);
-    const menuItems = this.getDirectoryMenuItem(item);
+    const menuItems = this.getDirectoryMenuItem(item, routerName).filter(item => !item?.hidden);
     this.diContextMenu.show(event, menuItems);
   }
 
@@ -191,6 +198,10 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
     this.mdRenameDirectory.show(item);
   }
 
+  private showMoveModal(e: Event, directory: Directory) {
+    this.directoryPicker.show(e, [directory.id], directory.id);
+  }
+
   private async softDelete(item: Directory) {
     try {
       await DirectoryModule.softDelete(item.id);
@@ -199,7 +210,7 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
     }
   }
 
-  private getDirectoryMenuItem(directory: Directory): ContextMenuItem[] {
+  private getDirectoryMenuItem(directory: Directory, routerName: Routers): ContextMenuItem[] {
     return [
       {
         text: DirectoryMenuItem.Rename,
@@ -209,9 +220,9 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
       },
       {
         text: DirectoryMenuItem.MoveTo,
-        disabled: true,
-        click: () => {
-          // this.move(row);
+        hidden: routerName !== Routers.AllData,
+        click: (e: Event) => {
+          this.showMoveModal(e, directory);
         }
       },
       this.getStarMenuItem(directory),
@@ -316,6 +327,20 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
     Modals.showConfirmationModal(`Are you sure to delete ${directory.directoryType} '${directory.name}' ?`, {
       onOk: () => this.softDelete(directory)
     });
+  }
+
+  private async handleMoveToDirectory(parentId: DirectoryId, directoryId: DirectoryId) {
+    try {
+      Log.debug('DirectoryListing::handleMoveToDirectory::id::', parentId, directoryId);
+      DirectoryModule.setStatus(Status.Updating);
+      await DirectoryModule.moveDirectory({ id: directoryId, parentId: parentId });
+      await this.myData?.handler.loadDirectoryListing(parentId, this.myData?.createPaginationRequest());
+    } catch (e) {
+      Log.error('DirectoryListing::handleMoveToDirectory::error::', e);
+      PopupUtils.showError(e.message);
+    } finally {
+      DirectoryModule.setStatus(Status.Loaded);
+    }
   }
 }
 </script>

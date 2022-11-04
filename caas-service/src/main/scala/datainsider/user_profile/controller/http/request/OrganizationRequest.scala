@@ -19,6 +19,7 @@ import datainsider.user_profile.util.{JsonParser, Utils}
 import education.x.commons.Serializer
 import org.apache.commons.lang3.SerializationUtils
 
+import java.util.UUID
 import javax.inject.Inject
 
 /**
@@ -116,7 +117,7 @@ case class CreateOrganizationRequest(
     createdTime: Long
 ) {
 
-  def buildOrganization: Organization = {
+  def buildOrganization(): Organization = {
     Organization(
       organizationId = organizationId,
       owner = owner,
@@ -125,7 +126,10 @@ case class CreateOrganizationRequest(
       isActive = isActive,
       reportTimeZoneId = reportTimeZoneId,
       thumbnailUrl = thumbnailUrl.notEmptyOrNull,
-      createdTime = Some(createdTime)
+      createdTime = Some(createdTime),
+      updatedTime = Some(createdTime),
+      updatedBy = Some(owner),
+      licenceKey = Some(UUID.randomUUID().toString)
     )
   }
 }

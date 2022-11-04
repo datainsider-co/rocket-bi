@@ -8,43 +8,54 @@ import TabFilter from '@chart/TabFilter';
 import { StringUtils } from '@/utils/StringUtils';
 import { Direction, TabFilterDisplay } from '@/shared';
 import TabSelection from '@/shared/components/TabSelection.vue';
+import DiSearchInput from '@/shared/components/DiSearchInput.vue';
 
 export class DefaultTabFilter implements WidgetRenderer<TabFilter> {
   render(widget: TabFilter, h: any): any {
     const enableTitle = widget.setting.options.title?.enabled ?? true;
-    const enableSubTitle = widget.setting.options.subtitle?.enabled ?? true;
     const title = enableTitle && (
       <div class="filter-chart single-line" title={widget.title} style={widget.titleStyle}>
         {widget.title}
       </div>
     );
-    const subtitle = enableSubTitle && this.renderSubtitle(widget, h);
     const tab = this.renderTabSelection(widget, h);
     const isDropdown = widget.displayAs === TabFilterDisplay.dropDown;
     const scrollClass = widget.direction === Direction.column ? 'scroll-column' : 'scroll-row';
     if (isDropdown) {
       return (
         <div class={widget.containerClass} style={widget.containerStyle}>
-          <div class={widget.infoClass}>
-            {title}
-            {subtitle}
-          </div>
+          <div class={widget.infoClass}>{title}</div>
           {tab}
         </div>
       );
     } else {
       return (
         <div class={widget.containerClass} style={widget.containerStyle}>
-          <div class={widget.infoClass}>
-            {title}
-            {subtitle}
-          </div>
-          <vuescroll className={['tab-filter-scroller', scrollClass]} style="position: unset">
+          <div class={widget.infoClass}>{title}</div>
+          {this.renderSearch(widget, h)}
+          <vuescroll class={['tab-filter-scroller', scrollClass]} style="position: unset">
             {this.renderTabSelection(widget, h)}
           </vuescroll>
         </div>
       );
     }
+  }
+
+  private renderSearch(widget: TabFilter, h: any) {
+    const enableSearch = widget.setting.options.search?.enabled ?? true;
+    const placeholder = widget.setting.options.search?.placeholder ?? 'Search...';
+    return (
+      enableSearch && (
+        <DiSearchInput
+          style="background-color:transparent"
+          border
+          placeholder={placeholder}
+          class="mb-2"
+          value={widget.keyword}
+          onChange={widget.handleChangeKeyword}
+        />
+      )
+    );
   }
 
   private renderTitle(widget: TabFilter, h: any) {
@@ -69,12 +80,7 @@ export class DefaultTabFilter implements WidgetRenderer<TabFilter> {
 
   private renderTabSelection(widget: TabFilter, h: any) {
     return (
-      <TabSelection
-        {...{ props: widget.tabSelectionData }}
-        class={widget.filterClass}
-        onSelected={widget.handleItemChanged}
-        // style={widget.selectionStyle}
-      />
+      <TabSelection {...{ props: widget.tabSelectionData }} class={widget.filterClass} onSelected={widget.handleItemChanged} style={widget.selectionStyle} />
     );
   }
 }

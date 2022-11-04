@@ -461,19 +461,6 @@ class CaasController @Inject() (
     Profiler(s"[Thrift] ${this.getClass.getSimpleName}::GetWithDomain") {
       organizationService
         .getWithDomain(request.args.domain)
-        .map({
-          case Some(organization) => organization
-          case _                  =>
-            // Single tenant organization
-            Organization(
-              organizationId = 0L,
-              owner = "root",
-              name = "Data Insider",
-              domain = request.args.domain,
-              isActive = true,
-              createdTime = Some(System.currentTimeMillis())
-            )
-        })
         .map(_.asThrift())
         .map(_.toScroogeResponse())
     }

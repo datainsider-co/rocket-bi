@@ -1,7 +1,7 @@
 version: '3'
 services:
   schema_service:
-    image: registry.gitlab.com/datainsider/schema-service:oss
+    image: datainsiderco/schema-service:main
     container_name: rocket-schema-service
     restart: always
     environment:

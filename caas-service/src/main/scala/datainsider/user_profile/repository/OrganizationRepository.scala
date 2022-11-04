@@ -35,7 +35,7 @@ trait OrganizationRepository {
 
 object MySqlOrganizationRepository {
   private val INSERT_SQL =
-    "INSERT INTO organization (organization_id, owner, name, domain, is_active, report_time_zone_id, thumbnail_url, created_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    "INSERT INTO organization (organization_id, owner, name, domain, is_active, report_time_zone_id, thumbnail_url, created_time, updated_time, updated_by, licence_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
   private val SELECT_BY_ID_SQL =
     "SELECT * FROM organization WHERE organization_id=?"
   private val SELECT_BY_IDS_SQL =
@@ -53,7 +53,7 @@ object MySqlOrganizationRepository {
 
   private val SELECT_WITH_DOMAIN = "SELECT * FROM organization WHERE domain = ?"
 
-  private val UPDATE_SQL = "UPDATE organization set name=?, domain=?, thumbnail_url=? WHERE organization_id = ?"
+  private val UPDATE_SQL = "UPDATE organization set name=?, domain=?, thumbnail_url=?, updated_time = ?, updated_by = ?, licence_key = ? WHERE organization_id = ?"
 }
 
 case class MySqlOrganizationRepository(client: JdbcClient) extends OrganizationRepository {
@@ -75,7 +75,10 @@ case class MySqlOrganizationRepository(client: JdbcClient) extends OrganizationR
       organization.isActive,
       organization.reportTimeZoneId.getOrElse(""),
       organization.thumbnailUrl.getOrElse(""),
-      organization.createdTime.getOrElse(System.currentTimeMillis)
+      organization.createdTime.getOrElse(System.currentTimeMillis),
+      organization.updatedTime.getOrElse(System.currentTimeMillis),
+      organization.updatedBy.orNull,
+      organization.licenceKey.orNull
     )
     count > 0
   }
@@ -117,7 +120,10 @@ case class MySqlOrganizationRepository(client: JdbcClient) extends OrganizationR
           isActive = rs.getBoolean("is_active"),
           reportTimeZoneId = Option(rs.getString("report_time_zone_id")).notEmptyOrNull,
           thumbnailUrl = Option(rs.getString("thumbnail_url")).notEmptyOrNull,
-          createdTime = Option(rs.getLong("created_time"))
+          createdTime = Option(rs.getLong("created_time")),
+          updatedTime = Option(rs.getLong("updated_time")),
+          updatedBy = Option(rs.getString("updated_by")),
+          licenceKey = Option(rs.getString("licence_key"))
         )
       )
     }
@@ -145,6 +151,9 @@ case class MySqlOrganizationRepository(client: JdbcClient) extends OrganizationR
       organization.name,
       organization.domain,
       organization.thumbnailUrl.getOrElse(""),
+      System.currentTimeMillis(),
+      organization.updatedBy.getOrElse(organization.owner),
+      organization.licenceKey.orNull,
       organization.organizationId
     )
   }

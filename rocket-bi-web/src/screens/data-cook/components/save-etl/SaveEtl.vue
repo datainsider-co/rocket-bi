@@ -22,7 +22,7 @@
                 {{ nameError }}
               </div>
             </div>
-            <SchedulerSettingV2 ref="schedulerSetting" @change="handleScheduler" :schedulerTime="model.scheduleTime"></SchedulerSettingV2>
+            <SchedulerSettingV2 ignoreMinutely ref="schedulerSetting" @change="handleScheduler" :schedulerTime="model.scheduleTime"></SchedulerSettingV2>
 
             <div class="etl-config">
               <PanelHeader header="Incremental Setting" target-id="incremental-config">

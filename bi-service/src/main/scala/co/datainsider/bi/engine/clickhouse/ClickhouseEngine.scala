@@ -60,7 +60,7 @@ class ClickhouseEngine @Inject() (@Named("clickhouse") client: JdbcClient) exten
           DataTable(colNames, colTypes, rows.toArray)
         })
       } catch {
-        case e: SQLException => throw DbExecuteError(e.getMessage)
+        case e: SQLException => throw DbExecuteError(s"execute sql '$sql' failed with exception: $e")
         case e: Throwable    => throw InternalError(s"engine.execute failed with exception: $e")
       }
     }

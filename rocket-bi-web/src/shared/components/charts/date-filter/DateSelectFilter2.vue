@@ -5,7 +5,7 @@
       :id="`${id}`"
       :isHiddenCompareToSection="true"
       :isShowResetFilterButton="false"
-      :mainDateFilterMode="mainDateFilterMode"
+      :mainDateFilterMode="mainDateMode"
       :defaultDateRange="defaultDateRange"
       :mode-options="MainDateModeOptions"
       :get-date-range-by-mode="getDateRangeByMode"
@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { DateRange, DateTimeConstants } from '@/shared';
 import moment from 'moment';
 import { DateTimeFormatter, DateUtils, ListUtils, RandomUtils } from '@/utils';
@@ -37,6 +37,8 @@ import { MainDateMode } from '@core/common/domain';
 import DiCalendar from '@filter/main-date-filter-v2/DiCalendar.vue';
 import { CalendarData } from '@/shared/models';
 import { Log } from '@core/utils';
+import { DateFilterData } from '@chart/date-filter/DateFilterData';
+import { DateFilterUtils } from '@chart/date-filter/DateFilterUtils';
 
 @Component({ components: { DiCalendar } })
 export default class DateSelectFilter2 extends Vue {
@@ -47,50 +49,56 @@ export default class DateSelectFilter2 extends Vue {
     return DateUtils.getDateRange(mode);
   }
 
-  @Prop({ type: Array, default: () => [] })
-  dates!: string[];
+  @Prop({ default: DateFilterUtils.defaultDateFilterData })
+  filterData!: DateFilterData;
+
+  private localValue = this.filterData;
+
+  private mainDateMode: MainDateMode = this.filterData.mode;
 
   private isShowCalendar = false;
 
+  @Watch('filterData', { deep: true })
+  onFilterDataChanged() {
+    this.localValue = this.filterData;
+  }
+
   private get defaultDateRange(): DateRange | undefined {
-    Log.debug('defaultDateRange::', this.dates, ListUtils.isNotEmpty(this.dates));
-    if (ListUtils.isNotEmpty(this.dates)) {
+    if (ListUtils.isNotEmpty(this.localValue.dates)) {
       return {
-        start: moment(this.dates[0]).toDate(),
-        end: moment(this.dates[1]).toDate()
+        start: moment(this.localValue.dates).toDate(),
+        end: moment(this.localValue.dates).toDate()
       };
     } else {
       return void 0;
     }
   }
 
-  private get mainDateFilterMode(): MainDateMode {
-    if (this.defaultDateRange) {
-      return MainDateMode.custom;
-    } else {
-      return MainDateMode.allTime;
-    }
-  }
-
   private handleCalendarSelected(calendarData: CalendarData) {
-    Log.debug('handleCalendarSelected', calendarData);
+    Log.debug('handleCalendarSelected::', calendarData);
     const dates = [];
     switch (calendarData.filterMode) {
       case MainDateMode.allTime:
         break;
       default:
-        if (calendarData.chosenDateRange) {
-          dates.push(DateTimeFormatter.formatDate(calendarData.chosenDateRange.start), DateTimeFormatter.formatDate(calendarData.chosenDateRange.end));
+        {
+          if (calendarData.chosenDateRange) {
+            dates.push(DateTimeFormatter.formatDate(calendarData.chosenDateRange.start), DateTimeFormatter.formatDate(calendarData.chosenDateRange.end));
+          }
         }
         break;
     }
-    this.$emit('selected', dates);
+    this.localValue = {
+      dates: dates,
+      mode: calendarData.filterMode
+    };
+    this.$emit('selected', dates, calendarData.filterMode);
   }
 
   private get dateRange(): string {
-    if (ListUtils.isNotEmpty(this.dates)) {
-      const startDate = DateTimeFormatter.formatAsDDMMYYYY(this.dates[0]);
-      const endDate = DateTimeFormatter.formatAsDDMMYYYY(this.dates[1]);
+    if (ListUtils.isNotEmpty(this.localValue.dates)) {
+      const startDate = DateTimeFormatter.formatAsDDMMYYYY(this.localValue.dates[0]);
+      const endDate = DateTimeFormatter.formatAsDDMMYYYY(this.localValue.dates[1]);
       return `${startDate} - ${endDate}`;
     }
     return 'All Time';
@@ -114,6 +122,7 @@ export default class DateSelectFilter2 extends Vue {
   border-radius: 4px;
   width: 100%;
   height: 32px;
+  color: var(--text-color);
 
   .di-calendar-input-container {
     height: 32px;

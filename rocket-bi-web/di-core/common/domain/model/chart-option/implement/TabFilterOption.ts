@@ -14,6 +14,11 @@ export interface DefaultSettings {
   dynamicFunction?: DefaultDynamicFunctionValue;
 }
 
+export interface SearchSetting {
+  enabled: boolean;
+  placeholder?: string;
+}
+
 export interface TabOptionData extends ChartOptionData {
   displayAs?: TabFilterDisplay;
   direction?: Direction;
@@ -22,6 +27,7 @@ export interface TabOptionData extends ChartOptionData {
   choiceActiveColor?: string;
   choiceDeActiveColor?: string;
   default?: DefaultSettings;
+  search?: SearchSetting;
 }
 
 export class TabFilterOption extends ChartOption<TabOptionData> {
@@ -118,6 +124,10 @@ export class TabFilterOption extends ChartOption<TabOptionData> {
         setting: {
           value: null
         }
+      },
+      search: {
+        enabled: true,
+        placeholder: 'Search...'
       }
     };
   }

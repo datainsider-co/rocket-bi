@@ -5,8 +5,7 @@ import co.datainsider.bi.controller.http.filter.{
   CORSFilter,
   CaseClassExceptionMapping,
   CommonExceptionMapping,
-  JsonParseExceptionMapping,
-  LicenceFilter
+  JsonParseExceptionMapping
 }
 import co.datainsider.bi.controller.thrift.TBIServiceController
 import co.datainsider.bi.module.{AccessFilterModule, BIServiceModule, TestModule}
@@ -24,8 +23,9 @@ import com.twitter.finatra.thrift.ThriftServer
 import com.twitter.finatra.thrift.routing.ThriftRouter
 import com.twitter.util.Await
 import datainsider.client.exception.DbExecuteError
-import datainsider.client.filter.{LoggedInUserParser, MustLoggedInFilter}
+import datainsider.client.filter.{LicenceFilter, LoggedInUserParser, MustLoggedInFilter}
 import datainsider.client.module.{CaasClientModule, MockCaasClientModule, MockSchemaClientModule, SchemaClientModule}
+import datainsider.licence.module.LicenceClientModule
 
 /**
   * Created by SangDang on 9/8/

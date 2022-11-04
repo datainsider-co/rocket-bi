@@ -7,9 +7,10 @@ import com.twitter.finatra.mustache.modules.MustacheFactoryModule
 import com.twitter.inject.TwitterModule
 import datainsider.admin.service.{AdminUserService, AdminUserServiceImpl}
 import datainsider.client.util.{JdbcClient, ZConfig}
-import datainsider.user_profile.repository.{OrganizationMemberRepository, _}
+import datainsider.user_caas.repository.UserRepository
+import datainsider.user_profile.repository._
 import datainsider.user_profile.service.verification._
-import datainsider.user_profile.service.{OrganizationService, RegistrationService, _}
+import datainsider.user_profile.service._
 import education.x.commons.I32IdGenerator
 import org.nutz.ssdb4j.spi.SSDB
 
@@ -31,7 +32,6 @@ object UserProfileModule extends TwitterModule {
     bind[VerifyService].to[EmailVerifyService].asEagerSingleton()
 
     bind[UserProfileService].to[UserProfileServiceImpl].asEagerSingleton()
-    bind[OrganizationService].to[OrganizationServiceImpl].asEagerSingleton()
     bind[DnsService].to[CloudflareDnsService].asEagerSingleton()
 
     //Admin services
@@ -139,4 +139,27 @@ object UserProfileModule extends TwitterModule {
     SendGridEmailService(new SendGrid(apiKey), senderEmail)
   }
 
+  @Singleton
+  @Provides
+  def providesOrganizationService(
+      idGenerator: I32IdGenerator,
+      organizationRepository: OrganizationRepository,
+      userRepository: UserRepository,
+      adminUserService: AdminUserService,
+      client: SSDB,
+      dnsService: DnsService,
+      emailChannel: ChannelService
+  ): OrganizationService = {
+    val defaultOrganizationId = ZConfig.getLong("caas.default_organization_id", 0)
+    OrganizationServiceImpl(
+      idGenerator,
+      organizationRepository,
+      userRepository,
+      adminUserService,
+      client,
+      dnsService,
+      emailChannel,
+      defaultOrganizationId
+    )
+  }
 }

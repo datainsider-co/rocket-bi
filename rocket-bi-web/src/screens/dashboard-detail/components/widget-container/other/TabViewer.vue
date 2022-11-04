@@ -28,7 +28,7 @@
             </template>
             <!-- Content -->
             <vuescroll v-else>
-              <DiGridstack ref="gridstack" :canInteractive="isShowEdit" :options="defaultOptions">
+              <DiGridstack ref="gridstacks" :canInteractive="isShowEdit" :options="defaultOptions">
                 <template v-for="(position, id) in positions">
                   <DiGridstackItem
                     :id="+id"
@@ -110,6 +110,8 @@ import { DashboardService } from '@core/common/services';
 import { cloneDeep, isNumber } from 'lodash';
 import { Component, Inject, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import Swal from 'sweetalert2';
+import { Log } from '@core/utils';
+import { DomUtils, ListUtils } from '@/utils';
 
 @Component({ components: { WidgetContainer, DiGridstack, DiGridstackItem, DiRenameModal, SortModal } })
 export default class TabViewer extends Vue {
@@ -130,7 +132,7 @@ export default class TabViewer extends Vue {
   renameModal!: DiRenameModal;
 
   @Ref()
-  gridstack!: DiGridstack;
+  gridstacks!: DiGridstack[];
 
   // Provide from DiGridstackItem
   @Inject({ default: undefined })
@@ -250,8 +252,9 @@ export default class TabViewer extends Vue {
     PopupUtils.hideAllPopup();
     this.$root.$emit(DashboardEvents.RemoveChartFromTab, this.widget, tabIndex, (widgetIds: WidgetId[]) => {
       widgetIds.forEach(id => {
-        if (this.gridstack) {
-          this.gridstack.removeItemById(id);
+        const gridstack = ListUtils.getHead(this.gridstacks);
+        if (gridstack) {
+          gridstack.removeItemById(id);
         }
       });
     });
