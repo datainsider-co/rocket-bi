@@ -151,52 +151,66 @@ For contribution guidelines, see [contributing](/contributing.md).
   
 ### Example: 
 
-![Animation](https://user-images.githubusercontent.com/19279051/194230899-e9911c22-93a8-465f-ab2d-09d59c0095e9.gif)
+<img width="800" alt="Animation" src="https://user-images.githubusercontent.com/19279051/194230899-e9911c22-93a8-465f-ab2d-09d59c0095e9.gif">
 
 
 Adhoc-Query to explore data & quickly build visualization. There is also supported functions & autocompletion for sql query. 
 
-![adhoc query](https://user-images.githubusercontent.com/19279051/193552439-9bc97cc4-d599-4a82-835d-c958932296eb.jpg)
+<img width="650" alt="adhoc query" src="https://user-images.githubusercontent.com/19279051/193552439-9bc97cc4-d599-4a82-835d-c958932296eb.jpg">
 
 
 Drag-n-Drop Chart Builder 
 
-![chart builder](https://user-images.githubusercontent.com/19279051/193552493-290051b8-0056-449a-aa8f-6dcf639892e4.jpg)
+<img width="650" alt="chart builder" src="https://user-images.githubusercontent.com/19279051/193552493-290051b8-0056-449a-aa8f-6dcf639892e4.jpg">
 
 
 Interactive Dashboard
 
-![dashboard](https://user-images.githubusercontent.com/19279051/193552728-758d5501-e36e-424b-9232-7a2ab8a6f340.jpg)
+<img width="650" alt="dashboard" src="https://user-images.githubusercontent.com/19279051/193552728-758d5501-e36e-424b-9232-7a2ab8a6f340.jpg">
 
 
 Apply filter to Dashboard
 
-![dash filter](https://user-images.githubusercontent.com/19279051/193552790-e0491b21-c57e-42e7-83d8-28db01f1b6bc.jpg)
+<img width="650" alt="dash filter" src="https://user-images.githubusercontent.com/19279051/193552790-e0491b21-c57e-42e7-83d8-28db01f1b6bc.jpg">
 
 
 Add Control to Chart
 
-![chart control](https://user-images.githubusercontent.com/19279051/193552863-9e189c20-512b-4c86-bf17-795c85877ef9.jpg)
+<img width="650" alt="chart control" src="https://user-images.githubusercontent.com/19279051/193552863-9e189c20-512b-4c86-bf17-795c85877ef9.jpg">
 
 
 Drilldown your data 
 
-![drill down](https://user-images.githubusercontent.com/19279051/193552519-221865d5-2adb-4624-8bd1-ac8c72d7cffd.jpg)
+<img width="650" alt="drill down" src="https://user-images.githubusercontent.com/19279051/193552519-221865d5-2adb-4624-8bd1-ac8c72d7cffd.jpg">
 
 
 No Code ETL data
 
-![no code etl](https://user-images.githubusercontent.com/19279051/193552548-93816afc-9fba-4549-931b-5b097604652a.jpg)
+<img width="650" alt="no code etl" src="https://user-images.githubusercontent.com/19279051/193552548-93816afc-9fba-4549-931b-5b097604652a.jpg">
 
 
 Row-Level Security
 
-![rls](https://user-images.githubusercontent.com/19279051/193552945-6fd9175f-08a6-405f-a358-dcfa87957998.jpg)
+<img width="650" alt="rls" src="https://user-images.githubusercontent.com/19279051/193552945-6fd9175f-08a6-405f-a358-dcfa87957998.jpg">
 
 
 Share & Collaboration 
 
-![share](https://user-images.githubusercontent.com/19279051/193552578-59c9f5a6-095d-405f-832e-5b7133bc0d2e.jpg)
+<img width="650" alt="Share & Collaborate with Others" src="https://user-images.githubusercontent.com/19279051/193552578-59c9f5a6-095d-405f-832e-5b7133bc0d2e.jpg">
 
 
-.. and more 
+Manager User's Attribute to custom the data accessibility to the data level
+
+<img width="650" alt="Row-level Security" src="https://user-images.githubusercontent.com/91059979/194751159-fdefb0aa-8ab1-4cc2-98ce-f0828c647c69.png">
+
+Calculated & Measurement Fields in Chart builder to create a dynamic view of data
+
+<img width="650" alt="calculate-measurement-field" src="https://user-images.githubusercontent.com/91059979/194797687-d3fd3b8c-5398-4d4e-af0c-864b759096b7.png">
+
+Click & connect relationship frome multiple tables, and do cross sources analysis
+
+<img width="650" alt="Relationship Builder" src="https://user-images.githubusercontent.com/91059979/194750965-9f019221-b1a9-4c72-a782-8de5ea9f99f3.png">
+
+Schema Management with Data Encryption
+
+<img width="650" alt="Schema Management" src="https://user-images.githubusercontent.com/91059979/194801262-c5d31c10-339b-41e0-bed2-65cf0f593bfe.png">
