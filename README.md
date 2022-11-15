@@ -4,7 +4,9 @@ RocketBI is a self-service, web-based business intelligent product tailor-made f
 stack.
 You can use RocketBI to analyze, visualize, and easily collaborate with your friends.
 
-To learn more about DataInsider's stack and RocketBi's features, see our documentation
+To learn more about DataInsider's stack and RocketBi's features, see our documentation. 
+
+You could try the demo version at https://demo.rocket.bi 
 
 ### Get started
 
