@@ -16,7 +16,7 @@ Follow the guide here: [Rocket.BI Readme](https://github.com/datainsider-co/rock
 
 ## LET'S BUILD THE DASHBOARD
 
-In Dashboard, you will find your reportings, start visualization by clicking +New
+In Dashboard, you will find your reportings, start visualization by clicking **+New**
 You can build **unlimited dashboards** & draw **unlimited charts** in a dashboard.
 
 <img width="800" alt="rocketbi_create_chart" src="https://user-images.githubusercontent.com/91059979/194799689-3ad88958-b7a8-4b3f-a98d-7af8b198d684.gif">
