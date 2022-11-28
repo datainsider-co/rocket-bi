@@ -19,7 +19,7 @@
     <ContextMenu ref="diContextMenu" :ignoreOutsideClass="listIgnoreClassForContextMenu" minWidth="250px" textColor="var(--text-color)" />
     <DirectoryCreate ref="mdCreateDirectory" />
     <DirectoryRename ref="mdRenameDirectory" />
-    <DiShareModal ref="mdShareDirectory" />
+    <DiShareModal ref="mdShareDirectory" @shared="reload" />
 
     <MyDataPickDirectory ref="directoryPicker" @selectDirectory="handleMoveToDirectory" />
   </LayoutWrapper>
@@ -56,6 +56,8 @@ import PopoverV2 from '@/shared/components/common/popover-v2/PopoverV2.vue';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Track } from '@/shared/anotation';
 import MyDataPickDirectory from '@/screens/lake-house/components/move-file/MyDataPickDirectory.vue';
+import { DirectoryMetadata } from '@core/common/domain/model/directory/directory-metadata/DirectoryMetadata';
+import { DashboardMetaData } from '@core/common/domain/model/directory/directory-metadata/DashboardMetaData';
 
 export enum DirectoryListingEvents {
   ShowMenuCreateDirectory = 'show-menu-create-directory',
@@ -178,17 +180,11 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
 
   private showShareModal(item: Directory) {
     this.diContextMenu.hide();
-    const organizationId = this.dataManager.getUserInfo()?.organization.organizationId!;
-    const resourceData: ResourceData = {
-      organizationId: organizationId,
-      resourceType: ResourceType.directory,
-      resourceId: item.id.toString()
-    };
-    let linkHandler: LinkHandler = new ShareDirectoryLinkHandler(item.id.toString(), item.name);
     if (item.dashboardId) {
-      linkHandler = new ShareDashboardLinkHandler(item.dashboardId.toString(), item.name);
+      this.mdShareDirectory.showShareDashboard(item);
+    } else {
+      this.mdShareDirectory.showShareDirectory(item);
     }
-    this.mdShareDirectory.showShareDirectory(resourceData, linkHandler);
     Log.debug('Share::item', item);
   }
 
@@ -335,6 +331,18 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
       DirectoryModule.setStatus(Status.Updating);
       await DirectoryModule.moveDirectory({ id: directoryId, parentId: parentId });
       await this.myData?.handler.loadDirectoryListing(parentId, this.myData?.createPaginationRequest());
+    } catch (e) {
+      Log.error('DirectoryListing::handleMoveToDirectory::error::', e);
+      PopupUtils.showError(e.message);
+    } finally {
+      DirectoryModule.setStatus(Status.Loaded);
+    }
+  }
+
+  private async reload() {
+    try {
+      DirectoryModule.setStatus(Status.Updating);
+      await this.myData?.handler.loadDirectoryListing(this.myData?.currentDirectoryId, this.myData?.createPaginationRequest());
     } catch (e) {
       Log.error('DirectoryListing::handleMoveToDirectory::error::', e);
       PopupUtils.showError(e.message);

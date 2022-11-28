@@ -39,7 +39,7 @@
         <template>
           <template v-if="isFullSizeMode">
             <ActionWidgetFilter
-              v-if="hasFilter()"
+              v-if="hasFilter() && showEditComponent"
               :id="genBtnId('filter-full-mode', currentChartInfo.id)"
               :filter-requests="getFilterRequests()"
               :is-apply-filter="isAffectByFilter()"
@@ -62,7 +62,7 @@
           </template>
           <template v-else>
             <ActionWidgetFilter
-              v-if="hasFilter()"
+              v-if="hasFilter() && showEditComponent"
               :id="genBtnId('filter', currentChartInfo.id)"
               :filter-requests="getFilterRequests()"
               :is-apply-filter="isAffectByFilter()"

@@ -75,6 +75,10 @@ export default class DateFilter2 extends BaseWidget {
 
   filterData: DateFilterData = this.getDateSelected();
 
+  mounted() {
+    this.filterData = this.getDateSelected();
+  }
+
   resize(): void {
     //Todo: Add resize method
   }
@@ -226,14 +230,18 @@ export default class DateFilter2 extends BaseWidget {
   getDateSelected(): DateFilterData {
     const defaultValue: any = this.setting.options.default?.setting?.value;
     const isUsingDefault = this.setting.options.default?.setting?.value != null;
-    Log.debug('getDateSelected::', defaultValue, isUsingDefault);
+    Log.debug('getDateSelected::', defaultValue, isUsingDefault, DateFilterUtils.isDateFilterData(defaultValue));
     if (isUsingDefault && Array.isArray(defaultValue)) {
       return {
-        dates: this.setting.options.default?.setting?.value,
+        dates: defaultValue,
         mode: MainDateMode.custom
       };
     } else if (isUsingDefault && DateFilterUtils.isDateFilterData(defaultValue)) {
       const dates: string[] = DateFilterUtils.calculatedDates(defaultValue);
+      Log.debug('getDateSelected::object::', {
+        dates: dates,
+        mode: defaultValue.mode
+      });
       return {
         dates: dates,
         mode: defaultValue.mode

@@ -3,7 +3,7 @@ import { OracleSourceInfo } from './OracleSourceInfo';
 import { MSSqlSourceInfo } from './MSSqlSourceInfo';
 import { DataSourceType } from '@core/data-ingestion/domain/data-source/DataSourceType';
 import { DataSource } from '@core/data-ingestion/domain/response/DataSource';
-import { DataSources, JdbcSource, MongoDBSource, MongoDBSourceInfo, S3Source, S3SourceInfo } from '@core/data-ingestion';
+import { DataSources, GoogleAdsSourceInfo, JdbcSource, MongoDBSource, MongoDBSourceInfo, S3Source, S3SourceInfo } from '@core/data-ingestion';
 import { SourceId } from '@core/common/domain';
 import { RedshiftSourceInfo } from '@core/data-ingestion/domain/data-source/RedshiftSourceInfo';
 import { UnsupportedException } from '@core/common/domain/exception/UnsupportedException';
@@ -60,6 +60,8 @@ export abstract class DataSourceInfo {
         return ShopifySourceInfo.fromObject(obj);
       case DataSourceType.S3:
         return S3SourceInfo.fromObject(obj);
+      case DataSourceType.GoogleAds:
+        return GoogleAdsSourceInfo.fromObject(obj);
       default:
         return UnsupportedSourceInfo.fromObject(obj);
     }
@@ -83,6 +85,8 @@ export abstract class DataSourceInfo {
         return S3SourceInfo.fromS3Source(obj as S3Source);
       case DataSources.GA4Source:
         return GA4SourceInfo.fromGA4Source(obj as GA4Source);
+      case DataSources.GoogleAdsSource:
+        return GoogleAdsSourceInfo.fromObject(obj);
       default:
         return UnsupportedSourceInfo.fromObject(obj);
     }
@@ -148,11 +152,14 @@ export abstract class DataSourceInfo {
         return 'ic_s3_small.png';
       case DataSourceType.GA4:
         return 'ic_ga_small.png';
+      case DataSourceType.GoogleAds:
+        return 'ic_gg_ads_small.png';
       default:
         return 'ic_default.svg';
     }
   }
 
   abstract toDataSource(): DataSource;
+
   abstract getDisplayName(): string;
 }

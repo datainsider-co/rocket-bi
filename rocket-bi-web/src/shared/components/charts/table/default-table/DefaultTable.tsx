@@ -522,7 +522,8 @@ export default class DefaultTable extends BaseWidget {
   async downloadCSV(): Promise<void> {
     try {
       const fileName: string = StringUtils.toKebabCase(StringUtils.vietnamese(this.title));
-      await ChartUtils.downloadAsCSV(fileName, this.internalTableResponse);
+      const csvData = await DashboardControllerModule.loadCsvData({ widgetId: this.chartId });
+      await ChartUtils.writeCsvFile(fileName, csvData);
     } catch (ex) {
       Log.error('downloadCSV::failure', ex);
       PopupUtils.showError('Download CSV failure, try again later');

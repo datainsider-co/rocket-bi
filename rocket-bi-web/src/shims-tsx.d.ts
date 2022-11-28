@@ -54,5 +54,10 @@ declare global {
     VUE_APP_IS_DISABLE_USER_ACTIVITIES: boolean;
     VUE_APP_IS_ENABLE_CLICKHOUSE_CONFIG: boolean;
     VUE_APP_IS_DISABLE_BILLING: boolean;
+    VUE_APP_VERSION: string;
+    VUE_APP_LOGIN_SAMPLE: {
+      isShowHint: boolean;
+      hintMessage: string;
+    };
   }
 }

@@ -192,6 +192,22 @@ export default class VisualHeader extends Vue {
         case ChartType.FlattenPivotTable:
         case ChartType.Parliament:
         case ChartType.Kpi:
+        case ChartType.InputControl:
+        case ChartType.InputFilter:
+        case ChartType.SingleChoiceMeasurement:
+        case ChartType.SingleChoice:
+        case ChartType.SingleChoiceFilter:
+        case ChartType.MultiChoice:
+        case ChartType.MultiChoiceMeasurement:
+        case ChartType.MultiChoiceFilter:
+        case ChartType.DropDownMeasurement:
+        case ChartType.DropDown:
+        case ChartType.DropDownFilter:
+        case ChartType.TabMeasurement:
+        case ChartType.TabFilter:
+        case ChartType.TabInnerFilter:
+        case ChartType.DateSelectFilter:
+        case ChartType.SlicerFilter:
           return false;
         default:
           return true;
@@ -208,6 +224,22 @@ export default class VisualHeader extends Vue {
         case ChartType.PivotTable:
         case ChartType.FlattenPivotTable:
         case ChartType.Parliament:
+        case ChartType.InputControl:
+        case ChartType.InputFilter:
+        case ChartType.SingleChoiceMeasurement:
+        case ChartType.SingleChoice:
+        case ChartType.SingleChoiceFilter:
+        case ChartType.MultiChoice:
+        case ChartType.MultiChoiceMeasurement:
+        case ChartType.MultiChoiceFilter:
+        case ChartType.DropDownMeasurement:
+        case ChartType.DropDown:
+        case ChartType.DropDownFilter:
+        case ChartType.TabMeasurement:
+        case ChartType.TabFilter:
+        case ChartType.TabInnerFilter:
+        case ChartType.DateSelectFilter:
+        case ChartType.SlicerFilter:
           return false;
         default:
           return true;

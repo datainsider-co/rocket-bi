@@ -43,6 +43,8 @@ export abstract class DirectoryRepository {
   abstract star(directoryId: DirectoryId): Promise<void>;
 
   abstract removeStar(directoryId: DirectoryId): Promise<void>;
+
+  abstract update(directory: Directory): Promise<boolean>;
 }
 
 export class HttpDirectoryRepository extends DirectoryRepository {
@@ -50,7 +52,7 @@ export class HttpDirectoryRepository extends DirectoryRepository {
   private httpClient!: BaseClient;
 
   get(id: DirectoryId): Promise<Directory> {
-    return this.httpClient.get<Directory>(`/directories/${id}`);
+    return this.httpClient.get<Directory>(`/directories/${id}`).then(res => Directory.fromObject(res));
   }
 
   create(request: CreateDirectoryRequest): Promise<Directory> {
@@ -127,5 +129,9 @@ export class HttpDirectoryRepository extends DirectoryRepository {
 
   removeStar(directoryId: DirectoryId): Promise<void> {
     return this.httpClient.post<void>(`/directories/${directoryId}/unstar`, void 0, void 0, void 0, data => data);
+  }
+
+  update(directory: Directory): Promise<boolean> {
+    return this.httpClient.put(`/directories/${directory.id}`, directory).then(_ => true);
   }
 }

@@ -53,6 +53,7 @@ import { DataType } from '@core/schema/service/FieldFilter';
 import { FunctionResolver } from '@core/common/services/function-builder/FunctionResolver';
 import { Log, NumberUtils } from '@core/utils';
 import { Function } from '@core/common/domain/model/function/Function';
+import { DownloadableFileWriter } from '@core/common/misc/csv/AbstractFileWriter';
 
 export abstract class ChartUtils {
   private static SETTING_NEED_KEEPS = ['title', 'subtitle', 'background', 'text_color'];
@@ -460,6 +461,7 @@ export abstract class ChartUtils {
   }
 
   /**
+   * @deprecated call api download instead of
    * @throws Exception
    */
   static async downloadAsCSV(fileName: string, tableResponse: AbstractTableResponse) {
@@ -471,6 +473,12 @@ export abstract class ChartUtils {
     });
     await csvWriter.writeRecords(csv.records);
     csvWriter.close();
+  }
+
+  static async writeCsvFile(fileName: string, data: string) {
+    const writer = new DownloadableFileWriter(`${fileName}.csv`, true);
+    await writer.write(data);
+    writer.close();
   }
 
   //trả về giá trị data label có được hiển thị với điều kiện tương ứng

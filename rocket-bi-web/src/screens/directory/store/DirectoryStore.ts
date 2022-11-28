@@ -212,13 +212,12 @@ export default class DirectoryStore extends VuexModule {
   async handleRename(payload: { id: number; name: string; resourceType: ResourceType }) {
     const updatedDirectories = [...this.directories];
     const updatedIndex = await this.getDirectoryIndexById({ id: payload.id, directories: updatedDirectories, resourceType: payload.resourceType });
-    const updatedDirectory = Directory.fromObject({ ...updatedDirectories[updatedIndex], name: payload.name });
+    const updatedDirectory = Directory.fromObject({ ...updatedDirectories[updatedIndex], name: payload.name } as Directory);
     updatedDirectories.splice(updatedIndex, 1, updatedDirectory);
     Log.debug('DirectoryStore::handleRenameFolder::updatedDirectories::', updatedDirectories);
     Log.debug('DirectoryStore::handleRenameFolder::updatedDirectory::', updatedDirectory, updatedIndex);
     this.setDirectories(updatedDirectories);
   }
-
   @Action
   getDirectoryIndexById(payload: { id: number; directories: Directory[]; resourceType: ResourceType }): Promise<number> {
     switch (payload.resourceType) {
@@ -380,7 +379,7 @@ export default class DirectoryStore extends VuexModule {
     const index = this.directories.findIndex(directory => directory.id == id);
     if (index > -1) {
       const directories = Array.from(this.directories);
-      const updatedDirectory = Directory.fromObject({ ...directories[index], isStarred: isStarred });
+      const updatedDirectory = Directory.fromObject({ ...directories[index], isStarred: isStarred } as Directory);
       directories.splice(index, 1, updatedDirectory);
       this.directories = directories;
     }

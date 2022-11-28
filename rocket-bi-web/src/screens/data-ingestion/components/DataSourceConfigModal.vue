@@ -130,6 +130,8 @@ export default class DataSourceConfigModal extends Vue {
     switch (sourceType) {
       // case DataSourceType.GoogleSheet:
       //   return true;
+      case DataSourceType.GoogleAds:
+        return true;
       default:
         return false;
     }

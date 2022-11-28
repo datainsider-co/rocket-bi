@@ -41,7 +41,7 @@
             <div class="padding-top"></div>
             <FormulaCompletionInput
               class="flex-grow-1 flex-shrink-1"
-              v-model.trim="formula"
+              v-model="formula"
               :formulaController="formulaController"
               @onSelectKeyword="handleSelectKeyword"
             />
@@ -142,6 +142,7 @@ import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTa
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
+import { RandomUtils } from '@/utils';
 
 @Component({
   components: {
@@ -480,6 +481,7 @@ export default class CalculatedFieldModal extends Vue {
       height: 434px;
       display: flex;
       flex-direction: column;
+      background-color: var(--editor-color);
 
       .padding-top {
         background-color: var(--editor-color);

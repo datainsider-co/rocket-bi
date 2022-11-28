@@ -87,7 +87,7 @@
                   <div class="table-header-toggle">
                     <i class="di-icon-table"></i>
                     <div class="table-header-toggle-title">{{ node.title }}</div>
-                    <template v-if="!node.isLeaf">
+                    <template v-if="!node.isLeaf && !hideTableAction">
                       <div
                         class="icon-create-field btn-icon btn-icon-border"
                         v-if="mode === DatabaseEditionMode.Query"

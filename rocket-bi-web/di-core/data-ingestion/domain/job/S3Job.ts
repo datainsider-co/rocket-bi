@@ -286,4 +286,9 @@ export class S3Job implements Job {
     this.destDatabaseName = dbName;
     return this;
   }
+
+  withDisplayName(displayName: string): Job {
+    this.displayName = displayName;
+    return this;
+  }
 }

@@ -1,8 +1,17 @@
 import { ActionType, ResourceType } from '@/utils/PermissionUtils';
-import { DIException, GetUserSharingInfoRequest, PermissionTokenResponse, ResourceInfo, SharedUserInfo, UserProfile } from '@core/common/domain';
+import {
+  DIException,
+  GetUserSharingInfoRequest,
+  PasswordConfig,
+  PermissionTokenResponse,
+  ResourceInfo,
+  SharedUserInfo,
+  UserProfile
+} from '@core/common/domain';
 import { Log } from '@core/utils';
 import { ShareHandler } from '@/shared/components/common/di-share-modal/share-handler/ShareHandler';
 import { _DataCookShareStore } from '@/screens/data-management/store/DataCookShareStore';
+import { UnsupportedException } from '@core/common/domain/exception/UnsupportedException';
 
 export class DataCookShareHandler implements ShareHandler {
   get resourceInfo(): ResourceInfo | null {
@@ -47,5 +56,13 @@ export class DataCookShareHandler implements ShareHandler {
       shareAnyonePermissionType: shareAnyonePermissionType,
       isChangeShareAnyone: isChangeShareAnyone
     });
+  }
+
+  async savePassword(resourceId: string, resourceType: ResourceType, password: PasswordConfig) {
+    throw new UnsupportedException('Data Cook is not support save with password');
+  }
+
+  async removePassword(resourceId: string, resourceType: ResourceType) {
+    throw new UnsupportedException('Data Cook is not support save with password');
   }
 }

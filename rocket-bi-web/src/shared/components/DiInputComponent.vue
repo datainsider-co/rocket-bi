@@ -11,7 +11,7 @@
         ref="input"
         :name="autocomplete"
         :autocomplete="autocomplete"
-        @keydown.enter="$emit('enter')"
+        @keydown.enter="emitEnterEvent"
         @input="input => $emit('input', input)"
         @change="value => $emit('change', value)"
         v-bind="$attrs"
@@ -30,7 +30,8 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { Component, Prop } from 'vue-property-decorator';
+import { Component, Emit, Prop } from 'vue-property-decorator';
+import { TimeoutUtils } from '@/utils';
 
 @Component({
   inheritAttrs: true
@@ -65,6 +66,13 @@ export default class DiInputComponent extends Vue {
   focus() {
     //@ts-ignored
     this.$refs.input.focus();
+  }
+
+  @Emit('enter')
+  private async emitEnterEvent(event: Event) {
+    // trick, wait for input value changed
+    await TimeoutUtils.sleep(50);
+    return event;
   }
 }
 </script>

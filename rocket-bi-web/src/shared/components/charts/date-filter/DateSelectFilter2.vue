@@ -44,12 +44,13 @@ import { DateFilterUtils } from '@chart/date-filter/DateFilterUtils';
 export default class DateSelectFilter2 extends Vue {
   private readonly MainDateModeOptions = DateTimeConstants.ListDateRangeModeOptions;
   private id = RandomUtils.nextInt(0, 10000);
+  private readonly dateMode = MainDateMode.custom;
 
   private getDateRangeByMode(mode: MainDateMode): DateRange | null {
     return DateUtils.getDateRange(mode);
   }
 
-  @Prop({ default: DateFilterUtils.defaultDateFilterData })
+  @Prop({ required: true })
   filterData!: DateFilterData;
 
   private localValue = this.filterData;
@@ -66,8 +67,8 @@ export default class DateSelectFilter2 extends Vue {
   private get defaultDateRange(): DateRange | undefined {
     if (ListUtils.isNotEmpty(this.localValue.dates)) {
       return {
-        start: moment(this.localValue.dates).toDate(),
-        end: moment(this.localValue.dates).toDate()
+        start: moment(this.localValue.dates[0]).toDate(),
+        end: moment(this.localValue.dates[1]).toDate()
       };
     } else {
       return void 0;

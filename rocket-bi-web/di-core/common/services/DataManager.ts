@@ -1,4 +1,15 @@
-import { Dashboard, DashboardId, DashboardSetting, DynamicFilter, FieldDetailInfo, FilterWidget, UserInfo, UserProfile, Widget } from '@core/common/domain';
+import {
+  Dashboard,
+  DashboardId,
+  DashboardSetting,
+  DynamicFilter,
+  FieldDetailInfo,
+  FilterWidget,
+  Organization,
+  UserInfo,
+  UserProfile,
+  Widget
+} from '@core/common/domain';
 import { CookieManger } from '@core/common/services/index';
 import { JsonUtils, Log } from '@core/utils';
 import { SessionInfo } from '@core/common/domain/response';
@@ -27,7 +38,8 @@ enum DataManagerKeys {
   DashboardSetting = 'dashboard_setting',
   LoginType = 'login_type',
   Dashboard = 'dashboard',
-  SelectedColumns = 'selected_columns'
+  SelectedColumns = 'selected_columns',
+  Organization = 'organization'
 }
 
 export class DataManager {
@@ -280,6 +292,26 @@ export class DataManager {
 
   saveSelectedColumnNames(columnNames: string[]) {
     localStorage.setItem(DataManagerKeys.SelectedColumns, JSON.stringify(columnNames));
+  }
+
+  getOrganization(): Organization | null {
+    try {
+      const value = localStorage.getItem(DataManagerKeys.Organization);
+      if (value) {
+        return Organization.fromObject(JSON.parse(value));
+      } else {
+        return null;
+      }
+    } catch (ex) {
+      Log.error('DataManagerService.getOrganization failed', ex);
+      return null;
+    }
+  }
+
+  saveOrganization(organization: Organization) {
+    const newOrganization = Organization.fromObject(organization);
+    newOrganization.expiredTimeMs = Date.now() + 86400000; // expired in 1 days
+    localStorage.setItem(DataManagerKeys.Organization, JSON.stringify(newOrganization));
   }
 
   clearLocalStorage() {

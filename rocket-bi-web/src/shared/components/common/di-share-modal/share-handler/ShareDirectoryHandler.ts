@@ -1,13 +1,30 @@
 import { ActionType, ResourceType } from '@/utils/PermissionUtils';
-import { GetUserSharingInfoRequest, PermissionTokenResponse, ResourceInfo, SharedUserInfo, UserProfile } from '@core/common/domain';
+import {
+  PasswordSetting,
+  DirectoryType,
+  GetUserSharingInfoRequest,
+  PasswordConfig,
+  PermissionTokenResponse,
+  ResourceInfo,
+  SharedUserInfo,
+  UserProfile
+} from '@core/common/domain';
 import { ShareModule } from '@/store/modules/ShareStore';
 import { Log } from '@core/utils';
 import { ShareHandler } from '@/shared/components/common/di-share-modal/share-handler/ShareHandler';
+import { DashboardService, DirectoryService } from '@core/common/services';
+import { Di } from '@core/common/modules';
+import { DirectoryMetadata } from '@core/common/domain/model/directory/directory-metadata/DirectoryMetadata';
 
 export class ShareDirectoryHandler implements ShareHandler {
+  private readonly directoryService = Di.get(DirectoryService);
+  private readonly dashboardService = Di.get(DashboardService);
+  private static readonly directoryMapper: Map<ResourceType, DirectoryType> = new Map([[ResourceType.directory, DirectoryType.Dashboard]]);
+
   addShareUser(organizationId: string, resourceType: ResourceType, resourceId: string, userProfile: UserProfile): void {
     ShareModule.addNewShareUser({ userProfile: userProfile, organizationId: organizationId, resourceId: resourceId, resourceType: resourceType });
   }
+
   getShareAnyone(resourceType: ResourceType, resourceId: string): Promise<PermissionTokenResponse | null> {
     return ShareModule.getShareWithAnyone({
       resourceType: resourceType,
@@ -18,7 +35,6 @@ export class ShareDirectoryHandler implements ShareHandler {
   loadResourceInfo(resourceType: ResourceType, resourceId: string): Promise<void> {
     const request: GetUserSharingInfoRequest = new GetUserSharingInfoRequest(resourceType, resourceId, 0, 100);
     return ShareModule.loadResourceInfo(request);
-    Log.debug('request::', request.resourceId, resourceId);
   }
 
   get resourceInfo(): ResourceInfo | null {
@@ -44,5 +60,35 @@ export class ShareDirectoryHandler implements ShareHandler {
       shareAnyonePermissionType: shareAnyonePermissionType,
       isChangeShareAnyone: isChangeShareAnyone
     });
+  }
+
+  async savePassword(resourceId: string, resourceType: ResourceType, password: PasswordConfig) {
+    try {
+      const directory = await this.directoryService.get(+resourceId);
+      ///Create extraData if old directory(not have extra data in directory)
+      Log.debug('savePassword::', directory, !directory.data);
+      if (!directory.data) {
+        directory.data = DirectoryMetadata.default(ShareDirectoryHandler.directoryMapper.get(resourceType)!);
+      }
+      Log.debug('savePassword::', directory.data);
+      if (PasswordSetting.is(directory.data)) {
+        directory.data.setPassword(password.hashedPassword!).setEnable(password.enabled);
+        await this.directoryService.update(directory);
+      }
+    } catch (ex) {
+      Log.error(ex);
+    }
+  }
+
+  async removePassword(resourceId: string, resourceType: ResourceType) {
+    try {
+      const directory = await this.directoryService.get(+resourceId);
+      if (PasswordSetting.is(directory?.data)) {
+        directory.data.removePassword();
+        await this.directoryService.update(directory);
+      }
+    } catch (ex) {
+      Log.error(ex);
+    }
   }
 }

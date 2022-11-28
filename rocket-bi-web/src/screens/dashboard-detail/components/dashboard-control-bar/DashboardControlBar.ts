@@ -304,8 +304,7 @@ export default class DashboardControlBar extends Vue {
     try {
       if (this.dashboardId) {
         Log.debug('DashboardControlBar::clickShare::dashboardId::', this.dashboardId);
-        this.currentDirectoryId = this.currentDirectoryId ?? (await DashboardModule.getDirectoryId(this.dashboardId));
-        this.showShareModal(this.currentDirectoryId.toString(), this.dashboardId.toString());
+        this.showShareModal(this.dashboardId.toString());
       } else {
         Log.debug('DashboardControlBar::clickShare::error:: can not get dashboard Id.');
         PopupUtils.showError('Can not get Dashboard Id.');
@@ -323,16 +322,8 @@ export default class DashboardControlBar extends Vue {
   @Track(TrackEvents.ShareDashboard, {
     dashboard_id: (_: DashboardControlBar, args: any) => args[1]
   })
-  private showShareModal(directoryId: string, dashboardId: string) {
-    const organizationId = this.dataManager.getUserInfo()?.organization.organizationId!;
-    const name = DashboardModule.currentDashboard?.name ?? '';
-    const resourceData: ResourceData = {
-      organizationId: organizationId,
-      resourceType: ResourceType.directory,
-      resourceId: directoryId
-    };
-    const linkHandler: LinkHandler = new ShareDashboardLinkHandler(dashboardId, name);
-    this.$root.$emit(DashboardEvents.ShowShareModal, resourceData, linkHandler);
+  private showShareModal(dashboardId: string) {
+    this.$root.$emit(DashboardEvents.ShowShareModal, +dashboardId);
   }
 
   async handleEditMainDateFilter(newMainDateFilter: DateFilter) {

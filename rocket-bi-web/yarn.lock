@@ -5232,10 +5232,10 @@ detect-node@^2.0.4:
   resolved "https://registry.npmjs.org/detect-node/-/detect-node-2.0.4.tgz#014ee8f8f669c5c58023da64b8179c083a28c46c"
   integrity sha512-ZIzRpLJrOj7jjP2miAtgqIfmzbxa4ZOr5jJc601zklsfEx9oTzmmj2nVpIPRpNlRTIh8lc1kyViIY7BWSGNmKw==
 
-di-web-analytics@^0.7.1:
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/di-web-analytics/-/di-web-analytics-0.7.1.tgz#efacbc828c4f5edac0bc98c492145bc72093059c"
-  integrity sha512-EXMGQf9Xnbhgmx/4FKcGDd6VLuqaO/zfiSBVldgqkGQoI1ViQfdrHxBgNZZ3ymCoIwIQ0VntxNMYxGXGJGNRnw==
+di-web-analytics@^0.7.4:
+  version "0.7.4"
+  resolved "https://registry.yarnpkg.com/di-web-analytics/-/di-web-analytics-0.7.4.tgz#784c3712799db527edce9973eb6c86786c4d7bc0"
+  integrity sha512-kB8dJkYD6EXOnEmJcjsNm3eEvFwAaDbO/Qd5LV2/oT2s/YxpaeP0nHzy3pxAzclNdlW3HmltxOkG4wvdXDuT6Q==
   dependencies:
     "@types/node" "^16.6.1"
     "@types/uuid" "^8.3.0"
@@ -7923,6 +7923,11 @@ js-queue@2.0.0:
   integrity sha1-NiITz4YPRo8BJfxslqvBdCUx+Ug=
   dependencies:
     easy-stack "^1.0.0"
+
+js-sha256@0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/js-sha256/-/js-sha256-0.9.0.tgz#0b89ac166583e91ef9123644bd3c5334ce9d0966"
+  integrity sha512-sga3MHh9sgQN2+pJ9VYZ+1LPwXOxuBJBA5nrR5/ofPfuiJBE2hnjsaN8se8JznOmGLN2p49Pe5U/ttafcs/apA==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"

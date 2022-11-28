@@ -11,6 +11,9 @@ import { JsonUtils } from '@core/utils';
 
 export abstract class QueryRepository {
   abstract query(request: QueryRequest): Promise<VisualizationResponse>;
+
+  abstract queryAsCsv(request: QueryRequest): Promise<string>;
+
   abstract queryWithUser(request: QueryRequest, userProfile: UserProfile): Promise<VisualizationResponse>;
 }
 
@@ -47,5 +50,9 @@ export class QueryRepositoryImpl implements QueryRepository {
     } else {
       return void 0;
     }
+  }
+
+  queryAsCsv(request: QueryRequest): Promise<string> {
+    return this.baseClient.post<string>(`/query/csv`, request);
   }
 }

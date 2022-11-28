@@ -100,6 +100,9 @@
               <template v-if="isS3Job">
                 <S3DataSourceConfig ref="s3FromSuggestion" :job.sync="jdbcJob" />
               </template>
+              <template v-if="isGgAdsJob">
+                <GoogleAdsSourceConfig ref="ggAdsFromSuggestion" :single-table.sync="isSingleTable" :job.sync="jdbcJob" />
+              </template>
             </div>
           </div>
 
@@ -125,7 +128,7 @@
 
           <JobLakeConfig v-if="jdbcJob.isShowLakeConfig" :job.sync="jdbcJob" class="job-section export-form" />
           <div class="job-section">
-            <JobSyncConfig ref="jobSyncModeConfig" :is-validate="isValidate" :job.sync="jdbcJob"></JobSyncConfig>
+            <JobSyncConfig v-if="showSyncConfig" ref="jobSyncModeConfig" :is-validate="isValidate" :job.sync="jdbcJob"></JobSyncConfig>
             <SchedulerSettingV2
               id="setting-job-scheduler"
               :scheduler-time="jdbcJob.scheduleTime"
@@ -145,7 +148,21 @@
 <script lang="ts">
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
-import { DataDestination, DataSourceInfo, DataSources, DataSourceType, FormMode, JdbcJob, Job, JobType, S3Job, SyncMode } from '@core/data-ingestion';
+import {
+  DataDestination,
+  DataSourceInfo,
+  DataSources,
+  DataSourceType,
+  FormMode,
+  GoogleAdsJob,
+  GoogleAdsSourceInfo,
+  JdbcJob,
+  Job,
+  JobName,
+  JobType,
+  S3Job,
+  SyncMode
+} from '@core/data-ingestion';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
 import { DatabaseCreateRequest, DIException } from '@core/common/domain';
 import { Log } from '@core/utils';
@@ -159,12 +176,10 @@ import { AtomicAction } from '@/shared/anotation/AtomicAction';
 import { JobModule } from '@/screens/data-ingestion/store/JobStore';
 import { minValue, required } from 'vuelidate/lib/validators';
 import { ApiExceptions, Status, VerticalScrollConfigs } from '@/shared';
-import { StringUtils } from '@/utils/StringUtils';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { Inject } from 'typescript-ioc';
 import { SchemaService } from '@core/schema/service/SchemaService';
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
-import { JobName } from '@core/data-ingestion/domain/job/JobName';
 import JdbcDatabaseSuggestion from '@/screens/data-ingestion/components/JdbcFromDatabaseSuggestion.vue';
 import MultiBigQueryFromDatabaseSuggestion from '@/screens/data-ingestion/components/MultiBigQueryFromDatabaseSuggestion.vue';
 import { BigQueryJob } from '@core/data-ingestion/domain/job/BigQueryJob';
@@ -189,6 +204,7 @@ import MultiShopifyFromDatabaseSuggestion from '@/screens/data-ingestion/compone
 import { ShopifyJob } from '@core/data-ingestion/domain/job/ShopifyJob';
 import S3DataSourceConfig from './s3-csv/S3DataSourceConfig.vue';
 import DiInput from '@/shared/components/common/DiInput.vue';
+import GoogleAdsSourceConfig from '@/screens/data-ingestion/components/google-ads/GoogleAdsSourceConfig.vue';
 
 type IngestionJobCallback = (job: Job, isSingleTable: boolean) => void;
 
@@ -215,7 +231,8 @@ type IngestionJobCallback = (job: Job, isSingleTable: boolean) => void;
     DataSourceConfig,
     JobWareHouseConfig,
     MultiJobWareHouseConfig,
-    S3DataSourceConfig
+    S3DataSourceConfig,
+    GoogleAdsSourceConfig
   },
   validations: {
     jdbcJob: {
@@ -227,6 +244,8 @@ type IngestionJobCallback = (job: Job, isSingleTable: boolean) => void;
 export default class MultiJobCreationModal extends Vue {
   private scrollOption = VerticalScrollConfigs;
   private readonly jobName = JobName;
+  private readonly ggAds = require('./google-ads-resources.json');
+
   private jdbcJob: Job = JdbcJob.default(DataSourceInfo.default(DataSourceType.MySql));
   private isShowModal = false;
   private status = Status.Loaded;
@@ -273,6 +292,9 @@ export default class MultiJobCreationModal extends Vue {
 
   @Ref()
   private readonly multiJobWareHouseConfig!: MultiJobWareHouseConfig;
+
+  @Ref()
+  private readonly ggAdsFromSuggestion?: GoogleAdsSourceConfig;
 
   private readonly fromDatabaseNameDefaultOption: any = {
     label: 'Select database please...',
@@ -336,6 +358,10 @@ export default class MultiJobCreationModal extends Vue {
     return Job.isS3Job(this.jdbcJob);
   }
 
+  private get isGgAdsJob(): boolean {
+    return this.jdbcJob.className === JobName.GoogleAdsJob;
+  }
+
   private get isEnableSyncToDataWarehouse() {
     return this.jdbcJob.destinations.some(dataDestination => dataDestination === DataDestination.Clickhouse);
   }
@@ -394,6 +420,7 @@ export default class MultiJobCreationModal extends Vue {
             case JobType.Shopify:
               await this.shopifyFromDatabaseSuggestion.handleLoadShopifyFromData();
               break;
+            case JobType.GoogleCredential:
             case JobType.S3:
               ///Nothing to do
               break;
@@ -456,6 +483,7 @@ export default class MultiJobCreationModal extends Vue {
       this.showLoading();
       const job: Job = this.jdbcJob;
       this.ensureJobConfig(job);
+      Log.debug('handleSubmitJob::', this.isValidJob());
       if (this.isValidJob()) {
         await this.createDatabase(this.newDbName);
         if (this.submitCallback) {
@@ -506,14 +534,12 @@ export default class MultiJobCreationModal extends Vue {
   }
 
   private isValidJob() {
-    this.isValidate = true;
-    Log.debug('validSyncMode::', this.isValidSyncMode());
     this.$v.$touch();
-    if (this.$v.$invalid || !this.isValidFromDatabase() || !this.isValidSyncMode() || this.isInValidSyncToDataWareHouse) {
-      return false;
-    }
-
-    return true;
+    const isNameValid = !this.$v.$invalid;
+    const isFromDatabaseValid = this.isValidFromDatabase();
+    const isSyncModeValid = this.isValidSyncMode();
+    const isDestinationValid = this.isInValidSyncToDataWareHouse;
+    return isNameValid && isFromDatabaseValid && isSyncModeValid && isDestinationValid;
   }
 
   private async submitJob(job: Job) {
@@ -573,6 +599,10 @@ export default class MultiJobCreationModal extends Vue {
             this.jdbcJob = this.getJobFromS3Source(item.source);
             break;
           }
+          case DataSources.GoogleAdsSource: {
+            await this.handleSelectGoogleAdsSource(item.source);
+            break;
+          }
           default:
             await this.handleSelectJdbcSource(item.source);
         }
@@ -630,7 +660,15 @@ export default class MultiJobCreationModal extends Vue {
   }
 
   private getJobFromS3Source(source: DataSourceInfo) {
-    return (Job.default(source) as S3Job).copyWith({ displayName: this.jdbcJob.displayName });
+    return Job.default(source).withDisplayName(this.jdbcJob.displayName);
+  }
+
+  private async handleSelectGoogleAdsSource(source: GoogleAdsSourceInfo) {
+    this.jdbcJob = Job.default(source).withDisplayName(this.jdbcJob.displayName);
+    this.jdbcJob.sourceId = source.id;
+    this.$nextTick(async () => {
+      await this.ggAdsFromSuggestion?.loadCustomerIds(source);
+    });
   }
 
   private getJobFromJdbcSource(jdbcSource: DataSourceInfo) {
@@ -678,13 +716,18 @@ export default class MultiJobCreationModal extends Vue {
         return this.shopifyFromDatabaseSuggestion.isValidDatabaseSuggestion();
       case JobType.S3:
         return this.s3FromSuggestion.isValidFromSuggestion();
+      case JobType.GoogleAds:
+        return this.ggAdsFromSuggestion?.isValidSource();
       default:
         return this.jdbcFromDatabaseSuggestion.isValidDatabaseSuggestion();
     }
   }
 
   private isValidSyncMode() {
-    return this.jobSyncModeConfig.validSyncMode();
+    if (this.showSyncConfig) {
+      return this.jobSyncModeConfig.validSyncMode();
+    }
+    return true;
   }
 
   private handleDestinationDbChanged(name: string, isCreateNew: boolean) {
@@ -706,6 +749,15 @@ export default class MultiJobCreationModal extends Vue {
   private fromTableChanged(tblName: string) {
     if (this.isEnableSyncToDataWarehouse && this.isSingleTable) {
       this.jobWareHouseConfig.setTableName(tblName);
+    }
+  }
+
+  private get showSyncConfig(): boolean {
+    switch (this.jdbcJob.className) {
+      case JobName.GoogleAdsJob:
+        return false;
+      default:
+        return true;
     }
   }
 }
