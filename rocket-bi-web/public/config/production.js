@@ -14,6 +14,7 @@ const productionConfig = {
   VUE_APP_WORKER_API_URL: 'http://localhost:8080',
   VUE_APP_SCHEDULER_API_URL: 'http://localhost:8080',
   VUE_APP_RELAY_API_URL: 'http://localhost:8080',
+  VUE_APP_STATIC_FILE_URL: '/static',
 
   VUE_APP_IS_DISABLE_LAKE_HOUSE: true,
   VUE_APP_IS_DISABLE_STREAMING: true,
@@ -25,7 +26,8 @@ const productionConfig = {
   VUE_APP_LOGIN_SAMPLE: {
     isShowHint: true,
     hintMessage: 'You can use test account demo@datainsider.co/demo@123 to login'
-  }
+  },
+  VUE_APP_VERSION: 'v1.4.14'
 };
 
 window.appConfig = productionConfig;

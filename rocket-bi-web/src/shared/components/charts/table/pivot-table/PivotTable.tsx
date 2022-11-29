@@ -29,7 +29,7 @@ import { ChartUtils, ListUtils } from '@/utils';
 import { TableBodyStyleRender } from '@chart/table/style-render/TableBodyStyleRender';
 import { CustomPivotTableRenderer } from '@chart/table/pivot-table/render/CustomPivotTableRenderer';
 import { TableDataUtils } from '@chart/custom-table/TableDataUtils';
-import { Log } from '@core/utils';
+import { Log, UrlUtils } from '@core/utils';
 import { ObjectUtils } from '@core/utils/ObjectUtils';
 import { StringUtils } from '@/utils/StringUtils';
 import { ToggleCollapseData } from '@chart/custom-table/ToggleCollapseData';
@@ -589,9 +589,8 @@ export default class PivotTable extends BaseWidget {
 
   async downloadCSV(): Promise<void> {
     try {
-      const fileName: string = StringUtils.toKebabCase(StringUtils.vietnamese(this.title));
-      const csvData = await DashboardControllerModule.loadCsvData({ widgetId: this.chartId });
-      await ChartUtils.writeCsvFile(fileName, csvData);
+      const csvPath = await DashboardControllerModule.exportAsCsv({ widgetId: this.chartId });
+      UrlUtils.downloadCsvUrl(csvPath);
     } catch (ex) {
       Log.error('downloadCSV::failure', ex);
       PopupUtils.showError('Download CSV failure, try again later');

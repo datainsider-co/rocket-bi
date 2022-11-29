@@ -39,7 +39,7 @@ import { _ThemeStore } from '@/store/modules/ThemeStore';
 import { MouseEventData } from '@chart/BaseChart';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
-import { Log } from '@core/utils';
+import { Log, UrlUtils } from '@core/utils';
 import { ColorUtils } from '@/utils/ColorUtils';
 import { ChartUtils } from '@/utils';
 import { PopupUtils } from '@/utils/PopupUtils';
@@ -521,9 +521,8 @@ export default class DefaultTable extends BaseWidget {
 
   async downloadCSV(): Promise<void> {
     try {
-      const fileName: string = StringUtils.toKebabCase(StringUtils.vietnamese(this.title));
-      const csvData = await DashboardControllerModule.loadCsvData({ widgetId: this.chartId });
-      await ChartUtils.writeCsvFile(fileName, csvData);
+      const csvPath = await DashboardControllerModule.exportAsCsv({ widgetId: this.chartId });
+      UrlUtils.downloadCsvUrl(csvPath);
     } catch (ex) {
       Log.error('downloadCSV::failure', ex);
       PopupUtils.showError('Download CSV failure, try again later');

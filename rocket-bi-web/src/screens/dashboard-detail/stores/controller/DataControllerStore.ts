@@ -284,14 +284,14 @@ export class DataControllerStore extends VuexModule {
   }
 
   @Action
-  async loadCsvData(payload: { widgetId: number }): Promise<string> {
+  async exportAsCsv(payload: { widgetId: number }): Promise<string> {
     const { widgetId } = payload;
     const request: QueryRequest = await getChartQueryRequest({
       widgetId: widgetId,
       mainDateFilter: FilterModule.mainDateFilterRequest,
       isFlattenPivot: true
     });
-    return _ChartStore.queryAsCsv(request);
+    return _ChartStore.exportAsCsv(request);
   }
 
   @Action

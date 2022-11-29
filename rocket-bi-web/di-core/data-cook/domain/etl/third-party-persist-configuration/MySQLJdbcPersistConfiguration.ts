@@ -39,6 +39,6 @@ export class MySQLJdbcPersistConfiguration extends JdbcPersistConfiguration {
   }
 
   static default(): MySQLJdbcPersistConfiguration {
-    return new MySQLJdbcPersistConfiguration('', '', '', '', '', PERSISTENT_TYPE.Update, '', '3306', '{}');
+    return new MySQLJdbcPersistConfiguration('', '', '', '', '', PERSISTENT_TYPE.Update, '', '3306', '{"connectTimeout": "30000"}');
   }
 }

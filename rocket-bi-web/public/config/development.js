@@ -17,6 +17,7 @@ const devConfig = {
   VUE_APP_WORKER_API_URL: 'http://rocket-bi.ddns.net/api',
   VUE_APP_SCHEDULER_API_URL: 'http://rocket-bi.ddns.net/api',
   VUE_APP_RELAY_API_URL: 'http://rocket-bi.ddns.net/api',
+  VUE_APP_STATIC_FILE_URL: 'http://rocket-bi.ddns.net/static',
 
   VUE_APP_IS_DISABLE_LAKE_HOUSE: true,
   VUE_APP_IS_DISABLE_CDP: true,

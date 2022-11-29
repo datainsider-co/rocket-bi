@@ -47,6 +47,7 @@ declare global {
     VUE_APP_WORKER_API_URL: string;
     VUE_APP_SCHEDULER_API_URL: string;
     VUE_APP_RELAY_API_URL: string;
+    VUE_APP_STATIC_FILE_URL: string;
 
     VUE_APP_IS_DISABLE_LAKE_HOUSE: boolean;
     VUE_APP_IS_DISABLE_CDP: boolean;

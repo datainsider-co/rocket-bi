@@ -4,10 +4,21 @@ import { DataSourceType } from '@core/data-ingestion/domain/data-source/DataSour
 import { DataSources } from '@core/data-ingestion/domain/data-source/DataSources';
 import { JdbcSource } from '@core/data-ingestion/domain/response/JdbcSource';
 import { SourceId } from '@core/common/domain';
-import { Log } from '@core/utils';
 import { StringUtils } from '@/utils';
+import { NewFieldData } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
+import { Log } from '@core/utils';
+export abstract class SourceWithExtraField {
+  abstract extraFields: Record<string, string>;
 
-export class MySqlSourceInfo implements DataSourceInfo {
+  abstract setField(fielData: NewFieldData): void;
+
+  abstract isExistField(fieldName: string): boolean;
+
+  static isSourceExtraField(source: DataSourceInfo | SourceWithExtraField): source is SourceWithExtraField {
+    return !!(source as SourceWithExtraField).setField;
+  }
+}
+export class MySqlSourceInfo implements DataSourceInfo, SourceWithExtraField {
   className = DataSources.JdbcSource;
   sourceType = DataSourceType.MySql;
   id: SourceId;
@@ -60,7 +71,7 @@ export class MySqlSourceInfo implements DataSourceInfo {
       obj.username ?? '',
       obj.password ?? '',
       obj.lastModify ?? 0,
-      obj.extraFields ?? {}
+      obj.extraFields ?? { connectTimeout: '30000' }
     );
   }
 
@@ -71,11 +82,12 @@ export class MySqlSourceInfo implements DataSourceInfo {
     return request;
   }
 
-  private static getExtraFields(text: string): Record<string, string> {
+  private static getExtraFields(text: string | undefined): Record<string, string> {
     const result: Record<string, string> = {};
-    const containerExtraField = StringUtils.isNotEmpty(text);
+    const extraAsString = text !== undefined ? text : 'connectTimeout=30000';
+    const containerExtraField = StringUtils.isNotEmpty(extraAsString);
     if (containerExtraField) {
-      text.split('&').forEach(extraAsString => {
+      extraAsString.split('&').forEach(extraAsString => {
         const [key, value] = extraAsString.split('=');
         result[key] = value;
       });
@@ -94,5 +106,12 @@ export class MySqlSourceInfo implements DataSourceInfo {
 
   getDisplayName(): string {
     return this.displayName;
+  }
+
+  setField(fielData: NewFieldData): void {
+    this.extraFields[fielData.fieldName] = fielData.fieldValue;
+  }
+  isExistField(fieldName: string): boolean {
+    return this.extraFields[fieldName] !== undefined;
   }
 }

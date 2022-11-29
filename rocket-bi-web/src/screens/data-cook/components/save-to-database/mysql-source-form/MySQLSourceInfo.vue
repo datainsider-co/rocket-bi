@@ -63,6 +63,7 @@ import { Component, PropSync, Vue, Watch } from 'vue-property-decorator';
 import { MySQLJdbcPersistConfiguration } from '@core/data-cook/domain/etl/third-party-persist-configuration/MySQLJdbcPersistConfiguration';
 import { cloneDeep } from 'lodash';
 import { Log } from '@core/utils';
+import { StringUtils } from '@/utils';
 
 @Component
 export default class MySQLSourceInfo extends Vue {
@@ -96,7 +97,7 @@ export default class MySQLSourceInfo extends Vue {
     const isExistKey = this.extraFields[key] !== undefined;
     if (isExistKey) {
       this.errorNewKey = 'Key is exist!';
-    } else {
+    } else if (StringUtils.isNotEmpty(key) && StringUtils.isNotEmpty(value)) {
       this.extraFields[key] = value;
       this.syncedMySQLJdbcPersistConfiguration.extraPropertiesAsJson = JSON.stringify(this.extraFields);
       this.errorNewKey = '';

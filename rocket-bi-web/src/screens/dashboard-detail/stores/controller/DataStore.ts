@@ -60,7 +60,7 @@ export class DataStore extends VuexModule {
   }
 
   @Action
-  queryAsCsv(request: QueryRequest): Promise<string> {
+  exportAsCsv(request: QueryRequest): Promise<string> {
     return this.queryService.queryAsCsv(request);
   }
 
