@@ -41,18 +41,18 @@ pipeline {
             }
 
             steps {
-                script {
-                    echo "building oss image from branch ${BRANCH_NAME}..."
-
-                    def DOCKERHUB_HOST = 'https://registry.hub.docker.com'
-                    def DOCKERHUB_CREDENTIAL = 'acc_datainsider_dockerhub'
-                    def DOCKERHUB_IMAGE_NAME = 'datainsiderco/bi-service'
-                    def DOCKERHUB_IMAGE_TAG = 'main'
-
-                    docker.withRegistry(DOCKERHUB_HOST, DOCKERHUB_CREDENTIAL) {
-                        def image = docker.build(DOCKERHUB_IMAGE_NAME)
-                        image.push(DOCKERHUB_IMAGE_TAG)
-                    }
+                sshagent(credentials: ['admin_didev']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no admin@localhost "  
+                          cd /home/admin/data/rocket-bi
+                          git checkout dev && git pull     
+                          cd bi-service
+                          git pull gitlab oss
+                          cd ..
+                          git commit -am '[BOT] Update bi-service: merge from datainsider oss'
+                          git push
+                        "
+                    '''
                 }
             }
         }
