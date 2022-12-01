@@ -37,7 +37,7 @@ case class ChartRequest(
     useBoost: Boolean = false,
     dashboardId: Option[Long] = None,
     chartId: Option[Long] = None,
-    queryContext: Option[QueryContext] = None,
+    expressions: Map[String, String] = Map.empty,
     @Min(-1) from: Int = -1,
     @Min(-1) size: Int = -1,
     @Inject request: Request = null

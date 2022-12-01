@@ -33,8 +33,9 @@ case class CheckTokenActionPermittedRequest(
     @RouteParam @NotEmpty tokenId: String,
     @NotEmpty resourceId: String,
     @NotEmpty resourceType: String,
-    @NotEmpty actions: Seq[String]
-)
+    @NotEmpty actions: Seq[String],
+    @Inject request: Request
+) extends LoggedInRequest
 
 case class CheckTokenPermittedAllRequest(
     @RouteParam @NotEmpty tokenId: String,

@@ -17,6 +17,11 @@ services:
     volumes:
       - ./conf:/app/conf
       - ./logs:/app/logs
+      - biservice-csv-dir:/tmp/csv
+
+volumes:
+  biservice-csv-dir:
+    external: true
 
 networks:
   default:

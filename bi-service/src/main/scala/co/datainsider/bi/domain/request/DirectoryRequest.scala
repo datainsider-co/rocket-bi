@@ -33,6 +33,13 @@ case class CreateDirectoryRequest(
     @JsonScalaEnumeration(classOf[DirectoryTypeRef])
     directoryType: DirectoryType = DirectoryType.Directory,
     dashboardId: Option[Long] = None,
+    data: Option[Map[String, Any]] = None,
+    @Inject request: Request = null
+) extends LoggedInRequest
+
+case class UpdateDirectoryRequest(
+    @RouteParam @Min(0) id: DirectoryId,
+    data: Option[Map[String, Any]] = None,
     @Inject request: Request = null
 ) extends LoggedInRequest
 

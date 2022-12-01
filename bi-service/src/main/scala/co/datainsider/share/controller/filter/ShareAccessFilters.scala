@@ -5,7 +5,7 @@ import co.datainsider.bi.service.{DashboardService, DirectoryService}
 import com.twitter.finagle.http.Request
 import com.twitter.util.Future
 import datainsider.client.domain.permission.{PermissionResult, Permitted, UnPermitted}
-import datainsider.client.exception.{UnAuthorizedError, UnsupportedError}
+import datainsider.client.exception.UnAuthorizedError
 import datainsider.client.filter.BaseAccessFilter
 import datainsider.client.filter.BaseAccessFilter.AccessValidator
 import datainsider.client.filter.UserContext.UserContextSyntax
@@ -30,7 +30,7 @@ object BaseShareFilter {
   def isDirectoryOwner(directoryService: DirectoryService, request: Request): Future[PermissionResult] = {
     val resourceId: String = getResourceId(request)
     val username: String = request.currentUser.username
-    val orgId: Long = request.currentOrganizationId.get
+    val orgId: Long = request.getOrganizationId()
 
     val permissionResult: Future[PermissionResult] = directoryService
       .isOwner(orgId, resourceId.toLong, username)
@@ -65,7 +65,8 @@ object BaseShareFilter {
     DirectoryType.withName(getResourceType(request)) match {
       case DirectoryType.Directory                         => isDirectoryOwner(directoryService, request)
       case DirectoryType.Dashboard | DirectoryType.Queries => isDashboardOwner(dashboardService, request)
-      case _                                               => Future.exception(UnsupportedError("Unsupported share this resource"))
+      case DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis | DirectoryType.EventAnalysis | DirectoryType.PathExplorer =>
+        isDirectoryOwner(directoryService, request)
     }
   }
 }

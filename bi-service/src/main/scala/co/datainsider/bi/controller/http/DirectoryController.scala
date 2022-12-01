@@ -191,6 +191,22 @@ class DirectoryController @Inject() (
       }
     }
 
+  filter[MustLoggedInFilter]
+    .filter[DirectoryAccessFilters.EditAccessFilter]
+    .put(s"/directories/:id") { request: UpdateDirectoryRequest =>
+      Profiler(s"[Http] ${this.getClass.getSimpleName}::UpdateDirectoryRequest")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Update,
+        resourceType = ResourceType.Directory,
+        description = s"update directory id '${request.id}''"
+      ) {
+        val user: UserProfile = getUserProfile(request.request)
+        directoryService.updateDirectory(request.getOrganizationId(), request.id, request.data).map(toDirectoryResponse(_, Some(user.toShortUserProfile)))
+      }
+    }
+
   filter[DirectoryAccessFilters.EditAccessFilter]
     .put(s"/directories/:id/rename") { request: RenameDirectoryRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::RenameDirectoryRequest")
@@ -516,7 +532,8 @@ class DirectoryController @Inject() (
       isRemoved = dir.isRemoved,
       directoryType = dir.directoryType,
       dashboardId = dir.dashboardId,
-      updatedDate = dir.updatedDate
+      updatedDate = dir.updatedDate,
+      data = dir.data,
     )
   }
 

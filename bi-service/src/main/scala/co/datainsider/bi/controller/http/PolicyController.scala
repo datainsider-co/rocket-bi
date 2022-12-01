@@ -1,6 +1,6 @@
 package co.datainsider.bi.controller.http
 
-import co.datainsider.bi.domain.request.{ListPolicyRequest, SavePolicyRequest}
+import co.datainsider.bi.domain.request.{ListPolicyRequest, PutPolicyRequest}
 import co.datainsider.bi.service.RlsPolicyService
 import com.google.inject.Inject
 import com.twitter.finatra.http.Controller
@@ -16,9 +16,9 @@ class PolicyController @Inject() (policyService: RlsPolicyService, permissionFil
     }
 
   filter(permissionFilter.require("rls:edit:*"))
-    .put("/policies") { request: SavePolicyRequest =>
+    .put("/policies") { request: PutPolicyRequest =>
       val orgId = request.currentOrganizationId.get
-      policyService.save(orgId, request.dbName, request.tblName, request.policies.map(_.copy(orgId = orgId)))
+      policyService.put(orgId, request.dbName, request.tblName, request.policies.map(_.copy(orgId = orgId)))
     }
 
 }

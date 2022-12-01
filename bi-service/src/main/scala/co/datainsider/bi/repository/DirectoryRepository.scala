@@ -9,6 +9,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.twitter.util.Future
 import datainsider.client.exception.DbExecuteError
+import datainsider.client.util.JsonParser
 
 import java.sql.{PreparedStatement, ResultSet}
 import scala.collection.mutable.ArrayBuffer
@@ -37,6 +38,8 @@ trait DirectoryRepository {
   def restore(directory: Directory): Future[Boolean]
 
   def refreshUpdatedDate(ids: Array[DirectoryId]): Future[Boolean]
+
+  def update(directory: Directory): Future[Boolean]
 }
 
 class MySqlDirectoryRepository @Inject() (
@@ -66,8 +69,8 @@ class MySqlDirectoryRepository @Inject() (
       val query =
         s"""
          |insert into $dbName.$tblName
-         |(name, creator_id, owner_id, parent_id, dir_type, dashboard_id, updated_date)
-         |values(?, ?, ?, ?, ?, ?, ?);
+         |(name, creator_id, owner_id, parent_id, dir_type, dashboard_id, updated_date, data)
+         |values(?, ?, ?, ?, ?, ?, ?, ?);
          |""".stripMargin
 
       client.executeInsert(
@@ -78,7 +81,8 @@ class MySqlDirectoryRepository @Inject() (
         request.parentId,
         request.directoryType.toString,
         request.dashboardId.orNull,
-        System.currentTimeMillis()
+        System.currentTimeMillis(),
+        request.data.map(JsonParser.toJson(_, false)).orNull
       )
     }
 
@@ -156,7 +160,7 @@ class MySqlDirectoryRepository @Inject() (
       if (directoryIds.isEmpty) {
         Array.empty
       } else {
-        var query =
+        val query =
           s"select * from $dbName.$tblName where is_removed = FALSE && id in (${Array.fill(directoryIds.length)("?").mkString(",")})"
         client.executeQuery(query, directoryIds: _*)(toDirectories)
       }
@@ -209,8 +213,8 @@ class MySqlDirectoryRepository @Inject() (
       val query =
         s"""
            |insert into $dbName.$tblName
-           |(id, name, creator_id, owner_id, created_date, parent_id, dir_type, dashboard_id, updated_date)
-           |values(?, ?, ?, ?, ?, ?, ?, ?, ?);
+           |(id, name, creator_id, owner_id, created_date, parent_id, dir_type, dashboard_id, updated_date, data)
+           |values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
            |""".stripMargin
 
       client.executeUpdate(
@@ -223,7 +227,8 @@ class MySqlDirectoryRepository @Inject() (
         directory.parentId,
         directory.directoryType.toString,
         directory.dashboardId.orNull,
-        System.currentTimeMillis()
+        System.currentTimeMillis(),
+        directory.data.map(JsonParser.toJson(_, false)).orNull
       ) > 0
     }
 
@@ -239,6 +244,8 @@ class MySqlDirectoryRepository @Inject() (
     val dashboardIdTmp = rs.getLong("dashboard_id")
     val dashboardId = if (rs.wasNull()) None else Some(dashboardIdTmp)
     val updatedDate = rs.getLong("updated_date")
+    val dataAsJson: Option[String] = Option(rs.getString("data"))
+    val data: Option[Map[String, Any]] = dataAsJson.map(JsonParser.fromJson[Map[String, Any]](_))
     Directory(
       id,
       name,
@@ -249,7 +256,8 @@ class MySqlDirectoryRepository @Inject() (
       isRemoved,
       DirectoryType.withName(dirType),
       dashboardId,
-      Some(updatedDate)
+      Some(updatedDate),
+      data
     )
   }
 
@@ -300,4 +308,20 @@ class MySqlDirectoryRepository @Inject() (
         data
       ) >= 1
     }
+
+  override def update(directory: Directory): Future[Boolean] = Future {
+    val query =
+      s"""
+         |UPDATE $dbName.$tblName
+         |SET data = ?, updated_date = ?
+         |WHERE id = ?
+         |""".stripMargin
+
+    client.executeUpdate(
+      query,
+      directory.data.map(JsonParser.toJson(_, false)).orNull,
+      directory.updatedDate.getOrElse(System.currentTimeMillis()),
+      directory.id
+    ) > 0
+  }
 }

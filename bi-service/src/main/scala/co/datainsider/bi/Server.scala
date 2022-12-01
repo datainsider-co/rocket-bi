@@ -25,7 +25,6 @@ import com.twitter.util.Await
 import datainsider.client.exception.DbExecuteError
 import datainsider.client.filter.{LicenceFilter, LoggedInUserParser, MustLoggedInFilter}
 import datainsider.client.module.{CaasClientModule, MockCaasClientModule, MockSchemaClientModule, SchemaClientModule}
-import datainsider.licence.module.LicenceClientModule
 
 /**
   * Created by SangDang on 9/8/

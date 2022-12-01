@@ -1,6 +1,12 @@
 package co.datainsider.bi.service
-import co.datainsider.bi.domain.request.{ChartRequest, ViewAsRequest, SqlQueryRequest}
-import co.datainsider.bi.domain.response.{ChartResponse, SeriesOneItem, SeriesOneResponse, SqlQueryResponse}
+import co.datainsider.bi.domain.request.{ChartRequest, SqlQueryRequest, ViewAsRequest}
+import co.datainsider.bi.domain.response.{
+  CsvResponse,
+  ChartResponse,
+  SeriesOneItem,
+  SeriesOneResponse,
+  SqlQueryResponse
+}
 import com.twitter.util.Future
 
 class MockQueryService extends QueryService {
@@ -23,4 +29,6 @@ class MockQueryService extends QueryService {
     }
 
   override def query(request: ViewAsRequest): Future[ChartResponse] = ???
+
+  override def exportAsCsv(request: ChartRequest): Future[String] = Future.value("/path/to/csv")
 }

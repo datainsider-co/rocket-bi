@@ -17,7 +17,9 @@ case class DirectoryResponse(
     directoryType: DirectoryType = DirectoryType.Directory,
     dashboardId: Option[Long] = None,
     updatedDate: Option[Long] = None,
-    isStarred: Boolean = false
+    isStarred: Boolean = false,
+    // save cdp data
+    data: Option[Map[String, Any]] = None
 )
 
 case class ParentDirectoriesResponse(rootDirectory: Directory, isAll: Boolean, parentDirectories: Array[Directory])

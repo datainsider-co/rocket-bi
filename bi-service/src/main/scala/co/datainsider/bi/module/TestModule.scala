@@ -1,6 +1,6 @@
 package co.datainsider.bi.module
 
-import co.datainsider.bi.client.{HikariClient, JdbcClient}
+import co.datainsider.bi.client.{HikariClient, JdbcClient, NativeJDbcClient}
 import co.datainsider.bi.domain.query.{QueryParser, QueryParserImpl}
 import co.datainsider.bi.domain.response.ChartResponse
 import co.datainsider.bi.engine.Engine
@@ -119,8 +119,8 @@ object TestModule extends TwitterModule {
     val jdbcUrl = s"jdbc:mysql://$host:$port?useLegacyDatetimeCode=false&serverTimezone=Asia/Ho_Chi_Minh"
     val user: String = ZConfig.getString("database.mysql.user")
     val password: String = ZConfig.getString("database.mysql.password")
-    HikariClient(jdbcUrl, user, password)
-//    HikariClient("jdbc:mysql://localhost:3306", "root", "di@2020!")
+    NativeJDbcClient(jdbcUrl, user, password)
+//    NativeJDbcClient("jdbc:mysql://localhost:3306", "root", "di@2020!")
   }
 
   @Provides
@@ -138,8 +138,8 @@ object TestModule extends TwitterModule {
     val jdbcUrl = s"jdbc:clickhouse://$host:$port"
     val user: String = ZConfig.getString("database.clickhouse.user")
     val password: String = ZConfig.getString("database.clickhouse.password")
-    HikariClient(jdbcUrl, user, password)
-//    HikariClient("jdbc:clickhouse://localhost:8123", "default", "")
+    NativeJDbcClient(jdbcUrl, user, password)
+//    NativeJDbcClient("jdbc:clickhouse://localhost:8123", "default", "")
   }
 
   @Singleton

@@ -12,7 +12,7 @@ case class ListPolicyRequest(
     @Inject request: Request = null
 ) extends LoggedInRequest
 
-case class SavePolicyRequest(
+case class PutPolicyRequest(
     @NotEmpty dbName: String,
     @NotEmpty tblName: String,
     policies: Array[RlsPolicy],

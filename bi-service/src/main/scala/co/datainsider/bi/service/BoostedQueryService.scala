@@ -1,7 +1,7 @@
 package co.datainsider.bi.service
 
-import co.datainsider.bi.domain.request.{ChartRequest, ViewAsRequest, SqlQueryRequest}
-import co.datainsider.bi.domain.response.{ChartResponse, SqlQueryResponse}
+import co.datainsider.bi.domain.request.{ChartRequest, SqlQueryRequest, ViewAsRequest}
+import co.datainsider.bi.domain.response.{CsvResponse, ChartResponse, SqlQueryResponse}
 import co.datainsider.bi.repository.ChartResponseRepository
 import co.datainsider.bi.util.ZConfig
 import com.google.inject.Inject
@@ -67,4 +67,5 @@ class BoostedQueryService @Inject() (
 
     }
 
+  override def exportAsCsv(request: ChartRequest): Future[String] = queryService.exportAsCsv(request)
 }

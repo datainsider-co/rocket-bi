@@ -1,6 +1,5 @@
 package co.datainsider.bi.engine
 
-import co.datainsider.bi.domain.QueryContext
 import co.datainsider.bi.domain.query.{
   AlwaysFalse,
   AlwaysTrue,
@@ -8,6 +7,7 @@ import co.datainsider.bi.domain.query.{
   CurrentQuarter,
   CurrentYear,
   DynamicCondition,
+  ExpressionField,
   LastNMonth,
   LastNQuarter,
   LastNWeek,
@@ -20,15 +20,13 @@ import co.datainsider.bi.domain.query.{
   PastNYear,
   QueryParserImpl,
   Select,
-  SqlQuery,
+  SelectExpression,
   TableField
 }
 import co.datainsider.bi.domain.response.SqlQueryResponse
 import co.datainsider.bi.engine.clickhouse.ClickhouseParser
 import co.datainsider.query.DbTestUtils
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-
-import scala.collection.mutable
 
 class QueryParserTest extends FunSuite with BeforeAndAfterAll {
   val parser = new QueryParserImpl(ClickhouseParser)
@@ -126,25 +124,6 @@ class QueryParserTest extends FunSuite with BeforeAndAfterAll {
     assert(queryResp.headers.nonEmpty)
   }
 
-  test("test parse sql with query context") {
-    val queryContext = QueryContext(
-      variables = Map(
-        "total_cost_usd" -> "sum(Total_Cost)/23000",
-        "total_cost_usd_x1000" -> "total_cost_usd*1000"
-      )
-    )
-    val sqlQuery = SqlQuery(
-      query = s"select total_cost_usd_x1000 from ${DbTestUtils.dbName}.${DbTestUtils.tblSales} group by Region",
-      externalContext = Some(queryContext)
-    )
-    val finalSql = parser.parse(sqlQuery)
-    println(finalSql)
-    assert(finalSql.contains("sum"))
-
-    val queryResp: SqlQueryResponse = DbTestUtils.execute(finalSql)
-    assert(queryResp.records.nonEmpty)
-  }
-
   test("test parse query with empty dynamic condition") {
     val dynamicCondition = DynamicCondition(1L, And(Array.empty), Some(And(Array.empty)))
 
@@ -189,4 +168,86 @@ class QueryParserTest extends FunSuite with BeforeAndAfterAll {
     val queryResp: SqlQueryResponse = DbTestUtils.execute(sql)
     assert(queryResp.records.isEmpty)
   }
+
+  test("test parse query with expressions") {
+    val query = ObjectQuery(
+      functions = Seq(
+        SelectExpression(
+          ExpressionField(
+            expression = "count(*)",
+            dbName = DbTestUtils.dbName,
+            tblName = DbTestUtils.tblSales,
+            fieldName = "Total_Order_ID",
+            fieldType = "UInt64"
+          )
+        )
+      ),
+      expressions = Map("Total_Order_ID" -> "count(*)")
+    )
+
+    val sql: String = parser.parse(query)
+    assert(sql.contains("with ("))
+    assert(sql.contains("count(*)"))
+    assert(sql.contains("select Total_Order_ID"))
+
+    val queryResp: SqlQueryResponse = DbTestUtils.execute(sql)
+    assert(queryResp.records.nonEmpty)
+  }
+
+  test("test parse query expressions with existing expressions") {
+    val query = ObjectQuery(
+      functions = Seq(
+        SelectExpression(
+          ExpressionField(
+            expression = "a/b",
+            dbName = DbTestUtils.dbName,
+            tblName = DbTestUtils.tblSales,
+            fieldName = "Revenue_Per_Order",
+            fieldType = "UInt64"
+          )
+        )
+      ),
+      expressions = Map(
+        "a" -> "sum(Total_Revenue)",
+        "b" -> "count(Order_ID)"
+      )
+    )
+
+    val sql: String = parser.parse(query)
+
+    assert(sql.contains("with ("))
+    assert(sql.contains("a/b"))
+    assert(sql.contains("count(Order_ID)"))
+    assert(sql.contains("sum(Total_Revenue)"))
+    assert(sql.contains("select Revenue_Per_Order"))
+
+    val queryResp: SqlQueryResponse = DbTestUtils.execute(sql)
+    assert(queryResp.records.nonEmpty)
+  }
+
+  test("test parse query with COMPUTE expressions") {
+    val query = ObjectQuery(
+      functions = Seq(
+        SelectExpression(
+          ExpressionField(
+            expression = "COMPUTE(count(*))",
+            dbName = DbTestUtils.dbName,
+            tblName = DbTestUtils.tblSales,
+            fieldName = "Total_Order_ID",
+            fieldType = "UInt64"
+          )
+        )
+      )
+    )
+
+    val sql: String = parser.parse(query)
+
+    assert(sql.contains("with ("))
+    assert(sql.contains("select count(*)"))
+    assert(sql.contains("select Total_Order_ID"))
+
+    val queryResp: SqlQueryResponse = DbTestUtils.execute(sql)
+    assert(queryResp.records.nonEmpty)
+  }
+
 }

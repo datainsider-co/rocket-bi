@@ -1,11 +1,9 @@
 package co.datainsider.share.service
 
 import co.datainsider.bi.domain.Ids.DirectoryId
-import co.datainsider.bi.domain.request.GetDirectoryRequest
-import co.datainsider.bi.domain.{Directory, PermissionToken, DirectoryType, TokenFullInfo}
+import co.datainsider.bi.domain.{DirectoryType, PermissionToken, TokenFullInfo}
 import co.datainsider.bi.service.{DashboardService, DirectoryService}
 import co.datainsider.bi.util.SchemaImplicits.ActionListEnhanceImplicits
-import datainsider.profiler.Profiler
 import co.datainsider.share.controller.request._
 import co.datainsider.share.domain.response.{PageResult, ResourceSharingInfo, SharingInfo, UserSharingInfo}
 import co.datainsider.share.repository.ShareRepository
@@ -13,11 +11,10 @@ import com.twitter.util.Future
 import com.twitter.util.logging.Logging
 import datainsider.authorization.domain.PermissionProviders
 import datainsider.client.domain.user.UserProfile
-import datainsider.client.exception.UnsupportedError
 import datainsider.client.service.{OrgAuthorizationClientService, ProfileClientService}
+import datainsider.profiler.Profiler
 
 import javax.inject.Inject
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 
 case class DirectoryShareServiceImpl @Inject() (
@@ -36,9 +33,9 @@ case class DirectoryShareServiceImpl @Inject() (
   private def getOwnerResource(organizationId: Long, resourceType: String, resourceId: String): Future[UserProfile] = {
     DirectoryType.withName(resourceType) match {
       case DirectoryType.Directory => directoryService.getOwner(organizationId, resourceId.toLong)
-      case DirectoryType.Dashboard | DirectoryType.Queries =>
-        dashboardService.getOwner(organizationId, resourceId.toLong)
-      case _ => Future.exception(UnsupportedError(s"Unsupported share resource $resourceType"))
+      case DirectoryType.Dashboard | DirectoryType.Queries => dashboardService.getOwner(organizationId, resourceId.toLong)
+      case DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis | DirectoryType.EventAnalysis | DirectoryType.PathExplorer =>
+        directoryService.getOwner(organizationId, resourceId.toLong)
     }
   }
 

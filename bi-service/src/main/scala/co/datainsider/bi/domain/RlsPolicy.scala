@@ -34,8 +34,11 @@ case class UserAttribute(
 object AttributeBasedOperator extends Enumeration {
   type AttributeBasedOperator = Value
   val Equal: AttributeBasedOperator = Value("Equal")
+  val NotEqual: AttributeBasedOperator = Value("NotEqual")
   val Contain: AttributeBasedOperator = Value("Contain")
+  val NotContain: AttributeBasedOperator = Value("NotContain")
   val IsNull: AttributeBasedOperator = Value("IsNull")
+  val IsNotNull: AttributeBasedOperator = Value("IsNotNull")
 }
 
 class UserAttributeOperatorRef extends TypeReference[AttributeBasedOperator.type]

@@ -317,7 +317,8 @@ object ClickhouseParser extends SqlParser {
           case f: Last             => s"anyLast(${applyScalarFn(fieldName, f.scalarFunction)})"
           case f: SelectExpression => applyScalarFn(f.field.expression, f.scalarFunction)
         }
-        s"""`${StringUtils.shortMd5(aliasName)}`"""
+
+        s"""`f_${StringUtils.shortMd5(aliasName)}`"""
     }
   }
 
@@ -337,7 +338,7 @@ object ClickhouseParser extends SqlParser {
     }
   }
 
-  def selectWithAliasName(function: Function): String = {
+  def toFieldWithAliasName(function: Function): String = {
     s"${toQueryString(function)} as ${toAliasName(function)}"
   }
 
@@ -502,7 +503,7 @@ object ClickhouseParser extends SqlParser {
     * and insert into appropriate position
     */
   def addSelect(sql: String, select: FieldRelatedFunction): String = {
-    val fieldName = selectWithAliasName(select)
+    val fieldName = toFieldWithAliasName(select)
     findFirstMatch(sql, SqlRegex.SelectRegex) match {
       case Some(i) => sql.patch(i + 7, s"$fieldName,", 0)
       case None    => s"select $fieldName" + sql

@@ -35,6 +35,11 @@ object DirectoryType extends Enumeration {
   val Directory: DirectoryType = Value("directory")
   val Dashboard: DirectoryType = Value("dashboard")
   val Queries: DirectoryType = Value("queries")
+  val PathExplorer: DirectoryType = Value("path_explorer")
+  val EventAnalysis: DirectoryType = Value("event_analysis")
+  val FunnelAnalysis: DirectoryType = Value("funnel_analysis")
+  val RetentionAnalysis: DirectoryType = Value("retention_analysis")
+
 }
 
 class DirectoryTypeRef extends TypeReference[DirectoryType.type]

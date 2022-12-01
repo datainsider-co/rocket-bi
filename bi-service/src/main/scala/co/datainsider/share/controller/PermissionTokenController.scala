@@ -42,11 +42,11 @@ class PermissionTokenController @Inject() (
       Profiler("[Controller::PermissionTokenController] POST /permission_tokens/:token_id/action_permitted") {
         DirectoryType.withName(request.resourceType) match {
           case DirectoryType.Directory =>
-            directoryPermissionService.isPermitted(request.tokenId, 1L, request.resourceId.toLong, request.actions)
+            directoryPermissionService.isPermitted(request.tokenId, request.getOrganizationId(), request.resourceId.toLong, request.actions)
           case DirectoryType.Dashboard | DirectoryType.Queries =>
-            dashboardPermissionService.isPermitted(request.tokenId, 1L, request.resourceId.toLong, request.actions)
-          case _ => Future.exception(UnsupportedError(s"unsupported check action of type ${request.resourceType}"))
-        }
+            dashboardPermissionService.isPermitted(request.tokenId, request.getOrganizationId(), request.resourceId.toLong, request.actions)
+          case DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis | DirectoryType.EventAnalysis | DirectoryType.PathExplorer =>
+            directoryPermissionService.isPermitted(request.tokenId, request.getOrganizationId(), request.resourceId.toLong, request.actions)        }
       }
     }
   }

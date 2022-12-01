@@ -1,0 +1,76 @@
+pipeline {
+    agent any
+
+    tools {
+        maven "M3"
+    }
+
+    environment {
+        DOCKER_REGISTRY_HOST = 'https://registry.gitlab.com'
+        DOCKER_REGISTRY_CREDENTIAL = 'acc_nkt165'
+        IMAGE_NAME = 'registry.gitlab.com/datainsider/bi-service'
+    }
+
+    stages {
+        stage('build') {
+            steps {
+                sh './build.sh'
+            }
+        }
+
+        stage('deploy') {
+            when {
+                expression { BRANCH_NAME ==~ /(main|dev|cdp)/ }
+            }
+
+            steps {
+                script {
+                    echo "building docker image from branch ${BRANCH_NAME}..."
+                    docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_CREDENTIAL) {
+                        def image = docker.build(IMAGE_NAME)
+                        def IMAGE_TAG = BRANCH_NAME
+                        image.push(IMAGE_TAG)
+                    }
+                }
+            }
+        }
+
+        stage('deploy oss') {
+            when {
+                branch 'oss'
+            }
+
+            steps {
+                script {
+                    echo "building oss image from branch ${BRANCH_NAME}..."
+
+                    def DOCKERHUB_HOST = 'https://registry.hub.docker.com'
+                    def DOCKERHUB_CREDENTIAL = 'acc_datainsider_dockerhub'
+                    def DOCKERHUB_IMAGE_NAME = 'datainsiderco/bi-service'
+                    def DOCKERHUB_IMAGE_TAG = 'main'
+
+                    docker.withRegistry(DOCKERHUB_HOST, DOCKERHUB_CREDENTIAL) {
+                        def image = docker.build(DOCKERHUB_IMAGE_NAME)
+                        image.push(DOCKERHUB_IMAGE_TAG)
+                    }
+                }
+            }
+        }
+
+    }
+
+    post {
+        success {
+            slackSend(
+                    color: 'good',
+                    message: "The pipeline ${currentBuild.fullDisplayName} completed successfully."
+            )
+        }
+        failure {
+            slackSend(
+                    color: 'danger',
+                    message: "The pipeline ${currentBuild.fullDisplayName} failed. Build URL: ${BUILD_URL}"
+            )
+        }
+    }
+}
