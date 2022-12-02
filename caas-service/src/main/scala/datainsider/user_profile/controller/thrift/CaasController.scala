@@ -6,17 +6,7 @@ import com.twitter.inject.Logging
 import com.twitter.scrooge.{Request, Response}
 import com.twitter.util.{Future, Return, Throw}
 import datainsider.apikey.service.ApiKeyService
-import datainsider.client.domain.ThriftImplicit.{
-  RichListUserLike,
-  RichUser,
-  RichUserProfileLike,
-  ScroogeResponseLike,
-  TLoginResponseLike,
-  TOrganizationLike,
-  TRoleInfoLike,
-  TUserInfoLike
-}
-import datainsider.client.domain.org.Organization
+import datainsider.client.domain.ThriftImplicit.{RichListUserLike, RichUser, RichUserProfileLike, ScroogeResponseLike, TLoginResponseLike, TOrganizationLike, TRoleInfoLike, TUserInfoLike}
 import datainsider.client.domain.user.{LoginResponse, UserProfile}
 import datainsider.client.exception.NotFoundError
 import datainsider.profiler.Profiler
@@ -85,23 +75,6 @@ class CaasController @Inject() (
     Profiler(s"[Thrift] ${this.getClass.getSimpleName}::IsOrganizationMember") {
       organizationService
         .isOrganizationMember(request.args.organizationId, request.args.username)
-        .map(Response(_))
-    }
-  }
-
-  handle(GetJoinedOrganizationIds).withFn { request: Request[GetJoinedOrganizationIds.Args] =>
-    Profiler(s"[Thrift] ${this.getClass.getSimpleName}::GetJoinedOrganizationIds") {
-      organizationService
-        .getJoinedOrganizationIds(request.args.username)
-        .map(Response(_))
-    }
-  }
-
-  handle(GetJoinedOrganizations).withFn { request: Request[GetJoinedOrganizations.Args] =>
-    Profiler(s"[Thrift] ${this.getClass.getSimpleName}::GetJoinedOrganizations") {
-      organizationService
-        .getJoinedOrganizations(request.args.username)
-        .map(_.map(_.asThrift()))
         .map(Response(_))
     }
   }
@@ -460,7 +433,7 @@ class CaasController @Inject() (
   handle(GetWithDomain).withFn { request: Request[GetWithDomain.Args] =>
     Profiler(s"[Thrift] ${this.getClass.getSimpleName}::GetWithDomain") {
       organizationService
-        .getWithDomain(request.args.domain)
+        .getByDomain(request.args.domain)
         .map(_.asThrift())
         .map(_.toScroogeResponse())
     }

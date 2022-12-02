@@ -40,7 +40,7 @@ fi
 
 if [[ "x$BUILD" == "xtrue" ]]; then
   cd ${DIR}/bi-service && ./build.sh
-#  cd ${DIR}/caas-service && ./build.sh
+  cd ${DIR}/caas-service && ./build.sh
 #  cd ${DIR}/schema-service && ./build.sh
 fi
 
@@ -48,13 +48,21 @@ cd $DIR
 
 if [[ "x$PUSH" == "xtrue" ]]; then
   echo "Build and push images to registry..."
+  # bi-service
   docker build -f ${DIR}/bi-service/Dockerfile -t ${REGISTRY}/bi-service:${TAG} ${DIR}/bi-service
   docker push ${REGISTRY}/bi-service:${TAG}
+  # caas-service
+  docker build -f ${DIR}/caas-service/Dockerfile -t ${REGISTRY}/caas-service:${TAG} ${DIR}/caas-service
+  docker push ${REGISTRY}/caas-service:${TAG}
 
   # build tag 'latest' for every build except for tag latest itself
   if [[ "x$TAG" != "xlatest" ]]; then
     echo "Create latest tags..."
+    # bi-service
     docker tag ${REGISTRY}/bi-service:${TAG} ${REGISTRY}/bi-service:latest
     docker push ${REGISTRY}/bi-service:latest
+    # caas-service
+    docker tag ${REGISTRY}/caas-service:${TAG} ${REGISTRY}/caas-service:latest
+    docker push ${REGISTRY}/caas-service:latest
   fi
 fi

@@ -147,7 +147,6 @@ object UserProfileModule extends TwitterModule {
       userRepository: UserRepository,
       adminUserService: AdminUserService,
       client: SSDB,
-      dnsService: DnsService,
       emailChannel: ChannelService
   ): OrganizationService = {
     val defaultOrganizationId = ZConfig.getLong("caas.default_organization_id", 0)
@@ -157,7 +156,6 @@ object UserProfileModule extends TwitterModule {
       userRepository,
       adminUserService,
       client,
-      dnsService,
       emailChannel,
       defaultOrganizationId
     )

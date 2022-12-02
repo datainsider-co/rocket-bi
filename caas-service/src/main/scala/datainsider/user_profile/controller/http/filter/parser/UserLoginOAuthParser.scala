@@ -52,7 +52,7 @@ class UserLoginOAuthParser @Inject() (
       for {
         // get oauth info
         // valid oauth data
-        orgId <- organizationService.getWithDomain(reqDomain).map(_.organizationId)
+        orgId <- organizationService.getByDomain(reqDomain).map(_.organizationId)
         oauthInfo <- orgOAuthorizationProvider.getOAuthInfo(
           orgId,
           oAuthBodyRequest.oauthType,

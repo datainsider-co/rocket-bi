@@ -25,14 +25,14 @@ class OrganizationParser @Inject() (organizationService: OrganizationService) ex
     Profiler(s"[Filter] ${this.getClass.getSimpleName}::apply") {
       val reqDomain: String = request.headerMap.get("Host").get
       for {
-        org <- getOrgFromDomain(reqDomain)
+        org <- getOrgByDomain(reqDomain)
         _ = request.ctx.update(OrganizationField, org)
         resp <- service(request)
       } yield resp
     }
 
-  private def getOrgFromDomain(domain: String): Future[Organization] =
+  private def getOrgByDomain(domain: String): Future[Organization] =
     Profiler(s"[Filter] ${this.getClass.getSimpleName}::getOrgFromDomain") {
-      organizationService.getWithDomain(domain)
+      organizationService.getByDomain(domain)
     }
 }
