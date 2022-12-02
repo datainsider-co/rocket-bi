@@ -14,19 +14,19 @@ pipeline {
     stages {
         stage('build') {
             steps {
-                sh './build.sh build'
+                sh './build_all.sh build'
             }
         }
 
         stage('deploy') {
             when {
-                expression { BRANCH_NAME ==~ /(main|dev|setup_autodeploy)/ }
+                expression { BRANCH_NAME ==~ /(main|dev)/ }
             }
 
             steps {
                 withCredentials([usernamePassword(credentialsId: 'acc_datainsider_dockerhub', passwordVariable: 'password', usernameVariable: 'username')]) {
                     sh "docker login -u $username -p $password "
-                    sh "./build.sh -t $BRANCH_NAME push"
+                    sh "./build_all.sh -t $BRANCH_NAME push"
                 }
             }
         }
