@@ -52,8 +52,7 @@ export class PermissionGroup {
 export class SupportPermissionGroups {
   static organization() {
     return new PermissionGroup('Organization', new PermissionInfo('All', `organization:*:*`), [
-      new PermissionInfo('Change Logo', `organization:edit:logo`),
-      new PermissionInfo('Change Name', `organization:edit:name`),
+      new PermissionInfo('Edit Organization', `organization:edit:*`),
       new PermissionInfo('Delete Organization', `organization:delete:*`)
     ]);
   }
@@ -67,7 +66,7 @@ export class SupportPermissionGroups {
       new PermissionInfo('Delete Users', `user:delete:*`),
       new PermissionInfo('View User Permissions', `permission:view:*`),
       new PermissionInfo('Assign User Permissions', `permission:assign:*`),
-      new PermissionInfo('Mange Login Method', `login_method:manage`),
+      new PermissionInfo('Manage Login Method', `login_method:manage`),
       new PermissionInfo('View User Activities', `user_activity:view:*`)
     ]);
   }
