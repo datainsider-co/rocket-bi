@@ -9,6 +9,7 @@ export enum DataSourceType {
   GoogleAnalytics = 'GoogleAnalytics',
   GA4 = 'Ga4',
   GoogleSheet = 'GoogleSheet',
+  GoogleAds = 'GoogleAds',
   Others = 'Others',
   GenericJdbc = 'GenericJdbc',
   MongoDB = 'MongoDB',

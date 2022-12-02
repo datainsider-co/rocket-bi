@@ -142,8 +142,6 @@ export default class ActionWidgetMore extends Vue {
   }
 
   private get menuOptions(): ContextMenuItem[] {
-    const containChartFilter: boolean = this.metaData.chartFilter != undefined;
-    Log.debug('containChartFilter: ', !DashboardModeModule.canEdit || containChartFilter);
     return [
       {
         text: DashboardOptions.EDIT_TITLE,
@@ -159,19 +157,19 @@ export default class ActionWidgetMore extends Vue {
         text: DashboardOptions.ADD_FILTER_WIDGET,
         click: this.handleAddInnerFilter,
         disabled: !DashboardModeModule.canEdit,
-        hidden: containChartFilter
+        hidden: this.metaData.containChartFilter
       },
       {
         text: DashboardOptions.UPDATE_FILTER_WIDGET,
         click: this.handleUpdateInnerFilter,
         disabled: !DashboardModeModule.canEdit,
-        hidden: !containChartFilter
+        hidden: !this.metaData.containChartFilter
       },
       {
         text: DashboardOptions.DELETE_FILTER_WIDGET,
         click: this.handleDeleteInnerFilter,
         disabled: !DashboardModeModule.canEdit,
-        hidden: !containChartFilter
+        hidden: !this.metaData.containChartFilter
       },
       {
         text: DashboardOptions.DUPLICATE_CHART,
@@ -191,6 +189,7 @@ export default class ActionWidgetMore extends Vue {
     if (isEditMode) {
       this.hideDrilldown();
       this.hideZoomPopover();
+      this.hideMenuPopover();
     }
   }
 

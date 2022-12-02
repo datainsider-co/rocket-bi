@@ -19,3 +19,4 @@ export * from './MongoJob';
 export * from './S3Job';
 export * from './ShopifyJob';
 export * from './UnsupportedJob';
+export * from './google-ads';

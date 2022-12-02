@@ -8,13 +8,13 @@ import { Route } from 'vue-router';
 import { NavigationGuardNext } from 'vue-router/types/router';
 import {
   ChartInfo,
-  ChartInfoType,
+  DashboardId,
   DatabaseSchema,
   DIException,
-  FunctionControl,
+  Directory,
   DynamicFunctionWidget,
-  DynamicValues,
   InlineSqlView,
+  PasswordSetting,
   Position,
   TableSchema,
   TabWidget,
@@ -46,7 +46,7 @@ import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { Routers } from '@/shared/enums/Routers';
 import ParamInfo, { RouterUtils } from '@/utils/RouterUtils';
 import { Inject } from 'typescript-ioc';
-import { DataManager } from '@core/common/services';
+import { DashboardService, DataManager, DirectoryService } from '@core/common/services';
 import { PermissionHandlerModule } from '@/store/modules/PermissionHandler';
 import { ActionType, ResourceType } from '@/utils/PermissionUtils';
 import ChartComponents from '@chart/index';
@@ -65,8 +65,7 @@ import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/Conf
 import { _ThemeStore } from '@/store/modules/ThemeStore';
 import { ShareHandler } from '@/shared/components/common/di-share-modal/share-handler/ShareHandler';
 import { ShareDirectoryHandler } from '@/shared/components/common/di-share-modal/share-handler/ShareDirectoryHandler';
-import { LinkHandler } from '@/shared/components/common/di-share-modal/link-handler/LinkHandler';
-import DiShareModal, { ResourceData } from '@/shared/components/common/di-share-modal/DiShareModal.vue';
+import DiShareModal from '@/shared/components/common/di-share-modal/DiShareModal.vue';
 import ContextMenu from '@/shared/components/ContextMenu.vue';
 import { AtomicAction } from '@/shared/anotation/AtomicAction';
 import { GeolocationModule } from '@/store/modules/data-builder/GeolocationStore';
@@ -75,12 +74,18 @@ import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTa
 import { ListUtils, PositionUtils } from '@/utils';
 import { SchemaService } from '@core/schema/service/SchemaService';
 import { DynamicConditionWidget } from '@core/common/domain/model/widget/filter/DynamicConditionWidget';
-import {
-  AdhocBuilderConfig,
-  ControlBuilderConfig,
-  DefaultChartBuilderConfig
-} from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderConfig';
+import { AdhocBuilderConfig, ControlBuilderConfig } from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderConfig';
 import { EventBus } from '@/event-bus/EventBus';
+import {
+  ChartProcessor,
+  DynamicFunctionChartHandler,
+  DynamicValuesChartHandler,
+  FilterChartHandler,
+  NormalChartHandler
+} from '@/screens/dashboard-detail/views/WidgetProcessService';
+import { Dashboard as CoreDashboard } from '@core/common/domain/model/dashboard/Dashboard.ts';
+import PasswordModal from '@/screens/dashboard-detail/components/PasswordModal.vue';
+import { Di } from '@core/common/modules';
 
 Vue.use(ChartComponents);
 Vue.use(GridStackComponents);
@@ -99,13 +104,20 @@ Vue.use(GridStackComponents);
     BoostContextMenu,
     WidgetSettingModal,
     AddChartModal,
-    SortModal
+    SortModal,
+    PasswordModal
   }
 })
 export default class DashboardDetail extends Vue implements WidgetFullSizeHandler {
   private static readonly FIXED_STYLE: string = 'bar-fixed';
   private readonly dashboardScrollConfigs = VerticalScrollConfigs;
   private directoryHandler: ShareHandler = new ShareDirectoryHandler();
+  private chartProcessor: ChartProcessor = new ChartProcessor([
+    new DynamicValuesChartHandler(),
+    new DynamicFunctionChartHandler(),
+    new FilterChartHandler(),
+    new NormalChartHandler()
+  ]);
 
   @Inject
   private readonly dataManager!: DataManager;
@@ -142,6 +154,9 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
 
   @Ref()
   private readonly dashboard!: DashboardCtrl;
+
+  @Ref()
+  private readonly passwordModal!: PasswordModal;
 
   get paramInfo(): ParamInfo {
     return RouterUtils.parseToParamInfo(this.$route.params.name);
@@ -409,13 +424,15 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
   private async loadDashboard(): Promise<void> {
     try {
       await DashboardModule.handleLoadDashboard(this.paramInfo.idAsNumber());
-      this.updateRouter(this.paramInfo.idAsNumber(), DashboardModule.title);
-      await DashboardModule.handleUpdateOrAddNewWidgetFromChartBuilder();
-      // TODO: apply filter when have dashboard
-      await FilterModule.handleLoadDashboard();
-      const useBoost = DashboardModule.currentDashboard?.useBoost;
-      await DashboardControllerModule.renderAllChartOrFilters({ useBoost: useBoost });
-      await DashboardControllerModule.renderAllChartFilter();
+      await this.updateRouter(this.paramInfo.idAsNumber(), DashboardModule.title);
+      await this.processSecurity(DashboardModule.currentDashboard!, DashboardModule.dashboardDirectory!, async () => {
+        await DashboardModule.handleUpdateOrAddNewWidgetFromChartBuilder();
+        // TODO: apply filter when have dashboard
+        await FilterModule.handleLoadDashboard();
+        const useBoost = DashboardModule.currentDashboard?.useBoost;
+        await DashboardControllerModule.renderAllChartOrFilters({ useBoost: useBoost });
+        await DashboardControllerModule.renderAllChartFilter();
+      });
     } catch (ex) {
       Log.error('loadDashboard::error', ex);
       // Ignored
@@ -424,7 +441,7 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
 
   private loadViewAsDashboard(viewAsUser: UserProfile) {
     Log.debug('DashboardDetail::loadViewAsDashboard::viewAsUser::', viewAsUser);
-    this.loadDashboard();
+    return this.loadDashboard();
   }
 
   private onScrollDashboard(vertical: { process: number }, horizontal: { process: number }, event: MouseEvent) {
@@ -566,8 +583,11 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
     this.chartBuilderComponent.showUpdateInnerFilterModal(chartInfo);
   }
 
-  private onShowShareModal(resource: ResourceData, linkHandler: LinkHandler) {
-    this.shareModal.showShareDirectory(resource, linkHandler);
+  private async onShowShareModal(dashboardId: DashboardId) {
+    const currentDashboardDirectory = DashboardModule.dashboardDirectory;
+    if (currentDashboardDirectory) {
+      this.shareModal.showShareDashboard(currentDashboardDirectory);
+    }
   }
 
   private onShowContextMenu(event: MouseEvent, items: ContextMenuItem[]) {
@@ -646,33 +666,7 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
       widget: chartInfo,
       position: position
     })) as ChartInfo;
-    switch (newChartInfo.getChartInfoType()) {
-      case ChartInfoType.normal: {
-        if (newChartInfo.setting.hasDynamicFunction) {
-          newChartInfo.setting.setDynamicFunctions(DashboardControllerModule.dynamicFunctions);
-        }
-        if (newChartInfo.setting.hasDynamicCondition) {
-          newChartInfo.setting.setDynamicFilter(DashboardControllerModule.dynamicFilter);
-        }
-        break;
-      }
-      case ChartInfoType.filter: {
-        await FilterModule.addFilterWidget(newChartInfo);
-        break;
-      }
-      case ChartInfoType.dynamicFunction: {
-        await DashboardControllerModule.replaceDynamicFunction({
-          widget: newChartInfo,
-          selected: ((newChartInfo.setting as any) as FunctionControl).getDefaultFunctions(),
-          apply: true
-        });
-        break;
-      }
-      case ChartInfoType.dynamicValues: {
-        await DashboardControllerModule.setDynamicFilter({ id: newChartInfo.id, values: ((newChartInfo.setting as any) as DynamicValues).getDefaultValues() });
-        break;
-      }
-    }
+    await this.chartProcessor.onAdd(newChartInfo);
     WidgetModule.addWidget({ widget: newChartInfo, position: position });
     QuerySettingModule.setQuerySetting({ id: newChartInfo.id, query: newChartInfo.setting });
     DashboardControllerModule.initAffectFilterWidgets([newChartInfo]);
@@ -686,38 +680,7 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
     await WidgetModule.handleUpdateWidget(chartInfo);
     WidgetModule.setWidget({ widgetId: chartInfo.id, widget: chartInfo });
     ZoomModule.registerZoomData(chartInfo);
-    switch (chartInfo.getChartInfoType()) {
-      case ChartInfoType.normal: {
-        chartInfo.setting = chartInfo.setting.hasDynamicFunction ? DashboardControllerModule.updateDynamicFunctionValue(chartInfo.setting) : chartInfo.setting;
-        if (chartInfo.setting.hasDynamicFunction) {
-          chartInfo.setting.setDynamicFunctions(DashboardControllerModule.dynamicFunctions);
-        }
-        if (chartInfo.setting.hasDynamicCondition) {
-          chartInfo.setting.setDynamicFilter(DashboardControllerModule.dynamicFilter);
-        }
-        break;
-      }
-      case ChartInfoType.filter: {
-        await FilterModule.addFilterWidget(chartInfo);
-        break;
-      }
-      case ChartInfoType.dynamicFunction: {
-        const defaultColumns = DashboardControllerModule.dynamicFunctions.get(chartInfo.id);
-        const updateDefaultColumns = ((chartInfo.setting as any) as FunctionControl).getDefaultFunctions();
-        if (!isEqual(defaultColumns, updateDefaultColumns)) {
-          await DashboardControllerModule.replaceDynamicFunction({ widget: chartInfo, selected: updateDefaultColumns, apply: true });
-        }
-        break;
-      }
-      case ChartInfoType.dynamicValues: {
-        const currentFilterValues = DashboardControllerModule.dynamicFilter.get(chartInfo.id);
-        const updateFilterValues = ((chartInfo.setting as any) as DynamicValues).getDefaultValues();
-        if (!isEqual(currentFilterValues, updateFilterValues)) {
-          await DashboardControllerModule.replaceDynamicFilter({ widget: chartInfo, values: updateFilterValues, apply: true });
-        }
-        break;
-      }
-    }
+    await this.chartProcessor.onUpdate(chartInfo);
     QuerySettingModule.setQuerySetting({ id: chartInfo.id, query: chartInfo.setting });
     DashboardControllerModule.setAffectFilterWidget(chartInfo);
     const useBoost = DashboardModule.currentDashboard?.useBoost;
@@ -745,5 +708,41 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
     this.boostContextMenu?.show(event, boostInfo, async () => {
       await DashboardModule.forceRefresh();
     });
+  }
+
+  private async processSecurity(dashboard: CoreDashboard, directory: Directory, onCompleted: () => Promise<void>) {
+    if (!directory) {
+      throw new DIException('Dashboard not found!');
+    }
+    const isOwner = this.isOwnDirectory(dashboard.ownerId);
+    const isRequiredPassword = PasswordSetting.is(directory.data) && directory.data.config?.enabled;
+    Log.debug('processSecurity::', isOwner, directory.data);
+    if (isOwner || !isRequiredPassword) {
+      return onCompleted();
+    } else if (isRequiredPassword) {
+      await this.passwordModal.show((directory.data as PasswordSetting).config!, onCompleted, () => {
+        _ConfigBuilderStore.setAllowBack(true);
+        history.back();
+      });
+    }
+  }
+
+  private async loadDirectory(dashboard: CoreDashboard): Promise<Directory> {
+    const dashboardService = Di.get(DashboardService);
+    const directoryId: number = await dashboardService.getDirectoryId(dashboard.id);
+    const directoryService = Di.get(DirectoryService);
+    return directoryService.get(directoryId);
+  }
+
+  private isOwnDirectory(ownerUserName: string): boolean {
+    const dataManager = Di.get(DataManager);
+    const localUsername = dataManager.getUserInfo()?.username;
+    if (localUsername === null || localUsername === undefined) {
+      return false;
+    }
+
+    Log.debug('isOwnDirectory', ownerUserName, localUsername);
+
+    return localUsername === ownerUserName;
   }
 }

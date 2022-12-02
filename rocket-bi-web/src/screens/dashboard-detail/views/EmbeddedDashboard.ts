@@ -1,7 +1,7 @@
 import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
 import { Route } from 'vue-router';
 import { NavigationGuardNext } from 'vue-router/types/router';
-import { ChartInfo, DIException, TextWidget } from '@core/common/domain';
+import { ChartInfo, DashboardId, DIException, Directory, TextWidget } from '@core/common/domain';
 import { StringUtils } from '@/utils/StringUtils';
 import {
   DashboardControllerModule,
@@ -24,7 +24,7 @@ import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { Routers } from '@/shared/enums/Routers';
 import ParamInfo, { RouterUtils } from '@/utils/RouterUtils';
 import { Inject } from 'typescript-ioc';
-import { DataManager } from '@core/common/services';
+import { DataManager, DirectoryService } from '@core/common/services';
 import { PermissionHandlerModule } from '@/store/modules/PermissionHandler';
 import { ActionType, ResourceType } from '@/utils/PermissionUtils';
 import ChartComponents from '@chart/index';
@@ -51,6 +51,7 @@ import { GeolocationModule } from '@/store/modules/data-builder/GeolocationStore
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
 import EmbeddedDashboardHeader from '@/screens/dashboard-detail/components/EmbeddedDashboardHeader.vue';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
+import { Di } from '@core/common/modules';
 
 Vue.use(ChartComponents);
 Vue.use(GridStackComponents);
@@ -370,8 +371,10 @@ export default class EmbeddedDashboard extends Vue implements WidgetFullSizeHand
     this.chartBuilderComponent.showUpdateChartModal(chartInfo);
   }
 
-  private onShowShareModal(resource: ResourceData, linkHandler: LinkHandler) {
-    this.shareModal.showShareDirectory(resource, linkHandler);
+  private async onShowShareModal(dashboardId: DashboardId) {
+    const directoryService = Di.get(DirectoryService);
+    const directory: Directory = await directoryService.get(dashboardId);
+    this.shareModal.showShareDashboard(directory);
   }
 
   private onShowContextMenu(event: MouseEvent, items: ContextMenuItem[]) {

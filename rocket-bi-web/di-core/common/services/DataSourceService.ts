@@ -8,14 +8,21 @@ import { ListingRequest } from '@core/lake-house/domain/request/listing-request/
 
 export abstract class DataSourceService {
   abstract testConnection(dataSourceInfo: DataSourceInfo): Promise<boolean>;
+
   abstract create(dataSourceInfo: DataSourceInfo): Promise<DataSourceInfo>;
+
   abstract createGaSource(displayName: string, authorizationCode: string): Promise<DataSourceInfo>;
+
   abstract list(request: ListingRequest): Promise<ListingResponse<DataSourceResponse>>;
+
   abstract delete(id: SourceId): Promise<boolean>;
+
   abstract update(id: SourceId, dataSourceInfo: DataSourceInfo): Promise<boolean>;
+
   abstract listDatabaseName(id: SourceId, projectName: string, location: string): Promise<string[]>;
 
   abstract listTableName(id: SourceId, dbName: string, projectName: string, location: string): Promise<string[]>;
+
   abstract listIncrementColumns(id: SourceId, dbName: string, tblName: string, projectName: string, location: string): Promise<string[]>;
 
   abstract getRefreshToken(authorizationCode: string): Promise<string>;
@@ -25,6 +32,8 @@ export abstract class DataSourceService {
   abstract getShopifyAccessToken(shopUrl: string, authorizationCode: string, apiVersion: string): Promise<string>;
 
   abstract previewSchema(sourceInfo: DataSourceInfo, job: Job): Promise<PreviewResponse>;
+
+  abstract getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]>;
 }
 
 export class DataSourceServiceImpl extends DataSourceService {
@@ -82,5 +91,8 @@ export class DataSourceServiceImpl extends DataSourceService {
 
   previewSchema(sourceInfo: DataSourceInfo, job: Job): Promise<PreviewResponse> {
     return this.dataSourceRepository.previewS3Job(sourceInfo, job);
+  }
+  getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]> {
+    return this.dataSourceRepository.getGoogleAdsCustomerIds(sourceId);
   }
 }

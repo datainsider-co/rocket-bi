@@ -18,12 +18,14 @@ import { Log } from '@core/utils/Log';
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { StringUtils } from '@/utils/StringUtils';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
+import { OrganizationStoreModule } from '@/store/modules/OrganizationStore';
 import OrganizationPermissionModule from '@/store/modules/OrganizationPermissionStore';
 
 @Component({
   components: { ConfirmationModal }
 })
 export default class App extends Vue {
+  private readonly DEFAULT_FAVICON = '/favicon.ico';
   @Ref()
   confirmationModal!: ConfirmationModal;
 
@@ -39,12 +41,21 @@ export default class App extends Vue {
   private async init() {
     try {
       this.initTheme();
+      await OrganizationStoreModule.init();
       await AuthenticationModule.init();
       await OrganizationPermissionModule.init();
     } catch (ex) {
       Log.error('init project failure', ex);
       this.$router.go(0);
     }
+  }
+
+  private get logoUrl(): string {
+    return OrganizationStoreModule.organization.thumbnailUrl || '';
+  }
+
+  private get companyName(): string {
+    return OrganizationStoreModule.organization.name || '';
   }
 
   @Watch('themeName')
@@ -122,6 +133,29 @@ export default class App extends Vue {
       themeName: mainTheme,
       force: true
     });
+  }
+
+  @Watch('logoUrl', { immediate: true })
+  handleLogoUrlChanged(newLogoUrl: string, oldLogoUrl: string) {
+    if (newLogoUrl !== oldLogoUrl) {
+      const favicon: NodeListOf<HTMLElement> = document.getElementsByName('favicon');
+      favicon.forEach(element => {
+        element.setAttribute('href', newLogoUrl || this.DEFAULT_FAVICON);
+      });
+      Log.debug('handleLogoUrlChanged number of favicon', favicon.length);
+    }
+  }
+
+  @Watch('companyName', { immediate: true })
+  handleCompanyNameChanged(newCompanyName: string, oldCompanyName: string) {
+    if (newCompanyName !== oldCompanyName) {
+      const companyNameElement = document.getElementById('company-name');
+      Log.debug('handleCompanyNameChanged::companyNameElement', companyNameElement);
+
+      if (companyNameElement) {
+        companyNameElement.innerText = newCompanyName;
+      }
+    }
   }
 }
 </script>

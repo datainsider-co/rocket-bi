@@ -2,12 +2,20 @@ import { getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import store from '@/store';
 import { Stores } from '@/shared';
 import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
-import { ChartInfo, PivotTableQuerySetting, WidgetId, Zoomable } from '@core/common/domain/model';
+import { ChartInfo, FlattenPivotTableQuerySetting, PivotTableQuerySetting, WidgetId, Zoomable } from '@core/common/domain/model';
 import { ZoomModule } from '@/store/modules/ZoomStore';
 import { QueryRelatedWidget } from '@core/common/domain/model/widget/chart/QueryRelatedWidget';
 import { DIException } from '@core/common/domain/exception';
 import { SortDirection } from '@core/common/domain/request';
 import { Sortable } from '@core/common/domain/model/query/features/Sortable';
+
+const toFlattenPivotIfPossible = (querySetting: QuerySetting): QuerySetting => {
+  if (PivotTableQuerySetting.isPivotChartSetting(querySetting)) {
+    return FlattenPivotTableQuerySetting.fromObject(querySetting as any);
+  } else {
+    return querySetting;
+  }
+};
 
 /**
  * Store chứa tất cả các query của Widget trong một Dashboard
@@ -17,16 +25,20 @@ export class QuerySettingStore extends VuexModule {
   querySettingAsMap: Map<WidgetId, QuerySetting> = new Map<WidgetId, QuerySetting>();
   /**
    * Build Query setting; the final Query is combined by Zoom and Server Query
+   * @param widgetId id of widget
+   * @param isFlattenPivot if true, will return flatten pivot instead of pivot table
    */
-  get buildQuerySetting(): (id: WidgetId) => QuerySetting {
-    return (id: WidgetId) => {
+  get buildQuerySetting(): (id: WidgetId, isFlattenPivot?: boolean) => QuerySetting {
+    return (id: WidgetId, isFlattenPivot?: boolean) => {
       const querySetting = this.querySettingAsMap.get(id);
       if (querySetting) {
         const zoomData = ZoomModule.zoomDataAsMap.get(id);
         if (Zoomable.isZoomable(querySetting) && zoomData) {
           querySetting.setZoomData(zoomData);
         }
-        if (PivotTableQuerySetting.isPivotChartSetting(querySetting)) {
+        if (isFlattenPivot) {
+          return toFlattenPivotIfPossible(querySetting);
+        } else if (PivotTableQuerySetting.isPivotChartSetting(querySetting)) {
           return querySetting.getCurrentQuery();
         } else {
           return querySetting;

@@ -3,6 +3,7 @@ export enum JobName {
   GenericJdbc = 'generic_jdbc_job',
   GoogleAnalyticJob = 'ga_job',
   GA4Job = 'ga4_job',
+  GoogleAdsJob = 'google_ads_job',
   GoogleSheetJob = 'google_sheets_job',
   BigQueryJob = 'bigquery_storage_job',
   MongoJob = 'mongo_db_job',

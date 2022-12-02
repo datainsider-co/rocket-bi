@@ -43,6 +43,8 @@ export abstract class DataSourceRepository {
   abstract getShopifyAccessToken(shopUrl: string, authorizationCode: string, apiVersion: string): Promise<string>;
 
   abstract previewS3Job(sourceInfo: DataSourceInfo, job: Job): Promise<PreviewResponse>;
+
+  abstract getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]>;
 }
 
 export class DataSourceRepositoryImpl extends DataSourceRepository {
@@ -155,6 +157,10 @@ export class DataSourceRepositoryImpl extends DataSourceRepository {
       })
       .then((resp: any) => PreviewResponse.fromObject(resp));
   }
+
+  getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]> {
+    return this.httpClient.get(`/source/google_ads/customer_id/${sourceId}`);
+  }
 }
 
 export class DataSourceRepositoryMock extends DataSourceRepository {
@@ -219,6 +225,10 @@ export class DataSourceRepositoryMock extends DataSourceRepository {
   }
 
   previewS3Job(sourceInfo: DataSourceInfo, job: Job): Promise<PreviewResponse> {
+    throw new DIException('Not supported');
+  }
+
+  getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]> {
     throw new DIException('Not supported');
   }
 }

@@ -188,4 +188,9 @@ export class UnsupportedJob implements Job {
   copyWithDestDbName(dbName: string): Job {
     throw new DIException('copyWithDestDbName is unsupported.');
   }
+
+  withDisplayName(displayName: string): Job {
+    this.displayName = displayName;
+    return this;
+  }
 }

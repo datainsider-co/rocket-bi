@@ -454,5 +454,7 @@ export enum TrackEvents {
 
   /**QueryChart*/
   QueryChartOk = 'query_chart_ok', //query
-  QueryChartFail = 'query_chart_fail' //query error
+  QueryChartFail = 'query_chart_fail', //query error
+  QueryCsvFail = 'query_csv_fail',
+  QueryCsvOk = 'query_csv_ok'
 }

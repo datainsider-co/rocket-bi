@@ -10,7 +10,7 @@ import { PostgreSqlDataSourceFormRender } from '@/screens/data-ingestion/form-bu
 import { RedshiftDataSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/RedshiftDataSourceFormRender';
 import { S3SourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/S3SourceFormRender';
 import { ShopifySourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/ShopifySourceFormRender';
-import { MongoDBSourceInfo, S3SourceInfo } from '@core/data-ingestion';
+import { GoogleAdsSourceInfo, MongoDBSourceInfo, S3SourceInfo } from '@core/data-ingestion';
 import { BigQuerySourceInfoV2 } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfoV2';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { DataSourceType } from '@core/data-ingestion/domain/data-source/DataSourceType';
@@ -24,9 +24,10 @@ import { ShopifySourceInfo } from '@core/data-ingestion/domain/data-source/Shopi
 import { UnsupportedException } from '@core/common/domain/exception/UnsupportedException';
 import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4SourceInfo';
 import { Ga4SourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/Ga4SourceFormRender';
+import { GoogleAdsSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/GoogleAdsSourceFormRender';
 
 export class DataSourceFormFactory {
-  createRender(dataSource: DataSourceInfo): DataSourceFormRender {
+  createRender(dataSource: DataSourceInfo, onSubmit?: () => void): DataSourceFormRender {
     switch (dataSource.sourceType) {
       case DataSourceType.MSSql: {
         return new MsSqlDataSourceFormRender(dataSource as MSSqlSourceInfo);
@@ -59,6 +60,8 @@ export class DataSourceFormFactory {
         return new ShopifySourceFormRender(dataSource as ShopifySourceInfo);
       case DataSourceType.S3:
         return new S3SourceFormRender(dataSource as S3SourceInfo);
+      case DataSourceType.GoogleAds:
+        return new GoogleAdsSourceFormRender(dataSource as GoogleAdsSourceInfo, onSubmit);
       default:
         throw new UnsupportedException(`Unsupported data source type ${dataSource.sourceType}`);
     }

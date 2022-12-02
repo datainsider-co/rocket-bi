@@ -25,12 +25,58 @@ export class UserInfo {
   }
 }
 
-export interface Organization {
+export class Organization {
   organizationId: string;
   owner: string;
   isActive: boolean;
   name: string;
-  reportTimeZoneId: string;
-  createdTime: number;
+  reportTimeZoneId?: string;
+  createdTime?: number;
   domain: string;
+  thumbnailUrl?: string;
+  expiredTimeMs?: number;
+
+  constructor(
+    organizationId: string,
+    owner: string,
+    isActive: boolean,
+    name: string,
+    domain: string,
+    createdTime?: number,
+    reportTimeZoneId?: string,
+    thumbnailUrl?: string,
+    expiredTimeMs?: number
+  ) {
+    this.organizationId = organizationId;
+    this.owner = owner;
+    this.isActive = isActive;
+    this.name = name;
+    this.reportTimeZoneId = reportTimeZoneId;
+    this.createdTime = createdTime;
+    this.domain = domain;
+    this.thumbnailUrl = thumbnailUrl;
+    this.expiredTimeMs = expiredTimeMs;
+  }
+
+  isExpiredCache(): boolean {
+    return Date.now() > (this.expiredTimeMs || 0);
+  }
+
+  static fromObject(object: any): Organization {
+    return new Organization(
+      object.organizationId,
+      object.owner,
+      object.isActive,
+      object.name,
+      object.domain,
+      object.createdTime,
+      object.reportTimeZoneId,
+      object.thumbnailUrl,
+      object.expiredTimeMs ?? Date.now()
+    );
+  }
+
+  static default() {
+    return new Organization('0', 'root', true, 'DATA INSIDER', 'datainsider.com', Date.now());
+  }
 }

@@ -4,8 +4,11 @@ import { StringUtils } from '@/utils/StringUtils';
 
 export enum UserAttributeOperator {
   Equal = 'Equal',
+  NotEqual = 'NotEqual',
   Contain = 'Contain',
-  IsNull = 'IsNull'
+  NotContain = 'NotContain',
+  IsNull = 'IsNull',
+  IsNotNull = 'IsNotNull'
 }
 
 export class UserAttribute {
@@ -25,17 +28,5 @@ export class UserAttribute {
 
   static fromObject(obj: any): UserAttribute {
     return new UserAttribute(obj.key, obj.values, obj.operator);
-  }
-
-  get isEqualOperator() {
-    return this.operator === UserAttributeOperator.Equal;
-  }
-
-  get isNullOperator() {
-    return this.operator === UserAttributeOperator.IsNull;
-  }
-
-  get isInOperator() {
-    return this.operator === UserAttributeOperator.Contain;
   }
 }

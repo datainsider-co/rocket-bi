@@ -69,7 +69,12 @@ export default {
       });
     },
     sparseToCsvData(records) {
-      return records.map(rowData => rowData.join(this.delimiter)).join('\n');
+      const re = new RegExp('\\r?\\n', 'g');
+      return records
+        .map(rowData => {
+          return rowData.join(this.delimiter).replaceAll(re, ' ');
+        })
+        .join('\n');
     }
   }
 };

@@ -8,6 +8,7 @@ export enum DataSources {
   MongoDbSource = 'mongo_db_source',
   GoogleSheetSource = 'google_token_credential_source',
   GoogleAnalyticsSource = 'gg_credential_source',
+  GoogleAdsSource = 'google_ads_source',
   GA4Source = 'ga4_source',
   GoogleServiceAccountSource = 'gg_service_account_source',
   UnsupportedSource = 'unsupported_source',

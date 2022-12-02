@@ -15,6 +15,7 @@
   .modal-content,
   .modal-body {
     background-color: var(--modal-background-color);
+    box-shadow: unset !important;
   }
 
   .modal-body {
@@ -37,20 +38,43 @@
   }
 
   .modal-footer {
-    background-color: var(--modal-background-color);
-    margin-top: 7px;
+    background: transparent;
+    box-shadow: unset;
     padding: 0;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
 
-    .anyone-header-area {
-      padding: 18px 24px 24px;
+    > * {
+      margin: 0;
     }
 
-    &.collapsed .anyone-header-area {
-      padding: 18px 24px 16px 24px;
-    }
+    //background-color: var(--modal-background-color);
+    //margin-top: 7px;
+    //padding: 0;
+    //border-top-left-radius: 4px;
+    //border-top-right-radius: 4px;
+    //
+    //.anyone-header-area {
+    //  padding: 18px 24px 24px;
+    //}
+    //
+    //&.collapsed .anyone-header-area {
+    //  padding: 18px 24px 16px 24px;
+    //}
   }
+}
+
+.share-section {
+  background: var(--modal-background-color);
+  padding: 24px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08) !important;
+}
+.input-password-disable {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: var(--disable-opacity);
+}
+#reset-password-btn {
+  background: var(--danger) !important;
 }
 
 .divider-top {
@@ -115,7 +139,7 @@
 }
 
 ::v-deep {
-  #success-copy-tooltip,
+  .success-copy-tooltip,
   #success-quick-copy-tooltip {
     .arrow {
       &::before {
@@ -124,7 +148,7 @@
     }
   }
 
-  #error-copy-tooltip,
+  .error-copy-tooltip,
   #error-quick-copy-tooltip {
     .arrow {
       &::before {
@@ -276,9 +300,11 @@
     .modal-header .share-people-area {
       padding: 16px;
     }
+
     .modal-footer.collapsed .anyone-header-area {
       padding: 18px 16px;
     }
+
     .share-people-header > span,
     .share-anyone-header .get-link > span {
       font-size: 20px;

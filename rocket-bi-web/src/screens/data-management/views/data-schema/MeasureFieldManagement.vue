@@ -49,7 +49,7 @@
               </td>
               <td class="text-center">
                 <div class="h-100 d-flex align-items-center">
-                  <i class="di-icon-edit btn-icon btn-icon-border p-0 mr-1" @click="editMeasureField(...arguments, tableSchema, column)"></i>
+                  <i class="di-icon-edit btn-icon btn-icon-border p-0 mr-1" @click="editMeasureField(...arguments, syncedModel.table, column)"></i>
                   <i class="di-icon-delete btn-icon btn-icon-border p-0" @click="showDeleteConfirmationModal(...arguments, syncedModel.table, column)"></i>
                 </div>
               </td>

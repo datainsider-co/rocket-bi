@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    tools {
+        maven "M3"
+    }
+
+    environment {
+        DOCKER_REGISTRY_HOST = 'https://registry.gitlab.com'
+        DOCKER_REGISTRY_CREDENTIAL = 'acc_nkt165'
+        IMAGE_NAME = 'registry.gitlab.com/datainsider/web'
+    }
+
+    stages {
+        stage('deploy') {
+            when {
+                expression { BRANCH_NAME ==~ /(main|dev|oss|cdp)/ }
+            }
+
+            steps {
+                script {
+                    echo "building docker image from branch ${BRANCH_NAME}..."
+                    docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_CREDENTIAL) {
+                        def image = docker.build(IMAGE_NAME)
+                        def IMAGE_TAG = BRANCH_NAME
+                        image.push(IMAGE_TAG)
+                    }
+                }
+            }
+        }
+    }
+
+  post {
+    success {
+      slackSend(
+        color: 'good',
+        message: "The pipeline ${currentBuild.fullDisplayName} completed successfully."
+      )
+    }
+    failure {
+      slackSend(
+        color: 'danger',
+        message: "The pipeline ${currentBuild.fullDisplayName} failed. Build URL: ${BUILD_URL}"
+      )
+    }
+  }
+}

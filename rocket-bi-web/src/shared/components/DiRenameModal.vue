@@ -2,7 +2,7 @@
   <BModal id="mdRename" ref="mdRename" centered ok-title="Rename" cancel-title="Cancel" :title="title" class="rounded" size="md" @ok="rename">
     <template v-slot:modal-header="{ close }">
       <h6 class="modal-title">{{ title }}</h6>
-      <button type="button" class="close btn-ghost" @click.prevent="close()" aria-label="Close">
+      <button type="button" class="close btn-ghost" @click.prevent="close()" aria-label="Close" v-show="false">
         <BIconX class="button-x" />
       </button>
     </template>

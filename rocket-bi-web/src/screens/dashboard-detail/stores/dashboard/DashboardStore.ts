@@ -22,6 +22,7 @@ import {
   DashboardSetting,
   DIException,
   DIMap,
+  Directory,
   DirectoryId,
   FieldRelatedCondition,
   FilterRequest,
@@ -36,7 +37,7 @@ import {
   Widgets
 } from '@core/common/domain';
 import { Di } from '@core/common/modules';
-import { DashboardService, DataManager, UploadService } from '@core/common/services';
+import { DashboardService, DataManager, DirectoryService, UploadService } from '@core/common/services';
 import { DashboardAction } from '@core/tracking/domain/TrackingDataType';
 import { TrackingService } from '@core/tracking/service/TrackingService';
 import { Log, WidgetUtils } from '@core/utils';
@@ -66,9 +67,13 @@ export class DashboardStore extends VuexModule {
   private widgetWillAddToDashboard: Widget | null = null;
   private widgetWillUpdate: Widget | null = null;
   currentDashboard: Dashboard | null = null;
+  dashboardDirectory: Directory | null = null;
 
   @Inject
   private dashboardService!: DashboardService;
+
+  @Inject
+  private directoryService!: DirectoryService;
 
   @Inject
   private uploadService!: UploadService;
@@ -160,6 +165,7 @@ export class DashboardStore extends VuexModule {
       this.setDashboardStatus(Status.Loading);
       const dashboard = await this.dashboardService.get(id);
       this.saveOwnerId({ ownerId: dashboard.ownerId });
+      await this.loadDashboardDirectory(id);
       await this.processDashboardData(dashboard);
     } catch (ex) {
       Log.error('handleLoadDashboard::ex', ex);
@@ -292,6 +298,7 @@ export class DashboardStore extends VuexModule {
     this.ownerId = null;
     this.setting = DashboardSetting.default();
     this.currentDashboard = null;
+    this.dashboardDirectory = null;
   }
 
   @Mutation
@@ -327,6 +334,18 @@ export class DashboardStore extends VuexModule {
     const setting = Di.get(DataManager).getDashboardSetting(id);
     const themeName = setting?.themeName ?? ThemeUtils.getDefaultThemeName();
     _ThemeStore.setDashboardTheme(themeName);
+  }
+
+  @Action
+  private async loadDashboardDirectory(id: DashboardId): Promise<void> {
+    const directoryId = await this.dashboardService.getDirectoryId(id);
+    const directory = await this.directoryService.get(directoryId);
+    this.setDashboardDirectory(directory);
+  }
+
+  @Mutation
+  private setDashboardDirectory(directory: Directory): void {
+    this.dashboardDirectory = directory;
   }
 
   @Action

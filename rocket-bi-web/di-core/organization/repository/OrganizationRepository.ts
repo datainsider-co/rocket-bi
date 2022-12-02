@@ -1,12 +1,12 @@
-import { PlanDetail, PlanInfo } from '../domain';
+import { PlanDetail, PlanInfo, SubscribePlanResp } from '../domain';
 import { InjectValue } from 'typescript-ioc';
 import { DIKeys } from '@core/common/modules';
 import { BaseClient } from '@core/common/services/HttpClient';
 import { UnsubscribePlanResp } from '@core/organization/domain/plan/UnsubscribePlanResp';
 import { Log } from '@core/utils';
-import { DIException } from '@core/common/domain';
-import { SubscribePlanResp } from '@core/organization/domain/plan/SubscribePlanResp';
+import { DIException, Organization } from '@core/common/domain';
 import { PlanType } from '@core/organization/domain/plan/PlanType';
+import { UpdateOrganizationRequest } from '@core/organization/domain/request/UpdateOrganizationRequest';
 
 export abstract class OrganizationRepository {
   abstract getPlan(): Promise<PlanInfo>;
@@ -14,11 +14,16 @@ export abstract class OrganizationRepository {
   abstract subscribePlan(planType: PlanType): Promise<SubscribePlanResp>;
   abstract revisePlan(planType: PlanType): Promise<SubscribePlanResp>;
   abstract unsubscribePlan(): Promise<UnsubscribePlanResp>;
+  abstract getOrganization(): Promise<Organization>;
+  abstract updateOrganization(request: UpdateOrganizationRequest): Promise<Organization>;
 }
 
 export class OrganizationRepositoryImpl extends OrganizationRepository {
   @InjectValue(DIKeys.BillingClient)
   private httpClient!: BaseClient;
+
+  @InjectValue(DIKeys.CaasClient)
+  private orgClient!: BaseClient;
 
   getPlan(): Promise<PlanInfo> {
     return this.httpClient
@@ -70,5 +75,13 @@ export class OrganizationRepositoryImpl extends OrganizationRepository {
     //   Log.error('OrganizationRepositoryImpl::revisePlan::exception::', e.message);
     //   throw new DIException(e.message);
     // });
+  }
+
+  getOrganization(): Promise<Organization> {
+    return this.orgClient.get('/organizations/my-domain').then(Organization.fromObject);
+  }
+
+  updateOrganization(request: UpdateOrganizationRequest): Promise<Organization> {
+    return this.orgClient.put('/organizations', request).then(Organization.fromObject);
   }
 }

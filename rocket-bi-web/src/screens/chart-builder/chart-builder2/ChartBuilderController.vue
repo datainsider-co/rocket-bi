@@ -23,6 +23,7 @@
           :hideRetry="true"
           :showSelectDatabase="config.databaseConfig.showSelectDatabase"
           :showSelectTabControl="config.databaseConfig.useTabControl"
+          :hideTableAction="config.databaseConfig.hideTableAction"
           class="database-panel"
           ref="databasePanel"
           @updateTable="handleTableUpdated"

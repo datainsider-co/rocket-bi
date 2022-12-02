@@ -36,18 +36,18 @@
                     :appendAtRoot="true"
                   ></DiDropdown>
 
-                  <template v-if="isEqualOperator(policy)">
+                  <template v-if="isUseInputComponent(policy)">
                     <div class="view-equal-value" v-if="isViewMode">{{ policy.userAttribute.values[0] }}</div>
                     <DiInputComponent v-else trim v-model="policy.userAttribute.values[0]" placeholder="Attribute value"></DiInputComponent>
                   </template>
 
                   <TagsInput
-                    v-else-if="isInOperator(policy)"
+                    v-else-if="isUseTagsComponent(policy)"
                     placeholder="Attribute value"
                     id="attribute-values"
                     :style="{ 'pointer-events': isViewMode ? 'none' : 'auto' }"
                     :default-tags="policy.userAttribute.values"
-                    :addOnKey="[13, ',', ';', ' ']"
+                    :addOnKey="[13, ',', ';']"
                     @tagsChanged="handlePolicyValuesChanged(policiesResponse.data, index, ...arguments)"
                   >
                   </TagsInput>
@@ -138,18 +138,18 @@
                     v-model="policy.userAttribute.operator"
                     :appendAtRoot="true"
                   ></DiDropdown>
-                  <template v-if="isEqualOperator(policy)">
+                  <template v-if="isUseInputComponent(policy)">
                     <div class="view-equal-value" v-if="isViewMode">{{ policy.userAttribute.values[0] }}</div>
                     <DiInputComponent v-else trim v-model="policy.userAttribute.values[0]" placeholder="Attribute value"></DiInputComponent>
                   </template>
 
                   <TagsInput
-                    v-else-if="isInOperator(policy)"
+                    v-else-if="isUseTagsComponent(policy)"
                     placeholder="Attribute value"
                     id="new-attribute-values"
                     :style="{ 'pointer-events': isViewMode ? 'none' : 'auto' }"
                     :default-tags="policy.userAttribute.values"
-                    :addOnKey="[13, ',', ';', ' ']"
+                    :addOnKey="[13, ',', ';']"
                     @tagsChanged="handlePolicyValuesChanged(newPolicies, index, ...arguments)"
                   >
                   </TagsInput>
@@ -311,12 +311,24 @@ export default class ManageRLSPolicy extends Vue {
         value: UserAttributeOperator.Contain
       },
       {
+        label: 'not in',
+        value: UserAttributeOperator.NotContain
+      },
+      {
         label: 'equal',
         value: UserAttributeOperator.Equal
       },
       {
+        label: 'not equal',
+        value: UserAttributeOperator.NotEqual
+      },
+      {
         label: 'is null',
         value: UserAttributeOperator.IsNull
+      },
+      {
+        label: 'is not null',
+        value: UserAttributeOperator.IsNotNull
       }
     ];
   }
@@ -348,12 +360,12 @@ export default class ManageRLSPolicy extends Vue {
     return ListUtils.isEmpty(this.newPolicies);
   }
 
-  private isEqualOperator(policy: RlsPolicy) {
-    return policy.userAttribute.isEqualOperator;
+  private isUseInputComponent(policy: RlsPolicy): boolean {
+    return [UserAttributeOperator.Equal, UserAttributeOperator.NotEqual].includes(policy.userAttribute.operator);
   }
 
-  private isInOperator(policy: RlsPolicy) {
-    return policy.userAttribute.isInOperator;
+  private isUseTagsComponent(policy: RlsPolicy): boolean {
+    return [UserAttributeOperator.Contain, UserAttributeOperator.NotContain].includes(policy.userAttribute.operator);
   }
 
   private showLoading() {

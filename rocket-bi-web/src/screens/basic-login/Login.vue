@@ -3,13 +3,11 @@
     <div class="login-screen-left-panel">
       <div class="login-screen-left-panel-body">
         <div class="login-screen-left-panel-body-form">
-          <div class="login-screen-left-panel-body-form-logo">
-            <img alt="DataInsider-logo" src="@/assets/logo/text-logo.png" />
-          </div>
+          <CompanyLogoNameComponent class="login-screen-left-panel-body-form-logo"></CompanyLogoNameComponent>
           <div class="login-screen-left-panel-body-form-header">
             <div class="login-screen-left-panel-body-form-header-title">Login</div>
-            <div class="d-none login-screen-left-panel-body-form-header-subtitle">
-              You can use test account (test@datainsider.co/di@2020) to login.
+            <div class="login-screen-left-panel-body-form-header-subtitle" v-if="isShowHint">
+              {{ hintMessage }}
             </div>
           </div>
           <div class="login-screen-left-panel-body-form-body">
@@ -110,9 +108,11 @@ import { RouterUtils } from '@/utils/RouterUtils';
 import DiInputComponent from '@/shared/components/DiInputComponent.vue';
 import { StringUtils } from '@/utils/StringUtils';
 import { required, email } from 'vuelidate/lib/validators';
+import CompanyLogoNameComponent from '@/screens/organization-settings/components/organization-logo-modal/CompanyLogoNameComponent.vue';
 
 @Component({
   components: {
+    CompanyLogoNameComponent,
     DiInputComponent
   },
   validations: {
@@ -135,19 +135,12 @@ export default class Login extends Vue {
     return AuthenticationModule.googleOauthConfig?.isActive ?? false;
   }
 
-  // @ts-ignored
-  private readonly config = require('@/shared/constants/config.json');
-
-  private get usernameExample(): string {
-    return this.config.login.account.username ?? '';
+  private get isShowHint(): boolean {
+    return window.appConfig.VUE_APP_LOGIN_SAMPLE.isShowHint;
   }
 
-  private get passwordExample(): string {
-    return this.config.login.account.password ?? '';
-  }
-
-  private get isShowAccountExample(): boolean {
-    return this.config.login.isShowHint ?? false;
+  private get hintMessage(): string {
+    return window.appConfig.VUE_APP_LOGIN_SAMPLE.hintMessage ?? '';
   }
 
   @AtomicAction()
@@ -277,10 +270,7 @@ export default class Login extends Vue {
           left: 0;
           top: -56px;
 
-          img {
-            width: 118.8px;
-            height: 40px;
-          }
+          color: var(--text-color);
         }
 
         &-error {

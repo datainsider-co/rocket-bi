@@ -20,7 +20,7 @@
         <label>Field expression</label>
         <div class="formula-completion-input" :class="{ 'is-invalid': formulaError }">
           <div class="padding-top"></div>
-          <FormulaCompletionInput v-if="formulaController" v-model.trim="formula" :formulaController="formulaController" />
+          <FormulaCompletionInput v-if="formulaController" v-model="formula" :formulaController="formulaController" />
         </div>
         <p class="invalid-feedback text-danger">{{ formulaError }}</p>
       </div>

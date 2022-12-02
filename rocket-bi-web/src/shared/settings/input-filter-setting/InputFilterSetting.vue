@@ -4,6 +4,7 @@
 
     <InputFilterControlTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <VisualHeader :setting="setting.options" :widget-type="currentWidget" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
 </template>
 
@@ -16,12 +17,14 @@ import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/Conf
 import { Log } from '@core/utils';
 import TitleTab from '@/shared/settings/common/tabs/TitleTab.vue';
 import InputFilterControlTab from '@/shared/settings/input-filter-setting/InputFilterControlTab.vue';
+import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
 
 @Component({
   components: {
     TitleTab,
     BackgroundTab,
-    InputFilterControlTab
+    InputFilterControlTab,
+    VisualHeader
   }
 })
 export default class InputFilterSetting extends Vue {

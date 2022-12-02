@@ -17,13 +17,19 @@ const devConfig = {
   VUE_APP_WORKER_API_URL: 'http://rocket-bi.ddns.net/api',
   VUE_APP_SCHEDULER_API_URL: 'http://rocket-bi.ddns.net/api',
   VUE_APP_RELAY_API_URL: 'http://rocket-bi.ddns.net/api',
+  VUE_APP_STATIC_FILE_URL: 'http://rocket-bi.ddns.net/static',
 
   VUE_APP_IS_DISABLE_LAKE_HOUSE: true,
   VUE_APP_IS_DISABLE_CDP: true,
   VUE_APP_IS_DISABLE_INGESTION: false,
   VUE_APP_IS_DISABLE_USER_ACTIVITIES: false,
   VUE_APP_IS_ENABLE_CLICKHOUSE_CONFIG: false,
-  VUE_APP_IS_DISABLE_BILLING: false
+  VUE_APP_IS_DISABLE_BILLING: false,
+  VUE_APP_VERSION: 'v1.4.14',
+  VUE_APP_LOGIN_SAMPLE: {
+    isShowHint: true,
+    hintMessage: 'You can use test account demo@datainsider.co/demo@123 to login'
+  }
 };
 
 window.appConfig = devConfig;

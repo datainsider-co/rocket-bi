@@ -3,6 +3,8 @@ import { BFormInput } from 'bootstrap-vue';
 import { MySqlSourceInfo } from '@core/data-ingestion/domain/data-source/MySqlSourceInfo';
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
+import { StringUtils } from '@/utils';
+import { cloneDeep } from 'lodash';
 
 export class MySqlDataSourceFormRender implements DataSourceFormRender {
   private mySqlSourceInfo: MySqlSourceInfo;
@@ -42,6 +44,7 @@ export class MySqlDataSourceFormRender implements DataSourceFormRender {
   private set username(value: string) {
     this.mySqlSourceInfo.username = value;
   }
+
   private get password() {
     return this.mySqlSourceInfo.password;
   }
@@ -52,39 +55,73 @@ export class MySqlDataSourceFormRender implements DataSourceFormRender {
 
   renderForm(h: any): any {
     return (
-      <div>
-        <div class="form-item d-flex w-100 justify-content-center align-items-center">
-          <div class="title">Display name:</div>
-          <div class="input">
-            <BFormInput id="input-display-name" placeholder="Input display name" autocomplete="off" v-model={this.displayName}></BFormInput>
+      <vuescroll style="position: unset">
+        <div style="max-height: 40vh">
+          <div class="form-item d-flex w-100 justify-content-center align-items-center">
+            <div class="title">Display name:</div>
+            <div class="input">
+              <BFormInput id="input-display-name" placeholder="Input display name" autocomplete="off" v-model={this.displayName}></BFormInput>
+            </div>
           </div>
-        </div>
-        <div class="form-item d-flex w-100 justify-content-center align-items-center">
-          <div class="title">Host:</div>
-          <div class="input">
-            <BFormInput id="input-host" placeholder="Input host" autocomplete="off" trim v-model={this.host}></BFormInput>
+          <div class="form-item d-flex w-100 justify-content-center align-items-center">
+            <div class="title">Host:</div>
+            <div class="input">
+              <BFormInput id="input-host" placeholder="Input host" autocomplete="off" trim v-model={this.host}></BFormInput>
+            </div>
           </div>
-        </div>
-        <div class="form-item d-flex w-100 justify-content-center align-items-center">
-          <div class="title">Port:</div>
-          <div class="input">
-            <BFormInput id="input-port" placeholder="Input port" autocomplete="off" trim v-model={this.port}></BFormInput>
+          <div class="form-item d-flex w-100 justify-content-center align-items-center">
+            <div class="title">Port:</div>
+            <div class="input">
+              <BFormInput id="input-port" placeholder="Input port" autocomplete="off" trim v-model={this.port}></BFormInput>
+            </div>
           </div>
-        </div>
-        <div class="form-item d-flex w-100 justify-content-center align-items-center">
-          <div class="title">Username:</div>
-          <div class="input">
-            <BFormInput id="input-username" hide-track-value hide placeholder="Input username" autocomplete="off" trim v-model={this.username}></BFormInput>
+          <div class="form-item d-flex w-100 justify-content-center align-items-center">
+            <div class="title">Username:</div>
+            <div class="input">
+              <BFormInput id="input-username" hide-track-value hide placeholder="Input username" autocomplete="off" trim v-model={this.username}></BFormInput>
+            </div>
           </div>
-        </div>
-        <div class="form-item d-flex w-100 justify-content-center align-items-center">
-          <div class="title">Password:</div>
-          <div class="input">
-            <BFormInput id="input-password" hide-track-value placeholder="Input password" v-model={this.password} type="password"></BFormInput>
+          <div class="form-item d-flex w-100 justify-content-center align-items-center">
+            <div class="title">Password:</div>
+            <div class="input">
+              <BFormInput id="input-password" hide-track-value placeholder="Input password" v-model={this.password} type="password"></BFormInput>
+            </div>
           </div>
+          {...this.renderUpdateExtraFields(h, this.mySqlSourceInfo)}
         </div>
-      </div>
+      </vuescroll>
     );
+  }
+
+  private renderUpdateExtraFields(h: any, source: MySqlSourceInfo): any[] {
+    const uiFields: any[] = [];
+    for (const key in source.extraFields) {
+      const displayKey = key;
+      const placeHolder = `Input value of '${displayKey}'`;
+      uiFields.push(
+        <div class="form-item d-flex w-100 justify-content-center align-items-center">
+          <div class="title single-line">{displayKey}</div>
+          <div class="extra-input input">
+            <BFormInput
+              hide-track-value
+              placeholder={placeHolder}
+              value={source.extraFields[key]}
+              onChange={(text: string) => this.onUpdateExtraFieldChange(key, text)}></BFormInput>
+          </div>
+          <i class="di-icon-delete btn-delete btn-icon-border" onClick={() => this.onDeleteExtraField(key)}></i>
+        </div>
+      );
+    }
+    return uiFields;
+  }
+
+  private onUpdateExtraFieldChange(key: string, newValue: string) {
+    this.mySqlSourceInfo.extraFields[key] = newValue;
+  }
+
+  private onDeleteExtraField(key: string) {
+    delete this.mySqlSourceInfo.extraFields[key];
+    this.mySqlSourceInfo.extraFields = cloneDeep(this.mySqlSourceInfo.extraFields);
   }
 
   createDataSourceInfo(): DataSourceInfo {

@@ -75,7 +75,7 @@ export default class MyData extends Vue {
     };
   }
 
-  private get currentDirectoryId(): DirectoryId {
+  get currentDirectoryId(): DirectoryId {
     return RouterUtils.parseToParamInfo(this.$route.params.name).idAsNumber() || this.defaultDirectoryId;
   }
 

@@ -38,4 +38,10 @@ export abstract class UrlUtils {
     const staticHost = window.appConfig.VUE_APP_LAKE_API_URL;
     return `${staticHost}/file/download?path=${path}`;
   }
+
+  static downloadCsvUrl(pathToFile: string): void {
+    const staticFile: string = window.appConfig.VUE_APP_STATIC_FILE_URL;
+    const fullPath = `${staticFile}${pathToFile}`;
+    window.location.assign(fullPath);
+  }
 }

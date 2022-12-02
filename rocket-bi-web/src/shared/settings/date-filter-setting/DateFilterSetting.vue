@@ -3,6 +3,7 @@
     <TitleTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <DateTabControl :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <VisualHeader :setting="setting.options" :widget-type="currentWidget" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
 </template>
 
@@ -15,8 +16,9 @@ import { Log } from '@core/utils';
 import BackgroundTab from '@/shared/settings/common/tabs/BackgroundTab.vue';
 import TitleTab from '@/shared/settings/common/tabs/TitleTab.vue';
 import DateTabControl from '@/shared/settings/date-filter-setting/DateTabControl.vue';
+import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
 
-@Component({ components: { TitleTab, BackgroundTab, DateTabControl } })
+@Component({ components: { TitleTab, BackgroundTab, DateTabControl, VisualHeader } })
 export default class SlicerFilterSetting extends Vue {
   @Prop({ required: true })
   private readonly chartInfo!: ChartInfo;

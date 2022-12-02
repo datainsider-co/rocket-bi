@@ -31,22 +31,32 @@
     <template #modal-footer="{ok}">
       <div class="custom-footer d-flex col-12 p-0 m-0 mr-1">
         <DiButton
+          id="button-add-field"
+          :class="{ 'd-none': isHideAddField }"
+          class="button-test btn-ghost ml-auto"
+          title="Add Connection Properties"
+          @click="handleAddProperty"
+        >
+          <i class="di-icon-add ic-16" />
+        </DiButton>
+        <DiButton
           id="button-test-connection"
           :class="{ 'd-none': isHideTestConnection }"
-          class="button-test btn-ghost col-6"
+          class="button-test btn-ghost ml-auto mr-2"
           title="Test Connection"
           @click="handleTestConnection"
         >
           <img src="@/assets/icon/data_ingestion/ic_connect.svg" class="ic-16" alt="" />
         </DiButton>
-        <DiButton id="button-submit" :class="{ 'ml-auto': isHideTestConnection }" class="button-add btn-primary col-6" :title="okTitle" @click="ok"> </DiButton>
+        <DiButton id="button-submit" class="ml-auto button-add btn-primary" :title="okTitle" @click="ok"></DiButton>
       </div>
     </template>
+    <ManagePropertyModal ref="managePropertyModal" />
   </BModal>
 </template>
 
 <script lang="ts">
-import { Component, Prop, PropSync, Vue } from 'vue-property-decorator';
+import { Component, Prop, PropSync, Ref, Vue } from 'vue-property-decorator';
 import DiCustomModal from '@/shared/components/DiCustomModal.vue';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import MessageContainer from '@/shared/components/MessageContainer.vue';
@@ -58,14 +68,17 @@ import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/Data
 import TestConnection, { ConnectionStatus } from '@/screens/data-ingestion/components/TestConnection.vue';
 import { DIException } from '@core/common/domain';
 import { AtomicAction } from '@/shared/anotation/AtomicAction';
-import { DataSourceType } from '@core/data-ingestion';
+import { DataSourceType, MySqlSourceInfo, SourceWithExtraField } from '@core/data-ingestion';
 import TSLForm from '@/screens/data-cook/components/save-to-database/TSLForm.vue';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
+import { NewFieldData } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
+import ManagePropertyModal from '@/screens/data-ingestion/form-builder/render-impl/ManagePropertyModal.vue';
+import { cloneDeep } from 'lodash';
 
 @Component({
-  components: { TestConnection, MessageContainer, DiButton, DiCustomModal, DataSourceConfigForm, TSLForm, DiDropdown }
+  components: { TestConnection, MessageContainer, DiButton, DiCustomModal, DataSourceConfigForm, TSLForm, ManagePropertyModal, DiDropdown }
 })
 export default class DataSourceConfigModal extends Vue {
   private static readonly DEFAULT_ID = -1;
@@ -76,7 +89,10 @@ export default class DataSourceConfigModal extends Vue {
   isShowSync!: boolean;
 
   @Prop({ required: true })
-  private readonly dataSourceRender!: DataSourceFormRender;
+  private dataSourceRender!: DataSourceFormRender;
+
+  @Ref()
+  private readonly managePropertyModal!: ManagePropertyModal;
 
   private closeModal() {
     this.isShowSync = false;
@@ -130,9 +146,29 @@ export default class DataSourceConfigModal extends Vue {
     switch (sourceType) {
       // case DataSourceType.GoogleSheet:
       //   return true;
+      case DataSourceType.GoogleAds:
+        return true;
       default:
         return false;
     }
+  }
+
+  private get isHideAddField() {
+    const sourceInfo: DataSourceInfo = this.dataSourceRender.createDataSourceInfo();
+    return !SourceWithExtraField.isSourceExtraField(sourceInfo);
+  }
+
+  private handleAddProperty() {
+    const emptyField: NewFieldData = NewFieldData.empty();
+    this.managePropertyModal.show(emptyField, async updateField => {
+      const sourceInfo: SourceWithExtraField = (this.dataSourceRender.createDataSourceInfo() as unknown) as SourceWithExtraField;
+      if (sourceInfo.isExistField(updateField.fieldName)) {
+        throw new DIException('Field is exist!');
+      }
+      sourceInfo.setField(updateField);
+      Log.debug('handleAddField::sourceInfo', sourceInfo);
+      this.dataSourceRender = cloneDeep(this.dataSourceRender);
+    });
   }
 
   private async handleSubmit() {
@@ -185,6 +221,7 @@ export default class DataSourceConfigModal extends Vue {
 
 <style lang="scss" scoped>
 @import '~@/themes/scss/mixin.scss';
+
 .modal-title {
   font-size: 16px;
   padding: 10px 25px 8px 25px;
@@ -193,6 +230,7 @@ export default class DataSourceConfigModal extends Vue {
   font-weight: 500;
   color: var(--text-color);
 }
+
 .modal-sub-title {
   font-size: 16px;
   line-height: 1.5;
@@ -204,6 +242,7 @@ export default class DataSourceConfigModal extends Vue {
 .btn-close {
   top: 12px;
   right: 12px;
+
   .title {
     width: 0;
   }
@@ -223,14 +262,17 @@ export default class DataSourceConfigModal extends Vue {
   .title {
     width: 120px;
   }
+
   .input {
     width: 340px;
     margin-top: 16px;
+
     input {
       padding-left: 16px;
       cursor: text !important;
     }
   }
+
   .text-connection {
     color: var(--accent);
   }
@@ -252,28 +294,36 @@ export default class DataSourceConfigModal extends Vue {
   .modal-dialog {
     max-width: fit-content;
   }
+
   .modal-body {
     padding: 24px 24px 8px;
   }
 
   .modal-footer {
-    width: 384px;
+    width: 100%;
     padding: 8px 24px 24px 24px;
     margin-left: auto;
     display: flex;
     @media (max-width: 500px) {
       width: 100%;
     }
+
     .button-test {
       justify-content: center;
       height: 42px;
+
       .title {
         width: fit-content;
         color: var(--accent);
       }
+      i {
+        color: var(--accent);
+      }
     }
+
     .button-add {
       height: 42px;
+      width: 100px;
       margin-left: 6px;
     }
   }

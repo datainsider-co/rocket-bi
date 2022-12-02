@@ -193,4 +193,9 @@ export class GoogleSheetJob implements Job {
     this.destDatabaseName = dbName;
     return this;
   }
+
+  withDisplayName(displayName: string): Job {
+    this.displayName = displayName;
+    return this;
+  }
 }
