@@ -12,9 +12,7 @@ pipeline {
                 sh './build.sh build'
             }
         }
-    }
 
-    stages {
         stage('deploy') {
             when {
                 expression { BRANCH_NAME ==~ /(main|dev|setup_autodeploy)/ }
