@@ -6,6 +6,11 @@ pipeline {
         maven "M3"
     }
 
+    environment {
+        DOCKER_REGISTRY_HOST = 'https://registry.hub.docker.com'
+        DOCKER_REGISTRY_CREDENTIAL = 'acc_datainsider_dockerhub'
+    }
+
     stages {
         stage('build') {
             steps {
@@ -19,7 +24,9 @@ pipeline {
             }
 
             steps {
-                sh "./build.sh -t $BRANCH_NAME push"
+                docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_CREDENTIAL) {
+                    sh "./build.sh -t $BRANCH_NAME push"
+                }
             }
         }
     }
