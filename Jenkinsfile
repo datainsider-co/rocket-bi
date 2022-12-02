@@ -24,8 +24,10 @@ pipeline {
             }
 
             steps {
-                docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_CREDENTIAL) {
-                    sh "./build.sh -t $BRANCH_NAME push"
+                script {
+                    docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_CREDENTIAL) {
+                        sh "./build.sh -t $BRANCH_NAME push"
+                    }
                 }
             }
         }
