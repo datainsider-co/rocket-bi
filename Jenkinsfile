@@ -2,13 +2,27 @@ pipeline {
     agent any
 
     tools {
+        jdk "jdk8"
         maven "M3"
     }
 
     stages {
         stage('build') {
             steps {
-                sh './build.sh compile'
+                sh './build_all.sh build'
+            }
+        }
+
+        stage('deploy') {
+            when {
+                expression { BRANCH_NAME ==~ /(main|dev)/ }
+            }
+
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'acc_datainsider_dockerhub', passwordVariable: 'password', usernameVariable: 'username')]) {
+                    sh "docker login -u $username -p $password "
+                    sh "./build_all.sh -t $BRANCH_NAME push"
+                }
             }
         }
     }
