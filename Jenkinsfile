@@ -24,10 +24,9 @@ pipeline {
             }
 
             steps {
-                script {
-                    docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_CREDENTIAL) {
-                        sh "./build.sh -t $BRANCH_NAME push"
-                    }
+                withCredentials([usernamePassword(credentialsId: 'acc_datainsider_dockerhub', passwordVariable: 'password', usernameVariable: 'username')]) {
+                    sh "docker login -u $username -p $password "
+                    sh "./build.sh -t $BRANCH_NAME push"
                 }
             }
         }
