@@ -2,13 +2,27 @@ pipeline {
     agent any
 
     tools {
+        jdk "jdk8"
         maven "M3"
     }
 
     stages {
         stage('build') {
             steps {
-                sh './build.sh compile'
+                sh './build.sh build'
+            }
+        }
+    }
+
+    stages {
+        stage('deploy') {
+            when {
+                expression { BRANCH_NAME ==~ /(main|dev|setup_autodeploy)/ }
+            }
+
+            steps {
+                def IMAGE_TAG = BRANCH_NAME
+                sh "./build.sh -t $IMAGE_TAG push"
             }
         }
     }
