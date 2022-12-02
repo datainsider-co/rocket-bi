@@ -56,8 +56,8 @@ export class TrackingServiceImpl extends TrackingService {
     const properties = {} as Properties;
 
     properties['is_success'] = registerResponse ? true : false;
-    properties['email'] = email || registerResponse?.userProfile?.email || '';
-    properties['user_id'] = registerResponse?.userInfo?.username || '';
+    properties['di_customer_email'] = email || registerResponse?.userProfile?.email || '';
+    properties['di_customer_id'] = registerResponse?.userInfo?.username || '';
     DiAnalytics.track(TrackingService.EVENT_USER_REGISTER, properties).catch(error => {
       Log.debug('Analytics Tracking ::trackRegister', error);
     });
@@ -75,8 +75,8 @@ export class TrackingServiceImpl extends TrackingService {
     properties['login_source'] = loginSrc || 'email';
     properties['id'] = id;
     properties['is_success'] = loginResponse ? true : false;
-    properties['user_id'] = loginResponse?.userInfo?.username;
-    properties['email'] = loginResponse?.userProfile?.email || '';
+    properties['di_customer_id'] = loginResponse?.userInfo?.username;
+    properties['di_customer_email'] = loginResponse?.userProfile?.email || '';
     DiAnalytics.track(TrackingService.EVENT_USER_LOGIN, properties).catch(error => {
       Log.debug('Analytics Tracking ::trackLogin', error);
     });

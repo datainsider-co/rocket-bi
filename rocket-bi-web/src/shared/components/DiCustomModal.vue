@@ -34,7 +34,12 @@
       </slot>
     </template>
     <template #modal-footer="{ ok, cancel}">
-      <slot name="modal-footer" :ok="ok" :cancel="cancel"></slot>
+      <slot name="modal-footer" :ok="ok" :cancel="cancel">
+        <div class="flex-fill d-flex flex-row flex-nowrap">
+          <DiButton :title="cancelTitle" class="flex-fill w-50 h-42px mr-2" border secondary @click="cancel()"></DiButton>
+          <DiButton :title="okTitle" :isDisable="isLoading" :is-loading="isLoading" class="flex-fill w-50 h-42px" primary @click="ok()"></DiButton>
+        </div>
+      </slot>
     </template>
     <template #default>
       <slot></slot>
@@ -45,9 +50,16 @@
 <script lang="ts">
 import { Component, Emit, Prop, Ref, Vue } from 'vue-property-decorator';
 import { BModal, BvModalEvent } from 'bootstrap-vue';
+import DiButton from '@/shared/components/common/DiButton.vue';
 
-@Component
+@Component({
+  components: {
+    DiButton
+  }
+})
 export default class DiCustomModal extends Vue {
+  private isLoading = false;
+
   @Prop({ type: String, default: 'custom-modal' })
   private id!: string;
 
@@ -101,12 +113,17 @@ export default class DiCustomModal extends Vue {
 
   @Emit('hidden')
   private handleHidden(bvModalEvt: BvModalEvent) {
+    this.isLoading = false;
     return bvModalEvt;
   }
 
   @Emit('hide')
   handleClose(bvModalEvt: MouseEvent) {
     return bvModalEvt;
+  }
+
+  setLoading(isLoading: boolean) {
+    this.isLoading = isLoading;
   }
 }
 </script>

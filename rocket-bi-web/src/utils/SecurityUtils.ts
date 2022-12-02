@@ -1,6 +1,7 @@
 import CryptoJS from 'crypto-js';
+import { sha256 } from 'js-sha256';
 
-export class SecurityUtils {
+export abstract class SecurityUtils {
   private static readonly key = '66C53869AEE51E9896D2C17D9E410A26EE5CC4EFA89E201A49C9ACAF45F214E1';
   private static readonly iv = 'IDEFA89E201A49C9ACAFDI';
 
@@ -20,5 +21,9 @@ export class SecurityUtils {
     });
 
     return CryptoJS.enc.Utf8.stringify(cipher).toString();
+  }
+
+  static hash(text: string): string {
+    return sha256(text);
   }
 }

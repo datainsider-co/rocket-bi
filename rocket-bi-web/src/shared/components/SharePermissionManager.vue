@@ -2,12 +2,8 @@
   <div v-if="data" class="user-item-status-listing">
     <vuescroll :ops="scrollOptions">
       <div class="vuescroll-body">
-        <div v-if="owner" class="user-owner">
+        <div class="user-owner">
           <UserItem :user-data="owner" class="owner" userStatus="Owner"></UserItem>
-          <span>Owner</span>
-        </div>
-        <div v-else class="user-owner">
-          <UserItem :user-data="unknownProfile" class="owner" userStatus="Owner"></UserItem>
           <span>Owner</span>
         </div>
         <UserItemStatus
@@ -38,9 +34,8 @@ import { SharedUserInfo } from '@core/common/domain/response/resouce-sharing/Sha
 @Component({
   components: { UserItemStatus }
 })
-export default class UserItemStatusListing extends Vue {
-  private readonly unknownProfile: UserProfile = UserProfile.unknown();
-  @Prop({ required: false })
+export default class SharePermissionManager extends Vue {
+  @Prop({ required: false, default: UserProfile.unknown() })
   private readonly owner?: UserProfile;
   @Prop({ required: true })
   private readonly data!: SharedUserInfo[];
@@ -50,9 +45,10 @@ export default class UserItemStatusListing extends Vue {
   @Prop({ required: true })
   private readonly resourceType!: ResourceType;
   @Prop({ required: true })
-  private readonly resourceId!: number;
+  private readonly resourceId!: string;
   @Prop()
   private readonly statusData!: ActionNode[];
+
   private readonly scrollOptions: Config = VerticalScrollConfigs;
 
   handleItemStatusChange(userItemData: SharedUserInfo, status: string) {

@@ -2,18 +2,14 @@
   <div class="header-bar-container">
     <div class="container-fluid h-100 w-100">
       <div class="header-content" :class="{ open: showedMenu }">
-        <div id="btn-home" class="d-flex align-items-center" @click="toMyData">
-          <img alt="logo" class="logo mr-2" src="@/assets/logo/logo.svg" />
-        </div>
+        <CompanyLogoNameComponent class="cursor-pointer header-content--logo" @click.native="toMyData"></CompanyLogoNameComponent>
         <button v-if="isLogin" @click.prevent="toggleMenu" class="menu-responsive-action" type="button">
           <i v-if="!showedMenu" class="fa fa-bars"></i>
           <i v-else class="di-icon-close"></i>
         </button>
         <div v-if="isLogin" @click.prevent="toggleMenu(false)" class="menu-backdrop"></div>
         <div v-if="isLogin" class="menu">
-          <div class="menu-logo">
-            <img alt="logo" class="logo mr-2" src="@/assets/logo/logo.svg" />
-          </div>
+          <CompanyLogoNameComponent class="menu-logo" @click.native="toMyData"></CompanyLogoNameComponent>
           <!--          <div class="search-input">-->
           <!--            <SearchInput :hintText="'Search dashboard and chart'" />-->
           <!--          </div>-->
@@ -177,6 +173,9 @@ import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 import { UserProfile } from '@core/common/domain';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 import OrganizationPermissionModule from '@/store/modules/OrganizationPermissionStore';
+import LogoComponent from '@/screens/organization-settings/components/organization-logo-modal/LogoComponent.vue';
+import CompanyLogoNameComponent from '@/screens/organization-settings/components/organization-logo-modal/CompanyLogoNameComponent.vue';
+import { RouterUtils } from '@/utils/RouterUtils';
 
 interface RouterNode {
   label: string;
@@ -186,6 +185,8 @@ interface RouterNode {
 
 @Component({
   components: {
+    CompanyLogoNameComponent,
+    LogoComponent,
     CaretDownIcon,
     LakeHouseIcon,
     SettingIcon,
@@ -318,7 +319,7 @@ export default class HeaderBar extends Vue {
   }
 
   private toMyData() {
-    this.$router.push({ name: Routers.AllData });
+    RouterUtils.to(Routers.AllData);
   }
 
   private handleChangePassword() {
@@ -568,10 +569,11 @@ $header-bar-height: 68px;
       height: 100%;
       justify-content: space-between;
 
-      .logo {
-        cursor: pointer;
-        height: 36px;
-        object-fit: contain;
+      .header-content--logo {
+        overflow: hidden;
+        flex-shrink: 1;
+        flex-grow: 1;
+        margin-right: 8px;
       }
 
       .menu-responsive-action {
@@ -632,6 +634,7 @@ $header-bar-height: 68px;
             padding-left: 6px;
             text-align: center;
             user-select: none;
+            white-space: nowrap;
 
             @include media-breakpoint-down(md) {
               display: none;

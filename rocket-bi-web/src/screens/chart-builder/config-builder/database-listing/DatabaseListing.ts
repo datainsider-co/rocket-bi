@@ -82,6 +82,9 @@ export default class DatabaseListing extends Vue {
   @Prop({ default: false, required: false, type: Boolean })
   showSelectTabControl!: boolean;
 
+  @Prop({ default: false, required: false, type: Boolean })
+  hideTableAction!: boolean;
+
   private options = VerticalScrollConfigs;
   private enableSearch = false;
   private keyword = '';

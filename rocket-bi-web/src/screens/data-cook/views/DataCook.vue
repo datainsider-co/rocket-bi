@@ -90,7 +90,7 @@ export default class DataCook extends LoggedInScreen {
       resourceType: ResourceType.etl,
       organizationId: organizationId
     };
-    this.shareModal.showShareModal(resourceData, new DataCookShareHandler(), false);
+    this.shareModal.showShareModal(resourceData, new DataCookShareHandler(), false, null, false, null);
   }
 
   @Track(TrackEvents.ETLCreate, { etl_name: (_: DataCook) => _.createEtlJobRoute?.name })

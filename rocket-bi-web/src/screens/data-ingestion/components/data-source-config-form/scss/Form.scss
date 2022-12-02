@@ -60,10 +60,35 @@
       }
     }
   }
+  .new-extra-input {
+    width: 112px;
+    margin-right: auto;
+  }
+  .extra-input {
+    width: 313px;
+  }
+
+  .btn-delete {
+    margin-left: 4px;
+    &:hover {
+      color: var(--danger);
+    }
+  }
+  .btn-add {
+    margin-left: 4px;
+    &:hover {
+      color: var(--accent);
+    }
+  }
   .text-connection {
     color: var(--accent);
   }
 }
 .form-item + .form-item {
+  margin-top: 8px;
+}
+#add-field-btn {
+  width: 100px;
+  margin-left: auto;
   margin-top: 8px;
 }

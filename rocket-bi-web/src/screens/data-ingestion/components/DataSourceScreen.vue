@@ -96,7 +96,7 @@ import { Modals } from '@/utils/Modals';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { StringUtils } from '@/utils/StringUtils';
 import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
-import { DataSources, DataSourceType, FormMode, Job, JobInfo, S3Job, S3SourceInfo, SortRequest } from '@core/data-ingestion';
+import { DataSources, DataSourceType, FormMode, GoogleAdsJob, GoogleAdsSourceInfo, Job, JobInfo, S3Job, S3SourceInfo, SortRequest } from '@core/data-ingestion';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { GoogleAnalyticJob } from '@core/data-ingestion/domain/job/google-analytic/GoogleAnalyticJob';
 import { DataSourceResponse } from '@core/data-ingestion/domain/response/DataSourceResponse';
@@ -110,6 +110,7 @@ import { Component, Ref, Vue } from 'vue-property-decorator';
 import DocumentModal from './DocumentModal.vue';
 import { GoogleAuthenticationType } from '@/shared/components/google-authen/enum/GoogleAuthenticationType';
 import { GA4Job } from '@core/data-ingestion/domain/job/ga4/GA4Job';
+import MultiJobCreationModal from '@/screens/data-ingestion/components/MultiJobCreationModal.vue';
 
 @Component({
   components: {
@@ -165,7 +166,10 @@ export default class DataSourceScreen extends Vue {
   private jobFormRenderer: JobFormRender = JobFormRender.default();
   private tableErrorMessage = '';
   private tableStatus: Status = Status.Loading;
-  private dataSourceFormRender: DataSourceFormRender = new DataSourceFormFactory().createRender(DataSourceInfo.default(DataSourceType.MySql));
+  private dataSourceFormRender: DataSourceFormRender = new DataSourceFormFactory().createRender(
+    DataSourceInfo.default(DataSourceType.MySql),
+    this.handleSubmitDataSource
+  );
   private googleConfig = require('@/screens/data-ingestion/constants/google-config.json');
 
   private get dataSourceHeaders(): HeaderData[] {
@@ -282,7 +286,7 @@ export default class DataSourceScreen extends Vue {
 
   private openDataSourceForm(dataSource: DataSourceInfo) {
     this.isShowDataSourceConfigModal = true;
-    this.dataSourceFormRender = new DataSourceFormFactory().createRender(dataSource);
+    this.dataSourceFormRender = new DataSourceFormFactory().createRender(dataSource, this.handleSubmitDataSource);
   }
 
   private closeDatabaseSelection() {
@@ -340,6 +344,12 @@ export default class DataSourceScreen extends Vue {
         }
         case DataSourceType.GA4: {
           await this.handleSelectGoogleSourceType(`${this.googleConfig.ga4Url}?redirect=${window.location.origin}&scope=${this.googleConfig.ga4Scope}`);
+          break;
+        }
+        case DataSourceType.GoogleAds: {
+          await this.handleSelectGoogleSourceType(
+            `${this.googleConfig.gAdvertiseUrl}?redirect=${window.location.origin}&scope=${this.googleConfig.gAdvertiseScope}`
+          );
           break;
         }
         case DataSourceType.S3: {
@@ -426,6 +436,7 @@ export default class DataSourceScreen extends Vue {
   @AtomicAction()
   private async handleSubmitDataSource() {
     try {
+      this.isShowDataSourceConfigModal = false;
       this.showLoading();
       const sourceInfo: DataSourceInfo = this.dataSourceFormRender.createDataSourceInfo();
       Log.debug('handleSubmitDatasource::sourceInfo::', sourceInfo);
@@ -609,7 +620,6 @@ export default class DataSourceScreen extends Vue {
   private async handleMessageData(event: MessageEvent) {
     const responseType = event.data?.responseType ?? GoogleAuthenticationType.NotFound;
     const authorizeResponse: gapi.auth2.AuthorizeResponse | null = event.data?.authResponse ?? null;
-
     if (authorizeResponse) {
       Log.debug('DataSourceScreen::handleMessageData::event::', event);
       Log.debug('DataSourceScreen::handleMessageData::authorizeResponse::', event.data);
@@ -625,6 +635,10 @@ export default class DataSourceScreen extends Vue {
         }
         case GoogleAuthenticationType.GoogleSheet: {
           this.handleGoogleSheetMessage(authorizeResponse.access_token, authorizeResponse.code);
+          break;
+        }
+        case GoogleAuthenticationType.GoogleAds: {
+          await this.handleGoogleAdsMessage(authorizeResponse.access_token, authorizeResponse.code);
           break;
         }
         default:
@@ -665,6 +679,18 @@ export default class DataSourceScreen extends Vue {
     DiUploadGoogleSheetActions.showUploadGoogleSheet();
     DiUploadGoogleSheetActions.setAccessToken(accessToken);
     DiUploadGoogleSheetActions.setAuthorizationCode(authorizationCode);
+  }
+
+  private async handleGoogleAdsMessage(accessToken: string, authorizationCode: string) {
+    const refreshToken = authorizationCode ? await DataSourceModule.getRefreshToken(authorizationCode) : '';
+    const source: GoogleAdsSourceInfo = GoogleAdsSourceInfo.default()
+      .setAccessToken(accessToken)
+      .setRefreshToken(refreshToken);
+    this.openDataSourceForm(source);
+    // const job = GoogleAdsJob.default()
+    //   .setAccessToken(accessToken)
+    //   .setAuthorizationCode(authorizationCode);
+    // this.openMultiJobConfigModal(job);
   }
 
   @AtomicAction()

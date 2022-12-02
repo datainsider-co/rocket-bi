@@ -112,7 +112,7 @@ h6 {
   font-family: $roboto-font-family;
   color: var(--text-color);
   text-align: center;
-  cursor: pointer;
+  cursor: default;
   text-overflow: ellipsis;
   overflow: hidden;
 }

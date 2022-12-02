@@ -71,23 +71,22 @@ export class FilterStore extends VuexModule {
   }
 
   /*Lấy tất cả filter của 1 widget <br>
-  Có 2 trường hợp sẽ chỉ có Inner Filter:
+  Có 1 trường hợp sẽ chỉ có Inner Filter:
    + TH1: Widget không bị Affect By Filter (Setting của widget)
-   + TH2: Widget đó là Filter
    */
   get getAllFilters(): (id: WidgetId) => FilterRequest[] {
     return id => {
       const isChartFilter = ChartInfoUtils.isChartFilterId(id);
       const parentId = isChartFilter ? ChartInfoUtils.generatedChartParentId(id) : id;
       const isAffectByFilter = DashboardControllerModule.isAffectedByFilter(parentId);
-      const isFilter = this.excludeApplyFilterIds.has(parentId);
+      // const isFilter = this.excludeApplyFilterIds.has(parentId);
       const filters = [];
       filters.push(this.innerFilters.get(id));
-      Log.debug('getAllFilters::isChartFilter::', isChartFilter, '::parentId::', parentId, '::isAffectByFilter::', isAffectByFilter, '::isFilter::', isFilter);
-      if (isAffectByFilter && !isFilter) {
+      Log.debug('getAllFilters::isChartFilter::', isChartFilter, '::parentId::', parentId, '::isAffectByFilter::', isAffectByFilter, '::isFilter::');
+      if (isAffectByFilter) {
         filters.push(
           this.crossFilterRequest,
-          ...this.filterRequests.values(),
+          ...[...this.filterRequests.values()].filter(request => request.filterId !== id), ///All filter request not me
           ...Array.from(this.mainFilterWidgets.values()).map(widget => widget.toFilterRequest())
         );
       }
@@ -308,7 +307,7 @@ export class FilterStore extends VuexModule {
     widgets
       .filter(widget => ChartInfo.isChartInfo(widget) && FilterUtils.isFilter(widget) && !ChartInfoUtils.isChartFilterId(widget.id))
       .forEach(filter => {
-        Log.debug('FilterStore::widget is filter::', filter.id, filter);
+        Log.debug('FilterStore::widget is filter::', filter.id, filter, filter.setting.getChartOption()?.options?.default?.setting?.conditions);
         if (filter.setting.getChartOption()?.options?.default?.setting?.conditions) {
           const condition: Condition = Condition.fromObject(filter.setting.getChartOption()?.options?.default?.setting?.conditions);
           const filterRequests = new FilterRequest(filter.id, condition);

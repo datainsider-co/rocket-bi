@@ -29,7 +29,7 @@ import { ChartUtils, ListUtils } from '@/utils';
 import { TableBodyStyleRender } from '@chart/table/style-render/TableBodyStyleRender';
 import { CustomPivotTableRenderer } from '@chart/table/pivot-table/render/CustomPivotTableRenderer';
 import { TableDataUtils } from '@chart/custom-table/TableDataUtils';
-import { Log } from '@core/utils';
+import { Log, UrlUtils } from '@core/utils';
 import { ObjectUtils } from '@core/utils/ObjectUtils';
 import { StringUtils } from '@/utils/StringUtils';
 import { ToggleCollapseData } from '@chart/custom-table/ToggleCollapseData';
@@ -45,6 +45,7 @@ import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvent
 import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
 import { ColorUtils } from '@/utils/ColorUtils';
 import { PopupUtils } from '@/utils/PopupUtils';
+import { Inject } from 'typescript-ioc';
 
 @Component({
   components: {
@@ -588,8 +589,8 @@ export default class PivotTable extends BaseWidget {
 
   async downloadCSV(): Promise<void> {
     try {
-      const fileName: string = StringUtils.toKebabCase(StringUtils.vietnamese(this.title));
-      await ChartUtils.downloadAsCSV(fileName, this.internalTableResponse);
+      const csvPath = await DashboardControllerModule.exportAsCsv({ widgetId: this.chartId });
+      UrlUtils.downloadCsvUrl(csvPath);
     } catch (ex) {
       Log.error('downloadCSV::failure', ex);
       PopupUtils.showError('Download CSV failure, try again later');

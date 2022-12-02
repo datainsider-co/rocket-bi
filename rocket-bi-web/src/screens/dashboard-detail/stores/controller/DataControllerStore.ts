@@ -10,16 +10,16 @@ import {
   CompareRequest,
   Condition,
   DIException,
-  FunctionControl,
   DynamicValues,
   FilterRequest,
+  FlattenPivotTableQuerySetting,
+  FunctionControl,
   PivotTableQuerySetting,
   QueryRelatedWidget,
   QueryRequest,
   QuerySetting,
   TableColumn,
   TableResponse,
-  UserProfile,
   VisualizationResponse,
   VizSettingType,
   Widget,
@@ -76,24 +76,22 @@ export const handleGetMainFilterRequest = (mainDateCompareRequest: MainDateCompa
   }
 };
 
+/**
+ * get chart query request from query setting
+ * @param payload {
+ *   isFlattenPivot: convert query to flatten pivot if possible
+ * }
+ */
 const getChartQueryRequest = (payload: {
   widgetId: number;
   mainDateFilter: FilterRequest | null;
   pagination?: Pagination;
   useBoost?: boolean;
+  isFlattenPivot?: boolean;
 }): QueryRequest => {
-  const { widgetId, pagination, useBoost, mainDateFilter } = payload;
+  const { widgetId, pagination, useBoost, mainDateFilter, isFlattenPivot } = payload;
   const filters: FilterRequest[] = FilterModule.getAllFilters(widgetId);
-  const querySetting: QuerySetting = QuerySettingModule.buildQuerySetting(widgetId);
-
-  // if (mainDateCompareRequest) {
-  //   if (!getCompareRequest(querySetting, mainDateCompareRequest)) {
-  //     const mainFilter = handleGetMainFilterRequest(mainDateCompareRequest);
-  //     if (mainFilter) {
-  //       filters.push(mainFilter);
-  //     }
-  //   }
-  // }
+  const querySetting: QuerySetting = QuerySettingModule.buildQuerySetting(widgetId, isFlattenPivot);
 
   if (mainDateFilter) {
     filters.push(mainDateFilter);
@@ -283,6 +281,17 @@ export class DataControllerStore extends VuexModule {
       pagination: pagination
     });
     return _ChartStore.query(request);
+  }
+
+  @Action
+  async exportAsCsv(payload: { widgetId: number }): Promise<string> {
+    const { widgetId } = payload;
+    const request: QueryRequest = await getChartQueryRequest({
+      widgetId: widgetId,
+      mainDateFilter: FilterModule.mainDateFilterRequest,
+      isFlattenPivot: true
+    });
+    return _ChartStore.exportAsCsv(request);
   }
 
   @Action

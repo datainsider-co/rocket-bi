@@ -2,3 +2,4 @@
 
 export * from './Directory';
 export * from './DirectoryType';
+export * from './directory-metadata';

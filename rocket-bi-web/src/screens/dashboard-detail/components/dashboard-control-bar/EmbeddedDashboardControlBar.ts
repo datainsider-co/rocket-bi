@@ -1,7 +1,7 @@
 import { Component, Inject, Prop, Provide, Ref, Vue } from 'vue-property-decorator';
 import { ContextMenuItem, DashboardMode, DashboardOptions, DateRange } from '@/shared';
 import { mapGetters, mapState } from 'vuex';
-import { DashboardSetting, DIException, Field, MainDateFilter as DateFilter, MainDateMode, Position, TextWidget } from '@core/common/domain';
+import { DashboardId, DashboardSetting, DIException, Field, MainDateFilter as DateFilter, MainDateMode, Position, TextWidget } from '@core/common/domain';
 import { DashboardModeModule, DashboardModule, FilterModule, MainDateData, WidgetModule } from '@/screens/dashboard-detail/stores';
 import { DataManager } from '@core/common/services';
 import SetupMainDateFilter from '@filter/main-date-filter-v2/SetupMainDateFilter.vue';
@@ -213,8 +213,7 @@ export default class EmbeddedDashboardControlBar extends Vue {
     try {
       if (this.dashboardId) {
         Log.debug('DashboardControlBar::clickShare::dashboardId::', this.dashboardId);
-        this.currentDirectoryId = this.currentDirectoryId ?? (await DashboardModule.getDirectoryId(this.dashboardId));
-        this.showShareModal(this.currentDirectoryId.toString(), this.dashboardId.toString());
+        this.showShareModal(+this.dashboardId);
       } else {
         Log.debug('DashboardControlBar::clickShare::error:: can not get dashboard Id.');
         PopupUtils.showError('Can not get Dashboard Id.');
@@ -224,11 +223,8 @@ export default class EmbeddedDashboardControlBar extends Vue {
     }
   }
 
-  private showShareModal(directoryId: string, dashboardId: string) {
-    const organizationId = this.dataManager.getUserInfo()?.organization.organizationId!;
-    const resourceData: ResourceData = { organizationId: organizationId, resourceType: ResourceType.directory, resourceId: directoryId };
-    const linkHandler: LinkHandler = new ShareDashboardLinkHandler(dashboardId, DashboardModule.dashboardTitle);
-    this.$root.$emit(DashboardEvents.ShowShareModal, resourceData, linkHandler);
+  private showShareModal(dashboardId: DashboardId) {
+    this.$root.$emit(DashboardEvents.ShowShareModal, +dashboardId);
   }
 
   async handleEditMainDateFilter(newMainDateFilter: DateFilter) {

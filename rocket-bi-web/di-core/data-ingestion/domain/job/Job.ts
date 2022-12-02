@@ -1,4 +1,4 @@
-import { S3Job } from '@core/data-ingestion';
+import { GoogleAdsJob, GoogleAdsSourceInfo, S3Job } from '@core/data-ingestion';
 import { GoogleAnalyticJob } from '@core/data-ingestion/domain/job/google-analytic/GoogleAnalyticJob';
 
 import { JobName } from '@core/data-ingestion/domain/job/JobName';
@@ -85,6 +85,8 @@ export abstract class Job {
         return ShopifyJob.fromObject(obj);
       case JobName.S3Job:
         return S3Job.fromObject(obj);
+      case JobName.GoogleAdsJob:
+        return GoogleAdsJob.fromObject(obj);
       default:
         return UnsupportedJob.fromObject(obj);
     }
@@ -115,6 +117,8 @@ export abstract class Job {
         return S3Job.default(dataSource);
       case DataSourceType.GA4:
         return GA4Job.default();
+      case DataSourceType.GoogleAds:
+        return GoogleAdsJob.default();
       default:
         return UnsupportedJob.default(dataSource);
     }
@@ -164,6 +168,8 @@ export abstract class Job {
         return 'ic_shopify_small.png';
       case JobName.S3Job:
         return 'ic_s3_small.png';
+      case JobName.GoogleAdsJob:
+        return 'ic_ga_small.png';
       default:
         return 'ic_default.svg';
     }
@@ -213,6 +219,11 @@ export abstract class Job {
   static isS3Job(job: Job): boolean {
     return job.className === JobName.S3Job;
   }
+
+  withDisplayName(displayName: string): Job {
+    this.displayName = displayName;
+    return this;
+  }
 }
 
 export class JobInfo {
@@ -247,6 +258,8 @@ export class JobInfo {
       case JobName.S3Job:
       case JobName.GA4Job:
         return DataSourceInfo.fromDataSource(obj.source);
+      case JobName.GoogleAdsJob:
+        return GoogleAdsSourceInfo.default();
       default:
         return UnsupportedSourceInfo.fromObject(obj.source);
     }

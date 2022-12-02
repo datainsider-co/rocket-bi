@@ -24,6 +24,7 @@
       :shopify-job.sync="syncJob"
     ></ShopifySyncModeConfig>
     <S3SyncModeConfig v-if="isS3Job" ref="s3SyncModeConfig" class="mb-3" :is-validate="isValidate" :job.sync="syncJob"></S3SyncModeConfig>
+    <GoogleAdsSyncModeConfig v-if="isGoogleAdsJob" ref="ggAdsSyncModeConfig" class="mb-3" :is-validate="isValidate" :job.sync="syncJob" />
   </div>
 </template>
 
@@ -33,10 +34,10 @@ import GenericJdbcSyncModeConfig from '@/screens/data-ingestion/components/gener
 import JdbcSyncModeConfig from '@/screens/data-ingestion/components/JdbcSyncModeConfig.vue';
 import ShopifySyncModeConfig from '@/screens/data-ingestion/components/ShopifySyncModeConfig.vue';
 import MongoSyncModeConfig from '@/screens/data-ingestion/mongo-job-form/MongoSyncModeConfig.vue';
-import { Job } from '@core/data-ingestion';
-import { JobName } from '@core/data-ingestion/domain/job/JobName';
+import { Job, JobName } from '@core/data-ingestion';
 import { Component, Prop, PropSync, Ref, Vue } from 'vue-property-decorator';
 import S3SyncModeConfig from './S3SyncModeConfig.vue';
+import GoogleAdsSyncModeConfig from '@/screens/data-ingestion/components/GoogleAdsSyncModeConfig.vue';
 
 @Component({
   components: {
@@ -45,7 +46,8 @@ import S3SyncModeConfig from './S3SyncModeConfig.vue';
     JdbcSyncModeConfig,
     GenericJdbcSyncModeConfig,
     MongoSyncModeConfig,
-    BigQuerySyncModeConfig
+    BigQuerySyncModeConfig,
+    GoogleAdsSyncModeConfig
   }
 })
 export default class JobSyncConfig extends Vue {
@@ -74,6 +76,9 @@ export default class JobSyncConfig extends Vue {
   @Ref()
   private readonly s3SyncModeConfig?: S3SyncModeConfig;
 
+  @Ref()
+  private readonly ggAdsSyncModeConfig?: GoogleAdsSyncModeConfig;
+
   private get isJdbcJob(): boolean {
     return Job.isJdbcJob(this.syncJob);
   }
@@ -98,6 +103,10 @@ export default class JobSyncConfig extends Vue {
     return Job.isS3Job(this.syncJob);
   }
 
+  private get isGoogleAdsJob(): boolean {
+    return this.syncJob.className === JobName.GoogleAdsJob;
+  }
+
   public validSyncMode() {
     switch (this.syncJob.className) {
       case JobName.Jdbc:
@@ -112,6 +121,8 @@ export default class JobSyncConfig extends Vue {
         return this.shopifySyncModeConfig?.validSyncMode();
       case JobName.S3Job:
         return this.s3SyncModeConfig?.validSyncMode();
+      case JobName.GoogleAdsJob:
+        return this.ggAdsSyncModeConfig?.validSyncMode();
       case JobName.GoogleAnalyticJob:
       case JobName.GoogleSheetJob:
       case JobName.UnsupportedJob:

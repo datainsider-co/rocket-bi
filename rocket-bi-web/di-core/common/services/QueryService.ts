@@ -11,10 +11,10 @@ import { cloneDeep } from 'lodash';
 import { DIException, UserProfile } from '@core/common/domain';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
-import { Log } from '@core/utils';
 
 export abstract class QueryService {
   abstract query(request: QueryRequest): Promise<VisualizationResponse>;
+  abstract queryAsCsv(request: QueryRequest): Promise<string>;
   abstract viewAsQuery(request: QueryRequest, userProfile: UserProfile): Promise<VisualizationResponse>;
 }
 
@@ -53,5 +53,19 @@ export class QueryServiceImpl implements QueryService {
     const newRequest = cloneDeep(request);
     newRequest.querySetting.options = {};
     return newRequest;
+  }
+
+  queryAsCsv(request: QueryRequest): Promise<string> {
+    const newRequest = this.removeUnusedData(request);
+    return this.repository
+      .queryAsCsv(newRequest)
+      .then(data => {
+        TrackingUtils.track(TrackEvents.QueryCsvOk, { query: JSON.stringify(request) });
+        return data;
+      })
+      .catch(ex => {
+        TrackingUtils.track(TrackEvents.QueryCsvFail, { query: JSON.stringify(request), error: ex.message });
+        throw DIException.fromObject(ex);
+      });
   }
 }

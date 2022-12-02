@@ -9,3 +9,5 @@ Vue.use(Vuex);
 const isDebugMode = process.env.NODE_ENV !== 'production';
 
 export default new Vuex.Store({ strict: isDebugMode });
+
+export const commonStore = new Vuex.Store({ strict: isDebugMode });

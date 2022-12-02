@@ -55,7 +55,8 @@ export const ControlBuilderConfig: ChartBuilderConfig = {
 export const AdhocBuilderConfig: ChartBuilderConfig = {
   databaseConfig: {
     showSelectDatabase: false,
-    useTabControl: false
+    useTabControl: false,
+    hideTableAction: true
   },
   builderConfig: {
     vizItems: [...DataBuilderConstantsV35.ALL_CHARTS, ...DataBuilderConstantsV35.ALL_FILTERS].filter(item => !item.isHidden),
@@ -97,4 +98,5 @@ export interface BuilderConfig {
 export interface DatabaseListingConfig {
   showSelectDatabase?: boolean;
   useTabControl?: boolean;
+  hideTableAction?: boolean;
 }

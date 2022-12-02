@@ -1,5 +1,5 @@
 <template>
-  <SlideYUpTransition :duration="animationDuration">
+  <SlideYUpTransition :duration="animationDuration" :delay="delay">
     <div
       class="modal fade hide"
       @click.self="handleClickBackdrop"
@@ -34,13 +34,15 @@
   </SlideYUpTransition>
 </template>
 <script lang="ts">
-import { SlideYUpTransition } from 'vue2-transitions';
+import { FadeTransition, SlideYUpTransition } from 'vue2-transitions';
 
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { Log } from '@core/utils/Log';
 
 @Component({
   components: {
-    SlideYUpTransition
+    SlideYUpTransition,
+    FadeTransition
   }
 })
 export default class Modal extends Vue {
@@ -119,6 +121,12 @@ export default class Modal extends Vue {
     default: 500
   })
   animationDuration!: number;
+
+  @Prop({
+    type: Number,
+    default: 80
+  })
+  delay!: number;
 
   @Watch('show')
   onShowChanged(val: any) {

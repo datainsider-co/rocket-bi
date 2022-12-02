@@ -4,7 +4,7 @@
   "private": true,
   "description": "Data Insider project",
   "scripts": {
-    "serve": "yarn && vue-cli-service serve --open",
+    "serve": "yarn && vue-cli-service serve --open ",
     "build": "export NODE_OPTIONS=\"--max-old-space-size=4096\" && vue-cli-service build",
     "lint": "export NODE_OPTIONS=\"--max-old-space-size=4096\" && vue-cli-service lint",
     "lint:fix": "export NODE_OPTIONS=\"--max-old-space-size=4096\" && vue-cli-service lint --fix",
@@ -26,7 +26,7 @@
     "create-ts-index": "^1.13.6",
     "crypto-js": "^4.0.0",
     "deneric": "^1.0.6-beta",
-    "di-web-analytics": "^0.7.1",
+    "di-web-analytics": "^0.7.4",
     "draggabilly": "^2.3.0",
     "file-saver": "^2.0.5",
     "gridstack": "2.2.0",
@@ -75,7 +75,8 @@
     "vuescroll": "4.17.3",
     "vuex": "^3.4.0",
     "vuex-class": "^0.3.2",
-    "vuex-module-decorators": "^0.17.0"
+    "vuex-module-decorators": "^0.17.0",
+    "js-sha256": "0.9.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",

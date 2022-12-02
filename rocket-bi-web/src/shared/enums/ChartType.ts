@@ -127,7 +127,7 @@ export enum DateFunctionTypes {
   quarterOfYear = 'Quarter of Year',
   minuteOfHour = 'Minute of Hour',
   secondOfMinute = 'Second of Minute',
-  weekOfMonth = 'Week of Month',
+  weekOfYear = 'Week of Year',
   second = 'Second',
   millisecond = 'Millisecond',
   nanosecond = 'Nanosecond',

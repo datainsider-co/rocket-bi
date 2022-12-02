@@ -38,6 +38,7 @@
       <AddChartModal ref="addChartModal"></AddChartModal>
       <WidgetSettingModal ref="widgetSettingModal"></WidgetSettingModal>
       <SortModal ref="sortModal"></SortModal>
+      <PasswordModal ref="passwordModal" />
     </template>
   </div>
 </template>

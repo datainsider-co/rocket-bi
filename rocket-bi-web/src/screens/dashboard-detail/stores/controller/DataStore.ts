@@ -6,7 +6,7 @@
 import { Vue } from 'vue-property-decorator';
 import { Inject } from 'typescript-ioc';
 import { QueryRequest } from '@core/common/domain/request';
-import { DashboardId, DIMap, Field, VizSettingType, MainDateMode, WidgetId, UserProfile } from '@core/common/domain/model';
+import { DashboardId, Field, MainDateMode, UserProfile, VizSettingType, WidgetId } from '@core/common/domain/model';
 import { Action, getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import store from '@/store';
 import { DIException } from '@core/common/domain/exception';
@@ -57,6 +57,11 @@ export class DataStore extends VuexModule {
   @Action
   query(request: QueryRequest): Promise<VisualizationResponse> {
     return this.queryService.query(request);
+  }
+
+  @Action
+  exportAsCsv(request: QueryRequest): Promise<string> {
+    return this.queryService.queryAsCsv(request);
   }
 
   @Action

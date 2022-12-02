@@ -10,6 +10,7 @@
     />
     <SlicerTabControl v-else :setting="setting.options" :query="query" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <VisualHeader :setting="setting.options" :widget-type="currentWidget" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
 </template>
 
@@ -24,8 +25,9 @@ import TitleTab from '@/shared/settings/common/tabs/TitleTab.vue';
 import SlicerTabControl from '@/shared/settings/slicer-filter-setting/SlicerTabControl.vue';
 import DynamicSettingTab from '@/shared/settings/slicer-filter-setting/DynamicSettingTab.vue';
 import { ListUtils } from '@/utils';
+import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
 
-@Component({ components: { SlicerTabControl, BackgroundTab, TitleTab, DynamicSettingTab } })
+@Component({ components: { SlicerTabControl, BackgroundTab, TitleTab, DynamicSettingTab, VisualHeader } })
 export default class SlicerFilterSetting extends Vue {
   @Prop({ required: true })
   private readonly chartInfo!: ChartInfo;

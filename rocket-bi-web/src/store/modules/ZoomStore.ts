@@ -54,7 +54,7 @@ export class ZoomStore extends VuexModule {
         new ZoomLevelNode(ScalarFunctionType.ToYear, DateFunctionTypes.year),
         new ZoomLevelNode(ScalarFunctionType.ToQuarter, DateFunctionTypes.quarterOfYear),
         new ZoomLevelNode(ScalarFunctionType.ToMonth, DateFunctionTypes.monthOfYear),
-        new ZoomLevelNode(ScalarFunctionType.ToWeek, DateFunctionTypes.weekOfMonth),
+        new ZoomLevelNode(ScalarFunctionType.ToWeek, DateFunctionTypes.weekOfYear),
         new ZoomLevelNode(ScalarFunctionType.ToDayOfYear, DateFunctionTypes.dayOfYear),
         new ZoomLevelNode(ScalarFunctionType.ToDayOfMonth, DateFunctionTypes.dayOfMonth),
         new ZoomLevelNode(ScalarFunctionType.ToDayOfWeek, DateFunctionTypes.dayOfWeek),

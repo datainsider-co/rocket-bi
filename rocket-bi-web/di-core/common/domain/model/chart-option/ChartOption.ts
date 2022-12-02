@@ -328,11 +328,7 @@ export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> {
     if (isString(this.options.title)) {
       Object.assign(this.options, { title: title });
     } else {
-      JsonUtils.mergeDeep(this.options, {
-        title: {
-          text: title
-        }
-      });
+      ObjectUtils.set(this.options, 'title.text', title);
     }
   }
 

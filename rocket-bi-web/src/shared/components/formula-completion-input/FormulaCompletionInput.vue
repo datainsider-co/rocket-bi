@@ -45,6 +45,9 @@ monaco.editor.defineTheme('etl-query-theme-dark', EtlQueryThemeLight);
 @Component({
   components: { MonacoEditor }
 })
+/**
+ * don't use v-model.trim cause cursor position will be wrong
+ */
 export default class FormulaCompletionInput extends Vue {
   @Model('input', { required: true, type: String, default: '' })
   private readonly value!: string;

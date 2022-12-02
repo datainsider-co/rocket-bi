@@ -4,14 +4,13 @@
     ref="mdShare"
     :footer-class="{ collapsed: !isHeaderCollapsed }"
     :header-class="{ collapsed: isHeaderCollapsed }"
-    :hide-footer="!enableShareAnyone"
     centered
     class="modal-content"
     @hide="handleClose"
     @ok="done"
   >
     <template #modal-header>
-      <b-container :class="getCursorClassForHeader" class="share-people-area" @click.prevent="isHeaderCollapsed && toggleExpanded()">
+      <b-container :class="getCursorClassForHeader" class="share-people-area" @click.prevent="isHeaderCollapsed && expandShareUser()">
         <div v-if="isHeaderCollapsed" key="collapsed" class="share-people-collapsed">
           <div class="share-people-header p-md-0">
             <AddUserIcon deactive></AddUserIcon>
@@ -35,27 +34,10 @@
     <template #default="{ cancel, ok }">
       <CollapseTransition>
         <b-container v-if="isCollapsed" v-bind:key="'collapsed'" class="p-md-0 pad-y-15">
-          <div class="d-flex flex-column mt-2 text-uppercase">
-            <b-input
-              :id="genInputId('search-share-with-people-and-group')"
-              v-model="searchInput"
-              class="p-3 h-42px"
-              debounce="300"
-              placeholder="Add people and groups"
-              variant="dark"
-            ></b-input>
-            <UserItemListing
-              :data="suggestedUsers"
-              :error="suggestUserError"
-              :is-show-popover.sync="isShowPopover"
-              :status="getSuggestUserStatus"
-              :target="genInputId('search-share-with-people-and-group')"
-              @handleClickUserItem="handleClickUserItem"
-            ></UserItemListing>
-          </div>
+          <SearchUserInput @select="handleClickUserItem" ref="searchUserInput" />
           <StatusWidget :error="getSharedUserError" :status="getSharedUserStatus"></StatusWidget>
-          <UserItemStatusListing
-            v-if="isGetSharedUserLoaded"
+          <SharePermissionManager
+            v-if="getSharedUserStatus === Statuses.Loaded"
             :data="resourceInfo.usersSharing"
             :organizationId="organizationId"
             :owner="resourceInfo.owner"
@@ -63,7 +45,7 @@
             :resource-type="resourceType"
             :status-data="swmStatusData"
             @handleItemStatusChange="handleSharePermissionChange"
-          ></UserItemStatusListing>
+          />
           <div class="row divider-top" />
           <div class="d-flex mb-2 mb-sm-4">
             <b-button :id="genBtnId('share-cancel')" class="flex-fill h-42px m-1" variant="secondary" @click="cancel" event="share_cancel">
@@ -77,98 +59,31 @@
       </CollapseTransition>
     </template>
     <template #modal-footer="{ cancel, ok }">
-      <CollapseTransition>
-        <b-container :class="getCursorClassForFooter" class="anyone-header-area" fluid="" @click.prevent="isCollapsed && toggleExpanded()">
-          <b-container v-if="isHeaderCollapsed" key="collapsed" class="d-flex flex-column">
-            <b-row class="share-anyone-header">
-              <div class="get-link">
-                <LinkIcon active></LinkIcon>
-                <span>Get link</span>
-              </div>
-            </b-row>
-            <div class="row share-anyone-action mb-3">
-              <img src="@/assets/icon/users.svg" alt="user" />
-              <div class="share-anyone-info">
-                <span class="header">Anyone with the link</span>
-                <span>Anyone on the internet with this link can {{ isEdit ? 'edit' : 'view' }}</span>
-              </div>
-              <DiDropdown :id="genDropdownId('share-anyone')" v-model="currentPermission" :data="permissionTypes" value-props="type" />
-            </div>
-            <b-row>
-              <b-input-group>
-                <b-input :value="link" class="p-3 h-42px width-fit input-link cursor-default" plaintext size="sm"></b-input>
-                <b-input-group-append class="copy-reset">
-                  <a
-                    :id="genBtnId('copy-share-link')"
-                    v-clipboard:copy="link"
-                    v-clipboard:error="onError"
-                    v-clipboard:success="onCopy"
-                    class="copy-link"
-                    href="#"
-                  >
-                    Copy link
-                  </a>
-                  <b-tooltip id="success-copy-tooltip" :disabled="true" :target="genBtnId('copy-share-link')" placement="left">
-                    <div :class="tooltipBackground" class="custom-tooltip-body">{{ copyStatus }}</div>
-                  </b-tooltip>
-                  <b-tooltip id="error-copy-tooltip" :disabled="true" :target="genBtnId('copy-share-link')" placement="left">
-                    <div :class="tooltipBackground" class="custom-tooltip-body">{{ copyStatus }}</div>
-                  </b-tooltip>
-                </b-input-group-append>
-              </b-input-group>
-            </b-row>
-            <!--            <br />-->
-
-            <div ref="embedded" class="row embedded">
-              <DiButton v-if="isShareDashboard" :id="genBtnId('embedded-copy')" border title="Copy embed code" @click="handleCopyEmbedCode">
-                <i class="di-icon-embed"></i>
-              </DiButton>
-              <b-tooltip id="success-embed-tooltip" :disabled="true" :target="genBtnId('embedded-copy')" placement="top">
-                <div :class="tooltipBackground" class="custom-tooltip-body">
-                  {{ copyStatus }}
-                </div>
-              </b-tooltip>
-              <b-tooltip id="error-embed-tooltip" :disabled="true" :target="genBtnId('embedded-copy')" placement="top">
-                <div :class="tooltipBackground" class="custom-tooltip-body">
-                  {{ copyStatus }}
-                </div>
-              </b-tooltip>
-            </div>
-            <div class="row d-flex mar-t-24">
-              <b-button :id="genBtnId('share-anyone-cancel')" class="flex-fill h-42px mr-1" variant="secondary mr" @click="cancel" event="share_cancel">
-                Cancel
-              </b-button>
-              <b-button :id="genBtnId('share-anyone-done')" class="flex-fill h-42px ml-1" variant="primary" @click="ok">
-                Apply
-              </b-button>
-            </div>
-          </b-container>
-          <b-container v-if="isCollapsed" :key="'expanded'" class="px-0 d-flex flex-row justify-content-between flex-auto" fluid="">
-            <div class="share-anyone-header">
-              <div class="get-link">
-                <LinkIcon deactive></LinkIcon>
-                <span>Get link</span>
-              </div>
-              <span class="cursor-pointer">Anyone on the internet with this link can <span v-if="isEdit">edit</span> <span v-else>view</span></span>
-            </div>
-            <div ref="container" class="d-flex flex-row ml-auto align-items-center">
-              <!--              todo: don't delete this line below-->
-              <b-input :value="link" class="p-3 h-42px width-fit input-link cursor-default d-none" plaintext size="sm"></b-input>
-              <a :id="genBtnId('quick-copy')" class="mr-2 copy-link" href="#" @click.stop="handleCopyLinkShare"> Copy link</a>
-              <b-tooltip id="success-quick-copy-tooltip" :disabled="true" :target="genBtnId('quick-copy')" placement="left">
-                <div :class="tooltipBackground" class="custom-tooltip-body">
-                  {{ copyStatus }}
-                </div>
-              </b-tooltip>
-              <b-tooltip id="error-quick-copy-tooltip" :disabled="true" :target="genBtnId('quick-copy')" placement="left">
-                <div :class="tooltipBackground" class="custom-tooltip-body">
-                  {{ copyStatus }}
-                </div>
-              </b-tooltip>
-            </div>
-          </b-container>
-        </b-container>
-      </CollapseTransition>
+      <div class="w-100">
+        <ShareAnyone
+          v-if="enableShareAnyone"
+          ref="shareAnyone"
+          class="mt-2"
+          :link="link"
+          :permission-token-response="permissionTokenResponse"
+          :current-permission="currentPermission"
+          :link-handler="linkHandler"
+          @ok="ok"
+          @cancel="cancel"
+          @expand="onShareAnyoneExpand"
+        />
+        <PasswordProtection
+          v-if="enablePasswordProtection"
+          ref="passwordProtection"
+          :is-create-new="isCreatingPassword"
+          :config.sync="editPasswordSetting"
+          class="mt-2"
+          @ok="ok"
+          @cancel="cancel"
+          @expand="onPasswordProtectionExpand"
+          @reset="resetPassword"
+        />
+      </div>
     </template>
   </b-modal>
 </template>
@@ -182,10 +97,8 @@ import { ShareModule } from '@/store/modules/ShareStore';
 import { ActionType, PERMISSION_ACTION_NODES, ResourceType } from '@/utils/PermissionUtils';
 import { CollapseTransition, FadeTransition } from 'vue2-transitions';
 import { PermissionTokenResponse } from '@core/common/domain/response';
-import VueClipboard from 'vue-clipboard2';
-import UserItemStatusListing from '@/shared/components/UserItemStatusListing.vue';
 import UserItemListing from '@/shared/components/UserItemListing.vue';
-import { UserProfile } from '@core/common/domain/model';
+import { Directory, PasswordConfig, UserProfile } from '@core/common/domain/model';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { PermissionProviders } from '@core/admin/domain/permissions/PermissionProviders';
@@ -195,64 +108,82 @@ import { ShareHandler } from '@/shared/components/common/di-share-modal/share-ha
 import { ShareDatabaseHandler } from '@/shared/components/common/di-share-modal/share-handler/ShareDatabaseHandler';
 import { ShareDirectoryHandler } from '@/shared/components/common/di-share-modal/share-handler/ShareDirectoryHandler';
 import { LinkHandler } from '@/shared/components/common/di-share-modal/link-handler/LinkHandler';
-import { ListUtils } from '@/utils';
+import { ListUtils, SecurityUtils, StringUtils } from '@/utils';
 import DiShadowButton from '@/shared/components/common/DiShadowButton.vue';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import { Track } from '@/shared/anotation/TrackingAnotation';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
-
-VueClipboard.config.autoSetContainer = true;
-Vue.use(VueClipboard);
-
-export enum CopyStatus {
-  Failed = 'Failed',
-  Success = 'Copied'
-}
+import CopyButton from '@/shared/components/common/di-share-modal/components/CopyButton.vue';
+import SharePermissionManager from '@/shared/components/SharePermissionManager.vue';
+import SearchUserInput from '@/shared/components/common/di-share-modal/components/share-user/SearchUserInput.vue';
+import PasswordProtection from '@/shared/components/common/di-share-modal/components/password-protection/PasswordProtection.vue';
+import ShareAnyone from '@/shared/components/common/di-share-modal/components/share-anyone/ShareAnyone.vue';
+import { ShareDirectoryLinkHandler } from '@/shared/components/common/di-share-modal/link-handler/ShareDirectoryLinkHandler';
+import { ShareDashboardLinkHandler } from '@/shared/components/common/di-share-modal/link-handler/ShareDashboardLinkHandler';
+import { DashboardMetaData } from '@core/common/domain/model/directory/directory-metadata/DashboardMetaData';
+import { Di } from '@core/common/modules';
+import { DataManager } from '@core/common/services';
 
 export interface ResourceData {
   resourceType: ResourceType;
   resourceId: string;
   organizationId: string;
+  creator?: string;
 }
 
 @Component({
   components: {
+    CopyButton,
     DiButton,
     DiShadowButton,
     StatusWidget,
     UserItemListing,
-    UserItemStatusListing,
+    SharePermissionManager,
     CollapseTransition,
-    FadeTransition
+    FadeTransition,
+    SearchUserInput,
+    PasswordProtection,
+    ShareAnyone
   }
 })
 export default class DiShareModal extends Vue {
-  static readonly SHOWING_DURATION = 1000;
+  private readonly Statuses = Status;
   shareHandler: ShareHandler = new ShareDirectoryHandler();
   linkHandler: LinkHandler | null = null;
-  items: any[];
-  fields: any[];
-  title: string;
-  selected: any;
   isHeaderCollapsed = false;
   link = '';
-  searchInput = '';
-  isShowPopover = false;
+  //
   resourceType: ResourceType = ResourceType.directory;
-  resourceId = '0';
-  getSharedUserStatus: Status = Status.Loading;
-  getSharedUserError = '';
-  getSuggestUserStatus: Status = Status.Loaded;
-  suggestUserError = '';
-  permissionTokenResponse: PermissionTokenResponse | null = null;
-  copyStatus: CopyStatus = CopyStatus.Failed;
   organizationId = '';
+  resourceId = '0';
+  creator = '';
+  //
+  getSharedUserError = '';
+  getSharedUserStatus: Status = Status.Loading;
+  //
+  permissionTokenResponse: PermissionTokenResponse | null = null;
   enableShareAnyone = false;
+  enablePasswordProtection = false;
+
+  localPasswordSetting: PasswordConfig | null = null; ///Use for valid/reset password
+
+  editPasswordSetting: PasswordConfig | null = null; ///Use for edit password
+
   @Ref()
   mdShare!: BModal;
-  private readonly permissionTypes: ActionNode[] = PERMISSION_ACTION_NODES;
+
+  @Ref()
+  searchUserInput!: SearchUserInput;
+
+  @Ref()
+  shareAnyone!: ShareAnyone;
+  @Ref()
+  passwordProtection!: PasswordProtection;
+
   private currentPermission: ActionType = ActionType.none;
+
+  private dataManager = Di.get(DataManager);
 
   private get isSharePeopleEmpty(): boolean {
     return ListUtils.isEmpty(this.resourceInfo?.usersSharing);
@@ -263,77 +194,24 @@ export default class DiShareModal extends Vue {
     return userInfos.map(userInfo => userInfo.user.getName).join(', ');
   }
 
-  constructor() {
-    super();
-    this.title = 'All data';
-    // TODO: it's temp data, need to update late
-    this.items = [
-      {
-        id: 1,
-        name: 'Customer demands'
-      },
-      {
-        id: 2,
-        name: 'Business 2017'
-      },
-      {
-        id: 3,
-        name: 'Customer trending'
-      },
-      {
-        id: 4,
-        name: 'Marketing test'
-      }
-    ];
-    this.fields = [
-      {
-        key: 'name',
-        sortable: false,
-        label: 'Name',
-        tdClass: 'td-text-style-primary text-left',
-        thClass: 'th-text-style text-left'
-      },
-      {
-        key: 'selected',
-        tdClass: 'td-text-style-primary text-right',
-        thClass: 'th-text-style text-right'
-      }
-    ];
-  }
-
   get swmStatusData(): ActionNode[] {
     return PERMISSION_ACTION_NODES;
-  }
-
-  get suggestedUsers(): UserProfile[] {
-    return ShareModule.suggestedUsers;
-  }
-
-  get sharedUserInfos(): SharedUserInfo[] {
-    return this.shareHandler.sharedUserInfos;
   }
 
   get resourceInfo(): ResourceInfo | null {
     return this.shareHandler.resourceInfo;
   }
 
-  get isGetSharedUserLoaded(): boolean {
-    return this.getSharedUserStatus === Status.Loaded;
-  }
-
   get isEdit() {
     return this.currentPermission === ActionType.edit;
   }
 
-  get tooltipBackground() {
-    return {
-      'tooltip-basic-bg': this.copyStatus === CopyStatus.Failed,
-      'tooltip-success-bg': this.copyStatus === CopyStatus.Success
-    };
-  }
-
   private get isCollapsed() {
     return !this.isHeaderCollapsed;
+  }
+
+  private getCursorClass(isExpanded: boolean) {
+    return isExpanded ? 'cursor-default' : 'cursor-pointer';
   }
 
   private get getCursorClassForHeader() {
@@ -346,29 +224,67 @@ export default class DiShareModal extends Vue {
     }
   }
 
-  private get getCursorClassForFooter() {
-    if (this.isCollapsed) {
-      return 'cursor-pointer';
-    } else {
-      return 'cursor-default';
-    }
-  }
-
-  private get isShareDashboard() {
-    return this.linkHandler!.resourceType === ResourceType.dashboard;
-  }
-
   @Track(TrackEvents.ShowShareModal, {
     resource_type: (_: DiShareModal, args: any) => args[0].resourceType,
     resource_id: (_: DiShareModal, args: any) => args[0].resourceId
   })
-  showShareModal(resourceData: ResourceData, handler: ShareHandler, enableShareAnyone: boolean, linkHandler: LinkHandler | null = null) {
-    this.init(resourceData.organizationId, resourceData.resourceType, resourceData.resourceId);
-    this.enableShareAnyone = enableShareAnyone;
+  showShareModal(
+    resourceData: ResourceData,
+    handler: ShareHandler,
+    enableShareAnyone: boolean,
+    linkHandler: LinkHandler | null = null,
+    enablePassword: boolean,
+    passwordSetting: PasswordConfig | null = null
+  ) {
+    this.init(resourceData, handler, linkHandler); ///K load
+    this.loadResourceInfo(resourceData);
+    this.initShareAnyone(enableShareAnyone);
+    this.initPassword(enablePassword, passwordSetting);
+    this.mdShare.show();
+  }
+
+  showShareDatabase(resourceData: ResourceData) {
+    this.showShareModal(resourceData, new ShareDatabaseHandler(), false, null, false);
+  }
+
+  showShareDirectory(directory: Directory) {
+    const directoryName = directory.name;
+    const resourceData: ResourceData = {
+      organizationId: this.dataManager.getUserInfo()?.organization.organizationId!,
+      resourceType: ResourceType.directory,
+      resourceId: directory.id.toString(),
+      creator: directory.owner.username
+    };
+    const linkHandler: LinkHandler = new ShareDirectoryLinkHandler(resourceData.resourceId, directoryName);
+    this.showShareModal(resourceData, new ShareDirectoryHandler(), true, linkHandler, false);
+  }
+
+  showShareDashboard(directory: Directory) {
+    const directoryName = directory.name;
+    const resourceData: ResourceData = {
+      organizationId: this.dataManager.getUserInfo()?.organization.organizationId!,
+      resourceType: ResourceType.directory,
+      resourceId: directory.id.toString(),
+      creator: directory.owner.username
+    };
+    const linkHandler = new ShareDashboardLinkHandler(directory.dashboardId!.toString(), directoryName);
+    const currentPassword = directory?.data ? (directory.data as DashboardMetaData)?.config ?? null : null;
+    Log.debug('showShareDashboard::', currentPassword);
+    this.showShareModal(resourceData, new ShareDirectoryHandler(), true, linkHandler, true, currentPassword);
+  }
+
+  init(resource: ResourceData, handler: ShareHandler, linkHandler: LinkHandler | null = null) {
+    this.isHeaderCollapsed = false;
+    this.organizationId = resource.organizationId;
+    this.resourceId = `${resource.resourceId}`;
+    this.resourceType = resource.resourceType;
+    this.creator = resource.creator ?? '';
     this.shareHandler = handler;
     this.linkHandler = linkHandler;
-    this.loadResourceInfo(resourceData.resourceType, resourceData.resourceId);
+  }
 
+  private initShareAnyone(enableShareAnyone: boolean) {
+    this.enableShareAnyone = enableShareAnyone;
     if (enableShareAnyone) {
       this.handleGetToken().then(() => {
         if (this.permissionTokenResponse) {
@@ -376,28 +292,34 @@ export default class DiShareModal extends Vue {
         }
       });
     }
-    this.mdShare.show();
   }
 
-  showShareDatabase(resourceData: ResourceData) {
-    this.showShareModal(resourceData, new ShareDatabaseHandler(), false);
+  private initPassword(enablePassword: boolean, passwordSetting: PasswordConfig | null = null) {
+    Log.debug('initPassword::', enablePassword, this.isOwner);
+    this.enablePasswordProtection = enablePassword && this.isOwner;
+    this.localPasswordSetting = passwordSetting;
+    this.editPasswordSetting = passwordSetting;
   }
 
-  showShareDirectory(resourceData: ResourceData, linkHandler: LinkHandler) {
-    this.showShareModal(resourceData, new ShareDirectoryHandler(), true, linkHandler);
+  private get isOwner() {
+    const localUsername = Di.get(DataManager).getUserInfo()?.username ?? '';
+    if (!localUsername) {
+      return false;
+    }
+    if (!this.creator) {
+      return false;
+    }
+    return localUsername === this.creator;
   }
 
-  init(organizationId: string, resourceType: ResourceType, resourceId: string) {
-    this.isHeaderCollapsed = false;
-    this.organizationId = organizationId;
-    this.resourceId = resourceId;
-    this.resourceType = resourceType;
+  private get isCreatingPassword(): boolean {
+    return this.localPasswordSetting === null;
   }
 
-  loadResourceInfo(resourceType: ResourceType, resourceId: string) {
+  loadResourceInfo(resource: ResourceData) {
     this.getSharedUserStatus = Status.Loading;
     this.shareHandler
-      .loadResourceInfo(resourceType, resourceId.toString())
+      .loadResourceInfo(resource.resourceType, `${resource.resourceId}`)
       .then(() => {
         Log.debug('DiShareModal::show::sharedUsersResponse::', this.resourceInfo);
         this.getSharedUserStatus = Status.Loaded;
@@ -407,14 +329,6 @@ export default class DiShareModal extends Vue {
         this.getSharedUserError = err.message;
         Log.debug('DiShareModal::show::err::', err.message);
       });
-  }
-
-  selectedRow(item: any, index: number, event: any) {
-    Log.debug(item);
-  }
-
-  addNewFolder() {
-    Log.debug('addNewFolder');
   }
 
   @Track(TrackEvents.SubmitShare, {
@@ -427,7 +341,9 @@ export default class DiShareModal extends Vue {
       const isShareAnyoneActionChange = this.checkShareAnyoneChange();
 
       await this.shareHandler.saveAll(this.resourceId.toString(), this.resourceType, this.currentPermission, isShareAnyoneActionChange);
+      await this.updatePassword(this.enablePasswordProtection, this.editPasswordSetting);
       TrackingUtils.track(TrackEvents.SubmitShareOk, {});
+      this.$emit('shared');
     } catch (e) {
       PopupUtils.showError(e.message);
       TrackingUtils.track(TrackEvents.SubmitShareFail, { error: e.message });
@@ -436,9 +352,12 @@ export default class DiShareModal extends Vue {
 
   handleClose() {
     Log.debug('DiShareModal::handleClose::Modal Closed.');
-    this.searchInput = '';
+    this.searchUserInput.reset();
     this.link = '';
     this.permissionTokenResponse = null;
+    this.enablePasswordProtection = false;
+    this.localPasswordSetting = null;
+    this.editPasswordSetting = null;
     ShareModule.reset();
   }
 
@@ -453,21 +372,6 @@ export default class DiShareModal extends Vue {
       return highestPermission !== this.currentPermission;
     }
     return false;
-  }
-
-  onRowSelected(item: any) {
-    Log.debug(item);
-    this.selected = item;
-  }
-
-  @Watch('searchInput')
-  handleSearchInputChange(newValue: string) {
-    if (newValue.trim() !== '') {
-      this.isShowPopover = true;
-      this.handleGetSuggestedUsers();
-    } else {
-      this.isShowPopover = false;
-    }
   }
 
   @Watch('isHeaderCollapsed')
@@ -489,77 +393,6 @@ export default class DiShareModal extends Vue {
     this.permissionTokenResponse = await this.shareHandler.getShareAnyone(this.resourceType, this.resourceId.toString());
   }
 
-  @Track(TrackEvents.CopyShareWithAnyone, {
-    resource_type: (_: DiShareModal, args: any) => args[0].resourceType,
-    resource_id: (_: DiShareModal, args: any) => args[0].resourceId
-  })
-  copyLink() {
-    this.$copyText(this.link, this.$refs.container)
-      .then(() => {
-        //success copy link
-        Log.debug('copied link:: ', this.link);
-        this.showTooltip('success-quick-copy-tooltip', CopyStatus.Success, DiShareModal.SHOWING_DURATION);
-      })
-      .catch(err => {
-        //copy failed
-        Log.error('Copied Failed::error::', err);
-        this.showTooltip('error-quick-copy-tooltip', CopyStatus.Failed, DiShareModal.SHOWING_DURATION);
-      });
-  }
-
-  private get dashboardEmbeddedCode() {
-    return UrlUtils.createDashboardEmbedCode(this.linkHandler!.id, this.permissionTokenResponse?.tokenId ?? '');
-  }
-
-  copyEmbedCode() {
-    this.$copyText(this.dashboardEmbeddedCode, this.$refs.embedded)
-      .then(() => {
-        //success copy link
-        Log.debug('copied embedded code:: ', this.dashboardEmbeddedCode);
-
-        this.showTooltip('success-embed-tooltip', CopyStatus.Success, DiShareModal.SHOWING_DURATION);
-      })
-      .catch(err => {
-        //copy failed
-        Log.error('Copied Failed::error::', err);
-        this.showTooltip('error-embed-tooltip', CopyStatus.Failed, DiShareModal.SHOWING_DURATION);
-      });
-  }
-
-  //show tooltip during showing duration time
-  showTooltip(tooltipId: string, status: CopyStatus, showingDuration: number) {
-    try {
-      this.displayTooltipWithId(tooltipId);
-      this.copyStatus = status;
-      this.waitToHideTooltip(tooltipId, showingDuration);
-    } catch (e) {
-      Log.debug('DiShareModel::ShowTooltip::Err::', e.message);
-    }
-  }
-
-  displayTooltipWithId(tooltipId: string) {
-    this.$root.$emit('bv::show::tooltip', tooltipId);
-  }
-
-  handleCopyLinkShare() {
-    if (this.permissionTokenResponse) {
-      this.copyLink();
-    } else {
-      this.handleCreateToken().then(() => {
-        this.createLinkShare();
-        this.copyLink();
-      });
-    }
-  }
-
-  @Track(TrackEvents.CopyEmbeddedCode, {
-    resource_type: (_: DiShareModal, args: any) => args[0].resourceType,
-    resource_id: (_: DiShareModal, args: any) => args[0].resourceId
-  })
-  handleCopyEmbedCode() {
-    this.copyEmbedCode();
-  }
-
   private createLinkShare() {
     if (this.permissionTokenResponse) {
       Log.debug('tokenResponse::', this.permissionTokenResponse);
@@ -578,39 +411,6 @@ export default class DiShareModal extends Vue {
   @Watch('currentPermission')
   onShareAnyonePermissionChanged(permission: string) {
     TrackingUtils.track(TrackEvents.SelectShareAnyonePermission, { permission: permission });
-  }
-
-  @Track(TrackEvents.CopyShareWithAnyone, {
-    resource_type: (_: DiShareModal, args: any) => args[0].resourceType,
-    resource_id: (_: DiShareModal, args: any) => args[0].resourceId
-  })
-  private onCopy(e: any) {
-    Log.debug('You just copied: ' + e.text);
-    this.showTooltip('success-copy-tooltip', CopyStatus.Success, DiShareModal.SHOWING_DURATION);
-  }
-
-  private onError(e: any) {
-    Log.debug('Failed to copy texts');
-    this.showTooltip('error-copy-tooltip', CopyStatus.Failed, DiShareModal.SHOWING_DURATION);
-  }
-
-  private toggleExpanded() {
-    this.isHeaderCollapsed = !this.isHeaderCollapsed;
-  }
-
-  private handleGetSuggestedUsers() {
-    //todo: refactor fixed value
-    this.getSuggestUserStatus = Status.Loading;
-    ShareModule.getSuggestedUsers({ keyword: this.searchInput, from: 0, size: 100 })
-      .then(() => {
-        this.getSuggestUserStatus = Status.Loaded;
-      })
-      .catch(err => {
-        this.getSuggestUserStatus = Status.Error;
-        this.suggestUserError = err.message;
-        Log.debug('DiShareModal::handleGetSuggestedUsers::err::', err);
-      });
-    Log.debug('DiShareModal::handleGetSuggestedUsers::suggestedUsers::', ShareModule.suggestedUsers);
   }
 
   @Track(TrackEvents.SelectShareUser, {
@@ -637,10 +437,44 @@ export default class DiShareModal extends Vue {
     this.shareHandler.updateSharePermission(userItemData, permission);
   }
 
-  private waitToHideTooltip(tooltipId: string, showingDuration: number) {
-    return setTimeout(() => {
-      this.$root.$emit('bv::hide::tooltip', tooltipId);
-    }, showingDuration);
+  private async resetPassword() {
+    try {
+      await this.shareHandler.removePassword(this.resourceId, this.resourceType);
+      this.localPasswordSetting = null;
+      this.editPasswordSetting = { enabled: true, hashedPassword: '' };
+    } catch (ex) {
+      Log.error(ex);
+    }
+  }
+
+  async updatePassword(enabled: boolean, config: PasswordConfig | null) {
+    Log.debug('updatePassword::', enabled, config);
+    if (!enabled) {
+      return;
+    }
+    if (this.isCreatingPassword && config) {
+      await this.shareHandler.savePassword(this.resourceId, this.resourceType, config);
+      return;
+    }
+  }
+
+  private expandShareUser() {
+    this.isHeaderCollapsed = !this.isHeaderCollapsed;
+    this.shareAnyone.collapse();
+    this.passwordProtection?.collapse();
+  }
+
+  private onShareAnyoneExpand() {
+    this.isHeaderCollapsed = true;
+    this.passwordProtection?.collapse();
+  }
+
+  private onPasswordProtectionExpand() {
+    this.isHeaderCollapsed = true;
+    this.shareAnyone.collapse();
+    if (this.editPasswordSetting === null) {
+      this.editPasswordSetting = { enabled: true, hashedPassword: '' };
+    }
   }
 }
 </script>
@@ -651,15 +485,19 @@ export default class DiShareModal extends Vue {
   .modal-dialog {
     max-width: 560px;
   }
+
   .status-loading {
     height: 56px !important;
   }
+
   .embedded {
     margin-top: 12px;
   }
+
   .select-container {
     margin: 0;
   }
+
   #swm-select-share-anyone {
     height: 32px;
   }

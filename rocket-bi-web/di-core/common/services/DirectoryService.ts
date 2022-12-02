@@ -42,6 +42,8 @@ export abstract class DirectoryService {
   abstract star(directoryId: DirectoryId): Promise<void>;
 
   abstract removeStar(directoryId: DirectoryId): Promise<void>;
+
+  abstract update(directory: Directory): Promise<boolean>;
 }
 
 export class DirectoryServiceImpl extends DirectoryService {
@@ -119,5 +121,9 @@ export class DirectoryServiceImpl extends DirectoryService {
 
   removeStar(directoryId: DirectoryId): Promise<void> {
     return this.directoryRepository.removeStar(directoryId);
+  }
+
+  update(directory: Directory): Promise<boolean> {
+    return this.directoryRepository.update(directory);
   }
 }

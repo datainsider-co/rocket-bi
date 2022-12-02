@@ -9,6 +9,7 @@
       @onDefaultChanged="handleDefaultValueChanged"
     />
     <BackgroundTab v-if="enableTitleSetting" :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <VisualHeader :setting="setting.options" :widget-type="currentWidget" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
 </template>
 
@@ -22,12 +23,14 @@ import FilterTitleTab from '@/shared/settings/tab-filter-setting/FilterTitleTab.
 import { ChartType, DefaultFilterValue } from '@/shared';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import { Log } from '@core/utils';
+import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
 
 @Component({
   components: {
     FilterTitleTab,
     BackgroundTab,
-    TabFilterControlTab
+    TabFilterControlTab,
+    VisualHeader
   }
 })
 export default class TabFilterSetting extends Vue {
