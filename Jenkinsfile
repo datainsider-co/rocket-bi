@@ -21,8 +21,7 @@ pipeline {
             }
 
             steps {
-                def IMAGE_TAG = BRANCH_NAME
-                sh "./build.sh -t $IMAGE_TAG push"
+                sh "./build.sh -t $BRANCH_NAME push"
             }
         }
     }
