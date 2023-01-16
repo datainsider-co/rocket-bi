@@ -43,7 +43,7 @@ class OrganizationController @Inject() (organizationService: OrganizationService
   get(s"/organizations/domain/check") { request: Request =>
     Profiler(s"[Http] ${this.getClass.getSimpleName}::/organizations/domain/check") {
       val subDomain = request.getParam("sub_domain")
-      organizationService.isSubDomainExisted(subDomain).map(isExisted => Map("existed" -> isExisted))
+      organizationService.isDomainValid(subDomain)
     }
   }
 
@@ -61,8 +61,8 @@ class OrganizationController @Inject() (organizationService: OrganizationService
 
   get("/organizations/my-domain") { request: Request =>
     Profiler(s"[Http] ${this.getClass.getSimpleName}::/organizations/my-domain") {
-      val domain: Option[String] = request.headerMap.get("Host")
-      organizationService.getByDomain(domain.getOrElse(""))
+      val orgDomain: String = getRequestDomain(request)
+      organizationService.getByDomain(orgDomain)
     }
   }
 
@@ -85,5 +85,12 @@ class OrganizationController @Inject() (organizationService: OrganizationService
           .map(success => Map("success" -> success))
       }
     }
+
+  private def getRequestDomain(request: Request): String = {
+    request.headerMap.get("Host") match {
+      case Some(host) => host.split('.').head
+      case None       => ""
+    }
+  }
 
 }

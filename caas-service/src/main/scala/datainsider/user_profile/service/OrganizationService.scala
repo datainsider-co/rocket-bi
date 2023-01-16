@@ -19,6 +19,7 @@ import org.nutz.ssdb4j.spi.SSDB
 import scalaj.http.{Http, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.matching.Regex
 
 /**
   * @author andy
@@ -44,9 +45,9 @@ trait OrganizationService {
 
   def register(request: RegisterOrgRequest): Future[Organization]
 
-  def isSubDomainExisted(subDomain: String): Future[Boolean]
+  def isDomainValid(domain: String): Future[Boolean]
 
-  def updateDomain(orgId: Long, subDomain: String): Future[Boolean]
+  def updateDomain(orgId: Long, newDomain: String): Future[Boolean]
 
   def update(orgId: Long, name: String, thumbnailUrl: String, updatedBy: String): Future[Organization]
 }
@@ -61,6 +62,8 @@ case class OrganizationServiceImpl(
     defaultOrganizationId: Long
 ) extends OrganizationService
     with Logging {
+
+  private val CDP_DOMAIN_PREFIX = ZConfig.getString("org_setting.cdp_domain_prefix", "cdp-")
 
   override def isExists(organizationId: Long): Future[Boolean] = {
     Future {
@@ -122,7 +125,9 @@ case class OrganizationServiceImpl(
 
   override def getByDomain(domain: String): Future[Organization] =
     Future {
-      organizationRepository.getByDomain(domain) match {
+      val originalDomain: String = getOriginalDomain(domain)
+
+      organizationRepository.getByDomain(originalDomain) match {
         case Some(organization) => organization
         case None =>
           logger.debug(s"Organization with domain $domain not found, use default organization")
@@ -143,33 +148,25 @@ case class OrganizationServiceImpl(
 
   override def register(request: RegisterOrgRequest): Future[Organization] = {
     for {
-      _ <- isValidRecaptchaToken(request.reCaptchaToken)
-      availableSubDomain <- findAvailableSubDomain(request.subDomain)
-      org <- activate(request.copy(subDomain = availableSubDomain))
+      _ <- isRecaptchaValid(request.reCaptchaToken)
+      _ <- isDomainValid(request.subDomain)
+      org <- doRegister(request)
     } yield org
   }
 
-  override def isSubDomainExisted(subDomain: String): Future[Boolean] = {
-    val mainDomain: String = ZConfig.getString("cloudflare.main_domain")
-    val fullDomain: String = s"$subDomain.$mainDomain"
-    Future(organizationRepository.getByDomain(fullDomain)).map(_.isDefined)
-  }
-
-  override def updateDomain(orgId: Long, subDomain: String): Future[Boolean] = {
+  override def updateDomain(orgId: Long, newDomain: String): Future[Boolean] = {
     for {
-      _ <- isValidSubDomain(subDomain)
+      _ <- isDomainValid(newDomain)
       org = organizationRepository.getOrganization(orgId)
-      orgUpdated = organizationRepository.update(org.copy(domain = getFullDomain(subDomain)))
+      orgUpdated = organizationRepository.update(org.copy(domain = newDomain))
     } yield orgUpdated
   }
 
-  private def activate(request: RegisterOrgRequest): Future[Organization] = {
+  private def doRegister(request: RegisterOrgRequest): Future[Organization] = {
     for {
       orgId <- idGenerator.getNextId().map(generatedIdShouldExists).asTwitter
       ownerId <- adminUserService.createAdminAccount(orgId, request.toCreateAdminAccountReq)
-      organization <- createOrganization(
-        request.toCreateOrganizationReq(orgId, ownerId, getFullDomain(request.subDomain))
-      )
+      organization <- createOrganization(request.toCreateOrganizationReq(orgId, ownerId, request.subDomain))
       permissionAdded <- adminUserService.assignAdminPermissions(organization.organizationId, ownerId)
     } yield {
       if (permissionAdded) organization
@@ -177,37 +174,24 @@ case class OrganizationServiceImpl(
     }
   }
 
-  private def getFullDomain(subDomain: String): String = {
-    val mainDomain: String = ZConfig.getString("cloudflare.main_domain")
-    s"$subDomain.$mainDomain"
-  }
-
-  private def isValidSubDomain(domain: String): Future[Boolean] = {
-    isSubDomainExisted(domain).map(isExisted => {
-      if (isExisted) {
-        throw BadRequestError(s"domain $domain is already existed")
-      } else true
-    })
-  }
-
-  private def findAvailableSubDomain(subDomain: String): Future[String] = {
-    var curSubDomain: String = subDomain
-    var count: Int = 2
-
-    while (count < 5 && isSubDomainExisted(curSubDomain).syncGet()) {
-      curSubDomain = s"$subDomain$count"
-      count += 1
+  override def isDomainValid(domain: String): Future[Boolean] = {
+    if (domain.startsWith(CDP_DOMAIN_PREFIX)) {
+      throw BadRequestError(s"Invalid domain name, domain can not start with '$CDP_DOMAIN_PREFIX' word.")
     }
 
-    curSubDomain
+    organizationRepository.getByDomain(domain) match {
+      case None      => true
+      case Some(org) => throw BadRequestError(s"domain $domain is already existed")
+    }
   }
 
-  private def isValidRecaptchaToken(token: Option[String]): Future[Unit] = {
+  private def isRecaptchaValid(token: Option[String]): Future[Boolean] = {
     token match {
       case Some(value) =>
-        logger.info(s"recaptcha token: $value")
-        validateRecaptchaToken(token).map(isTokenValid =>
-          if (!isTokenValid) throw BadRequestError("invalid recaptcha token")
+        validateRecaptchaToken(value).map(isTokenValid =>
+          if (!isTokenValid) {
+            throw BadRequestError("invalid recaptcha token")
+          } else true
         )
       case None => throw BadRequestError("missing recaptcha token")
     }
@@ -236,31 +220,41 @@ case class OrganizationServiceImpl(
       name: String,
       thumbnailUrl: String,
       updatedBy: String
-  ): Future[Organization] = Future {
-    try {
-      val oldOrganization: Organization = fetch(orgId)
-      val newOrganization: Organization = oldOrganization.copy(
-        name = name,
-        thumbnailUrl = thumbnailUrl,
-        updatedBy = updatedBy
-      )
-      organizationRepository.update(newOrganization)
-      newOrganization
-    } catch {
-      case ex: NotFoundError => throw ex
-      case ex: Throwable =>
-        logger.error(s"Error when update organization metadata: $ex", ex)
-        throw InternalError(s"error when update organization metadata: $ex")
+  ): Future[Organization] =
+    Future {
+      try {
+        val oldOrganization: Organization = fetch(orgId)
+        val newOrganization: Organization = oldOrganization.copy(
+          name = name,
+          thumbnailUrl = thumbnailUrl,
+          updatedBy = updatedBy
+        )
+        organizationRepository.update(newOrganization)
+        newOrganization
+      } catch {
+        case ex: NotFoundError => throw ex
+        case ex: Throwable =>
+          logger.error(s"Error when update organization metadata: $ex", ex)
+          throw InternalError(s"error when update organization metadata: $ex")
+      }
     }
-  }
 
   /**
-   * @throws NotFoundError if organization not found
-   */
+    * @throws NotFoundError if organization not found
+    */
   private def fetch(orgId: Long): Organization = {
     organizationRepository.getOrganization(orgId) match {
       case Some(organization) => organization
-      case None => throw NotFoundError(s"organization with id $orgId not found")
+      case None               => throw NotFoundError(s"organization with id $orgId not found")
+    }
+  }
+
+  private def getOriginalDomain(domain: String): String = {
+    val cdpDomainRegex: Regex = raw"""^$CDP_DOMAIN_PREFIX\w+$$""".r
+
+    cdpDomainRegex.findFirstMatchIn(domain) match {
+      case Some(value) => domain.drop(CDP_DOMAIN_PREFIX.length) // remove 'cdp-'
+      case None        => domain
     }
   }
 }

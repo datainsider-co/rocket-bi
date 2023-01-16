@@ -38,7 +38,7 @@
             <maxFileSize>50MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%msg %X{traceId}%n</pattern>
+            <pattern>%date %.-3level %-16X{traceId} %-25logger{0} %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -53,7 +53,7 @@
             <maxFileSize>50MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%msg %X{traceId}%n</pattern>
+            <pattern>%date %.-3level %-16X{traceId} %-25logger{0} %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -91,6 +91,18 @@
         <appender-ref ref="ACCESS"/>
     </appender>
 
+    <appender name="ASYNC-SendCodeViaEmail" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>${async_queue_size}</queueSize>
+        <maxFlushTime>${async_max_flush_time}</maxFlushTime>
+        <appender-ref ref="SendCodeViaEmail"/>
+    </appender>
+
+    <appender name="ASYNC-SendCodeViaSMS" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>${async_queue_size}</queueSize>
+        <maxFlushTime>${async_max_flush_time}</maxFlushTime>
+        <appender-ref ref="SendCodeViaSMS"/>
+    </appender>
+
     <!-- ===================================================== -->
     <!-- Package Config -->
     <!-- ===================================================== -->
@@ -101,26 +113,26 @@
     </root>
 
     <!-- Access Logging Http -->
-    <logger name="com.twitter.com.twitter.com.twitter.finatra.http.filters.AccessLoggingFilter"
-            level="INFO"
+    <logger name="com.twitter.finatra.http.filters.AccessLoggingFilter"
+            level="info"
             additivity="false">
         <appender-ref ref="ASYNC-ACCESS"/>
     </logger>
 
     <!-- Access Logging Thrift -->
-    <logger name="com.twitter.com.twitter.com.twitter.finatra.thrift.filters.AccessLoggingFilter"
-            level="INFO"
+    <logger name="com.twitter.finatra.thrift.filters.AccessLoggingFilter"
+            level="info"
             additivity="false">
         <appender-ref ref="ASYNC-ACCESS"/>
     </logger>
 
     <!-- Phone Logging -->
-    <logger name="SendCodeViaEmailLogger" level="DEBUG" additivity="false">
-        <appender-ref ref="SendCodeViaEmail"/>
+    <logger name="SendCodeViaEmailLogger" level="debug" additivity="false">
+        <appender-ref ref="ASYNC-SendCodeViaEmail"/>
     </logger>
 
-    <logger name="SendCodeViaSMSLogger" level="DEBUG" additivity="false">
-        <appender-ref ref="SendCodeViaSMS"/>
+    <logger name="SendCodeViaSMSLogger" level="debug" additivity="false">
+        <appender-ref ref="ASYNC-SendCodeViaSMS"/>
     </logger>
 
 </configuration>

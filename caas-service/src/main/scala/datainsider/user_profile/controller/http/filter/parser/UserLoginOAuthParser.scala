@@ -47,12 +47,12 @@ class UserLoginOAuthParser @Inject() (
     Profiler(s"[Filter] ${this.getClass.getSimpleName}::apply") {
 
       val oAuthBodyRequest = JsonParser.fromJson[UserOAuthRequestBody](request.contentString)
-      val reqDomain: String = request.headerMap.get("Host").get
+      val orgDomain: String = getRequestDomain(request)
 
       for {
         // get oauth info
         // valid oauth data
-        orgId <- organizationService.getByDomain(reqDomain).map(_.organizationId)
+        orgId <- organizationService.getByDomain(orgDomain).map(_.organizationId)
         oauthInfo <- orgOAuthorizationProvider.getOAuthInfo(
           orgId,
           oAuthBodyRequest.oauthType,
@@ -91,4 +91,11 @@ class UserLoginOAuthParser @Inject() (
         Future.exception(EmailNotExistedError("email is empty"))
       }
     }
+
+  private def getRequestDomain(request: Request): String = {
+    request.headerMap.get("Host") match {
+      case Some(host) => host.split('.').head
+      case None       => ""
+    }
+  }
 }

@@ -23,9 +23,10 @@ object OrganizationContext {
 class OrganizationParser @Inject() (organizationService: OrganizationService) extends SimpleFilter[Request, Response] {
   override def apply(request: Request, service: Service[Request, Response]): Future[Response] =
     Profiler(s"[Filter] ${this.getClass.getSimpleName}::apply") {
-      val reqDomain: String = request.headerMap.get("Host").get
+      val orgDomain: String = getRequestDomain(request)
+
       for {
-        org <- getOrgByDomain(reqDomain)
+        org <- getOrgByDomain(orgDomain)
         _ = request.ctx.update(OrganizationField, org)
         resp <- service(request)
       } yield resp
@@ -35,4 +36,11 @@ class OrganizationParser @Inject() (organizationService: OrganizationService) ex
     Profiler(s"[Filter] ${this.getClass.getSimpleName}::getOrgFromDomain") {
       organizationService.getByDomain(domain)
     }
+
+  private def getRequestDomain(request: Request): String = {
+    request.headerMap.get("Host") match {
+      case Some(host) => host.split('.').head
+      case None       => ""
+    }
+  }
 }
