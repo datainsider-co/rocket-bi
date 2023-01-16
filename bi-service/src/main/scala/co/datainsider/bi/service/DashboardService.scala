@@ -2,15 +2,13 @@ package co.datainsider.bi.service
 
 import co.datainsider.bi.domain.Ids.{DashboardId, DirectoryId, WidgetId}
 import co.datainsider.bi.domain._
-import co.datainsider.bi.domain.chart.{Chart, Widget}
-import co.datainsider.bi.domain.query.{ObjectQuery, QueryView, SqlQuery}
+import co.datainsider.bi.domain.chart.Widget
 import co.datainsider.bi.domain.request._
 import co.datainsider.bi.repository.{ChartResponseRepository, DashboardRepository}
 import co.datainsider.bi.util.Implicits._
 import co.datainsider.bi.util.Serializer
 import co.datainsider.share.controller.request.GetOrCreatePermissionTokenRequest
 import co.datainsider.share.service.{PermissionTokenService, ShareService}
-import com.fasterxml.jackson.databind.JsonNode
 import com.google.inject.Inject
 import com.twitter.util.Future
 import datainsider.authorization.domain.PermissionProviders
@@ -20,7 +18,6 @@ import datainsider.client.service.ProfileClientService
 import education.x.commons.I32IdGenerator
 import org.nutz.ssdb4j.spi.SSDB
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait DashboardService {
@@ -77,7 +74,7 @@ class DashboardServiceImpl @Inject() (
     ssdb: SSDB,
     profileService: ProfileClientService,
     shareService: ShareService,
-    dashboardFieldService: DashboardFieldService,
+    drillThroughService: DrillThroughService,
     boostScheduleService: BoostScheduleService,
     chartResponseRepository: ChartResponseRepository
 ) extends DashboardService {
@@ -124,7 +121,7 @@ class DashboardServiceImpl @Inject() (
         parentDir.ownerId
       )
       dashboard <- fetch(orgId, createdDashboardId)
-      _ <- dashboardFieldService.setFields(dashboard)
+      _ <- drillThroughService.updateDrillThroughFields(dashboard)
     } yield dashboard
   }
 
@@ -159,7 +156,7 @@ class DashboardServiceImpl @Inject() (
       _ <- fetch(orgId, request.id)
       dirId <- directoryService.list(ListDirectoriesRequest(dashboardId = Some(request.id))).map(_.head.id)
       response <- directoryService.delete(DeleteDirectoryRequest(dirId))
-      _ <- dashboardFieldService.delFields(request.id)
+      _ <- drillThroughService.deleteDrillThroughFields(request.id)
     } yield response
   }
 
@@ -193,7 +190,7 @@ class DashboardServiceImpl @Inject() (
         newDashboard.widgetPositions
       )
       createdWidget <- getWidget(orgId, request.dashboardId, newWidget.id)
-      _ <- dashboardFieldService.setFields(newDashboard)
+      _ <- drillThroughService.updateDrillThroughFields(newDashboard)
     } yield createdWidget
   }
 
@@ -224,7 +221,7 @@ class DashboardServiceImpl @Inject() (
         newDashboard.widgets,
         newDashboard.widgetPositions
       )
-      _ <- dashboardFieldService.setFields(newDashboard)
+      _ <- drillThroughService.updateDrillThroughFields(newDashboard)
     } yield response
   }
 
@@ -242,7 +239,7 @@ class DashboardServiceImpl @Inject() (
         newDashboard.widgets,
         newDashboard.widgetPositions
       )
-      _ <- dashboardFieldService.setFields(newDashboard)
+      _ <- drillThroughService.updateDrillThroughFields(newDashboard)
     } yield response
   }
 
@@ -430,20 +427,32 @@ class DashboardServiceImpl @Inject() (
       creatorId: String
   ): Future[Dashboard] = {
     for {
-      widgets <- Future.collect(
-        request.widgets.getOrElse(Array.empty).map(widget => assignWidgetInfo(widget, ownerId, creatorId))
+      newWidgetAsMap <- Future.collect(
+        request.widgets
+          .getOrElse(Array.empty)
+          .map(widget => {
+            widget.id -> assignWidgetInfo(widget, ownerId, creatorId)
+          })
+          .toMap
       )
-    } yield {
-      Dashboard(
-        name = request.name,
-        creatorId = request.currentUsername,
-        ownerId = ownerId,
-        setting = None,
-        mainDateFilter = None,
-        widgets = Some(widgets.toArray),
-        widgetPositions = Some(Map.empty)
-      )
-    }
+      newPositions: Map[WidgetId, Position] = request
+        .widgetPositions
+        .map {
+          case (oldId: WidgetId, position: Position) => {
+            val newId: Option[WidgetId] = newWidgetAsMap.get(oldId).map(_.id)
+            newId.getOrElse(oldId) -> position
+          }
+      }
+    } yield Dashboard(
+      name = request.name,
+      creatorId = request.currentUsername,
+      ownerId = ownerId,
+      setting = request.setting,
+      mainDateFilter = request.mainDateFilter,
+      widgets = Some(newWidgetAsMap.values.toArray),
+      widgetPositions = Some(newPositions),
+      boostInfo = request.boostInfo
+    )
   }
 
   private def getOrgId(orgId: Option[Long]): Long = {

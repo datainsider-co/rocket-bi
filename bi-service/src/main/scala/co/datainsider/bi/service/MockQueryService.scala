@@ -1,5 +1,5 @@
 package co.datainsider.bi.service
-import co.datainsider.bi.domain.request.{ChartRequest, SqlQueryRequest, ViewAsRequest}
+import co.datainsider.bi.domain.request.{ChartRequest, SqlQueryRequest, QueryViewAsRequest}
 import co.datainsider.bi.domain.response.{
   CsvResponse,
   ChartResponse,
@@ -28,7 +28,7 @@ class MockQueryService extends QueryService {
       )
     }
 
-  override def query(request: ViewAsRequest): Future[ChartResponse] = ???
+  override def query(request: QueryViewAsRequest): Future[ChartResponse] = ???
 
   override def exportAsCsv(request: ChartRequest): Future[String] = Future.value("/path/to/csv")
 }

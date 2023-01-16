@@ -4,7 +4,7 @@ import co.datainsider.bi.TestServer
 import co.datainsider.bi.domain.{AttributeBasedOperator, RlsPolicy, UserAttribute}
 import co.datainsider.bi.domain.chart.{SeriesChartSetting, TableColumn}
 import co.datainsider.bi.domain.query.{Equal, GroupBy, Sum, TableField}
-import co.datainsider.bi.domain.request.{ChartRequest, ViewAsRequest}
+import co.datainsider.bi.domain.request.{ChartRequest, QueryViewAsRequest}
 import co.datainsider.bi.domain.response.{SeriesOneResponse, SqlQueryResponse}
 import co.datainsider.bi.service.RlsPolicyService
 import co.datainsider.bi.util.{Serializer, ZConfig}
@@ -81,7 +81,7 @@ class QueryControllerTest extends FeatureTest with BeforeAndAfterAll {
   }
 
   test("test query with ViewAsRequest") {
-    val request = ViewAsRequest(
+    val request = QueryViewAsRequest(
       queryRequest = ChartRequest(
         querySetting = SeriesChartSetting(
           xAxis = TableColumn(

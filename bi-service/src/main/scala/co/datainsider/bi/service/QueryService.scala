@@ -37,7 +37,7 @@ trait QueryService {
 
   def query(request: SqlQueryRequest): Future[SqlQueryResponse]
 
-  def query(request: ViewAsRequest): Future[ChartResponse]
+  def query(request: QueryViewAsRequest): Future[ChartResponse]
 
   def exportAsCsv(request: ChartRequest): Future[String]
 
@@ -72,27 +72,27 @@ class QueryServiceImpl @Inject() (
 
   override def query(request: ChartRequest): Future[ChartResponse] =
     Profiler(s"[Builder] ${this.getClass.getSimpleName}::ChartRequest") {
-      buildQueryAndExecute(request)
+      buildQueryAndExecute(request, None)
     }
 
-  override def query(request: ViewAsRequest): Future[ChartResponse] =
+  override def query(request: QueryViewAsRequest): Future[ChartResponse] =
     Profiler(s"[Builder] ${this.getClass.getSimpleName}::queryViewAs") {
       require(request.userProfile.isDefined, "a target is required for querying as View As")
-      buildQueryAndExecute(request.queryRequest)
+      buildQueryAndExecute(request.queryRequest, request.userProfile)
     }
 
   override def exportAsCsv(request: ChartRequest): Future[String] =
     Profiler(s"[Builder] ${this.getClass.getSimpleName}::exportAsCsv") {
       for {
-        prepareResp <- prepareQuery(request, None)
+        prepareResp <- prepareQuery(request, None, None)
         csvFilePath <- createCsvFile(prepareResp.finalQuery)
       } yield csvFilePath
     }
 
-  private def buildQueryAndExecute(request: ChartRequest): Future[ChartResponse] = {
+  private def buildQueryAndExecute(request: ChartRequest, viewAsProfile: Option[UserProfile]): Future[ChartResponse] = {
     val limit: Option[Limit] = processLimit(request)
     for {
-      prepareResp <- prepareQuery(request, limit)
+      prepareResp <- prepareQuery(request, limit, viewAsProfile)
       chartResp <- executeAndRenderChart(
         prepareResp.finalQuery,
         request,
@@ -110,13 +110,18 @@ class QueryServiceImpl @Inject() (
       filterRequests: Array[FilterRequest],
       relationshipInfo: RelationshipInfo,
       rlsPolicies: Seq[RlsPolicy],
-      expressions: Map[String, String]
+      expressions: Map[String, String],
+      parameters: Map[String, String]
   ): Query = {
     val enhancedQuery = processAdditionalConditions(baseQuery, filterRequests, relationshipInfo)
     val decryptQuery = applyDecryption(enhancedQuery, username)
-    val finalQuery = applyLimit(decryptQuery, limit).customCopy(rlsPolicies.map(_.toRlsCondition()))
+    val finalQuery = applyLimit(decryptQuery, limit)
 
-    finalQuery.customCopy(expressions)
+    finalQuery.customCopy(
+      rlsConditions = rlsPolicies.map(_.toRlsCondition()),
+      expressions = expressions,
+      parameters = parameters
+    )
   }
 
   private def executeAndRenderChart(
@@ -169,7 +174,7 @@ class QueryServiceImpl @Inject() (
       case s: MapChartSetting =>
         toMapResponse(query, s)
       case s: PivotTableSetting =>
-        toPivotTableResponse(query, s, filterRequests, relationshipInfo, rlsPolicies, expressions)
+        toPivotTableResponse(query, s, filterRequests, relationshipInfo, rlsPolicies, expressions, request.parameters)
       case s: FlattenPivotTableSetting =>
         toTableResponse(query, s)
       case s: RawQuerySetting =>
@@ -843,7 +848,8 @@ class QueryServiceImpl @Inject() (
       filterRequests: Array[FilterRequest],
       relationshipInfo: RelationshipInfo,
       rlsPolicies: Seq[RlsPolicy],
-      expressions: Map[String, String]
+      expressions: Map[String, String],
+      parameters: Map[String, String]
   ): Future[JsonTableResponse] =
     Profiler(s"[Builder] ${this.getClass.getSimpleName}::toPivotTableResponse") {
       Future {
@@ -870,7 +876,8 @@ class QueryServiceImpl @Inject() (
               filterRequests = filterRequests,
               relationshipInfo = relationshipInfo,
               rlsPolicies = rlsPolicies,
-              expressions = expressions
+              expressions = expressions,
+              parameters = parameters
             )
 
             val grandTotalBaseResp: DataTable = executeQuery(grandTotalQuery, setting.toGrandTotalTableColumns)
@@ -893,7 +900,8 @@ class QueryServiceImpl @Inject() (
               filterRequests = filterRequests,
               relationshipInfo = relationshipInfo,
               rlsPolicies = rlsPolicies,
-              expressions = expressions
+              expressions = expressions,
+              parameters = parameters
             )
 
             val horizontalTotalBaseResp: DataTable =
@@ -1360,8 +1368,8 @@ class QueryServiceImpl @Inject() (
       if (baseMinMaxResp.records.nonEmpty) {
         baseMinMaxResp.records.transpose.last match {
           case Array(a, b) =>
-            val firstNum = a.toString.toDouble
-            val secondNum = b.toString.toDouble
+            val firstNum: Double = Try(a.toString.toDouble).getOrElse(0)
+            val secondNum: Double = Try(b.toString.toDouble).getOrElse(0)
             MinMaxPair(valueCol.name, firstNum.min(secondNum), firstNum.max(secondNum))
         }
       } else {
@@ -1644,9 +1652,13 @@ class QueryServiceImpl @Inject() (
     }
   }
 
-  private def prepareQuery(request: ChartRequest, limit: Option[Limit]): Future[PrepareQueryResponse] = {
-    val orgId: Option[Long] = Try(request.currentOrganizationId.get).toOption
-    val userProfile: Option[UserProfile] = Try(request.currentProfile).toOption.flatten
+  private def prepareQuery(
+      request: ChartRequest,
+      limit: Option[Limit],
+      viewAsProfile: Option[UserProfile]
+  ): Future[PrepareQueryResponse] = {
+    val orgId: Option[Long] = request.currentOrganizationId
+    val userProfile: Option[UserProfile] = Seq(viewAsProfile, request.currentProfile).flatten.headOption
     val baseQuery: Query = request.querySetting.toQuery
 
     for {
@@ -1660,7 +1672,8 @@ class QueryServiceImpl @Inject() (
         if (request.querySetting.isInstanceOf[FilterSetting]) Array.empty else request.filterRequests,
         relationshipInfo,
         rlsPolicies,
-        tableExpressions
+        tableExpressions,
+        request.parameters
       )
     } yield {
       PrepareQueryResponse(relationshipInfo, rlsPolicies, tableExpressions, finalQuery)

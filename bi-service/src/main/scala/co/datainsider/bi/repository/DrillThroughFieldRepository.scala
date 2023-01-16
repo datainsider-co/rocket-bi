@@ -14,7 +14,7 @@ import scala.collection.mutable.ListBuffer
   * @author tvc12 - Thien Vi
   * @created 09/13/2021 - 5:49 PM
   */
-trait DashboardFieldRepository {
+trait DrillThroughFieldRepository {
   def getFields(id: DashboardId): Future[Seq[Field]]
 
   def setFields(id: DashboardId, fields: Seq[Field]): Future[Unit]
@@ -23,7 +23,7 @@ trait DashboardFieldRepository {
 }
 
 class DashboardFieldRepositoryImpl(client: JdbcClient, dbName: String, tblName: String)
-    extends DashboardFieldRepository {
+    extends DrillThroughFieldRepository {
   override def getFields(id: DashboardId): Future[Seq[Field]] =
     Future {
       client.executeQuery(

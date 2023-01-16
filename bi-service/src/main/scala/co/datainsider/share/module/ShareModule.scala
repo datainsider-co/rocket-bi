@@ -26,7 +26,6 @@ object ShareModule extends TwitterModule {
 
     bindSingleton[DirectoryPermissionService].to[DirectoryPermissionServiceImplV2]
     bindSingleton[DashboardPermissionService].to[DashboardPermissionServiceImpl]
-    bindSingleton[WidgetPermissionService].to[WidgetPermissionServiceImpl]
   }
 
   override def configure(): Unit = {

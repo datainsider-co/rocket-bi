@@ -21,6 +21,7 @@ import co.datainsider.bi.domain.query.{
   QueryParserImpl,
   Select,
   SelectExpression,
+  SqlQuery,
   TableField
 }
 import co.datainsider.bi.domain.response.SqlQueryResponse
@@ -245,6 +246,34 @@ class QueryParserTest extends FunSuite with BeforeAndAfterAll {
     assert(sql.contains("with ("))
     assert(sql.contains("select count(*)"))
     assert(sql.contains("select Total_Order_ID"))
+
+    val queryResp: SqlQueryResponse = DbTestUtils.execute(sql)
+    assert(queryResp.records.nonEmpty)
+  }
+
+  test("test parse sql query with parameters") {
+    val query = SqlQuery(
+      query = s"""
+        |select * 
+        |from ${DbTestUtils.dbName}.${DbTestUtils.tblSales}
+        |where Region = {{region}}
+        |  and Order_Date >= {{  begin_date}}
+        |  and Order_Date <= {{end_date  }}
+        |  and Unit_Sold < {{  unit_sold  }}
+        |""".stripMargin,
+      parameters = Map(
+        "region" -> "'Asia'",
+        "begin_date" -> "'2018-01-01'",
+        "end_date" -> "'2018-12-31'",
+        "unit_sold" -> "1000"
+      )
+    )
+
+    val sql: String = parser.parse(query)
+    assert(sql.contains("""Region = 'Asia'"""))
+    assert(sql.contains("""Order_Date >= '2018-01-01'"""))
+    assert(sql.contains("""Order_Date <= '2018-12-31'"""))
+    assert(sql.contains("""Unit_Sold < 1000"""))
 
     val queryResp: SqlQueryResponse = DbTestUtils.execute(sql)
     assert(queryResp.records.nonEmpty)

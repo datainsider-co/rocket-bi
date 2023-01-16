@@ -5,15 +5,15 @@ import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.bi.domain.Ids.{DashboardId, WidgetId}
 import co.datainsider.bi.domain._
 import co.datainsider.bi.domain.chart.Widget
+import co.datainsider.bi.domain.query.Field
 import co.datainsider.bi.domain.request.ListDrillThroughDashboardRequest
-import co.datainsider.bi.util.{Serializer, Using}
+import co.datainsider.bi.util.Serializer
 import co.datainsider.share.domain.response.PageResult
 import com.fasterxml.jackson.databind.JsonNode
 import com.twitter.inject.Logging
 import com.twitter.util.{Await, Future}
-import datainsider.client.exception.DbExecuteError
 
-import java.sql.{PreparedStatement, ResultSet}
+import java.sql.ResultSet
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 trait DashboardRepository {
@@ -232,45 +232,45 @@ class MySqlDashboardRepository(
   }
 
   private def getDrillThroughDashboards(request: ListDrillThroughDashboardRequest): Seq[Dashboard] = {
-    val queryData = prepareListDrillThroughQueryData(request)
-    client.executeQuery(buildDrillThroughQuery(request), queryData: _*)(toDashboards)
+    val queryData = prepareListDrillThroughDashboards(request)
+    client.executeQuery(querySelectDrillThroughDashboard(request), queryData: _*)(toDashboards)
   }
 
   private def countTotalDrillThroughDashboards(request: ListDrillThroughDashboardRequest): Long = {
-    val queryData = prepareCountDrillThroughQueryData(request)
-    client.executeQuery(buildCountDrillThroughQuery(request), queryData: _*)(rs => if (rs.next()) rs.getLong(1) else 0)
+    val queryData = prepareCountDrillThroughDashboards(request)
+    client.executeQuery(queryCountDrillThroughDashboard(request), queryData: _*)(rs => if (rs.next()) rs.getLong(1) else 0)
   }
 
-  private def buildDrillThroughQuery(request: ListDrillThroughDashboardRequest): String = {
-    /// Be careful: don't add new columns, because will duplicate row
+  private def querySelectDrillThroughDashboard(request: ListDrillThroughDashboardRequest): String = {
     s"""
-       |SELECT DISTINCT
-       |	dashboard.id,
-       |	dashboard.name,
-       |	dashboard.main_date_filter,
-       |	dashboard.widgets,
-       |	dashboard.widget_positions,
-       |	dashboard.creator_id,
-       |	dashboard.owner_id,
-       |	dashboard.setting
+       |SELECT dashboard.*
        |FROM $dbName.$tblDashboardName dashboard
-       |LEFT JOIN $dbName.$tblDirectoryName directory on dashboard.id = directory.dashboard_id
+       |INNER JOIN $dbName.$tblDirectoryName directory on dashboard.id = directory.dashboard_id
        |LEFT JOIN $dbName.$tblShareInfoName share_info on share_info.resource_id = directory.id
-       |RIGHT JOIN $dbName.$tblDrillThroughFieldName drill_field on dashboard.id = drill_field.dashboard_id
+       |RIGHT JOIN (${queryDrillThroughDashboardId(request.fields)}) drill_field on dashboard.id = drill_field.dashboard_id
        |${buildWhereDrillThroughCause(request)}
        |ORDER BY dashboard.name ASC
        |LIMIT ?, ?""".stripMargin
   }
 
-  private def buildCountDrillThroughQuery(request: ListDrillThroughDashboardRequest): String = {
+  private def queryCountDrillThroughDashboard(request: ListDrillThroughDashboardRequest): String = {
     s"""
-       |SELECT COUNT(DISTINCT dashboard.id)
+       |SELECT COUNT(dashboard.id)
        |FROM $dbName.$tblDashboardName dashboard
-       |LEFT JOIN $dbName.$tblDirectoryName directory on dashboard.id = directory.dashboard_id
+       |INNER JOIN $dbName.$tblDirectoryName directory on dashboard.id = directory.dashboard_id
        |LEFT JOIN $dbName.$tblShareInfoName share_info on share_info.resource_id = directory.id
-       |RIGHT JOIN $dbName.$tblDrillThroughFieldName drill_field on dashboard.id = drill_field.dashboard_id
+       |RIGHT JOIN (${queryDrillThroughDashboardId(request.fields)}) drill_field on dashboard.id = drill_field.dashboard_id
        | ${buildWhereDrillThroughCause(request)}
        | """.stripMargin
+  }
+
+  private def queryDrillThroughDashboardId(fields: Array[Field]): String = {
+    s"""
+       |SELECT DISTINCT dashboard_id
+       |FROM $dbName.$tblDrillThroughFieldName
+       |WHERE
+       |${if (fields.nonEmpty) s"field_id in (${createParams(fields.length)})" else " FALSE"}
+       |""".stripMargin
   }
 
   private def buildWhereDrillThroughCause(request: ListDrillThroughDashboardRequest) = {
@@ -293,46 +293,40 @@ class MySqlDashboardRepository(
       finalWhereCause.append(s" and dashboard.id not in (${createParams(request.excludeIds.length)})")
     }
 
-    val whereFieldIdCause = request.fields.nonEmpty match {
-      case true => s" and drill_field.field_id in (${createParams(request.fields.length)})"
-      // if fields empty select will return empty
-      case _ => " and false"
-    }
-    finalWhereCause.append(whereFieldIdCause)
-
     finalWhereCause.toString()
   }
 
-  private def prepareListDrillThroughQueryData(request: ListDrillThroughDashboardRequest): Record = {
-    val record = new ArrayBuffer[Any]()
-    record.append(
+  private def prepareListDrillThroughDashboards(request: ListDrillThroughDashboardRequest): Record = {
+    val params = ArrayBuffer.empty[Any]
+    val fieldIds: Seq[String] = request.fields.map(field => field.normalizedFieldName)
+    params.appendAll(fieldIds)
+    params.append(
       request.isRemoved.getOrElse(false),
       request.currentUsername,
       request.currentUsername
     )
-    record.appendAll(request.excludeIds)
-    val fieldIds: Seq[String] = request.fields.map(field => field.normalizedFieldName)
-    record.appendAll(fieldIds)
+    params.appendAll(request.excludeIds)
 
-    record.append(
+    params.append(
       request.from,
       request.size
     )
 
-    record.toArray
+    params.toArray
   }
 
-  private def prepareCountDrillThroughQueryData(request: ListDrillThroughDashboardRequest): Record = {
-    val record = new ArrayBuffer[Any]()
-    record.append(
+  private def prepareCountDrillThroughDashboards(request: ListDrillThroughDashboardRequest): Record = {
+    val params = ArrayBuffer.empty[Any]
+    val fieldIds: Seq[String] = request.fields.map(field => field.normalizedFieldName)
+    params.appendAll(fieldIds)
+
+    params.append(
       request.isRemoved.getOrElse(false),
       request.currentUsername,
       request.currentUsername
     )
-    record.appendAll(request.excludeIds)
-    val fieldIds: Seq[String] = request.fields.map(field => field.normalizedFieldName)
-    record.appendAll(fieldIds)
-    record.toArray
+    params.appendAll(request.excludeIds)
+    params.toArray
   }
 
   private def createParams(size: Int): String = {

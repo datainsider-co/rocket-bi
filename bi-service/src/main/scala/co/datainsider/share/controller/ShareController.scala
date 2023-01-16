@@ -1,17 +1,12 @@
 package co.datainsider.share.controller
 
 import co.datainsider.bi.domain.DirectoryType
-import datainsider.profiler.Profiler
-import co.datainsider.share.controller.filter.ShareContext.ShareContextSyntax
-import co.datainsider.share.controller.filter.{ShareAccessFilters, UserNonSharingFilter}
+import co.datainsider.share.controller.filter.ShareAccessFilters
 import co.datainsider.share.controller.request._
 import co.datainsider.share.service.{DashboardPermissionService, DirectoryPermissionService, ShareService}
 import com.google.inject.{Inject, Singleton}
-import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
-import com.twitter.util.Future
-import datainsider.client.exception.UnsupportedError
-import datainsider.client.filter.UserContext.UserContextSyntax
+import datainsider.profiler.Profiler
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

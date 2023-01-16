@@ -25,11 +25,17 @@ trait Query {
   val rlsConditions: Seq[RlsCondition]
   val allQueryViews: Seq[QueryView]
   val expressions: Map[String, String]
+  val parameters: Map[String, String]
 
   def addConditions(conditions: Seq[Condition]): Query
+
   def setLimit(limit: Option[Limit]): Query
-  def customCopy(rlsConditions: Seq[RlsCondition]): Query
-  def customCopy(expressions: Map[String, String]): Query
+
+  def customCopy(
+      rlsConditions: Seq[RlsCondition],
+      expressions: Map[String, String],
+      parameters: Map[String, String]
+  ): Query
 
 }
 
@@ -37,7 +43,8 @@ case class SqlQuery(
     query: String,
     encryptKey: Option[String] = None,
     rlsConditions: Seq[RlsCondition] = Seq.empty,
-    expressions: Map[String, String] = Map.empty
+    expressions: Map[String, String] = Map.empty,
+    parameters: Map[String, String] = Map.empty
 ) extends Query
     with Logging {
   override val allQueryViews: Seq[QueryView] = {
@@ -58,14 +65,13 @@ case class SqlQuery(
     throw BadRequestError(s"addFieldCondition($this) is not yet supported")
   }
 
-  override def customCopy(rlsConditions: Seq[RlsCondition]): SqlQuery = {
-    this.copy(rlsConditions = rlsConditions)
+  override def customCopy(
+      rlsConditions: Seq[RlsCondition],
+      expressions: Map[String, String],
+      parameters: Map[String, String]
+  ): SqlQuery = {
+    this.copy(rlsConditions = rlsConditions, expressions = expressions, parameters = parameters)
   }
-
-  override def customCopy(expressions: Map[String, String]): SqlQuery = {
-    this.copy(expressions = expressions)
-  }
-
 }
 
 case class ObjectQuery(
@@ -78,7 +84,8 @@ case class ObjectQuery(
     limit: Option[Limit] = None,
     encryptKey: Option[String] = None,
     rlsConditions: Seq[RlsCondition] = Seq.empty,
-    expressions: Map[String, String] = Map.empty
+    expressions: Map[String, String] = Map.empty,
+    parameters: Map[String, String] = Map.empty
 ) extends Query {
   override def addConditions(conditions: Seq[Condition]): Query = {
     this.copy(conditions = this.conditions ++ conditions)
@@ -132,12 +139,12 @@ case class ObjectQuery(
     }
   }
 
-  override def customCopy(rlsConditions: Seq[RlsCondition]): ObjectQuery = {
-    this.copy(rlsConditions = rlsConditions)
-  }
-
-  override def customCopy(expressions: Map[String, String]): ObjectQuery = {
-    this.copy(expressions = expressions)
+  override def customCopy(
+      rlsConditions: Seq[RlsCondition],
+      expressions: Map[String, String],
+      parameters: Map[String, String]
+  ): ObjectQuery = {
+    this.copy(rlsConditions = rlsConditions, expressions = expressions, parameters = parameters)
   }
 
   def getFinalExpressions: Map[String, String] = {

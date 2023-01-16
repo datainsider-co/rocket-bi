@@ -21,7 +21,7 @@ import co.datainsider.bi.repository.{
   ChartResponseRepository,
   ChartResponseRepositoryImpl,
   ClickhouseActivityRepository,
-  DashboardFieldRepository,
+  DrillThroughFieldRepository,
   DashboardFieldRepositoryImpl,
   DashboardRepository,
   DeletedDirectoryRepository,
@@ -48,7 +48,7 @@ import co.datainsider.bi.service.{
   BoostScheduleService,
   BoostScheduleServiceImpl,
   CustomJobFactory,
-  DashboardFieldService,
+  DrillThroughService,
   DashboardFieldServiceImpl,
   GeolocationService,
   GeolocationServiceImpl,
@@ -87,7 +87,7 @@ object TestModule extends TwitterModule {
     bind[QueryService].to[QueryServiceImpl].asEagerSingleton()
     bind[QueryExecutor].to[QueryExecutorImpl].asEagerSingleton()
     bind[GeolocationService].to[GeolocationServiceImpl].asEagerSingleton()
-    bind[DashboardFieldService].to[DashboardFieldServiceImpl].asEagerSingleton()
+    bind[DrillThroughService].to[DashboardFieldServiceImpl].asEagerSingleton()
     bind[RlsPolicyService].to[RlsPolicyServiceImpl].asEagerSingleton()
     bind[UserActivityService].to[UserActivityServiceImpl].asEagerSingleton()
     bind[SchemaClientService].to[MockSchemaClientService].asEagerSingleton()
@@ -203,7 +203,7 @@ object TestModule extends TwitterModule {
 
   @Singleton
   @Provides
-  def provideMySqlDrillThroughFieldRepository(@Inject @Named("mysql") client: JdbcClient): DashboardFieldRepository = {
+  def provideMySqlDrillThroughFieldRepository(@Inject @Named("mysql") client: JdbcClient): DrillThroughFieldRepository = {
     new DashboardFieldRepositoryImpl(client, dbTestName, tblDashboardFieldName)
   }
 

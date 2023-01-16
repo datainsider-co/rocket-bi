@@ -1,30 +1,24 @@
 package co.datainsider.bi.controller.http
 
-import co.datainsider.bi.controller.http.filter.UserActivityTracker
+import co.datainsider.bi.controller.http.filter._
 import co.datainsider.bi.domain.Directory
 import co.datainsider.bi.domain.Directory.{MyData, Shared}
 import co.datainsider.bi.domain.Ids.{DirectoryId, UserId}
 import co.datainsider.bi.domain.query.event.{ActionType, ResourceType}
 import co.datainsider.bi.domain.request._
 import co.datainsider.bi.domain.response.{DirectoryResponse, ParentDirectoriesResponse}
-import co.datainsider.bi.service.{
-  DeletedDirectoryService,
-  DirectoryService,
-  RecentDirectoryService,
-  StarredDirectoryService
-}
-import datainsider.profiler.Profiler
+import co.datainsider.bi.service.{DeletedDirectoryService, DirectoryService, RecentDirectoryService, StarredDirectoryService}
 import com.google.inject.Inject
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import com.twitter.util.Future
-import datainsider.authorization.filters.DirectoryAccessFilters
 import datainsider.client.domain.ThriftImplicit.RichUserProfileLike
 import datainsider.client.domain.user.{ShortUserProfile, UserProfile}
 import datainsider.client.exception.{BadRequestError, NotFoundError, UnAuthorizedError, UnsupportedError}
 import datainsider.client.filter.MustLoggedInFilter
 import datainsider.client.filter.UserContext.UserContextSyntax
 import datainsider.client.service.ProfileClientService
+import datainsider.profiler.Profiler
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -33,10 +27,18 @@ class DirectoryController @Inject() (
     profileService: ProfileClientService,
     deletedDirectoryService: DeletedDirectoryService,
     starredDirectoryService: StarredDirectoryService,
-    recentDirectoryService: RecentDirectoryService
+    recentDirectoryService: RecentDirectoryService,
+    directoryFilter: DirectoryPermissionFilter
 ) extends Controller {
 
-  filter[DirectoryAccessFilters.ViewAccessFilter]
+  filter[ShareTokenParser].filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("view", "id"),
+      directoryFilter.requireTokenPermission("view", "id")
+    )
+  )
+    .filter[InviteToDirectoryFilter]
     .get(s"/directories/:id") { request: GetDirectoryRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::GetDirectoryRequest")
       UserActivityTracker(
@@ -70,7 +72,13 @@ class DirectoryController @Inject() (
       }
     }
 
-  filter[DirectoryAccessFilters.ViewAccessFilter]
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("view", "id"),
+      directoryFilter.requireTokenPermission("view", "id")
+    )
+  ).filter[InviteToDirectoryFilter]
     .post(s"/directories/:id/list") { request: ListDirectoriesRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::ListDirectoriesRequest")
       UserActivityTracker(
@@ -92,7 +100,13 @@ class DirectoryController @Inject() (
       }
     }
 
-  filter[DirectoryAccessFilters.ViewAccessFilter]
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("view", "id"),
+      directoryFilter.requireTokenPermission("view", "id")
+    )
+  ).filter[InviteToDirectoryFilter]
     .post(s"/directories/:id/list/shared") { request: ListDirectoriesRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/:id/list/shared")
       UserActivityTracker(
@@ -166,7 +180,13 @@ class DirectoryController @Inject() (
     }
 
   filter[MustLoggedInFilter]
-    .filter[DirectoryAccessFilters.CreateAccessFilter]
+    .filter(
+      OrFilter(
+        directoryFilter.requireDirectoryOwner("parent_id"),
+        directoryFilter.requireUserPermission("create", "parent_id"),
+        directoryFilter.requireTokenPermission("create", "parent_id")
+      )
+    )
     .post(s"/directories/create") { request: CreateDirectoryRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::CreateDirectoryRequest")
       UserActivityTracker(
@@ -192,7 +212,13 @@ class DirectoryController @Inject() (
     }
 
   filter[MustLoggedInFilter]
-    .filter[DirectoryAccessFilters.EditAccessFilter]
+    .filter(
+      OrFilter(
+        directoryFilter.requireDirectoryOwner("id"),
+        directoryFilter.requireUserPermission("edit", "id"),
+        directoryFilter.requireTokenPermission("edit", "id")
+      )
+    )
     .put(s"/directories/:id") { request: UpdateDirectoryRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::UpdateDirectoryRequest")
       UserActivityTracker(
@@ -203,37 +229,49 @@ class DirectoryController @Inject() (
         description = s"update directory id '${request.id}''"
       ) {
         val user: UserProfile = getUserProfile(request.request)
-        directoryService.updateDirectory(request.getOrganizationId(), request.id, request.data).map(toDirectoryResponse(_, Some(user.toShortUserProfile)))
+        directoryService
+          .updateDirectory(request.getOrganizationId(), request.id, request.data)
+          .map(toDirectoryResponse(_, Some(user.toShortUserProfile)))
       }
     }
 
-  filter[DirectoryAccessFilters.EditAccessFilter]
-    .put(s"/directories/:id/rename") { request: RenameDirectoryRequest =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::RenameDirectoryRequest")
-      UserActivityTracker(
-        request = request.request,
-        actionName = request.getClass.getSimpleName,
-        actionType = ActionType.Update,
-        resourceType = ResourceType.Directory,
-        description = s"rename directory to '${request.toName}'"
-      ) {
-        directoryService.rename(request).map(toResponse)
-      }
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("edit", "id"),
+      directoryFilter.requireTokenPermission("edit", "id")
+    )
+  ).put(s"/directories/:id/rename") { request: RenameDirectoryRequest =>
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::RenameDirectoryRequest")
+    UserActivityTracker(
+      request = request.request,
+      actionName = request.getClass.getSimpleName,
+      actionType = ActionType.Update,
+      resourceType = ResourceType.Directory,
+      description = s"rename directory to '${request.toName}'"
+    ) {
+      directoryService.rename(request).map(toResponse)
     }
+  }
 
-  filter[DirectoryAccessFilters.EditAccessFilter]
-    .put(s"/directories/:id/move") { request: MoveDirectoryRequest =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::MoveDirectoryRequest")
-      UserActivityTracker(
-        request = request.request,
-        actionName = request.getClass.getSimpleName,
-        actionType = ActionType.Update,
-        resourceType = ResourceType.Directory,
-        description = s"move directory ${request.id} into directory ${request.toParentId}"
-      ) {
-        directoryService.move(request).map(toResponse)
-      }
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("edit", "id"),
+      directoryFilter.requireTokenPermission("edit", "id")
+    )
+  ).put(s"/directories/:id/move") { request: MoveDirectoryRequest =>
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::MoveDirectoryRequest")
+    UserActivityTracker(
+      request = request.request,
+      actionName = request.getClass.getSimpleName,
+      actionType = ActionType.Update,
+      resourceType = ResourceType.Directory,
+      description = s"move directory ${request.id} into directory ${request.toParentId}"
+    ) {
+      directoryService.move(request).map(toResponse)
     }
+  }
 
   filter[MustLoggedInFilter]
     .post(s"/directories/removed/list") { request: ListDirectoriesRequest =>
@@ -293,123 +331,157 @@ class DirectoryController @Inject() (
       } yield response
     }
 
-  filter[DirectoryAccessFilters.ViewAccessFilter]
-    .get(s"/directories/:id/parents") { request: GetDirectoryRequest =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/:id/parents")
-      UserActivityTracker(
-        request = request.request,
-        actionName = request.getClass.getSimpleName,
-        actionType = ActionType.View,
-        resourceType = ResourceType.Directory,
-        description = s"list parent directories of directory ${request.id}"
-      ) {
-        request.id match {
-          case MyData =>
-            for {
-              parentId: DirectoryId <- getRootId(request.request)
-              directoriesResponse: ParentDirectoriesResponse <-
-                directoryService.listParents(request.copy(id = parentId))
-            } yield directoriesResponse
-          case Shared                            => directoryService.listParentsShared(request)
-          case directoryId if (directoryId > 0L) => directoryService.listParents(request)
-          case _                                 => Future.exception(BadRequestError("Directory id invalid"))
-        }
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("view", "id"),
+      directoryFilter.requireTokenPermission("view", "id")
+    )
+  ).get(s"/directories/:id/parents") { request: GetDirectoryRequest =>
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/:id/parents")
+    UserActivityTracker(
+      request = request.request,
+      actionName = request.getClass.getSimpleName,
+      actionType = ActionType.View,
+      resourceType = ResourceType.Directory,
+      description = s"list parent directories of directory ${request.id}"
+    ) {
+      request.id match {
+        case MyData =>
+          for {
+            parentId: DirectoryId <- getRootId(request.request)
+            directoriesResponse: ParentDirectoriesResponse <- directoryService.listParents(request.copy(id = parentId))
+          } yield directoriesResponse
+        case Shared                            => directoryService.listParentsShared(request)
+        case directoryId if (directoryId > 0L) => directoryService.listParents(request)
+        case _                                 => Future.exception(BadRequestError("Directory id invalid"))
       }
     }
+  }
 
-  filter[DirectoryAccessFilters.DeleteAccessFilter]
-    .delete(s"/directories/:id") { request: DeleteDirectoryRequest =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::DeleteDirectoryRequest")
-      UserActivityTracker(
-        request = request.request,
-        actionName = request.getClass.getSimpleName,
-        actionType = ActionType.Delete,
-        resourceType = ResourceType.Directory,
-        description = s"delete directory ${request.id}"
-      ) {
-        directoryService.delete(request).map(toResponse)
-      }
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("delete", "id"),
+      directoryFilter.requireTokenPermission("delete", "id")
+    )
+  ).delete(s"/directories/:id") { request: DeleteDirectoryRequest =>
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::DeleteDirectoryRequest")
+    UserActivityTracker(
+      request = request.request,
+      actionName = request.getClass.getSimpleName,
+      actionType = ActionType.Delete,
+      resourceType = ResourceType.Directory,
+      description = s"delete directory ${request.id}"
+    ) {
+      directoryService.delete(request).map(toResponse)
     }
+  }
 
-  filter[DirectoryAccessFilters.DeleteAccessFilter]
-    .put(s"/directories/:id/remove") { request: DeleteDirectoryRequest =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/:id/remove")
-      UserActivityTracker(
-        request = request.request,
-        actionName = request.getClass.getSimpleName,
-        actionType = ActionType.Delete,
-        resourceType = ResourceType.Directory,
-        description = s"remove directory ${request.id}"
-      ) {
-        val orgId: Long = request.currentOrganizationId.get
-        for {
-          _ <- recentDirectoryService.delete(orgId, request.id)
-          response <- directoryService.remove(request).map(toResponse)
-        } yield response
-      }
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("delete", "id"),
+      directoryFilter.requireTokenPermission("delete", "id")
+    )
+  ).put(s"/directories/:id/remove") { request: DeleteDirectoryRequest =>
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/:id/remove")
+    UserActivityTracker(
+      request = request.request,
+      actionName = request.getClass.getSimpleName,
+      actionType = ActionType.Delete,
+      resourceType = ResourceType.Directory,
+      description = s"remove directory ${request.id}"
+    ) {
+      val orgId: Long = request.currentOrganizationId.get
+      for {
+        _ <- recentDirectoryService.delete(orgId, request.id)
+        response <- directoryService.remove(request).map(toResponse)
+      } yield response
     }
+  }
 
-  filter[DirectoryAccessFilters.DeleteAccessFilter]
-    .put(s"/directories/:id/restore") { request: DeleteDirectoryRequest =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/:id/restore")
-      UserActivityTracker(
-        request = request.request,
-        actionName = request.getClass.getSimpleName,
-        actionType = ActionType.Delete,
-        resourceType = ResourceType.Directory,
-        description = s"restore directory ${request.id}"
-      ) {
-        deletedDirectoryService.restore(request).map(toResponse)
-      }
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("delete", "id"),
+      directoryFilter.requireTokenPermission("delete", "id")
+    )
+  ).put(s"/directories/:id/restore") { request: DeleteDirectoryRequest =>
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/:id/restore")
+    UserActivityTracker(
+      request = request.request,
+      actionName = request.getClass.getSimpleName,
+      actionType = ActionType.Delete,
+      resourceType = ResourceType.Directory,
+      description = s"restore directory ${request.id}"
+    ) {
+      deletedDirectoryService.restore(request).map(toResponse)
     }
+  }
 
-  filter[DirectoryAccessFilters.DeleteAccessFilter]
-    .delete(s"/directories/trash/:id/delete") { request: DeleteDirectoryRequest =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/trash/:id/delete")
-      UserActivityTracker(
-        request = request.request,
-        actionName = request.getClass.getSimpleName,
-        actionType = ActionType.Delete,
-        resourceType = ResourceType.Directory,
-        description = s"delete directory ${request.id} forever"
-      ) {
-        deletedDirectoryService.permanentDeleteDirectory(request).map(toResponse)
-      }
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("delete", "id"),
+      directoryFilter.requireTokenPermission("delete", "id")
+    )
+  ).delete(s"/directories/trash/:id/delete") { request: DeleteDirectoryRequest =>
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/trash/:id/delete")
+    UserActivityTracker(
+      request = request.request,
+      actionName = request.getClass.getSimpleName,
+      actionType = ActionType.Delete,
+      resourceType = ResourceType.Directory,
+      description = s"delete directory ${request.id} forever"
+    ) {
+      deletedDirectoryService.permanentDeleteDirectory(request).map(toResponse)
     }
+  }
 
-  filter[DirectoryAccessFilters.ViewAccessFilter]
-    .post(s"/directories/:id/star") { request: Request =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/:id/star")
-      UserActivityTracker(
-        request = request.request,
-        actionName = request.getClass.getSimpleName,
-        actionType = ActionType.Update,
-        resourceType = ResourceType.Directory,
-        description = s"add directory ${request.getLongParam("id")} to favorite"
-      ) {
-        val organizationId = getOrganizationId(request.currentOrganizationId)
-        val username = request.currentUsername
-        val id = request.getLongParam("id")
-        starredDirectoryService.star(organizationId, username, id).map(toResponse)
-      }
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("edit", "id"),
+      directoryFilter.requireTokenPermission("edit", "id")
+    )
+  ).post(s"/directories/:id/star") { request: Request =>
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/:id/star")
+    UserActivityTracker(
+      request = request.request,
+      actionName = request.getClass.getSimpleName,
+      actionType = ActionType.Update,
+      resourceType = ResourceType.Directory,
+      description = s"add directory ${request.getLongParam("id")} to favorite"
+    ) {
+      val organizationId = getOrganizationId(request.currentOrganizationId)
+      val username = request.currentUsername
+      val id = request.getLongParam("id")
+      starredDirectoryService.star(organizationId, username, id).map(toResponse)
     }
+  }
 
-  filter[DirectoryAccessFilters.ViewAccessFilter]
-    .post(s"/directories/:id/unstar") { request: Request =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/:id/unstar")
-      UserActivityTracker(
-        request = request.request,
-        actionName = request.getClass.getSimpleName,
-        actionType = ActionType.Update,
-        resourceType = ResourceType.Directory,
-        description = s"remove directory ${request.getLongParam("id")} to favorite"
-      ) {
-        val organizationId = getOrganizationId(request.currentOrganizationId)
-        val username = request.currentUsername
-        val id = request.getLongParam("id")
-        starredDirectoryService.unstar(organizationId, username, id).map(toResponse)
-      }
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("id"),
+      directoryFilter.requireUserPermission("edit", "id"),
+      directoryFilter.requireTokenPermission("edit", "id")
+    )
+  ).post(s"/directories/:id/unstar") { request: Request =>
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/:id/unstar")
+    UserActivityTracker(
+      request = request.request,
+      actionName = request.getClass.getSimpleName,
+      actionType = ActionType.Update,
+      resourceType = ResourceType.Directory,
+      description = s"remove directory ${request.getLongParam("id")} to favorite"
+    ) {
+      val organizationId = getOrganizationId(request.currentOrganizationId)
+      val username = request.currentUsername
+      val id = request.getLongParam("id")
+      starredDirectoryService.unstar(organizationId, username, id).map(toResponse)
     }
+  }
 
   filter[MustLoggedInFilter]
     .post(s"/directories/recent") { request: ListDirectoriesRequest =>
@@ -471,6 +543,13 @@ class DirectoryController @Inject() (
     }
 
   filter[MustLoggedInFilter]
+    .filter(
+      OrFilter(
+        directoryFilter.requireDirectoryOwner("id"),
+        directoryFilter.requireUserPermission("view", "id"),
+        directoryFilter.requireTokenPermission("view", "id")
+      )
+    )
     .post(s"/directories/trash/:id") { request: ListDirectoriesRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::/directories/trash/:id")
       UserActivityTracker(
@@ -533,7 +612,7 @@ class DirectoryController @Inject() (
       directoryType = dir.directoryType,
       dashboardId = dir.dashboardId,
       updatedDate = dir.updatedDate,
-      data = dir.data,
+      data = dir.data
     )
   }
 

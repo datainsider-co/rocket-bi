@@ -38,7 +38,7 @@ object BIServiceModule extends TwitterModule {
     bind[DeletedDirectoryService].to[DeletedDirectoryServiceImpl].asEagerSingleton()
     bind[StarredDirectoryService].to[StarredDirectoryServiceImpl].asEagerSingleton()
     bind[RecentDirectoryService].to[RecentDirectoryServiceImpl].asEagerSingleton()
-    bind[DashboardFieldService].to[DashboardFieldServiceImpl].asEagerSingleton()
+    bind[DrillThroughService].to[DashboardFieldServiceImpl].asEagerSingleton()
     bind[RelationshipService].to[RelationshipServiceImpl].asEagerSingleton()
     bind[RlsPolicyService].to[RlsPolicyServiceImpl].asEagerSingleton()
     bind[UserActivityService].to[UserActivityServiceImpl].asEagerSingleton()
@@ -166,7 +166,7 @@ object BIServiceModule extends TwitterModule {
 
   @Singleton
   @Provides
-  def provideMySqlDrillThroughFieldRepository(@Inject @Named("mysql") client: JdbcClient): DashboardFieldRepository = {
+  def provideMySqlDrillThroughFieldRepository(@Inject @Named("mysql") client: JdbcClient): DrillThroughFieldRepository = {
     new DashboardFieldRepositoryImpl(client, dbLiveName, tblDashboardFieldName)
   }
 

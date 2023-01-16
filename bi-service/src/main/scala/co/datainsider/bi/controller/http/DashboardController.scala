@@ -1,16 +1,15 @@
 package co.datainsider.bi.controller.http
 
-import co.datainsider.bi.controller.http.filter.{SharedDirectoryTokenParser, UserActivityTracker}
+import co.datainsider.bi.controller.http.filter._
 import co.datainsider.bi.domain.Directory.{MyData, Shared}
 import co.datainsider.bi.domain.Ids.DirectoryId
 import co.datainsider.bi.domain.query.event.{ActionType, ResourceType}
 import co.datainsider.bi.domain.request._
-import co.datainsider.bi.service.{DashboardFieldService, DashboardService, DirectoryService}
+import co.datainsider.bi.service.{DrillThroughService, DashboardService, DirectoryService}
 import com.google.inject.Inject
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import com.twitter.util.Future
-import datainsider.authorization.filters.{DashboardAccessFilters, WidgetAccessFilters}
 import datainsider.client.exception.UnsupportedError
 import datainsider.client.filter.MustLoggedInFilter
 import datainsider.profiler.Profiler
@@ -18,13 +17,20 @@ import datainsider.profiler.Profiler
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DashboardController @Inject() (
-    dashboardService: DashboardService,
-    directoryService: DirectoryService,
-    dashboardFieldService: DashboardFieldService
+                                      dashboardService: DashboardService,
+                                      directoryService: DirectoryService,
+                                      drillThroughService: DrillThroughService,
+                                      dashboardFilter: DashboardPermissionFilter,
+                                      directoryFilter: DirectoryPermissionFilter
 ) extends Controller {
 
-  filter[SharedDirectoryTokenParser]
-    .filter[DashboardAccessFilters.ViewAccessFilter]
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "id"),
+      dashboardFilter.requireUserPermission(action = "view", dashboardParamName = "id"),
+      dashboardFilter.requireTokenPermission(action = "view", dashboardParamName = "id")
+    )
+  )
     .get(s"/dashboards/:id") { request: GetDashboardRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::GetDashboardRequest")
       UserActivityTracker(
@@ -38,8 +44,13 @@ class DashboardController @Inject() (
       }
     }
 
-  filter[MustLoggedInFilter]
-    .filter[DashboardAccessFilters.CreateAccessFilter]
+  filter(
+    OrFilter(
+      directoryFilter.requireDirectoryOwner("parent_directory_id"),
+      directoryFilter.requireUserPermission("create", "parent_directory_id"),
+      directoryFilter.requireTokenPermission("create", "parent_directory_id")
+    )
+  )
     .post(s"/dashboards/create") { request: CreateDashboardRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::CreateDashboardRequest")
       UserActivityTracker(
@@ -66,24 +77,33 @@ class DashboardController @Inject() (
       directoryService.getRootDir(GetRootDirectoryRequest(request)).map(_.id)
     }
 
-  /* filter[SharedDirectoryTokenParser]
-    .filter[DashboardAccessFilters.EditAccessFilter]
-    .*/
-  put(s"/dashboards/:id/rename") { request: RenameDashboardRequest =>
-    Profiler(s"[Http] ${this.getClass.getSimpleName}::RenameDashboardRequest")
-    UserActivityTracker(
-      request = request.request,
-      actionName = request.getClass.getSimpleName,
-      actionType = ActionType.Update,
-      resourceType = ResourceType.Dashboard,
-      description = s"rename dashboard ${request.id} to ${request.toName}"
-    ) {
-      dashboardService.rename(request).map(toResponse)
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "id"),
+      dashboardFilter.requireUserPermission(action = "edit", dashboardParamName = "id"),
+      dashboardFilter.requireTokenPermission(action = "edit", dashboardParamName = "id")
+    )
+  )
+    .put(s"/dashboards/:id/rename") { request: RenameDashboardRequest =>
+      Profiler(s"[Http] ${this.getClass.getSimpleName}::RenameDashboardRequest")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Update,
+        resourceType = ResourceType.Dashboard,
+        description = s"rename dashboard ${request.id} to ${request.toName}"
+      ) {
+        dashboardService.rename(request).map(toResponse)
+      }
     }
-  }
 
-  filter[SharedDirectoryTokenParser]
-    .filter[DashboardAccessFilters.EditAccessFilter]
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "id"),
+      dashboardFilter.requireUserPermission(action = "edit", dashboardParamName = "id"),
+      dashboardFilter.requireTokenPermission(action = "edit", dashboardParamName = "id")
+    )
+  )
     .put(s"/dashboards/:id/main_date_filter/edit") { request: UpdateMainDateFilterRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::UpdateMainDateFilterRequest")
       UserActivityTracker(
@@ -97,8 +117,13 @@ class DashboardController @Inject() (
       }
     }
 
-  filter[SharedDirectoryTokenParser]
-    .filter[DashboardAccessFilters.DeleteAccessFilter]
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "id"),
+      dashboardFilter.requireUserPermission(action = "delete", dashboardParamName = "id"),
+      dashboardFilter.requireTokenPermission(action = "delete", dashboardParamName = "id")
+    )
+  )
     .delete(s"/dashboards/:id") { request: DeleteDashboardRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::DeleteDashboardRequest")
       UserActivityTracker(
@@ -113,7 +138,12 @@ class DashboardController @Inject() (
     }
 
   filter[MustLoggedInFilter]
-    .filter[DashboardAccessFilters.ShareAccessFilter]
+    .filter(
+      OrFilter(
+        dashboardFilter.requireDirectoryOwner(dashboardParamName = "id"),
+        dashboardFilter.requireUserPermission(action = "share", dashboardParamName = "id")
+      )
+    )
     .post(s"/dashboards/:id/share") { request: ShareDashboardRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::ShareDashboardRequest")
       UserActivityTracker(
@@ -127,8 +157,13 @@ class DashboardController @Inject() (
       }
     }
 
-  filter[SharedDirectoryTokenParser]
-    .filter[WidgetAccessFilters.ViewAccessFilter]
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "dashboard_id"),
+      dashboardFilter.requireUserPermission(action = "view", dashboardParamName = "dashboard_id"),
+      dashboardFilter.requireTokenPermission(action = "view", dashboardParamName = "dashboard_id")
+    )
+  )
     .get(s"/dashboards/:dashboard_id/widgets/:widget_id") { request: GetWidgetRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::GetWidgetRequest")
       UserActivityTracker(
@@ -142,8 +177,13 @@ class DashboardController @Inject() (
       }
     }
 
-  filter[SharedDirectoryTokenParser]
-    .filter[WidgetAccessFilters.CreateAccessFilter]
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "dashboard_id"),
+      dashboardFilter.requireUserPermission(action = "create", dashboardParamName = "dashboard_id"),
+      dashboardFilter.requireTokenPermission(action = "create", dashboardParamName = "dashboard_id")
+    )
+  )
     .post(s"/dashboards/:dashboard_id/widgets/create") { request: CreateWidgetRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::CreateWidgetRequest")
       UserActivityTracker(
@@ -157,8 +197,14 @@ class DashboardController @Inject() (
       }
     }
 
-  filter[SharedDirectoryTokenParser]
-    .filter[WidgetAccessFilters.EditAccessFilter]
+  filter[ShareTokenParser]
+    .filter(
+      OrFilter(
+        dashboardFilter.requireDirectoryOwner(dashboardParamName = "dashboard_id"),
+        dashboardFilter.requireUserPermission(action = "edit", dashboardParamName = "dashboard_id"),
+        dashboardFilter.requireTokenPermission(action = "edit", dashboardParamName = "dashboard_id")
+      )
+    )
     .put(s"/dashboards/:dashboard_id/widgets/:widget_id/edit") { request: EditWidgetRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::EditWidgetRequest")
       UserActivityTracker(
@@ -172,8 +218,13 @@ class DashboardController @Inject() (
       }
     }
 
-  filter[SharedDirectoryTokenParser]
-    .filter[WidgetAccessFilters.DeleteAccessFilter]
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "dashboard_id"),
+      dashboardFilter.requireUserPermission(action = "delete", dashboardParamName = "dashboard_id"),
+      dashboardFilter.requireTokenPermission(action = "delete", dashboardParamName = "dashboard_id")
+    )
+  )
     .delete(s"/dashboards/:dashboard_id/widgets/:widget_id") { request: DeleteWidgetRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::DeleteWidgetRequest")
       UserActivityTracker(
@@ -187,8 +238,13 @@ class DashboardController @Inject() (
       }
     }
 
-  filter[SharedDirectoryTokenParser]
-    .filter[DashboardAccessFilters.EditAccessFilter]
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "dashboard_id"),
+      dashboardFilter.requireUserPermission(action = "edit", dashboardParamName = "dashboard_id"),
+      dashboardFilter.requireTokenPermission(action = "edit", dashboardParamName = "dashboard_id")
+    )
+  )
     .put(s"/dashboards/:dashboard_id/widgets/resize") { request: ResizeWidgetsRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::ResizeWidgetsRequest")
       UserActivityTracker(
@@ -202,47 +258,72 @@ class DashboardController @Inject() (
       }
     }
 
-  put(s"/dashboards/:id") { request: UpdateSettingsRequest =>
-    Profiler(s"[Http] ${this.getClass.getSimpleName}::UpdateSettingsRequest")
-    UserActivityTracker(
-      request = request.request,
-      actionName = request.getClass.getSimpleName,
-      actionType = ActionType.Update,
-      resourceType = ResourceType.Dashboard,
-      description = s"update settings of dashboard ${request.id}"
-    ) {
-      dashboardService.updateSettings(request).map(toResponse)
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "id"),
+      dashboardFilter.requireUserPermission(action = "edit", dashboardParamName = "id"),
+      dashboardFilter.requireTokenPermission(action = "edit", dashboardParamName = "id")
+    )
+  )
+    .put(s"/dashboards/:id") { request: UpdateSettingsRequest =>
+      Profiler(s"[Http] ${this.getClass.getSimpleName}::UpdateSettingsRequest")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Update,
+        resourceType = ResourceType.Dashboard,
+        description = s"update settings of dashboard ${request.id}"
+      ) {
+        dashboardService.updateSettings(request).map(toResponse)
+      }
     }
-  }
-
-  post(s"/dashboards/:id/refresh_boost") { request: RefreshBoostRequest =>
-    Profiler(s"[Http] ${this.getClass.getSimpleName}::RefreshBoostRequest")
-    UserActivityTracker(
-      request = request.request,
-      actionName = request.getClass.getSimpleName,
-      actionType = ActionType.Update,
-      resourceType = ResourceType.Dashboard,
-      description = s"refresh boost of dashboard ${request.id}"
-    ) {
-      dashboardService.refreshBoost(request).map(toResponse)
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "id"),
+      dashboardFilter.requireUserPermission(action = "edit", dashboardParamName = "id"),
+      dashboardFilter.requireTokenPermission(action = "edit", dashboardParamName = "id")
+    )
+  )
+    .post(s"/dashboards/:id/refresh_boost") { request: RefreshBoostRequest =>
+      Profiler(s"[Http] ${this.getClass.getSimpleName}::RefreshBoostRequest")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Update,
+        resourceType = ResourceType.Dashboard,
+        description = s"refresh boost of dashboard ${request.id}"
+      ) {
+        dashboardService.refreshBoost(request).map(toResponse)
+      }
     }
-  }
 
-  post(s"/dashboards/:id/force_boost") { request: ForceBoostRequest =>
-    Profiler(s"[Http] ${this.getClass.getSimpleName}::ForceBoostRequest")
-    UserActivityTracker(
-      request = request.request,
-      actionName = request.getClass.getSimpleName,
-      actionType = ActionType.Update,
-      resourceType = ResourceType.Dashboard,
-      description = s"force boost of dashboard ${request.id}"
-    ) {
-      dashboardService.forceBoost(request)
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "id"),
+      dashboardFilter.requireUserPermission(action = "edit", dashboardParamName = "id"),
+      dashboardFilter.requireTokenPermission(action = "edit", dashboardParamName = "id")
+    )
+  )
+    .post(s"/dashboards/:id/force_boost") { request: ForceBoostRequest =>
+      Profiler(s"[Http] ${this.getClass.getSimpleName}::ForceBoostRequest")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Update,
+        resourceType = ResourceType.Dashboard,
+        description = s"force boost of dashboard ${request.id}"
+      ) {
+        dashboardService.forceBoost(request)
+      }
     }
-  }
 
-  filter[SharedDirectoryTokenParser]
-    .filter[DashboardAccessFilters.ViewAccessFilter]
+  filter(
+    OrFilter(
+      dashboardFilter.requireDirectoryOwner(dashboardParamName = "dashboard_id"),
+      dashboardFilter.requireUserPermission(action = "view", dashboardParamName = "dashboard_id"),
+      dashboardFilter.requireTokenPermission(action = "view", dashboardParamName = "dashboard_id")
+    )
+  )
     .get(s"/dashboards/:dashboard_id/get_directory_id") { request: Request =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::/dashboards/:dashboard_id/get_directory_id")
       UserActivityTracker(
@@ -267,7 +348,14 @@ class DashboardController @Inject() (
         resourceType = ResourceType.Dashboard,
         description = s"drill through from dashboard ${request.from}"
       ) {
-        dashboardFieldService.listDashboards(request)
+        drillThroughService.listDashboards(request)
+      }
+    }
+
+  filter[MustLoggedInFilter]
+    .post("/dashboards/drill_through/scan") {
+      request: Request => {
+        drillThroughService.scanAndUpdateDrillThroughFields()
       }
     }
 

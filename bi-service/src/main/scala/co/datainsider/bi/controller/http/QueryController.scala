@@ -2,7 +2,7 @@ package co.datainsider.bi.controller.http
 
 import co.datainsider.bi.controller.http.filter.UserActivityTracker
 import co.datainsider.bi.domain.query.event.{ActionType, ResourceType}
-import co.datainsider.bi.domain.request.{ChartRequest, ListUserActivitiesRequest, SqlQueryRequest, ViewAsRequest}
+import co.datainsider.bi.domain.request.{ChartRequest, ListUserActivitiesRequest, SqlQueryRequest, QueryViewAsRequest}
 import co.datainsider.bi.service.{QueryService, UserActivityService}
 import com.google.inject.Inject
 import com.google.inject.name.Named
@@ -65,7 +65,7 @@ class QueryController @Inject() (
     }
 
   filter(permissionFilter.require("rls:view:*"))
-    .post("/chart/view_as") { request: ViewAsRequest =>
+    .post("/chart/view_as") { request: QueryViewAsRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::QueryViewAsRequest") {
         queryService.query(request)
       }

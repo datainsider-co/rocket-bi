@@ -20,19 +20,25 @@ trait QueryParser {
 class QueryParserImpl @Inject() (sqlParser: SqlParser) extends QueryParser with Logging {
 
   override def parse(query: Query): String = {
-    val baseSql: String = query match {
+    var sql: String = query match {
       case sqlQuery: SqlQuery    => sqlQuery.query
       case objQuery: ObjectQuery => parse(objQuery)
       case _                     => throw BadRequestError(s"$query parsing is not supported")
     }
 
-    val decryptedSql = if (query.encryptKey.isDefined) {
-      toDecryptedSql(baseSql, query.encryptKey.get)
-    } else {
-      baseSql
+    if (query.encryptKey.isDefined) {
+      sql = applyDecryption(sql, query.encryptKey.get)
     }
 
-    toAppliedRlsSql(decryptedSql, query.rlsConditions)
+    if (query.parameters.nonEmpty) {
+      sql = applyParameters(sql, query.parameters)
+    }
+
+    if (query.rlsConditions.nonEmpty) {
+      sql = applyRlsConditions(sql, query.rlsConditions)
+    }
+
+    sql
   }
 
   private def parse(objQuery: ObjectQuery): String = {
@@ -102,7 +108,7 @@ class QueryParserImpl @Inject() (sqlParser: SqlParser) extends QueryParser with 
     })
   }
 
-  private def toDecryptedSql(sql: String, encryptKey: String): String = {
+  private def applyDecryption(sql: String, encryptKey: String): String = {
     val encryptMode = ZConfig.getString("database.clickhouse.encryption.mode")
     val initialVector = ZConfig.getString("database.clickhouse.encryption.iv")
 
@@ -113,7 +119,7 @@ class QueryParserImpl @Inject() (sqlParser: SqlParser) extends QueryParser with 
 
   }
 
-  private def toAppliedRlsSql(sql: String, rlsConditions: Seq[RlsCondition]): String = {
+  private def applyRlsConditions(sql: String, rlsConditions: Seq[RlsCondition]): String = {
     rlsConditions.foldLeft(sql)(applyRlsCondition) // TODO: detect related table only
   }
 
@@ -146,6 +152,14 @@ class QueryParserImpl @Inject() (sqlParser: SqlParser) extends QueryParser with 
     )
 
     parse(exprQuery)
+  }
+
+  private def applyParameters(sql: String, parameters: Map[String, String]): String = {
+    parameters.foldLeft(sql)((query, kv) => {
+      val PARAM_REGEX = raw"""\{\{\s*${kv._1}\s*\}\}"""
+
+      query.replaceAll(PARAM_REGEX, kv._2)
+    })
   }
 
 }

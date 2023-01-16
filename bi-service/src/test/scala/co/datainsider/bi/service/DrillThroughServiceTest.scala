@@ -5,16 +5,13 @@ import co.datainsider.bi.domain.chart.{Chart, DropdownFilterChartSetting, TabFil
 import co.datainsider.bi.domain.query.{Field, GroupBy, TableField}
 import co.datainsider.bi.module.TestModule
 import co.datainsider.bi.repository.SchemaManager
-import co.datainsider.bi.util.Serializer
-import com.fasterxml.jackson.databind.JsonNode
 import com.twitter.inject.app.TestInjector
 import com.twitter.inject.{Injector, IntegrationTest}
-import datainsider.client.module.MockCaasClientModule
 
-class DashboardFieldServiceTest extends IntegrationTest {
+class DrillThroughServiceTest extends IntegrationTest {
   override protected def injector: Injector = TestInjector(TestModule).newInstance()
 
-  val dashboardFieldService: DashboardFieldService = injector.instance[DashboardFieldService]
+  val drillThroughService: DrillThroughService = injector.instance[DrillThroughService]
   val schemaManager: SchemaManager = injector.instance[SchemaManager]
 
   val field1: TableField = TableField("Animal", "Cat", "Name", "string");
@@ -49,42 +46,42 @@ class DashboardFieldServiceTest extends IntegrationTest {
 
   override def beforeAll(): Unit = {
     await(schemaManager.ensureDatabase())
-    await(dashboardFieldService.delFields(dashboard.id))
+    await(drillThroughService.deleteDrillThroughFields(dashboard.id))
   }
 
   override def afterAll(): Unit = {
-    await(dashboardFieldService.delFields(dashboard.id))
+    await(drillThroughService.deleteDrillThroughFields(dashboard.id))
   }
 
   test("Set Drill Through Fields") {
-    await(dashboardFieldService.setFields(dashboard))
-    val tableFields: Seq[Field] = await(dashboardFieldService.getFields(dashboard.id))
+    await(drillThroughService.updateDrillThroughFields(dashboard))
+    val tableFields: Seq[Field] = await(drillThroughService.getDrillThroughFields(dashboard.id))
     assertResult(2)(tableFields.size)
   }
 
   test("Set Drill Through Fields with dashboard empty") {
-    await(dashboardFieldService.setFields(dashboard.copy(widgets = None)))
-    val tableFields: Seq[Field] = await(dashboardFieldService.getFields(dashboard.id))
+    await(drillThroughService.updateDrillThroughFields(dashboard.copy(widgets = None)))
+    val tableFields: Seq[Field] = await(drillThroughService.getDrillThroughFields(dashboard.id))
     assertResult(0)(tableFields.size)
   }
 
   test("Delete all field by dashboard id") {
     // set filters
-    await(dashboardFieldService.setFields(dashboard))
+    await(drillThroughService.updateDrillThroughFields(dashboard))
     // tests insert ok
-    val insertResult: Seq[Field] = await(dashboardFieldService.getFields(dashboard.id))
+    val insertResult: Seq[Field] = await(drillThroughService.getDrillThroughFields(dashboard.id))
     assertResult(2)(insertResult.size)
     // delete
-    await(dashboardFieldService.delFields(dashboard.id))
+    await(drillThroughService.deleteDrillThroughFields(dashboard.id))
     // check delete ok
-    val deleteResult: Seq[Field] = await(dashboardFieldService.getFields(dashboard.id))
+    val deleteResult: Seq[Field] = await(drillThroughService.getDrillThroughFields(dashboard.id))
     assertResult(0)(deleteResult.size)
   }
 
-  test("Scan and create dashboard field") {
+  test("Scan and create drill through field") {
     val turnOn = false
     if (turnOn) {
-      await(dashboardFieldService.scanAndCreateDashboardFields())
+      await(drillThroughService.scanAndUpdateDrillThroughFields())
     }
   }
 }

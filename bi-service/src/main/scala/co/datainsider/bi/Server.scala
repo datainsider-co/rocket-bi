@@ -1,17 +1,12 @@
 package co.datainsider.bi
 
 import co.datainsider.bi.controller.http._
-import co.datainsider.bi.controller.http.filter.{
-  CORSFilter,
-  CaseClassExceptionMapping,
-  CommonExceptionMapping,
-  JsonParseExceptionMapping
-}
+import co.datainsider.bi.controller.http.filter._
 import co.datainsider.bi.controller.thrift.TBIServiceController
-import co.datainsider.bi.module.{AccessFilterModule, BIServiceModule, TestModule}
+import co.datainsider.bi.module.{BIServiceModule, TestModule}
 import co.datainsider.bi.repository.SchemaManager
 import co.datainsider.bi.service.BoostScheduleService
-import co.datainsider.bi.util.{LicenceUtils, ZConfig}
+import co.datainsider.bi.util.ZConfig
 import co.datainsider.share.controller.{PermissionTokenController, ShareController}
 import co.datainsider.share.module.{MockShareModule, ShareModule}
 import com.google.inject.Module
@@ -44,8 +39,7 @@ class Server extends HttpServer with ThriftServer {
       BIServiceModule,
       ShareModule,
       CaasClientModule,
-      SchemaClientModule,
-      AccessFilterModule
+      SchemaClientModule
     )
 
   override protected def configureHttp(router: HttpRouter): Unit = {
@@ -54,8 +48,8 @@ class Server extends HttpServer with ThriftServer {
       .filter[CommonFilters]
       .filter[LoggedInUserParser]
       .add[HealthController]
-      .add[QueryController]
-      .add[DashboardController]
+      .add[ShareTokenParser, QueryController]
+      .add[ShareTokenParser, DashboardController]
       .add[DirectoryController]
       .add[MustLoggedInFilter, RelationshipController]
       .add[MustLoggedInFilter, PolicyController]

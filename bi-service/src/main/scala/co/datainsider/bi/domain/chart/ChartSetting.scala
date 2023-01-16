@@ -1,18 +1,6 @@
 package co.datainsider.bi.domain.chart
 
-import co.datainsider.bi.domain.query.{
-  AggregateCondition,
-  Condition,
-  FieldRelatedFunction,
-  Function,
-  JoinCondition,
-  ObjectQueryBuilder,
-  Or,
-  OrderBy,
-  Query,
-  SqlQuery,
-  SqlView
-}
+import co.datainsider.bi.domain.query.{AggregateCondition, Condition, Field, FieldRelatedFunction, Function, JoinCondition, ObjectQueryBuilder, Or, OrderBy, Query, SqlQuery, SqlView}
 import co.datainsider.bi.domain.request.{CompareRequest, FilterRequest}
 import co.datainsider.bi.domain.{GeoArea, Order}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
@@ -475,6 +463,7 @@ case class HistogramChartSetting(
   override def customCopy(options: Map[String, Any]): HistogramChartSetting = this.copy(options = options)
 }
 
+@deprecated("use TabControlChartSetting instead")
 case class DropdownFilterChartSetting(
     value: TableColumn,
     label: Option[TableColumn] = None,
@@ -484,7 +473,8 @@ case class DropdownFilterChartSetting(
     filterRequest: Option[FilterRequest] = None,
     options: Map[String, Any] = Map.empty
 ) extends ChartSetting
-    with FilterSetting {
+    with FilterSetting
+    with DrillThroughSetting {
   override def toTableColumns: Array[TableColumn] =
     if (label.isDefined) Array(label.get, value) else Array(value, value)
 
@@ -499,8 +489,16 @@ case class DropdownFilterChartSetting(
   }
 
   override def customCopy(options: Map[String, Any]): DropdownFilterChartSetting = this.copy(options = options)
+
+  override def getDrillThroughFields(): Seq[Field] = {
+    value.function match {
+      case function: FieldRelatedFunction => Seq(function.field)
+      case _ => Seq.empty
+    }
+  }
 }
 
+@deprecated("use TabControlChartSetting instead")
 case class TabFilterChartSetting(
     value: TableColumn,
     label: Option[TableColumn] = None,
@@ -510,7 +508,8 @@ case class TabFilterChartSetting(
     filterRequest: Option[FilterRequest] = None,
     options: Map[String, Any] = Map.empty
 ) extends ChartSetting
-    with FilterSetting {
+    with FilterSetting
+    with DrillThroughSetting  {
   override def toTableColumns: Array[TableColumn] =
     if (label.isDefined) Array(label.get, value) else Array(value, value)
 
@@ -525,6 +524,13 @@ case class TabFilterChartSetting(
   }
 
   override def customCopy(options: Map[String, Any]): TabFilterChartSetting = this.copy(options = options)
+
+  override def getDrillThroughFields(): Seq[Field] = {
+    value.function match {
+      case function: FieldRelatedFunction => Seq(function.field)
+      case _ => Seq.empty
+    }
+  }
 }
 
 case class TabControlChartSetting(
@@ -535,7 +541,8 @@ case class TabControlChartSetting(
     filterRequest: Option[FilterRequest] = None,
     options: Map[String, Any] = Map.empty
 ) extends ChartSetting
-    with FilterSetting {
+    with FilterSetting
+    with DrillThroughSetting {
   private def getFirstColumn: TableColumn = {
     require(values.nonEmpty, "tab control's values can not be empty")
     values.head
@@ -553,6 +560,13 @@ case class TabControlChartSetting(
   }
 
   override def customCopy(options: Map[String, Any]): TabControlChartSetting = this.copy(options = options)
+
+  override def getDrillThroughFields(): Seq[Field] = {
+    getFirstColumn.function match {
+      case function: FieldRelatedFunction => Seq(function.field)
+      case _        => Seq.empty
+    }
+  }
 }
 
 case class InputControlChartSetting(
@@ -563,7 +577,8 @@ case class InputControlChartSetting(
     filterRequest: Option[FilterRequest] = None,
     options: Map[String, Any] = Map.empty
 ) extends ChartSetting
-    with FilterSetting {
+    with FilterSetting
+    with DrillThroughSetting {
 
   override def toTableColumns: Array[TableColumn] = values
 
@@ -577,6 +592,18 @@ case class InputControlChartSetting(
   }
 
   override def customCopy(options: Map[String, Any]): InputControlChartSetting = this.copy(options = options)
+
+  override def getDrillThroughFields(): Seq[Field] = {
+    val firstColumn: Option[TableColumn] = values.headOption
+    if (firstColumn.isDefined) {
+      firstColumn.get.function match {
+        case function: FieldRelatedFunction => Seq(function.field)
+        case _        => Seq.empty
+      }
+    } else {
+      Seq.empty
+    }
+  }
 }
 
 case class MapChartSetting(
