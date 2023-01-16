@@ -54,6 +54,9 @@ if [[ "x$PUSH" == "xtrue" ]]; then
   # caas-service
   docker build -f ${DIR}/caas-service/Dockerfile -t ${REGISTRY}/caas-service:${TAG} ${DIR}/caas-service
   docker push ${REGISTRY}/caas-service:${TAG}
+  # rocket-bi-web
+  docker build -f ${DIR}/rocket-bi-web/Dockerfile -t ${REGISTRY}/rocket-bi-web:${TAG} ${DIR}/rocket-bi-web
+  docker push ${REGISTRY}/rocket-bi-web:${TAG}
 
   # build tag 'latest' for every build except for tag latest itself
   if [[ "x$TAG" != "xlatest" ]]; then
@@ -64,5 +67,8 @@ if [[ "x$PUSH" == "xtrue" ]]; then
     # caas-service
     docker tag ${REGISTRY}/caas-service:${TAG} ${REGISTRY}/caas-service:latest
     docker push ${REGISTRY}/caas-service:latest
+    # rocket-bi-web
+    docker tag ${REGISTRY}/rocket-bi-web:${TAG} ${REGISTRY}/rocket-bi-web:latest
+    docker push ${REGISTRY}/rocket-bi-web:latest
   fi
 fi
