@@ -5,8 +5,9 @@
         id="data-point"
         :value="dataPoint"
         class="mb-3 group-config"
-        placeholder="Input Data Point"
-        label="Maximum data point"
+        :label="`${configSetting['maxDataPoint'].label}`"
+        :hint="`${configSetting['maxDataPoint'].hint}`"
+        :placeholder="`${configSetting['maxDataPoint'].placeHolder}`"
         size="full"
         @onChanged="handleDataPointChanged"
       />
@@ -22,6 +23,8 @@ import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 
 @Component({ components: { PanelHeader } })
 export default class DataPointTab extends Vue {
+  private readonly configSetting = window.chartSetting['general.tab'];
+
   @Prop({ required: false, type: Object })
   setting!: SeriesOptionData;
 

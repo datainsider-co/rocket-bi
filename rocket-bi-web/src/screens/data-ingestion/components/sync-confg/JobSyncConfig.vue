@@ -25,6 +25,7 @@
     ></ShopifySyncModeConfig>
     <S3SyncModeConfig v-if="isS3Job" ref="s3SyncModeConfig" class="mb-3" :is-validate="isValidate" :job.sync="syncJob"></S3SyncModeConfig>
     <GoogleAdsSyncModeConfig v-if="isGoogleAdsJob" ref="ggAdsSyncModeConfig" class="mb-3" :is-validate="isValidate" :job.sync="syncJob" />
+    <FacebookAdsSyncModeConfig v-if="isFacebookAdsJob" ref="fbAdsSyncModeConfig" class="mb-3" :is-validate="isValidate" :job.sync="syncJob" />
   </div>
 </template>
 
@@ -38,6 +39,7 @@ import { Job, JobName } from '@core/data-ingestion';
 import { Component, Prop, PropSync, Ref, Vue } from 'vue-property-decorator';
 import S3SyncModeConfig from './S3SyncModeConfig.vue';
 import GoogleAdsSyncModeConfig from '@/screens/data-ingestion/components/GoogleAdsSyncModeConfig.vue';
+import FacebookAdsSyncModeConfig from '@/screens/data-ingestion/components/facebook-ads/FacebookAdsSyncModeConfig.vue';
 
 @Component({
   components: {
@@ -47,7 +49,8 @@ import GoogleAdsSyncModeConfig from '@/screens/data-ingestion/components/GoogleA
     GenericJdbcSyncModeConfig,
     MongoSyncModeConfig,
     BigQuerySyncModeConfig,
-    GoogleAdsSyncModeConfig
+    GoogleAdsSyncModeConfig,
+    FacebookAdsSyncModeConfig
   }
 })
 export default class JobSyncConfig extends Vue {
@@ -79,6 +82,9 @@ export default class JobSyncConfig extends Vue {
   @Ref()
   private readonly ggAdsSyncModeConfig?: GoogleAdsSyncModeConfig;
 
+  @Ref()
+  private readonly fbAdsSyncModeConfig?: FacebookAdsSyncModeConfig;
+
   private get isJdbcJob(): boolean {
     return Job.isJdbcJob(this.syncJob);
   }
@@ -106,6 +112,9 @@ export default class JobSyncConfig extends Vue {
   private get isGoogleAdsJob(): boolean {
     return this.syncJob.className === JobName.GoogleAdsJob;
   }
+  private get isFacebookAdsJob(): boolean {
+    return this.syncJob.className === JobName.FacebookAdsJob;
+  }
 
   public validSyncMode() {
     switch (this.syncJob.className) {
@@ -123,6 +132,8 @@ export default class JobSyncConfig extends Vue {
         return this.s3SyncModeConfig?.validSyncMode();
       case JobName.GoogleAdsJob:
         return this.ggAdsSyncModeConfig?.validSyncMode();
+      case JobName.FacebookAdsJob:
+        return this.fbAdsSyncModeConfig?.validSyncMode();
       case JobName.GoogleAnalyticJob:
       case JobName.GoogleSheetJob:
       case JobName.UnsupportedJob:

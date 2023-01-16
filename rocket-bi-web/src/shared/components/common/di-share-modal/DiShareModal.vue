@@ -452,7 +452,7 @@ export default class DiShareModal extends Vue {
     if (!enabled) {
       return;
     }
-    if (this.isCreatingPassword && config) {
+    if (this.isCreatingPassword && config && StringUtils.isNotEmpty(config.hashedPassword)) {
       await this.shareHandler.savePassword(this.resourceId, this.resourceType, config);
       return;
     }

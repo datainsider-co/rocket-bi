@@ -15,6 +15,9 @@ const productionConfig = {
   VUE_APP_SCHEDULER_API_URL: 'http://localhost:8080',
   VUE_APP_RELAY_API_URL: 'http://localhost:8080',
   VUE_APP_STATIC_FILE_URL: '/static',
+  VUE_APP_FACEBOOK_APP_ID: '1371850590286877',
+  VUE_APP_FACEBOOK_APP_SECRET: '27c4375073eeabebba910688aba028de',
+  VUE_APP_FACEBOOK_SCOPE: 'ads_management,ads_read',
 
   VUE_APP_IS_DISABLE_LAKE_HOUSE: true,
   VUE_APP_IS_DISABLE_STREAMING: true,

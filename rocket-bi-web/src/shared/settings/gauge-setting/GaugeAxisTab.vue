@@ -4,11 +4,12 @@
       <InputSetting
         id="min-value-input"
         ref="minInput"
-        placeholder="Input Min Value"
         applyFormatNumber
         :value="minValue"
         class="mr-2"
-        label="Min"
+        :label="`${configSetting['min'].label}`"
+        :hint="`${configSetting['min'].hint}`"
+        :placeholder="`${configSetting['min'].placeholder}`"
         size="half"
         type="number"
         @onChanged="handleMinSaved"
@@ -16,10 +17,11 @@
       <InputSetting
         id="max-value-input"
         ref="maxInput"
-        placeholder="Input Max Value"
+        :label="`${configSetting['max'].label}`"
+        :hint="`${configSetting['max'].hint}`"
+        :placeholder="`${configSetting['max'].placeholder}`"
         applyFormatNumber
         :value="maxValue"
-        label="Max"
         size="half"
         type="number"
         @onChanged="handleMaxSaved"
@@ -31,14 +33,16 @@
       :options="fontOptions"
       :value="axisFont"
       class="mb-3"
-      label="Font family"
+      :label="`${configSetting['axis.fontFamily'].label}`"
+      :hint="`${configSetting['axis.fontFamily'].hint}`"
       size="full"
       @onChanged="handleAxisFontChanged"
     />
     <div class="row-config-container">
       <ColorSetting
         id="axis-text-color"
-        label="Font color"
+        :label="`${configSetting['axis.color'].label}`"
+        :hint="`${configSetting['axis.color'].hint}`"
         :value="axisColor"
         size="small"
         class="mr-2"
@@ -49,18 +53,20 @@
         id="axis-font-size"
         :options="fontSizeOptions"
         :value="axisFontSize"
-        label="Text size"
+        :label="`${configSetting['axis.fontSize'].label}`"
+        :hint="`${configSetting['axis.fontSize'].hint}`"
         size="small"
         @onChanged="handleAxisFontSizeChanged"
       />
     </div>
     <InputSetting
       id="target-value-input"
-      placeholder="Input Target Value"
       applyFormatNumber
       :value="targetValue"
       class="mb-3"
-      label="Target"
+      :label="`${configSetting['axis.target.value'].label}`"
+      :hint="`${configSetting['axis.target.value'].hint}`"
+      :placeholder="`${configSetting['axis.target.value'].placeholder}`"
       size="full"
       type="number"
       @onChanged="handleTargetSaved"
@@ -69,7 +75,8 @@
       id="target-color"
       :value="targetColor"
       class="mb-3"
-      label="Target line color"
+      :label="`${configSetting['axis.target.color'].label}`"
+      :hint="`${configSetting['axis.target.color'].hint}`"
       size="full"
       @onChanged="handleTargetLineColorChanged"
       :defaultColor="defaultSetting.targetColor"
@@ -81,8 +88,9 @@
         id="x-axis-prefix-input"
         :value="prefixText"
         class="mr-2"
-        label="Prefix"
-        placeholder="Input Prefix"
+        :label="`${configSetting['axis.prefix'].label}`"
+        :hint="`${configSetting['axis.prefix'].hint}`"
+        :placeholder="`${configSetting['axis.prefix'].hint}`"
         size="half"
         :maxLength="defaultSetting.prefixMaxLength"
         @onChanged="handlePrefixSaved"
@@ -90,8 +98,9 @@
       <InputSetting
         id="x-axis-postfix-input"
         :value="postfixText"
-        label="Postfix"
-        placeholder="Input Postfix"
+        :label="`${configSetting['axis.postfix'].label}`"
+        :hint="`${configSetting['axis.postfix'].hint}`"
+        :placeholder="`${configSetting['axis.postfix'].hint}`"
         size="half"
         @onChanged="handlePostfixSaved"
         :maxLength="defaultSetting.suffixMaxLength"
@@ -113,6 +122,8 @@ import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOption
 
 @Component({ components: { PanelHeader } })
 export default class GaugeAxisTab extends Vue {
+  private readonly configSetting = window.chartSetting['gaugeAxis.tab'];
+
   @Ref()
   minInput?: InputSetting;
   @Ref()

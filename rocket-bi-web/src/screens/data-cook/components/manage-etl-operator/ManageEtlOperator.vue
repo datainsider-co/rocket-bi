@@ -288,7 +288,7 @@
     <SaveToDataWareHouse ref="saveToDataWareHouse"></SaveToDataWareHouse>
     <SaveToDatabase ref="saveToDatabase"></SaveToDatabase>
     <SendToEmail ref="sendToEmail" />
-    <DiRenameModal @rename="handleSubmitRenameOperator" ref="renameModal" title="Edit Display Name"></DiRenameModal>
+    <DiRenameModal ref="renameModal" title="Edit Display Name"></DiRenameModal>
   </div>
 </template>
 <script lang="ts" src="./ManageEtlOperator.ts"></script>

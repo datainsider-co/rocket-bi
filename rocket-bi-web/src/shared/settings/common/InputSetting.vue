@@ -1,6 +1,9 @@
 <template>
   <div :class="{ 'disabled-setting': disable }" class="setting-container input-setting dropdown-setting no-gutters">
-    <p v-if="label != null" class="label text-break mb-2">{{ label }}</p>
+    <div class="d-flex flex-row align-items-center">
+      <p v-if="label != null" class="m-0">{{ label }}</p>
+      <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
+    </div>
     <b-input-group class="form-control">
       <!--      <InputNumber/>-->
       <b-form-input
@@ -94,6 +97,8 @@ export default class InputSetting extends Vue {
 
   @Prop({ required: false, type: Array, default: () => [] })
   private readonly suggestions!: string[];
+  @Prop({ type: String, default: '' })
+  private readonly hint!: string;
 
   @Ref()
   private readonly input?: BFormInput;
@@ -254,6 +259,9 @@ export default class InputSetting extends Vue {
   private handleSelectSuggest(text: string) {
     this.onTextInputChanged(text);
     this.handleSave();
+  }
+  private get showHint(): boolean {
+    return StringUtils.isNotEmpty(this.hint);
   }
 }
 </script>

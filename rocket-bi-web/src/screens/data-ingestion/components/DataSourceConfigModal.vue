@@ -48,7 +48,13 @@
         >
           <img src="@/assets/icon/data_ingestion/ic_connect.svg" class="ic-16" alt="" />
         </DiButton>
-        <DiButton id="button-submit" class="ml-auto button-add btn-primary" :title="okTitle" @click="ok"></DiButton>
+        <DiButton
+          :class="{ 'ml-auto': isHideTestConnection && isHideAddField }"
+          id="button-submit"
+          class="button-add btn-primary"
+          :title="okTitle"
+          @click="ok"
+        ></DiButton>
       </div>
     </template>
     <ManagePropertyModal ref="managePropertyModal" />
@@ -78,7 +84,16 @@ import ManagePropertyModal from '@/screens/data-ingestion/form-builder/render-im
 import { cloneDeep } from 'lodash';
 
 @Component({
-  components: { TestConnection, MessageContainer, DiButton, DiCustomModal, DataSourceConfigForm, TSLForm, ManagePropertyModal, DiDropdown }
+  components: {
+    TestConnection,
+    MessageContainer,
+    DiButton,
+    DiCustomModal,
+    DataSourceConfigForm,
+    TSLForm,
+    ManagePropertyModal,
+    DiDropdown
+  }
 })
 export default class DataSourceConfigModal extends Vue {
   private static readonly DEFAULT_ID = -1;
@@ -316,6 +331,7 @@ export default class DataSourceConfigModal extends Vue {
         width: fit-content;
         color: var(--accent);
       }
+
       i {
         color: var(--accent);
       }

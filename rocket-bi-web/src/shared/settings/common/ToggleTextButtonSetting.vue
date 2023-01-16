@@ -2,12 +2,14 @@
   <div :class="{ 'disabled-setting': disable }" class="toggle-text-button">
     <ToggleSetting :id="toggleId" :label="toggleLabel" :value="value" @onChanged="emitToggleValueChanged" />
     <h6 :title="buttonLabel" v-show="value" @click="emitClickedButton">{{ buttonLabel }}</h6>
+    <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator';
 import ToggleSetting from '@/shared/settings/common/ToggleSetting.vue';
+import { StringUtils } from '@/utils';
 
 @Component({
   components: {
@@ -37,6 +39,9 @@ export default class ToggleTextButtonSetting extends Vue {
   @Prop({ required: false, type: Boolean, default: false })
   private readonly disable!: boolean;
 
+  @Prop({ type: String, default: '' })
+  private readonly hint!: string;
+
   @Emit('onChanged')
   private emitToggleValueChanged(value: boolean): boolean {
     return value;
@@ -45,6 +50,9 @@ export default class ToggleTextButtonSetting extends Vue {
   @Emit('onClickedButton')
   private emitClickedButton(event: MouseEvent): MouseEvent {
     return event;
+  }
+  private get showHint(): boolean {
+    return StringUtils.isNotEmpty(this.hint);
   }
 }
 </script>

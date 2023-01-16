@@ -10,7 +10,7 @@ import { PostgreSqlDataSourceFormRender } from '@/screens/data-ingestion/form-bu
 import { RedshiftDataSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/RedshiftDataSourceFormRender';
 import { S3SourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/S3SourceFormRender';
 import { ShopifySourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/ShopifySourceFormRender';
-import { GoogleAdsSourceInfo, MongoDBSourceInfo, S3SourceInfo } from '@core/data-ingestion';
+import { FacebookAdsSourceInfo, GoogleAdsSourceInfo, MongoDBSourceInfo, S3SourceInfo } from '@core/data-ingestion';
 import { BigQuerySourceInfoV2 } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfoV2';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { DataSourceType } from '@core/data-ingestion/domain/data-source/DataSourceType';
@@ -25,6 +25,7 @@ import { UnsupportedException } from '@core/common/domain/exception/UnsupportedE
 import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4SourceInfo';
 import { Ga4SourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/Ga4SourceFormRender';
 import { GoogleAdsSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/GoogleAdsSourceFormRender';
+import { FacebookAdsSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/FacebookAdsSourceFormRender';
 
 export class DataSourceFormFactory {
   createRender(dataSource: DataSourceInfo, onSubmit?: () => void): DataSourceFormRender {
@@ -62,6 +63,8 @@ export class DataSourceFormFactory {
         return new S3SourceFormRender(dataSource as S3SourceInfo);
       case DataSourceType.GoogleAds:
         return new GoogleAdsSourceFormRender(dataSource as GoogleAdsSourceInfo, onSubmit);
+      case DataSourceType.Facebook:
+        return new FacebookAdsSourceFormRender(dataSource as FacebookAdsSourceInfo, onSubmit);
       default:
         throw new UnsupportedException(`Unsupported data source type ${dataSource.sourceType}`);
     }

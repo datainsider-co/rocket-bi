@@ -6,6 +6,7 @@
 import { DataSourceType, DataSources } from '@core/data-ingestion';
 import { DataSource } from '@core/data-ingestion/domain/response/DataSource';
 import { SourceId } from '@core/common/domain';
+import { Log } from '@core/utils';
 
 export class JdbcSource implements DataSource {
   id: SourceId;

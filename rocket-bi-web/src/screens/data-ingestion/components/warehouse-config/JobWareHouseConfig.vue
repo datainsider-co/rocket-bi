@@ -100,6 +100,11 @@ export default class JobWareHouseConfig extends Vue {
     if (this.$v.$invalid && this.isEnableSyncToDataWarehouse) {
       return false;
     }
+    const isEmptyDatabase = StringUtils.isEmpty(this.syncJob.destDatabaseName);
+    const isEmptyTable = StringUtils.isEmpty(this.syncJob.destTableName);
+    if (this.isEnableSyncToDataWarehouse) {
+      return !isEmptyTable && !isEmptyDatabase;
+    }
     return true;
   }
 }

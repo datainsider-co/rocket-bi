@@ -112,7 +112,7 @@ export default class ManageEtlJob extends Vue {
   }
 
   private rename() {
-    this.renameModal.show(this.model?.displayName || '');
+    this.renameModal.show(this.model?.displayName || '', (newName: string) => this.handleSubmitRename(newName));
   }
 
   private handleSubmitRename(newName: string) {

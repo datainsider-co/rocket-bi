@@ -190,7 +190,7 @@
         minWidth="168px"
         textColor="var(--text-color)"
       />
-      <DiRenameModal ref="renameModal" :title="renameModalTitle" @rename="handleRenameTable" />
+      <DiRenameModal ref="renameModal" :title="renameModalTitle" />
     </SplitArea>
   </Split>
 </template>

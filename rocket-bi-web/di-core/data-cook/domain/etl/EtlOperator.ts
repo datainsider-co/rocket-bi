@@ -61,6 +61,14 @@ export abstract class EtlOperator {
     return [];
   }
 
+  getOperatorByName(name: string): EtlOperator | undefined {
+    return this.getAllOperators().find(operator => operator.destTableName === name);
+  }
+
+  isExistOperatorName(name: string): boolean {
+    return !!this.getOperatorByName(name);
+  }
+
   static fromObject(obj: EtlOperator): EtlOperator {
     switch (obj.className) {
       case ETL_OPERATOR_TYPE.JoinOperator:

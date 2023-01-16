@@ -206,7 +206,7 @@ export default class EmbeddedDashboard extends Vue implements WidgetFullSizeHand
 
   handleCreateText(textWidget: TextWidget) {
     if (StringUtils.isNotEmpty(textWidget.content)) {
-      WidgetModule.handleCreateTextWidget(textWidget).catch(ex => this.showError('Create text failure! Try again later', ex));
+      WidgetModule.handleCreateTextWidget({ widget: textWidget }).catch(ex => this.showError('Create text failure! Try again later', ex));
     }
   }
 

@@ -94,6 +94,12 @@ class WidgetStore extends VuexModule {
     return positions;
   }
 
+  get getPosition() {
+    return (widgetId: number) => {
+      return this.mapPosition[widgetId];
+    };
+  }
+
   @Mutation
   setWidgets(widgets: Widget[]) {
     this.widgets = widgets;
@@ -199,23 +205,17 @@ class WidgetStore extends VuexModule {
   }
 
   @Action
-  handleCreateTextWidget(textWidget: TextWidget) {
-    // TODO: loading when create text
-    const position: Position = Position.defaultForText();
-    const widgetPosition = {
-      widget: textWidget,
+  async handleCreateTextWidget(payload: { widget: Widget; position?: Position }): Promise<void> {
+    const position: Position = payload.position || Position.defaultForText();
+    const newWidgetInfo = {
+      widget: payload.widget,
       position: position
     };
-    return this.handleCreateNewWidget(widgetPosition)
-      .then(widget => {
-        return this.addWidget({
-          widget: widget,
-          position: position
-        });
-      })
-      .catch(ex => {
-        Log.debug('createTextWidget::', ex);
-      });
+    const newWidget = await this.handleCreateNewWidget(newWidgetInfo);
+    this.addWidget({
+      widget: newWidget,
+      position: position
+    });
   }
 
   @Action

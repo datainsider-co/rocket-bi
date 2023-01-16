@@ -78,29 +78,6 @@ export default class App extends Vue {
     });
 
     window.addEventListener('click', this.trackingClickEvent);
-    window.addEventListener('change', this.trackInputEvent);
-  }
-
-  private trackInputEvent(event: Event) {
-    const element = event.target as HTMLInputElement;
-    // Log.debug('Event target::', event);
-    if (element.nodeName === 'INPUT' || element.nodeName === 'TEXTAREA') {
-      const id: string | null = element.getAttribute('id');
-      const hideValue = element.getAttribute('hide-track-value') ? true : false;
-      if (id && !StringUtils.isIncludes('bvid', id)) {
-        const event = StringUtils.toSnakeCase(`${id}`);
-        const value = hideValue ? 'unknown' : this.getInputValue(element);
-        TrackingUtils.track(event, { value: value });
-      }
-    }
-  }
-
-  private getInputValue(element: HTMLInputElement): string | boolean {
-    if (element.type === 'text') {
-      return element.value;
-    } else {
-      return element.checked;
-    }
   }
 
   private trackingClickEvent(event: MouseEvent) {

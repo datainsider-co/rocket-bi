@@ -2,14 +2,23 @@
   <PanelHeader header="Data Color" target-id="color-tab">
     <div class="color-tab">
       <div class="column-config-container">
-        <InputSetting id="width-between-value" :value="gap" class="mb-2" label="Width between values" size="full" @onChanged="handleGapChanged" />
+        <InputSetting
+          id="width-between-value"
+          :value="gap"
+          class="mb-2"
+          :label="`${configSetting['width'].label}`"
+          :hint="`${configSetting['width'].hint}`"
+          size="full"
+          @onChanged="handleGapChanged"
+        />
         <div class="row-config-container">
           <ColorSetting
             id="min-color"
             :default-color="defaultValues.minColor"
             :value="minColor"
             class="mb-2"
-            label="Color of Min values"
+            :label="`${configSetting['minColor'].label}`"
+            :hint="`${configSetting['minColor'].hint}`"
             size="half"
             style="margin-right: 12px"
             @onChanged="handleMinColorChanged"
@@ -19,7 +28,8 @@
             :default-color="defaultValues.maxColor"
             :value="maxColor"
             class="mb-2"
-            label="Color of Max values"
+            :label="`${configSetting['maxColor'].label}`"
+            :hint="`${configSetting['maxColor'].hint}`"
             size="half"
             @onChanged="handleMaxColorChanged"
           />
@@ -29,7 +39,8 @@
           :default-color="defaultValues.noneColor"
           :value="noneColor"
           class="mb-3"
-          label="Color of None values"
+          :label="`${configSetting['noneColor'].label}`"
+          :hint="`${configSetting['noneColor'].hint}`"
           size="half"
           style="margin-right: 12px"
           enabledRevert="true"
@@ -50,6 +61,8 @@ import { get } from 'lodash';
 
 @Component({ components: { PanelHeader } })
 export default class HeatMapColorTab extends Vue {
+  private readonly configSetting = window.chartSetting['heatmapColor.tab'];
+
   @Prop({ type: Object, required: false })
   private setting?: SeriesOptionData;
   @Prop({ required: false, type: String })

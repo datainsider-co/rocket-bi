@@ -1341,11 +1341,6 @@
   resolved "https://registry.npmjs.org/@types/node/-/node-14.0.27.tgz#a151873af5a5e851b51b3b065c9e63390a9e0eb1"
   integrity sha512-kVrqXhbclHNHGu9ztnAwSncIgJv/FaxmzXJvGXNdcCpV1b8u1/Mi6z6m0vwy0LzKeXFTPLH0NzwmoJ3fNCIq0g==
 
-"@types/node@^16.6.1":
-  version "16.11.36"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.36.tgz#9ab9f8276987132ed2b225cace2218ba794fc751"
-  integrity sha512-FR5QJe+TaoZ2GsMHkjuwoNabr+UrJNRr2HNOo+r/7vhcuntM6Ee/pRPOnRhhL2XE9OOvX9VLEq+BcXl3VjNoWA==
-
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
   resolved "https://registry.npmjs.org/@types/normalize-package-data/-/normalize-package-data-2.4.0.tgz#e486d0d97396d79beedd0a6e33f4534ff6b4973e"
@@ -1501,11 +1496,6 @@
   integrity sha1-2U7WCOKVvFQkyWAOa4VlQHtrS2s=
   dependencies:
     source-map "^0.6.1"
-
-"@types/uuid@^8.3.0":
-  version "8.3.4"
-  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-8.3.4.tgz#bd86a43617df0594787d38b735f55c805becf1bc"
-  integrity sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==
 
 "@types/vuelidate@^0.7.13":
   version "0.7.13"
@@ -5232,20 +5222,18 @@ detect-node@^2.0.4:
   resolved "https://registry.npmjs.org/detect-node/-/detect-node-2.0.4.tgz#014ee8f8f669c5c58023da64b8179c083a28c46c"
   integrity sha512-ZIzRpLJrOj7jjP2miAtgqIfmzbxa4ZOr5jJc601zklsfEx9oTzmmj2nVpIPRpNlRTIh8lc1kyViIY7BWSGNmKw==
 
-di-web-analytics@^0.7.4:
-  version "0.7.4"
-  resolved "https://registry.yarnpkg.com/di-web-analytics/-/di-web-analytics-0.7.4.tgz#784c3712799db527edce9973eb6c86786c4d7bc0"
-  integrity sha512-kB8dJkYD6EXOnEmJcjsNm3eEvFwAaDbO/Qd5LV2/oT2s/YxpaeP0nHzy3pxAzclNdlW3HmltxOkG4wvdXDuT6Q==
+di-web-analytics@^0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/di-web-analytics/-/di-web-analytics-0.8.3.tgz#efaa4e9de0d3341ab452a1b9c9df29af08dea318"
+  integrity sha512-wqq/kJvYbwEBH2AZTebKoqp+Hj5pVmjNHmASlC29RT6ywzVWHSSpFA2nc4C+I6M6TSX2K31DI3o8MbNLGBc8tA==
   dependencies:
-    "@types/node" "^16.6.1"
-    "@types/uuid" "^8.3.0"
     async-mutex "^0.2.4"
     axios "^0.20.0"
     bowser "^2.11.0"
     js-cookies "^1.0.4"
     mini-json "^1.0.0"
     storage-based-queue "^1.2.6"
-    uuid "^8.3.2"
+    uuid "^9.0.0"
     webpack "^5.50.0"
     webpack-cli "^4.8.0"
 
@@ -12524,10 +12512,10 @@ uuid@^3.3.2, uuid@^3.4.0:
   resolved "https://registry.npmjs.org/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
 
-uuid@^8.3.2:
-  version "8.3.2"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
-  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
+uuid@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
+  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
 
 v-calendar@^1.0.8:
   version "1.0.8"

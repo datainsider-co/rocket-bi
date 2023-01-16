@@ -37,7 +37,7 @@
       </div>
       <TableCreationFromQueryModal ref="tableCreationModal" :query="currentQuery"></TableCreationFromQueryModal>
     </SplitArea>
-    <DirectoryCreate ref="mdCreateDirectory" @onCreated="handleQueryCreated" />
+    <DiRenameModal ref="createAnalysisModal" title="Create Analysis" action-name="Create" label="Analysis name" placeholder="Type analysis name" />
     <MyDataPickFile ref="filePicker" @selectDirectory="handleSelectFile" />
     <MyDataPickDirectory ref="directoryPicker" @selectDirectory="handleSelectDirectory" />
   </Split>

@@ -41,7 +41,7 @@
       <div class="text-danger mt-1">{{ customerIdError }}</div>
     </div>
     <div class="job-section">
-      <div class="d-flex">
+      <div class="d-flex" v-if="isCreateNew">
         <DiToggle id="sync-all-table" :value="!isSingleTable" @onSelected="isSingleTable = !isSingleTable"></DiToggle>
         <div class="ml-1">Sync all Resource</div>
       </div>
@@ -66,7 +66,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, PropSync } from 'vue-property-decorator';
-import { GoogleAdsJob, GoogleAdsSourceInfo } from '@core/data-ingestion';
+import { FormMode, GoogleAdsJob, GoogleAdsSourceInfo, Job } from '@core/data-ingestion';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown';
 import { Inject } from 'typescript-ioc';
 import { DataSourceService } from '@core/common/services/DataSourceService';
@@ -75,7 +75,7 @@ import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore
 import { SelectOption } from '@/shared';
 import DiToggle from '@/shared/components/common/DiToggle.vue';
 import { StringUtils } from '@/utils';
-import { DIException } from '@core/common/domain';
+import { DIException, SourceId } from '@core/common/domain';
 
 @Component({ components: { DiToggle } })
 export default class GoogleAdsSourceConfig extends Vue {
@@ -102,10 +102,10 @@ export default class GoogleAdsSourceConfig extends Vue {
     DataSourceModule.setTableNames([]);
   }
 
-  async loadCustomerIds(source: GoogleAdsSourceInfo): Promise<void> {
+  async loadCustomerIds(id: SourceId): Promise<void> {
     try {
       this.initResourceNames();
-      await this.initCustomerIds(source);
+      await this.initCustomerIds(id);
     } catch (ex) {
       Log.error(ex);
       this.customerIds = [];
@@ -133,8 +133,8 @@ export default class GoogleAdsSourceConfig extends Vue {
     DataSourceModule.setTableNames(allTables);
   }
 
-  private async initCustomerIds(source: GoogleAdsSourceInfo) {
-    this.customerIds = await this.sourcesService.listDatabaseName(source.id, '', '');
+  private async initCustomerIds(id: SourceId) {
+    this.customerIds = await this.sourcesService.listDatabaseName(id, '', '');
   }
 
   isValidSource() {
@@ -164,6 +164,9 @@ export default class GoogleAdsSourceConfig extends Vue {
 
   private resetCustomerIdError() {
     this.customerIdError = '';
+  }
+  private get isCreateNew(): boolean {
+    return Job.getJobFormConfigMode(this.syncedJob) === FormMode.Create;
   }
 }
 </script>

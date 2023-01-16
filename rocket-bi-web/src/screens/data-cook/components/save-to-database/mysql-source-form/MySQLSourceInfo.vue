@@ -37,7 +37,7 @@
         <i class="di-icon-delete btn-delete btn-icon-border" @click="onDeleteExtraField(key)"></i>
       </div>
       <div class="extra-input input">
-        <BFormInput hide-track-value :placeholder="`Input value ${key}`" :value="extraFields[key]" @onChange="onExtraFieldChanged(key, ...arguments)">
+        <BFormInput hide-track-value :placeholder="`Input value ${key}`" :value="extraFields[key]" @change="onExtraFieldChanged(key, ...arguments)">
         </BFormInput>
       </div>
     </div>

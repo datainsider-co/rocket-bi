@@ -1,6 +1,9 @@
 <template>
   <div :class="{ 'disabled-setting': disable }" class="setting-container no-gutters">
-    <div v-if="label != null" class="label single-line mb-2">{{ label }}</div>
+    <div class="d-flex flex-row align-items-center">
+      <p v-if="label != null" class="m-0">{{ label }}</p>
+      <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
+    </div>
     <div class="w-100 d-flex justify-content-between align-items-center">
       <ColorPicker
         :id="genBtnId(id)"
@@ -20,6 +23,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import ColorPicker from '@/shared/components/ColorPicker.vue';
 import { SettingSize } from '@/shared/settings/common/SettingSize';
+import { StringUtils } from '@/utils';
 
 @Component({
   components: {
@@ -45,6 +49,8 @@ export default class ColorSetting extends Vue {
 
   @Prop({ default: SettingSize.full })
   private readonly size!: SettingSize;
+  @Prop({ type: String, default: '' })
+  private readonly hint!: string;
 
   private currentValue = this.value;
 
@@ -62,6 +68,10 @@ export default class ColorSetting extends Vue {
 
   private handleRevert() {
     this.$emit('onRevert');
+  }
+
+  private get showHint(): boolean {
+    return StringUtils.isNotEmpty(this.hint);
   }
 }
 </script>

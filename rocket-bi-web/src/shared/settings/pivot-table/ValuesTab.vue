@@ -6,7 +6,8 @@
           id="value-font-color"
           :default-color="defaultStyle.color"
           :value="fontColor"
-          label="Font color"
+          :label="`${configSetting['value.color'].label}`"
+          :hint="`${configSetting['value.color'].hint}`"
           style="width: 145px; margin-right: 12px"
           @onChanged="handleFontColorChanged"
         />
@@ -14,7 +15,8 @@
           id="value-background-color"
           :default-color="defaultStyle.backgroundColor"
           :value="backgroundColor"
-          label="Background color"
+          :label="`${configSetting['value.backgroundColor'].label}`"
+          :hint="`${configSetting['value.backgroundColor'].hint}`"
           style="width: 145px;"
           @onChanged="handleBackgroundColorChanged"
         />
@@ -24,7 +26,8 @@
           id="value-alternate-font-color"
           :default-color="defaultStyle.alternateColor"
           :value="alternateFontColor"
-          label="Alternate font color"
+          :label="`${configSetting['value.alternateColor'].label}`"
+          :hint="`${configSetting['value.alternateColor'].hint}`"
           style="width: 145px; margin-right: 12px"
           @onChanged="handleAlternateFontColorChanged"
         />
@@ -32,21 +35,29 @@
           id="value-alternate-background-color"
           :default-color="defaultStyle.alternateBackgroundColor"
           :value="alternateBackgroundColor"
-          label="Background color"
+          :label="`${configSetting['value.alternateBackgroundColor'].label}`"
+          :hint="`${configSetting['value.alternateBackgroundColor'].hint}`"
           style="width: 145px;"
           @onChanged="handleAlternateBackgroundColorChanged"
         />
       </div>
       <div class="row-config-container">
         <!--        <ToggleSetting disable id="value-url-icon" :value="enableUrlIcon" label="URL icon" style="margin-right: 12px" @onChanged="handleURLIconChanged" />-->
-        <ToggleSetting id="value-word-wrap" :value="isWordWrap" label="Word wrap" @onChanged="handleWordWrapChanged" />
+        <ToggleSetting
+          id="value-word-wrap"
+          :value="isWordWrap"
+          :label="`${configSetting['value.style.isWordWrap'].label}`"
+          :hint="`${configSetting['value.style.isWordWrap'].hint}`"
+          @onChanged="handleWordWrapChanged"
+        />
       </div>
       <DropdownSetting
         id="value-font-family"
         :options="fontOptions"
         :value="font"
         class="mb-2"
-        label="Font family"
+        :label="`${configSetting['value.style.fontFamily'].label}`"
+        :hint="`${configSetting['value.style.fontFamily'].hint}`"
         size="full"
         @onChanged="handleFontChanged"
       />
@@ -57,9 +68,17 @@
           :options="fontSizeOptions"
           :value="fontSize"
           size="small"
+          :label="`${configSetting['value.style.fontSize'].label}`"
+          :hint="`${configSetting['value.style.fontSize'].hint}`"
           @onChanged="handleFontSizeChanged"
         />
-        <AlignSetting id="value-align" :value="valuesAlign" @onChanged="handleAlignChanged" />
+        <AlignSetting
+          id="value-align"
+          :value="valuesAlign"
+          :label="`${configSetting['value.align'].label}`"
+          :hint="`${configSetting['value.align'].hint}`"
+          @onChanged="handleAlignChanged"
+        />
       </div>
       <RevertButton class="mb-3" style="text-align: right" @click="handleRevert" />
     </div>
@@ -75,6 +94,8 @@ import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOption
 
 @Component({ components: { PanelHeader } })
 export default class ValuesTab extends Vue {
+  private readonly configSetting = window.chartSetting['value.tab'];
+
   // TODO: change here
   private readonly defaultStyle = {
     color: ChartOption.getThemeTextColor(),

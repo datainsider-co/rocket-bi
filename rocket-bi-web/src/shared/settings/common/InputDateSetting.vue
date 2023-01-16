@@ -1,6 +1,9 @@
 <template>
   <div :class="{ 'disabled-setting': disable }" class="input-date-setting setting-container dropdown-setting no-gutters">
-    <p v-if="label != null" class="label text-break mb-2">{{ label }}</p>
+    <div class="d-flex flex-row align-items-center">
+      <p v-if="label != null" class="m-0">{{ label }}</p>
+      <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
+    </div>
     <div class="calendar-area">
       <DiCalendar
         ref="diCalendar"
@@ -23,7 +26,7 @@ import DiCalendar from '@filter/main-date-filter-v2/DiCalendar.vue';
 import { CalendarData } from '@/shared/models';
 import { DateRange, DateTimeConstants } from '@/shared';
 import { DataRange, MainDateMode } from '@core/common/domain';
-import { DateUtils } from '@/utils';
+import { DateUtils, StringUtils } from '@/utils';
 import { ComparisonUtils } from '@core/utils/ComparisonUtils';
 
 export enum InputDateType {
@@ -57,7 +60,8 @@ export default class InputDateSetting extends Vue {
 
   @Prop({ required: false })
   private readonly defaultDataRange!: DataRange | null;
-
+  @Prop({ type: String, default: '' })
+  private readonly hint!: string;
   @Ref()
   private readonly diCalendar!: DiCalendar;
 
@@ -98,6 +102,10 @@ export default class InputDateSetting extends Vue {
 
   setDateRange(dateRange: DateRange | null) {
     this.diCalendar.applyDateRange(dateRange);
+  }
+
+  private get showHint(): boolean {
+    return StringUtils.isNotEmpty(this.hint);
   }
 }
 </script>

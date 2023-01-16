@@ -7,7 +7,8 @@
         :value="theme"
         class="mb-3 group-config"
         enabledRevert="true"
-        label="Select style"
+        :label="`${configSetting['theme'].label}`"
+        :hint="`${configSetting['theme'].hint}`"
         size="full"
         @onChanged="handleFontChanged"
         @onRevert="handleRevert"
@@ -26,6 +27,7 @@ import { _ThemeStore, DiTheme } from '@/store/modules/ThemeStore';
 
 @Component({ components: { PanelHeader } })
 export default class StyleTab extends Vue {
+  private readonly configSetting = window.chartSetting['style.tab'];
   private readonly themAsMap: Record<DiTheme, SettingTheme[]> = require('./TableTheme.json');
 
   @Prop({ required: false, type: Object })

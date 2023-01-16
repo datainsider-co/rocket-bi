@@ -103,6 +103,9 @@
               <template v-if="isGgAdsJob">
                 <GoogleAdsSourceConfig ref="ggAdsFromSuggestion" :single-table.sync="isSingleTable" :job.sync="jdbcJob" />
               </template>
+              <template v-if="isFacebookAdsJob">
+                <FacebookAdsSourceConfig ref="fbAdsFromSuggestion" :single-table.sync="isSingleTable" :job.sync="jdbcJob" />
+              </template>
             </div>
           </div>
 
@@ -130,6 +133,7 @@
           <div class="job-section">
             <JobSyncConfig v-if="showSyncConfig" ref="jobSyncModeConfig" :is-validate="isValidate" :job.sync="jdbcJob"></JobSyncConfig>
             <SchedulerSettingV2
+              ignoreMinutely
               id="setting-job-scheduler"
               :scheduler-time="jdbcJob.scheduleTime"
               @change="
@@ -153,6 +157,8 @@ import {
   DataSourceInfo,
   DataSources,
   DataSourceType,
+  FacebookAdsSource,
+  FacebookAdsSourceInfo,
   FormMode,
   GoogleAdsJob,
   GoogleAdsSourceInfo,
@@ -205,6 +211,7 @@ import { ShopifyJob } from '@core/data-ingestion/domain/job/ShopifyJob';
 import S3DataSourceConfig from './s3-csv/S3DataSourceConfig.vue';
 import DiInput from '@/shared/components/common/DiInput.vue';
 import GoogleAdsSourceConfig from '@/screens/data-ingestion/components/google-ads/GoogleAdsSourceConfig.vue';
+import FacebookAdsSourceConfig from '@/screens/data-ingestion/components/facebook-ads/FacebookAdsSourceConfig.vue';
 
 type IngestionJobCallback = (job: Job, isSingleTable: boolean) => void;
 
@@ -232,7 +239,8 @@ type IngestionJobCallback = (job: Job, isSingleTable: boolean) => void;
     JobWareHouseConfig,
     MultiJobWareHouseConfig,
     S3DataSourceConfig,
-    GoogleAdsSourceConfig
+    GoogleAdsSourceConfig,
+    FacebookAdsSourceConfig
   },
   validations: {
     jdbcJob: {
@@ -295,6 +303,9 @@ export default class MultiJobCreationModal extends Vue {
 
   @Ref()
   private readonly ggAdsFromSuggestion?: GoogleAdsSourceConfig;
+
+  @Ref()
+  private readonly fbAdsFromSuggestion?: FacebookAdsSourceConfig;
 
   private readonly fromDatabaseNameDefaultOption: any = {
     label: 'Select database please...',
@@ -361,13 +372,16 @@ export default class MultiJobCreationModal extends Vue {
   private get isGgAdsJob(): boolean {
     return this.jdbcJob.className === JobName.GoogleAdsJob;
   }
+  private get isFacebookAdsJob(): boolean {
+    return this.jdbcJob.className === JobName.FacebookAdsJob;
+  }
 
   private get isEnableSyncToDataWarehouse() {
     return this.jdbcJob.destinations.some(dataDestination => dataDestination === DataDestination.Clickhouse);
   }
 
-  private get isInValidSyncToDataWareHouse() {
-    return this.isSingleTable ? !this.jobWareHouseConfig.isValidWarehouseConfig() : !this.multiJobWareHouseConfig.isValidWarehouseConfig();
+  private get isValidSyncToDataWareHouse() {
+    return this.isSingleTable ? this.jobWareHouseConfig.isValidWarehouseConfig() : this.multiJobWareHouseConfig.isValidWarehouseConfig();
     // return this.isInvalidDestinationTable || this.isInvalidDestinationDatabase;
   }
 
@@ -419,6 +433,12 @@ export default class MultiJobCreationModal extends Vue {
               break;
             case JobType.Shopify:
               await this.shopifyFromDatabaseSuggestion.handleLoadShopifyFromData();
+              break;
+            case JobType.Facebook:
+              await this.fbAdsFromSuggestion?.init(this.jdbcJob.sourceId!);
+              break;
+            case JobType.GoogleAds:
+              await this.ggAdsFromSuggestion?.loadCustomerIds(this.jdbcJob.sourceId!);
               break;
             case JobType.GoogleCredential:
             case JobType.S3:
@@ -538,7 +558,7 @@ export default class MultiJobCreationModal extends Vue {
     const isNameValid = !this.$v.$invalid;
     const isFromDatabaseValid = this.isValidFromDatabase();
     const isSyncModeValid = this.isValidSyncMode();
-    const isDestinationValid = this.isInValidSyncToDataWareHouse;
+    const isDestinationValid = this.isValidSyncToDataWareHouse;
     return isNameValid && isFromDatabaseValid && isSyncModeValid && isDestinationValid;
   }
 
@@ -601,6 +621,10 @@ export default class MultiJobCreationModal extends Vue {
           }
           case DataSources.GoogleAdsSource: {
             await this.handleSelectGoogleAdsSource(item.source);
+            break;
+          }
+          case DataSources.FacebookAds: {
+            await this.handleSelectFacebookAdsSource(item.source);
             break;
           }
           default:
@@ -667,7 +691,16 @@ export default class MultiJobCreationModal extends Vue {
     this.jdbcJob = Job.default(source).withDisplayName(this.jdbcJob.displayName);
     this.jdbcJob.sourceId = source.id;
     this.$nextTick(async () => {
-      await this.ggAdsFromSuggestion?.loadCustomerIds(source);
+      await this.ggAdsFromSuggestion?.loadCustomerIds(source.id);
+    });
+  }
+
+  private async handleSelectFacebookAdsSource(source: FacebookAdsSourceInfo) {
+    this.jdbcJob = Job.default(source).withDisplayName(this.jdbcJob.displayName);
+    this.jdbcJob.sourceId = source.id;
+    Log.debug('handleSelectFacebookAdsSource::', this.fbAdsFromSuggestion, source.id);
+    this.$nextTick(async () => {
+      await this.fbAdsFromSuggestion?.init(source.id);
     });
   }
 
@@ -718,6 +751,8 @@ export default class MultiJobCreationModal extends Vue {
         return this.s3FromSuggestion.isValidFromSuggestion();
       case JobType.GoogleAds:
         return this.ggAdsFromSuggestion?.isValidSource();
+      case JobType.Facebook:
+        return this.fbAdsFromSuggestion?.isValidSource();
       default:
         return this.jdbcFromDatabaseSuggestion.isValidDatabaseSuggestion();
     }

@@ -88,7 +88,7 @@
         </template>
       </b-tabs>
     </b-card>
-    <DiRenameModal ref="renameModal" @rename="handleRenameTab" />
+    <DiRenameModal ref="renameModal" />
   </div>
 </template>
 
@@ -354,9 +354,11 @@ export default class TabViewer extends Vue {
     ];
   }
 
-  private openRenameModal(name: string, extraData: any) {
+  private openRenameModal(name: string, tabIndex: number) {
     PopupUtils.hideAllPopup();
-    this.renameModal.show(name, extraData);
+    this.renameModal.show(name, (newName: string) => {
+      this.handleRenameTab(newName, tabIndex);
+    });
   }
 
   private handleChangePosition(payload: { id: number; position: Position }) {

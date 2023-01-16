@@ -17,22 +17,22 @@
     </LayoutSidebar>
     <router-view ref="myData" class="my-data-listing"></router-view>
     <ContextMenu ref="diContextMenu" :ignoreOutsideClass="listIgnoreClassForContextMenu" minWidth="250px" textColor="var(--text-color)" />
-    <DirectoryCreate ref="mdCreateDirectory" />
+    <DiRenameModal ref="createDirectoryModal" title="Create Folder" label="Folder name" placeholder="Type folder name" action-name="Create" />
+    <DiRenameModal ref="createDashboardModal" title="Create Dashboard" label="Dashboard name" placeholder="Type dashboard name" action-name="Create" />
     <DirectoryRename ref="mdRenameDirectory" />
     <DiShareModal ref="mdShareDirectory" @shared="reload" />
 
     <MyDataPickDirectory ref="directoryPicker" @selectDirectory="handleMoveToDirectory" />
+    <MyDataPickDirectory ref="copyDashboardPicker" @selectDirectory="copy" />
   </LayoutWrapper>
 </template>
 
 <script lang="ts">
 import { Component, Ref, Vue } from 'vue-property-decorator';
-import DirectoryCreate from '@/screens/directory/components/DirectoryCreate.vue';
 import DirectoryRename from '@/screens/directory/components/DirectoryRename.vue';
-import DiShareModal, { ResourceData } from '@/shared/components/common/di-share-modal/DiShareModal.vue';
+import DiShareModal from '@/shared/components/common/di-share-modal/DiShareModal.vue';
 import ContextMenu from '@/shared/components/ContextMenu.vue';
-import { CreateDashboardRequest, CreateDirectoryRequest, Directory, DirectoryId, DirectoryType } from '@core/common/domain';
-import { ResourceType } from '@/utils/PermissionUtils';
+import { CreateDashboardRequest, CreateDirectoryRequest, Dashboard, DIException, Directory, DirectoryId, DirectoryType } from '@core/common/domain';
 import { Log } from '@core/utils';
 import { DirectoryModule } from '@/screens/directory/store/DirectoryStore';
 import { PopupUtils } from '@/utils/PopupUtils';
@@ -42,12 +42,9 @@ import { Route } from 'vue-router';
 import { NavigationGuardNext } from 'vue-router/types/router';
 import { RouterUtils } from '@/utils/RouterUtils';
 import NavigationPanel, { NavigationItem } from '@/shared/components/common/NavigationPanel.vue';
-import { DataManager } from '@core/common/services';
+import { DashboardService, DataManager } from '@core/common/services';
 import { Di } from '@core/common/modules';
 import MyData from '@/screens/directory/views/mydata/MyData.vue';
-import { ShareDirectoryLinkHandler } from '@/shared/components/common/di-share-modal/link-handler/ShareDirectoryLinkHandler';
-import { LinkHandler } from '@/shared/components/common/di-share-modal/link-handler/LinkHandler';
-import { ShareDashboardLinkHandler } from '@/shared/components/common/di-share-modal/link-handler/ShareDashboardLinkHandler';
 import { DefaultDirectoryId } from '@/screens/directory/views/mydata/DefaultDirectoryId';
 import { Modals } from '@/utils/Modals';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
@@ -56,8 +53,9 @@ import PopoverV2 from '@/shared/components/common/popover-v2/PopoverV2.vue';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Track } from '@/shared/anotation';
 import MyDataPickDirectory from '@/screens/lake-house/components/move-file/MyDataPickDirectory.vue';
-import { DirectoryMetadata } from '@core/common/domain/model/directory/directory-metadata/DirectoryMetadata';
-import { DashboardMetaData } from '@core/common/domain/model/directory/directory-metadata/DashboardMetaData';
+import DiRenameModal from '@/shared/components/DiRenameModal.vue';
+import router from '@/router/Router';
+import { DashboardModule } from '@/screens/dashboard-detail/stores';
 
 export enum DirectoryListingEvents {
   ShowMenuCreateDirectory = 'show-menu-create-directory',
@@ -69,7 +67,6 @@ export enum DirectoryListingEvents {
 @Component({
   components: {
     NavigationPanel,
-    DirectoryCreate,
     DirectoryRename,
     DiShareModal,
     LayoutWrapper,
@@ -88,7 +85,10 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
   private diContextMenu!: ContextMenu;
 
   @Ref()
-  private mdCreateDirectory!: DirectoryCreate;
+  private createDirectoryModal!: DiRenameModal;
+
+  @Ref()
+  private createDashboardModal!: DiRenameModal;
 
   @Ref()
   private mdRenameDirectory!: DirectoryRename;
@@ -104,6 +104,9 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
 
   @Ref()
   private readonly directoryPicker!: MyDataPickDirectory;
+
+  @Ref()
+  private readonly copyDashboardPicker!: MyDataPickDirectory;
 
   private get navItems(): NavigationItem[] {
     return [
@@ -194,6 +197,43 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
     this.mdRenameDirectory.show(item);
   }
 
+  @Track(TrackEvents.DuplicateDirectory, { directory: (_: DirectoryListing, args: any) => args[0] })
+  private async duplicate(item: Directory) {
+    try {
+      this.diContextMenu.hide();
+      DirectoryModule.setStatus(Status.Updating);
+      switch (item.directoryType) {
+        case DirectoryType.Dashboard:
+        case DirectoryType.Query: {
+          await this.duplicateDashboard(item);
+          await this.reload();
+          // DirectoryModule.setStatus(Status.Loaded);
+          break;
+        }
+        default: {
+          Log.error(`Unsupported duplicate type ${item.directoryType}`);
+          DirectoryModule.setStatus(Status.Loaded);
+          PopupUtils.showError('Unsupported duplicate data');
+        }
+      }
+    } catch (ex) {
+      Log.error('Duplicate::error', ex);
+      PopupUtils.showError(`Duplicate failed cause ${ex.message}`);
+      DirectoryModule.setStatus(Status.Loaded);
+    }
+  }
+
+  private async duplicateDashboard(item: Directory): Promise<Dashboard> {
+    if (item.dashboardId) {
+      const dashboardService = Di.get<DashboardService>(DashboardService);
+      const dashboard = await dashboardService.get(item.dashboardId);
+      const request: CreateDashboardRequest = CreateDashboardRequest.fromDashboard(item.directoryType, item.parentId, dashboard);
+      return await DirectoryModule.createDashboard(request);
+    } else {
+      return Promise.reject(new DIException('Dashboard id is not found'));
+    }
+  }
+
   private showMoveModal(e: Event, directory: Directory) {
     this.directoryPicker.show(e, [directory.id], directory.id);
   }
@@ -213,6 +253,20 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
         click: () => {
           this.showRenameModal(directory);
         }
+      },
+      {
+        text: DirectoryMenuItem.Duplicate,
+        click: () => {
+          this.duplicate(directory);
+        },
+        hidden: directory.directoryType === DirectoryType.Directory
+      },
+      {
+        text: DirectoryMenuItem.Copy,
+        click: (event: MouseEvent) => {
+          this.copyDashboardPicker.show(event, [directory.id], directory);
+        },
+        hidden: directory.directoryType === DirectoryType.Directory
       },
       {
         text: DirectoryMenuItem.MoveTo,
@@ -254,8 +308,31 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
   private showCreateDashboardModal(parentId?: DirectoryId) {
     this.layoutWrapper.toggleSidebar(false);
     this.diContextMenu.hide();
-    const newDashboard = new CreateDashboardRequest('', parentId || 0);
-    this.mdCreateDirectory.show(newDashboard);
+    this.createDashboardModal.show('', async (name: string) => {
+      try {
+        this.createDashboardModal.setLoading(true);
+        const request = CreateDashboardRequest.createDashboardRequest({ name: name, parentDirectoryId: parentId || 0 });
+        const dashboard = await DirectoryModule.createDashboard(request);
+        this.createDashboardModal.hide();
+        this.createDashboardModal.setLoading(false);
+        this.navigateToDashboard(dashboard.id, dashboard.name);
+      } catch (ex) {
+        Log.error('CreateDashboard::error', ex);
+        this.createDashboardModal.setError(ex.message);
+        this.createDashboardModal.setLoading(false);
+      }
+    });
+  }
+
+  private async navigateToDashboard(dashboardId: number, name: string): Promise<void> {
+    await RouterUtils.to(Routers.Dashboard, {
+      params: {
+        name: RouterUtils.buildParamPath(dashboardId, name)
+      },
+      query: {
+        token: RouterUtils.getToken(router.currentRoute)
+      }
+    });
   }
 
   private showCreateDirectoryModal(parentId?: DirectoryId) {
@@ -266,7 +343,32 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
       parentId: parentId || 0,
       directoryType: DirectoryType.Directory
     });
-    this.mdCreateDirectory.show(newDirectory);
+    this.createDirectoryModal.show('', async (newName: string) => {
+      try {
+        this.createDirectoryModal.setLoading(true);
+        newDirectory.name = newName;
+        const directory = await DirectoryModule.createFolder(newDirectory);
+        this.createDirectoryModal.hide();
+        this.createDirectoryModal.setLoading(false);
+        this.navigateToDirectory(directory.id, directory.name);
+      } catch (ex) {
+        Log.error('CreateDirectory::error', ex);
+        this.createDirectoryModal.setError(ex.message);
+        this.createDirectoryModal.setLoading(false);
+      }
+    });
+  }
+
+  private async navigateToDirectory(directoryId: number, name: string): Promise<void> {
+    await RouterUtils.to(Routers.AllData, {
+      name: Routers.AllData,
+      params: {
+        name: RouterUtils.buildParamPath(directoryId, name)
+      },
+      query: {
+        token: RouterUtils.getToken(router.currentRoute)
+      }
+    });
   }
 
   private getCreateMenuItem(parentId?: DirectoryId): ContextMenuItem[] {
@@ -335,6 +437,33 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
       Log.error('DirectoryListing::handleMoveToDirectory::error::', e);
       PopupUtils.showError(e.message);
     } finally {
+      DirectoryModule.setStatus(Status.Loaded);
+    }
+  }
+
+  private async copy(parentId: DirectoryId, directory: Directory) {
+    switch (directory.directoryType) {
+      case DirectoryType.Dashboard:
+      case DirectoryType.Query: {
+        await this.copyDashboardTo(parentId, directory);
+        break;
+      }
+      default: {
+        PopupUtils.showError('Copy directory is not supported');
+        break;
+      }
+    }
+  }
+
+  private async copyDashboardTo(parentId: DirectoryId, directory: Directory) {
+    try {
+      DirectoryModule.setStatus(Status.Updating);
+      const dashboard: Dashboard = await this.duplicateDashboard(directory);
+      const directoryId = await DashboardModule.getDirectoryId(dashboard.id);
+      await this.handleMoveToDirectory(parentId, directoryId);
+      DirectoryModule.setStatus(Status.Loaded);
+    } catch (ex) {
+      PopupUtils.showError(ex.message);
       DirectoryModule.setStatus(Status.Loaded);
     }
   }

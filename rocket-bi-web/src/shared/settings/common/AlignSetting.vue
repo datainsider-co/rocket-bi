@@ -1,6 +1,9 @@
 <template>
   <div class="setting-container no-gutters" :class="{ 'disabled-setting': disable }">
-    <div v-if="label != null" class="label single-line mb-2">{{ label }}</div>
+    <div class="d-flex flex-row align-items-center mb-2">
+      <p v-if="label != null" class="label single-line m-0">{{ label }}</p>
+      <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
+    </div>
     <div class="d-flex align-items-center justify-content-between align-container" style="height: 34px;">
       <b-icon-text-left :class="`${iconClass(`left`)}`" @click="selectAlign(`left`)" />
       <b-icon-text-center :class="`${iconClass(`center`)}`" @click="selectAlign(`center`)" />
@@ -12,6 +15,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { Log } from '@core/utils';
+import { StringUtils } from '@/utils';
 
 @Component({})
 export default class AlignSetting extends Vue {
@@ -23,6 +27,9 @@ export default class AlignSetting extends Vue {
 
   @Prop({ required: false, type: Boolean, default: false })
   private readonly disable!: boolean;
+
+  @Prop({ type: String, default: '' })
+  private readonly hint!: string;
 
   private selectValue = this.value;
 
@@ -41,6 +48,9 @@ export default class AlignSetting extends Vue {
   private iconClass(align: string) {
     const classString = 'btn-icon btn-ghost di-popup ic-16';
     return this.selectValue == align ? `${classString} active` : `${classString}`;
+  }
+  private get showHint(): boolean {
+    return StringUtils.isNotEmpty(this.hint);
   }
 }
 </script>

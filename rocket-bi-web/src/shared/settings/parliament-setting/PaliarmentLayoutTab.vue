@@ -6,7 +6,8 @@
         :options="layoutOptions"
         :value="layout"
         class="mb-3 group-config"
-        label="Select style"
+        :label="`${configSetting['layout.select'].label}`"
+        :hint="`${configSetting['layout.select'].hint}`"
         size="full"
         @onChanged="handleLayoutChanged"
       />
@@ -22,6 +23,8 @@ import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 
 @Component({ components: { PanelHeader } })
 export default class ParliamentLayoutTab extends Vue {
+  private readonly configSetting = window.chartSetting['layout.tab'];
+
   @Prop({ required: false, type: Object })
   setting!: PlotOptions;
 

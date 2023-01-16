@@ -81,7 +81,7 @@ import { JobFormFactory } from '@/screens/data-ingestion/form-builder/JobFormFac
 import { JobFormRender } from '@/screens/data-ingestion/form-builder/JobFormRender';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
 import { JobModule } from '@/screens/data-ingestion/store/JobStore';
-import { DefaultPaging, ItemData, Routers, Status, VisualizationItemData } from '@/shared';
+import { DefaultPaging, ItemData, Routers, Status, VisualizationItemData, ApiExceptions } from '@/shared';
 import { Track } from '@/shared/anotation';
 import { AtomicAction } from '@/shared/anotation/AtomicAction';
 import DiButton from '@/shared/components/common/DiButton.vue';
@@ -96,7 +96,7 @@ import { Modals } from '@/utils/Modals';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { StringUtils } from '@/utils/StringUtils';
 import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
-import { DataSources, DataSourceType, FormMode, GoogleAdsJob, GoogleAdsSourceInfo, Job, JobInfo, S3Job, S3SourceInfo, SortRequest } from '@core/data-ingestion';
+import { DataSources, DataSourceType, FormMode, GoogleAdsSourceInfo, Job, JobInfo, S3Job, S3SourceInfo, SortRequest } from '@core/data-ingestion';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { GoogleAnalyticJob } from '@core/data-ingestion/domain/job/google-analytic/GoogleAnalyticJob';
 import { DataSourceResponse } from '@core/data-ingestion/domain/response/DataSourceResponse';
@@ -108,9 +108,12 @@ import { Log } from '@core/utils';
 import { cloneDeep } from 'lodash';
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import DocumentModal from './DocumentModal.vue';
-import { GoogleAuthenticationType } from '@/shared/components/google-authen/enum/GoogleAuthenticationType';
+import { ThirdPartyAuthenticationType } from '@/shared/components/google-authen/enum/ThirdPartyAuthenticationType';
 import { GA4Job } from '@core/data-ingestion/domain/job/ga4/GA4Job';
-import MultiJobCreationModal from '@/screens/data-ingestion/components/MultiJobCreationModal.vue';
+import { FacebookResponse, validFacebookResponse } from '@/shared/components/facebook-authen/FacebookResponse';
+import { FacebookAdsSourceInfo } from '@core/data-ingestion/domain/data-source/FacebookAdsSourceInfo';
+import { Inject } from 'typescript-ioc';
+import { DataSourceService } from '@core/common/services/DataSourceService';
 
 @Component({
   components: {
@@ -154,6 +157,9 @@ export default class DataSourceScreen extends Vue {
 
   @Ref()
   private jobConfigModal!: JobConfigModal;
+
+  @Inject
+  private readonly dataSourceService!: DataSourceService;
 
   private readonly allItems: ItemData[] = ALL_DATASOURCE;
   private from = 0;
@@ -214,6 +220,7 @@ export default class DataSourceScreen extends Vue {
 
   @Track(TrackEvents.DataSourceView)
   async created() {
+    // await this.initFacebookClient(window.appConfig.VUE_APP_FACEBOOK_APP_ID);
     await this.loadDataSourceTable();
     this.dataSourceTable?.setSort('Last Modified', this.sortMode);
   }
@@ -359,6 +366,10 @@ export default class DataSourceScreen extends Vue {
           this.openCreateS3SourceConfig(s3Source, s3Job);
           break;
         }
+        case DataSourceType.Facebook: {
+          await this.loginFacebook(this.handleFacebookLogin);
+          break;
+        }
         //TODO: Add here
         case DataSourceType.JavaScript:
         case DataSourceType.IOS:
@@ -378,6 +389,25 @@ export default class DataSourceScreen extends Vue {
       const exception = DIException.fromObject(e);
       PopupUtils.showError(exception.message);
       Log.error('DataSourceConfigModal::handleSelectDataSource::exception::', exception.message);
+    }
+  }
+
+  async loginFacebook(callback: (response: any) => void) {
+    (window as any).FB.login(callback, { scope: window.appConfig.VUE_APP_FACEBOOK_SCOPE, return_scopes: true });
+  }
+
+  private async handleFacebookLogin(response: FacebookResponse | undefined) {
+    try {
+      validFacebookResponse(response, window.appConfig.VUE_APP_FACEBOOK_SCOPE);
+      const tokenResponse = await this.dataSourceService.getFacebookExchangeToken(response!.authResponse!.accessToken);
+      const fbSource: FacebookAdsSourceInfo = FacebookAdsSourceInfo.default().withAccessToken(tokenResponse.accessToken);
+      this.openDataSourceForm(fbSource);
+    } catch (e) {
+      const exception = DIException.fromObject(e);
+      if (exception.reason !== ApiExceptions.unauthorized) {
+        PopupUtils.showError(exception.message);
+      }
+      Log.error('DataSourceConfigModal::handleFacebookLogin::exception::', exception.message);
     }
   }
 
@@ -555,30 +585,6 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private async handleSelectGoogleSheets() {
-    try {
-      this.addMessageEvent();
-      this.openWindow(
-        `${this.googleConfig.rootOrigin}/gauthen/${GoogleAuthenticationType.GoogleSheet}?redirect=${window.location.origin}&scope=${this.googleConfig.sheetScope}&clientId=${this.googleConfig.clientId}`
-      );
-    } catch (err) {
-      PopupUtils.showError(err.message);
-      Log.error('DataSourceScreen::handleSelectGoogleAnalytics::error::', err);
-    }
-  }
-
-  private async handleSelectGoogleAnalytics() {
-    try {
-      this.addMessageEvent();
-      this.openWindow(
-        `${this.googleConfig.rootOrigin}/gauthen/${GoogleAuthenticationType.GoogleAnalytic}?redirect=${window.location.origin}&scope=${this.googleConfig.gaScope}&clientId=${this.googleConfig.clientId}`
-      );
-    } catch (err) {
-      PopupUtils.showError(err.message);
-      Log.error('DataSourceScreen::handleSelectGoogleAnalytics::error::', err.message);
-    }
-  }
-
   private openWindow(url: string) {
     const width = 500;
     const height = 550;
@@ -618,32 +624,47 @@ export default class DataSourceScreen extends Vue {
   }
 
   private async handleMessageData(event: MessageEvent) {
-    const responseType = event.data?.responseType ?? GoogleAuthenticationType.NotFound;
+    const responseType = event.data?.responseType ?? ThirdPartyAuthenticationType.NotFound;
     const authorizeResponse: gapi.auth2.AuthorizeResponse | null = event.data?.authResponse ?? null;
     if (authorizeResponse) {
       Log.debug('DataSourceScreen::handleMessageData::event::', event);
       Log.debug('DataSourceScreen::handleMessageData::authorizeResponse::', event.data);
-      switch (responseType as GoogleAuthenticationType) {
-        case GoogleAuthenticationType.GoogleAnalytic: {
+      switch (responseType as ThirdPartyAuthenticationType) {
+        case ThirdPartyAuthenticationType.GoogleAnalytic: {
           this.handleGoogleAnalyticMessage(authorizeResponse.access_token, authorizeResponse.code);
           break;
         }
-        case GoogleAuthenticationType.GA4: {
+        case ThirdPartyAuthenticationType.GA4: {
           Log.debug('DataSourceScreen::handleMessageData::GA4Case::');
           this.handleGA4Message(authorizeResponse.access_token, authorizeResponse.code);
           break;
         }
-        case GoogleAuthenticationType.GoogleSheet: {
+        case ThirdPartyAuthenticationType.GoogleSheet: {
           this.handleGoogleSheetMessage(authorizeResponse.access_token, authorizeResponse.code);
           break;
         }
-        case GoogleAuthenticationType.GoogleAds: {
+        case ThirdPartyAuthenticationType.GoogleAds: {
           await this.handleGoogleAdsMessage(authorizeResponse.access_token, authorizeResponse.code);
+          break;
+        }
+        case ThirdPartyAuthenticationType.Facebook: {
+          await this.handleFacebookMessage(authorizeResponse);
           break;
         }
         default:
           throw new UnsupportedException(`Unsupported google response type ${responseType}`);
       }
+    }
+  }
+
+  private handleSelectFacebookSource(windowUrl: string) {
+    Log.debug('handleSelectFacebookSource', windowUrl);
+    try {
+      this.addMessageEvent();
+      this.openWindow(windowUrl);
+    } catch (err) {
+      PopupUtils.showError(err.message);
+      Log.error('DataSourceScreen::handleSelectFacebookSource::error::', err);
     }
   }
 
@@ -691,6 +712,10 @@ export default class DataSourceScreen extends Vue {
     //   .setAccessToken(accessToken)
     //   .setAuthorizationCode(authorizationCode);
     // this.openMultiJobConfigModal(job);
+  }
+
+  private async handleFacebookMessage(response: any) {
+    //
   }
 
   @AtomicAction()
@@ -775,11 +800,23 @@ export default class DataSourceScreen extends Vue {
       this.sortMode = SortDirection.Asc;
     }
   }
+
+  // async initFacebookClient(appId: string) {
+  //   Log.debug('initFacebookClient::', appId);
+  //   (window as any).fbAsyncInit = function() {
+  //     (window as any).FB.init({
+  //       appId: appId,
+  //       cookie: true, // This is important, it's not enabled by default
+  //       version: 'v13.0'
+  //     });
+  //     jQuery(document).trigger('FBSDKLoaded');
+  //   };
+  // }
 }
 </script>
 
 <style lang="scss">
-@import '~@/themes/scss/mixin';
+@import '~@/themes/scss/mixin.scss';
 
 .data-source {
   display: flex;

@@ -137,6 +137,9 @@ export default class ActionWidgetMore extends Vue {
   @Inject({ default: undefined })
   private deleteChart?: () => void;
 
+  @Inject({ default: undefined })
+  private copyChart?: () => void;
+
   private get isEditMode(): boolean {
     return this.dashboardMode == DashboardMode.Edit;
   }
@@ -147,6 +150,11 @@ export default class ActionWidgetMore extends Vue {
         text: DashboardOptions.EDIT_TITLE,
         click: this.handleEditTitle,
         disabled: !DashboardModeModule.canEdit
+      },
+      {
+        text: 'Copy chart',
+        click: this.copyChart,
+        disabled: !DashboardModeModule.canDuplicate
       },
       {
         text: DashboardOptions.CONFIG_CHART,

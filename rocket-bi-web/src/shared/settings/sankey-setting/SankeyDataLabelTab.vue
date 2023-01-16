@@ -1,15 +1,31 @@
 <template>
   <PanelHeader header="Sankey" target-id="data-label-tab">
     <div class="data-label-tab">
-      <DropdownSetting id="sankey-display" :options="displayOptions" :value="display" class="mb-2" label="Display" @onChanged="handleDisplayChanged" />
-      <ToggleSetting id="data-label-enable" :value="enabled" class="mb-3 group-config" label="Data Label" @onChanged="handleDataLabelEnabled" />
+      <DropdownSetting
+        id="sankey-display"
+        :options="displayOptions"
+        :value="display"
+        class="mb-2"
+        :label="`${configSetting['sankey.layout'].label}`"
+        :hint="`${configSetting['sankey.layout'].hint}`"
+        @onChanged="handleDisplayChanged"
+      />
+      <ToggleSetting
+        id="data-label-enable"
+        :value="enabled"
+        class="mb-3 group-config"
+        :label="`${configSetting['label.enabled'].label}`"
+        :hint="`${configSetting['label.enabled'].hint}`"
+        @onChanged="handleDataLabelEnabled"
+      />
       <DropdownSetting
         id="data-label-font-family"
         :options="fontOptions"
         :style="labelSettingStyle"
         :value="font"
         class="mb-2"
-        label="Font family"
+        :label="`${configSetting['label.fontFamily'].label}`"
+        :hint="`${configSetting['label.fontFamily'].hint}`"
         size="full"
         @onChanged="handleFontChanged"
       />
@@ -18,11 +34,21 @@
           id="data-label-font-color"
           :default-color="defaultSetting.color"
           :value="color"
+          :label="`${configSetting['label.color'].label}`"
+          :hint="`${configSetting['label.color'].hint}`"
           class="mr-2"
           size="small"
           @onChanged="handleColorChanged"
         />
-        <DropdownSetting id="data-label-font-size" :options="fontSizeOptions" :value="fontSize" size="small" @onChanged="handleFontSizeChanged" />
+        <DropdownSetting
+          id="data-label-font-size"
+          :options="fontSizeOptions"
+          :label="`${configSetting['label.fontSize'].label}`"
+          :hint="`${configSetting['label.fontSize'].hint}`"
+          :value="fontSize"
+          size="small"
+          @onChanged="handleFontSizeChanged"
+        />
       </div>
       <RevertButton class="mb-3 pr-3" style="text-align: right" @click="handleRevert" />
     </div>
@@ -45,6 +71,8 @@ import { ChartOption, SeriesOptionData, SettingKey } from '@core/common/domain';
 
 @Component({ components: { SliderSetting, PanelHeader } })
 export default class SankeyDataLabelTab extends Vue {
+  private readonly configSetting = window.chartSetting['sankey.tab'];
+
   @Prop({ required: false, type: Object })
   private readonly setting!: SeriesOptionData;
   @Prop({ required: false, type: String })

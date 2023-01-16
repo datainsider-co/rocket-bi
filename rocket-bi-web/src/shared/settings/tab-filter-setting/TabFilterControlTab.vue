@@ -7,7 +7,8 @@
         :options="directionOptions"
         :value="direction"
         class="mb-3"
-        label="Position"
+        :label="`${configSetting['position'].label}`"
+        :hint="`${configSetting['position'].hint}`"
         size="full"
         @onChanged="handleDirectionChanged"
       />
@@ -27,7 +28,8 @@
           id="de-active-color"
           :default-color="defaultSetting.deActiveColor"
           :value="deactivateColor"
-          label="Background inactive"
+          :label="`${configSetting['inActive.background'].label}`"
+          :hint="`${configSetting['inActive.background'].hint}`"
           size="half"
           style="margin-right: 12px"
           @onChanged="handleDeActivateColorChanged"
@@ -36,12 +38,20 @@
           id="active-color"
           :default-color="defaultSetting.activeColor"
           :value="activeColor"
-          label="Background active"
+          :label="`${configSetting['active.background'].label}`"
+          :hint="`${configSetting['active.background'].hint}`"
           size="half"
           @onChanged="handleActivateColorChanged"
         />
       </div>
-      <ToggleSetting v-if="!isDropdown" id="enable-search-setting" :value="enableSearch" label="Enable search" @onChanged="handleSearchChanged" />
+      <ToggleSetting
+        v-if="!isDropdown"
+        id="enable-search-setting"
+        :value="enableSearch"
+        :label="`${configSetting['search.enabled'].label}`"
+        :hint="`${configSetting['search.enabled'].hint}`"
+        @onChanged="handleSearchChanged"
+      />
       <InputSetting
         v-if="!isDropdown"
         :disabled="enableSearch"
@@ -49,10 +59,18 @@
         class="mb-2"
         size="full"
         :value="searchPlaceholder"
-        label="Search placeholder"
+        :label="`${configSetting['search.placeHolder'].label}`"
+        :hint="`${configSetting['search.placeHolder'].hint}`"
+        :placeholder="`${configSetting['search.placeHolder'].placeHolder}`"
         @onChanged="handleSearchPlaceHolderChanged"
       />
-      <DefaultValueSetting :setting="setting.default" @onReset="handleResetDefaultValue" @onSaved="handleSetDefaultValue" />
+      <DefaultValueSetting
+        :setting="setting.default"
+        :title="`${configSetting['default.set'].label}`"
+        :hint="`${configSetting['default.set'].hint}`"
+        @onReset="handleResetDefaultValue"
+        @onSaved="handleSetDefaultValue"
+      />
       <RevertButton class="mb-3 pr-3" style="text-align: right" @click="handleRevert" />
     </div>
   </PanelHeader>
@@ -71,6 +89,8 @@ import DefaultValueSetting from '@/shared/settings/tab-filter-setting/DefaultVal
 
 @Component({ components: { DefaultValueSetting, DiIconTextButton, DiShadowButton, DiButton, PanelHeader } })
 export default class TabFilterControlTab extends Vue {
+  private readonly configSetting = window.chartSetting['tabControl.tab'];
+
   @Prop({ required: false, type: Object })
   setting?: TabOptionData;
 

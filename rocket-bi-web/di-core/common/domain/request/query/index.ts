@@ -4,4 +4,3 @@ export * from './CompareMode';
 export * from './CompareRequest';
 export * from './FilterRequest';
 export * from './QueryRequest';
-export * from './CreateQueryRequest';

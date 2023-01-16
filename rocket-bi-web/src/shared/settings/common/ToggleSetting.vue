@@ -5,12 +5,16 @@
       <label :for="`toggle-${id}`" class="custom-control-label"> </label>
     </div>
     <p :title="label" class="label text-break">{{ label }}</p>
+    <span v-if="showHint" :id="`tooltip-icon-${id}`" class="di-icon-help ml-2"></span>
+    <b-tooltip v-if="showHint" :target="`tooltip-icon-${id}`" triggers="hover">
+      <div v-html="hint" />
+    </b-tooltip>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { Log } from '@core/utils';
+import { StringUtils } from '@/utils';
 
 @Component({})
 export default class ToggleSetting extends Vue {
@@ -22,7 +26,8 @@ export default class ToggleSetting extends Vue {
   private readonly value!: boolean;
   @Prop({ required: false, type: Boolean, default: false })
   private readonly disable!: boolean;
-
+  @Prop({ type: String, default: '' })
+  private readonly hint!: string;
   private selectedValue = this.value;
 
   @Watch('value')
@@ -36,6 +41,10 @@ export default class ToggleSetting extends Vue {
       this.selectedValue = !this.selectedValue;
       this.$emit('onChanged', this.selectedValue);
     }
+  }
+
+  private get showHint(): boolean {
+    return StringUtils.isNotEmpty(this.hint);
   }
 }
 </script>

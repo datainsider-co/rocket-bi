@@ -20,7 +20,7 @@ import { DataBuilderConstantsV35, VisualizationItemData } from '@/shared';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import ChartBuilderModal, { TChartBuilderOptions } from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderModal.vue';
 import { ChartInfo, DatabaseSchema, Position } from '@core/common/domain';
-import { DashboardControllerModule, FilterModule, QuerySettingModule, WidgetModule } from '@/screens/dashboard-detail/stores';
+import { DashboardControllerModule, DashboardModule, FilterModule, QuerySettingModule, WidgetModule } from '@/screens/dashboard-detail/stores';
 import { ChartInfoUtils, PositionUtils } from '@/utils';
 import { ZoomModule } from '@/store/modules/ZoomStore';
 import { Log } from '@core/utils';
@@ -154,17 +154,7 @@ export default class ChartBuilderComponent extends Vue {
   }
 
   private async handleAddChart(chartInfo: ChartInfo): Promise<void> {
-    const position: Position = PositionUtils.getPosition(chartInfo);
-    const newChartInfo = (await WidgetModule.handleCreateNewWidget({
-      widget: chartInfo,
-      position: position
-    })) as ChartInfo;
-    WidgetModule.handleDeleteSnapWidget();
-    WidgetModule.addWidget({ widget: newChartInfo, position: position });
-    QuerySettingModule.setQuerySetting({ id: newChartInfo.id, query: newChartInfo.setting });
-    DashboardControllerModule.initAffectFilterWidgets([newChartInfo]);
-    await FilterModule.addFilterWidget(chartInfo);
-    await DashboardControllerModule.renderChartOrFilter({ widget: newChartInfo, forceFetch: true });
+    await DashboardModule.addNewChart({ chartInfo: chartInfo });
   }
 
   private async handleAddInnerFilter(innerFilter: ChartInfo): Promise<void> {

@@ -1,14 +1,22 @@
 <template>
   <PanelHeader header="Legend" target-id="legend-tab">
     <div class="legend-tab">
-      <ToggleSetting id="legend-enable" :value="enabled" class="mb-3 group-config" label="On" @onChanged="handleLegendEnabled" />
+      <ToggleSetting
+        id="legend-enable"
+        :value="enabled"
+        class="mb-3 group-config"
+        :label="`${configSetting['legend.enabled'].label}`"
+        :hint="`${configSetting['legend.enabled'].hint}`"
+        @onChanged="handleLegendEnabled"
+      />
       <DropdownSetting
         id="legend-position"
         :options="positionOptions"
         :style="legendSettingStyle"
         :value="position"
         class="mb-3"
-        label="Position"
+        :label="`${configSetting['legend.verticalAlign'].label}`"
+        :hint="`${configSetting['legend.verticalAlign'].hint}`"
         size="full"
         @onChanged="handleChangePosition"
       />
@@ -17,8 +25,9 @@
         :style="legendSettingStyle"
         :value="title"
         class="mb-3"
-        label="Legend name"
-        placeholder="Input Legend Title"
+        :label="`${configSetting['legend.title.text'].label}`"
+        :hint="`${configSetting['legend.title.text'].hint}`"
+        :placeholder="`${configSetting['legend.title.text'].hint}`"
         size="full"
         @onChanged="handleTitleSaved"
       />
@@ -29,23 +38,52 @@
         :style="legendSettingStyle"
         :value="font"
         class="mb-2"
-        label="Font family"
+        :label="`${configSetting['legend.itemStyle.fontFamily'].label}`"
+        :hint="`${configSetting['legend.itemStyle.fontFamily'].hint}`"
         size="full"
         @onChanged="handleFontChanged"
       />
       <div :style="legendSettingStyle" class="row-config-container">
-        <ColorSetting id="legend-font-color" :default-color="defaultSetting.color" :value="color" class="mr-2" size="small" @onChanged="handleColorChanged" />
-        <DropdownSetting id="legend-font-size" :options="fontSizeOptions" :value="fontSize" size="small" @onChanged="handleFontSizeChanged" />
+        <ColorSetting
+          id="legend-font-color"
+          :label="`${configSetting['legend.itemStyle.color'].label}`"
+          :hint="`${configSetting['legend.itemStyle.color'].hint}`"
+          :default-color="defaultSetting.color"
+          :value="color"
+          class="mr-2"
+          size="small"
+          @onChanged="handleColorChanged"
+        />
+        <DropdownSetting
+          id="legend-font-size"
+          :options="fontSizeOptions"
+          :label="`${configSetting['legend.itemStyle.fontSize'].label}`"
+          :hint="`${configSetting['legend.itemStyle.fontSize'].hint}`"
+          :value="fontSize"
+          size="small"
+          @onChanged="handleFontSizeChanged"
+        />
       </div>
       <ToggleSetting
         id="manual-height-enable"
         class="mb-2"
         :style="legendSettingStyle"
-        label="Manual Height"
+        :label="`${configSetting['legend.enableCustomHeight'].label}`"
+        :hint="`${configSetting['legend.enableCustomHeight'].hint}`"
         :value="enableCustomHeight"
         @onChanged="handleCustomHeightEnableChanged"
       />
-      <InputSetting id="manual-height-input" class="mb-2" v-if="enableCustomHeight" :value="maxHeight" @onChanged="handleMaxHeightChange" applyFormatNumber />
+      <InputSetting
+        id="manual-height-input"
+        class="mb-2"
+        v-if="enableCustomHeight"
+        :label="`${configSetting['legend.maxHeight'].label}`"
+        :hint="`${configSetting['legend.maxHeight'].hint}`"
+        :placeholder="`${configSetting['legend.maxHeight'].placeHolder}`"
+        :value="maxHeight"
+        @onChanged="handleMaxHeightChange"
+        applyFormatNumber
+      />
       <RevertButton class="mb-3" style="text-align: right" @click="handleRevert" />
     </div>
   </PanelHeader>
@@ -67,6 +105,8 @@ import { toNumber } from 'lodash';
 
 @Component({ components: { PanelHeader } })
 export default class LegendTab extends Vue {
+  private readonly configSetting = window.chartSetting['legend.tab'];
+
   @Prop({ required: false, type: Object })
   private readonly setting!: LegendSetting;
 

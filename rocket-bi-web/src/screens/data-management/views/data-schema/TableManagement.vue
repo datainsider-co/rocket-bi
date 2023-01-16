@@ -49,16 +49,9 @@
         </EmptyWidget>
       </div>
     </div>
-    <DiRenameModal
-      ref="createTableModal"
-      title="Create Table"
-      label="Table name"
-      placeholder="Input table name"
-      action-name="Create"
-      @rename="handleSubmitTableName"
-    />
+    <DiRenameModal ref="createTableModal" title="Create Table" label="Table name" placeholder="Input table name" action-name="Create" />
     <ContextMenu ref="contextMenu" :ignoreOutsideClass="listIgnoreClassForContextMenu" minWidth="168px" textColor="var(--text-color)" />
-    <DiRenameModal ref="renameModal" :title="renameModalTitle" @rename="handleRename" />
+    <DiRenameModal ref="renameModal" :title="renameModalTitle" />
     <DiShareModal ref="shareDatabaseModal" />
   </div>
 </template>
@@ -209,7 +202,9 @@ export default class TableManagement extends Vue {
         },
         action: RenameActions.table
       };
-      this.renameModal.show(table.name, data);
+      this.renameModal.show(table.name, (newName: string) => {
+        this.handleRename(newName, data);
+      });
       TrackingUtils.track(TrackEvents.DataSchemaRenameTable, { database: this.model?.database, table: table });
     });
     buttonRename.setAttribute('data-title', 'Rename');
@@ -264,7 +259,9 @@ export default class TableManagement extends Vue {
         action: RenameActions.database
       };
       this.renameModalTitle = `Rename database`;
-      this.renameModal.show(this.model.database.displayName, data);
+      this.renameModal.show(this.model.database.displayName, (newName: string) => {
+        this.handleRename(newName, data);
+      });
     }
   }
 
@@ -302,7 +299,9 @@ export default class TableManagement extends Vue {
           };
           this.renameModalTitle = `Rename database`;
           this.contextMenu.hide();
-          this.renameModal.show(model.database.displayName, data);
+          this.renameModal.show(model.database.displayName, (newName: string) => {
+            this.handleRename(newName, data);
+          });
         }
       },
 
@@ -335,7 +334,9 @@ export default class TableManagement extends Vue {
   }
 
   private showTableCreationModal(tableName: string) {
-    this.createTableModal.show(tableName, this.model!.database);
+    this.createTableModal.show(tableName, newName => {
+      this.handleSubmitTableName(newName, this.model!.database);
+    });
   }
 
   @Track(TrackEvents.DataSchemaSubmitHardRemoveTable, {

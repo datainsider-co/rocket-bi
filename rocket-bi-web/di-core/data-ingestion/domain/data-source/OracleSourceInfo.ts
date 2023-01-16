@@ -4,6 +4,9 @@ import { DataSourceType } from '@core/data-ingestion/domain/data-source/DataSour
 import { DataSources } from '@core/data-ingestion/domain/data-source/DataSources';
 import { JdbcSource } from '@core/data-ingestion/domain/response/JdbcSource';
 import { SourceId } from '@core/common/domain';
+import { SourceWithExtraField } from '@core/data-ingestion';
+import { NewFieldData } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
+import { StringUtils } from '@/utils';
 import { Log } from '@core/utils';
 
 export enum TNSNames {
@@ -11,7 +14,7 @@ export enum TNSNames {
   ServiceName = 'service_name'
 }
 
-export class OracleSourceInfo implements DataSourceInfo {
+export class OracleSourceInfo implements DataSourceInfo, SourceWithExtraField {
   className = DataSources.JdbcSource;
   sourceType = DataSourceType.Oracle;
   id: SourceId;
@@ -24,6 +27,7 @@ export class OracleSourceInfo implements DataSourceInfo {
   password: string;
   lastModify: number;
   tnsName: TNSNames;
+  extraFields: Record<string, string>;
 
   constructor(
     id: SourceId,
@@ -35,7 +39,8 @@ export class OracleSourceInfo implements DataSourceInfo {
     username: string,
     password: string,
     lastModify: number,
-    tnsName: TNSNames
+    tnsName: TNSNames,
+    extraFields: Record<string, string>
   ) {
     this.id = id;
     this.orgId = orgId;
@@ -47,14 +52,19 @@ export class OracleSourceInfo implements DataSourceInfo {
     this.password = password;
     this.lastModify = lastModify;
     this.tnsName = tnsName;
+    this.extraFields = extraFields;
   }
 
   static fromJdbcSource(obj: JdbcSource): DataSourceInfo {
     const url = obj.jdbcUrl;
     const regex = new RegExp('jdbc:oracle:thin:@//(.*)?:(.*?)([:/])(.*)');
-    const [_, host, port, sign, serviceName] = regex.exec(url);
+    const abc = new URL(url);
+    Log.debug('fromJdbcSource::abc', abc);
+    const [_, host, port, sign, remain] = regex.exec(url);
     const tnsName = sign === '/' ? TNSNames.ServiceName : TNSNames.SID;
-    return new OracleSourceInfo(obj.id, obj.orgId, obj.displayName, host, port, serviceName, obj.username, obj.password, obj.lastModify, tnsName);
+    const [serviceName, extra] = remain.split('&');
+    const extraFields: Record<string, string> = this.getExtraFields(extra);
+    return new OracleSourceInfo(obj.id, obj.orgId, obj.displayName, host, port, serviceName, obj.username, obj.password, obj.lastModify, tnsName, extraFields);
   }
 
   static fromObject(obj: any): OracleSourceInfo {
@@ -68,7 +78,8 @@ export class OracleSourceInfo implements DataSourceInfo {
       obj.username ?? '',
       obj.password ?? '',
       obj.lastModify ?? 0,
-      obj?.tnsName ?? TNSNames.ServiceName
+      obj?.tnsName ?? TNSNames.ServiceName,
+      obj?.extraFields ?? {}
     );
   }
 
@@ -83,12 +94,39 @@ export class OracleSourceInfo implements DataSourceInfo {
         serviceNameSign = ':';
       }
     }
-    const jdbcUrl = `jdbc:oracle:thin:@//${this.host}:${this.port}${serviceNameSign}${this.serviceName}`;
-    const request = new JdbcSource(this.id, this.orgId, this.sourceType, this.displayName, jdbcUrl, this.username, this.password, this.lastModify);
-    return request;
+    const extraFields = this.extraFieldsAsString?.length === 0 ? '' : `?${this.extraFieldsAsString}`;
+    const jdbcUrl = `jdbc:oracle:thin:@//${this.host}:${this.port}${serviceNameSign}${this.serviceName}${extraFields}`;
+    return new JdbcSource(this.id, this.orgId, this.sourceType, this.displayName, jdbcUrl, this.username, this.password, this.lastModify);
+  }
+  private static getExtraFields(text: string | undefined): Record<string, string> {
+    const result: Record<string, string> = {};
+    const extraAsString = text !== undefined ? text : 'connectTimeout=30000';
+    const containerExtraField = StringUtils.isNotEmpty(extraAsString);
+    if (containerExtraField) {
+      extraAsString.split('&').forEach(extraAsString => {
+        const [key, value] = extraAsString.split('=');
+        result[key] = value;
+      });
+    }
+    return result;
+  }
+
+  private get extraFieldsAsString(): string {
+    return JSON.stringify(this.extraFields)
+      .replace('{', '')
+      .replace('}', '')
+      .replaceAll(/['"]+/g, '')
+      .replaceAll(':', '=')
+      .replaceAll(',', '&');
   }
 
   getDisplayName(): string {
     return this.displayName;
+  }
+  setField(fielData: NewFieldData): void {
+    this.extraFields[fielData.fieldName] = fielData.fieldValue;
+  }
+  isExistField(fieldName: string): boolean {
+    return this.extraFields[fieldName] !== undefined;
   }
 }

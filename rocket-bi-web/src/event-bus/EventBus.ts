@@ -1,6 +1,7 @@
 import { Vue } from 'vue-property-decorator';
 import { BusEvents } from '@/event-bus/BusEvents';
 import { UserProfile } from '@core/common/domain';
+import { CopiedData } from '@/screens/dashboard-detail/intefaces/CopiedData';
 
 export class EventBus {
   private static instance: Vue;
@@ -46,5 +47,17 @@ export class EventBus {
 
   static destDatabaseNameChange(name: string, isCreateNew: boolean) {
     this.getInstance().$emit(BusEvents.DestDatabaseNameChange, name, isCreateNew);
+  }
+
+  static onPasteData(fn: (data: CopiedData) => void) {
+    this.getInstance().$on(BusEvents.PasteData, fn);
+  }
+
+  static offPasteData(fn: (data: CopiedData) => void) {
+    this.getInstance().$off(BusEvents.PasteData, fn);
+  }
+
+  static pasteData(data: CopiedData) {
+    this.getInstance().$emit(BusEvents.PasteData, data);
   }
 }

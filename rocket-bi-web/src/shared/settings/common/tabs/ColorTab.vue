@@ -1,7 +1,14 @@
 <template>
   <PanelHeader header="Data Color" target-id="color-tab">
     <div class="color-tab">
-      <ToggleSetting id="color-theme-enable" :value="enabled" class="mb-3 group-config" label="Auto" @onChanged="handleThemeColorEnabled" />
+      <ToggleSetting
+        id="color-theme-enable"
+        :value="enabled"
+        class="mb-3 group-config"
+        :label="`${configSetting['color.auto.enabled'].label}`"
+        :hint="`${configSetting['color.auto.enabled'].hint}`"
+        @onChanged="handleThemeColorEnabled"
+      />
       <div class="row-config-container">
         <ColorSetting
           id="palette-color-0"
@@ -120,6 +127,8 @@ import { _ThemeStore } from '@/store/modules/ThemeStore';
 
 @Component({ components: { PanelHeader } })
 export default class ColorTab extends Vue {
+  private readonly configSetting = window.chartSetting['color.tab'];
+
   @Prop({ type: Object, required: false })
   private setting?: ThemeColor;
   private readonly defaultColors = _ThemeStore.paletteColors;

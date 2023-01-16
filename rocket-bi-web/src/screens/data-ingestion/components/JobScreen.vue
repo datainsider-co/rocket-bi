@@ -293,17 +293,20 @@ export default class JobScreen extends Vue {
   //create job with multi creation modal
   private async createJob(job: Job, isSingleTable: boolean) {
     this.showUpdating();
-    this.showUpdating();
     if (Job.isS3Job(job)) {
       this.openS3PreviewModal(job as S3Job);
     } else {
       const clonedJob = cloneDeep(job);
       clonedJob.scheduleTime = TimeScheduler.toSchedulerV2(job.scheduleTime!);
-      if (isSingleTable) {
-        await JobModule.create(job);
+      if (Job.getJobFormConfigMode(job) === FormMode.Create) {
+        if (isSingleTable) {
+          await JobModule.create(job);
+        } else {
+          const tableNames = [...DataSourceModule.tableNames];
+          await JobModule.createMulti({ job: job, tables: tableNames });
+        }
       } else {
-        const tableNames = [...DataSourceModule.tableNames];
-        await JobModule.createMulti({ job: job, tables: tableNames });
+        await JobModule.update(job);
       }
     }
     await this.handleLoadJobs();
@@ -324,6 +327,15 @@ export default class JobScreen extends Vue {
       case JobType.S3:
         this.jobCreationModal.show(jobInfo.job);
         break;
+      case JobType.Facebook:
+      case JobType.GoogleAds: {
+        this.multiJobCreationModal.show(
+          jobInfo.job,
+          (job, isSingleTable) => this.createJob(job, isSingleTable),
+          (job, isSingleTable) => this.multiJobCreationModal.hide()
+        );
+        break;
+      }
       default:
         Log.debug('openJobConfigModal::', jobInfo);
         this.jobFormRenderer = new JobFormFactory().createRender(jobInfo);

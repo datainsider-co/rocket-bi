@@ -20,3 +20,4 @@ export * from './S3Job';
 export * from './ShopifyJob';
 export * from './UnsupportedJob';
 export * from './google-ads';
+export * from './facebook-ads';

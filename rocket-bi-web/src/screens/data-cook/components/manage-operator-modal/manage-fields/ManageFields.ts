@@ -262,8 +262,6 @@ export default class ManageFields extends ManageOperatorModal {
     model.fields.forEach(field => {
       if (initAsType) {
         field.asType = field.asType || this.getAsType(field.field.fieldType as ColumnType);
-      } else {
-        field.asType = this.getAsType(field.asType as ColumnType) === this.getAsType(field.field.fieldType as ColumnType) ? null : field.asType;
       }
       if (resetIsHidden) {
         field.isHidden = false;

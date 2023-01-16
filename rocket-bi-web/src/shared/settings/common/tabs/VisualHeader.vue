@@ -28,7 +28,8 @@
         :options="displayUnitOptions"
         :value="displayUnit"
         class="mr-2"
-        label="Display unit"
+        :label="`${configSetting['dataLabels.displayUnit'].label}`"
+        :hint="`${configSetting['dataLabels.displayUnit'].hint}`"
         size="half"
         @onChanged="handleDisplayUnitChanged"
       />
@@ -37,18 +38,27 @@
         id="precision-setting"
         :options="precisionOptions"
         :value="precision"
-        label="Precision"
+        :label="`${configSetting['precision'].label}`"
+        :hint="`${configSetting['precision'].hint}`"
         size="small"
         @onChanged="handlePrecisionChanged"
       />
     </div>
-    <ToggleSetting id="header-filter-enable" :value="enableFilter" class="mb-3" label="Enable filter" @onChanged="handleEnableFilterChanged" />
+    <ToggleSetting
+      id="header-filter-enable"
+      :value="enableFilter"
+      class="mb-3"
+      :label="`${configSetting['affectedByFilter'].label}`"
+      :hint="`${configSetting['affectedByFilter'].hint}`"
+      @onChanged="handleEnableFilterChanged"
+    />
     <ToggleSetting
       v-if="showEnableCrossFilter"
       id="cross-filter-enable"
       :value="enableCrossFilter"
       class="mb-3"
-      label="Enable cross filter"
+      :label="`${configSetting['isCrossFilter'].label}`"
+      :hint="`${configSetting['isCrossFilter'].hint}`"
       @onChanged="handleEnableCrossFilterChanged"
     />
     <ToggleSetting
@@ -56,7 +66,8 @@
       id="header-drilldown-enable"
       :value="enableDrilldown"
       class="mb-2"
-      label="Enable drilldown"
+      :label="`${configSetting['isEnableDrilldown'].label}`"
+      :hint="`${configSetting['isEnableDrilldown'].hint}`"
       @onChanged="handleEnableDrilldownChanged"
     />
     <ToggleSetting
@@ -64,7 +75,8 @@
       id="header-zoom-enable"
       :value="enableZoom"
       class="mb-2"
-      label="Enable change date function"
+      :label="`${configSetting['isEnableZoom'].label}`"
+      :hint="`${configSetting['isEnableZoom'].hint}`"
       @onChanged="handleEnableZoomChanged"
     />
   </PanelHeader>
@@ -83,6 +95,7 @@ import { PrecisionOptions } from '@/shared/settings/common/options/PrecisionOpti
 
 @Component({ components: { PanelHeader } })
 export default class VisualHeader extends Vue {
+  private readonly configSetting = window.chartSetting['other.tab'];
   private readonly defaultSetting = {
     iconColor: '#ffffff',
     background: '#333645',

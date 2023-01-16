@@ -1,14 +1,22 @@
 <template>
   <PanelHeader header="Data Label" target-id="data-label-tab">
     <div class="data-label-tab">
-      <ToggleSetting id="data-label-enable" :value="enabled" class="mb-3 group-config" label="On" @onChanged="handleDataLabelEnabled" />
+      <ToggleSetting
+        id="data-label-enable"
+        :value="enabled"
+        class="mb-3 group-config"
+        :label="`${configSetting['dataLabel.enable'].label}`"
+        :hint="`${configSetting['dataLabel.enable'].hint}`"
+        @onChanged="handleDataLabelEnabled"
+      />
       <DropdownSetting
         v-if="haveLabelFormatSetting"
         id="data-label-format"
         :options="labelFormatOptions"
         :value="labelFormat"
         class="mb-2"
-        label="Label style"
+        :label="`${configSetting['dataLabel.style'].label}`"
+        :hint="`${configSetting['dataLabel.style'].hint}`"
         size="full"
         :style="labelSettingStyle"
         @onChanged="handleLabelFormatChanged"
@@ -18,7 +26,8 @@
         :options="fontOptions"
         :value="font"
         class="mb-2"
-        label="Font family"
+        :label="`${configSetting['dataLabel.fontFamily'].label}`"
+        :hint="`${configSetting['dataLabel.fontFamily'].hint}`"
         size="full"
         :style="labelSettingStyle"
         @onChanged="handleFontChanged"
@@ -30,9 +39,19 @@
           :value="color"
           class="mr-2"
           size="small"
+          :label="`${configSetting['dataLabel.color'].label}`"
+          :hint="`${configSetting['dataLabel.color'].hint}`"
           @onChanged="handleColorChanged"
         />
-        <DropdownSetting id="data-label-font-size" :options="fontSizeOptions" :value="fontSize" size="small" @onChanged="handleFontSizeChanged" />
+        <DropdownSetting
+          id="data-label-font-size"
+          :options="fontSizeOptions"
+          :value="fontSize"
+          :label="`${configSetting['dataLabel.fontSize'].label}`"
+          :hint="`${configSetting['dataLabel.fontSize'].hint}`"
+          size="small"
+          @onChanged="handleFontSizeChanged"
+        />
       </div>
       <!--      <DropdownSetting-->
       <!--        id="data-label-display-unit"-->
@@ -47,11 +66,12 @@
       <SliderSetting
         v-if="haveDistanceSetting"
         id="data-label-distance"
-        label="Label position"
         class="mb-2 group-config"
         :min="-100"
         :max="60"
         :value="distance"
+        :label="`${configSetting['dataLabel.distance'].label}`"
+        :hint="`${configSetting['dataLabel.distance'].hint}`"
         :style="labelSettingStyle"
         @onChanged="handleDistanceChanged"
       />
@@ -62,22 +82,39 @@
         :options="positionOptions"
         class="mb-3"
         size="full"
-        label="Label position"
+        :label="`${configSetting['dataLabel.position'].label}`"
+        :hint="`${configSetting['dataLabel.position'].hint}`"
         :style="labelSettingStyle"
         @onChanged="handlePositionChanged"
       />
       <div v-if="enableConditionSetting" :style="labelSettingStyle">
-        <ToggleSetting id="condition-enable" :value="conditionEnabled" class="mb-2 group-config" label="Condition" @onChanged="handleConditionEnabled" />
+        <ToggleSetting
+          id="condition-enable"
+          :value="conditionEnabled"
+          class="mb-2 group-config"
+          :label="`${configSetting['dataLabel.condition.enabled'].label}`"
+          :hint="`${configSetting['dataLabel.condition.enabled'].hint}`"
+          @onChanged="handleConditionEnabled"
+        />
         <div class="row-config-container">
           <div>
-            <ToggleSetting id="min-enable" :value="enableMinCondition" :disable="!conditionEnabled" class="mb-1" label="Min" @onChanged="handleEnabledMin" />
+            <ToggleSetting
+              id="min-enable"
+              :value="enableMinCondition"
+              :disable="!conditionEnabled"
+              class="mb-1"
+              :label="`${configSetting['dataLabel.condition.min.enabled'].label}`"
+              :hint="`${configSetting['dataLabel.condition.min.enabled'].hint}`"
+              @onChanged="handleEnabledMin"
+            />
             <DropdownSetting
               id="min-equal-setting"
               class="mr-2 mb-1"
               :disable="!enableMinCondition || !conditionEnabled"
               :options="minOptions"
               :value="isEqualMin"
-              label=""
+              :label="`${configSetting['dataLabel.condition.min.equal'].label}`"
+              :hint="`${configSetting['dataLabel.condition.min.equal'].hint}`"
               size="half"
               @onChanged="handleMinEqualChanged"
             />
@@ -87,21 +124,32 @@
               applyFormatNumber
               class="mr-2"
               :disable="!enableMinCondition || !conditionEnabled"
-              placeholder="Input Min Value"
+              :label="`${configSetting['dataLabel.condition.min.value'].label}`"
+              :hint="`${configSetting['dataLabel.condition.min.value'].hint}`"
+              :placeholder="`${configSetting['dataLabel.condition.min.value'].hint}`"
               size="half"
               type="number"
               @onChanged="handleMinConditionChanged"
             />
           </div>
           <div>
-            <ToggleSetting id="max-enable" :value="enableMaxCondition" :disable="!conditionEnabled" class="mb-1" label="Max" @onChanged="handleEnableMax" />
+            <ToggleSetting
+              id="max-enable"
+              :value="enableMaxCondition"
+              :disable="!conditionEnabled"
+              class="mb-1"
+              :label="`${configSetting['dataLabel.condition.max.enabled'].label}`"
+              :hint="`${configSetting['dataLabel.condition.max.enabled'].hint}`"
+              @onChanged="handleEnableMax"
+            />
             <DropdownSetting
               id="max-equal-setting"
               class="mb-1"
               :disable="!enableMaxCondition || !conditionEnabled"
               :options="maxOptions"
               :value="isEqualMax"
-              label=""
+              :label="`${configSetting['dataLabel.condition.max.equal'].label}`"
+              :hint="`${configSetting['dataLabel.condition.max.equal'].hint}`"
               size="half"
               @onChanged="handleMaxEqualChanged"
             />
@@ -110,7 +158,9 @@
               :value="maxCondition"
               :disable="!enableMaxCondition || !conditionEnabled"
               applyFormatNumber
-              placeholder="Input Max Value"
+              :label="`${configSetting['dataLabel.condition.max.value'].label}`"
+              :hint="`${configSetting['dataLabel.condition.max.value'].hint}`"
+              :placeholder="`${configSetting['dataLabel.condition.max.value'].hint}`"
               size="half"
               type="number"
               @onChanged="handleMaxConditionChanged"
@@ -143,6 +193,8 @@ import { ChartOption, SettingKey } from '@core/common/domain';
 
 @Component({ components: { SliderSetting, PanelHeader } })
 export default class DataLabelTab extends Vue {
+  private readonly configSetting = window.chartSetting['dataLabel.tab'];
+
   private readonly minOptions = HeadComparisonOptions;
   private readonly maxOptions = TailComparisonOptions;
   @Prop({ required: false, type: Object })

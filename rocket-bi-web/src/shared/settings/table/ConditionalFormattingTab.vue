@@ -1,12 +1,21 @@
 <template>
   <PanelHeader header="Conditional Formatting" target-id="field-formatting-tab">
     <div class="field-formatting-tab">
-      <DropdownSetting id="conditional-selection" :options="columnOptions" :value="selectedColumnId" size="full" @onSelected="handleSelectedItem" />
+      <DropdownSetting
+        id="conditional-selection"
+        :options="columnOptions"
+        :label="`${configSetting['column.select'].label}`"
+        :hint="`${configSetting['column.select'].hint}`"
+        :value="selectedColumnId"
+        size="full"
+        @onSelected="handleSelectedItem"
+      />
       <ToggleTextButtonSetting
         :value="applyBackgroundColor"
         buttonId="conditional-background-button"
         toggleId="conditional-background-toggle"
-        toggleLabel="Background color"
+        :toggleLabel="`${configSetting['conditionalFormatting.backgroundColor.enabled'].label}`"
+        :hint="`${configSetting['conditionalFormatting.backgroundColor.enabled'].hint}`"
         @onChanged="handleApplyBackgroundSetting"
         @onClickedButton="handleAdvanceBackgroundSetting"
       />
@@ -14,7 +23,8 @@
         :value="applyColor"
         buttonId="conditional-color-button"
         toggleId="conditional-color-toggle"
-        toggleLabel="Font color"
+        :toggleLabel="`${configSetting['conditionalFormatting.color.enabled'].label}`"
+        :hint="`${configSetting['conditionalFormatting.color.enabled'].hint}`"
         @onChanged="handleApplyColorSetting"
         @onClickedButton="handleAdvanceColorSetting"
       />
@@ -23,7 +33,8 @@
         :value="applyDataBar"
         buttonId="conditional-data-bar-button"
         toggleId="conditional-data-bar-toggle"
-        toggleLabel="Data bars"
+        :toggleLabel="`${configSetting['conditionalFormatting.dataBar.enabled'].label}`"
+        :hint="`${configSetting['conditionalFormatting.dataBar.enabled'].hint}`"
         @onChanged="handleApplyDataBarSetting"
         @onClickedButton="handleAdvanceDataBarSetting"
       />
@@ -31,7 +42,8 @@
         :value="applyIcon"
         buttonId="conditional-icon-button"
         toggleId="conditional-icon-toggle"
-        toggleLabel="Icons"
+        :toggleLabel="`${configSetting['conditionalFormatting.icon.enabled'].label}`"
+        :hint="`${configSetting['conditionalFormatting.icon.enabled'].hint}`"
         @onChanged="handleApplyIconSetting"
         @onClickedButton="handleAdvanceIconSetting"
       />
@@ -96,6 +108,7 @@ type SettingKeyType = 'backgroundColor' | 'color' | 'icon' | 'dataBar';
   }
 })
 export default class ConditionalFormattingTab extends Vue {
+  private readonly configSetting = window.chartSetting['conditionalFormatting.tab'];
   @Prop({ required: true })
   private readonly options!: PivotTableOptionData | TableOptionData;
   @Prop({ required: true, type: Array, default: [] })

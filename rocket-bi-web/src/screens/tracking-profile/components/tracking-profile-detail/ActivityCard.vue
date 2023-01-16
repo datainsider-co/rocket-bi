@@ -44,7 +44,7 @@ export default class ActivityCard extends Vue {
 
   get getPageTitle() {
     switch (this.data.eventName) {
-      case SystemEvents.PAGE_VIEW:
+      case SystemEvents.PageView:
         return this.event.screenName ?? '';
       default:
         return this.event.url ? this.getShortName(this.event.url) : '';
@@ -53,7 +53,7 @@ export default class ActivityCard extends Vue {
 
   get activityDescription() {
     switch (this.data.eventName) {
-      case SystemEvents.PAGE_VIEW:
+      case SystemEvents.PageView:
         return `${this.getUserDisplayName()} has viewed a page`;
       default:
         return `${this.getUserDisplayName()} has been ${this.event.displayName} at`;

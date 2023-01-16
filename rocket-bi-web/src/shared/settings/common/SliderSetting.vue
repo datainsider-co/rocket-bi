@@ -1,6 +1,9 @@
 <template>
   <div :class="{ 'disabled-setting': disable }" class="slider-setting no-gutters">
-    <div v-if="label != null" class="label single-line mb-2">{{ label }}</div>
+    <div class="d-flex flex-row align-items-center">
+      <p v-if="label != null" class="m-0">{{ label }}</p>
+      <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
+    </div>
     <div class="d-flex align-items-center">
       <BFormInput
         ref="displayInput"
@@ -23,6 +26,7 @@ import DiSlider from '@/shared/components/common/di-slider/DiSlider.vue';
 import { Log } from '@core/utils';
 import { toNumber } from 'lodash';
 import { BFormInput } from 'bootstrap-vue';
+import { StringUtils } from '@/utils';
 
 @Component({
   components: { DiSlider }
@@ -48,6 +52,9 @@ export default class SliderSetting extends Vue {
 
   @Prop({ required: false, type: Boolean, default: false })
   private readonly disable!: boolean;
+
+  @Prop({ type: String, default: '' })
+  private readonly hint!: string;
 
   private displayValue = this.value.toString();
 
@@ -76,6 +83,10 @@ export default class SliderSetting extends Vue {
     this.setDisplayInputValue(newValue.toString());
     Log.debug('settingSlider::handleValueChanged::', newValue);
     this.$emit('onChanged', newValue);
+  }
+
+  private get showHint(): boolean {
+    return StringUtils.isNotEmpty(this.hint);
   }
 }
 </script>

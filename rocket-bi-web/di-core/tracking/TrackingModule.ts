@@ -8,7 +8,7 @@ import { TrackingActivityRepository, TrackingActivityRepositoryImpl } from '@cor
 
 export class TrackingModule extends BaseModule {
   configuration(): void {
-    DiAnalytics.init('https://admin.datainsider.co', 'c2c09332-14a1-4eb1-8964-2d85b2a561c8');
+    DiAnalytics.init('https://analytics.datainsider.co', 'di_api_7dc8dd96-611a-4116-a506-1ba89713fbe6');
 
     Container.bind(TrackingService)
       .to(TrackingServiceImpl)

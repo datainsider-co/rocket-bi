@@ -3,7 +3,16 @@ import { OracleSourceInfo } from './OracleSourceInfo';
 import { MSSqlSourceInfo } from './MSSqlSourceInfo';
 import { DataSourceType } from '@core/data-ingestion/domain/data-source/DataSourceType';
 import { DataSource } from '@core/data-ingestion/domain/response/DataSource';
-import { DataSources, GoogleAdsSourceInfo, JdbcSource, MongoDBSource, MongoDBSourceInfo, S3Source, S3SourceInfo } from '@core/data-ingestion';
+import {
+  DataSources,
+  FacebookAdsSourceInfo,
+  GoogleAdsSourceInfo,
+  JdbcSource,
+  MongoDBSource,
+  MongoDBSourceInfo,
+  S3Source,
+  S3SourceInfo
+} from '@core/data-ingestion';
 import { SourceId } from '@core/common/domain';
 import { RedshiftSourceInfo } from '@core/data-ingestion/domain/data-source/RedshiftSourceInfo';
 import { UnsupportedException } from '@core/common/domain/exception/UnsupportedException';
@@ -62,6 +71,8 @@ export abstract class DataSourceInfo {
         return S3SourceInfo.fromObject(obj);
       case DataSourceType.GoogleAds:
         return GoogleAdsSourceInfo.fromObject(obj);
+      case DataSourceType.Facebook:
+        return FacebookAdsSourceInfo.fromObject(obj);
       default:
         return UnsupportedSourceInfo.fromObject(obj);
     }
@@ -87,6 +98,8 @@ export abstract class DataSourceInfo {
         return GA4SourceInfo.fromGA4Source(obj as GA4Source);
       case DataSources.GoogleAdsSource:
         return GoogleAdsSourceInfo.fromObject(obj);
+      case DataSources.FacebookAds:
+        return FacebookAdsSourceInfo.fromObject(obj);
       default:
         return UnsupportedSourceInfo.fromObject(obj);
     }
@@ -154,6 +167,8 @@ export abstract class DataSourceInfo {
         return 'ic_ga_small.png';
       case DataSourceType.GoogleAds:
         return 'ic_gg_ads_small.png';
+      case DataSourceType.Facebook:
+        return 'ic_fb_small.png';
       default:
         return 'ic_default.svg';
     }

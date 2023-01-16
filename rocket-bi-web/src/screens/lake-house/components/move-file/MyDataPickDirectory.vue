@@ -1,13 +1,5 @@
 <template>
-  <ContextMenu
-    id="my-data-directory-picker"
-    ref="vueContext"
-    tag="div"
-    minWidth="314px"
-    :ignoreOutsideClass="listIgnoreClassForContextMenu"
-    :close-on-click="true"
-    :z-index="1"
-  >
+  <ContextMenu :id="id" ref="vueContext" tag="div" minWidth="314px" :ignoreOutsideClass="listIgnoreClassForContextMenu" :close-on-click="true" :z-index="1">
     <div class="move-file-container">
       <MoveFile
         ref="moveFile"
@@ -26,20 +18,19 @@
   </ContextMenu>
 </template>
 <script lang="ts">
-import { Component, Ref, Vue } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import MoveFile from '@/screens/lake-house/components/move-file/MoveFile.vue';
 import { Log } from '@core/utils';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { CreateDirectoryRequest, DIException, Directory, DirectoryId, DirectoryPagingRequest, DirectoryType } from '@core/common/domain';
 import { ApiExceptions } from '@/shared';
 import ContextMenu from '@/shared/components/ContextMenu.vue';
-import { DirectoryListingHandler } from '@/screens/directory/views/mydata/directory-listing-handler/DirectoryListingHandler';
-import { MyDataDirectoryListingHandler } from '@/screens/directory/views/mydata/directory-listing-handler/MyDataDirectoryListingHandler';
 import { DefaultDirectoryId } from '@/screens/directory/views/mydata/DefaultDirectoryId';
 import { DirectoryService } from '@core/common/services';
 import { Di } from '@core/common/modules';
 import { DirectoryModule } from '@/screens/directory/store/DirectoryStore';
 import { Inject } from 'typescript-ioc';
+import { RandomUtils } from '@/utils';
 
 @Component({
   components: { MoveFile, ContextMenu }
@@ -56,6 +47,9 @@ export default class MyDataPickDirectory extends Vue {
   private currentDirectories: Directory[] = [];
 
   private data?: any = null;
+
+  @Prop({ required: false, type: String, default: () => `my-data-directory-picker-${RandomUtils.nextString()}` })
+  private id!: string;
 
   @Inject
   private readonly directoryService!: DirectoryService;

@@ -6,7 +6,8 @@
         :options="fontOptions"
         :value="font"
         class="mb-2"
-        label="Font family"
+        :label="`${configSetting['header.style.fontFamily'].label}`"
+        :hint="`${configSetting['header.style.fontFamily'].hint}`"
         size="full"
         @onChanged="handleFontChanged"
       />
@@ -15,6 +16,8 @@
           id="header-font-family-color"
           :default-color="defaultStyle.fontFamily"
           :value="fontFamilyColor"
+          :label="`${configSetting['header.style.color'].label}`"
+          :hint="`${configSetting['header.style.color'].hint}`"
           style="width: 145px; margin-right: 8px"
           @onChanged="handleFontFamilyColorChanged"
         />
@@ -24,15 +27,24 @@
           :value="fontSize"
           class="mr-2"
           size="small"
+          :label="`${configSetting['header.style.fontSize'].label}`"
+          :hint="`${configSetting['header.style.fontSize'].hint}`"
           @onChanged="handleFontSizeChanged"
         />
-        <AlignSetting id="header-align" :value="columnAlign" @onChanged="handleAlignChanged" />
+        <AlignSetting
+          id="header-align"
+          :label="`${configSetting['header.align'].label}`"
+          :hint="`${configSetting['header.align'].hint}`"
+          :value="columnAlign"
+          @onChanged="handleAlignChanged"
+        />
       </div>
       <ColorSetting
         id="header-background-color"
         :default-color="defaultStyle.backgroundColor"
         :value="backgroundColor"
-        label="Background color"
+        :label="`${configSetting['header.backgroundColor'].label}`"
+        :hint="`${configSetting['header.backgroundColor'].hint}`"
         style="width: 145px; margin-bottom: 12px"
         @onChanged="handleBackgroundColorChanged"
       />
@@ -45,7 +57,13 @@
         <!--          style="margin-right: 12px"-->
         <!--          @onChanged="handleAutoWidthChanged"-->
         <!--        />-->
-        <ToggleSetting id="header-word-wrap" :value="isWordWrap" label="Word wrap" @onChanged="handleWordWrapChanged" />
+        <ToggleSetting
+          id="header-word-wrap"
+          :value="isWordWrap"
+          :label="`${configSetting['header.isWordWrap'].label}`"
+          :hint="`${configSetting['header.isWordWrap'].hint}`"
+          @onChanged="handleWordWrapChanged"
+        />
       </div>
       <RevertButton class="mb-3" style="text-align: right" @click="handleRevert" />
     </div>
@@ -65,6 +83,7 @@ import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOp
 
 @Component({ components: { ToggleSetting, DropdownSetting, ColorSetting, PanelHeader, AlignSetting } })
 export default class HeaderTab extends Vue {
+  private readonly configSetting = window.chartSetting['header.tab'];
   @Prop({ required: false, type: Object })
   private readonly setting!: PivotTableChartOption;
   private readonly fontSizeOptions = FontSizeOptions;

@@ -35,6 +35,7 @@ export default class DataSourceItem extends Vue {
   overflow: hidden;
   > img {
     width: auto;
+    object-fit: cover;
   }
 
   .title {

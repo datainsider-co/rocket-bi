@@ -15,8 +15,7 @@
       <div class="col-auto flex-shrink-1">
         <DashboardControlBar :showResetFilters="haveFilters" />
       </div>
-      <DiRenameModal ref="renameDashboardModal" @rename="handleRenameDashboard" />
-      <DiRenameModal ref="editChartTextModal" @rename="handleRenameWidget" />
+      <DiRenameModal ref="renameModal" />
     </div>
     <div v-if="enableFilter && !isMobile()" class="filters-bar">
       <FilterBar
@@ -72,9 +71,7 @@ export default class DashboardHeader extends Vue {
   private readonly isLogin!: boolean;
 
   @Ref()
-  private readonly renameDashboardModal!: DiRenameModal;
-  @Ref()
-  private readonly editChartTextModal!: DiRenameModal;
+  private readonly renameModal!: DiRenameModal;
 
   @Ref()
   private readonly filterBar?: FilterBar;
@@ -110,7 +107,9 @@ export default class DashboardHeader extends Vue {
   }
 
   private onShowEditChartTitleModal(widget: Widget) {
-    this.editChartTextModal?.show(widget.name, widget);
+    this.renameModal?.show(widget.name, (newName: string) => {
+      this.handleRenameWidget(newName, widget);
+    });
   }
 
   @Provide()
@@ -139,7 +138,7 @@ export default class DashboardHeader extends Vue {
   private async handleRenameDashboard(newName: string): Promise<void> {
     if (DashboardModule.dashboardTitle !== newName) {
       try {
-        this.renameDashboardModal.hide();
+        this.renameModal.hide();
         await DashboardModule.handleRenameDashboard(newName);
         this.updateRouter(this.dashboardId, newName);
       } catch (ex) {
@@ -159,7 +158,9 @@ export default class DashboardHeader extends Vue {
     dashboard_id: (_: DashboardHeader, args: any) => _.dashboardId
   })
   private onClickRename(): void {
-    this.renameDashboardModal.show(this.title);
+    this.renameModal.show(this.title, (newName: string) => {
+      this.handleRenameDashboard(newName);
+    });
   }
 
   @Provide()
@@ -191,7 +192,7 @@ export default class DashboardHeader extends Vue {
   private async handleRenameWidget(newName: string, currentWidget: Widget): Promise<void> {
     if (currentWidget) {
       try {
-        this.editChartTextModal.hide();
+        this.renameModal.hide();
         await WidgetModule.updateTitleWidget({ widget: currentWidget, newName: newName });
       } catch (ex) {
         this.handleError(ex);

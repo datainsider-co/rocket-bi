@@ -6,7 +6,8 @@
         id="vertical-grid-color"
         :default-color="verticalColor"
         :value="verticalColor"
-        label="Vertical grid color"
+        :label="`${configSetting['grid.vertical.color'].label}`"
+        :hint="`${configSetting['grid.vertical.color'].hint}`"
         style="width: 145px; margin-right: 12px"
         @onChanged="handleVerticalColorChanged"
       />
@@ -14,16 +15,37 @@
         id="vertical-grid-thickness"
         :options="thickNessOptions"
         :value="verticalThickness"
-        label="Thickness"
+        :label="`${configSetting['grid.vertical.thickness'].label}`"
+        :hint="`${configSetting['grid.vertical.thickness'].hint}`"
         size="small"
         style="width: 64px;"
         @onChanged="handleVerticalThicknessChanged"
       />
     </div>
     <div class="row-config-container">
-      <ToggleSetting id="vertical-enable-header" :value="verticalHeaderEnabled" class="mr-4" label="Header" @onChanged="handleVerticalHeaderEnabled" />
-      <ToggleSetting id="vertical-enable-body" :value="verticalBodyEnabled" class="mr-4" label="Body" @onChanged="handleVerticalBodyEnabled" />
-      <ToggleSetting id="vertical-enable-total" :value="verticalTotalEnabled" label="Total" @onChanged="handleVerticalTotalEnabled" />
+      <ToggleSetting
+        id="vertical-enable-header"
+        :value="verticalHeaderEnabled"
+        class="mr-4"
+        :label="`${configSetting['grid.vertical.applyHeader'].label}`"
+        :hint="`${configSetting['grid.vertical.applyHeader'].hint}`"
+        @onChanged="handleVerticalHeaderEnabled"
+      />
+      <ToggleSetting
+        id="vertical-enable-body"
+        :value="verticalBodyEnabled"
+        class="mr-4"
+        :label="`${configSetting['grid.vertical.applyBody'].label}`"
+        :hint="`${configSetting['grid.vertical.applyBody'].hint}`"
+        @onChanged="handleVerticalBodyEnabled"
+      />
+      <ToggleSetting
+        id="vertical-enable-total"
+        :value="verticalTotalEnabled"
+        :label="`${configSetting['grid.vertical.applyTotal'].label}`"
+        :hint="`${configSetting['grid.vertical.applyTotal'].hint}`"
+        @onChanged="handleVerticalTotalEnabled"
+      />
     </div>
     <!--   Horizontal Grid Setting-->
     <div class="row-config-container">
@@ -31,7 +53,8 @@
         id="horizontal-grid-color"
         :default-color="horizontalColor"
         :value="horizontalColor"
-        label="Horizontal grid color"
+        :label="`${configSetting['grid.horizontal.color'].label}`"
+        :hint="`${configSetting['grid.horizontal.color'].hint}`"
         style="width: 145px; margin-right: 12px"
         @onChanged="handleHorizontalColorChanged"
       />
@@ -39,7 +62,8 @@
         id="horizontal-grid-thickness"
         :options="thickNessOptions"
         :value="horizontalThickness"
-        label="Thickness"
+        :label="`${configSetting['grid.horizontal.thickness'].label}`"
+        :hint="`${configSetting['grid.horizontal.thickness'].hint}`"
         size="small"
         style="width: 64px;margin-right: 12px;"
         @onChanged="handleHorizontalThicknessChanged"
@@ -49,15 +73,36 @@
         :options="rowPaddingOptions"
         :value="horizontalRowPadding"
         disable
-        label="Row padding"
+        :label="`${configSetting['grid.horizontal.rowPadding'].label}`"
+        :hint="`${configSetting['grid.horizontal.rowPadding'].hint}`"
         size="small"
         @onChanged="handleHorizontalRowPaddingChanged"
       />
     </div>
     <div class="row-config-container">
-      <ToggleSetting id="horizontal-enable-header" :value="horizontalHeaderEnabled" class="mr-4" label="Header" @onChanged="handleHorizontalHeaderEnabled" />
-      <ToggleSetting id="horizontal-enable-body" :value="horizontalBodyEnabled" class="mr-4" label="Body" @onChanged="handleHorizontalBodyEnabled" />
-      <ToggleSetting id="horizontal-enable-total" :value="horizontalTotalEnabled" label="Total" @onChanged="handleHorizontalTotalEnabled" />
+      <ToggleSetting
+        id="horizontal-enable-header"
+        :value="horizontalHeaderEnabled"
+        class="mr-4"
+        :label="`${configSetting['grid.horizontal.applyHeader'].label}`"
+        :hint="`${configSetting['grid.horizontal.applyHeader'].hint}`"
+        @onChanged="handleHorizontalHeaderEnabled"
+      />
+      <ToggleSetting
+        id="horizontal-enable-body"
+        :value="horizontalBodyEnabled"
+        class="mr-4"
+        :label="`${configSetting['grid.horizontal.applyBody'].label}`"
+        :hint="`${configSetting['grid.horizontal.applyBody'].hint}`"
+        @onChanged="handleHorizontalBodyEnabled"
+      />
+      <ToggleSetting
+        id="horizontal-enable-total"
+        :value="horizontalTotalEnabled"
+        :label="`${configSetting['grid.horizontal.applyTotal'].label}`"
+        :hint="`${configSetting['grid.horizontal.applyTotal'].hint}`"
+        @onChanged="handleHorizontalTotalEnabled"
+      />
     </div>
     <RevertButton class="mb-3" style="text-align: right" @click="handleRevert" />
   </PanelHeader>
@@ -72,6 +117,7 @@ import { ListUtils } from '@/utils';
 
 @Component({ components: { PanelHeader } })
 export default class GridTab extends Vue {
+  private readonly configSetting = window.chartSetting['grid.tab'];
   static readonly defaultSetting = {
     verticalColor: ChartOption.getTableGridLineColor(),
     verticalThickness: '1px',

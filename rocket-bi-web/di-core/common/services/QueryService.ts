@@ -22,29 +22,41 @@ export class QueryServiceImpl implements QueryService {
   constructor(@Inject private repository: QueryRepository) {}
 
   query(request: QueryRequest): Promise<VisualizationResponse> {
+    const startTime = Date.now();
     const newRequest = this.removeUnusedData(request);
     return this.repository
       .query(newRequest)
       .then(data => {
-        TrackingUtils.track(TrackEvents.QueryChartOk, { query: JSON.stringify(request) });
+        TrackingUtils.track(TrackEvents.QueryChartOk, { query: JSON.stringify(request), di_start_time: startTime, di_duration: Date.now() - startTime });
         return data;
       })
       .catch(ex => {
-        TrackingUtils.track(TrackEvents.QueryChartFail, { query: JSON.stringify(request), error: ex.message });
+        TrackingUtils.track(TrackEvents.QueryChartFail, {
+          query: JSON.stringify(request),
+          di_start_time: startTime,
+          di_duration: Date.now() - startTime,
+          error: ex.message
+        });
         throw DIException.fromObject(ex);
       });
   }
 
   viewAsQuery(request: QueryRequest, userProfile: UserProfile): Promise<VisualizationResponse> {
+    const startTime = Date.now();
     const newRequest = this.removeUnusedData(request);
     return this.repository
       .queryWithUser(newRequest, userProfile)
       .then(data => {
-        TrackingUtils.track(TrackEvents.QueryChartOk, { query: JSON.stringify(request) });
+        TrackingUtils.track(TrackEvents.QueryChartOk, { query: JSON.stringify(request), di_start_time: startTime, di_duration: Date.now() - startTime });
         return data;
       })
       .catch(ex => {
-        TrackingUtils.track(TrackEvents.QueryChartFail, { query: JSON.stringify(request), error: ex.message });
+        TrackingUtils.track(TrackEvents.QueryChartFail, {
+          query: JSON.stringify(request),
+          di_start_time: startTime,
+          di_duration: Date.now() - startTime,
+          error: ex.message
+        });
         throw DIException.fromObject(ex);
       });
   }
@@ -56,15 +68,21 @@ export class QueryServiceImpl implements QueryService {
   }
 
   queryAsCsv(request: QueryRequest): Promise<string> {
+    const startTime = Date.now();
     const newRequest = this.removeUnusedData(request);
     return this.repository
       .queryAsCsv(newRequest)
       .then(data => {
-        TrackingUtils.track(TrackEvents.QueryCsvOk, { query: JSON.stringify(request) });
+        TrackingUtils.track(TrackEvents.QueryCsvOk, { query: JSON.stringify(request), di_start_time: startTime, di_duration: Date.now() - startTime });
         return data;
       })
       .catch(ex => {
-        TrackingUtils.track(TrackEvents.QueryCsvFail, { query: JSON.stringify(request), error: ex.message });
+        TrackingUtils.track(TrackEvents.QueryCsvFail, {
+          query: JSON.stringify(request),
+          di_start_time: startTime,
+          di_duration: Date.now() - startTime,
+          error: ex.message
+        });
         throw DIException.fromObject(ex);
       });
   }

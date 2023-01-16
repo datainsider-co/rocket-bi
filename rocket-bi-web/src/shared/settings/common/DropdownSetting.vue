@@ -1,7 +1,10 @@
 <template>
   <div :class="{ 'disabled-setting': disable }" class="setting-container dropdown-setting no-gutters">
     <div v-if="enabledRevert || label != null" class="row mb-2 label justify-content-between w-100">
-      <p v-if="label != null" class="m-0">{{ label }}</p>
+      <div class="d-flex flex-row align-items-center">
+        <p v-if="label != null" class="m-0">{{ label }}</p>
+        <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
+      </div>
       <RevertButton v-if="enabledRevert" @click="handleRevert" />
     </div>
     <DiDropdown
@@ -30,6 +33,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { SelectOption } from '@/shared';
 import { SettingSize } from '@/shared/settings/common/SettingSize';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
+import { StringUtils } from '@/utils';
 
 @Component({
   components: {
@@ -59,6 +63,9 @@ export default class DropdownSetting extends Vue {
   @Prop({ required: false, type: String, default: 'window' })
   private readonly boundary!: string;
 
+  @Prop({ type: String, default: '' })
+  private readonly hint!: string;
+
   private selected = this.value;
 
   @Watch('value')
@@ -73,6 +80,10 @@ export default class DropdownSetting extends Vue {
 
   handleRevert() {
     this.$emit('onRevert');
+  }
+
+  private get showHint(): boolean {
+    return StringUtils.isNotEmpty(this.hint);
   }
 }
 </script>

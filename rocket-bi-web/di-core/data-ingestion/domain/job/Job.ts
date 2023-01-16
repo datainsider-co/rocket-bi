@@ -1,4 +1,4 @@
-import { GoogleAdsJob, GoogleAdsSourceInfo, S3Job } from '@core/data-ingestion';
+import { DataSourceType, FacebookAdsJob, GoogleAdsJob, GoogleAdsSourceInfo, S3Job } from '@core/data-ingestion';
 import { GoogleAnalyticJob } from '@core/data-ingestion/domain/job/google-analytic/GoogleAnalyticJob';
 
 import { JobName } from '@core/data-ingestion/domain/job/JobName';
@@ -6,7 +6,6 @@ import { JobId, SourceId } from '@core/common/domain';
 import { TimeScheduler } from '@/screens/data-ingestion/components/job-scheduler-form/scheduler-time/TimeScheduler';
 import { GoogleSheetJob } from '@core/data-ingestion/domain/job/GoogleSheetJob';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
-import { DataSourceType } from '@core/data-ingestion/domain/data-source/DataSourceType';
 import { FormMode } from '@core/data-ingestion/domain/job/FormMode';
 import { UnsupportedJob } from '@core/data-ingestion/domain/job/UnsupportedJob';
 import { BigQueryJob } from '@core/data-ingestion/domain/job/BigQueryJob';
@@ -87,6 +86,8 @@ export abstract class Job {
         return S3Job.fromObject(obj);
       case JobName.GoogleAdsJob:
         return GoogleAdsJob.fromObject(obj);
+      case JobName.FacebookAdsJob:
+        return FacebookAdsJob.fromObject(obj);
       default:
         return UnsupportedJob.fromObject(obj);
     }
@@ -119,6 +120,8 @@ export abstract class Job {
         return GA4Job.default();
       case DataSourceType.GoogleAds:
         return GoogleAdsJob.default();
+      case DataSourceType.Facebook:
+        return FacebookAdsJob.default();
       default:
         return UnsupportedJob.default(dataSource);
     }
@@ -169,7 +172,9 @@ export abstract class Job {
       case JobName.S3Job:
         return 'ic_s3_small.png';
       case JobName.GoogleAdsJob:
-        return 'ic_ga_small.png';
+        return 'ic_gg_ads_small.png';
+      case JobName.FacebookAdsJob:
+        return 'ic_fb_small.png';
       default:
         return 'ic_default.svg';
     }

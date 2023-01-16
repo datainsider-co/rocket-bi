@@ -45,6 +45,8 @@ import { Properties } from 'di-web-analytics/dist/domain';
 import { Inject } from 'typescript-ioc';
 import { Route } from 'vue-router';
 import { Action, getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators';
+import { CopiedData } from '@/screens/dashboard-detail/intefaces/CopiedData';
+import { cloneDeep } from 'lodash';
 
 export interface MainDateData {
   mode: MainDateMode;
@@ -68,6 +70,9 @@ export class DashboardStore extends VuexModule {
   private widgetWillUpdate: Widget | null = null;
   currentDashboard: Dashboard | null = null;
   dashboardDirectory: Directory | null = null;
+
+  // for copy widget future
+  copiedData: CopiedData | null = null;
 
   @Inject
   private dashboardService!: DashboardService;
@@ -160,6 +165,7 @@ export class DashboardStore extends VuexModule {
 
   @Action({ rawError: true })
   async handleLoadDashboard(id: DashboardId): Promise<void> {
+    const startTime = Date.now();
     try {
       this.setDashboardId(id);
       this.setDashboardStatus(Status.Loading);
@@ -167,13 +173,26 @@ export class DashboardStore extends VuexModule {
       this.saveOwnerId({ ownerId: dashboard.ownerId });
       await this.loadDashboardDirectory(id);
       await this.processDashboardData(dashboard);
+      this.trackingService.trackDashboard({
+        action: DashboardAction.View,
+        dashboardId: dashboard.id,
+        dashboardName: dashboard.name,
+        extraProperties: {
+          di_duration: Date.now() - startTime,
+          di_start_time: startTime
+        }
+      });
     } catch (ex) {
       Log.error('handleLoadDashboard::ex', ex);
       Log.trace('handleLoadDashboard::trace', ex);
       this.trackingService.trackDashboard({
         action: DashboardAction.View,
         dashboardId: id,
-        isError: true
+        isError: true,
+        extraProperties: {
+          di_duration: Date.now() - startTime,
+          di_start_time: startTime
+        }
       });
       await this.handleError(ex);
     }
@@ -364,11 +383,6 @@ export class DashboardStore extends VuexModule {
     ZoomModule.loadZoomLevels(WidgetModule.allQueryWidgets);
     ZoomModule.registerMultiZoomData(WidgetModule.allQueryWidgets);
     await DashboardControllerModule.initTabControl(WidgetModule.allQueryWidgets);
-    this.trackingService.trackDashboard({
-      action: DashboardAction.View,
-      dashboardId: dashboard.id,
-      dashboardName: dashboard.name
-    });
     this.setDashboardStatus(Status.Loaded);
   }
 
@@ -528,6 +542,31 @@ export class DashboardStore extends VuexModule {
       this.setCurrentDashboard(dashboard);
     } catch (ex) {
       Log.error(ex);
+    }
+  }
+
+  @Action
+  async addNewChart(payload: { chartInfo: ChartInfo; position?: Position }) {
+    const { chartInfo, position } = payload;
+    const currentPosition: Position = position || PositionUtils.getPosition(chartInfo);
+    const newChartInfo = (await WidgetModule.handleCreateNewWidget({
+      widget: chartInfo,
+      position: currentPosition
+    })) as ChartInfo;
+    WidgetModule.handleDeleteSnapWidget();
+    WidgetModule.addWidget({ widget: newChartInfo, position: currentPosition });
+    QuerySettingModule.setQuerySetting({ id: newChartInfo.id, query: newChartInfo.setting });
+    DashboardControllerModule.initAffectFilterWidgets([newChartInfo]);
+    await FilterModule.addFilterWidget(chartInfo);
+    await DashboardControllerModule.renderChartOrFilter({ widget: newChartInfo, forceFetch: true });
+  }
+
+  @Mutation
+  setCopiedData(copiedData: CopiedData | null) {
+    if (copiedData) {
+      this.copiedData = cloneDeep(copiedData);
+    } else {
+      this.copiedData = null;
     }
   }
 }

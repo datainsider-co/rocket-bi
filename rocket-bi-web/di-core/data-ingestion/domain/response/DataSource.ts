@@ -3,7 +3,7 @@
  * @created: 6/1/21, 2:16 PM
  */
 
-import { DataSources, DataSourceType, GoogleAdsSource, JdbcSource, MongoDBSource, S3Source } from '@core/data-ingestion';
+import { DataSources, DataSourceType, FacebookAdsSource, GoogleAdsSource, JdbcSource, MongoDBSource, S3Source } from '@core/data-ingestion';
 import { GoogleServiceAccountSource } from '@core/data-ingestion/domain/response/GoogleServiceAccountSource';
 import { ShopifySource } from '@core/data-ingestion/domain/response/ShopifySource';
 import { UnsupportedSource } from '@core/data-ingestion/domain/response/UnsupportedSource';
@@ -31,6 +31,8 @@ export abstract class DataSource {
         return GA4Source.fromObject(obj);
       case DataSources.GoogleAdsSource:
         return GoogleAdsSource.fromObject(obj);
+      case DataSources.FacebookAds:
+        return FacebookAdsSource.fromObject(obj);
       default:
         return UnsupportedSource.fromObject(obj);
     }

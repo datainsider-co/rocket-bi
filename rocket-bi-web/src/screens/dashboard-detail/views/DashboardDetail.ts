@@ -71,7 +71,7 @@ import { AtomicAction } from '@/shared/anotation/AtomicAction';
 import { GeolocationModule } from '@/store/modules/data-builder/GeolocationStore';
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
-import { ListUtils, PositionUtils } from '@/utils';
+import { ListUtils, PositionUtils, TimeoutUtils } from '@/utils';
 import { SchemaService } from '@core/schema/service/SchemaService';
 import { DynamicConditionWidget } from '@core/common/domain/model/widget/filter/DynamicConditionWidget';
 import { AdhocBuilderConfig, ControlBuilderConfig } from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderConfig';
@@ -86,6 +86,7 @@ import {
 import { Dashboard as CoreDashboard } from '@core/common/domain/model/dashboard/Dashboard.ts';
 import PasswordModal from '@/screens/dashboard-detail/components/PasswordModal.vue';
 import { Di } from '@core/common/modules';
+import { CopiedData, CopiedDataType } from '@/screens/dashboard-detail/intefaces/CopiedData';
 
 Vue.use(ChartComponents);
 Vue.use(GridStackComponents);
@@ -271,7 +272,7 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
 
   handleCreateText(textWidget: TextWidget) {
     if (StringUtils.isNotEmpty(textWidget.content)) {
-      WidgetModule.handleCreateTextWidget(textWidget).catch(ex => this.showError('Create text failure! Try again later', ex));
+      WidgetModule.handleCreateTextWidget({ widget: textWidget }).catch(ex => this.showError('Create text failure! Try again later', ex));
       this.editTextModal.hide();
     }
   }
@@ -397,6 +398,8 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
     this.$root.$on(DashboardEvents.UpdateDynamicConditionWidget, this.onUpdateDynamicConditionWidget);
     EventBus.onRLSViewAs(this.loadViewAsDashboard);
     EventBus.onExitRLSViewAs(this.loadDashboard);
+    EventBus.onPasteData(this.processCopiedData);
+    window.document.addEventListener('paste', this.handlePasteEvent);
   }
 
   private unregisterEvents() {
@@ -419,6 +422,69 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
     this.$root.$off(DashboardEvents.UpdateDynamicConditionWidget, this.onUpdateDynamicConditionWidget);
     EventBus.offRLSViewAs(this.loadViewAsDashboard);
     EventBus.offExitRLSViewAs(this.loadDashboard);
+    EventBus.offPasteData(this.processCopiedData);
+    window.document.removeEventListener('paste', this.handlePasteEvent);
+  }
+
+  private async handlePasteEvent(event: ClipboardEvent) {
+    const copiedData: string = event.clipboardData?.getData('text') ?? '{}';
+    const data: CopiedData | undefined = CopiedData.fromObject(JSON.parse(copiedData));
+    await this.processCopiedData(data);
+  }
+
+  private async processCopiedData(data: CopiedData | undefined) {
+    Log.debug('handleOnPaste::copiedData', data);
+    if (data && CopiedData.isSameOrigin(data)) {
+      switch (data.type) {
+        case CopiedDataType.Chart: {
+          await this.pasteChart(data);
+          break;
+        }
+        case CopiedDataType.Widget: {
+          await this.pasteWidget(data);
+          break;
+        }
+        default: {
+          PopupUtils.showError('Unsupported paste this chart data');
+          break;
+        }
+      }
+    } else {
+      Log.debug('handleOnPaste:: cannot paste data cause incompatible chart data');
+      PopupUtils.showError('Incompatible this chart data');
+    }
+  }
+
+  private async pasteChart(data: CopiedData) {
+    try {
+      const obj = JSON.parse(data.transferData);
+      const chartInfo = ChartInfo.fromObject(obj.widget);
+      const position = Position.fromObject(obj.position);
+      position.resetRowColumn();
+      await DashboardModule.addNewChart({
+        chartInfo: chartInfo,
+        position: position
+      });
+    } catch (ex) {
+      Log.error('handlePasteChart::error', ex);
+      PopupUtils.showError('Failed to paste chart');
+    }
+  }
+
+  private async pasteWidget(data: CopiedData) {
+    try {
+      const obj = JSON.parse(data.transferData);
+      const widget = Widget.fromObject(obj.widget);
+      const position = Position.fromObject(obj.position);
+      position.resetRowColumn();
+      await WidgetModule.handleCreateTextWidget({
+        widget: widget,
+        position: position
+      });
+    } catch (ex) {
+      Log.error('handlePasteChart::error', ex);
+      PopupUtils.showError('Failed to paste chart');
+    }
   }
 
   private async loadDashboard(): Promise<void> {

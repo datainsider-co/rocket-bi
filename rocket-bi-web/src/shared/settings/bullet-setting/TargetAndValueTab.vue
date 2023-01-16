@@ -6,8 +6,9 @@
       :value="target"
       applyFormatNumber
       class="mb-2"
-      label="Target"
-      placeholder="Input Target Value"
+      :label="`${configSetting['target.value'].label}`"
+      :hint="`${configSetting['target.value'].hint}`"
+      :placeholder="`${configSetting['target.value'].hint}`"
       size="full"
       type="number"
       @onChanged="handleTargetSaved"
@@ -16,7 +17,9 @@
       <InputSetting
         id="target-width-input"
         :value="targetHeight"
-        label="Target Width"
+        :label="`${configSetting['target.width'].label}`"
+        :hint="`${configSetting['target.width'].hint}`"
+        :placeholder="`${configSetting['target.width'].hint}`"
         size="small"
         style="margin-right: 8px"
         type="number"
@@ -26,7 +29,9 @@
         id="target-color"
         :defaultColor="defaultSetting.targetColor"
         :value="targetColor"
-        label="Color"
+        :label="`${configSetting['target.color'].label}`"
+        :hint="`${configSetting['target.color'].hint}`"
+        :placeholder="`${configSetting['target.color'].hint}`"
         size="small"
         @onChanged="handleTargetColorChanged"
       />
@@ -35,7 +40,9 @@
       id="series-color"
       :defaultColor="defaultSetting.seriesColor"
       :value="seriesColor"
-      label="Bullet Color"
+      :label="`${configSetting['bullet.color'].label}`"
+      :hint="`${configSetting['bullet.color'].hint}`"
+      :placeholder="`${configSetting['bullet.color'].hint}`"
       size="small"
       class="mb-2"
       @onChanged="handleSeriesColorChanged"
@@ -45,7 +52,9 @@
         id="series-width-input"
         :value="seriesBorderWidth"
         applyFormatNumber
-        label="Border Width"
+        :label="`${configSetting['bullet.borderWidth'].label}`"
+        :hint="`${configSetting['bullet.borderWidth'].hint}`"
+        :placeholder="`${configSetting['bullet.borderWidth'].hint}`"
         size="small"
         style="margin-right: 8px"
         type="number"
@@ -55,7 +64,8 @@
         id="border-color"
         :defaultColor="defaultSetting.borderColor"
         :value="borderColor"
-        label="Border Color"
+        :label="`${configSetting['border.color'].label}`"
+        :hint="`${configSetting['border.color'].hint}`"
         size="small"
         @onChanged="handleBorderColorChanged"
       />
@@ -73,6 +83,8 @@ import RevertButton from '@/shared/settings/common/RevertButton.vue';
 
 @Component({ components: { PanelHeader, RevertButton } })
 export default class TargetAndValueTab extends Vue {
+  private readonly configSetting = window.chartSetting['bulletColor.tab'];
+
   private readonly defaultSetting = {
     target: 7500,
     height: 3,

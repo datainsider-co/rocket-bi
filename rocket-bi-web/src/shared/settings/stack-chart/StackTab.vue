@@ -3,7 +3,8 @@
     <div class="shape-tab">
       <DropdownSetting
         id="stack-value"
-        label="Stack"
+        :label="`${configSetting['stack'].label}`"
+        :hint="`${configSetting['stack'].hint}`"
         :options="stackOptions"
         :value="stackValue"
         class="mb-2"
@@ -36,6 +37,8 @@ import { SelectOption } from '@/shared';
 
 @Component({ components: { PanelHeader } })
 export default class StackTab extends Vue {
+  private readonly configSetting = window.chartSetting['stack.tab'];
+
   @Prop({ required: false, type: Object })
   private readonly response?: SeriesOneResponse;
 
