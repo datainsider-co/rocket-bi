@@ -34,9 +34,10 @@ export class FunnelQuerySetting extends QuerySetting<FunnelChartOption> implemen
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   get zoomData(): ZoomData {
@@ -49,7 +50,7 @@ export class FunnelQuerySetting extends QuerySetting<FunnelChartOption> implemen
     const value = TableColumn.fromObject(obj.value);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new FunnelQuerySetting(legend, value, filters, sorts, obj.options, sqlViews);
+    return new FunnelQuerySetting(legend, value, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {
@@ -68,7 +69,7 @@ export class FunnelQuerySetting extends QuerySetting<FunnelChartOption> implemen
     const currentConditions: Condition[] = this.filters ?? [];
     const equal: Equal = ConditionUtils.buildEqualCondition(this.legend, drilldownData.value);
     const drilldownConditions: Condition[] = ConditionUtils.buildDrilldownConditions(currentConditions, equal);
-    return new FunnelQuerySetting(newLegend, this.value, drilldownConditions, this.sorts, this.options, this.sqlViews);
+    return new FunnelQuerySetting(newLegend, this.value, drilldownConditions, this.sorts, this.options, this.sqlViews, this.parameters);
   }
 
   getColumnWillDrilldown(): TableColumn {

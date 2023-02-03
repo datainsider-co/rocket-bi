@@ -37,9 +37,10 @@ export class ParetoQuerySetting extends QuerySetting<ParetoChartOption> implemen
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
 
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   static fromObject(obj: ParetoQuerySetting): ParetoQuerySetting {
@@ -49,7 +50,7 @@ export class ParetoQuerySetting extends QuerySetting<ParetoChartOption> implemen
     const legend = obj.legend ? TableColumn.fromObject(obj.legend) : void 0;
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new ParetoQuerySetting(xAxis, yAxis, legend, filters, sorts, obj.options, sqlViews);
+    return new ParetoQuerySetting(xAxis, yAxis, legend, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

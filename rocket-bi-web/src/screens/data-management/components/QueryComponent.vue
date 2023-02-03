@@ -2,6 +2,10 @@
   <Split :gutterSize="24" direction="vertical" @onDragEnd="resizeChart" class="query-component">
     <SplitArea :size="45" :minSize="150">
       <div class="query-input-container">
+        <div class="d-flex row query-header">
+          <div class="query-title">Build Query</div>
+          <slot name="header"></slot>
+        </div>
         <div class="flex-grow-1 overflow-hidden">
           <div class="formula-completion-input">
             <div class="padding-top"></div>
@@ -16,9 +20,28 @@
               placeholder="select * from..."
               @onExecute="handleQuery"
               @onSave="handleSave"
+              @input="onQueryChanged"
             />
           </div>
         </div>
+        <div style="max-height: 10vh" v-if="showParameter">
+          <vuescroll>
+            <div class="param-listing">
+              <ParamItem
+                v-for="(param, key) in parameters"
+                :key="key"
+                :param="param"
+                @select="addParamToQuery"
+                @change="updateParamValue"
+                @edit="onConfigParam"
+              />
+              <DiButton border id="button-query-param" class="btn-ghost default-button" title="Add Param" tabindex="-1" @click="onAddParam">
+                <i class="di-icon-add"></i>
+              </DiButton>
+            </div>
+          </vuescroll>
+        </div>
+
         <div class="row-limit-container d-flex align-items-center" ref="actionRow">
           <div v-if="showAdHocAnalysis" class="d-flex w-100 align-items-center">
             <template v-if="listAdhocInfo.length > 0">
@@ -75,7 +98,7 @@
               class="btn-ghost default-button action-button"
               title="Actions"
               tabindex="-1"
-              @click="showActionOptions"
+              @click="showSaveOptions"
             ></DiButton>
 
             <DiButton primary :disabled="isExecutingQuery" :id="genBtnId('query')" class="btn-query flex-fill btn-primary" title="Execute" @click="handleQuery">
@@ -87,7 +110,13 @@
     </SplitArea>
     <SplitArea :size="55">
       <!--        :style="{ height: `calc(100% - ${charHolderContainerHeight()}px)` }"-->
-      <div v-if="currentAdhocAnalysis" class="query-result d-flex flex-column text-left h-100">
+      <div v-if="errorMsg" class="query-result d-flex align-items-center h-100 p-3 text-danger text-center">
+        <vuescroll class="query-result--error">
+          <pre>{{ errorMsg }}</pre>
+        </vuescroll>
+      </div>
+      <LoadingComponent v-else-if="isLoading" class="query-result d-flex align-items-center h-100 justify-content-center" />
+      <div v-else-if="currentAdhocAnalysis" class="query-result d-flex flex-column text-left h-100">
         <div class="table-container flex-grow-1 table-container-padding-15">
           <ChartHolder
             :isPreview="true"
@@ -111,17 +140,22 @@
       <ChartBuilderComponent ref="chartBuilderComponent"></ChartBuilderComponent>
     </SplitArea>
     <ContextMenu id="save-query-menu" ref="contextMenu" :ignoreOutsideClass="['action-button']" minWidth="200px" textColor="#fff" z-index="2" />
+    <ParameterModal ref="paramModal" />
   </Split>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
+import { Component, Emit, Inject, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import FormulaCompletionInput from '@/shared/components/formula-completion-input/FormulaCompletionInput.vue';
 import { FormulaController } from '@/shared/fomula/FormulaController';
 import {
   ChartInfo,
+  ChartOption,
   DatabaseSchema,
+  defaultQueryParameter,
   InlineSqlView,
+  ParamValueType,
+  QueryParameter,
   QueryRelatedWidget,
   QuerySetting,
   RawQuerySetting,
@@ -130,17 +164,17 @@ import {
   WidgetCommonData
 } from '@core/common/domain';
 import ChartHolder from '@/screens/dashboard-detail/components/widget-container/charts/ChartHolder.vue';
-import { isFunction, get } from 'lodash';
+import { cloneDeep, get, isFunction } from 'lodash';
 import { StringUtils } from '@/utils/StringUtils';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { Log } from '@core/utils';
 import { QueryUtils } from '@/screens/data-management/views/query-editor/QueryUtils';
 import { Pagination } from '@/shared/models/CustomCell';
-import { ChartType, DataBuilderConstantsV35, HorizontalScrollConfig, Status, VisualizationItemData } from '@/shared';
+import { ChartType, ContextMenuItem, DataBuilderConstantsV35, HorizontalScrollConfig, Status, VisualizationItemData } from '@/shared';
 import VisualizeSelectionModal from '@/screens/chart-builder/config-builder/chart-selection-panel/VisualizeSelectionModal.vue';
 import ChartBuilder from '@/screens/chart-builder/data-cook/ChartBuilder.vue';
 import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
-import { ChartInfoUtils, ListUtils, ChartUtils } from '@/utils';
+import { ChartInfoUtils, ChartUtils, ListUtils, RandomUtils } from '@/utils';
 import ChartBuilderModal from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderModal.vue';
 import VisualizationItem from '@/screens/chart-builder/config-builder/chart-selection-panel/VisualizationItem.vue';
 
@@ -150,7 +184,7 @@ import { BFormTextarea } from 'bootstrap-vue';
 // @ts-ignore
 import { Split, SplitArea } from 'vue-split-panel';
 import { SchemaService } from '@core/schema/service/SchemaService';
-import { Inject } from 'typescript-ioc';
+import { Inject as ioc } from 'typescript-ioc';
 import Swal from 'sweetalert2';
 import { QueryEditorMode } from '../views/query-editor/QueryEditor';
 import ContextMenu from '@/shared/components/ContextMenu.vue';
@@ -159,7 +193,10 @@ import { EditorController } from '@/shared/fomula/EditorController';
 import { Track } from '@/shared/anotation/TrackingAnotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
-import { AdhocBuilderConfig, DefaultChartBuilderConfig } from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderConfig';
+import { AdhocBuilderConfig } from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderConfig';
+import ParameterModal from '@/screens/data-management/components/ParameterModal.vue';
+import ParamItem from '@/screens/data-management/components/ParamItem.vue';
+import LoadingComponent from '@/shared/components/LoadingComponent.vue';
 
 class AdHocAnalysisInfo {
   chartInfo: ChartInfo;
@@ -180,6 +217,7 @@ class AdHocAnalysisInfo {
 
 @Component({
   components: {
+    LoadingComponent,
     ChartBuilderModal,
     FormulaCompletionInput,
     ChartHolder,
@@ -190,7 +228,9 @@ class AdHocAnalysisInfo {
     ChartBuilderComponent,
     Split,
     SplitArea,
-    ContextMenu
+    ContextMenu,
+    ParameterModal,
+    ParamItem
   }
 })
 export default class QueryComponent extends Vue {
@@ -205,12 +245,16 @@ export default class QueryComponent extends Vue {
   };
 
   private queryStatus = Status.Empty;
+  private errorMsg = '';
   private isAddChartLoading = false;
   isSavingAdhocChart = false;
   private query = '';
   private disablePagination = false;
 
   private listAdhocInfo: AdHocAnalysisInfo[] = [];
+  private parameters: Record<string, QueryParameter> = {};
+
+  private parameterValues: Record<string, any> = {};
   private currentAdHocIndex = 0;
   private readonly tableSchemaAsMap = new Map<string, TableSchema>();
   $alert!: typeof Swal;
@@ -242,6 +286,9 @@ export default class QueryComponent extends Vue {
   @Prop({ required: false, type: Number, default: QueryEditorMode.Query })
   private readonly mode!: QueryEditorMode;
 
+  @Prop({ required: false, type: Boolean, default: true })
+  private readonly showParameter!: boolean;
+
   @Ref()
   private readonly formulaCompletionInput?: FormulaCompletionInput;
 
@@ -260,8 +307,16 @@ export default class QueryComponent extends Vue {
   @Ref()
   private readonly contextMenu!: ContextMenu;
 
-  @Inject
+  @ioc
   private readonly schemaService!: SchemaService;
+
+  @Ref()
+  private readonly paramModal!: ParameterModal;
+
+  @Inject({ from: 'preProcessQuery', default: undefined })
+  private readonly preProcessQuery?: (url: string) => Promise<string>;
+
+  timeout: number | undefined = void 0;
 
   @Watch('defaultQuery')
   private onDefaultQueryChanged(newValue: string) {
@@ -281,6 +336,9 @@ export default class QueryComponent extends Vue {
   private queryEditorHeight() {
     return this.formulaCompletionInput?.$el.clientHeight ?? this.formulaInputPlaceholder?.$el.clientHeight ?? 0;
   }
+  private get isLoading(): boolean {
+    return this.queryStatus === Status.Loading;
+  }
 
   private get isSuccessQuery() {
     return this.queryStatus === Status.Loaded;
@@ -292,6 +350,14 @@ export default class QueryComponent extends Vue {
 
   private isMobile() {
     return ChartUtils.isMobile();
+  }
+
+  @Watch('showParameter')
+  onShowParamChanged() {
+    if (!this.showParameter) {
+      this.parameters = {};
+      this.parameterValues = {};
+    }
   }
 
   created() {
@@ -333,7 +399,7 @@ export default class QueryComponent extends Vue {
   @Track(TrackEvents.AdhocCreateTableFromQuery)
   @Emit('onCreateTable')
   private emitCreateTable(event: Event) {
-    return this.currentQuery;
+    return this.assignQueryParameter(this.currentQuery, this.parameterValues);
   }
 
   @Emit('onUpdateTable')
@@ -341,9 +407,8 @@ export default class QueryComponent extends Vue {
     return this.currentQuery;
   }
 
-  private showActionOptions(event: MouseEvent) {
-    const mouseEvent = HtmlElementRenderUtils.fixMenuOverlap(event, 'button-action', 64, 8);
-    const saveOptions = [
+  private getSaveOptions(mouseEvent: MouseEvent): ContextMenuItem[] {
+    return [
       {
         text: 'Create Table From Query',
         disabled: ListUtils.isEmpty(this.listAdhocInfo),
@@ -380,8 +445,20 @@ export default class QueryComponent extends Vue {
         },
         hidden: this.mode !== QueryEditorMode.Dashboard
       }
-    ].filter(option => !option.hidden);
-    this.contextMenu.show(mouseEvent, saveOptions);
+    ];
+  }
+
+  showSaveOptions(event: MouseEvent) {
+    const mouseEvent = HtmlElementRenderUtils.fixMenuOverlap(event, 'button-action', 64, 8);
+    const options = this.getSaveOptions(event);
+    this.showActionOptions(mouseEvent, options);
+  }
+
+  private showActionOptions(event: Event, action: ContextMenuItem[]) {
+    this.contextMenu.show(
+      event,
+      action.filter(option => !option.hidden)
+    );
   }
 
   @Track(TrackEvents.SaveQueryToCurrentChart, {
@@ -408,22 +485,36 @@ export default class QueryComponent extends Vue {
   }
 
   @Track(TrackEvents.ExecuteQuery, { query: (_: QueryComponent) => _.query })
-  private async handleQuery() {
+  async handleQuery() {
     try {
+      this.errorMsg = '';
+      this.queryStatus = Status.Loading;
+      Log.debug('Query::handleQuery');
       this.disablePagination = this.isLimitQuery;
       const isSelectAllText = this.editorController.isSelectingAll();
       const query = isSelectAllText ? this.currentQuery : this.editorController.getSelectedText();
-      const adhoc = new AdHocAnalysisInfo(this.buildAdhocChart(query));
+      const queryProcessed: string = this.preProcessQuery ? await this.preProcessQuery(query) : query;
+      const adhoc = new AdHocAnalysisInfo(this.buildAdhocChart(queryProcessed, this.parameters));
       const pagination = this.disablePagination ? Pagination.defaultPagination() : void 0;
       await this.renderChart(adhoc.chartInfo, pagination);
       this.updateAdHoc(adhoc, 0);
       this.goToAdHoc(0);
-      if (isSelectAllText) {
-        this.updateQuery(adhoc.query);
-      }
+      // if (isSelectAllText) {
+      //   this.updateQuery(adhoc.query);
+      // }
     } catch (e) {
-      Log.error('QueryComponent::handleQuery::error::', e.message);
+      this.renderChartError(e.message);
     }
+  }
+
+  private assignQueryParameter(query: string, params: Record<string, QueryParameter>) {
+    let result = cloneDeep(query);
+    for (const paramsKey in params) {
+      const regex = new RegExp(`{{\\s*${paramsKey}\\s*}}`, 'g');
+      const normalizeValue = QuerySetting.formatParamValue(this.parameters[paramsKey].valueType ?? ParamValueType.text, params[paramsKey]);
+      result = result.replaceAll(regex, normalizeValue);
+    }
+    return result;
   }
 
   private async handleSave(event: Event) {
@@ -460,13 +551,26 @@ export default class QueryComponent extends Vue {
     }
   }
 
-  private buildAdhocChart(query: string): ChartInfo {
+  private getParameterNormalizeValues(): Record<string, string> {
+    const result: Record<string, string> = {};
+    for (const key in this.parameterValues) {
+      // Log.debug('getParameterNormalizeValues::', key, this.parameters[key]?.value, this.parameterValues[key], QuerySetting.formatParamValue(this.parameters[key]?.value ?? ParamValueType.text, this.parameterValues[key]));
+      const currentValue = StringUtils.isNotEmpty(this.parameterValues[key]) ? this.parameterValues[key] : this.parameters[key].value;
+      result[key] = QuerySetting.formatParamValue(this.parameters[key]?.valueType ?? ParamValueType.text, currentValue);
+    }
+    return result;
+  }
+
+  private buildAdhocChart(query: string, params: Record<string, QueryParameter>): ChartInfo {
     const id = get(this.listAdhocInfo, '[0].chartInfo.id', ChartInfoUtils.getNextId());
-    const querySetting: QuerySetting = RawQuerySetting.fromQuery(query);
+    const queryParams = this.getParameterNormalizeValues();
+    const querySetting: QuerySetting = RawQuerySetting.fromQuery(query).withQueryParameters(queryParams);
     const defaultChartOption = TableChartOption.getDefaultChartOption();
     defaultChartOption.setOption('header.color', '#FFFFFF');
+    defaultChartOption.setOption('queryParameter', params);
     querySetting.setChartOption(defaultChartOption);
     const commonSetting: WidgetCommonData = { id: id, name: '', description: '' };
+    Log.debug('buildAdhocChart::', querySetting);
     return new ChartInfo(commonSetting, querySetting);
   }
 
@@ -475,6 +579,7 @@ export default class QueryComponent extends Vue {
     QuerySettingModule.setQuerySetting({ id: chartInfo.id, query: chartInfo.setting });
     await DashboardControllerModule.renderChart({ id: chartInfo.id, forceFetch: true, pagination: pagination });
     this.queryStatus = _ChartStore.statuses[chartInfo.id];
+    this.errorMsg = _ChartStore.mapErrorMessage[chartInfo.id] ?? '';
   }
 
   private reRenderChart() {
@@ -496,11 +601,11 @@ export default class QueryComponent extends Vue {
   private async handleNewChart() {
     try {
       this.isAddChartLoading = true;
-      const tableSchema = await this.getOrDetectAdhocTable(this.currentQuery);
+      const tableSchema = await this.getOrDetectAdhocTable(this.assignQueryParameter(this.currentQuery, this.parameterValues));
       this.chartBuilderComponent.showModal({
         selectedTables: [tableSchema.name],
         database: DatabaseSchema.adhoc(tableSchema),
-        onCompleted: this.handleAddChart,
+        onCompleted: chartInfo => this.handleAddChart(chartInfo, this.query, this.parameters, this.parameterValues),
         config: AdhocBuilderConfig
       });
       this.isAddChartLoading = false;
@@ -561,7 +666,10 @@ export default class QueryComponent extends Vue {
       this.isAddChartLoading = true;
       const inlineViews: InlineSqlView[] = this.currentAdhocAnalysis.chartInfo.setting.sqlViews;
       const currentView: InlineSqlView = ListUtils.getHead(inlineViews)!;
-      const tableSchema: TableSchema = await this.getOrDetectAdhocTable(currentView.query.query, currentView.aliasName);
+      const tableSchema: TableSchema = await this.getOrDetectAdhocTable(
+        this.assignQueryParameter(this.currentQuery, this.parameterValues),
+        currentView.aliasName
+      );
       Log.debug('Selected Table::', tableSchema.name);
 
       this.chartBuilderComponent.showModal({
@@ -639,18 +747,34 @@ export default class QueryComponent extends Vue {
     chart_type: (_: QueryComponent, args: any) => args[0].chartInfo?.extraData?.currentChartType,
     chart_id: (_: QueryComponent, args: any) => _.listAdhocInfo[args[0]].chartInfo?.id
   })
-  async handleAddChart(chartInfo: ChartInfo) {
+  async handleAddChart(chartInfo: ChartInfo, currentQuery: string, params: Record<string, QueryParameter>, paramsValue: Record<string, any>) {
     try {
-      const adhoc = new AdHocAnalysisInfo(chartInfo.copyWithId(ChartInfoUtils.getNextId()));
-      this.updateAdHoc(adhoc, this.listAdhocInfo.length);
-      this.updateQuery(adhoc.query);
-      this.goToAdHoc(this.listAdhocInfo.length);
-      await this.renderChart(adhoc.chartInfo);
+      const analysisInfo: AdHocAnalysisInfo = this.buildAddAdhocAnalysis(chartInfo, currentQuery, params, paramsValue);
+      this.updateAdHoc(analysisInfo, this.listAdhocInfo.length);
+      this.updateQuery(analysisInfo.query);
+      this.goToAdHoc(this.listAdhocInfo.length - 1);
+      await this.renderChart(analysisInfo.chartInfo);
       ///Call Api create widget if is in Dashboard mode
-      this.$emit('onCreateChart', adhoc);
+      this.$emit('onCreateChart', analysisInfo);
     } catch (e) {
       Log.error('QueryComponent::handleAddChart::error::', e);
     }
+  }
+
+  private buildAddAdhocAnalysis(
+    chartInfo: ChartInfo,
+    currentQuery: string,
+    params: Record<string, QueryParameter>,
+    paramsValue: Record<string, string>
+  ): AdHocAnalysisInfo {
+    const newChartInfo = chartInfo.copyWithId(ChartInfoUtils.getNextId());
+    const defaultChartOption = newChartInfo.setting.getChartOption() || TableChartOption.getDefaultChartOption();
+    defaultChartOption.setOption('queryParameter', params);
+    newChartInfo.setting.setChartOption(defaultChartOption);
+    const aliasName: string = ListUtils.getHead(newChartInfo.setting.sqlViews)?.aliasName ?? '';
+    newChartInfo.setting.updateInlineView(aliasName, currentQuery);
+    newChartInfo.setting.withQueryParameters(paramsValue);
+    return new AdHocAnalysisInfo(newChartInfo);
   }
 
   get allChartInfos(): ChartInfo[] {
@@ -663,6 +787,14 @@ export default class QueryComponent extends Vue {
       .map(chart => {
         return new AdHocAnalysisInfo(chart);
       });
+  }
+
+  setParameters(params: Record<string, QueryParameter>) {
+    this.parameters = params;
+    for (const paramsKey in params) {
+      this.parameterValues[paramsKey] = params[paramsKey].value;
+    }
+    this.$forceUpdate();
   }
 
   selectChart(index: number) {
@@ -684,6 +816,137 @@ export default class QueryComponent extends Vue {
     this.emitSaveQuery(mouseEvent, saveAs);
   }
 
+  private onAddParam() {
+    const newParam = defaultQueryParameter();
+    newParam.displayName = `untitle_param_${RandomUtils.nextInt()}`;
+    this.setParameter(newParam);
+    this.query = this.query.concat(` {{${newParam.displayName}}}`);
+  }
+
+  setParameter(parameter: QueryParameter) {
+    this.parameters[parameter.displayName] = parameter;
+    this.parameterValues[parameter.displayName] = parameter.value;
+    this.$forceUpdate();
+  }
+
+  private onConfigParam(event: MouseEvent, param: QueryParameter, currentValue: any) {
+    const target = `action-${param.displayName}`;
+    const mouseEvent = HtmlElementRenderUtils.fixMenuOverlap(event, target, 0, 8);
+    const options = this.getParamOptions(param, currentValue);
+    this.showActionOptions(mouseEvent, options);
+  }
+
+  private getParamOptions(param: QueryParameter, currentValue: any): ContextMenuItem[] {
+    return [
+      {
+        text: 'Edit',
+        click: () => {
+          this.contextMenu.hide();
+          this.editParam(param);
+        }
+      },
+      {
+        text: 'Set Value as Default',
+        hidden: param.value === currentValue,
+        click: () => {
+          this.contextMenu.hide();
+          this.parameters[param.displayName].value = currentValue;
+        }
+      },
+      {
+        text: 'Delete',
+        click: async () => {
+          this.contextMenu.hide();
+          const { isConfirmed } = await this.showEnsureModal(
+            'Delete Parameter',
+            `Are you sure that you want to remove this parameter ${param.displayName}?`,
+            'Yes',
+            'No'
+          );
+          if (isConfirmed) {
+            this.deleteParam(param);
+          }
+        }
+      }
+    ];
+  }
+
+  private onQueryChanged() {
+    clearTimeout(this.timeout);
+    this.timeout = setTimeout(() => {
+      Log.debug('QueryComponent::query', this.query);
+      const paramRegex = new RegExp('{{\\s*\\w+\\s*}}', 'g');
+      const params: RegExpMatchArray | null = this.query.match(paramRegex);
+      this.buildQueryParams(params ?? []);
+    }, 1000);
+  }
+
+  private buildQueryParams(params: RegExpMatchArray) {
+    params.forEach(param => {
+      ///{{ value test}} -> value_test
+      const paramName = param
+        .replaceAll('{{', '')
+        .replaceAll('}}', '')
+        .trim();
+      if (this.parameters[paramName] !== undefined) {
+        return;
+      } else {
+        const queryParam: QueryParameter = {
+          displayName: paramName,
+          valueType: ParamValueType.text,
+          value: ''
+        };
+        this.setParameter(queryParam);
+      }
+    });
+  }
+
+  private updateParamValue(paramKey: string, value: any) {
+    Log.debug('updateParamValue::', paramKey, value);
+    this.parameterValues[paramKey] = value;
+  }
+
+  private addParamToQuery(param: QueryParameter) {
+    // const queryCursors = this.editorController.getCursor();
+    // const text = ` {{${param.displayName}}}`;
+    // if (queryCursors.length > 0) {
+    //   this.query = StringUtils.insertAt(this.query, text, queryCursors[0]);
+    // } else {
+    //   this.editorController.appendText(text, true);
+    // }
+    // Log.debug('onSelectParam::query', this.query);
+  }
+
+  private editParam(param: QueryParameter) {
+    const oldName = param.displayName;
+    // const oldValue = param.value;
+    this.paramModal.show(param, (edited: QueryParameter) => {
+      this.deleteParam(param);
+      this.setParameter(edited);
+      const regex = new RegExp(`{{\\s*${oldName}\\s*}}`, 'g');
+      this.query = this.query.replaceAll(regex, `{{ ${edited.displayName} }}`);
+    });
+  }
+
+  private deleteParam(param: QueryParameter) {
+    delete this.parameters[param.displayName];
+    delete this.parameterValues[param.displayName];
+    this.$forceUpdate();
+    this.$emit('delete', param);
+  }
+
+  private async showEnsureModal(title: string, html: string, confirmButtonText?: string, cancelButtonText?: string) {
+    //@ts-ignore
+    return this.$alert.fire({
+      icon: 'warning',
+      title: title,
+      html: html,
+      confirmButtonText: confirmButtonText ?? 'Yes',
+      showCancelButton: true,
+      cancelButtonText: cancelButtonText ?? 'No'
+    });
+  }
+
   private get titleSaveAnalysis(): string {
     switch (this.mode) {
       case QueryEditorMode.Dashboard:
@@ -698,7 +961,13 @@ export default class QueryComponent extends Vue {
   }
 
   getQuery() {
-    return this.buildAdhocChart(this.query);
+    return this.buildAdhocChart(this.query, this.parameters);
+  }
+
+  private renderChartError(message: string) {
+    Log.error(message);
+    this.queryStatus = Status.Error;
+    this.errorMsg = message;
   }
 }
 </script>
@@ -712,6 +981,18 @@ export default class QueryComponent extends Vue {
     flex-direction: column;
     height: 100%;
     padding: 12px 16px 12px;
+
+    .query-header {
+      padding-right: 16px;
+      padding-left: 16px;
+      margin-bottom: 8px;
+      align-items: center;
+
+      .query-title {
+        @include bold-text-14();
+        margin-right: 12px;
+      }
+    }
 
     .add-chart-button {
       @media screen and (max-width: 1080px) {
@@ -791,6 +1072,13 @@ export default class QueryComponent extends Vue {
     }
   }
 
+  .param-listing {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
   .row-limit-container {
     margin-top: 12px;
 
@@ -842,6 +1130,9 @@ export default class QueryComponent extends Vue {
   }
 
   .query-result {
+    .loading-icon {
+      background: var(--panel-background-color);
+    }
     .table-container-padding-15 {
       padding: 15px;
     }
@@ -935,6 +1226,18 @@ export default class QueryComponent extends Vue {
       //.table-chart-table-content {
       //  background: var(--panel-background-color);
       //}
+    }
+
+    &--error .__view {
+      display: flex;
+      align-items: center;
+      pre {
+        flex: 1;
+        margin: 0;
+        text-align: left;
+        color: var(--danger);
+        white-space: pre-wrap;
+      }
     }
   }
 }

@@ -171,4 +171,12 @@ export class ObjectUtils {
   static set(obj: any, key: string, value: any) {
     set(obj, key, value);
   }
+
+  static isEmpty(obj: any): boolean {
+    return Object.keys(obj).length === 0;
+  }
+
+  static isNotEmpty(obj: any): boolean {
+    return Object.keys(obj).length > 0;
+  }
 }

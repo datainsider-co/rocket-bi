@@ -4,6 +4,8 @@ import { MySqlSourceInfo } from '@core/data-ingestion/domain/data-source/MySqlSo
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { RedshiftSourceInfo } from '@core/data-ingestion/domain/data-source/RedshiftSourceInfo';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class RedshiftDataSourceFormRender implements DataSourceFormRender {
   private redshiftSourceInfo: RedshiftSourceInfo;
@@ -52,7 +54,7 @@ export class RedshiftDataSourceFormRender implements DataSourceFormRender {
     this.redshiftSourceInfo.username = value;
   }
   private get password() {
-    return this.redshiftSourceInfo.password;
+    return this.redshiftSourceInfo.password ?? '';
   }
 
   private set password(value: string) {
@@ -104,5 +106,22 @@ export class RedshiftDataSourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return RedshiftSourceInfo.fromObject(this.redshiftSourceInfo);
+  }
+  validSource(source: RedshiftSourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
+    if (StringUtils.isEmpty(source.host)) {
+      throw new DIException('Host is required!');
+    }
+    if (StringUtils.isEmpty(source.port)) {
+      throw new DIException('Port is required!');
+    }
+    if (StringUtils.isEmpty(source.databaseName)) {
+      throw new DIException('Database name is required!');
+    }
+    if (StringUtils.isEmpty(source.username)) {
+      throw new DIException('Username is required!');
+    }
   }
 }

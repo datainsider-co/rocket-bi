@@ -15,9 +15,10 @@ export class SankeyQuerySetting extends QuerySetting<SankeyChartOption> {
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
 
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   getAllFunction(): Function[] {
@@ -31,7 +32,7 @@ export class SankeyQuerySetting extends QuerySetting<SankeyChartOption> {
     const breakdowns: TableColumn[] = obj.breakdowns?.map(breakdown => TableColumn.fromObject(breakdown)) ?? [];
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new SankeyQuerySetting(obj.source, obj.destination, breakdowns, obj.weight, obj.filters, obj.sorts, obj.options, sqlViews);
+    return new SankeyQuerySetting(obj.source, obj.destination, breakdowns, obj.weight, obj.filters, obj.sorts, obj.options, sqlViews, obj.parameters);
   }
 
   setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {

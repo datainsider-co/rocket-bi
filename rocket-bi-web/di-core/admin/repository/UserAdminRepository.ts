@@ -36,30 +36,28 @@ export abstract class UserAdminRepository {
 export class UserAdminRepositoryImpl extends UserAdminRepository {
   @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
-  private apiPath = '/admin/users/';
-
   create(request: CreateUserRequest): Promise<RegisterResponse> {
-    return this.httpClient.post(`${this.apiPath}/create`, request, undefined).then(obj => RegisterResponse.fromObject(obj));
+    return this.httpClient.post(`/admin/users/create`, request, undefined).then(obj => RegisterResponse.fromObject(obj));
   }
 
   getUserFullDetailInfo(username: string): Promise<UserFullDetailInfo> {
-    return this.httpClient.get(`${this.apiPath}/${username}`).then(response => {
+    return this.httpClient.get(`/admin/users/${username}`).then(response => {
       return UserFullDetailInfo.fromObject(response);
     });
   }
 
   editUserProfile(request: EditUserProfileRequest): Promise<UserProfile> {
-    return this.httpClient.put(`${this.apiPath}/${request.username}`, request).then(response => {
+    return this.httpClient.put(`/admin/users/${request.username}`, request).then(response => {
       return UserProfile.fromObject(response);
     });
   }
 
   activate(username: string): Promise<boolean> {
-    return this.httpClient.post(`${this.apiPath}/${username}/activate`);
+    return this.httpClient.post(`/admin/users/${username}/activate`);
   }
 
   deactivate(username: string): Promise<boolean> {
-    return this.httpClient.post(`${this.apiPath}/${username}/deactivate`);
+    return this.httpClient.post(`/admin/users/${username}/deactivate`);
   }
 
   /**
@@ -76,7 +74,7 @@ export class UserAdminRepositoryImpl extends UserAdminRepository {
       // eslint-disable-next-line @typescript-eslint/camelcase
       is_active: isActive
     };
-    return this.httpClient.post(`${this.apiPath}/search`, undefined, params).then(data => {
+    return this.httpClient.post(`/admin/users/search`, undefined, params).then(data => {
       return UsersResponse.fromObject(data);
     });
   }
@@ -89,16 +87,13 @@ export class UserAdminRepositoryImpl extends UserAdminRepository {
       // eslint-disable-next-line @typescript-eslint/camelcase
       is_active: isActive
     };
-    return this.httpClient.post(`${this.apiPath}/search/v2`, undefined, params).then(data => {
+    return this.httpClient.post(`/admin/users/search/v2`, undefined, params).then(data => {
       return UserSearchResponse.fromObject(data);
     });
   }
 
   delete(request: DeleteUserRequest): Promise<boolean> {
-    const body = {
-      transferDataConfig: request.transferDataConfig
-    };
-    return this.httpClient.delete(`${this.apiPath}/${request.username}/delete`, body, undefined);
+    return this.httpClient.delete(`/user-data/${request.username}`, request, undefined).then((res: any) => res.success);
   }
 
   getSuggestedUsers(request: SearchUserRequest): Promise<UsersResponse> {

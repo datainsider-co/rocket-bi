@@ -131,7 +131,7 @@ export default class RLSViewAsModal extends Vue {
 
   private handleGetSuggestedUsers() {
     this.getSuggestUserStatus = Status.Loading;
-    ShareModule.getSuggestedUsers({ keyword: this.searchUserKeyword, from: 0, size: 100 })
+    ShareModule.loadSuggestedUsers({ keyword: this.searchUserKeyword, from: 0, size: 100 })
       .then(() => {
         this.getSuggestUserStatus = Status.Loaded;
       })

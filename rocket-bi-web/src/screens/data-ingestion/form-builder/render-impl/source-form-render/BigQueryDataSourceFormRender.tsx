@@ -4,6 +4,9 @@ import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/Data
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { BigQuerySourceInfo } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfo';
 import { BigQuerySourceInfoV2 } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfoV2';
+import { DataSourceType } from '@core/data-ingestion';
+import { DIException } from '@core/common/domain';
+import { StringUtils } from '@/utils';
 
 export class BigQueryDataSourceFormRender implements DataSourceFormRender {
   private bigQuerySourceInfo: BigQuerySourceInfoV2;
@@ -49,5 +52,14 @@ export class BigQueryDataSourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return BigQuerySourceInfoV2.fromObject(this.bigQuerySourceInfo);
+  }
+
+  validSource(source: BigQuerySourceInfoV2): void {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
+    if (StringUtils.isEmpty(source.credential)) {
+      throw new DIException('Service account key is required!');
+    }
   }
 }

@@ -76,6 +76,7 @@ class GeolocationStore extends VuexModule {
       }
     }
   }
+
   @Action
   async processGeolocationFromWidgets(widgets: QueryRelatedWidget[]) {
     widgets.forEach(widget => {
@@ -84,11 +85,12 @@ class GeolocationStore extends VuexModule {
   }
 
   @Mutation
-  loadMapDataFromWidget(widget: QueryRelatedWidget) {
+  async loadMapDataFromWidget(widget: QueryRelatedWidget) {
     if (MapQuerySetting.isMapQuery(widget.setting)) {
+      Log.debug('loadMapDataFromWidget', widget.setting);
       const path: string | undefined = widget.setting.geoArea?.mapUrl;
       if (path && !this.pathToMapDataAsMap.has(path)) {
-        const mapData = HighchartUtils.initMapData(path);
+        const mapData = await HighchartUtils.initMapData(path);
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         GeolocationModule.saveMapData({ mapUrl: path, mapData: mapData });
       }

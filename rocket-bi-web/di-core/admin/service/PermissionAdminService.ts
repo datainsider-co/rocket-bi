@@ -32,8 +32,8 @@ export class PermissionAdminServiceImpl implements PermissionAdminService {
       SupportPermissionGroups.insights(),
       SupportPermissionGroups.dataCook(),
       SupportPermissionGroups.dataLake(),
-      SupportPermissionGroups.CDP(),
-      SupportPermissionGroups.APIKey()
+      SupportPermissionGroups.cdp(),
+      SupportPermissionGroups.apiKey()
     ]);
   }
 

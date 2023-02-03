@@ -4,7 +4,7 @@
       :id="genInputId('search-share-with-people-and-group')"
       v-model="searchInput"
       class="p-3 h-42px"
-      debounce="300"
+      debounce="500"
       placeholder="Add people and groups"
       variant="dark"
     ></b-input>
@@ -56,7 +56,7 @@ export default class SearchUserInput extends Vue {
   private handleGetSuggestedUsers() {
     //todo: refactor fixed value
     this.getSuggestUserStatus = Status.Loading;
-    ShareModule.getSuggestedUsers({ keyword: this.searchInput, from: 0, size: 100 })
+    ShareModule.loadSuggestedUsers({ keyword: this.searchInput, from: 0, size: 100 })
       .then(() => {
         this.getSuggestUserStatus = Status.Loaded;
       })
@@ -73,5 +73,3 @@ export default class SearchUserInput extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

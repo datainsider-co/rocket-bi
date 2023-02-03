@@ -5,13 +5,15 @@
 
 import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
 import { Paginatable } from '@core/common/domain/model/query/features/Paginatable';
-import { Log } from '@core/utils';
+import { Log, ObjectUtils } from '@core/utils';
 import { FilterRequest } from './FilterRequest';
 import { CompareRequest } from './CompareRequest';
 import { Comparable } from '@core/common/domain/model/query/features/Comparable';
 import { PivotTableQuerySetting } from '@core/common/domain/model/query/implement/PivotTableQuerySetting';
 import { AbstractTableQuerySetting } from '@core/common/domain/model/query/implement/AbstractTableQuerySetting';
 import { Pagination } from '@/shared/models';
+import { QueryParameter } from '@core/common/domain';
+import { MapUtils } from '@/utils';
 
 export class QueryRequest {
   constructor(
@@ -28,7 +30,8 @@ export class QueryRequest {
     public size: number = -1,
     public useBoost?: boolean,
     // apply for relationship
-    public dashboardId?: number
+    public dashboardId?: number,
+    public parameters: Map<string, string> = new Map<string, string>()
   ) {}
 
   static buildQueryRequest(
@@ -62,11 +65,16 @@ export class QueryRequest {
     if (PivotTableQuerySetting.isPivotChartSetting(querySetting)) {
       currentQuerySetting = querySetting.getCurrentQuery();
     }
-    return new QueryRequest(currentQuerySetting, currentFilterRequests, compareRequest, from, size, useBoost, dashboardId);
+    const queryParam: Record<string, any> = ObjectUtils.isNotEmpty(querySetting.parameters) ? querySetting.parameters : querySetting.getQueryParamInOptions();
+    Log.debug('buildQueryRequest::', queryParam, querySetting.parameters);
+    const newQueryParams: Map<string, string> = MapUtils.fromRecord<string, string>(queryParam);
+    return new QueryRequest(currentQuerySetting, currentFilterRequests, compareRequest, from, size, useBoost, dashboardId, newQueryParams);
   }
 
   static fromQuery(querySetting: QuerySetting, from: number, size: number, dashboardId?: number): QueryRequest {
-    return new QueryRequest(querySetting, [], void 0, from, size, void 0, dashboardId);
+    const queryParam: Record<string, any> = ObjectUtils.isNotEmpty(querySetting.parameters) ? querySetting.parameters : querySetting.getQueryParamInOptions();
+    const newQueryParams: Map<string, string> = MapUtils.fromRecord<string, string>(queryParam);
+    return new QueryRequest(querySetting, [], void 0, from, size, void 0, dashboardId, newQueryParams);
   }
 
   handleSetDefaultPagination(): void {

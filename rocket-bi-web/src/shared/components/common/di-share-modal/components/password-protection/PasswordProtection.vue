@@ -33,12 +33,15 @@
           </div>
         </div>
         <div class="d-flex">
-          <b-button :id="genBtnId('share-anyone-cancel')" class="flex-fill h-42px mr-1" variant="secondary mr" @click="$emit('cancel')" event="share_cancel">
-            Cancel
-          </b-button>
-          <b-button :id="genBtnId('share-anyone-done')" class="flex-fill h-42px ml-1" variant="primary" @click="$emit('ok')">
-            Apply
-          </b-button>
+          <DiButton :id="genBtnId('password-cancel')" border class="flex-fill h-42px m-1" @click="$emit('cancel')" placeholder="Cancel"></DiButton>
+          <DiButton
+            :id="genBtnId('password-ok')"
+            :is-loading="isBtnLoading"
+            primary
+            class="flex-fill h-42px m-1"
+            @click="$emit('ok')"
+            placeholder="Apply"
+          ></DiButton>
         </div>
       </div>
       <b-container v-else key="collapsed" class="d-flex flex-column px-0">
@@ -73,6 +76,9 @@ export default class PasswordProtection extends Vue {
 
   @Prop({ default: true })
   private isCreateNew!: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  private readonly isBtnLoading!: boolean;
 
   collapse() {
     this.isExpand = false;

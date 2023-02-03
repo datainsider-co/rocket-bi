@@ -627,6 +627,7 @@ export default class DashboardDetail extends Vue implements WidgetFullSizeHandle
         });
       }
     } else {
+      Log.debug('onUpdateChart::', chartInfo);
       //Normal chart
       this.chartBuilderComponent.showModal({
         chart: chartInfo,

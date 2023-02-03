@@ -22,6 +22,7 @@
         <div class="query-builder-body overflow-auto">
           <QueryComponent
             ref="queryComponent"
+            :showParameter="showParameter"
             :showAdHocAnalysis="false"
             :convertor="convertQuery"
             :editor-controller="editorController"
@@ -30,7 +31,11 @@
             :show-create-table-button="false"
             :is-query-on-first-time="true"
             :show-ad-hoc-analysis="false"
-          />
+          >
+            <template #header>
+              <DiButtonGroup :buttons="queryLanguageOptions" ref="buttonGroup" />
+            </template>
+          </QueryComponent>
         </div>
       </div>
     </div>

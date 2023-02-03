@@ -29,9 +29,10 @@ export class TreeMapQuerySetting extends QuerySetting<TreeMapChartOption> {
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
 
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   static fromObject(obj: TreeMapQuerySetting): TreeMapQuerySetting {
@@ -40,7 +41,7 @@ export class TreeMapQuerySetting extends QuerySetting<TreeMapChartOption> {
     const value = TableColumn.fromObject(obj.value);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new TreeMapQuerySetting(legends, value, filters, sorts, obj.options, sqlViews);
+    return new TreeMapQuerySetting(legends, value, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

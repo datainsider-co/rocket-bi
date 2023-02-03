@@ -5,3 +5,4 @@ export * from './implement';
 export * from './QuerySetting';
 export * from './QuerySettingType';
 export * from './InlineSqlView';
+export * from './QueryParameter';

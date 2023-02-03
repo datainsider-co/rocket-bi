@@ -17,7 +17,7 @@ export class HttpModule extends BaseModule {
     Container.bindName(DIKeys.SchemaClient).to(this.buildClient(schemaApiUrl, timeout));
 
     const lakeApiUrl = window.appConfig.VUE_APP_LAKE_API_URL;
-    Container.bindName(DIKeys.LakeClient).to(this.buildClient(lakeApiUrl, timeout));
+    Container.bindName(DIKeys.LakeClient).to(this.buildLakeClient(lakeApiUrl, timeout));
 
     const cdpApiUrl = window.appConfig.VUE_APP_CDP_API_URL;
     Container.bindName(DIKeys.CdpClient).to(this.buildClient(cdpApiUrl, timeout));
@@ -43,6 +43,13 @@ export class HttpModule extends BaseModule {
 
   private buildClient(apiUrl: string, timeout: number): BaseClient {
     return ClientBuilders.authAndTokenBuilder()
+      .withBaseUrl(apiUrl)
+      .withTimeout(timeout)
+      .build();
+  }
+
+  private buildLakeClient(apiUrl: string, timeout: number): BaseClient {
+    return ClientBuilders.lakeHouseBuilder()
       .withBaseUrl(apiUrl)
       .withTimeout(timeout)
       .build();

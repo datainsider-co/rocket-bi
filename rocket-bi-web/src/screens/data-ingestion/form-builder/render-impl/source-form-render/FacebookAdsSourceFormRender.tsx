@@ -5,6 +5,8 @@ import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSour
 import KeyDownEvent = JQuery.KeyDownEvent;
 import { Log } from '@core/utils';
 import { FacebookAdsSourceInfo } from '@core/data-ingestion';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class FacebookAdsSourceFormRender implements DataSourceFormRender {
   private sourceInfo: FacebookAdsSourceInfo;
@@ -52,5 +54,10 @@ export class FacebookAdsSourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return FacebookAdsSourceInfo.fromObject(this.sourceInfo);
+  }
+  validSource(source: FacebookAdsSourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
   }
 }

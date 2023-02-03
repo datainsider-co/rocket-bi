@@ -76,31 +76,6 @@ export default class App extends Vue {
       Modals.init(this.confirmationModal);
       TableTooltipUtils.initTooltip();
     });
-
-    window.addEventListener('click', this.trackingClickEvent);
-  }
-
-  private trackingClickEvent(event: MouseEvent) {
-    try {
-      const trackingElement = this.getTrackingElement(event);
-      if (trackingElement) {
-        const trackingEvent = trackingElement.getAttribute('event');
-        if (trackingEvent) {
-          TrackingUtils.track(trackingEvent, {});
-        }
-      }
-    } catch (e) {
-      //
-    }
-  }
-
-  private getTrackingElement(event: MouseEvent): HTMLElement | null {
-    //@ts-ignore
-    const trackingElement = (event.path as HTMLElement[]).find(element => StringUtils.isNotEmpty(element.getAttribute('event')));
-    if (trackingElement) {
-      return trackingElement;
-    }
-    return null;
   }
 
   private initTheme() {

@@ -27,4 +27,8 @@ export class SharedUserInfo {
   static fromObject(obj: any): SharedUserInfo {
     return new SharedUserInfo(obj.id, UserProfile.fromObject(obj.user), obj.permissions, obj.createdAt, obj.updatedAt, obj.createdBy, obj.updatedBy);
   }
+
+  static new(userProfile: UserProfile) {
+    return new SharedUserInfo('', userProfile, [], Date.now(), Date.now(), '', '');
+  }
 }

@@ -3,6 +3,8 @@ import { BFormInput } from 'bootstrap-vue';
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { PostgreSqlSourceInfo } from '@core/data-ingestion/domain/data-source/PostgreSqlSourceInfo';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class PostgreSqlDataSourceFormRender implements DataSourceFormRender {
   private postgreSqlSourceInfo: PostgreSqlSourceInfo;
@@ -51,7 +53,7 @@ export class PostgreSqlDataSourceFormRender implements DataSourceFormRender {
     this.postgreSqlSourceInfo.username = value;
   }
   private get password() {
-    return this.postgreSqlSourceInfo.password;
+    return this.postgreSqlSourceInfo.password ?? '';
   }
 
   private set password(value: string) {
@@ -103,5 +105,22 @@ export class PostgreSqlDataSourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return PostgreSqlSourceInfo.fromObject(this.postgreSqlSourceInfo);
+  }
+  validSource(source: PostgreSqlSourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
+    if (StringUtils.isEmpty(source.host)) {
+      throw new DIException('Host is required!');
+    }
+    if (StringUtils.isEmpty(source.port)) {
+      throw new DIException('Port is required!');
+    }
+    if (StringUtils.isEmpty(source.databaseName)) {
+      throw new DIException('Database name is required!');
+    }
+    if (StringUtils.isEmpty(source.username)) {
+      throw new DIException('Username is required!');
+    }
   }
 }

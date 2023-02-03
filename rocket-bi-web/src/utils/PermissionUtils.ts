@@ -26,29 +26,3 @@ export enum ResourceType {
   database = 'database',
   etl = 'etl'
 }
-
-export class PermissionUtils {
-  static isPermissionViewDashboard(permissionType: ActionType): boolean {
-    return permissionType == ActionType.view;
-  }
-
-  static isPermissionEditDashboard(permissionType: ActionType): boolean {
-    return permissionType == ActionType.edit || permissionType == ActionType.all;
-  }
-
-  static isPermissionEditChart(permissionType: ActionType): boolean {
-    return permissionType == ActionType.edit || permissionType == ActionType.all;
-  }
-
-  static isPermissionDeleteChart(permissionType: ActionType): boolean {
-    return permissionType == ActionType.all;
-  }
-
-  static isPermissionCreateChart(permissionType: ActionType): boolean {
-    return permissionType == ActionType.all;
-  }
-
-  static isPermissionDuplicateChart(permissionType: ActionType): boolean {
-    return permissionType == ActionType.all;
-  }
-}

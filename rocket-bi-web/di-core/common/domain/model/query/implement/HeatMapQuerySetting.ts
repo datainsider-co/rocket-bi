@@ -27,9 +27,10 @@ export class HeatMapQuerySetting extends QuerySetting<HeatMapChartOption> {
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   static fromObject(obj: HeatMapQuerySetting): HeatMapQuerySetting {
@@ -39,7 +40,7 @@ export class HeatMapQuerySetting extends QuerySetting<HeatMapChartOption> {
     const value = TableColumn.fromObject(obj.value);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new HeatMapQuerySetting(xAxis, yAxis, value, filters, sorts, obj.options, sqlViews);
+    return new HeatMapQuerySetting(xAxis, yAxis, value, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

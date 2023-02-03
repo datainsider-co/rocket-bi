@@ -25,6 +25,16 @@ export class EditorController {
     }
   }
 
+  getCursor(): number[] {
+    const selections = this.editor.getSelections();
+    Log.debug('getCursor::', selections);
+    if (ListUtils.isNotEmpty(selections)) {
+      return selections!.map(selection => selection.endColumn - 1);
+    } else {
+      return [0];
+    }
+  }
+
   getSelectedText(): string {
     const paragraph = this.editor.getValue();
     const selections = this.editor.getSelections();

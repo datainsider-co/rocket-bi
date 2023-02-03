@@ -28,6 +28,8 @@ declare global {
     testConfig: AppConfig;
 
     chartSetting: any;
+
+    queryLanguages: QueryLanguage;
   }
 
   export interface AppConfig {
@@ -65,5 +67,9 @@ declare global {
       isShowHint: boolean;
       hintMessage: string;
     };
+  }
+  export interface QueryLanguage {
+    clickHouse: { default: string };
+    python3: { default: string };
   }
 }

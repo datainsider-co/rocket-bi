@@ -80,6 +80,7 @@ export default class ManageEtlJob extends Vue {
       this.handleModelChanged();
       this.updateRouter(this.model!.id, this.model.displayName);
     } catch (ex) {
+      Log.error(ex);
       this.errorMsg = ex.message;
       this.model = null;
       this.loading = false;

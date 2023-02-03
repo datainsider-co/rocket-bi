@@ -23,14 +23,14 @@ export default class UserItem extends Vue {
       return {};
     }
   })
-  private readonly userData!: UserProfile;
+  private readonly userData?: UserProfile;
 
   private get userAvatar(): string {
     return this.userData?.avatar || this.getDefaultUserAvatar();
   }
 
   private get username(): string {
-    return this.userData.getName;
+    return this.userData?.getName ?? 'Unknown';
   }
 
   private getDefaultUserAvatar(): string {

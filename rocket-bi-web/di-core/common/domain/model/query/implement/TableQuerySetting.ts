@@ -35,9 +35,10 @@ export class TableQueryChartSetting extends AbstractTableQuerySetting<TableChart
     options: Record<string, any> = {},
     readonly formatters: TableColumn[] = [],
 
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(columns, filters, sorts, options, formatters, sqlViews);
+    super(columns, filters, sorts, options, formatters, sqlViews, parameters);
   }
 
   static fromObject(obj: any): TableQueryChartSetting {
@@ -46,7 +47,7 @@ export class TableQueryChartSetting extends AbstractTableQuerySetting<TableChart
     const [filters, sorts] = getFiltersAndSorts(obj);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new TableQueryChartSetting(columns, filters, sorts, obj.options, formatters, sqlViews);
+    return new TableQueryChartSetting(columns, filters, sorts, obj.options, formatters, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

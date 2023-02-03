@@ -24,6 +24,7 @@ export enum ETL_OPERATOR_TYPE {
   ManageFieldOperator = 'manage_field_operator',
   PivotTableOperator = 'pivot_table_operator',
   SQLQueryOperator = 'sql_query_operator',
+  PythonOperator = 'python_operator',
   SendToGroupEmailOperator = 'send_to_group_email_operator'
 }
 
@@ -34,6 +35,7 @@ export const ETL_OPERATOR_TYPE_NAME: Record<ETL_OPERATOR_TYPE, string> = Object.
   [ETL_OPERATOR_TYPE.ManageFieldOperator]: 'Manage Fields',
   [ETL_OPERATOR_TYPE.PivotTableOperator]: 'Pivot Table',
   [ETL_OPERATOR_TYPE.SQLQueryOperator]: 'SQL Query',
+  [ETL_OPERATOR_TYPE.PythonOperator]: 'Python',
   [ETL_OPERATOR_TYPE.SendToGroupEmailOperator]: 'Send Email'
 });
 
@@ -44,6 +46,7 @@ export const ETL_OPERATOR_TYPE_SHORT_NAME: Record<ETL_OPERATOR_TYPE, string> = O
   [ETL_OPERATOR_TYPE.ManageFieldOperator]: 'Manage Fields',
   [ETL_OPERATOR_TYPE.PivotTableOperator]: 'Pivot',
   [ETL_OPERATOR_TYPE.SQLQueryOperator]: 'SQL Query',
+  [ETL_OPERATOR_TYPE.PythonOperator]: 'Python Query',
   [ETL_OPERATOR_TYPE.SendToGroupEmailOperator]: 'Send Email'
 });
 

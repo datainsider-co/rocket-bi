@@ -276,7 +276,9 @@ export default class ChartHolder extends Vue {
         _ChartStore.setStatusLoaded(chartInfo.id);
       } else {
         _ChartStore.setStatusLoading(chartInfo.id);
+        Log.debug('ChartHolder::renderChart::chartInfo', chartInfo, chartInfo.id);
         const queryRequest: QueryRequest = this.toQueryRequest(chartInfo);
+        Log.debug('ChartHolder::renderChart::queryRequest', queryRequest);
         const response = await this.queryService.query(queryRequest);
         //Todo: Update Setting by response here
         this._renderChart(response, chartInfo);

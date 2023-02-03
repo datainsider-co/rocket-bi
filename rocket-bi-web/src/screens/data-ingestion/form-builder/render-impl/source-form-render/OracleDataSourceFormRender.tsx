@@ -6,6 +6,8 @@ import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSour
 import { DropdownData } from '@/shared/components/common/di-dropdown';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
 import { cloneDeep } from 'lodash';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class OracleDataSourceFormRender implements DataSourceFormRender {
   private oracleSourceInfo: OracleSourceInfo;
@@ -46,7 +48,7 @@ export class OracleDataSourceFormRender implements DataSourceFormRender {
     this.oracleSourceInfo.username = value;
   }
   private get password() {
-    return this.oracleSourceInfo.password;
+    return this.oracleSourceInfo.password ?? '';
   }
 
   private set password(value: string) {
@@ -167,5 +169,25 @@ export class OracleDataSourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return OracleSourceInfo.fromObject(this.oracleSourceInfo);
+  }
+  validSource(source: OracleSourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
+    if (StringUtils.isEmpty(source.host)) {
+      throw new DIException('Host is required!');
+    }
+    if (StringUtils.isEmpty(source.port)) {
+      throw new DIException('Port is required!');
+    }
+    if (StringUtils.isEmpty(source.tnsName)) {
+      throw new DIException('Connection type is required!');
+    }
+    if (StringUtils.isEmpty(source.serviceName)) {
+      throw new DIException('Service name is required!');
+    }
+    if (StringUtils.isEmpty(source.username)) {
+      throw new DIException('Username is required!');
+    }
   }
 }

@@ -23,7 +23,10 @@
           <!--          <TestConnection :status="connectionStatus" @handleTestConnection="handleTestConnection"></TestConnection>-->
           <div v-if="isTestConnection" class="p-0 text-center">
             <BSpinner v-if="isTestConnectionLoading" small class="text-center"></BSpinner>
-            <div v-else :class="statusClass" class="text-right">{{ statusMessage }}</div>
+            <div v-else :class="statusClass" class="text-right">{{ getStatusMessage() }}</div>
+          </div>
+          <div v-if="errorMsg" class="p-0 text-center">
+            <div class="text-right text-danger">{{ errorMsg }}</div>
           </div>
         </div>
       </div>
@@ -99,6 +102,7 @@ export default class DataSourceConfigModal extends Vue {
   private static readonly DEFAULT_ID = -1;
   private connectionStatus: ConnectionStatus = ConnectionStatus.Failed;
   private isTestConnection = false;
+  private errorMsg = '';
 
   @PropSync('isShow', { type: Boolean })
   isShowSync!: boolean;
@@ -120,7 +124,7 @@ export default class DataSourceConfigModal extends Vue {
     };
   }
 
-  private get statusMessage(): string {
+  private getStatusMessage(): string {
     switch (this.connectionStatus) {
       case ConnectionStatus.Success:
         return TestConnection.CONNECTION_SUCCESS;
@@ -186,8 +190,18 @@ export default class DataSourceConfigModal extends Vue {
     });
   }
 
-  private async handleSubmit() {
-    this.$emit('onClickOk');
+  private async handleSubmit(event: Event) {
+    try {
+      event.preventDefault();
+      this.errorMsg = '';
+      const source = this.dataSourceRender.createDataSourceInfo();
+      Log.debug('handleSubmit::', source);
+      this.dataSourceRender.validSource(source);
+      this.$emit('onClickOk', source);
+    } catch (ex) {
+      Log.error('handleSubmit', ex);
+      this.errorMsg = ex.message;
+    }
   }
 
   private onHide() {
@@ -203,6 +217,7 @@ export default class DataSourceConfigModal extends Vue {
   private async handleTestConnection(e: Event) {
     try {
       e.preventDefault();
+      this.errorMsg = '';
       this.isTestConnection = true;
       const dataSourceInfo: DataSourceInfo = this.dataSourceRender.createDataSourceInfo();
       Log.debug('DataConfigModal::handleTestConnection::request::', dataSourceInfo);
@@ -229,6 +244,7 @@ export default class DataSourceConfigModal extends Vue {
   }
 
   private reset() {
+    this.errorMsg = '';
     this.connectionStatus = ConnectionStatus.Failed;
   }
 }

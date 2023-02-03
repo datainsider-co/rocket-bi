@@ -24,18 +24,21 @@ import {
   MapQuerySetting,
   NumberQuerySetting,
   OrderBy,
+  ParamValueType,
   ParetoQuerySetting,
   ParliamentQuerySetting,
   PieQuerySetting,
   PivotTableQuerySetting,
   PyramidQuerySetting,
   Queryable,
+  QueryParameter,
   QuerySettingType,
   RawQuerySetting,
   SankeyQuerySetting,
   ScatterQuerySetting,
   SeriesQuerySetting,
   SpiderWebQuerySetting,
+  SqlQuery,
   StackedQuerySetting,
   TabFilterQuerySetting,
   TableColumn,
@@ -50,6 +53,7 @@ import { Log } from '@core/utils';
 import { InlineSqlView } from '@core/common/domain/model/query/InlineSqlView';
 import { FilterUtils, ListUtils } from '@/utils';
 import { DefaultSize } from '@/shared';
+import { cloneDeep } from 'lodash';
 
 export const getFiltersAndSorts: (obj: QuerySetting) => [Condition[], OrderBy[]] = (obj: QuerySetting): [Condition[], OrderBy[]] => {
   const filters: Condition[] = obj.filters?.map(filter => Condition.fromObject(filter)) ?? [];
@@ -63,12 +67,14 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
   public sorts: OrderBy[];
   public options: Record<string, any>;
   sqlViews: InlineSqlView[];
+  public parameters: Record<string, string>;
 
-  protected constructor(filters: Condition[], sorts: OrderBy[], options: Record<string, any>, sqlViews: InlineSqlView[]) {
+  protected constructor(filters: Condition[], sorts: OrderBy[], options: Record<string, any>, sqlViews: InlineSqlView[], parameters: Record<string, string>) {
     this.filters = filters;
     this.sorts = sorts;
     this.options = options;
     this.sqlViews = sqlViews;
+    this.parameters = parameters;
   }
 
   static fromObject(obj: QuerySetting): QuerySetting | undefined {
@@ -272,5 +278,45 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
   ///Second value is Height
   getDefaultSize(): [number, number] {
     return DefaultSize;
+  }
+
+  withQueryParameters(params: Record<string, string>): QuerySetting {
+    this.parameters = params;
+    return this;
+  }
+
+  getQueryParamInOptions(): Record<string, any> {
+    const result: Record<string, any> = {};
+    const queryParamInOptions: Record<string, QueryParameter> = this.getChartOption()?.options?.queryParameter ?? {};
+    for (const key in queryParamInOptions) {
+      const param = queryParamInOptions[key];
+      result[param.displayName] = QuerySetting.formatParamValue(param.valueType, param.value);
+    }
+    return result;
+  }
+
+  updateInlineView(aliasName: string, newQuery: string): void {
+    Log.debug('updateInlineView::', aliasName, newQuery);
+    const inlineView = this.getInlineView(aliasName);
+    if (inlineView) {
+      inlineView.query = new SqlQuery(newQuery);
+    } else {
+      Log.error('updateNewInlineView::InlineView not found');
+    }
+  }
+
+  getInlineView(aliasName: string): InlineSqlView | undefined {
+    return this.sqlViews.find(inlineView => inlineView.aliasName === aliasName);
+  }
+
+  static formatParamValue(type: ParamValueType, value: any): any {
+    //Regex link: https://stackoverflow.com/questions/22626579/regex-match-a-string-enclosed-in-single-quotes-but-dont-match-those-inside-do
+    switch (type) {
+      case ParamValueType.text:
+      case ParamValueType.date:
+        return `'${value}'`;
+      case ParamValueType.number:
+        return value;
+    }
   }
 }

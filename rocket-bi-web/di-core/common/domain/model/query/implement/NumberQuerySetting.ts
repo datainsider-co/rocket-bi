@@ -33,9 +33,10 @@ export class NumberQuerySetting extends QuerySetting<NumberChartOption> implemen
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
     sqlViews: InlineSqlView[] = [],
-    compareRequest?: CompareRequest | null
+    compareRequest?: CompareRequest | null,
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
     this.compareRequest = compareRequest || null;
   }
 
@@ -52,7 +53,7 @@ export class NumberQuerySetting extends QuerySetting<NumberChartOption> implemen
     const value = TableColumn.fromObject(obj.value);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
     const compareRequest: CompareRequest | null = obj.compareRequest ? CompareRequest.fromObject(obj.compareRequest) : null;
-    return new NumberQuerySetting(value, filters, sorts, obj.options, sqlViews, compareRequest);
+    return new NumberQuerySetting(value, filters, sorts, obj.options, sqlViews, compareRequest, obj.parameters);
   }
 
   getAllFunction(): Function[] {

@@ -22,6 +22,7 @@ import { VizSettingResolver } from '@/shared/resolver';
 import { ChartInfo, WidgetId } from '@core/common/domain';
 import { _ChartStore } from '@/screens/dashboard-detail/stores';
 import DiIconTextButton from '@/shared/components/common/DiIconTextButton.vue';
+import { Log } from '@core/utils';
 
 @Component({
   components: {
@@ -46,6 +47,7 @@ export default class VizPanel extends Vue {
   }
 
   renderChart(chartInfo: ChartInfo | null) {
+    Log.debug('VizPanel::renderChart::chartInfo', chartInfo);
     this.currentChartId = chartInfo?.id || null;
     this.previewPanel.renderChart(chartInfo);
   }

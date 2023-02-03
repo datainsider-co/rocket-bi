@@ -14,6 +14,7 @@
         @keydown.enter="emitEnterEvent"
         @input="input => $emit('input', input)"
         @change="value => $emit('change', value)"
+        @onfocusout="$emit('onfocusout')"
         v-bind="$attrs"
         :type="currentType"
       ></b-form-input>
@@ -86,9 +87,11 @@ export default class DiInputComponent extends Vue {
     cursor: default;
     display: flex;
     justify-content: space-between;
+
     &-right {
       color: var(--accent);
       cursor: pointer;
+
       &:hover {
         text-decoration: underline;
       }

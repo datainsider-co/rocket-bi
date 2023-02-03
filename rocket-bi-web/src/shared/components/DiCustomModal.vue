@@ -36,8 +36,8 @@
     <template #modal-footer="{ ok, cancel}">
       <slot name="modal-footer" :ok="ok" :cancel="cancel">
         <div class="flex-fill d-flex flex-row flex-nowrap">
-          <DiButton :title="cancelTitle" class="flex-fill w-50 h-42px mr-2" border secondary @click="cancel()"></DiButton>
-          <DiButton :title="okTitle" :isDisable="isLoading" :is-loading="isLoading" class="flex-fill w-50 h-42px" primary @click="ok()"></DiButton>
+          <DiButton :title="cancelTitle" class="flex-fill w-50 h-42px mr-2" border secondary @click="cancel"></DiButton>
+          <DiButton :title="okTitle" :isDisable="isLoading" :is-loading="isLoading" class="flex-fill w-50 h-42px" primary @click="ok"></DiButton>
         </div>
       </slot>
     </template>
@@ -51,6 +51,7 @@
 import { Component, Emit, Prop, Ref, Vue } from 'vue-property-decorator';
 import { BModal, BvModalEvent } from 'bootstrap-vue';
 import DiButton from '@/shared/components/common/DiButton.vue';
+import { Log } from '@core/utils';
 
 @Component({
   components: {
@@ -98,6 +99,7 @@ export default class DiCustomModal extends Vue {
   }
 
   hide() {
+    Log.debug('hide::');
     this.modal.hide();
   }
 

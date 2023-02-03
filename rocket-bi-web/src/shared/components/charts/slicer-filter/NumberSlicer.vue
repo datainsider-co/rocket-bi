@@ -74,10 +74,10 @@ import RangeSlider from '@/shared/components/common/di-slider/range-slider/Range
 import { toNumber } from 'lodash';
 import { SlicerRange } from '@/shared';
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
-import { DateTimeFormatter } from '@/utils';
+import { DateTimeFormatter, DateUtils } from '@/utils';
 import { MouseEventData } from '@chart/BaseChart';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
-import { isDate } from 'moment';
+import moment, { isDate } from 'moment';
 import { Log } from '@core/utils';
 
 export enum SlicerDisplay {
@@ -169,20 +169,22 @@ export default class NumberSlicer extends Vue {
   }
 
   private updateMinValue(value: string | Date) {
-    const fromValueAsNumber: number = isDate(value) ? value.valueOf() : toNumber(value);
-    if (fromValueAsNumber > this.toValue) {
+    const valueAsNumber: number = isDate(value) ? value.valueOf() : toNumber(value);
+    const fromValue = this.isDate ? DateUtils.toStartTime(moment(valueAsNumber).toDate()) : valueAsNumber;
+    if (fromValue > this.toValue) {
       this.fromValue = this.toValue;
     } else {
-      this.fromValue = fromValueAsNumber;
+      this.fromValue = fromValue;
     }
   }
 
   private updateMaxValue(value: string | Date) {
-    const toValueAsNumber: number = isDate(value) ? value.valueOf() : toNumber(value);
-    if (toValueAsNumber < this.fromValue) {
+    const valueAsNumber: number = isDate(value) ? value.valueOf() : toNumber(value);
+    const toValue = this.isDate ? DateUtils.toEndTime(moment(valueAsNumber).toDate()) : valueAsNumber;
+    if (toValue < this.fromValue) {
       this.toValue = this.fromValue;
     } else {
-      this.toValue = toValueAsNumber;
+      this.toValue = toValue;
     }
   }
 

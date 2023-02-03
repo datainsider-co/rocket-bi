@@ -4,6 +4,8 @@ import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/Data
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { BigQuerySourceInfoV2 } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfoV2';
 import { JdbcUrlSourceInfo } from '@core/data-ingestion/domain/data-source/JdbcUrlSourceInfo';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class JdbcUrlSourceFormRender implements DataSourceFormRender {
   private jdbcUrlSourceInfo: JdbcUrlSourceInfo;
@@ -21,7 +23,7 @@ export class JdbcUrlSourceFormRender implements DataSourceFormRender {
   }
 
   private get password() {
-    return this.jdbcUrlSourceInfo.password;
+    return this.jdbcUrlSourceInfo.password ?? '';
   }
 
   private set password(value: string) {
@@ -77,5 +79,17 @@ export class JdbcUrlSourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return JdbcUrlSourceInfo.fromObject(this.jdbcUrlSourceInfo);
+  }
+
+  validSource(source: JdbcUrlSourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
+    if (StringUtils.isEmpty(source.jdbcUrl)) {
+      throw new DIException('Jdbc Url is required!');
+    }
+    if (StringUtils.isEmpty(source.username)) {
+      throw new DIException('Username is required!');
+    }
   }
 }

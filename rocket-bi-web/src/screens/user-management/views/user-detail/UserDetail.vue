@@ -14,8 +14,8 @@
               <UserPrivilege
                 v-if="isUserPrivilegeOpened"
                 :errorMessage="privilegeErrorMessage"
-                :permissionGroups="transformData(permissionGroups)"
-                :permissions="selectedPermissions"
+                :permissionGroups="permissionGroups"
+                :selectedPermissions="selectedPermissions"
                 :fullName="fullName"
                 :status="userPrivilegeStatus"
               />
@@ -26,25 +26,6 @@
       </status-widget>
     </div>
   </LayoutContent>
-
-  <!--  <div class="right-panel">-->
-  <!--    <template>-->
-  <!--      <header>-->
-  <!--        <div class="right-panel-title">-->
-  <!--          <div class="root-title cursor-pointer" @click.prevent="navigateToUserManagement">-->
-  <!--            <i class="di-icon-users"></i>-->
-  <!--            <span>User Managements</span>-->
-  <!--          </div>-->
-  <!--          <template>-->
-  <!--            <BreadcrumbComponent :breadcrumbs="breadcrumbs"></BreadcrumbComponent>-->
-  <!--          </template>-->
-  <!--        </div>-->
-  <!--      </header>-->
-  <!--      <div class="right-panel-divider"></div>-->
-  <!--    </template>-->
-
-  <!--    -->
-  <!--  </div>-->
 </template>
 
 <script lang="ts">
@@ -53,10 +34,10 @@ import { NavigationGuardNext, Route } from 'vue-router';
 import { FadeTransition } from 'vue2-transitions';
 
 import Contact from '@/screens/user-management/components/user-detail/Contact.vue';
-import { CheckboxGroupOption, GroupCheckboxOption, Routers, Status } from '@/shared';
+import { Routers, Status } from '@/shared';
 import UserPrivilege from '@/screens/user-management/components/user-detail/UserPrivilege.vue';
 import UserDeletion from '@/screens/user-management/components/user-detail/UserDeletion.vue';
-import { PermissionGroup, PermissionInfo } from '@core/admin/domain/permissions/PermissionGroup';
+import { PermissionGroup } from '@core/admin/domain/permissions/PermissionGroup';
 import { UserFullDetailInfo } from '@core/common/domain/model';
 import { UserDetailModule } from '@/screens/user-management/store/UserDetailStore';
 import MessageContainer from '@/shared/components/MessageContainer.vue';
@@ -153,26 +134,6 @@ export default class UserManagementDetails extends Vue {
 
   destroyed() {
     UserDetailModule.reset();
-  }
-
-  //todo rename and move to new file
-  transformData(permissionGroups: PermissionGroup[]): GroupCheckboxOption[] {
-    const result = permissionGroups.map(group => {
-      return {
-        ...group,
-        permissions: this.toCheckboxGroupOption(group.permissions)
-      };
-    });
-    return result;
-  }
-
-  toCheckboxGroupOption(permissions: PermissionInfo[]): CheckboxGroupOption[] {
-    return permissions.map(per => {
-      return {
-        text: per.name,
-        value: per.permission
-      };
-    });
   }
 
   showLoading() {

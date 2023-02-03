@@ -8,20 +8,23 @@
       @nodeclick="handleNodeClick"
       @clickField="handleClickField"
     >
-      <template #header="{keyword, submitKeywordChanged, enableSearch, toggleSearch, blur }">
-        <template v-if="enableSearch">
-          <SearchInput id="lake-table-listing" :value="keyword" place-holder="Search columns" @blur="blur" @input="submitKeywordChanged" />
-        </template>
-        <template v-else>
-          <label class="unselectable">Tables ({{ numTable }})</label>
-          <div class="listing-icon-bar">
-            <i class="di-icon-reset btn-icon btn-icon-border" @click="handleLoadTables" :event="trackEvents.LakeSchemaRefreshTable"></i>
-            <i class="di-icon-add btn-icon btn-icon-border" v-if="!hideAddButton" @click="emitCreateTable" :event="trackEvents.LakeSchemaCreateTable"></i>
-            <div class="cursor-pointer btn-icon btn-icon-border" @click="toggleSearch">
-              <img alt="search" src="@/assets/icon/ic_search.svg" />
+      <template #header><div style="padding: 8px"></div></template>
+      <template #database-header="{keyword, submitKeywordChanged, enableSearch, toggleSearch, blur }">
+        <div class="lake-database-header">
+          <template v-if="enableSearch">
+            <SearchInput id="lake-table-listing" :value="keyword" place-holder="Search tables & columns" @blur="blur" @input="submitKeywordChanged" />
+          </template>
+          <template v-else>
+            <label class="unselectable lake-table-listing--table-name">Tables ({{ numTable }})</label>
+            <div class="listing-icon-bar">
+              <i class="di-icon-reset btn-icon btn-icon-border" @click="handleLoadTables" :event="trackEvents.LakeSchemaRefreshTable"></i>
+              <i class="di-icon-add btn-icon btn-icon-border" v-if="!hideAddButton" @click="emitCreateTable" :event="trackEvents.LakeSchemaCreateTable"></i>
+              <div class="cursor-pointer btn-icon btn-icon-border" @click="toggleSearch">
+                <img alt="search" src="@/assets/icon/ic_search.svg" />
+              </div>
             </div>
-          </div>
-        </template>
+          </template>
+        </div>
       </template>
     </DatabaseListing>
   </StatusWidget>
@@ -164,27 +167,39 @@ export default class LakeTableListing extends Vue {
     }
   }
 
-  .listing-icon-bar {
-    align-items: center;
+  .lake-database-header {
     display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 
-    .btn-icon {
-      color: #5f6368;
+    label {
       font-size: 16px;
-      height: 16px;
-      line-height: 1;
-      opacity: 1;
-      padding: 4px;
-      width: 16px;
-
-      > img {
-        height: 16px;
-        width: 16px;
-      }
+      font-weight: 500;
+      color: var(--text-color);
+      //margin: 0;
     }
+    .listing-icon-bar {
+      align-items: center;
+      display: flex;
 
-    .btn-icon + .btn-icon {
-      margin-left: 8px;
+      .btn-icon {
+        color: #5f6368;
+        font-size: 16px;
+        height: 16px;
+        line-height: 1;
+        opacity: 1;
+        padding: 4px;
+        width: 16px;
+
+        > img {
+          height: 16px;
+          width: 16px;
+        }
+      }
+
+      .btn-icon + .btn-icon {
+        margin-left: 8px;
+      }
     }
   }
 }

@@ -152,14 +152,14 @@ export default class ActionWidgetMore extends Vue {
         disabled: !DashboardModeModule.canEdit
       },
       {
-        text: 'Copy chart',
-        click: this.copyChart,
-        disabled: !DashboardModeModule.canDuplicate
-      },
-      {
         text: DashboardOptions.CONFIG_CHART,
         click: this.handleEditChart,
         disabled: !DashboardModeModule.canEdit
+      },
+      {
+        text: 'Copy chart',
+        click: this.copyChart,
+        disabled: !DashboardModeModule.canDuplicate
       },
       {
         text: DashboardOptions.ADD_FILTER_WIDGET,

@@ -21,9 +21,10 @@ export abstract class AbstractTableQuerySetting<T extends TableChartOption = Tab
     options: Record<string, any> = {},
     formatters: TableColumn[] = [],
 
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
     this.formatters = formatters;
   }
 

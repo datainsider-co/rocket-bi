@@ -6,8 +6,8 @@
     :header-class="{ collapsed: isHeaderCollapsed }"
     centered
     class="modal-content"
-    @hide="handleClose"
-    @ok="done"
+    @hidden="() => handleOnModalHidden()"
+    @ok="event => done(event)"
   >
     <template #modal-header>
       <b-container :class="getCursorClassForHeader" class="share-people-area" @click.prevent="isHeaderCollapsed && expandShareUser()">
@@ -43,17 +43,12 @@
             :owner="resourceInfo.owner"
             :resource-id="resourceId"
             :resource-type="resourceType"
-            :status-data="swmStatusData"
-            @handleItemStatusChange="handleSharePermissionChange"
+            @onActionTypeChanged="handleActionTypeChanged"
           />
           <div class="row divider-top" />
           <div class="d-flex mb-2 mb-sm-4">
-            <b-button :id="genBtnId('share-cancel')" class="flex-fill h-42px m-1" variant="secondary" @click="cancel" event="share_cancel">
-              Cancel
-            </b-button>
-            <b-button :id="genBtnId('share-done')" class="flex-fill h-42px m-1" variant="primary" @click="ok">
-              Apply
-            </b-button>
+            <DiButton :id="genBtnId('share-cancel')" border class="flex-fill h-42px m-1" @click="cancel" placeholder="Cancel"></DiButton>
+            <DiButton :id="genBtnId('share-done')" :is-loading="isBtnLoading" primary class="flex-fill h-42px m-1" @click="ok" placeholder="Apply"></DiButton>
           </div>
         </b-container>
       </CollapseTransition>
@@ -64,9 +59,10 @@
           v-if="enableShareAnyone"
           ref="shareAnyone"
           class="mt-2"
+          v-model="currentPermission"
           :link="link"
+          :is-btn-loading="isBtnLoading"
           :permission-token-response="permissionTokenResponse"
-          :current-permission="currentPermission"
           :link-handler="linkHandler"
           @ok="ok"
           @cancel="cancel"
@@ -77,6 +73,7 @@
           ref="passwordProtection"
           :is-create-new="isCreatingPassword"
           :config.sync="editPasswordSetting"
+          :is-btn-loading="isBtnLoading"
           class="mt-2"
           @ok="ok"
           @cancel="cancel"
@@ -91,14 +88,14 @@
 <script lang="ts">
 import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
-import { ActionNode, Status } from '@/shared';
-import { Log, UrlUtils } from '@core/utils';
+import { Status } from '@/shared';
+import { Log } from '@core/utils';
 import { ShareModule } from '@/store/modules/ShareStore';
-import { ActionType, PERMISSION_ACTION_NODES, ResourceType } from '@/utils/PermissionUtils';
+import { ActionType, ResourceType } from '@/utils/PermissionUtils';
 import { CollapseTransition, FadeTransition } from 'vue2-transitions';
 import { PermissionTokenResponse } from '@core/common/domain/response';
 import UserItemListing from '@/shared/components/UserItemListing.vue';
-import { Directory, PasswordConfig, UserProfile } from '@core/common/domain/model';
+import { Directory, DirectoryType, PasswordConfig, UserProfile } from '@core/common/domain/model';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { PermissionProviders } from '@core/admin/domain/permissions/PermissionProviders';
@@ -108,7 +105,7 @@ import { ShareHandler } from '@/shared/components/common/di-share-modal/share-ha
 import { ShareDatabaseHandler } from '@/shared/components/common/di-share-modal/share-handler/ShareDatabaseHandler';
 import { ShareDirectoryHandler } from '@/shared/components/common/di-share-modal/share-handler/ShareDirectoryHandler';
 import { LinkHandler } from '@/shared/components/common/di-share-modal/link-handler/LinkHandler';
-import { ListUtils, SecurityUtils, StringUtils } from '@/utils';
+import { ListUtils, StringUtils, TimeoutUtils } from '@/utils';
 import DiShadowButton from '@/shared/components/common/DiShadowButton.vue';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import { Track } from '@/shared/anotation/TrackingAnotation';
@@ -170,11 +167,13 @@ export default class DiShareModal extends Vue {
 
   editPasswordSetting: PasswordConfig | null = null; ///Use for edit password
 
+  private isBtnLoading = false;
+
   @Ref()
   mdShare!: BModal;
 
   @Ref()
-  searchUserInput!: SearchUserInput;
+  searchUserInput?: SearchUserInput;
 
   @Ref()
   shareAnyone!: ShareAnyone;
@@ -192,10 +191,6 @@ export default class DiShareModal extends Vue {
   get sharedUserNames(): string {
     const userInfos = this.resourceInfo?.usersSharing?.slice(0, 10) ?? [];
     return userInfos.map(userInfo => userInfo.user.getName).join(', ');
-  }
-
-  get swmStatusData(): ActionNode[] {
-    return PERMISSION_ACTION_NODES;
   }
 
   get resourceInfo(): ResourceInfo | null {
@@ -253,7 +248,7 @@ export default class DiShareModal extends Vue {
       organizationId: this.dataManager.getUserInfo()?.organization.organizationId!,
       resourceType: ResourceType.directory,
       resourceId: directory.id.toString(),
-      creator: directory.owner.username
+      creator: directory?.owner?.username
     };
     const linkHandler: LinkHandler = new ShareDirectoryLinkHandler(resourceData.resourceId, directoryName);
     this.showShareModal(resourceData, new ShareDirectoryHandler(), true, linkHandler, false);
@@ -265,12 +260,13 @@ export default class DiShareModal extends Vue {
       organizationId: this.dataManager.getUserInfo()?.organization.organizationId!,
       resourceType: ResourceType.directory,
       resourceId: directory.id.toString(),
-      creator: directory.owner.username
+      creator: directory?.owner?.username
     };
     const linkHandler = new ShareDashboardLinkHandler(directory.dashboardId!.toString(), directoryName);
     const currentPassword = directory?.data ? (directory.data as DashboardMetaData)?.config ?? null : null;
     Log.debug('showShareDashboard::', currentPassword);
-    this.showShareModal(resourceData, new ShareDirectoryHandler(), true, linkHandler, true, currentPassword);
+    const enableShareAnyone = directory.directoryType === DirectoryType.Dashboard;
+    this.showShareModal(resourceData, new ShareDirectoryHandler(), enableShareAnyone, linkHandler, true, currentPassword);
   }
 
   init(resource: ResourceData, handler: ShareHandler, linkHandler: LinkHandler | null = null) {
@@ -335,30 +331,36 @@ export default class DiShareModal extends Vue {
     resource_type: (_: DiShareModal, args: any) => _.resourceType,
     resource_id: (_: DiShareModal, args: any) => _.resourceId
   })
-  async done() {
+  private async done(event: Event): Promise<void> {
     try {
-      this.mdShare.hide();
+      event.preventDefault();
+      this.isBtnLoading = true;
       const isShareAnyoneActionChange = this.checkShareAnyoneChange();
-
       await this.shareHandler.saveAll(this.resourceId.toString(), this.resourceType, this.currentPermission, isShareAnyoneActionChange);
       await this.updatePassword(this.enablePasswordProtection, this.editPasswordSetting);
       TrackingUtils.track(TrackEvents.SubmitShareOk, {});
+      this.mdShare.hide();
       this.$emit('shared');
     } catch (e) {
+      Log.error('DiShareModal::done::err::', e);
       PopupUtils.showError(e.message);
       TrackingUtils.track(TrackEvents.SubmitShareFail, { error: e.message });
+    } finally {
+      this.isBtnLoading = false;
     }
   }
 
-  handleClose() {
-    Log.debug('DiShareModal::handleClose::Modal Closed.');
-    this.searchUserInput.reset();
+  private handleOnModalHidden(): void {
+    Log.debug('DiShareModal::handleClose::Modal Closing.');
+    this.searchUserInput?.reset();
     this.link = '';
     this.permissionTokenResponse = null;
     this.enablePasswordProtection = false;
     this.localPasswordSetting = null;
     this.editPasswordSetting = null;
+    this.isBtnLoading = false;
     ShareModule.reset();
+    Log.debug('DiShareModal::handleClose::Modal Closed');
   }
 
   checkShareAnyoneChange(): boolean {
@@ -432,9 +434,9 @@ export default class DiShareModal extends Vue {
     resource_type: (_: DiShareModal, args: any) => args[0].resourceType,
     resource_id: (_: DiShareModal, args: any) => args[0].resourceId
   })
-  private handleSharePermissionChange(userItemData: SharedUserInfo, permission: string) {
-    Log.debug('change::', userItemData, permission);
-    this.shareHandler.updateSharePermission(userItemData, permission);
+  private handleActionTypeChanged(userItemData: SharedUserInfo, actionType: ActionType) {
+    Log.debug('change::', userItemData, actionType);
+    this.shareHandler.updateSharePermission(userItemData, actionType);
   }
 
   private async resetPassword() {

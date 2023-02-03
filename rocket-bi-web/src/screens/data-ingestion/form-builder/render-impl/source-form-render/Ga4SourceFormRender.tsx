@@ -4,6 +4,8 @@ import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/Data
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { BigQuerySourceInfoV2 } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfoV2';
 import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4SourceInfo';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class Ga4SourceFormRender implements DataSourceFormRender {
   private ga4SourceInfo: GA4SourceInfo;
@@ -50,6 +52,11 @@ export class Ga4SourceFormRender implements DataSourceFormRender {
   }
 
   createDataSourceInfo(): DataSourceInfo {
-    return BigQuerySourceInfoV2.fromObject(this.ga4SourceInfo);
+    return GA4SourceInfo.fromObject(this.ga4SourceInfo);
+  }
+  validSource(source: GA4SourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
   }
 }

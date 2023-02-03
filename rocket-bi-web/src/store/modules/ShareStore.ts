@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { Action, getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import store from '@/store';
 import { Stores } from '@/shared';
 import { Inject } from 'typescript-ioc';
 import { DashboardService, PermissionTokenService } from '@core/common/services';
-import { DIException } from '@core/common/domain/exception';
 import { ActionType, editActions, ResourceType } from '@/utils/PermissionUtils';
 import { PermissionTokenResponse } from '@core/common/domain/response';
 import { UsersResponse } from '@core/common/domain/response/user/UsersResponse';
@@ -22,9 +22,10 @@ import {
 import { UserAdminService } from '@core/admin/service/UserAdminService';
 import { SearchUserRequest } from '@core/admin/domain/request/SearchUserRequest';
 import { SharedUserInfo } from '@core/common/domain/response/resouce-sharing/SharedUserInfo';
-import { PermissionProviders } from '@core/admin/domain/permissions/PermissionProviders';
 import { Log } from '@core/utils';
 import { ResourceInfo } from '@core/common/domain/response/resouce-sharing/ResourceInfo';
+import { ListUtils, MapUtils } from '@/utils';
+import { PermissionProviders } from '@core/admin/domain/permissions/PermissionProviders';
 
 export interface IdTokenData {
   id: number;
@@ -34,6 +35,13 @@ export interface IdTokenData {
 export interface IdPermissionsData {
   id: number;
   permissions: ActionType[];
+}
+
+export interface SaveShareData {
+  resourceId: string;
+  resourceType: ResourceType;
+  shareAnyonePermissionType: ActionType;
+  isChangeShareAnyone: boolean;
 }
 
 @Module({ store, name: Stores.shareStore, dynamic: true, namespaced: true })
@@ -111,7 +119,7 @@ class ShareStore extends VuexModule {
   }
 
   @Action({ rawError: true })
-  getSuggestedUsers(request: SearchUserRequest) {
+  loadSuggestedUsers(request: SearchUserRequest) {
     return this.userAdminService.getSuggestedUsers(request).then(resp => {
       this.saveSuggestedUsersResponse({ suggestedUserResponse: resp });
     });
@@ -138,106 +146,156 @@ class ShareStore extends VuexModule {
   @Mutation
   addNewShareUser(payload: { userProfile: UserProfile; organizationId: string; resourceId: string; resourceType: ResourceType }) {
     if (this.resourceInfo) {
-      const newUserSharingInfo: SharedUserInfo = {
-        id: '',
-        user: payload.userProfile,
-        permissions: [PermissionProviders.buildPermission(payload.organizationId, payload.resourceType, ActionType.view, payload.resourceId)]
-      };
-      //todo: check before add new
-      // check not exist newUserSharingInfo
-      const item = this.resourceInfo.usersSharing.find(item => item.user.username === newUserSharingInfo.user.username);
-      if (!item) {
-        this.resourceInfo.usersSharing.unshift(newUserSharingInfo);
-        this.createdUsers.set(newUserSharingInfo.user.username, [ActionType.view]);
+      const { userProfile } = payload;
+      const isShared = this.resourceInfo.usersSharing.some(user => user.user.username === userProfile.username);
+      if (!isShared) {
+        const sharedInfo: SharedUserInfo = SharedUserInfo.new(userProfile);
+        const viewPermission = PermissionProviders.buildPermission(payload.organizationId, payload.resourceType, ActionType.view, payload.resourceId);
+        sharedInfo.permissions = [viewPermission];
+        this.resourceInfo.usersSharing = [sharedInfo, ...this.resourceInfo.usersSharing];
+        ShareModule.updateSharePermission({
+          userData: sharedInfo,
+          editedValue: ActionType.view
+        });
       }
-      Log.debug('ShareModule::updateSharePermission::newUserSharingInfo', newUserSharingInfo);
-      Log.debug('ShareModule::updateSharePermission::createdUsers', this.createdUsers);
+    } else {
+      Log.error('ShareModule::updateSharePermission::resourceInfo is null');
     }
   }
 
-  @Action({ rawError: true })
-  saveAll(payload: { resourceId: string; resourceType: ResourceType; shareAnyonePermissionType: ActionType; isChangeShareAnyone: boolean }): Promise<any[]> {
-    const createShareRequest: ShareWithUserRequest = { resourceId: payload.resourceId, resourceType: payload.resourceType, userActions: this.createdUsers };
-    const editShareRequest: UpdateShareRequest = { resourceId: payload.resourceId, resourceType: payload.resourceType, shareIdActions: this.editedUsers };
-    const revokeShareRequest: RevokeShareRequest = {
-      resourceId: payload.resourceId.toString(),
-      resourceType: payload.resourceType,
-      usernames: this.revokedUsers
-    };
+  @Action
+  async createShareInfo(payload: SaveShareData): Promise<void> {
+    const isNotEmpty: boolean = this.createdUsers.size > 0;
+    Log.debug('ShareStore::createShareInfo::called createdUsers is not empty::', isNotEmpty);
+    if (isNotEmpty) {
+      const request: ShareWithUserRequest = {
+        resourceId: payload.resourceId,
+        resourceType: payload.resourceType,
+        userActions: this.createdUsers
+      };
+      Log.debug('ShareStore::createShareInfo::request::', request);
+      const result: Map<string, boolean> = await this.shareService.create(request);
+      Log.debug('ShareStore::createShareInfo::result::', result);
+    }
+  }
 
-    const promiseAll: Promise<any>[] = [];
-    if (this.createdUsers.size > 0) {
-      promiseAll.push(this.shareService.create(createShareRequest));
+  @Action
+  async editShareInfo(payload: SaveShareData): Promise<void> {
+    const isNotEmpty: boolean = this.editedUsers.size > 0;
+    Log.debug('ShareStore::editShareInfo::called shareIdActions is not empty::', isNotEmpty);
+    if (isNotEmpty) {
+      const request: UpdateShareRequest = {
+        resourceId: payload.resourceId,
+        resourceType: payload.resourceType,
+        shareIdActions: this.editedUsers
+      };
+      const result: Map<string, string[]> = await this.shareService.editSharedPermission(request);
+      Log.debug('ShareStore::editShareInfo::result::', result);
     }
-    if (this.editedUsers.size > 0) {
-      promiseAll.push(this.shareService.editSharedPermission(editShareRequest));
-    }
-    if (this.revokedUsers.length > 0) {
-      promiseAll.push(this.shareService.revokeSharedPermission(revokeShareRequest));
-    }
+  }
 
-    const request: ShareAnyoneRequest = {
-      resourceType: payload.resourceType,
-      resourceId: payload.resourceId,
-      actions: []
-    };
+  @Action
+  async revokeShareInfo(payload: SaveShareData): Promise<void> {
+    const isNotEmpty: boolean = ListUtils.isNotEmpty(this.revokedUsers);
+    Log.debug('ShareStore::revokeShareInfo::called usernames is not empty::', isNotEmpty);
+    if (isNotEmpty) {
+      const request: RevokeShareRequest = {
+        resourceId: payload.resourceId.toString(),
+        resourceType: payload.resourceType,
+        usernames: this.revokedUsers
+      };
+      const result: Map<string, boolean> = await this.shareService.revokeSharedPermission(request);
+      Log.debug('ShareStore::revokeShareInfo::result::', result);
+    }
+  }
+
+  @Action
+  async shareAnyone(payload: SaveShareData): Promise<void> {
+    Log.debug('ShareStore::shareAnyone::called::payload.isChangeShareAnyone', payload.isChangeShareAnyone);
+
     if (payload.isChangeShareAnyone) {
+      const request: ShareAnyoneRequest = {
+        resourceType: payload.resourceType,
+        resourceId: payload.resourceId,
+        actions: []
+      };
       switch (payload.shareAnyonePermissionType) {
         case ActionType.edit:
           request.actions = editActions;
-          promiseAll.push(this.updateShareAnyone(request));
+          await this.updateShareAnyone(request);
           break;
         case ActionType.view:
           request.actions = [ActionType.view];
-          promiseAll.push(this.updateShareAnyone(request));
+          await this.updateShareAnyone(request);
           break;
         case ActionType.none:
-          //reject share anyone
-          promiseAll.push(
-            this.revokeShareWithAnyone({
-              resourceType: payload.resourceType,
-              resourceId: payload.resourceId
-            })
-          );
+          await this.revokeShareWithAnyone({
+            resourceType: payload.resourceType,
+            resourceId: payload.resourceId
+          });
           break;
         default:
           break;
       }
     }
-
-    return Promise.all(promiseAll);
   }
 
-  //todo: change
   @Mutation
-  updateSharePermission(payload: { userData: SharedUserInfo; editedValue: string }) {
-    if (payload.userData.id === '') {
-      if (payload.editedValue.includes(ActionType.edit)) {
-        this.createdUsers.set(payload.userData.user.username, editActions);
-      } else if (payload.editedValue.includes(ActionType.view)) {
-        this.createdUsers.set(payload.userData.user.username, [ActionType.view]);
-      } else if (payload.editedValue.includes(ActionType.none)) {
-        this.createdUsers.delete(payload.userData.user.username);
-      }
+  updateSharePermission(payload: { userData: SharedUserInfo; editedValue: ActionType }) {
+    Log.debug('updateSharePermission::payload', payload.userData);
+    const { userData, editedValue } = payload;
+    if (userData.id) {
+      Log.debug('ShareModule::updateSharePermission::edit exits user for share', userData.id, 'type', editedValue);
+      ShareModule.handleEditExistsUser(payload);
     } else {
-      this.createdUsers.delete(payload.userData.user.username);
-      this.editedUsers.delete(payload.userData.id);
-      const usernameIndex = this.revokedUsers.findIndex(username => username === payload.userData.user.username);
-      if (usernameIndex > -1) {
-        this.revokedUsers.splice(usernameIndex, 1);
-      }
-      if (payload.editedValue.includes(ActionType.view)) {
-        this.editedUsers.set(payload.userData.id.toString(), [ActionType.view]);
-      } else if (payload.editedValue.includes(ActionType.edit)) {
-        this.editedUsers.set(payload.userData.id.toString(), editActions);
-      } else if (payload.editedValue.includes(ActionType.none)) {
-        this.revokedUsers.push(payload.userData.user.username);
-      }
+      Log.debug('ShareModule::updateSharePermission::edit new user', 'type is', editedValue);
+      ShareModule.handleEditNewUser(payload);
     }
+  }
 
-    Log.debug('ShareModule::updateSharePermission::createdUsers', this.createdUsers);
-    Log.debug('ShareModule::updateSharePermission::revokedUsers', this.revokedUsers);
-    Log.debug('ShareModule::updateSharePermission::editedUsers', this.editedUsers);
+  @Mutation
+  private handleEditNewUser(payload: { userData: SharedUserInfo; editedValue: ActionType }) {
+    const { userData, editedValue } = payload;
+    const targetUsername: string = userData.user.username;
+
+    switch (editedValue) {
+      case ActionType.edit:
+        this.createdUsers.set(targetUsername, editActions);
+        break;
+      case ActionType.view:
+        this.createdUsers.set(targetUsername, [ActionType.view]);
+        break;
+      case ActionType.none:
+        this.createdUsers.delete(targetUsername);
+        break;
+      default:
+        break;
+    }
+  }
+
+  @Mutation
+  private handleEditExistsUser(payload: { userData: SharedUserInfo; editedValue: ActionType }) {
+    const { userData, editedValue } = payload;
+    const targetUsername: string = userData.user.username;
+
+    this.createdUsers.delete(targetUsername);
+    this.editedUsers.delete(userData.id);
+    this.revokedUsers = this.revokedUsers.filter(item => item !== targetUsername);
+
+    switch (editedValue) {
+      case ActionType.edit:
+        this.editedUsers.set(userData.id.toString(), editActions);
+        break;
+      case ActionType.view:
+        this.editedUsers.set(userData.id.toString(), [ActionType.view]);
+        break;
+      case ActionType.none:
+        this.revokedUsers.push(targetUsername);
+        break;
+      default:
+        //do nothing
+        break;
+    }
   }
 
   @Action({ rawError: true })
@@ -272,7 +330,6 @@ class ShareStore extends VuexModule {
     this.revokedUsers = []; //username
     this.editedUsers = new Map(); //shareId: id
     this.createdUsers = new Map();
-    //todo : call at close modal
   }
 }
 

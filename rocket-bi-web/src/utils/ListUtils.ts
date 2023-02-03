@@ -106,4 +106,18 @@ export abstract class ListUtils {
   static unique(list: string[]): string[] {
     return Array.from(new Set(list).values());
   }
+
+  /**
+   * find difference between two list, return list of element in listA but not in listB
+   */
+  static diff(listA: string[], listB: string[]): string[] {
+    return listA.filter(item => !listB.includes(item));
+  }
+
+  /**
+   * find intersection between two list, return list of element in listA and in listB
+   */
+  static intersection(listA: string[], listB: string[]) {
+    return listA.filter(item => listB.includes(item));
+  }
 }

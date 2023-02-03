@@ -3,6 +3,8 @@ import { BFormInput } from 'bootstrap-vue';
 import { MSSqlSourceInfo } from '@core/data-ingestion/domain/data-source/MSSqlSourceInfo';
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class MsSqlDataSourceFormRender implements DataSourceFormRender {
   private mySqlSourceInfo: MSSqlSourceInfo;
@@ -51,7 +53,7 @@ export class MsSqlDataSourceFormRender implements DataSourceFormRender {
     this.mySqlSourceInfo.username = value;
   }
   private get password() {
-    return this.mySqlSourceInfo.password;
+    return this.mySqlSourceInfo.password ?? '';
   }
 
   private set password(value: string) {
@@ -103,5 +105,22 @@ export class MsSqlDataSourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return MSSqlSourceInfo.fromObject(this.mySqlSourceInfo);
+  }
+  validSource(source: MSSqlSourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
+    if (StringUtils.isEmpty(source.host)) {
+      throw new DIException('Host is required!');
+    }
+    if (StringUtils.isEmpty(source.port)) {
+      throw new DIException('Port is required!');
+    }
+    if (StringUtils.isEmpty(source.databaseName)) {
+      throw new DIException('Database is required!');
+    }
+    if (StringUtils.isEmpty(source.username)) {
+      throw new DIException('Username is required!');
+    }
   }
 }

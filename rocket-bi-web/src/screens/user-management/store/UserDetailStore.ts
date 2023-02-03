@@ -9,28 +9,22 @@ import { PermissionAdminService } from '@core/admin/service/PermissionAdminServi
 import { DIException } from '@core/common/domain/exception';
 import { ChangePermissionRequest } from '@core/admin/domain/request/ChangePermissionRequest';
 import { EditUserProfileRequest } from '@core/admin/domain/request/EditUserProfileRequest';
-import { DeleteUserRequest, TransferUserDataConfig } from '@core/admin/domain/request/TransferUserDataConfig';
+import { DeleteUserRequest } from '@core/admin/domain/request/TransferUserDataConfig';
 import { UserDetailPanelType } from '@/screens/user-management/store/Enum';
 import { Log } from '@core/utils';
 import { Di } from '@core/common/modules';
 import { DataManager } from '@core/common/services';
 import { EditUserPropertyRequest } from '@core/admin/domain/request/EditUserPropertyRequest';
-
-export interface UserProfileDetailState {
-  currentDetailPanelType: UserDetailPanelType;
-  userFullDetailInfo: UserFullDetailInfo;
-  selectedUsername: string;
-  permissionGroups: PermissionGroup[];
-  selectedPermissions: string[];
-}
+import { cloneDeep } from 'lodash';
 
 @Module({ namespaced: true, store: store, dynamic: true, name: Stores.userProfileDetailStore })
 class UserDetailStore extends VuexModule {
-  currentDetailPanelType: UserProfileDetailState['currentDetailPanelType'] = UserDetailPanelType.UserPrivilege;
-  userFullDetailInfo: UserProfileDetailState['userFullDetailInfo'] | null = null;
-  selectedUsername: UserProfileDetailState['selectedUsername'] = '';
-  permissionGroups: UserProfileDetailState['permissionGroups'] = [];
-  selectedPermissions: UserProfileDetailState['selectedPermissions'] = []; // current selected permissions.
+  currentDetailPanelType: UserDetailPanelType = UserDetailPanelType.UserPrivilege;
+  userFullDetailInfo: UserFullDetailInfo | null = null;
+  selectedUsername = '';
+  permissionGroups: PermissionGroup[] = [];
+  // contains all permissions of all groups.
+  selectedPermissions: string[] = [];
   dataManager = Di.get(DataManager);
   @Inject
   private userManagementService!: UserAdminService;
@@ -115,10 +109,11 @@ class UserDetailStore extends VuexModule {
   }
 
   @Action({ rawError: true })
-  deleteCurrentUser(config?: TransferUserDataConfig): Promise<boolean> {
+  async deleteCurrentUser(transferToEmail?: string): Promise<boolean> {
     if (this.selectedUsername) {
-      const request = new DeleteUserRequest(this.selectedUsername, config);
-      return this.userManagementService.delete(request).then(() => Promise.resolve(true));
+      const request = new DeleteUserRequest(this.selectedUsername, transferToEmail);
+      Log.debug('deleted user id', this.selectedUsername, 'transfer for', transferToEmail);
+      return this.userManagementService.delete(request);
     } else {
       return Promise.resolve(true);
     }

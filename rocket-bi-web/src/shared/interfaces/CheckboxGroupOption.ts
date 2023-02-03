@@ -5,9 +5,3 @@ export interface CheckboxGroupOption {
   value: string;
   text: string;
 }
-
-export interface GroupCheckboxOption {
-  groupName: string;
-  allPermission: PermissionInfo;
-  permissions: CheckboxGroupOption[];
-}

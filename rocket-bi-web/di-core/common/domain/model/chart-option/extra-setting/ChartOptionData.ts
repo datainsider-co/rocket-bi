@@ -3,7 +3,7 @@
  * @created: 5/30/21, 9:41 PM
  */
 
-import { TextSetting, ThemeColor } from '@core/common/domain/model';
+import { QueryParameter, TextSetting, ThemeColor } from '@core/common/domain/model';
 import { MetricNumberMode } from '@/utils';
 
 export interface ChartOptionData {
@@ -27,6 +27,7 @@ export interface ChartOptionData {
   precision?: number;
 
   isCrossFilter?: boolean;
+  queryParameter?: Record<string, QueryParameter>;
 
   [key: string]: any;
 }

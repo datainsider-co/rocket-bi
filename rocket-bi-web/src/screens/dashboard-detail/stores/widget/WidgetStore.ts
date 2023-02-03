@@ -12,6 +12,7 @@ import {
   DynamicConditionWidget,
   DynamicFunctionWidget,
   Position,
+  QueryParameter,
   TabControl,
   TabWidget,
   TextWidget,
@@ -53,6 +54,7 @@ class WidgetStore extends VuexModule {
   get allDynamicFunctionWidget(): DynamicFunctionWidget[] {
     return this.widgets.filter((widget): widget is DynamicFunctionWidget => widget.className === Widgets.DynamicFunctionWidget);
   }
+
   get allDynamicConditionWidget(): DynamicConditionWidget[] {
     return this.widgets.filter((widget): widget is DynamicConditionWidget => widget.className === Widgets.DynamicConditionWidget);
   }
@@ -475,6 +477,18 @@ class WidgetStore extends VuexModule {
   private reset() {
     this.widgets = [];
     this.mapPosition = {};
+  }
+
+  get allQueryParameters(): Record<string, QueryParameter> {
+    const result: Record<string, QueryParameter> = {};
+    this.allQueryWidgets.forEach(widget => {
+      const queryParam: Record<string, QueryParameter> = widget.setting.getChartOption()?.options?.queryParameter ?? {};
+      for (const key in queryParam) {
+        const param = queryParam[key];
+        result[param.displayName] = param;
+      }
+    });
+    return result;
   }
 }
 

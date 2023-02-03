@@ -569,6 +569,18 @@ export class DashboardStore extends VuexModule {
       this.copiedData = null;
     }
   }
+
+  @Action
+  async updateDirectory(directory: Directory) {
+    try {
+      await this.directoryService.update(directory);
+      if (this.dashboardDirectory?.id === directory.id) {
+        this.setDashboardDirectory(directory);
+      }
+    } catch (ex) {
+      Log.error(ex);
+    }
+  }
 }
 
 export const DashboardModule: DashboardStore = getModule(DashboardStore);

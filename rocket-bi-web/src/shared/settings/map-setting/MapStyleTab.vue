@@ -65,6 +65,7 @@ import { GeolocationModule } from '@/store/modules/data-builder/GeolocationStore
 import { get } from 'lodash';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
 import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { StringUtils } from '@/utils';
 
 @Component({ components: { PanelHeader } })
 export default class MapStyleTab extends Vue {
@@ -85,10 +86,12 @@ export default class MapStyleTab extends Vue {
   }
 
   private get geoAreaOptions(): SelectOption[] {
-    return Array.from(GeolocationModule.areaAsMap.values()).map<SelectOption>(area => ({
-      id: area.mapUrl,
-      displayName: area.displayName
-    }));
+    return Array.from(GeolocationModule.areaAsMap.values())
+      .map<SelectOption>(area => ({
+        id: area.mapUrl,
+        displayName: area.displayName
+      }))
+      .sort((a, b) => StringUtils.compare(a.displayName, b.displayName));
   }
 
   private get enabled(): boolean {

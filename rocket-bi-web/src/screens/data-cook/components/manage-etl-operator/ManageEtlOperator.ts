@@ -17,6 +17,8 @@ import {
   PivotTableOperator,
   Position,
   PositionValue,
+  PythonQueryOperator,
+  QueryOperator,
   SendToGroupEmailOperator,
   SQLQueryOperator,
   TableConfiguration,
@@ -468,6 +470,7 @@ export default class ManageEtlOperator extends Vue {
     if (this.model.mapLoading[operator.destTableName]) {
       return null;
     }
+    Log.debug('getPreviewEtlResponse::operator.destTableName', operator.className, operator.destTableName, this.model.mapPreviewData[operator.destTableName]);
     return this.model.mapPreviewData[operator.destTableName] ?? null;
   }
 
@@ -486,6 +489,8 @@ export default class ManageEtlOperator extends Vue {
         return this.previewOperator((operator as PivotTableOperator).operator);
       case ETL_OPERATOR_TYPE.SQLQueryOperator:
         return this.previewOperator((operator as SQLQueryOperator).operator);
+      case ETL_OPERATOR_TYPE.PythonOperator:
+        return this.previewOperator((operator as PythonQueryOperator).operator);
       case ETL_OPERATOR_TYPE.GetDataOperator:
       default:
         return this.previewOperator(operator);
@@ -536,7 +541,7 @@ export default class ManageEtlOperator extends Vue {
       try {
         this.showLoading(allOperators);
         const previewData: MultiPreviewEtlOperatorResponse = await this.dataCookService.multiPreview(this.value.id, operators, true);
-        Log.info('multiPreview::completed');
+        Log.info('multiPreview::completed', previewData);
         this.renderData(previewData);
         this.renderError(previewData);
       } catch (ex) {
@@ -659,8 +664,9 @@ export default class ManageEtlOperator extends Vue {
         this.editJoinOperator(operator as JoinOperator);
         break;
       case ETL_OPERATOR_TYPE.SQLQueryOperator:
+      case ETL_OPERATOR_TYPE.PythonOperator:
         // @ts-ignore
-        this.editQueryOperator(operator as SQLQueryOperator);
+        this.editQueryOperator(operator as QueryOperator);
         break;
       case ETL_OPERATOR_TYPE.PivotTableOperator:
         // @ts-ignore
@@ -690,6 +696,7 @@ export default class ManageEtlOperator extends Vue {
         }
         break;
       case ETL_OPERATOR_TYPE.SQLQueryOperator:
+      case ETL_OPERATOR_TYPE.PythonOperator:
         this.startQueryOperator(operator);
         break;
       case ETL_OPERATOR_TYPE.PivotTableOperator:
@@ -710,8 +717,9 @@ export default class ManageEtlOperator extends Vue {
   private async startQueryOperator(operator: EtlOperator) {
     const tableSchema = this.getTableSchema(operator);
     if (this.queryTable && tableSchema) {
+      Log.debug('startQueryOperator', this.value.id);
       // @ts-ignore
-      this.queryTable.add(operator, tableSchema, newOperator => {
+      this.queryTable.add(this.value.id, operator, tableSchema, newOperator => {
         this.handleNewOperator(operator, newOperator);
         Log.info(newOperator);
         Log.debug('startQueryOperator::', newOperator);
@@ -722,13 +730,13 @@ export default class ManageEtlOperator extends Vue {
   }
 
   @Track(TrackEvents.ETLEditSQLQuery)
-  private async editQueryOperator(operator: SQLQueryOperator) {
+  private async editQueryOperator(operator: QueryOperator) {
     const tableSchema = this.getTableSchema(operator.operator);
     if (this.queryTable && tableSchema) {
       // @ts-ignore
-      this.queryTable.edit(operator, tableSchema, (updatedOperator: SQLQueryOperator) => {
+      this.queryTable.edit(this.value.id, operator, tableSchema, (updatedOperator: QueryOperator) => {
         if (operator.query !== updatedOperator.query) {
-          this.processUpdateOperator<SQLQueryOperator>(updatedOperator.destTableName, ope => {
+          this.processUpdateOperator<QueryOperator>(updatedOperator.destTableName, ope => {
             ope.query = updatedOperator.query;
           });
           this.previewOperator(operator, true);

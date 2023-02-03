@@ -23,9 +23,10 @@ export class InputControlQuerySetting extends QuerySetting<InputFilterOption> im
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
     filterRequest?: FilterRequest,
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
     this.filterRequest = filterRequest;
   }
 
@@ -39,7 +40,7 @@ export class InputControlQuerySetting extends QuerySetting<InputFilterOption> im
     }
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
     const filterRequest: FilterRequest | undefined = obj.filterRequest ? FilterRequest.fromObject(obj.filterRequest) : void 0;
-    return new InputControlQuerySetting(values, filters, sorts, obj.options, filterRequest, sqlViews);
+    return new InputControlQuerySetting(values, filters, sorts, obj.options, filterRequest, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

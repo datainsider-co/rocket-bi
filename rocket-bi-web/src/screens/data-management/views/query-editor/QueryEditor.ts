@@ -23,20 +23,21 @@ import {
   DirectoryId,
   Field,
   Position,
+  QueryParameter,
   RawQuerySetting,
   TableSchema,
   TableType
 } from '@core/common/domain';
-import { _ChartStore, DashboardControllerModule, DashboardModule, WidgetModule } from '@/screens/dashboard-detail/stores';
+import { _ChartStore, DashboardControllerModule, DashboardModule, DashboardStore, WidgetModule } from '@/screens/dashboard-detail/stores';
 // @ts-ignore
 import { Split, SplitArea } from 'vue-split-panel';
 import MyDataPickDirectory from '@/screens/lake-house/components/move-file/MyDataPickDirectory.vue';
-import { get, toNumber } from 'lodash';
+import { cloneDeep, get, toNumber } from 'lodash';
 import MyDataPickFile from '@/screens/lake-house/components/move-file/MyDataPickFile.vue';
 import { PopupUtils } from '@/utils/PopupUtils';
 import LayoutNoData from '@/shared/components/layout-wrapper/LayoutNoData.vue';
 import SplitPanelMixin from '@/shared/components/layout-wrapper/SplitPanelMixin';
-import { ListUtils, PositionUtils, RouterUtils } from '@/utils';
+import { ListUtils, PositionUtils, RouterUtils, StringUtils } from '@/utils';
 import { EditorController } from '@/shared/fomula/EditorController';
 import { FormulaUtils } from '@/shared/fomula/FormulaUtils';
 import { RouterLeavingHook } from '@/shared/components/vue-hook/RouterLeavingHook';
@@ -183,14 +184,10 @@ export default class QueryEditor extends Mixins(DataManagementChild, SplitPanelM
       }
       // Update Route Query
       if (this.$route.query?.database !== database.name || this.$route.query?.table !== table.name) {
-        await this.$router.replace({ query: { database: database.name, table: table.name } });
+        await this.$router.replace({ query: { ...this.$router.currentRoute.query, database: database.name, table: table.name } }).catch(() => {
+          //
+        });
       }
-
-      // Query Table Data
-      this.$nextTick(async () => {
-        // @ts-ignore
-        await this.queryComponent?.handleQuery();
-      });
       if (onSelectComplete) {
         onSelectComplete(database, table);
       }
@@ -261,6 +258,7 @@ export default class QueryEditor extends Mixins(DataManagementChild, SplitPanelM
       this.handleCreateDashboard(newName, directoryId);
     });
   }
+
   private async handleCreateDashboard(name: string, parentId: DirectoryId): Promise<void> {
     try {
       this.createAnalysisModal.setLoading(true);
@@ -314,9 +312,10 @@ export default class QueryEditor extends Mixins(DataManagementChild, SplitPanelM
       case QueryEditorMode.Dashboard: {
         const adhocId = this.queryDashboardId;
         await DashboardModule.handleLoadDashboard(adhocId!);
+        Log.debug('Query::initAdhocComponent::', WidgetModule.allQueryParameters);
+        this.queryComponent?.setParameters(WidgetModule.allQueryParameters);
         await DashboardControllerModule.renderAllChartOrFilters();
         const query = (ListUtils.getHead(WidgetModule.allQueryWidgets)?.setting as RawQuerySetting)?.sql ?? '';
-        Log.debug('initAdhocComponent::query::', query);
         this.tempQuery = query;
         this.updateDefaultQuery(query);
         this.queryComponent?.setWidgets(WidgetModule.allQueryWidgets);
@@ -324,8 +323,10 @@ export default class QueryEditor extends Mixins(DataManagementChild, SplitPanelM
         this.autoSave();
         break;
       }
-      case QueryEditorMode.EditTable:
+      case QueryEditorMode.EditTable: {
+        await this.queryComponent?.handleQuery();
         break;
+      }
       case QueryEditorMode.Query:
         break;
     }
