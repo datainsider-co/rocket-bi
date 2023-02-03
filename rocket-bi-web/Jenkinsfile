@@ -46,7 +46,7 @@ pipeline {
                   git pull gitlab oss || { exit 1; }
                   cd ..
 
-                  git commit -am '[BOT] Update rocket-bi-web: merge from datainsider oss' && git push
+                  git add . && git commit -m '[BOT] Update rocket-bi-web: merge from datainsider oss' && git push
                   exit 0
                 "
             '''
