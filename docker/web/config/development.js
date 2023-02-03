@@ -4,7 +4,7 @@ const productionConfig = {
   VUE_APP_EXPORT_MAX_FILE_SIZE: 50000000,
   VUE_APP_PROFILER_ENABLED: true,
   VUE_APP_CAAS_API_URL: 'http://localhost:8580',
-  VUE_APP_BI_API_URL: 'http://localhost:8080',
+  VUE_APP_BI_API_URL: 'http://localhost:8686',
   VUE_APP_SCHEMA_API_URL: 'http://localhost:8489',
   VUE_APP_DATA_COOK_API_URL: 'http://localhost:8489',
   VUE_APP_LAKE_API_URL: 'http://localhost:8489',
@@ -28,9 +28,10 @@ const productionConfig = {
   VUE_APP_IS_DISABLE_BILLING: true,
   VUE_APP_LOGIN_SAMPLE: {
     isShowHint: true,
-    hintMessage: 'You can use test account demo@datainsider.co/demo@123 to login'
+    hintMessage: 'Login with default account: hello@gmail.com, pass: 123456'
   },
   VUE_APP_VERSION: 'v1.4.14'
 };
 
 window.appConfig = productionConfig;
+
