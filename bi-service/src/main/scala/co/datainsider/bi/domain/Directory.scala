@@ -33,7 +33,9 @@ case class Directory(
     @JsonScalaEnumeration(classOf[DirectoryTypeRef])
     directoryType: DirectoryType = DirectoryType.Directory,
     dashboardId: Option[Long] = None,
-    updatedDate: Option[Long] = None
+    updatedDate: Option[Long] = None,
+    // save cdp data
+    data: Option[Map[String, Any]] = None
 ) {
   def toCreateDirRequest: CreateDirectoryRequest = {
     CreateDirectoryRequest(

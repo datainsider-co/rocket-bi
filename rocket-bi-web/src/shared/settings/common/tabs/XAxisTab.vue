@@ -1,7 +1,14 @@
 <template>
   <PanelHeader :header="tabTitle" target-id="x-axis-tab">
     <div class="x-axis-tab">
-      <ToggleSetting id="x-axis-enable" :value="enabled" class="mb-3 group-config" label="On" @onChanged="handleAxisEnabled" />
+      <ToggleSetting
+        id="x-axis-enable"
+        :value="enabled"
+        class="mb-3 group-config"
+        :label="`${configSetting['xaxis.enabled'].label}`"
+        :hint="`${configSetting['xaxis.enabled'].hint}`"
+        @onChanged="handleAxisEnabled"
+      />
       <div :style="axisSettingStyle">
         <!--      Prefix setting-->
         <!--      Postfix setting-->
@@ -10,8 +17,9 @@
             id="x-axis-prefix-input"
             :value="prefixText"
             class="mr-2"
-            label="Prefix"
-            placeholder="Input Prefix"
+            :label="`${configSetting['label.prefix.text'].label}`"
+            :hint="`${configSetting['label.prefix.text'].hint}`"
+            :placeholder="`${configSetting['label.prefix.text'].placeHolder}`"
             size="half"
             :maxLength="defaultSetting.prefixMaxLength"
             @onChanged="handlePrefixSaved"
@@ -19,8 +27,9 @@
           <InputSetting
             id="x-axis-postfix-input"
             :value="postfixText"
-            label="Postfix"
-            placeholder="Input Postfix"
+            :label="`${configSetting['label.postfix.text'].label}`"
+            :hint="`${configSetting['label.postfix.text'].hint}`"
+            :placeholder="`${configSetting['label.postfix.text'].placeHolder}`"
             size="half"
             @onChanged="handlePostfixSaved"
             :maxLength="defaultSetting.suffixMaxLength"
@@ -31,7 +40,8 @@
           :options="fontOptions"
           :value="categoryFont"
           class="mb-2"
-          label="Font family"
+          :label="`${configSetting['xaxis.label.fontFamily'].label}`"
+          :hint="`${configSetting['xaxis.label.fontFamily'].hint}`"
           size="full"
           @onChanged="handleCategoryFontChanged"
         />
@@ -42,6 +52,8 @@
             :value="categoryColor"
             class="mr-2"
             size="small"
+            :label="`${configSetting['xaxis.label.color'].label}`"
+            :hint="`${configSetting['xaxis.label.color'].hint}`"
             @onChanged="handleCategoryColorChanged"
           />
           <DropdownSetting
@@ -49,17 +61,28 @@
             :options="fontSizeOptions"
             :value="categoryFontSize"
             size="small"
+            :label="`${configSetting['xaxis.label.fontSize'].label}`"
+            :hint="`${configSetting['xaxis.label.fontSize'].hint}`"
             @onChanged="handleCategoryFontSizeChanged"
           />
         </div>
-        <ToggleSetting id="x-axis-title-enable" :value="titleEnabled" class="mb-3 group-config" label="Axis title" @onChanged="handleTitleEnabled" />
+        <ToggleSetting
+          id="x-axis-title-enable"
+          :value="titleEnabled"
+          class="mb-3 group-config"
+          :label="`${configSetting['xaxis.title.text.enabled'].label}`"
+          :hint="`${configSetting['xaxis.title.text.enabled'].hint}`"
+          @onChanged="handleTitleEnabled"
+        />
         <InputSetting
           id="x-axis-title-input"
-          placeholder="Input Axis Title"
           :style="titleSettingStyle"
           :value="title"
           class="mb-3"
           size="full"
+          :label="`${configSetting['xaxis.title.text'].label}`"
+          :hint="`${configSetting['xaxis.title.text'].hint}`"
+          :placeholder="`${configSetting['xaxis.title.text'].placeHolder}`"
           @onChanged="handleTitleSaved"
         />
         <DropdownSetting
@@ -68,7 +91,8 @@
           :style="titleSettingStyle"
           :value="titleFont"
           class="mb-2"
-          label="Font family"
+          :label="`${configSetting['xaxis.title.fontFamily'].label}`"
+          :hint="`${configSetting['xaxis.title.fontFamily'].hint}`"
           size="full"
           @onChanged="handleTitleFontChanged"
         />
@@ -79,12 +103,29 @@
             :value="titleColor"
             class="mr-2"
             size="small"
+            :label="`${configSetting['xaxis.title.color'].label}`"
+            :hint="`${configSetting['xaxis.title.color'].hint}`"
             @onChanged="handleTitleColorChanged"
           />
-          <DropdownSetting id="x-axis-title-font-size" :options="fontSizeOptions" :value="titleFontSize" size="small" @onChanged="handleTitleFontSizeChanged" />
+          <DropdownSetting
+            id="x-axis-title-font-size"
+            :options="fontSizeOptions"
+            :value="titleFontSize"
+            :label="`${configSetting['xaxis.title.fontSize'].label}`"
+            :hint="`${configSetting['xaxis.title.fontSize'].hint}`"
+            size="small"
+            @onChanged="handleTitleFontSizeChanged"
+          />
         </div>
         <div v-if="enableSettingGridLine" class="mb-3">
-          <ToggleSetting id="x-axis-grid-enable" :value="gridEnabled" class="mb-3 group-config" label="Gridlines" @onChanged="handleGridEnabled" />
+          <ToggleSetting
+            id="x-axis-grid-enable"
+            :value="gridEnabled"
+            class="mb-3 group-config"
+            :label="`${configSetting['xaxis.grid.enabled'].label}`"
+            :hint="`${configSetting['xaxis.grid.enabled'].hint}`"
+            @onChanged="handleGridEnabled"
+          />
           <div :style="gridLineChildrenSettingStyle" class="row-config-container">
             <ColorSetting
               id="x-axis-grid-line-color"
@@ -92,9 +133,20 @@
               :value="gridLineColor"
               class="mr-2"
               size="half"
+              :label="`${configSetting['xaxis.grid.color'].label}`"
+              :hint="`${configSetting['xaxis.grid.color'].hint}`"
               @onChanged="handleGridColorChanged"
             />
-            <InputSetting id="x-axis-grid-line-width" :value="gridLineWidth" size="small" type="number" @onChanged="handleGridLineWidthChanged" />
+            <InputSetting
+              id="x-axis-grid-line-width"
+              :value="gridLineWidth"
+              size="small"
+              :label="`${configSetting['xaxis.grid.width'].label}`"
+              :hint="`${configSetting['xaxis.grid.width'].hint}`"
+              :placeholder="`${configSetting['xaxis.grid.width'].placeHolder}`"
+              type="number"
+              @onChanged="handleGridLineWidthChanged"
+            />
           </div>
           <DropdownSetting
             id="x-axis-grid-line-dash-style"
@@ -102,6 +154,8 @@
             :style="gridLineChildrenSettingStyle"
             :value="gridLineDashStyle"
             size="full"
+            :label="`${configSetting['xaxis.grid.dash'].label}`"
+            :hint="`${configSetting['xaxis.grid.dash'].hint}`"
             @onChanged="handleGridLineDashStyleChanged"
           />
         </div>
@@ -124,6 +178,8 @@ import { ChartType } from '@/shared';
 
 @Component({ components: { PanelHeader } })
 export default class XAxisTab extends Vue {
+  private readonly configSetting = window.chartSetting['xaxis.tab'];
+
   @Prop({ required: false, type: Array })
   private readonly setting!: AxisSetting[];
   @Prop({ required: false, type: Object })

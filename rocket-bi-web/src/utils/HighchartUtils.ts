@@ -117,10 +117,11 @@ export class HighchartUtils {
     });
   }
 
-  static initMapData(path: string): any {
+  static async initMapData(path: string): Promise<any> {
     if (path) {
-      return require(`@/shared/map/${path}`);
-      // return isLocal ? require(`@/shared/map/${path}`) : require(`@highcharts/map-collection/${path}`);
+      const apiUrl = window.appConfig.VUE_APP_STATIC_API_URL;
+      const response = await fetch(`${apiUrl}/${path}`);
+      return response.json();
     } else {
       throw new DIException(`Please select map to display!`);
     }

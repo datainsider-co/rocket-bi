@@ -1,7 +1,14 @@
 <template>
   <PanelHeader header="Date Range" target-id="map-control-tab">
     <div id="comparison-control" class="comparison-tab">
-      <ToggleSetting id="data-range-enabled" :value="dataRangeEnabled" class="group-config" label="Default Date Range" @onChanged="onDataRangeEnableChanged" />
+      <ToggleSetting
+        id="data-range-enabled"
+        :value="dataRangeEnabled"
+        class="group-config"
+        :label="`${configSetting['dataRange.enabled'].label}`"
+        :hint="`${configSetting['dataRange.enabled'].hint}`"
+        @onChanged="onDataRangeEnableChanged"
+      />
       <DropdownSetting
         id="date-field"
         :class="{ 'field-error': isFieldError }"
@@ -9,7 +16,8 @@
         :options="dateOptions"
         :value="selectedDateFieldId"
         boundary="viewport"
-        label="Date field"
+        :label="`${configSetting['field.select'].label}`"
+        :hint="`${configSetting['field.select'].hint}`"
         @onSelected="onDateFieldChanged"
       />
       <InputDateSetting
@@ -18,7 +26,8 @@
         :dateRange="dataDateRange"
         :disable="!dataRangeEnabled"
         class="mb-3"
-        label="Default range"
+        :label="`${configSetting['dataRange.range'].label}`"
+        :hint="`${configSetting['dataRange.range'].hint}`"
         @onDateChanged="onDataDateRangeChanged"
       />
       <!--      Comparison-->
@@ -28,7 +37,8 @@
           :disable="!dataRangeEnabled"
           :value="comparisonEnabled"
           class="group-config"
-          label="Comparison"
+          :label="`${configSetting['comparison.enabled'].label}`"
+          :hint="`${configSetting['comparison.enabled'].hint}`"
           @onChanged="onComparisonEnabledChanged"
         />
         <InputDateSetting
@@ -40,7 +50,8 @@
           :disable="!dataRangeEnabled || !comparisonEnabled"
           class="mb-3"
           inputDateType="date_compare"
-          label="Comparison"
+          :label="`${configSetting['comparison.range'].label}`"
+          :hint="`${configSetting['comparison.range'].hint}`"
           @onDateChanged="onComparisonDateRangeChanged"
         />
         <DropdownSetting
@@ -49,7 +60,8 @@
           :options="displayStyleOptions"
           :value="selectedComparisonStyle"
           boundary="viewport"
-          label="Display style"
+          :label="`${configSetting['comparison.compareStyle'].label}`"
+          :hint="`${configSetting['comparison.compareStyle'].hint}`"
           @onSelected="onComparisonStyleChanged"
         />
         <div class="row-config-container">
@@ -58,7 +70,8 @@
             :disable="!dataRangeEnabled || !comparisonEnabled"
             default-color="#4dcf36"
             :value="upTrendIconColor"
-            label="Uptrend color"
+            :label="`${configSetting['comparison.uptrendIconColor'].label}`"
+            :hint="`${configSetting['comparison.uptrendIconColor'].hint}`"
             size="small"
             style="margin-right: 12px"
             @onChanged="handleUpIconColorChanged"
@@ -68,7 +81,8 @@
             :disable="!dataRangeEnabled || !comparisonEnabled"
             :options="compareTrendIconOptions"
             :value="upTrendIcon"
-            label="Uptrend icon"
+            :label="`${configSetting['comparison.upTrendIcon'].label}`"
+            :hint="`${configSetting['comparison.upTrendIcon'].hint}`"
             boundary="viewport"
             size="small"
             @onChanged="handleUptrendIconChanged"
@@ -87,7 +101,8 @@
             :disable="!dataRangeEnabled || !comparisonEnabled"
             default-color="#ea6b6b"
             :value="downTrendIconColor"
-            label="Downtrend color"
+            :label="`${configSetting['comparison.downtrendIconColor'].label}`"
+            :hint="`${configSetting['comparison.downtrendIconColor'].hint}`"
             size="small"
             style="margin-right: 12px"
             @onChanged="handleDowntrendIconColorChanged"
@@ -97,7 +112,8 @@
             :disable="!dataRangeEnabled || !comparisonEnabled"
             :options="compareTrendIconOptions"
             :value="downTrendIcon"
-            label="Downtrend icon"
+            :label="`${configSetting['comparison.downTrendIcon'].label}`"
+            :hint="`${configSetting['comparison.downTrendIcon'].hint}`"
             size="small"
             boundary="viewport"
             @onChanged="handleDowntrendIconChanged"
@@ -118,7 +134,8 @@
           :disable="!dataRangeEnabled"
           :value="trendLineEnabled"
           class="group-config"
-          label="Trend-Line"
+          :label="`${configSetting['trendLine.enabled'].label}`"
+          :hint="`${configSetting['trendLine.enabled'].hint}`"
           @onChanged="onTrendLineEnabledChanged"
         />
         <DropdownSetting
@@ -127,7 +144,8 @@
           :options="trendLineTypeOptions"
           :value="selectedTrendLineType"
           boundary="viewport"
-          label="Trend-Line style"
+          :label="`${configSetting['trendLine.displayAs'].label}`"
+          :hint="`${configSetting['trendLine.displayAs'].hint}`"
           @onSelected="onTrendLineTypeChanged"
         />
         <DropdownSetting
@@ -136,7 +154,8 @@
           :options="trendLineByOptions"
           :value="selectedTrendLineBy"
           boundary="viewport"
-          label="Trend by"
+          :label="`${configSetting['trendLine.trendBy'].label}`"
+          :hint="`${configSetting['trendLine.trendBy'].hint}`"
           @onSelected="onTrendLineByChanged"
         />
       </template>
@@ -169,6 +188,7 @@ import { ComparisonUtils } from '@core/utils/ComparisonUtils';
   components: { PanelHeader }
 })
 export default class ComparisonTab extends Vue {
+  private readonly configSetting = window.chartSetting['comparison.tab'];
   @Prop({ required: false, type: Object })
   private readonly chartOption!: ComparisonOptionData;
 
@@ -259,7 +279,7 @@ export default class ComparisonTab extends Vue {
     ];
   }
 
-  private get compareTrendIconOptions(): DropdownData {
+  private get compareTrendIconOptions(): DropdownData[] {
     return [
       {
         id: TrendIcon.Up

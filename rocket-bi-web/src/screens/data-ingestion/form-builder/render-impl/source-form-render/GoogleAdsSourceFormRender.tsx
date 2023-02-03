@@ -7,6 +7,8 @@ import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4Source
 import { GoogleAdsSourceInfo } from '@core/data-ingestion';
 import KeyDownEvent = JQuery.KeyDownEvent;
 import { Log } from '@core/utils';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class GoogleAdsSourceFormRender implements DataSourceFormRender {
   private sourceInfo: GoogleAdsSourceInfo;
@@ -54,5 +56,11 @@ export class GoogleAdsSourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return GoogleAdsSourceInfo.fromObject(this.sourceInfo);
+  }
+
+  validSource(source: GoogleAdsSourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
   }
 }

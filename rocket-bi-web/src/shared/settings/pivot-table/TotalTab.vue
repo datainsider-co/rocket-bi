@@ -1,14 +1,30 @@
 <template>
   <PanelHeader header="Total" target-id="total-tab">
     <div class="total-tab">
-      <ToggleSetting id="total-enable" :value="totalEnabled" class="mb-3 group-config" label="Total" @onChanged="handleTotalEnabled" />
-      <InputSetting id="total-label" :value="label" class="mb-3" label="Total label" size="full" @onChanged="handleTotalLabelChanged" />
+      <ToggleSetting
+        id="total-enable"
+        :value="totalEnabled"
+        class="mb-3 group-config"
+        :label="`${configSetting['total.enabled'].label}`"
+        :hint="`${configSetting['total.enabled'].hint}`"
+        @onChanged="handleTotalEnabled"
+      />
+      <InputSetting
+        id="total-label"
+        :value="label"
+        class="mb-3"
+        :label="`${configSetting['total.label.text'].label}`"
+        :hint="`${configSetting['total.label.text'].hint}`"
+        size="full"
+        @onChanged="handleTotalLabelChanged"
+      />
       <DropdownSetting
         id="total-font-family"
         :options="fontOptions"
         :value="font"
         class="mb-2"
-        label="Font family"
+        :label="`${configSetting['total.label.style.fontFamily'].label}`"
+        :hint="`${configSetting['total.label.style.fontFamily'].hint}`"
         size="full"
         @onChanged="handleFontChanged"
       />
@@ -19,6 +35,8 @@
           :value="fontFamilyColor"
           style="margin-right: 8px"
           size="small"
+          :label="`${configSetting['total.label.style.color'].label}`"
+          :hint="`${configSetting['total.label.style.color'].hint}`"
           @onChanged="handleFontFamilyColorChanged"
         />
         <DropdownSetting
@@ -27,9 +45,17 @@
           :value="fontSize"
           class="mr-3"
           size="small"
+          :label="`${configSetting['total.label.style.fontSize'].label}`"
+          :hint="`${configSetting['total.label.style.fontSize'].hint}`"
           @onChanged="handleFontSizeChanged"
         />
-        <AlignSetting id="total-align" :value="labelAlign" @onChanged="handleAlignChanged" />
+        <AlignSetting
+          id="total-align"
+          :value="labelAlign"
+          :label="`${configSetting['total.label.align'].label}`"
+          :hint="`${configSetting['total.label.align'].hint}`"
+          @onChanged="handleAlignChanged"
+        />
       </div>
       <ColorSetting
         id="total-background-color"
@@ -37,7 +63,8 @@
         :value="backgroundColor"
         class="mb-3"
         enabledRevert="true"
-        label="Background color"
+        :label="`${configSetting['total.backgroundColor'].label}`"
+        :hint="`${configSetting['total.backgroundColor'].hint}`"
         size="half"
         @onChanged="handleBackgroundColorChanged"
         @onRevert="handleRevert"
@@ -55,6 +82,8 @@ import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOption
 
 @Component({ components: { PanelHeader } })
 export default class TotalTab extends Vue {
+  private readonly configSetting = window.chartSetting['value.tab'];
+
   @Prop({ required: false, type: Object })
   private readonly setting!: PivotTableChartOption;
   private fontOptions = FontFamilyOptions;

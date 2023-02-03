@@ -25,6 +25,31 @@
       v-model="syncedPersistConfig.sslServerCertDn"
       placeholder="Input SSL server dn matching"
     ></BFormInput>
+    <div v-for="(value, key) in extraFields" :key="key" class="d-flex flex-column mt-2">
+      <div class="title d-flex flex-row justify-content-between">
+        <div>{{ key }}</div>
+        <i class="di-icon-delete btn-delete btn-icon-border" @click="onDeleteExtraField(key)"></i>
+      </div>
+      <div class="extra-input input">
+        <BFormInput hide-track-value :placeholder="`Input value ${key}`" :value="extraFields[key]" @change="onExtraFieldChanged(key, ...arguments)">
+        </BFormInput>
+      </div>
+    </div>
+    <div class="d-flex flex-column mt-2">
+      <div class="d-flex row mb-1 mx-0">
+        <div>Add Properties</div>
+        <i class="di-icon-add btn-add btn-icon-border ml-auto" @click="onAddNewField(newKey, newValue)"></i>
+      </div>
+      <div class="d-flex w-100 justify-content-center align-items-center">
+        <div class="title new-extra-input input mb-0 mr-1" style="flex: 1">
+          <BFormInput hide-track-value placeholder="Input key" v-model="newKey" @change="resetError"></BFormInput>
+        </div>
+        <div class="extra-input input flex-2" style="flex: 2">
+          <BFormInput hide-track-value placeholder="Input value" v-model="newValue"></BFormInput>
+        </div>
+      </div>
+    </div>
+    <div class="text-danger mt-1">{{ errorNewKey }}</div>
   </div>
 </template>
 <script lang="ts">
@@ -33,9 +58,10 @@ import { OracleJdbcPersistConfiguration } from '@core/data-cook/domain/etl/third
 import SSLForm, { SSLUIConfig } from '@/screens/data-cook/components/save-to-database/SSLForm.vue';
 import { JKSConfig, KeyStoreConfig, SSLConfig } from '@core/data-cook';
 import { Log } from '@core/utils';
-import { toNumber } from 'lodash';
+import { cloneDeep, toNumber } from 'lodash';
 import { Di } from '@core/common/modules';
 import { DataManager } from '@core/common/services';
+import { StringUtils } from '@/utils';
 @Component({
   components: { SSLForm }
 })
@@ -44,9 +70,18 @@ export default class OracleSourceInfo extends Vue {
   syncedPersistConfig!: OracleJdbcPersistConfiguration;
 
   private isShowSSlConfig = false;
+  private errorNewKey = '';
+  private newKey = '';
+  private newValue = '';
+
+  private extraFields: Record<string, string> = {};
 
   created() {
     this.isShowSSlConfig = !!this.syncedPersistConfig?.sslConfiguration;
+    this.errorNewKey = '';
+    this.newKey = '';
+    this.newValue = '';
+    this.extraFields = JSON.parse(this.syncedPersistConfig.extraPropertiesAsJson);
   }
 
   private get sslUIConfig(): SSLUIConfig {
@@ -75,6 +110,35 @@ export default class OracleSourceInfo extends Vue {
       ? new KeyStoreConfig(orgId, sslUIConfig.trustStoreData, sslUIConfig.trustStorePass, sslUIConfig.trustStore?.name ?? '')
       : null;
     return new JKSConfig(keyStore, trustStore, sslUIConfig.protocol);
+  }
+
+  private onExtraFieldChanged(key: string, newValue: string) {
+    Log.debug('onExtraFieldChanged::', key, newValue);
+    this.extraFields[key] = newValue;
+    this.syncedPersistConfig.extraPropertiesAsJson = JSON.stringify(this.extraFields);
+  }
+
+  private onDeleteExtraField(key: string) {
+    delete this.extraFields[key];
+    this.extraFields = cloneDeep(this.extraFields);
+    this.syncedPersistConfig.extraPropertiesAsJson = JSON.stringify(this.extraFields);
+  }
+
+  private onAddNewField(key: string, value: string) {
+    const isExistKey = this.extraFields[key] !== undefined;
+    if (isExistKey) {
+      this.errorNewKey = 'Key is exist!';
+    } else if (StringUtils.isNotEmpty(key) && StringUtils.isNotEmpty(value)) {
+      this.extraFields[key] = value;
+      this.syncedPersistConfig.extraPropertiesAsJson = JSON.stringify(this.extraFields);
+      this.errorNewKey = '';
+      this.newKey = '';
+      this.newValue = '';
+    }
+  }
+
+  private resetError() {
+    this.errorNewKey = '';
   }
 }
 </script>

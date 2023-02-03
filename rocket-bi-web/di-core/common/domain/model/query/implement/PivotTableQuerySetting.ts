@@ -35,9 +35,10 @@ export class PivotTableQuerySetting extends QuerySetting<PivotTableChartOption> 
     sorts: OrderBy[],
     options: Record<string, any>,
     public formatters: TableColumn[] = [],
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   static fromObject(obj: any): PivotTableQuerySetting {
@@ -48,7 +49,7 @@ export class PivotTableQuerySetting extends QuerySetting<PivotTableChartOption> 
     const [filters, sorts] = getFiltersAndSorts(obj);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new PivotTableQuerySetting(columns, rows, values, filters, sorts, obj.options, formatters, sqlViews);
+    return new PivotTableQuerySetting(columns, rows, values, filters, sorts, obj.options, formatters, sqlViews, obj.parameters);
   }
 
   static isPivotChartSetting(setting: any): setting is PivotTableQuerySetting {

@@ -32,7 +32,7 @@
     <div v-else class="d-flex flex-grow-1 bg-white justify-content-center align-items-center">
       <ErrorWidget @onRetry="initData" :error="errorMsg"></ErrorWidget>
     </div>
-    <DiRenameModal @rename="handleSubmitRename" ref="renameModal" title="Rename ETL"></DiRenameModal>
+    <DiRenameModal ref="renameModal" title="Rename ETL"></DiRenameModal>
   </LayoutContent>
 </template>
 <script lang="ts" src="./ManageEtlJob.ts"></script>

@@ -15,7 +15,7 @@
         @onClickDownload="emitDownload"
       />
     </StatusWidget>
-    <DiRenameModal ref="diRenameModal" @rename="handleRenameFile"></DiRenameModal>
+    <DiRenameModal ref="diRenameModal"></DiRenameModal>
     <ViewPropertiesModal ref="viewPropertiesModal"></ViewPropertiesModal>
   </div>
 </template>
@@ -121,7 +121,9 @@ export default class FileBrowser extends Vue {
   })
   private handleClickRename(): void {
     //
-    this.diRenameModal?.show(this.fileInfo?.name ?? '', {});
+    this.diRenameModal?.show(this.fileInfo?.name ?? '', (newName: string) => {
+      this.handleRenameFile(newName);
+    });
   }
 
   private async handleRenameFile(newName: string) {

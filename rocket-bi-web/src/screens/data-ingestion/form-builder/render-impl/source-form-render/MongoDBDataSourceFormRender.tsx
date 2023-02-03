@@ -6,6 +6,8 @@ import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSour
 import TSLForm, { TSLUIConfig } from '@/screens/data-cook/components/save-to-database/TSLForm.vue';
 import { Log } from '@core/utils';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class MongoDBDataSourceFormRender implements DataSourceFormRender {
   private dataSourceInfo: MongoDBSourceInfo;
@@ -50,7 +52,7 @@ export class MongoDBDataSourceFormRender implements DataSourceFormRender {
   }
 
   private get password() {
-    return this.dataSourceInfo.password;
+    return this.dataSourceInfo.password ?? '';
   }
 
   private set password(value: string) {
@@ -191,6 +193,36 @@ export class MongoDBDataSourceFormRender implements DataSourceFormRender {
       }
     } catch (ex) {
       Log.trace('handleTSLChange::', config, ex);
+    }
+  }
+  validSource(source: MongoDBSourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
+    if (StringUtils.isEmpty(source.connectionType)) {
+      throw new DIException('Connection type is required!');
+    }
+    Log.debug('Mongo::valid::', source);
+    this.validConnectionConfig(source, this.connectionType);
+  }
+  private validConnectionConfig(source: MongoDBSourceInfo, configType: MongoConnectionType) {
+    switch (configType) {
+      case MongoConnectionType.uri:
+        if (StringUtils.isEmpty(source.connectionUri)) {
+          throw new DIException('Connection uri is required!');
+        }
+        break;
+      case MongoConnectionType.normal:
+        if (StringUtils.isEmpty(source.host)) {
+          throw new DIException('Host is required!');
+        }
+        if (StringUtils.isEmpty(source.port)) {
+          throw new DIException('Port is required!');
+        }
+        if (StringUtils.isEmpty(source.username)) {
+          throw new DIException('Username is required!');
+        }
+        break;
     }
   }
 }

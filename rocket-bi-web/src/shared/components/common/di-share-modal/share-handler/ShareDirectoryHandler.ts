@@ -9,7 +9,7 @@ import {
   SharedUserInfo,
   UserProfile
 } from '@core/common/domain';
-import { ShareModule } from '@/store/modules/ShareStore';
+import { SaveShareData, ShareModule } from '@/store/modules/ShareStore';
 import { Log } from '@core/utils';
 import { ShareHandler } from '@/shared/components/common/di-share-modal/share-handler/ShareHandler';
 import { DashboardService, DirectoryService } from '@core/common/services';
@@ -49,17 +49,23 @@ export class ShareDirectoryHandler implements ShareHandler {
     return ShareModule.shareWithAnyone({ resourceType: resourceType, resourceId: resourceId, actions: actionTypes });
   }
 
-  updateSharePermission(userData: SharedUserInfo, editedValue: string): void {
-    ShareModule.updateSharePermission({ userData: userData, editedValue: editedValue });
+  updateSharePermission(userData: SharedUserInfo, toActionType: ActionType): void {
+    ShareModule.updateSharePermission({ userData: userData, editedValue: toActionType });
   }
 
   async saveAll(resourceId: string, resourceType: ResourceType, shareAnyonePermissionType: ActionType, isChangeShareAnyone: boolean): Promise<void> {
-    await ShareModule.saveAll({
+    const shareData: SaveShareData = {
       resourceId: resourceId,
       resourceType: resourceType,
       shareAnyonePermissionType: shareAnyonePermissionType,
       isChangeShareAnyone: isChangeShareAnyone
-    });
+    };
+    await Promise.all([
+      ShareModule.createShareInfo(shareData),
+      ShareModule.editShareInfo(shareData),
+      ShareModule.revokeShareInfo(shareData),
+      ShareModule.shareAnyone(shareData)
+    ]);
   }
 
   async savePassword(resourceId: string, resourceType: ResourceType, password: PasswordConfig) {

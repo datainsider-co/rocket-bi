@@ -38,9 +38,15 @@ trait QueryExecutor {
       formatValues: Boolean = true
   ): DataTable
 
+  def parseQuery(query: Query): String
+
 }
 
 class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable]) extends QueryExecutor with Logging {
+
+  override def parseQuery(query: Query): String = {
+    parser.parse(query)
+  }
 
   override def executeQuery(
       query: Query,

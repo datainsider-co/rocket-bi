@@ -2,10 +2,35 @@
   <PanelHeader header="Shape" target-id="shape-tab">
     <div class="shape-tab">
       <div class="row-config-container">
-        <DropdownSetting id="shape-line-dash-style" :options="dashOptions" :value="dash" size="half" style="margin-right: 12px" @onChanged="handleDashChange" />
-        <DropdownSetting id="shape-line-width" :options="widthOptions" :value="width" disabled size="small" @onChanged="handleWidthChange" />
+        <DropdownSetting
+          id="shape-line-dash-style"
+          :options="dashOptions"
+          :label="`${configSetting['shape.dash'].label}`"
+          :hint="`${configSetting['shape.dash'].hint}`"
+          :value="dash"
+          size="half"
+          style="margin-right: 12px"
+          @onChanged="handleDashChange"
+        />
+        <DropdownSetting
+          id="shape-line-width"
+          :options="widthOptions"
+          :label="`${configSetting['shape.dash.width'].label}`"
+          :hint="`${configSetting['shape.dash.width'].hint}`"
+          :value="width"
+          disabled
+          size="small"
+          @onChanged="handleWidthChange"
+        />
       </div>
-      <ToggleSetting id="shape-show-marker" :value="showMarker" class="mb-3" label="Show marker" @onChanged="handleMarkerEnable" />
+      <ToggleSetting
+        id="shape-show-marker"
+        :value="showMarker"
+        :label="`${configSetting['shape.marker.enabled'].label}`"
+        :hint="`${configSetting['shape.marker.enabled'].hint}`"
+        class="mb-3"
+        @onChanged="handleMarkerEnable"
+      />
       <RevertButton class="mb-3 pr-3" style="text-align: right" @click="handleRevert" />
     </div>
   </PanelHeader>
@@ -21,6 +46,8 @@ import { SettingKey } from '@core/common/domain';
 
 @Component({ components: { PanelHeader } })
 export default class ShapeTab extends Vue {
+  private readonly configSetting = window.chartSetting['shape.tab'];
+
   @Prop({ required: false, type: Object })
   private readonly setting!: PlotOptions;
 

@@ -222,7 +222,8 @@ class MySqlSchemaManager @Inject() (
          |is_removed BOOLEAN DEFAULT FALSE,
          |dir_type VARCHAR(255),
          |dashboard_id BIGINT,
-         |updated_date BIGINT
+         |updated_date BIGINT,
+         |data LONGTEXT
          |) ENGINE=INNODB DEFAULT CHARSET=utf8;
          |""".stripMargin) >= 0
   }
@@ -297,7 +298,8 @@ class MySqlSchemaManager @Inject() (
          |dir_type VARCHAR(255),
          |dashboard_id BIGINT,
          |deleted_date BIGINT,
-         |updated_date BIGINT
+         |updated_date BIGINT,
+         |data LONGTEXT
          |) ENGINE=INNODB DEFAULT CHARSET=utf8;
          |""".stripMargin) >= 0
   }

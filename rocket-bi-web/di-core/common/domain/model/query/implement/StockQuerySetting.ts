@@ -34,9 +34,10 @@ export class StockQuerySetting extends QuerySetting<LineStockChartOption> {
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   static fromObject(obj: StockQuerySetting): StockQuerySetting {
@@ -45,7 +46,7 @@ export class StockQuerySetting extends QuerySetting<LineStockChartOption> {
     const legend = obj.legend ? TableColumn.fromObject(obj.legend) : void 0;
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new StockQuerySetting(values, legend, filters, sorts, obj.options, sqlViews);
+    return new StockQuerySetting(values, legend, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

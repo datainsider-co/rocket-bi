@@ -13,5 +13,6 @@ export enum DataSources {
   GoogleServiceAccountSource = 'gg_service_account_source',
   UnsupportedSource = 'unsupported_source',
   ShopifySource = 'shopify_source',
-  S3Source = 'amazon_s3'
+  S3Source = 'amazon_s3',
+  FacebookAds = 'facebook_ads_source'
 }

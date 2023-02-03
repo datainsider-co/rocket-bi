@@ -14,7 +14,13 @@
             <span class="header">Anyone with the link</span>
             <span>Anyone on the internet with this link can {{ isEdit ? 'edit' : 'view' }}</span>
           </div>
-          <DiDropdown :id="genDropdownId('share-anyone')" v-model="currentPermission" :data="permissionTypes" value-props="type" />
+          <DiDropdown
+            :id="genDropdownId('share-anyone')"
+            :value="currentPermission"
+            @change="value => $emit('change', value)"
+            :data="permissionTypes"
+            value-props="type"
+          />
         </div>
         <b-row>
           <b-input-group>
@@ -34,12 +40,15 @@
           </CopyButton>
         </div>
         <div class="row d-flex mar-t-24">
-          <b-button :id="genBtnId('share-anyone-cancel')" class="flex-fill h-42px mr-1" variant="secondary mr" @click="$emit('cancel')" event="share_cancel">
-            Cancel
-          </b-button>
-          <b-button :id="genBtnId('share-anyone-done')" class="flex-fill h-42px ml-1" variant="primary" @click="$emit('ok')">
-            Apply
-          </b-button>
+          <DiButton :id="genBtnId('share-anyone-cancel')" border class="flex-fill h-42px m-1" @click="$emit('cancel')" placeholder="Cancel"></DiButton>
+          <DiButton
+            :id="genBtnId('share-anyone-done')"
+            :is-loading="isBtnLoading"
+            primary
+            class="flex-fill h-42px m-1"
+            @click="$emit('ok')"
+            placeholder="Apply"
+          ></DiButton>
         </div>
       </b-container>
       <b-container v-else :key="'expanded'" class="px-0 d-flex flex-row justify-content-between flex-auto" fluid="">
@@ -61,7 +70,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Vue, Prop, Model } from 'vue-property-decorator';
 import LinkIcon from '@/shared/components/Icon/LinkIcon.vue';
 import CopyButton from '@/shared/components/common/di-share-modal/components/CopyButton.vue';
 import { ActionType, PERMISSION_ACTION_NODES, ResourceType } from '@/utils';
@@ -73,8 +82,11 @@ import { CollapseTransition, FadeTransition } from 'vue2-transitions';
 
 @Component({ components: { CollapseTransition, LinkIcon, CopyButton } })
 export default class ShareAnyone extends Vue {
-  @Prop({ default: ActionType.none })
-  private currentPermission!: ActionType;
+  @Model('change', { type: String, default: ActionType.none })
+  private readonly currentPermission!: ActionType;
+
+  @Prop({ type: Boolean, default: false })
+  private readonly isBtnLoading!: boolean;
 
   @Prop()
   private linkHandler?: LinkHandler;

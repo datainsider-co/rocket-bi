@@ -1,15 +1,29 @@
 <template>
   <PanelHeader header="Stock" target-id="stock-tab">
     <div id="stock-tab">
-      <ToggleSetting id="zoom-enable" :value="zoomEnabled" class="mb-2" label="Zoom" @onChanged="handleZoomEnabled" />
-      <ToggleSetting id="compare-enable" :value="enableCompare" label="Compare" @onChanged="handleCompareEnabled" />
+      <ToggleSetting
+        id="zoom-enable"
+        :value="zoomEnabled"
+        class="mb-2"
+        :label="`${configSetting['zoom.enabled'].label}`"
+        :hint="`${configSetting['zoom.enabled'].hint}`"
+        @onChanged="handleZoomEnabled"
+      />
+      <ToggleSetting
+        id="compare-enable"
+        :value="enableCompare"
+        :label="`${configSetting['compare.enabled'].label}`"
+        :hint="`${configSetting['compare.enabled'].hint}`"
+        @onChanged="handleCompareEnabled"
+      />
       <DropdownSetting
         v-if="enableCompare"
         id="compare-type"
         :options="compareOptions"
         :value="compare"
         disabled
-        label=""
+        :label="`${configSetting['display'].label}`"
+        :hint="`${configSetting['display'].hint}`"
         size="full"
         class="mb-3"
         @onChanged="handleCompareChanged"
@@ -28,6 +42,8 @@ import { Component, Vue, Prop } from 'vue-property-decorator';
 
 @Component({ components: { PanelHeader } })
 export default class StockTab extends Vue {
+  private readonly configSetting = window.chartSetting['stock.tab'];
+
   private readonly defaultSetting = {
     zoomEnabled: true,
     compare: ''

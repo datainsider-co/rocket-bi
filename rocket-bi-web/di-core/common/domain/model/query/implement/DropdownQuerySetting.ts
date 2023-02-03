@@ -27,9 +27,10 @@ export class DropdownQuerySetting extends QuerySetting<DropdownChartOption> impl
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
 
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   static fromObject(obj: DropdownQuerySetting): DropdownQuerySetting {
@@ -37,7 +38,7 @@ export class DropdownQuerySetting extends QuerySetting<DropdownChartOption> impl
     const value = TableColumn.fromObject(obj.value);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map(view => InlineSqlView.fromObject(view));
 
-    return new DropdownQuerySetting(value, filters, sorts, obj.options, sqlViews);
+    return new DropdownQuerySetting(value, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

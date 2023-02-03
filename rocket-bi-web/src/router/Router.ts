@@ -51,6 +51,8 @@ const JobHistories = () => import(/* webpackChunkName: "data-ingestion" */ '@/sc
 
 const GoogleAuthentication = () => import(/* webpackChunkName: "data-ingestion" */ '@/shared/components/google-authen/GoogleAuthen.vue');
 
+const FacebookAuthentication = () => import(/* webpackChunkName: "data-ingestion" */ '@/shared/components/facebook-authen/FacebookAuthentication.vue');
+
 const OrganizationSettings = () => import(/* webpackChunkName: "organization-settings" */ '@/screens/organization-settings/views/OrganizationSettings.vue');
 const OrganizationOverview = () =>
   import(/* webpackChunkName: "organization-settings" */ '@/screens/organization-settings/views/overview/OrganizationOverview.vue');
@@ -287,6 +289,12 @@ const routes: Array<RouteConfig> = [
     path: '/gauthen/:config_type',
     name: Routers.GoogleAuthentication,
     component: GoogleAuthentication,
+    props: true
+  },
+  {
+    path: '/fbauthen',
+    name: Routers.FacebookAuthentication,
+    component: FacebookAuthentication,
     props: true
   },
 

@@ -45,7 +45,7 @@ export class DataCookShareHandler implements ShareHandler {
     return Promise.reject('create share anyone fail with database');
   }
 
-  updateSharePermission(userData: SharedUserInfo, editedValue: string): void {
+  updateSharePermission(userData: SharedUserInfo, editedValue: ActionType): void {
     _DataCookShareStore.updateSharePermission({ userData: userData, editedValue: editedValue });
   }
 

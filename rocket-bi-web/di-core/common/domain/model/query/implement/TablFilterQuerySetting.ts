@@ -32,9 +32,10 @@ export class TabFilterQuerySetting extends QuerySetting<TabFilterOption> impleme
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
     filterRequest?: FilterRequest,
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
     this.filterRequest = filterRequest;
   }
 
@@ -48,7 +49,7 @@ export class TabFilterQuerySetting extends QuerySetting<TabFilterOption> impleme
     }
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
     const filterRequest: FilterRequest | undefined = obj.filterRequest ? FilterRequest.fromObject(obj.filterRequest) : void 0;
-    return new TabFilterQuerySetting(values, filters, sorts, obj.options, filterRequest, sqlViews);
+    return new TabFilterQuerySetting(values, filters, sorts, obj.options, filterRequest, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

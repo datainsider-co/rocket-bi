@@ -39,7 +39,7 @@
       </template>
     </DiTable>
     <DiShareModal ref="shareDatabaseModal" />
-    <DiRenameModal ref="renameModal" @rename="handleRenameDatabase" />
+    <DiRenameModal ref="renameModal" />
   </LayoutContent>
 </template>
 
@@ -314,7 +314,9 @@ export default class DatabaseListing extends Vue {
   })
   private showRenameDatabaseModal(event: MouseEvent, schemaInfo: ShortSchemaInfo) {
     event.stopPropagation();
-    this.renameModal?.show(schemaInfo.database.displayName, schemaInfo);
+    this.renameModal?.show(schemaInfo.database.displayName, (newName: string) => {
+      this.handleRenameDatabase(newName, schemaInfo);
+    });
     Log.debug('showRenameDatabaseModal::', schemaInfo);
   }
 

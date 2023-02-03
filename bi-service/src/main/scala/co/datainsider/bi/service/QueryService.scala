@@ -2,38 +2,30 @@ package co.datainsider.bi.service
 
 import co.datainsider.bi.domain.CompareMode.{CompareMode, PercentageDiff, RawValues, ValuesDiff}
 import co.datainsider.bi.domain.Ids.Geocode
-import co.datainsider.bi.domain.{
-  AttributeBasedOperator,
-  Order,
-  QueryContext,
-  Relationship,
-  RelationshipGraph,
-  RelationshipInfo,
-  RlsPolicy,
-  SqlRegex,
-  UserAttribute
-}
+import co.datainsider.bi.domain._
 import co.datainsider.bi.domain.chart._
 import co.datainsider.bi.domain.query._
-import co.datainsider.bi.domain.request.{ChartRequest, CompareRequest, FilterRequest, SqlQueryRequest, ViewAsRequest}
+import co.datainsider.bi.domain.request._
 import co.datainsider.bi.domain.response._
-import co.datainsider.bi.engine.clickhouse.{ClickhouseParser, DataTable}
 import co.datainsider.bi.engine.Engine
+import co.datainsider.bi.engine.clickhouse.{ClickhouseParser, DataTable}
+import co.datainsider.bi.repository.ClickhouseCsvWriter
 import co.datainsider.bi.util.Implicits.ImplicitObject
 import co.datainsider.bi.util.StringUtils.{findClosestString, normalizeVietnamese}
 import co.datainsider.bi.util._
-import datainsider.profiler.Profiler
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
 import com.google.inject.Inject
 import com.twitter.inject.Logging
 import com.twitter.util.Future
 import datainsider.client.domain.user.UserProfile
-import datainsider.client.exception.BadRequestError
+import datainsider.client.exception.{BadRequestError, InternalError}
 import datainsider.client.service.SchemaClientService
 import datainsider.client.util.JsonParser.mapper
 import datainsider.client.util.ZConfig
+import datainsider.profiler.Profiler
 
+import java.io.File
 import scala.collection.immutable.HashMap
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -45,7 +37,10 @@ trait QueryService {
 
   def query(request: SqlQueryRequest): Future[SqlQueryResponse]
 
-  def query(request: ViewAsRequest): Future[ChartResponse]
+  def query(request: QueryViewAsRequest): Future[ChartResponse]
+
+  def exportAsCsv(request: ChartRequest): Future[String]
+
 }
 
 class QueryServiceImpl @Inject() (
@@ -77,52 +72,37 @@ class QueryServiceImpl @Inject() (
 
   override def query(request: ChartRequest): Future[ChartResponse] =
     Profiler(s"[Builder] ${this.getClass.getSimpleName}::ChartRequest") {
-      val orgId: Option[Long] = Try(request.currentOrganizationId.get).toOption
-      val userProfile: Option[UserProfile] = Try(request.currentProfile).toOption.flatten
-
-      buildQueryAndExecute(orgId, userProfile, request)
+      buildQueryAndExecute(request, None)
     }
 
-  override def query(request: ViewAsRequest): Future[ChartResponse] =
-    Profiler(s"[Builder] ${this.getClass.getSimpleName}::queryWith") {
-      require(request.userProfile.isDefined, "an user profile is required for querying as ViewAs")
-      val orgId: Option[Long] = Try(request.currentOrganizationId.get).toOption
-
-      buildQueryAndExecute(orgId, request.userProfile, request.queryRequest)
+  override def query(request: QueryViewAsRequest): Future[ChartResponse] =
+    Profiler(s"[Builder] ${this.getClass.getSimpleName}::queryViewAs") {
+      require(request.userProfile.isDefined, "a target is required for querying as View As")
+      buildQueryAndExecute(request.queryRequest, request.userProfile)
     }
 
-  private def buildQueryAndExecute(
-      orgId: Option[Long],
-      userProfile: Option[UserProfile],
-      request: ChartRequest
-  ): Future[ChartResponse] = {
+  override def exportAsCsv(request: ChartRequest): Future[String] =
+    Profiler(s"[Builder] ${this.getClass.getSimpleName}::exportAsCsv") {
+      for {
+        prepareResp <- prepareQuery(request, None, None)
+        csvFilePath <- createCsvFile(prepareResp.finalQuery)
+      } yield csvFilePath
+    }
+
+  private def buildQueryAndExecute(request: ChartRequest, viewAsProfile: Option[UserProfile]): Future[ChartResponse] = {
     val limit: Option[Limit] = processLimit(request)
-    val baseQuery: Query = request.querySetting.toQuery
-
     for {
-      relationshipInfo <- fetchRelationships(orgId, request.dashboardId)
-      rlsPolicies <- fetchRlsPolicies(orgId, userProfile)
-      tableExpressions <- fetchTablesExpression(baseQuery.allQueryViews)
-      finalQuery = enhanceQuery(
-        baseQuery,
-        userProfile.map(_.username),
-        limit,
-        if (request.querySetting.isInstanceOf[FilterSetting]) Array.empty else request.filterRequests,
-        relationshipInfo,
-        rlsPolicies,
-        Some(QueryContext(tableExpressions))
-      )
+      prepareResp <- prepareQuery(request, limit, viewAsProfile)
       chartResp <- executeAndRenderChart(
-        finalQuery,
+        prepareResp.finalQuery,
         request,
         request.filterRequests,
-        relationshipInfo,
-        rlsPolicies,
-        Some(QueryContext(tableExpressions))
+        prepareResp.relationshipInfo,
+        prepareResp.rlsPolicies,
+        prepareResp.tableExpressions
       )
     } yield chartResp
   }
-
   private def enhanceQuery(
       baseQuery: Query,
       username: Option[String],
@@ -130,13 +110,18 @@ class QueryServiceImpl @Inject() (
       filterRequests: Array[FilterRequest],
       relationshipInfo: RelationshipInfo,
       rlsPolicies: Seq[RlsPolicy],
-      externalContext: Option[QueryContext]
+      expressions: Map[String, String],
+      parameters: Map[String, String]
   ): Query = {
     val enhancedQuery = processAdditionalConditions(baseQuery, filterRequests, relationshipInfo)
     val decryptQuery = applyDecryption(enhancedQuery, username)
-    val finalQuery = applyLimit(decryptQuery, limit).customCopy(rlsPolicies.map(_.toRlsCondition()))
+    val finalQuery = applyLimit(decryptQuery, limit)
 
-    finalQuery.customCopy(externalContext)
+    finalQuery.customCopy(
+      rlsConditions = rlsPolicies.map(_.toRlsCondition()),
+      expressions = expressions,
+      parameters = parameters
+    )
   }
 
   private def executeAndRenderChart(
@@ -145,7 +130,7 @@ class QueryServiceImpl @Inject() (
       filterRequests: Array[FilterRequest],
       relationshipInfo: RelationshipInfo,
       rlsPolicies: Seq[RlsPolicy],
-      externalContext: Option[QueryContext]
+      expressions: Map[String, String]
   ): Future[ChartResponse] = {
     request.querySetting match {
       case s: PieChartSetting =>
@@ -189,7 +174,7 @@ class QueryServiceImpl @Inject() (
       case s: MapChartSetting =>
         toMapResponse(query, s)
       case s: PivotTableSetting =>
-        toPivotTableResponse(query, s, filterRequests, relationshipInfo, rlsPolicies, externalContext)
+        toPivotTableResponse(query, s, filterRequests, relationshipInfo, rlsPolicies, expressions, request.parameters)
       case s: FlattenPivotTableSetting =>
         toTableResponse(query, s)
       case s: RawQuerySetting =>
@@ -863,7 +848,8 @@ class QueryServiceImpl @Inject() (
       filterRequests: Array[FilterRequest],
       relationshipInfo: RelationshipInfo,
       rlsPolicies: Seq[RlsPolicy],
-      externalContext: Option[QueryContext]
+      expressions: Map[String, String],
+      parameters: Map[String, String]
   ): Future[JsonTableResponse] =
     Profiler(s"[Builder] ${this.getClass.getSimpleName}::toPivotTableResponse") {
       Future {
@@ -890,7 +876,8 @@ class QueryServiceImpl @Inject() (
               filterRequests = filterRequests,
               relationshipInfo = relationshipInfo,
               rlsPolicies = rlsPolicies,
-              externalContext = externalContext
+              expressions = expressions,
+              parameters = parameters
             )
 
             val grandTotalBaseResp: DataTable = executeQuery(grandTotalQuery, setting.toGrandTotalTableColumns)
@@ -913,7 +900,8 @@ class QueryServiceImpl @Inject() (
               filterRequests = filterRequests,
               relationshipInfo = relationshipInfo,
               rlsPolicies = rlsPolicies,
-              externalContext = externalContext
+              expressions = expressions,
+              parameters = parameters
             )
 
             val horizontalTotalBaseResp: DataTable =
@@ -1380,8 +1368,8 @@ class QueryServiceImpl @Inject() (
       if (baseMinMaxResp.records.nonEmpty) {
         baseMinMaxResp.records.transpose.last match {
           case Array(a, b) =>
-            val firstNum = a.toString.toDouble
-            val secondNum = b.toString.toDouble
+            val firstNum: Double = Try(a.toString.toDouble).getOrElse(0)
+            val secondNum: Double = Try(b.toString.toDouble).getOrElse(0)
             MinMaxPair(valueCol.name, firstNum.min(secondNum), firstNum.max(secondNum))
         }
       } else {
@@ -1603,14 +1591,14 @@ class QueryServiceImpl @Inject() (
         .list(orgId.get, None, None)
         .map(_.data)
         .map(policies => {
-          policies.filter(policy => policy.conditions.nonEmpty && isTargetedToUser(policy, userProfile.get))
+          policies.filter(policy => policy.conditions.nonEmpty && isAffectedUser(policy, userProfile.get))
         })
     } else {
       Future(Seq.empty)
     }
   }
 
-  private def isTargetedToUser(policy: RlsPolicy, userProfile: UserProfile): Boolean = {
+  private def isAffectedUser(policy: RlsPolicy, userProfile: UserProfile): Boolean = {
     if (policy.userIds.contains(userProfile.username)) {
       return true
     }
@@ -1628,6 +1616,10 @@ class QueryServiceImpl @Inject() (
         val key: String = requiredAttribute.key
         userProperties.isEmpty || !userProperties.contains(key)
 
+      case AttributeBasedOperator.IsNotNull =>
+        val key: String = requiredAttribute.key
+        userProperties.isDefinedAt(key)
+
       case AttributeBasedOperator.Equal =>
         val key: String = requiredAttribute.key
 
@@ -1635,10 +1627,22 @@ class QueryServiceImpl @Inject() (
         val value: String = requiredAttribute.values.head
         userProperties.contains(key) && userProperties(key) == value
 
+      case AttributeBasedOperator.NotEqual =>
+        val key: String = requiredAttribute.key
+
+        require(requiredAttribute.values.nonEmpty, "RLS with NotEqual operator requires at least 1 value")
+        val value: String = requiredAttribute.values.head
+        !userProperties.contains(key) || userProperties(key) != value
+
       case AttributeBasedOperator.Contain =>
         val key: String = requiredAttribute.key
         val values: Seq[String] = requiredAttribute.values
         userProperties.contains(key) && values.contains(userProperties(key))
+
+      case AttributeBasedOperator.NotContain =>
+        val key: String = requiredAttribute.key
+        val values: Seq[String] = requiredAttribute.values
+        !userProperties.contains(key) || !values.contains(userProperties(key))
 
       case _ =>
         error(
@@ -1646,6 +1650,39 @@ class QueryServiceImpl @Inject() (
         )
         false
     }
+  }
+
+  private def prepareQuery(
+      request: ChartRequest,
+      limit: Option[Limit],
+      viewAsProfile: Option[UserProfile]
+  ): Future[PrepareQueryResponse] = {
+    val orgId: Option[Long] = request.currentOrganizationId
+    val userProfile: Option[UserProfile] = Seq(viewAsProfile, request.currentProfile).flatten.headOption
+    val baseQuery: Query = request.querySetting.toQuery
+
+    for {
+      relationshipInfo <- fetchRelationships(orgId, request.dashboardId)
+      rlsPolicies <- fetchRlsPolicies(orgId, userProfile)
+      tableExpressions <- fetchTablesExpression(baseQuery.allQueryViews)
+      finalQuery = enhanceQuery(
+        baseQuery,
+        userProfile.map(_.username),
+        limit,
+        if (request.querySetting.isInstanceOf[FilterSetting]) Array.empty else request.filterRequests,
+        relationshipInfo,
+        rlsPolicies,
+        tableExpressions,
+        request.parameters
+      )
+    } yield {
+      PrepareQueryResponse(relationshipInfo, rlsPolicies, tableExpressions, finalQuery)
+    }
+  }
+
+  private def createCsvFile(query: Query): Future[String] = {
+    val sql: String = queryExecutor.parseQuery(query)
+    ClickhouseCsvWriter.exportToFile(sql)
   }
 
 }

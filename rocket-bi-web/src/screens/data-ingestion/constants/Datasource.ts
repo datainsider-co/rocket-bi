@@ -76,6 +76,11 @@ export const ALL_DATASOURCE: ItemData[] = [
     title: 'S3',
     src: 'ic_s3.png',
     type: DataSourceType.S3
+  },
+  {
+    title: 'Facebook',
+    src: 'ic_fb.png',
+    type: DataSourceType.Facebook
   }
   // {
   //   title: 'iOS',

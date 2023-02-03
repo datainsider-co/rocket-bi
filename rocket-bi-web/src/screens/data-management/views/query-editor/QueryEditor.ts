@@ -1,4 +1,4 @@
-import { Component, Mixins, Ref, Vue, Watch } from 'vue-property-decorator';
+import { Component, Mixins, Ref, Vue } from 'vue-property-decorator';
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import { FormulaController } from '@/shared/fomula/FormulaController';
@@ -15,8 +15,7 @@ import QueryComponent from '@/screens/data-management/components/QueryComponent.
 import { Log } from '@core/utils';
 import {
   ChartInfo,
-  Column,
-  CreateQueryRequest,
+  CreateDashboardRequest,
   Dashboard,
   DashboardId,
   DatabaseSchema,
@@ -24,23 +23,21 @@ import {
   DirectoryId,
   Field,
   Position,
+  QueryParameter,
   RawQuerySetting,
-  TableColumn,
   TableSchema,
-  TableStatus,
   TableType
 } from '@core/common/domain';
-import { _ChartStore, DashboardControllerModule, DashboardModule, WidgetModule } from '@/screens/dashboard-detail/stores';
+import { _ChartStore, DashboardControllerModule, DashboardModule, DashboardStore, WidgetModule } from '@/screens/dashboard-detail/stores';
 // @ts-ignore
 import { Split, SplitArea } from 'vue-split-panel';
-import DirectoryCreate from '@/screens/directory/components/DirectoryCreate.vue';
 import MyDataPickDirectory from '@/screens/lake-house/components/move-file/MyDataPickDirectory.vue';
-import { get, toNumber } from 'lodash';
+import { cloneDeep, get, toNumber } from 'lodash';
 import MyDataPickFile from '@/screens/lake-house/components/move-file/MyDataPickFile.vue';
 import { PopupUtils } from '@/utils/PopupUtils';
 import LayoutNoData from '@/shared/components/layout-wrapper/LayoutNoData.vue';
 import SplitPanelMixin from '@/shared/components/layout-wrapper/SplitPanelMixin';
-import { ListUtils, PositionUtils } from '@/utils';
+import { ListUtils, PositionUtils, RouterUtils, StringUtils } from '@/utils';
 import { EditorController } from '@/shared/fomula/EditorController';
 import { FormulaUtils } from '@/shared/fomula/FormulaUtils';
 import { RouterLeavingHook } from '@/shared/components/vue-hook/RouterLeavingHook';
@@ -48,6 +45,10 @@ import { Route } from 'vue-router';
 import { NavigationGuardNext } from 'vue-router/types/router';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Track } from '@/shared/anotation';
+import DiRenameModal from '@/shared/components/DiRenameModal.vue';
+import { DirectoryModule } from '@/screens/directory/store/DirectoryStore';
+import router from '@/router/Router';
+import { Routers } from '@/shared';
 
 Vue.use(DataComponents);
 
@@ -71,10 +72,10 @@ type ModalComponentType = {
     CalculatedFieldModal,
     DataListing,
     QueryComponent,
-    DirectoryCreate,
     MyDataPickDirectory,
     MyDataPickFile,
-    LayoutNoData
+    LayoutNoData,
+    DiRenameModal
   }
 })
 export default class QueryEditor extends Mixins(DataManagementChild, SplitPanelMixin) implements RouterLeavingHook {
@@ -101,7 +102,7 @@ export default class QueryEditor extends Mixins(DataManagementChild, SplitPanelM
   private readonly tableCreationModal!: ModalComponentType & TableCreationFromQueryModal;
 
   @Ref()
-  private readonly mdCreateDirectory!: DirectoryCreate;
+  private readonly createAnalysisModal!: DiRenameModal;
 
   @Ref()
   private readonly directoryPicker!: MyDataPickDirectory;
@@ -183,14 +184,10 @@ export default class QueryEditor extends Mixins(DataManagementChild, SplitPanelM
       }
       // Update Route Query
       if (this.$route.query?.database !== database.name || this.$route.query?.table !== table.name) {
-        await this.$router.replace({ query: { database: database.name, table: table.name } });
+        await this.$router.replace({ query: { ...this.$router.currentRoute.query, database: database.name, table: table.name } }).catch(() => {
+          //
+        });
       }
-
-      // Query Table Data
-      this.$nextTick(async () => {
-        // @ts-ignore
-        await this.queryComponent?.handleQuery();
-      });
       if (onSelectComplete) {
         onSelectComplete(database, table);
       }
@@ -257,8 +254,42 @@ export default class QueryEditor extends Mixins(DataManagementChild, SplitPanelM
   }
 
   private handleSelectDirectory(directoryId: DirectoryId) {
-    const createRequest = new CreateQueryRequest({ name: '', parentDirectoryId: directoryId, widgets: this.queryComponent?.allChartInfos });
-    this.mdCreateDirectory.show(createRequest);
+    this.createAnalysisModal.show('', (newName: string) => {
+      this.handleCreateDashboard(newName, directoryId);
+    });
+  }
+
+  private async handleCreateDashboard(name: string, parentId: DirectoryId): Promise<void> {
+    try {
+      this.createAnalysisModal.setLoading(true);
+      const createRequest = CreateDashboardRequest.createQueryRequest({
+        name: name,
+        parentDirectoryId: parentId,
+        widgets: this.queryComponent?.allChartInfos ?? []
+      });
+      const dashboard = await DirectoryModule.createDashboard(createRequest);
+      this.handleQueryCreated(dashboard);
+      this.createAnalysisModal.hide();
+      this.$nextTick(() => {
+        this.navigateToMyData(name, parentId);
+      });
+    } catch (ex) {
+      Log.error('QueryEditor::handleCreateDashboard::error', ex);
+      this.createAnalysisModal.setError('Failed to create dashboard');
+    } finally {
+      this.createAnalysisModal.setLoading(false);
+    }
+  }
+
+  private async navigateToMyData(name: string, parentDirectoryId: DirectoryId): Promise<void> {
+    await RouterUtils.to(Routers.AllData, {
+      params: {
+        name: RouterUtils.buildParamPath(parentDirectoryId, name)
+      },
+      query: {
+        token: RouterUtils.getToken(router.currentRoute)
+      }
+    });
   }
 
   private handleSelectFile(directoryId: DirectoryId) {
@@ -281,9 +312,10 @@ export default class QueryEditor extends Mixins(DataManagementChild, SplitPanelM
       case QueryEditorMode.Dashboard: {
         const adhocId = this.queryDashboardId;
         await DashboardModule.handleLoadDashboard(adhocId!);
+        Log.debug('Query::initAdhocComponent::', WidgetModule.allQueryParameters);
+        this.queryComponent?.setParameters(WidgetModule.allQueryParameters);
         await DashboardControllerModule.renderAllChartOrFilters();
         const query = (ListUtils.getHead(WidgetModule.allQueryWidgets)?.setting as RawQuerySetting)?.sql ?? '';
-        Log.debug('initAdhocComponent::query::', query);
         this.tempQuery = query;
         this.updateDefaultQuery(query);
         this.queryComponent?.setWidgets(WidgetModule.allQueryWidgets);
@@ -291,8 +323,10 @@ export default class QueryEditor extends Mixins(DataManagementChild, SplitPanelM
         this.autoSave();
         break;
       }
-      case QueryEditorMode.EditTable:
+      case QueryEditorMode.EditTable: {
+        await this.queryComponent?.handleQuery();
         break;
+      }
       case QueryEditorMode.Query:
         break;
     }
@@ -456,7 +490,7 @@ export default class QueryEditor extends Mixins(DataManagementChild, SplitPanelM
     this.enableAutoSave = false;
   }
 
-  private handleQueryCreated(dashboard: Dashboard) {
+  private handleQueryCreated(dashboard: Dashboard): void {
     const query = get(dashboard, 'widgets[0].setting.sqlViews[0].query.query', '');
     Log.debug('handleQueryCreated:: query', query);
     this.tempQuery = query;

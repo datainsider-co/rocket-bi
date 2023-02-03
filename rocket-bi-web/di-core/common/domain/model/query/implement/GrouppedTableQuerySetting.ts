@@ -30,9 +30,10 @@ export class GroupedTableQuerySetting extends AbstractTableQuerySetting<TableCha
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
     readonly formatters: TableColumn[] = [],
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(columns, filters, sorts, options, formatters, sqlViews);
+    super(columns, filters, sorts, options, formatters, sqlViews, parameters);
   }
 
   static fromObject(obj: any): GroupedTableQuerySetting {
@@ -41,7 +42,7 @@ export class GroupedTableQuerySetting extends AbstractTableQuerySetting<TableCha
     const [filters, sorts] = getFiltersAndSorts(obj);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new GroupedTableQuerySetting(columns, filters, sorts, obj.options, formatters, sqlViews);
+    return new GroupedTableQuerySetting(columns, filters, sorts, obj.options, formatters, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

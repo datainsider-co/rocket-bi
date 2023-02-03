@@ -1,13 +1,12 @@
 package co.datainsider.bi.domain.query
 
-import co.datainsider.bi.domain.{QueryContext, RlsCondition}
+import co.datainsider.bi.domain.RlsCondition
 import co.datainsider.bi.engine.TableExpressionUtils
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 import com.twitter.inject.Logging
 import datainsider.client.exception.BadRequestError
 
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 @JsonTypeInfo(
@@ -25,14 +24,18 @@ trait Query {
   val encryptKey: Option[String]
   val rlsConditions: Seq[RlsCondition]
   val allQueryViews: Seq[QueryView]
-  val externalContext: Option[QueryContext]
+  val expressions: Map[String, String]
+  val parameters: Map[String, String]
 
   def addConditions(conditions: Seq[Condition]): Query
-  def setLimit(limit: Option[Limit]): Query
-  def customCopy(rlsConditions: Seq[RlsCondition]): Query
-  def customCopy(externalContext: Option[QueryContext]): Query
 
-  def getFinalContext(): QueryContext
+  def setLimit(limit: Option[Limit]): Query
+
+  def customCopy(
+      rlsConditions: Seq[RlsCondition],
+      expressions: Map[String, String],
+      parameters: Map[String, String]
+  ): Query
 
 }
 
@@ -40,7 +43,8 @@ case class SqlQuery(
     query: String,
     encryptKey: Option[String] = None,
     rlsConditions: Seq[RlsCondition] = Seq.empty,
-    externalContext: Option[QueryContext] = None
+    expressions: Map[String, String] = Map.empty,
+    parameters: Map[String, String] = Map.empty
 ) extends Query
     with Logging {
   override val allQueryViews: Seq[QueryView] = {
@@ -61,20 +65,13 @@ case class SqlQuery(
     throw BadRequestError(s"addFieldCondition($this) is not yet supported")
   }
 
-  override def customCopy(rlsConditions: Seq[RlsCondition]): SqlQuery = {
-    this.copy(rlsConditions = rlsConditions)
+  override def customCopy(
+      rlsConditions: Seq[RlsCondition],
+      expressions: Map[String, String],
+      parameters: Map[String, String]
+  ): SqlQuery = {
+    this.copy(rlsConditions = rlsConditions, expressions = expressions, parameters = parameters)
   }
-
-  override def customCopy(externalContext: Option[QueryContext]): SqlQuery = {
-    this.copy(externalContext = externalContext)
-  }
-
-  override def getFinalContext(): QueryContext = {
-    if (externalContext.isDefined) {
-      externalContext.get
-    } else QueryContext()
-  }
-
 }
 
 case class ObjectQuery(
@@ -87,7 +84,8 @@ case class ObjectQuery(
     limit: Option[Limit] = None,
     encryptKey: Option[String] = None,
     rlsConditions: Seq[RlsCondition] = Seq.empty,
-    externalContext: Option[QueryContext] = None
+    expressions: Map[String, String] = Map.empty,
+    parameters: Map[String, String] = Map.empty
 ) extends Query {
   override def addConditions(conditions: Seq[Condition]): Query = {
     this.copy(conditions = this.conditions ++ conditions)
@@ -141,15 +139,15 @@ case class ObjectQuery(
     }
   }
 
-  override def customCopy(rlsConditions: Seq[RlsCondition]): ObjectQuery = {
-    this.copy(rlsConditions = rlsConditions)
+  override def customCopy(
+      rlsConditions: Seq[RlsCondition],
+      expressions: Map[String, String],
+      parameters: Map[String, String]
+  ): ObjectQuery = {
+    this.copy(rlsConditions = rlsConditions, expressions = expressions, parameters = parameters)
   }
 
-  override def customCopy(externalContext: Option[QueryContext]): ObjectQuery = {
-    this.copy(externalContext = externalContext)
-  }
-
-  def getFinalContext: QueryContext = {
+  def getFinalExpressions: Map[String, String] = {
     val functionsFields: Seq[Field] = functions
       .filter(_.isInstanceOf[FieldRelatedFunction])
       .map(_.asInstanceOf[FieldRelatedFunction])
@@ -158,10 +156,9 @@ case class ObjectQuery(
     val conditionsFields: Seq[Field] = getFieldsFromConditions(conditions)
 
     val innerExpressions: Map[String, String] = getExpressionsFromFields((functionsFields ++ conditionsFields).distinct)
-    val outerExpressions: Map[String, String] =
-      if (externalContext.isDefined) externalContext.get.variables else Map.empty
+    val outerExpressions: Map[String, String] = expressions
 
-    QueryContext(innerExpressions ++ outerExpressions)
+    outerExpressions ++ innerExpressions
   }
 
   private def getExpressionsFromFields(fields: Seq[Field]): Map[String, String] = {

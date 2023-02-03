@@ -2,7 +2,7 @@ package co.datainsider.bi.controller
 
 import co.datainsider.bi.TestServer
 import co.datainsider.bi.domain.query.{Equal, In, TableField}
-import co.datainsider.bi.domain.request.{ListPolicyRequest, SavePolicyRequest}
+import co.datainsider.bi.domain.request.{ListPolicyRequest, PutPolicyRequest}
 import co.datainsider.bi.domain.{RlsPolicy, UserAttribute, AttributeBasedOperator}
 import co.datainsider.bi.util.Serializer
 import co.datainsider.share.domain.response.PageResult
@@ -28,7 +28,7 @@ class PolicyControllerTest extends FeatureTest {
   )
 
   test("test controller create rls policy") {
-    val saveRequest: SavePolicyRequest = SavePolicyRequest(
+    val putRequest: PutPolicyRequest = PutPolicyRequest(
       dbName = "sales",
       tblName = "orders",
       policies = Array(
@@ -43,7 +43,7 @@ class PolicyControllerTest extends FeatureTest {
 
     val r = server.httpPut(
       path = "/policies",
-      putBody = JsonParser.toJson(saveRequest),
+      putBody = JsonParser.toJson(putRequest),
       andExpect = Status.Ok
     )
 
@@ -77,7 +77,7 @@ class PolicyControllerTest extends FeatureTest {
   }
 
   test("test add and update rls policy") {
-    val saveRequest: SavePolicyRequest = SavePolicyRequest(
+    val putRequest: PutPolicyRequest = PutPolicyRequest(
       dbName = "sales",
       tblName = "orders",
       policies = Array(
@@ -94,7 +94,7 @@ class PolicyControllerTest extends FeatureTest {
 
     val r = server.httpPut(
       path = "/policies",
-      putBody = JsonParser.toJson(saveRequest),
+      putBody = JsonParser.toJson(putRequest),
       andExpect = Status.Ok
     )
 
@@ -107,7 +107,7 @@ class PolicyControllerTest extends FeatureTest {
   }
 
   test("test controller delete rls policy") {
-    val saveRequest: SavePolicyRequest = SavePolicyRequest(
+    val putRequest: PutPolicyRequest = PutPolicyRequest(
       dbName = "sales",
       tblName = "orders",
       policies = Array.empty
@@ -115,7 +115,7 @@ class PolicyControllerTest extends FeatureTest {
 
     val r = server.httpPut(
       path = "/policies",
-      putBody = JsonParser.toJson(saveRequest),
+      putBody = JsonParser.toJson(putRequest),
       andExpect = Status.Ok
     )
 

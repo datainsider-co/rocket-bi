@@ -24,9 +24,11 @@ case class CreateDashboardRequest(
     parentDirectoryId: DirectoryId,
     mainDateFilter: Option[MainDateFilter] = None,
     widgets: Option[Array[Widget]] = Some(Array.empty),
-    widgetPositions: Option[Map[WidgetId, Position]] = Some(Map.empty),
+    widgetPositions: Map[Long, Position] = Map.empty,
     @JsonScalaEnumeration(classOf[DirectoryTypeRef])
     directoryType: DirectoryType = DirectoryType.Dashboard,
+    setting: Option[JsonNode] = None,
+    boostInfo: Option[BoostInfo] = None,
     @Inject request: Request = null
 ) extends LoggedInRequest
 

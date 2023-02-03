@@ -14,7 +14,7 @@ import { PopupUtils } from '@/utils/PopupUtils';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import { StringUtils } from '@/utils/StringUtils';
 import { DIException } from '@core/common/domain';
-import { GoogleAuthenticationType } from '@/shared/components/google-authen/enum/GoogleAuthenticationType';
+import { ThirdPartyAuthenticationType } from '@/shared/components/google-authen/enum/ThirdPartyAuthenticationType';
 
 @Component({
   components: { DiButton }
@@ -23,7 +23,7 @@ export default class GoogleAuthentication extends Vue {
   private googleConfig = require('@/screens/data-ingestion/constants/google-config.json');
   private loading = false;
 
-  googleAuthenticationType = this.$attrs.config_type as GoogleAuthenticationType;
+  googleAuthenticationType = this.$attrs.config_type as ThirdPartyAuthenticationType;
 
   private get scope(): string {
     const scope = this.$route.query.scope as string;
@@ -32,9 +32,9 @@ export default class GoogleAuthentication extends Vue {
       //todo: fixme delete if deploy new version for google ads
     } else {
       switch (this.googleAuthenticationType) {
-        case GoogleAuthenticationType.GoogleAnalytic:
+        case ThirdPartyAuthenticationType.GoogleAnalytic:
           return this.googleConfig.gaScope;
-        case GoogleAuthenticationType.GoogleSheet:
+        case ThirdPartyAuthenticationType.GoogleSheet:
           return this.googleConfig.sheetScope;
         default:
           return '';

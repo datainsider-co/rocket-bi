@@ -77,7 +77,7 @@
       />
       <LakeExplorerMoveFile ref="lakeExplorerMoveFile" :current-path="currentPath" />
       <ViewPropertiesModal ref="viewPropertiesModal"></ViewPropertiesModal>
-      <DiRenameModal ref="diRenameModal" @rename="handleRenameFile"></DiRenameModal>
+      <DiRenameModal ref="diRenameModal"></DiRenameModal>
     </div>
   </LayoutContent>
 </template>
@@ -825,7 +825,7 @@ export default class LakeExplorer extends Vue {
   }
 
   private showDiRenameModal(fileInfo: FileInfo) {
-    this.diRenameModal?.show(fileInfo.name, fileInfo);
+    this.diRenameModal?.show(fileInfo.name, (newName: string) => this.handleRenameFile(newName, fileInfo));
   }
 
   @Track(TrackEvents.LakeDirectoryRename, {

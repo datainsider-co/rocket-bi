@@ -5,6 +5,8 @@ import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSour
 import { BigQuerySourceInfoV2 } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfoV2';
 import { JdbcUrlSourceInfo } from '@core/data-ingestion/domain/data-source/JdbcUrlSourceInfo';
 import { ShopifySourceInfo } from '@core/data-ingestion/domain/data-source/ShopifySourceInfo';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class ShopifySourceFormRender implements DataSourceFormRender {
   private shopifySourceInfo: ShopifySourceInfo;
@@ -70,5 +72,16 @@ export class ShopifySourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return ShopifySourceInfo.fromObject(this.shopifySourceInfo);
+  }
+  validSource(source: ShopifySourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
+    if (StringUtils.isEmpty(source.apiUrl)) {
+      throw new DIException('Shop URL is required!');
+    }
+    if (StringUtils.isEmpty(source.accessToken)) {
+      throw new DIException('Access token is required!');
+    }
   }
 }

@@ -16,6 +16,7 @@ import co.datainsider.bi.domain.chart.{
   HistogramChartSetting,
   NumberChartSetting,
   PieChartSetting,
+  PivotTableSetting,
   TableChartSetting,
   TableColumn
 }
@@ -45,16 +46,18 @@ import co.datainsider.bi.domain.query.{
 import co.datainsider.bi.domain.request.{ChartRequest, CompareRequest, FilterRequest}
 import co.datainsider.bi.domain.response.{JsonTableResponse, SeriesOneResponse, SeriesTwoResponse}
 import co.datainsider.bi.module.TestModule
+import co.datainsider.bi.repository.SchemaManager
 import co.datainsider.query.DbTestUtils
 import com.twitter.inject.app.TestInjector
 import com.twitter.inject.{Injector, IntegrationTest}
 import com.twitter.util.Await
 import datainsider.client.filter.MockUserContext
 import datainsider.client.module.MockCaasClientModule
+import datainsider.client.util.JsonParser
 
 class QueryServiceTest extends IntegrationTest {
   override protected def injector: Injector = TestInjector(TestModule, MockCaasClientModule).newInstance()
-
+  val schemaManager = injector.instance[SchemaManager]
   val queryService: QueryService = injector.instance[QueryService]
   val relationshipService: RelationshipService = injector.instance[RelationshipService]
   val rlsPolicyService: RlsPolicyService = injector.instance[RlsPolicyService]
@@ -76,7 +79,7 @@ class QueryServiceTest extends IntegrationTest {
   override def beforeAll(): Unit = {
     DbTestUtils.setUpTestDb()
     DbTestUtils.insertFakeData()
-
+    schemaManager.ensureDatabase()
     Await.result(
       relationshipService.createOrUpdate(
         orgId,
@@ -457,6 +460,47 @@ class QueryServiceTest extends IntegrationTest {
     assert(queryResult.total != 0)
     println(queryResult.headers)
     println(queryResult.records)
+  }
+
+  test("export csv file") {
+    val queryRequest: ChartRequest = ChartRequest(
+      TableChartSetting(
+        columns = Array(
+          TableColumn("id", Select(TableField(dbName, tblCustomers, "id", "UInt32"))),
+          TableColumn("name", Select(TableField(dbName, tblCustomers, "name", "String"))),
+          TableColumn("address", Select(TableField(dbName, tblCustomers, "address", "String"))),
+          TableColumn("dob", Select(TableField(dbName, tblCustomers, "dob", "Datetime")))
+        ),
+        sorts = Array(
+          OrderBy(function = Select(TableField(dbName, tblCustomers, "id", "UInt32")), order = Order.DESC)
+        )
+      )
+    )
+    val result = await(queryService.exportAsCsv(queryRequest))
+    println(result)
+  }
+
+  test("export csv file pivot table") {
+    val queryRequest: ChartRequest = ChartRequest(
+      PivotTableSetting(
+        columns = Array(
+          TableColumn("id", GroupBy(TableField(dbName, tblCustomers, "id", "UInt32"))),
+          TableColumn("name", GroupBy(TableField(dbName, tblCustomers, "name", "String")))
+        ),
+        rows = Array(
+          TableColumn("id", GroupBy(TableField(dbName, tblCustomers, "id", "UInt32"))),
+          TableColumn("name", GroupBy(TableField(dbName, tblCustomers, "name", "String")))
+        ),
+        values = Array(
+          TableColumn("id", CountAll())
+        ),
+        sorts = Array(
+          OrderBy(function = Select(TableField(dbName, tblCustomers, "id", "UInt32")), order = Order.DESC)
+        )
+      )
+    )
+    val result = await(queryService.exportAsCsv(queryRequest))
+    println(JsonParser.toJson(result))
   }
 
 }

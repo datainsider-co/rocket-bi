@@ -1,10 +1,8 @@
 package datainsider.user_caas.services
 
-import com.twitter.inject.Injector
-import com.twitter.inject.app.TestInjector
+import datainsider.client.domain.org.Organization
 import datainsider.user_caas.repository.UserRepository
 import datainsider.user_caas.service.UserService
-import datainsider.user_profile.TestServer
 import datainsider.user_profile.controller.http.request.CreateOrganizationRequest
 import datainsider.user_profile.domain.Implicits.FutureEnhanceLike
 import datainsider.user_profile.service.OrganizationService
@@ -60,6 +58,15 @@ class OrganizationServiceTest extends DataInsiderIntegrationTest {
     val organization = organizationService.getOrganization(organizationId).syncGet()
     assertResult(Some(organizationId))(organization.map(_.organizationId))
     println(organization)
+  }
+
+  test("update organization meta data") {
+    val _ = await(organizationService.update(organizationId, "test company", "https://url.com/test.png", "tvc12"))
+    val newCompany: Option[Organization] = await(organizationService.getOrganization(organizationId))
+    assert(newCompany.isDefined)
+    assert(newCompany.get.name == "test company")
+    assert(newCompany.get.thumbnailUrl.isDefined)
+    assert(newCompany.get.thumbnailUrl.get == "https://url.com/test.png")
   }
 
   // This function has been comment

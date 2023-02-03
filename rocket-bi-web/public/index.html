@@ -31,6 +31,9 @@
     <script type="text/javascript">
       var cachebuster = Math.round(new Date().getTime() / 1000);
       document.write('<scr' + 'ipt type="text/javascript" src="<%= BASE_URL %>config/<%= NODE_ENV %>.js?cb=' + cachebuster + '"></scr' + 'ipt>');
+      document.write('<scr' + 'ipt type="text/javascript" src="<%= BASE_URL %>config/config-setting.js?version=1"></scr' + 'ipt>');
+      document.write('<scr' + 'ipt type="text/javascript" src="<%= BASE_URL %>config/query-language.js?version=1"></scr' + 'ipt>');
+      document.write('<script async defer type="text/javascript" src="https://connect.facebook.net/en_US/sdk.js"></scr' + 'ipt>');
     </script>
   </head>
 
@@ -45,5 +48,14 @@
     </noscript>
     <div id="app"></div>
     <!-- built files will be auto injected -->
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId: window.appConfig.VUE_APP_FACEBOOK_APP_ID,
+          cookie: true, // This is important, it's not enabled by default
+          version: 'v13.0'
+        });
+      };
+    </script>
   </body>
 </html>

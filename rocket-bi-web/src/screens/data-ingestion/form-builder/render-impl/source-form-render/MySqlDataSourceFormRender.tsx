@@ -5,6 +5,7 @@ import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/Data
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { StringUtils } from '@/utils';
 import { cloneDeep } from 'lodash';
+import { DIException } from '@core/common/domain';
 
 export class MySqlDataSourceFormRender implements DataSourceFormRender {
   private mySqlSourceInfo: MySqlSourceInfo;
@@ -46,7 +47,7 @@ export class MySqlDataSourceFormRender implements DataSourceFormRender {
   }
 
   private get password() {
-    return this.mySqlSourceInfo.password;
+    return this.mySqlSourceInfo.password ?? '';
   }
 
   private set password(value: string) {
@@ -126,5 +127,19 @@ export class MySqlDataSourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return MySqlSourceInfo.fromObject(this.mySqlSourceInfo);
+  }
+  validSource(source: MySqlSourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
+    if (StringUtils.isEmpty(source.host)) {
+      throw new DIException('Host is required!');
+    }
+    if (StringUtils.isEmpty(source.port)) {
+      throw new DIException('Port is required!');
+    }
+    if (StringUtils.isEmpty(source.username)) {
+      throw new DIException('Username is required!');
+    }
   }
 }

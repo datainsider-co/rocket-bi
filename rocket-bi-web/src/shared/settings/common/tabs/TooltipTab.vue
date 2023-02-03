@@ -5,7 +5,8 @@
         id="tooltip-value-color"
         :default-color="defaultStyle.color"
         :value="valueColor"
-        label="Color"
+        :label="`${configSetting['tooltip.valueColor'].label}`"
+        :hint="`${configSetting['tooltip.valueColor'].hint}`"
         size="small"
         style="margin-right: 12px"
         @onChanged="handleValueColorChanged"
@@ -14,7 +15,8 @@
         id="tooltip-background-color"
         :default-color="defaultStyle.backgroundColor"
         :value="backgroundColor"
-        label="Background color"
+        :label="`${configSetting['tooltip.backgroundColor'].label}`"
+        :hint="`${configSetting['tooltip.backgroundColor'].hint}`"
         size="small"
         @onChanged="handleBackgroundChanged"
       />
@@ -24,7 +26,8 @@
       :options="fontOptions"
       :value="fontFamily"
       class="mb-3"
-      label="Font family"
+      :label="`${configSetting['tooltip.fontFamily'].label}`"
+      :hint="`${configSetting['tooltip.fontFamily'].hint}`"
       size="full"
       @onChanged="handleFontChanged"
     />
@@ -43,6 +46,8 @@ import { SettingKey } from '@core/common/domain';
 
 @Component({ components: { PanelHeader } })
 export default class TooltipTab extends Vue {
+  private readonly configSetting = window.chartSetting['tooltip.tab'];
+
   private readonly fontOptions = FontFamilyOptions;
   private defaultStyle = {
     color: '#FFFFFF',

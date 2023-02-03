@@ -3,6 +3,8 @@ import { BFormInput } from 'bootstrap-vue';
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { GoogleAnalyticsSourceInfo } from '@core/data-ingestion/domain/data-source/GoogleAnalyticsSourceInfo';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class GoogleAnalyticsSourceFormRender implements DataSourceFormRender {
   private googleAnalyticsSourceInfo: GoogleAnalyticsSourceInfo;
@@ -34,5 +36,10 @@ export class GoogleAnalyticsSourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return GoogleAnalyticsSourceInfo.fromObject(this.googleAnalyticsSourceInfo);
+  }
+  validSource(source: GoogleAnalyticsSourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
   }
 }

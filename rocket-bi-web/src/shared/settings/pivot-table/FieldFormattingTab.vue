@@ -1,13 +1,23 @@
 <template>
   <PanelHeader header="Field Formatting" target-id="field-formatting-tab">
     <div class="field-formatting-tab">
-      <DropdownSetting id="column-formatting" :options="columnOptions" :value="selectedColumn" class="mb-2" size="full" @onChanged="handleColumnSelect" />
+      <DropdownSetting
+        id="column-formatting"
+        :options="columnOptions"
+        :label="`${configSetting['column.select'].label}`"
+        :hint="`${configSetting['column.select'].hint}`"
+        :value="selectedColumn"
+        class="mb-2"
+        size="full"
+        @onChanged="handleColumnSelect"
+      />
       <div class="row-config-container">
         <ColorSetting
           id="field-font-color"
           :default-color="defaultSetting.style.color"
           :value="fontColor"
-          label="Font color"
+          :label="`${configSetting['fieldFormatting.style.color'].label}`"
+          :hint="`${configSetting['fieldFormatting.style.color'].hint}`"
           size="small"
           style="margin-right: 8px"
           @onChanged="handleFontColorChanged"
@@ -17,7 +27,8 @@
           :default-color="defaultSetting.background"
           :value="background"
           class="mr-2"
-          label="Background color"
+          :label="`${configSetting['fieldFormatting.backgroundColor'].label}`"
+          :hint="`${configSetting['fieldFormatting.backgroundColor'].hint}`"
           size="small"
           @onChanged="handleBackgroundChanged"
         />
@@ -26,14 +37,36 @@
           :options="alignOptions"
           :value="fieldAlign"
           class="mr-2"
-          label="Alignment"
+          :label="`${configSetting['fieldFormatting.align'].label}`"
+          :hint="`${configSetting['fieldFormatting.align'].hint}`"
           size="small"
           @onChanged="handleAlignChanged"
         />
       </div>
-      <ToggleSetting id="apply-format-header" :value="applyHeader" class="mb-2" label="Apply to header" @onChanged="handleApplyHeader" />
-      <ToggleSetting id="apply-format-values" :value="applyValues" class="mb-2" label="Apply to values" @onChanged="handleApplyValues" />
-      <ToggleSetting id="apply-format-total" :value="applyTotals" class="mb-2" label="Apply to total" @onChanged="handleApplyTotals" />
+      <ToggleSetting
+        id="apply-format-header"
+        :value="applyHeader"
+        class="mb-2"
+        :label="`${configSetting['fieldFormatting.applyHeader'].label}`"
+        :hint="`${configSetting['fieldFormatting.applyHeader'].hint}`"
+        @onChanged="handleApplyHeader"
+      />
+      <ToggleSetting
+        id="apply-format-values"
+        :value="applyValues"
+        class="mb-2"
+        :label="`${configSetting['fieldFormatting.applyValues'].label}`"
+        :hint="`${configSetting['fieldFormatting.applyValues'].hint}`"
+        @onChanged="handleApplyValues"
+      />
+      <ToggleSetting
+        id="apply-format-total"
+        :value="applyTotals"
+        class="mb-2"
+        :label="`${configSetting['fieldFormatting.applyTotals'].label}`"
+        :hint="`${configSetting['fieldFormatting.applyTotals'].hint}`"
+        @onChanged="handleApplyTotals"
+      />
       <RevertButton class="mb-3" style="text-align: right" @click="handleRevertDefault" />
     </div>
   </PanelHeader>
@@ -49,6 +82,8 @@ import { AlignOptions } from '@/shared/settings/common/options/AlignOptions';
 
 @Component({ components: { PanelHeader } })
 export default class FieldFormattingTab extends Vue {
+  private readonly configSetting = window.chartSetting['fieldFormatting.tab'];
+
   @Prop({ required: false, type: Object })
   private readonly setting!: PivotTableChartOption;
 

@@ -1,18 +1,22 @@
 package datainsider.user_profile.controller
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.twitter.finagle.http.Status
+import com.twitter.finagle.http.{Response, Status}
 import datainsider.client.domain.org.Organization
 import datainsider.login_provider.controller.DataInsiderServer
 import datainsider.user_profile.util.JsonParser
 
 // Todo: invalid recaptcha token, check again
-//class OrganizationControllerTest extends DataInsiderServer {
-//
-//  val email = "nkt165@gmail.com"
-//  val password: String = "asd@123"
-//  var activationToken: String = null
-//
+class OrganizationControllerTest extends DataInsiderServer {
+
+  val email = "nkt165@gmail.com"
+  val password: String = "asd@123"
+  var activationToken: String = null
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    login()
+  }
+
 //  var id: Long = -1
 //  test("test register new organization") {
 //    val r = server.httpPost(
@@ -60,5 +64,25 @@ import datainsider.user_profile.util.JsonParser
 //    assert(resp != null)
 //    println(resp)
 //  }
-//
-//}
+
+  test("update organization success") {
+    val response: Response = server.httpPut(
+      "/organizations",
+      andExpect = Status.Ok,
+      putBody = """
+        |{
+        | "name": "tvc12 company",
+        | "thumbnail_url": "https://www.google.com.vn/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
+        |}
+        |""".stripMargin,
+      headers = Map("Authorization" -> getToken())
+    )
+    assert(response.status == Status.Ok)
+    assert(response.contentString != null)
+    val organization: Organization = JsonParser.fromJson[Organization](response.contentString)
+    assert(organization.name == "tvc12 company")
+    assert(
+      organization.thumbnailUrl.get == "https://www.google.com.vn/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
+    )
+  }
+}

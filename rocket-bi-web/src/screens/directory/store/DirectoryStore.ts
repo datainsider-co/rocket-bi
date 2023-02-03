@@ -97,23 +97,15 @@ export default class DirectoryStore extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async createFolder(payload: CreateDirectoryRequest): Promise<void> {
+  async createFolder(payload: CreateDirectoryRequest): Promise<Directory> {
     try {
       const directory = await DirectoryStore.getDirectoryService().create(payload);
-      router.push({
-        name: Routers.AllData,
-        params: {
-          name: RouterUtils.buildParamPath(directory.id, directory.name)
-        },
-        query: {
-          token: RouterUtils.getToken(router.currentRoute)
-        }
-      });
       TrackingUtils.track(TrackEvents.CreateFolderOk, {
         directory_id: directory.id,
         parent_directory_id: payload.parentId,
         folder_name: payload.name
       });
+      return directory;
     } catch (error) {
       Log.debug('create Folder Error');
       TrackingUtils.track(TrackEvents.CreateFolderFail, {
@@ -127,20 +119,22 @@ export default class DirectoryStore extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async createDashboard(payload: CreateDashboardRequest): Promise<Dashboard> {
+  async createDashboard(request: CreateDashboardRequest): Promise<Dashboard> {
     try {
-      const dashboard = await DirectoryStore.getDashboardService().create(payload);
+      const dashboard = await DirectoryStore.getDashboardService().create(request);
       TrackingUtils.track(TrackEvents.CreateDashboardOk, {
         dashboard_id: dashboard.id,
         dashboard_name: dashboard.name,
-        parent_directory_id: payload.parentDirectoryId
+        parent_directory_id: request.parentDirectoryId,
+        dashboard_type: request.directoryType
       });
       return dashboard;
     } catch (error) {
       TrackingUtils.track(TrackEvents.CreateDashboardFail, {
-        dashboard_name: payload.name,
+        dashboard_name: request.name,
         error: error.message,
-        parent_directory_id: payload.parentDirectoryId
+        parent_directory_id: request.parentDirectoryId,
+        dashboard_type: request.directoryType
       });
       throw DIException.fromObject(error);
     }

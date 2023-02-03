@@ -8,6 +8,7 @@ export enum TrackEvents {
 
   /**Mydata Event*/
   MyDataDirectoryRename = 'mydata_rename',
+  DuplicateDirectory = 'duplicate_directory',
   MyDataCreate = 'mydata_create',
   MyDataSelectDirectory = 'mydata_select_directory',
 
@@ -263,6 +264,7 @@ export enum TrackEvents {
   RenameChart = 'rename_chart',
   SubmitRenameChart = 'submit_rename_chart',
   DuplicateChart = 'duplicate_chart',
+  CopyChart = 'copy_chart',
   DeleteChart = 'delete_chart',
   ConfigChart = 'config_chart',
 

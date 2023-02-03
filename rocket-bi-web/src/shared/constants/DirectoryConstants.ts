@@ -4,7 +4,8 @@ export class DirectoryMenuItem {
   static readonly MoveTo = 'Move to';
   static readonly AddToStarred = 'Add to Starred';
   static readonly RemoveFromStarred = 'Remove from Starred';
-  static readonly MakeACopy = 'Make a copy';
+  static readonly Duplicate = 'Duplicate';
+  static readonly Copy = 'Copy';
   static readonly Remove = 'Remove';
 }
 

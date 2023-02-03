@@ -7,15 +7,17 @@
     <CollapseTransition v-show="isShowListCheckbox" :delay="5000" easing="ease-in-out">
       <div class="list-checkbox">
         <div class="list-checkbox-container">
-          <b-form-checkbox v-if="group.allPermission.name" class="select-all" v-model="isSelectedAll" :value="true" :unchecked-value="false">
-            {{ group.allPermission.name }}
+          <b-form-checkbox v-if="group.hasSudoPermission" class="select-all" v-model="isSelectedAll" value="true" :unchecked-value="false">
+            All
           </b-form-checkbox>
           <MultiSelection
             :id="id"
             class="multi-selection"
             :model="selectedItems"
             :options="group.permissions"
-            @selectedColumnsChanged="selectedColumnsChanged"
+            key-label="name"
+            key-field="permission"
+            @selectedColumnsChanged="changePermissions"
           ></MultiSelection>
         </div>
       </div>
@@ -25,9 +27,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { CheckboxGroupOption, GroupCheckboxOption } from '@/shared';
 import { CollapseTransition } from 'vue2-transitions';
-import { PermissionInfo } from '@core/admin/domain/permissions/PermissionGroup';
+import { PermissionGroup } from '@core/admin/domain/permissions/PermissionGroup';
+import { Log } from '@core/utils';
+import { ListUtils } from '@/utils';
 
 @Component({
   components: {
@@ -35,80 +38,49 @@ import { PermissionInfo } from '@core/admin/domain/permissions/PermissionGroup';
   }
 })
 export default class GroupListCheckbox extends Vue {
-  private isShowListCheckbox = true;
-
   @Prop({ required: true, type: Object })
-  group!: GroupCheckboxOption;
-
-  private allCheckboxValue = this.group.allPermission.permission;
+  private readonly group!: PermissionGroup;
 
   @Prop({ required: true })
-  selectedItems!: string[];
-
-  private isSelectedAll = !this.group.permissions.some(per => !this.selectedItems.includes(per['value']));
+  private readonly selectedItems!: string[];
 
   @Prop({ required: false, type: Boolean, default: false })
-  isShowAllCheckbox!: boolean;
+  private readonly isShowAllCheckbox!: boolean;
 
   @Prop()
-  id!: string;
+  private readonly id!: string;
+
+  private isShowListCheckbox = true;
+  private isSelectedAll = this.group.isSudoPermission(this.selectedItems);
 
   get isAllPermissionChecked(): boolean {
-    let result = true;
-    this.group.permissions.forEach(item => {
-      if (!this.selectedItems.includes(item.value)) {
-        result = false;
-      }
-    });
-    return result;
+    const permissions: string[] = this.group.getPermissions();
+    return permissions.every(item => this.selectedItems.includes(item));
   }
 
   @Watch('isSelectedAll')
-  handleSelectAllChanged(isSelectedAll: boolean, oldIsSelectedAll: boolean) {
-    if (isSelectedAll !== oldIsSelectedAll) {
-      const newSelectedColumn: string[] = [...this.selectedItems];
-      if (isSelectedAll) {
-        this.$emit('handleChangeListCheckbox', [...new Set(this.handleAllSelected(newSelectedColumn))]);
-      } else {
-        this.$emit('handleChangeListCheckbox', [...new Set(this.handleAllUnSelected(newSelectedColumn))]);
-      }
+  onSelectAllChanged(isSelectedAll: boolean) {
+    if (this.isAllPermissionChecked && !isSelectedAll) {
+      const allPermissions: string[] = this.group.getAllPermissions();
+      const newPermissions: string[] = this.selectedItems.filter(item => !allPermissions.includes(item));
+      this.changePermissions(newPermissions);
+      this.isSelectedAll = false;
+    } else if (!this.isAllPermissionChecked && isSelectedAll) {
+      const allPermissions: string[] = [...this.selectedItems, ...this.group.getAllPermissions()];
+      this.changePermissions(allPermissions);
     }
   }
 
-  handleAllSelected(newSelectedColumn: string[]): string[] {
-    newSelectedColumn.push(this.allCheckboxValue);
-    if (!this.isAllPermissionChecked) {
-      this.group.permissions.forEach(item => {
-        newSelectedColumn.push(item.value);
-      });
-    }
-    return newSelectedColumn;
-  }
-
-  handleAllUnSelected(newSelectedColumn: string[]): string[] {
-    const indexAll = newSelectedColumn.findIndex(item => item === this.allCheckboxValue);
-    // Log.debug("inddexAll::", indexAll)
-    if (indexAll !== -1) {
-      newSelectedColumn.splice(indexAll, 1);
-      // Log.debug("inddexAll::", test, newSelectedColumn)
-    }
-    if (this.isAllPermissionChecked) {
-      this.group.permissions.forEach(item => {
-        const index = newSelectedColumn.findIndex(x => x === item.value);
-        if (index !== -1) {
-          newSelectedColumn.splice(index, 1);
-        }
-      });
-    }
-    return newSelectedColumn;
-  }
-
-  //todo rename
   @Watch('isAllPermissionChecked')
-  handleCheckedAllPermissions(newVal: boolean) {
-    if (newVal && !this.isSelectedAll) {
+  handleCheckedAllPermissions(isAllPermissionChecked: boolean) {
+    if (isAllPermissionChecked && !this.isSelectedAll) {
       this.isSelectedAll = true;
-    } else if (!newVal && this.isSelectedAll) {
+      const allPermissions: string[] = [...this.selectedItems, ...this.group.getAllPermissions()];
+      this.changePermissions(allPermissions);
+    } else if (!isAllPermissionChecked && this.isSelectedAll) {
+      const sudoPermissions: string[] = this.group.getSudoPermissions();
+      const newPermissions: string[] = this.selectedItems.filter(item => !sudoPermissions.includes(item));
+      this.changePermissions(newPermissions);
       this.isSelectedAll = false;
     }
   }
@@ -117,8 +89,15 @@ export default class GroupListCheckbox extends Vue {
     this.isShowListCheckbox = !this.isShowListCheckbox;
   }
 
-  private selectedColumnsChanged(values: string[]) {
-    this.$emit('handleChangeListCheckbox', values);
+  private changePermissions(newPermissions: string[]) {
+    const isSame: boolean =
+      ListUtils.isEmpty(ListUtils.diff(newPermissions, this.selectedItems)) && ListUtils.isEmpty(ListUtils.diff(this.selectedItems, newPermissions));
+    if (isSame) {
+      return;
+    } else {
+      const permissionSet: Set<string> = new Set(newPermissions);
+      this.$emit('change', Array.from(permissionSet));
+    }
   }
 }
 </script>

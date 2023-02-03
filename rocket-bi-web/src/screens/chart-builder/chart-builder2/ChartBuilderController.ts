@@ -58,6 +58,7 @@ export default class ChartBuilderController extends Vue {
   private readonly visualizationItems!: VisualizationItemData[];
 
   private currentChartInfo: ChartInfo | null = null;
+  private preventWatchQueryChange = false; //Chặn việc Watch làm thay đổi setting khi đang init
 
   @Ref()
   private readonly vizPanel!: VizPanel;
@@ -103,17 +104,27 @@ export default class ChartBuilderController extends Vue {
   }
 
   async init(chartInfo: ChartInfo, options?: TChartBuilderOptions) {
-    this.showDatabaseLoading();
-    this.currentChartInfo = chartInfo;
-    this.config = options?.config ?? DefaultChartBuilderConfig;
-    this.$nextTick(() => this.vizPanel.renderChart(this.currentChartInfo));
-    await Promise.all([
-      GeolocationModule.loadGeolocationMap(),
-      _ConfigBuilderStore.initState(chartInfo),
-      GeolocationModule.loadGeolocationFromWidget(chartInfo),
-      DatabaseSchemaModule.loadAllDatabaseInfos()
-    ]);
-    await this.selectDatabaseAndTable(chartInfo, options);
+    try {
+      this.preventWatchQueryChange = true;
+      this.showDatabaseLoading();
+      this.currentChartInfo = cloneDeep(chartInfo);
+      this.config = options?.config ?? DefaultChartBuilderConfig;
+      this.$nextTick(() => {
+        this.vizPanel.renderChart(chartInfo);
+        this.preventWatchQueryChange = false;
+      });
+      await Promise.all([
+        GeolocationModule.loadGeolocationMap(),
+        _ConfigBuilderStore.initState(cloneDeep(chartInfo)),
+        GeolocationModule.loadGeolocationFromWidget(cloneDeep(chartInfo)),
+        DatabaseSchemaModule.loadAllDatabaseInfos()
+      ]);
+      await this.selectDatabaseAndTable(chartInfo, options);
+    } catch (ex) {
+      Log.error(ex);
+      this.preventWatchQueryChange = false;
+      throw ex;
+    }
   }
 
   async initDefault(parentInfo?: ChartInfo | null, options?: TChartBuilderOptions | null) {
@@ -149,10 +160,12 @@ export default class ChartBuilderController extends Vue {
   }
 
   onQuerySettingChanged(querySetting: QuerySetting | null) {
-    const chartInfo: ChartInfo | null = this.createChartInfo(querySetting);
-    this.currentChartInfo = chartInfo;
-    Log.debug('onQuerySettingChanged::', chartInfo?.setting.options.options);
-    this.$nextTick(() => this.vizPanel.renderChart(chartInfo));
+    if (!this.preventWatchQueryChange) {
+      const chartInfo: ChartInfo | null = this.createChartInfo(querySetting);
+      this.currentChartInfo = chartInfo;
+      Log.debug('onQuerySettingChanged::', chartInfo?.setting.options.options);
+      this.$nextTick(() => this.vizPanel.renderChart(chartInfo));
+    }
   }
 
   private clearData() {

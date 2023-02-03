@@ -26,6 +26,10 @@ declare global {
     dataLayer: object[];
     appConfig: AppConfig;
     testConfig: AppConfig;
+
+    chartSetting: any;
+
+    queryLanguages: QueryLanguage;
   }
 
   export interface AppConfig {
@@ -48,6 +52,9 @@ declare global {
     VUE_APP_SCHEDULER_API_URL: string;
     VUE_APP_RELAY_API_URL: string;
     VUE_APP_STATIC_FILE_URL: string;
+    VUE_APP_FACEBOOK_APP_ID: string;
+    VUE_APP_FACEBOOK_APP_SECRET: string;
+    VUE_APP_FACEBOOK_SCOPE: string;
 
     VUE_APP_IS_DISABLE_LAKE_HOUSE: boolean;
     VUE_APP_IS_DISABLE_CDP: boolean;
@@ -60,5 +67,9 @@ declare global {
       isShowHint: boolean;
       hintMessage: string;
     };
+  }
+  export interface QueryLanguage {
+    clickHouse: { default: string };
+    python3: { default: string };
   }
 }

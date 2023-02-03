@@ -41,9 +41,10 @@ export class ScatterQuerySetting extends QuerySetting<ScatterChartOption> implem
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   get zoomData(): ZoomData {
@@ -57,7 +58,7 @@ export class ScatterQuerySetting extends QuerySetting<ScatterChartOption> implem
     const legend = obj.legend ? TableColumn.fromObject(obj.legend) : void 0;
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new ScatterQuerySetting(xAxis, yAxis, legend, filters, sorts, obj.options, sqlViews);
+    return new ScatterQuerySetting(xAxis, yAxis, legend, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getFrom(): number {
@@ -105,7 +106,8 @@ export class ScatterQuerySetting extends QuerySetting<ScatterChartOption> implem
       this.sorts,
       this.options,
 
-      this.sqlViews
+      this.sqlViews,
+      this.parameters
     );
   }
 

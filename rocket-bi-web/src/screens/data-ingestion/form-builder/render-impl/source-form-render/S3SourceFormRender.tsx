@@ -5,6 +5,8 @@ import { BFormInput } from 'bootstrap-vue';
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export class S3SourceFormRender implements DataSourceFormRender {
   private sourceInfo: S3SourceInfo;
@@ -136,5 +138,20 @@ export class S3SourceFormRender implements DataSourceFormRender {
 
   createDataSourceInfo(): DataSourceInfo {
     return S3SourceInfo.fromObject(this.sourceInfo);
+  }
+
+  validSource(source: S3SourceInfo) {
+    if (StringUtils.isEmpty(source.displayName)) {
+      throw new DIException('Display name is required!');
+    }
+    if (StringUtils.isEmpty(source.awsAccessKeyId)) {
+      throw new DIException('Access Key is required!');
+    }
+    if (StringUtils.isEmpty(source.awsSecretAccessKey)) {
+      throw new DIException('Secret Key is required!');
+    }
+    if (StringUtils.isEmpty(source.region)) {
+      throw new DIException('Region is required!');
+    }
   }
 }

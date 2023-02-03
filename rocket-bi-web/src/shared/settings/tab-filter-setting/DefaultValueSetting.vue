@@ -1,6 +1,12 @@
 <template>
   <div>
-    <p class="label mb-2">{{ title }}</p>
+    <div class="d-flex flex-row">
+      <p class="label mb-2">{{ title }}</p>
+      <span v-if="showHint" :id="`tooltip-default`" class="di-icon-help ml-2"></span>
+      <b-tooltip v-if="showHint" :target="`tooltip-default`" triggers="hover">
+        <div v-html="hint" />
+      </b-tooltip>
+    </div>
     <div class="d-flex flex-row">
       <DiButton :is-disable="!enableSetDefaultButton" class="button-set-default" title="Using value a default" @click="handleSetDefaultValue"></DiButton>
       <DiButton title="Reset" @click="handleResetDefaultValue"></DiButton>
@@ -13,6 +19,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import { DefaultFilterValue } from '@/shared';
+import { StringUtils } from '@/utils';
 
 @Component({ components: { DiButton } })
 export default class DefaultValueSetting extends Vue {
@@ -21,6 +28,9 @@ export default class DefaultValueSetting extends Vue {
 
   @Prop({ required: false, type: String, default: 'Default filter' })
   title!: string;
+
+  @Prop({ required: false, type: String, default: '' })
+  hint!: string;
 
   private get enableSetDefaultButton(): boolean {
     return _ConfigBuilderStore.tempFilterValue != null;
@@ -37,6 +47,10 @@ export default class DefaultValueSetting extends Vue {
   private handleResetDefaultValue() {
     _ConfigBuilderStore.setTempFilterValue(null);
     return this.$emit('onReset');
+  }
+
+  private get showHint(): boolean {
+    return StringUtils.isNotEmpty(this.hint);
   }
 }
 </script>

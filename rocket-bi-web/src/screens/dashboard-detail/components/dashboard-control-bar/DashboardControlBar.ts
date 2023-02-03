@@ -116,48 +116,40 @@ export default class DashboardControlBar extends Vue {
   private optionButton?: DiIconTextButton;
 
   private isResetMainDateFilter = false;
-  private readonly items: ContextMenuItem[] = [
-    {
-      text: DashboardOptions.ADD_CHART,
-      click: this.handleAddChart
-    },
-    // {
-    //   text: DashboardOptions.ADD_CONTROL,
-    //   click: () => Log.debug('Add control'),
-    //   disabled: true,
-    // },
-    // {
-    //   text: DashboardOptions.ADD_RULER,
-    //   disabled: true,
-    //   click: () => Log.debug('Add ruler')
-    // },
-    {
-      text: DashboardOptions.ADD_TAB,
-      click: this.handleAddTab
-    },
-    // {
-    //   text: DashboardOptions.ADD_DYNAMIC_CONTROL,
-    //   click: this.handleAddDynamicControl
-    // },
-    {
-      text: DashboardOptions.ADD_TEXT,
-      click: this.showAddText
-    },
-    // {
-    //   text: DashboardOptions.ADD_LINK,
-    //   disabled: true,
-    //   click: () => Log.debug('Add link')
-    // },
-    {
-      text: DashboardOptions.ADD_IMAGE,
-      click: this.addImage
-    }
-  ];
+  private get items(): ContextMenuItem[] {
+    return [
+      {
+        text: DashboardOptions.ADD_CHART,
+        click: this.handleAddChart
+      },
+      {
+        text: DashboardOptions.ADD_TAB,
+        click: this.handleAddTab
+      },
+      {
+        text: DashboardOptions.ADD_TEXT,
+        click: this.showAddText
+      },
+      {
+        text: DashboardOptions.ADD_IMAGE,
+        click: this.addImage
+      },
+      {
+        text: 'Paste chart',
+        click: this.handlePasteChart,
+        disabled: this.disabledPasteChart
+      }
+    ];
+  }
   // Provide from DashboardHeader.vue
   @Inject()
   private handleResetFilter?: () => void;
 
   private currentDirectoryId: number | null = null;
+
+  get disabledPasteChart(): boolean {
+    return !DashboardModule.copiedData;
+  }
 
   get getHiddenClass() {
     if (this.isViewMode && !this.mainDateFilter) {
@@ -460,6 +452,13 @@ export default class DashboardControlBar extends Vue {
       });
     } else {
       PopupUtils.showError('Cannot setting current dashboard!');
+    }
+  }
+
+  private handlePasteChart() {
+    this.hideOptionMenu();
+    if (DashboardModule.copiedData) {
+      EventBus.pasteData(DashboardModule.copiedData);
     }
   }
 

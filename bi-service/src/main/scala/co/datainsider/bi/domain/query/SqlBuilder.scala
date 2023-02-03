@@ -23,6 +23,8 @@ case class FromField(sqlStr: String, viewName: String)
   */
 case class JoinField(joinType: JoinType, leftViewName: String, rightViewName: String, conditionStr: String)
 
+case class CteField(exprName: String, expression: String)
+
 object JoinType extends Enumeration {
   type JoinType = Value
   val Left: JoinType = Value("left")
@@ -45,6 +47,7 @@ class SqlBuilder(sqlParser: SqlParser) {
   val groupByFields: ArrayBuffer[String] = ArrayBuffer[String]()
   val havingFields: ArrayBuffer[String] = ArrayBuffer[String]()
   val orderByFields: ArrayBuffer[String] = ArrayBuffer[String]()
+  val cteFields: ArrayBuffer[CteField] = ArrayBuffer[CteField]()
   var isGroupBy: Boolean = false
   var isDistinct: Boolean = false
   var isLimit: Boolean = false
@@ -54,43 +57,43 @@ class SqlBuilder(sqlParser: SqlParser) {
   def addFunction(function: Function): Unit = {
     function match {
       case f: Select =>
-        selectFields += sqlParser.selectWithAliasName(f)
+        selectFields += sqlParser.toFieldWithAliasName(f)
         groupByFields += sqlParser.toAliasName(f)
       case f: SelectDistinct =>
-        selectFields += sqlParser.selectWithAliasName(f)
+        selectFields += sqlParser.toFieldWithAliasName(f)
         isDistinct = true
       case f: GroupBy =>
-        selectFields += sqlParser.selectWithAliasName(f)
+        selectFields += sqlParser.toFieldWithAliasName(f)
         groupByFields += sqlParser.toAliasName(f)
         isGroupBy = true
 
       case f: Count =>
-        aggregateFields += sqlParser.selectWithAliasName(f)
+        aggregateFields += sqlParser.toFieldWithAliasName(f)
       case f: CountDistinct =>
-        aggregateFields += sqlParser.selectWithAliasName(f)
+        aggregateFields += sqlParser.toFieldWithAliasName(f)
       case f: Avg =>
-        aggregateFields += sqlParser.selectWithAliasName(f)
+        aggregateFields += sqlParser.toFieldWithAliasName(f)
       case f: Min =>
-        aggregateFields += sqlParser.selectWithAliasName(f)
+        aggregateFields += sqlParser.toFieldWithAliasName(f)
       case f: Max =>
-        aggregateFields += sqlParser.selectWithAliasName(f)
+        aggregateFields += sqlParser.toFieldWithAliasName(f)
       case f: Sum =>
-        aggregateFields += sqlParser.selectWithAliasName(f)
+        aggregateFields += sqlParser.toFieldWithAliasName(f)
       case f: First =>
-        aggregateFields += sqlParser.selectWithAliasName(f)
+        aggregateFields += sqlParser.toFieldWithAliasName(f)
       case f: Last =>
-        aggregateFields += sqlParser.selectWithAliasName(f)
+        aggregateFields += sqlParser.toFieldWithAliasName(f)
       case f: SelectExpression =>
-        aggregateFields += sqlParser.selectWithAliasName(f)
+        aggregateFields += sqlParser.toFieldWithAliasName(f)
 
       case f: SelectAll =>
         selectFields += "*"
       case f: SelectNull =>
-        selectFields += sqlParser.selectWithAliasName(f)
+        selectFields += sqlParser.toFieldWithAliasName(f)
       case f: CountAll =>
-        selectFields += sqlParser.selectWithAliasName(f)
+        selectFields += sqlParser.toFieldWithAliasName(f)
       case f: SelectExpr =>
-        selectFields += sqlParser.selectWithAliasName(f)
+        selectFields += sqlParser.toFieldWithAliasName(f)
 
       case f: DynamicFunction =>
         addFunction(f.finalFunction.getOrElse(f.baseFunction))
@@ -154,6 +157,10 @@ class SqlBuilder(sqlParser: SqlParser) {
     joinFields += joinField
   }
 
+  def addCte(cteField: CteField): Unit = {
+    cteFields += cteField
+  }
+
   def build(): String = {
     val selectClause: String = selectFields.union(aggregateFields).mkString(", ")
     val fromClause: String = buildFromClause()
@@ -166,16 +173,18 @@ class SqlBuilder(sqlParser: SqlParser) {
       else havingFields.mkString("(", ") and (", ")")
     val orderByClause: String = orderByFields.mkString(", ")
     val limitClause: String = s"$limitOffset, $limitSize"
+    val cteClause: String = cteFields.map(cte => s"(${cte.expression}) as ${cte.exprName}").mkString(",\n")
 
     s"""
+       |${if (cteFields.nonEmpty) s"with $cteClause" else ""}
        |${if (isDistinct) s"select distinct $selectClause" else s"select $selectClause"}
-       |${if (fromClause.isEmpty) "" else s"from $fromClause"}
-       |${if (whereClause.isEmpty) "" else s"where ($whereClause)"}
-       |${if (!isGroupBy) "" else s"group by $groupByClause"}
-       |${if (havingClause.isEmpty) "" else s"having $havingClause"}
-       |${if (orderByClause.isEmpty) "" else s"order by $orderByClause"}
-       |${if (!isLimit) "" else s"limit $limitClause"}
-       |""".stripMargin
+       |${if (fromClause.nonEmpty) s"from $fromClause" else ""}
+       |${if (whereClause.nonEmpty) s"where ($whereClause)" else ""}
+       |${if (isGroupBy) s"group by $groupByClause" else ""}
+       |${if (havingClause.nonEmpty) s"having $havingClause" else ""}
+       |${if (orderByClause.nonEmpty) s"order by $orderByClause" else ""}
+       |${if (isLimit) s"limit $limitClause" else ""}
+       |""".stripMargin.replaceAll("""(?m)^\s*\r?\n""", "")
   }
 
   /** *

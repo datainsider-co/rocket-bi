@@ -2,13 +2,13 @@ package co.datainsider.bi.controller.http
 
 import co.datainsider.bi.controller.http.filter.UserActivityTracker
 import co.datainsider.bi.domain.query.event.{ActionType, ResourceType}
-import co.datainsider.bi.domain.request.{ChartRequest, ListUserActivitiesRequest, ViewAsRequest, SqlQueryRequest}
+import co.datainsider.bi.domain.request.{ChartRequest, ListUserActivitiesRequest, SqlQueryRequest, QueryViewAsRequest}
 import co.datainsider.bi.service.{QueryService, UserActivityService}
-import datainsider.profiler.Profiler
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.twitter.finatra.http.Controller
 import datainsider.client.filter.{MustLoggedInFilter, PermissionFilter}
+import datainsider.profiler.Profiler
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -65,10 +65,15 @@ class QueryController @Inject() (
     }
 
   filter(permissionFilter.require("rls:view:*"))
-    .post("/chart/view_as") { request: ViewAsRequest =>
+    .post("/chart/view_as") { request: QueryViewAsRequest =>
       Profiler(s"[Http] ${this.getClass.getSimpleName}::QueryViewAsRequest") {
         queryService.query(request)
       }
     }
 
+  post("/query/csv") { request: ChartRequest =>
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::exportAsCsv") {
+      queryService.exportAsCsv(request)
+    }
+  }
 }

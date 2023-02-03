@@ -42,33 +42,42 @@
       </slot>
     </slot>
     <div class="d-flex flex-column database-listing">
-      <div class="database-selector " v-if="displayListing === DisplayListings.Database">
-        <slot name="database-selector" v-if="!enableSearch && showSelectDatabase">
-          <DiDropdown
-            canHideOtherPopup
-            class="selector mr-2"
-            :id="genDropdownId('databases')"
-            v-model="databaseSelected"
-            :data="databaseInfos"
-            labelProps="displayName"
-            placeholder="Select database"
-            valueProps="name"
-          >
-          </DiDropdown>
-        </slot>
-        <DiSearchInput
-          v-if="enableSearch || !showSelectDatabase"
-          class="w-100"
-          placeholder="Search tables & columns..."
-          :border="true"
-          v-model="keyword"
-          @blur="handleUnFocus"
-          @change="handleUnFocus"
-        />
-        <div v-else class="ml-auto icon-button cursor-pointer" @click="toggleSearch">
-          <img src="@/assets/icon/ic_search.svg" alt="" />
+      <slot
+        name="database-header"
+        :submitKeywordChanged="submitKeywordChanged"
+        :keyword="keyword"
+        :enableSearch="enableSearch"
+        :blur="handleUnFocus"
+        :toggleSearch="toggleSearch"
+      >
+        <div class="database-selector" v-if="displayListing === DisplayListings.Database">
+          <slot name="database-selector" v-if="!enableSearch && showSelectDatabase">
+            <DiDropdown
+              canHideOtherPopup
+              class="selector mr-2"
+              :id="genDropdownId('databases')"
+              v-model="databaseSelected"
+              :data="databaseInfos"
+              labelProps="displayName"
+              placeholder="Select database"
+              valueProps="name"
+            >
+            </DiDropdown>
+          </slot>
+          <DiSearchInput
+            v-if="enableSearch || !showSelectDatabase"
+            class="w-100"
+            placeholder="Search tables & columns..."
+            :border="true"
+            v-model="keyword"
+            @blur="handleUnFocus"
+            @change="handleUnFocus"
+          />
+          <div v-else class="ml-auto icon-button cursor-pointer" @click="toggleSearch">
+            <img src="@/assets/icon/ic_search.svg" alt="" />
+          </div>
         </div>
-      </div>
+      </slot>
       <StatusWidget :status="status" :error="error" :hide-retry="hideRetry" class="overflow-hidden pt-2">
         <vuescroll v-if="!isLoading && !isError && !isEmptyTableSchema" :ops="options" class="schema-listing" ref="treeNodeScroller">
           <div class="nav-scroll">

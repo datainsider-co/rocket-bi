@@ -7,7 +7,8 @@ services:
     command: mysqld --user=root --verbose
     restart: always
     volumes:
-      - mysql-data:/var/lib/mysql
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/conf:/etc/mysql/conf.d
     environment:
       MYSQL_USER: "di"
       MYSQL_PASSWORD: "di@2020!"
@@ -18,11 +19,12 @@ services:
     image: wendal/ssdb:latest
     container_name: rocket-ssdb
     volumes:
-      - ssdb-data:/var/lib/ssdb/data
+      - ./ssdb/data:/var/lib/ssdb/data
+      - ./ssdb/conf/ssdb.conf:/etc/ssdb.conf
     restart: always
 
   caas_service:
-    image: datainsiderco/caas-service:main
+    image: datainsiderco/caas-service:dev
     container_name: rocket-caas-service
     restart: always
     environment:
@@ -53,11 +55,11 @@ services:
       - caas_service
 
   bi_service:
-    image: datainsiderco/bi-service:main
+    image: datainsiderco/bi-service:dev
     container_name: rocket-bi-service
     restart: always
     ports:
-      - 8080:8080
+      - 8686:8080
     env_file:
       - .clickhouse.env
     environment:
@@ -70,8 +72,10 @@ services:
       - caas_service
 
   web:
-    image: datainsiderco/rocket-bi-web:main
+    image: datainsiderco/rocket-bi-web:dev
     container_name: rocket-web
+    volumes:
+     - ./web/config:/app/config
     ports:
       - 5050:8080
     deploy:
@@ -81,9 +85,7 @@ services:
         max_attempts: 3
         window: 30s
 
-volumes:
-  mysql-data:
-  ssdb-data:
-
 networks:
-  rocket_network:
+  default:
+    external:
+      name: di_network

@@ -1,8 +1,24 @@
 <template>
   <PanelHeader header="Display" target-id="display-tab">
     <div class="display-tab">
-      <DropdownSetting id="display-selection" :options="seriesOptions" :value="selectedLegend" class="mb-3" size="full" @onSelected="handleSelectedLegend" />
-      <InputSetting id="display-name-setting" :value="displayName" class="mb-3" label="Display Name" @onChanged="handleDisplayNameChanged" />
+      <DropdownSetting
+        id="display-selection"
+        :label="`${configSetting['legend.select'].label}`"
+        :hint="`${configSetting['legend.select'].hint}`"
+        :options="seriesOptions"
+        :value="selectedLegend"
+        class="mb-3"
+        size="full"
+        @onSelected="handleSelectedLegend"
+      />
+      <InputSetting
+        id="display-name-setting"
+        :value="displayName"
+        class="mb-3"
+        :label="`${configSetting['legend.name'].label}`"
+        :hint="`${configSetting['legend.name'].hint}`"
+        @onChanged="handleDisplayNameChanged"
+      />
       <div class="row-config-container align-items-end">
         <DropdownSetting
           id="display-type"
@@ -10,11 +26,19 @@
           :value="type"
           class="mr-2"
           disabled
-          label="Display"
+          :label="`${configSetting['legend.type'].label}`"
+          :hint="`${configSetting['legend.type'].hint}`"
           size="half"
           @onChanged="handleTypeChanged"
         />
-        <ToggleSetting v-if="enableMarkerSetting" id="display-show-marker" :value="showMarker" label="Show marker" @onChanged="handleMarkerEnable" />
+        <ToggleSetting
+          v-if="enableMarkerSetting"
+          id="display-show-marker"
+          :value="showMarker"
+          :label="`${configSetting['legend.marker.enabled'].label}`"
+          :hint="`${configSetting['legend.marker.enabled'].hint}`"
+          @onChanged="handleMarkerEnable"
+        />
       </div>
       <div class="row-config-container" v-if="enableWidthLineSetting">
         <DropdownSetting
@@ -22,16 +46,28 @@
           :options="dashOptions"
           :value="dash"
           size="half"
+          :label="`${configSetting['legend.dash'].label}`"
+          :hint="`${configSetting['legend.dash'].hint}`"
           style="margin-right: 12px"
           @onChanged="handleDashChange"
         />
-        <DropdownSetting id="display-line-width" :options="widthOptions" :value="width" disabled size="small" @onChanged="handleWidthChange" />
+        <DropdownSetting
+          id="display-line-width"
+          :label="`${configSetting['legend.dash.width'].label}`"
+          :hint="`${configSetting['legend.dash.width'].hint}`"
+          :options="widthOptions"
+          :value="width"
+          disabled
+          size="small"
+          @onChanged="handleWidthChange"
+        />
       </div>
       <ToggleSetting
         v-if="seriesOptions.length > 1 && enableDualAxis"
         id="use-dual-axis"
         :value="useDualAxis"
-        label="Use Second Axis"
+        :label="`${configSetting['legend.dualAxis'].label}`"
+        :hint="`${configSetting['legend.dualAxis'].hint}`"
         @onChanged="handleUseDualAxis"
       />
 
@@ -52,6 +88,8 @@ import { AxisSetting, SettingKey } from '@core/common/domain';
 
 @Component({ components: { PanelHeader } })
 export default class DisplayTab extends Vue {
+  private readonly configSetting = window.chartSetting['display.tab'];
+
   @Prop({ required: false, type: Object })
   private readonly setting!: PlotOptions;
 

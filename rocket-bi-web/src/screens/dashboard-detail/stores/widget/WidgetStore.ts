@@ -12,6 +12,7 @@ import {
   DynamicConditionWidget,
   DynamicFunctionWidget,
   Position,
+  QueryParameter,
   TabControl,
   TabWidget,
   TextWidget,
@@ -53,6 +54,7 @@ class WidgetStore extends VuexModule {
   get allDynamicFunctionWidget(): DynamicFunctionWidget[] {
     return this.widgets.filter((widget): widget is DynamicFunctionWidget => widget.className === Widgets.DynamicFunctionWidget);
   }
+
   get allDynamicConditionWidget(): DynamicConditionWidget[] {
     return this.widgets.filter((widget): widget is DynamicConditionWidget => widget.className === Widgets.DynamicConditionWidget);
   }
@@ -92,6 +94,12 @@ class WidgetStore extends VuexModule {
       }
     });
     return positions;
+  }
+
+  get getPosition() {
+    return (widgetId: number) => {
+      return this.mapPosition[widgetId];
+    };
   }
 
   @Mutation
@@ -199,23 +207,17 @@ class WidgetStore extends VuexModule {
   }
 
   @Action
-  handleCreateTextWidget(textWidget: TextWidget) {
-    // TODO: loading when create text
-    const position: Position = Position.defaultForText();
-    const widgetPosition = {
-      widget: textWidget,
+  async handleCreateTextWidget(payload: { widget: Widget; position?: Position }): Promise<void> {
+    const position: Position = payload.position || Position.defaultForText();
+    const newWidgetInfo = {
+      widget: payload.widget,
       position: position
     };
-    return this.handleCreateNewWidget(widgetPosition)
-      .then(widget => {
-        return this.addWidget({
-          widget: widget,
-          position: position
-        });
-      })
-      .catch(ex => {
-        Log.debug('createTextWidget::', ex);
-      });
+    const newWidget = await this.handleCreateNewWidget(newWidgetInfo);
+    this.addWidget({
+      widget: newWidget,
+      position: position
+    });
   }
 
   @Action
@@ -475,6 +477,18 @@ class WidgetStore extends VuexModule {
   private reset() {
     this.widgets = [];
     this.mapPosition = {};
+  }
+
+  get allQueryParameters(): Record<string, QueryParameter> {
+    const result: Record<string, QueryParameter> = {};
+    this.allQueryWidgets.forEach(widget => {
+      const queryParam: Record<string, QueryParameter> = widget.setting.getChartOption()?.options?.queryParameter ?? {};
+      for (const key in queryParam) {
+        const param = queryParam[key];
+        result[param.displayName] = param;
+      }
+    });
+    return result;
   }
 }
 

@@ -4,7 +4,7 @@ import { DIKeys } from '@core/common/modules';
 import { BaseClient } from '@core/common/services/HttpClient';
 import { DataSource } from '@core/data-ingestion/domain/response/DataSource';
 import { DIException, SourceId, TableSchema } from '@core/common/domain';
-import { Job, ListingResponse, PreviewResponse, S3Job, S3SourceInfo } from '@core/data-ingestion';
+import { FacebookTokenResponse, Job, ListingResponse, PreviewResponse, S3Job, S3SourceInfo } from '@core/data-ingestion';
 import { BaseResponse } from '@core/data-ingestion/domain/response/BaseResponse';
 import { Log } from '@core/utils';
 import { GoogleToken } from '@core/data-ingestion/domain/response/GoogleToken';
@@ -45,6 +45,8 @@ export abstract class DataSourceRepository {
   abstract previewS3Job(sourceInfo: DataSourceInfo, job: Job): Promise<PreviewResponse>;
 
   abstract getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]>;
+
+  abstract getFacebookExchangeToken(token: string): Promise<FacebookTokenResponse>;
 }
 
 export class DataSourceRepositoryImpl extends DataSourceRepository {
@@ -161,6 +163,10 @@ export class DataSourceRepositoryImpl extends DataSourceRepository {
   getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]> {
     return this.httpClient.get(`/source/google_ads/customer_id/${sourceId}`);
   }
+
+  getFacebookExchangeToken(token: string): Promise<FacebookTokenResponse> {
+    return this.httpClient.get(`worker/source/fb_ads/${token}/exchange_token`).then(res => FacebookTokenResponse.fromObject(res));
+  }
 }
 
 export class DataSourceRepositoryMock extends DataSourceRepository {
@@ -229,6 +235,10 @@ export class DataSourceRepositoryMock extends DataSourceRepository {
   }
 
   getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]> {
+    throw new DIException('Not supported');
+  }
+
+  getFacebookExchangeToken(token: string): Promise<FacebookTokenResponse> {
     throw new DIException('Not supported');
   }
 }

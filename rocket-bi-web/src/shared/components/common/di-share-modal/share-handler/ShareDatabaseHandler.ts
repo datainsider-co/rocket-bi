@@ -40,7 +40,7 @@ export class ShareDatabaseHandler implements ShareHandler {
     return Promise.reject('create share anyone fail with database');
   }
 
-  updateSharePermission(userData: SharedUserInfo, editedValue: string): void {
+  updateSharePermission(userData: SharedUserInfo, editedValue: ActionType): void {
     ShareDatabaseModule.updateSharePermission({ userData: userData, editedValue: editedValue });
   }
 

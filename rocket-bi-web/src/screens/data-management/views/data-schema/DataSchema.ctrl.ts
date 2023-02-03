@@ -402,7 +402,9 @@ export default class DataSchema extends Mixins(DataManagementChild, SplitPanelMi
           };
           this.renameModalTitle = `Rename database`;
           this.contextMenu.hide();
-          this.renameModal.show(model.database.displayName, data);
+          this.renameModal.show(model.database.displayName, (newName: string) => {
+            this.handleRenameTable(newName, data);
+          });
           TrackingUtils.track(TrackEvents.DataSchemaRenameDatabase, { database: this.model!.database.name });
         }
       },
@@ -416,7 +418,9 @@ export default class DataSchema extends Mixins(DataManagementChild, SplitPanelMi
           };
           this.renameModalTitle = `Rename table`;
           this.contextMenu.hide();
-          this.renameModal.show(model.table!.name, data);
+          this.renameModal.show(model.table!.name, (newName: string) => {
+            this.handleRenameTable(newName, data);
+          });
           TrackingUtils.track(TrackEvents.DataSchemaRenameTable, {
             database: this.model!.database.name,
             table: this.model!.table?.name

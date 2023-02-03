@@ -7,17 +7,28 @@
           id="title-enable"
           :value="titleEnabled"
           class="mb-3 group-config"
-          label="Title"
+          :label="`${configSetting['title.enabled'].label}`"
+          :hint="`${configSetting['title.enabled'].hint}`"
           @onChanged="handleTitleEnabled"
         />
-        <InputSetting id="title-input" placeholder="Input Title" :value="title" class="mb-3" label="Title text" size="full" @onChanged="handleTitleSaved" />
+        <InputSetting
+          id="title-input"
+          :label="`${configSetting['title.text'].label}`"
+          :hint="`${configSetting['title.text'].hint}`"
+          :placeholder="`${configSetting['title.text'].placeHolder}`"
+          :value="title"
+          class="mb-3"
+          size="full"
+          @onChanged="handleTitleSaved"
+        />
         <DropdownSetting
           id="title-font-family"
           :enabledRevert="false"
           :options="fontOptions"
           :value="titleFont"
           class="mb-3"
-          label="Font family"
+          :label="`${configSetting['title.style.fontFamily'].label}`"
+          :hint="`${configSetting['title.style.fontFamily'].hint}`"
           size="full"
           @onChanged="handleTitleFontChanged"
         />
@@ -26,7 +37,8 @@
             id="title-font-color"
             :default-color="defaultStyle.title.color"
             :value="titleColor"
-            label="Font color"
+            :label="`${configSetting['title.style.color'].label}`"
+            :hint="`${configSetting['title.style.color'].hint}`"
             size="small"
             style="margin-right: 12px"
             @onChanged="handleTitleColorChanged"
@@ -35,12 +47,19 @@
             id="title-font-size"
             :options="fontSizeOptions"
             :value="titleFontSize"
-            label="Text size"
+            :label="`${configSetting['title.style.fontSize'].label}`"
+            :hint="`${configSetting['title.style.fontSize'].hint}`"
             size="small"
             style="margin-right: 16px"
             @onChanged="handleTitleFontSizeChanged"
           />
-          <AlignSetting id="title-align" :value="titleAlign" label="Alignment" @onChanged="handleTitleAlignChanged" />
+          <AlignSetting
+            id="title-align"
+            :value="titleAlign"
+            :label="`${configSetting['title.align'].label}`"
+            :hint="`${configSetting['title.align'].hint}`"
+            @onChanged="handleTitleAlignChanged"
+          />
         </div>
         <RevertButton style="text-align: right" @click="handleRevertTitle" />
       </div>
@@ -51,15 +70,17 @@
           id="subtitle-enable"
           :value="subtitleEnabled"
           class="mb-3 group-config"
-          label="Subtitle"
+          :label="`${configSetting['subtitle.enabled'].label}`"
+          :hint="`${configSetting['subtitle.enabled'].hint}`"
           @onChanged="handleSubtitleEnabled"
         />
         <InputSetting
           id="subtitle-input"
-          placeholder="Input Subtitle"
           :value="subtitle"
           class="mb-3"
-          label="Subtitle text"
+          :label="`${configSetting['subtitle.text'].label}`"
+          :hint="`${configSetting['subtitle.text'].hint}`"
+          :placeholder="`${configSetting['subtitle.text'].placeHolder}`"
           size="full"
           @onChanged="handleSubtitleSaved"
         />
@@ -68,7 +89,8 @@
           :options="fontOptions"
           :value="subtitleFont"
           class="mb-3"
-          label="Font family"
+          :label="`${configSetting['subtitle.style.fontFamily'].label}`"
+          :hint="`${configSetting['subtitle.style.fontFamily'].hint}`"
           size="full"
           @onChanged="handleSubtitleFontChanged"
         />
@@ -77,7 +99,8 @@
             id="subtitle-font-color"
             :default-color="defaultStyle.subtitle.color"
             :value="subtitleColor"
-            label="Font color"
+            :label="`${configSetting['subtitle.style.color'].label}`"
+            :hint="`${configSetting['subtitle.style.color'].hint}`"
             size="small"
             style="margin-right: 12px"
             @onChanged="handleSubtitleColorChanged"
@@ -86,12 +109,19 @@
             id="subtitle-font-size"
             :options="fontSizeOptions"
             :value="subtitleFontSize"
-            label="Text size"
+            :label="`${configSetting['subtitle.style.fontSize'].label}`"
+            :hint="`${configSetting['subtitle.style.fontSize'].hint}`"
             size="small"
             style="margin-right: 16px"
             @onChanged="handleSubtitleFontSizeChanged"
           />
-          <AlignSetting id="subtitle-align" :value="subtitleAlign" label="Alignment" @onChanged="handleSubtitleAlignChanged" />
+          <AlignSetting
+            id="subtitle-align"
+            :value="subtitleAlign"
+            :label="`${configSetting['subtitle.align'].label}`"
+            :hint="`${configSetting['subtitle.align'].hint}`"
+            @onChanged="handleSubtitleAlignChanged"
+          />
         </div>
         <RevertButton class="mb-3" style="text-align: right" @click="handleRevertSubtitle" />
       </div>
@@ -109,6 +139,7 @@ import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOption
 
 @Component({ components: { PanelHeader } })
 export default class TitleTab extends Vue {
+  private readonly configSetting = window.chartSetting['title.tab'];
   @Prop({ required: false, type: Object })
   private readonly setting!: ChartOptionData;
   @Prop({ required: false })

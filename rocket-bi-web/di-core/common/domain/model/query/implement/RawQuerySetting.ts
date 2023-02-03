@@ -12,8 +12,15 @@ import { RandomUtils } from '@/utils';
 export class RawQuerySetting extends QuerySetting implements Paginatable {
   readonly className = QuerySettingType.RawQuery;
 
-  constructor(public sql: string, filters: Condition[] = [], sorts: OrderBy[] = [], options: Record<string, any> = {}, sqlViews: InlineSqlView[] = []) {
-    super(filters, sorts, options, sqlViews);
+  constructor(
+    public sql: string,
+    filters: Condition[] = [],
+    sorts: OrderBy[] = [],
+    options: Record<string, any> = {},
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
+  ) {
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   getAllFunction(): Function[] {
@@ -34,14 +41,14 @@ export class RawQuerySetting extends QuerySetting implements Paginatable {
 
   static fromQuery(query: string) {
     const viewName = IdGenerator.generateKey(['view', RandomUtils.nextString()]);
-    return new RawQuerySetting(query, [], [], {}, [new InlineSqlView(viewName, new SqlQuery(query))]);
+    return new RawQuerySetting(query, [], [], {}, [new InlineSqlView(viewName, new SqlQuery(query))], {});
   }
 
   static fromObject(obj: RawQuerySetting) {
     const [filters, sorts] = getFiltersAndSorts(obj);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new RawQuerySetting(obj.sql, filters, sorts, obj.options, sqlViews);
+    return new RawQuerySetting(obj.sql, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   static isRawQuerySetting(querySetting: QuerySetting): querySetting is RawQuerySetting {

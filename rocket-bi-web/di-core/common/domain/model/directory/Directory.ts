@@ -11,7 +11,7 @@ import { DirectoryMetadata } from '@core/common/domain/model/directory/directory
 export class Directory {
   public id: DirectoryId;
   public name: string;
-  public owner: UserProfile;
+  public owner?: UserProfile;
   public createdDate: DDate;
   public updatedDate: DDate;
   public ownerId: UserId;

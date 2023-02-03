@@ -7,15 +7,14 @@
           <span>Owner</span>
         </div>
         <UserItemStatus
-          v-for="(item, index) in data"
-          :id="index"
+          v-for="item in data"
+          :id="item.user.email"
           :key="item.user.email"
           :organization-id="organizationId"
           :resourceId="resourceId"
           :resourceType="resourceType"
-          :swm-data="statusData"
           :user-data="item"
-          @handleStatusChange="handleItemStatusChange"
+          @onActionTypeChanged="actionType => handleActionTypeChanged(item, actionType)"
         ></UserItemStatus>
       </div>
     </vuescroll>
@@ -25,7 +24,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import UserItemStatus from './UserItemStatus.vue';
-import { ResourceType } from '@/utils/PermissionUtils';
+import { ActionType, ResourceType } from '@/utils/PermissionUtils';
 import { Config } from 'vuescroll';
 import { UserProfile } from '@core/common/domain/model';
 import { ActionNode, VerticalScrollConfigs } from '@/shared';
@@ -46,13 +45,11 @@ export default class SharePermissionManager extends Vue {
   private readonly resourceType!: ResourceType;
   @Prop({ required: true })
   private readonly resourceId!: string;
-  @Prop()
-  private readonly statusData!: ActionNode[];
 
   private readonly scrollOptions: Config = VerticalScrollConfigs;
 
-  handleItemStatusChange(userItemData: SharedUserInfo, status: string) {
-    this.$emit('handleItemStatusChange', userItemData, status);
+  handleActionTypeChanged(userItemData: SharedUserInfo, actionType: ActionType) {
+    this.$emit('onActionTypeChanged', userItemData, actionType);
   }
 }
 </script>

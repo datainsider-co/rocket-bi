@@ -82,4 +82,5 @@ class StringUtilsTest extends FunSuite {
     assert(StringUtils.md5("world") == "7d793037a0760186574b0282f2f435e7")
     assert(StringUtils.md5("helloworld") == "fc5e038d38a57032085441e7fe7010b0")
   }
+
 }

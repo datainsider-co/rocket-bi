@@ -5,7 +5,8 @@
         id="range-1-color"
         :defaultColor="defaultSetting.range1Color"
         :value="range1Color"
-        label="Range 1 Color"
+        :label="`${configSetting['range1Color'].label}`"
+        :hint="`${configSetting['range1Color'].hint}`"
         size="half"
         style="margin-right: 8px"
         @onChanged="handleRangeColor1Changed"
@@ -14,7 +15,8 @@
         id="range-2-color"
         :defaultColor="defaultSetting.range2Color"
         :value="range2Color"
-        label="Range 2 Color"
+        :label="`${configSetting['range2Color'].label}`"
+        :hint="`${configSetting['range2Color'].hint}`"
         size="half"
         @onChanged="handleRangeColor2Changed"
       />
@@ -23,7 +25,8 @@
       id="range-3-color"
       :defaultColor="defaultSetting.range1Color"
       :value="range3Color"
-      label="Range 3 Color"
+      :label="`${configSetting['range3Color'].label}`"
+      :hint="`${configSetting['range3Color'].hint}`"
       size="half"
       @onChanged="handleRangeColor3Changed"
     />
@@ -40,6 +43,7 @@ import RevertButton from '@/shared/settings/common/RevertButton.vue';
 
 @Component({ components: { PanelHeader, RevertButton } })
 export default class BulletColorTab extends Vue {
+  private readonly configSetting = window.chartSetting['bulletColor.tab'];
   private readonly defaultSetting = {
     range1Color: '#75ABEA',
     range2Color: '#8ABCF8',

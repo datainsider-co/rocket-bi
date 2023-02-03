@@ -33,7 +33,7 @@
 
               <div class="form-custom mb-3">
                 <label>Privileges</label>
-                <div v-for="(group, index) in toGroupCheckboxOptions" :key="index">
+                <div v-for="(group, index) in permissionGroups" :key="index">
                   <div class="group-privilege pb-3">
                     <GroupListCheckbox
                       class="group-list-checkbox"
@@ -41,7 +41,7 @@
                       :selected-items="apiKeyResponse.permissions"
                       :group="group"
                       :is-show-all-checkbox="true"
-                      @handleChangeListCheckbox="handleChangeListCheckbox"
+                      @change="handleChangeListCheckbox"
                     ></GroupListCheckbox>
                   </div>
                 </div>
@@ -61,12 +61,12 @@ import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
 import { DIException } from '@core/common/domain';
 import { Log } from '@core/utils';
 import { AtomicAction } from '@/shared/anotation/AtomicAction';
-import { CheckboxGroupOption, GroupCheckboxOption, Status, VerticalScrollConfigs } from '@/shared';
+import { Status, VerticalScrollConfigs } from '@/shared';
 import DiInputComponent from '@/shared/components/DiInputComponent.vue';
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
 import { ApiKeyInfo, ApiKeyResponse, CreateApiKeyRequest, UpdateApiKeyRequest } from '@core/organization';
 import { FormMode } from '@core/data-ingestion';
-import { PermissionGroup, PermissionInfo, SupportPermissionGroups } from '@core/admin/domain/permissions/PermissionGroup';
+import { PermissionGroup, SupportPermissionGroups } from '@core/admin/domain/permissions/PermissionGroup';
 import { UserDetailModule } from '@/screens/user-management/store/UserDetailStore';
 import GroupListCheckbox from '@/screens/user-management/components/user-detail/GroupListCheckbox.vue';
 import { APIKeyService } from '@core/organization/service/APIKeyService';
@@ -124,31 +124,12 @@ export default class APIKeyConfigModal extends Vue {
   }
 
   private get permissionGroups(): PermissionGroup[] {
-    return UserDetailModule.permissionGroups.filter(per => per.groupName !== SupportPermissionGroups.APIKey().groupName);
-  }
-
-  private get toGroupCheckboxOptions(): GroupCheckboxOption[] {
-    const result = this.permissionGroups.map(group => {
-      return {
-        ...group,
-        permissions: this.toCheckboxGroupOption(group.permissions)
-      };
-    });
-    Log.debug('permission group::', result);
-    return result;
-  }
-
-  private toCheckboxGroupOption(permissions: PermissionInfo[]): CheckboxGroupOption[] {
-    return permissions.map(per => {
-      return {
-        text: per.name,
-        value: per.permission
-      };
-    });
+    return UserDetailModule.permissionGroups.filter(per => per.groupName !== SupportPermissionGroups.apiKey().groupName);
   }
 
   private handleChangeListCheckbox(selectedItems: string[]) {
-    this.apiKeyResponse.permissions = selectedItems;
+    const permissionsSet: Set<string> = new Set(selectedItems);
+    this.apiKeyResponse.permissions = Array.from(permissionsSet);
   }
 
   private updateExpireTime(date?: Date) {

@@ -76,54 +76,6 @@ export default class App extends Vue {
       Modals.init(this.confirmationModal);
       TableTooltipUtils.initTooltip();
     });
-
-    window.addEventListener('click', this.trackingClickEvent);
-    window.addEventListener('change', this.trackInputEvent);
-  }
-
-  private trackInputEvent(event: Event) {
-    const element = event.target as HTMLInputElement;
-    // Log.debug('Event target::', event);
-    if (element.nodeName === 'INPUT' || element.nodeName === 'TEXTAREA') {
-      const id: string | null = element.getAttribute('id');
-      const hideValue = element.getAttribute('hide-track-value') ? true : false;
-      if (id && !StringUtils.isIncludes('bvid', id)) {
-        const event = StringUtils.toSnakeCase(`${id}`);
-        const value = hideValue ? 'unknown' : this.getInputValue(element);
-        TrackingUtils.track(event, { value: value });
-      }
-    }
-  }
-
-  private getInputValue(element: HTMLInputElement): string | boolean {
-    if (element.type === 'text') {
-      return element.value;
-    } else {
-      return element.checked;
-    }
-  }
-
-  private trackingClickEvent(event: MouseEvent) {
-    try {
-      const trackingElement = this.getTrackingElement(event);
-      if (trackingElement) {
-        const trackingEvent = trackingElement.getAttribute('event');
-        if (trackingEvent) {
-          TrackingUtils.track(trackingEvent, {});
-        }
-      }
-    } catch (e) {
-      //
-    }
-  }
-
-  private getTrackingElement(event: MouseEvent): HTMLElement | null {
-    //@ts-ignore
-    const trackingElement = (event.path as HTMLElement[]).find(element => StringUtils.isNotEmpty(element.getAttribute('event')));
-    if (trackingElement) {
-      return trackingElement;
-    }
-    return null;
   }
 
   private initTheme() {

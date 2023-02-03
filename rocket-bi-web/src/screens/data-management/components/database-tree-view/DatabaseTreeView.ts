@@ -237,7 +237,9 @@ export default class DatabaseTreeView extends Vue {
   }
 
   private showCreateDatabaseModal() {
-    this.databaseCreationModal?.show('');
+    this.databaseCreationModal?.show('', (name: string) => {
+      this.handleCreateDatabase(name);
+    });
   }
 
   private showTableContextMenu(event: MouseEvent, table: TableSchema) {

@@ -9,6 +9,7 @@ export class OracleJdbcPersistConfiguration extends JdbcPersistConfiguration {
   serviceName: string;
   sslConfiguration: SSLConfig | null;
   sslServerCertDn: string;
+  extraPropertiesAsJson: string;
 
   constructor(
     displayName: string,
@@ -21,7 +22,8 @@ export class OracleJdbcPersistConfiguration extends JdbcPersistConfiguration {
     port: string,
     serviceName: string,
     sslConfiguration: SSLConfig | null,
-    sslServerCertDn: string
+    sslServerCertDn: string,
+    extraPropertiesAsJson: string
   ) {
     super(displayName, username, password, databaseName, tableName, persistType);
     this.host = host;
@@ -29,6 +31,7 @@ export class OracleJdbcPersistConfiguration extends JdbcPersistConfiguration {
     this.serviceName = serviceName;
     this.sslConfiguration = sslConfiguration;
     this.sslServerCertDn = sslServerCertDn;
+    this.extraPropertiesAsJson = extraPropertiesAsJson;
   }
 
   static fromObject(obj: any): OracleJdbcPersistConfiguration {
@@ -43,11 +46,12 @@ export class OracleJdbcPersistConfiguration extends JdbcPersistConfiguration {
       obj.port,
       obj.serviceName,
       obj.sslConfiguration ? SSLConfig.fromObject(obj.sslConfiguration) : null,
-      obj.sslServerCertDn
+      obj.sslServerCertDn,
+      obj.extraPropertiesAsJson
     );
   }
 
   static default(): OracleJdbcPersistConfiguration {
-    return new OracleJdbcPersistConfiguration('', '', '', '', '', PERSISTENT_TYPE.Update, '', '1521', '', null, '');
+    return new OracleJdbcPersistConfiguration('', '', '', '', '', PERSISTENT_TYPE.Update, '', '1521', '', null, '', '{}');
   }
 }

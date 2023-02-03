@@ -27,16 +27,17 @@ export class GroupMeasurementQuerySetting extends QuerySetting<TabFilterOption> 
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   static fromObject(obj: GroupMeasurementQuerySetting): GroupMeasurementQuerySetting {
     const [filters, sorts] = getFiltersAndSorts(obj);
     const values = obj.values ? obj.values.map(value => TableColumn.fromObject(value)) : [];
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
-    return new GroupMeasurementQuerySetting(values, filters, sorts, obj.options, sqlViews);
+    return new GroupMeasurementQuerySetting(values, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

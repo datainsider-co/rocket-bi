@@ -6,7 +6,8 @@
           id="toggle-background-color"
           :default-color="defaultValue.background"
           :value="background"
-          label="Background color"
+          :label="`${configSetting['toggleIcon.backgroundColor'].label}`"
+          :hint="`${configSetting['toggleIcon.backgroundColor'].hint}`"
           size="half"
           style="margin-right:12px"
           @onChanged="handleBackgroundColorChanged"
@@ -15,7 +16,8 @@
           id="toggle-icon-color"
           :default-color="defaultValue.color"
           :value="iconColor"
-          label="Icon color"
+          :label="`${configSetting['toggleIcon.color'].label}`"
+          :hint="`${configSetting['toggleIcon.color'].hint}`"
           size="half"
           @onChanged="handleIconColorChanged"
         />
@@ -32,6 +34,8 @@ import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 
 @Component({ components: { PanelHeader } })
 export default class CollapseTab extends Vue {
+  private readonly configSetting = window.chartSetting['collapse.tab'];
+
   @Prop({ required: false, type: Object })
   private readonly setting!: PivotTableChartOption;
   private readonly defaultValue = {

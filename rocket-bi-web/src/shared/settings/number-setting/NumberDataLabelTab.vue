@@ -6,7 +6,8 @@
         :options="fontOptions"
         :value="font"
         class="mb-2"
-        label="Font family"
+        :label="`${configSetting['style.fontFamily'].label}`"
+        :hint="`${configSetting['style.fontFamily'].hint}`"
         size="full"
         @onChanged="handleFontChanged"
       />
@@ -17,16 +18,27 @@
           :value="textColor"
           class="mr-2"
           size="small"
+          :label="`${configSetting['style.color'].label}`"
+          :hint="`${configSetting['style.color'].hint}`"
           @onChanged="handleColorChanged"
         />
-        <DropdownSetting id="data-label-font-size" :options="fontSizeOptions" :value="fontSize" size="small" @onChanged="handleFontSizeChanged" />
+        <DropdownSetting
+          id="data-label-font-size"
+          :options="fontSizeOptions"
+          :label="`${configSetting['style.fontSize'].label}`"
+          :hint="`${configSetting['style.fontSize'].hint}`"
+          :value="fontSize"
+          size="small"
+          @onChanged="handleFontSizeChanged"
+        />
       </div>
       <DropdownSetting
         id="data-label-display-unit"
         :options="displayUnitOptions"
         :value="displayUnit"
         class="mb-2"
-        label="Display unit"
+        :label="`${configSetting['displayUnit'].label}`"
+        :hint="`${configSetting['displayUnit'].hint}`"
         size="full"
         @onChanged="handleDisplayUnitChanged"
       />
@@ -35,8 +47,9 @@
         id="prefix-input"
         :value="prefixText"
         class="mb-3"
-        label="Prefix"
-        placeholder="Input Prefix"
+        :label="`${configSetting['prefix.text'].label}`"
+        :hint="`${configSetting['prefix.text'].hint}`"
+        :placeholder="`${configSetting['prefix.text'].placeHolder}`"
         size="full"
         :maxLength="defaultSetting.maxLength"
         @onChanged="handlePrefixSaved"
@@ -46,7 +59,8 @@
         :options="fontOptions"
         :value="prefixFont"
         class="mb-3"
-        label="Font family"
+        :label="`${configSetting['prefix.style.fontFamily'].label}`"
+        :hint="`${configSetting['prefix.style.fontFamily'].hint}`"
         size="full"
         @onChanged="handlePrefixFontChanged"
       />
@@ -55,17 +69,28 @@
           id="prefix-font-color"
           :default-color="defaultSetting.prefixColor"
           :value="prefixColor"
+          :label="`${configSetting['prefix.style.color'].label}`"
+          :hint="`${configSetting['prefix.style.color'].hint}`"
           style="width: 104px; margin-right: 12px"
           @onChanged="handlePrefixColorChanged"
         />
-        <DropdownSetting id="prefix-font-size" :options="fontSizeOptions" :value="prefixFontSize" size="small" @onChanged="handlePrefixFontSizeChanged" />
+        <DropdownSetting
+          id="prefix-font-size"
+          :options="fontSizeOptions"
+          :label="`${configSetting['prefix.style.fontSize'].label}`"
+          :hint="`${configSetting['prefix.style.fontSize'].hint}`"
+          :value="prefixFontSize"
+          size="small"
+          @onChanged="handlePrefixFontSizeChanged"
+        />
       </div>
       <InputSetting
         id="postfix-input"
         :value="postfixText"
         class="mb-3"
-        label="Postfix"
-        placeholder="Input Postfix"
+        :label="`${configSetting['postfix.text'].label}`"
+        :hint="`${configSetting['postfix.text'].hint}`"
+        :placeholder="`${configSetting['postfix.text'].placeHolder}`"
         size="full"
         @onChanged="handlePostfixSaved"
         :maxLength="defaultSetting.maxLength"
@@ -75,7 +100,8 @@
         :options="fontOptions"
         :value="postfixFont"
         class="mb-3"
-        label="Font family"
+        :label="`${configSetting['postfix.style.fontFamily'].label}`"
+        :hint="`${configSetting['postfix.style.fontFamily'].hint}`"
         size="full"
         @onChanged="handlePostfixFontChanged"
       />
@@ -84,10 +110,20 @@
           id="postfix-font-color"
           :default-color="defaultSetting.postfixColor"
           :value="postfixColor"
+          :label="`${configSetting['postfix.style.color'].label}`"
+          :hint="`${configSetting['postfix.style.color'].hint}`"
           style="width: 104px; margin-right: 12px"
           @onChanged="handlePostfixColorChanged"
         />
-        <DropdownSetting id="postfix-font-size" :options="fontSizeOptions" :value="postfixFontSize" size="small" @onChanged="handlePostfixFontSizeChanged" />
+        <DropdownSetting
+          id="postfix-font-size"
+          :options="fontSizeOptions"
+          :label="`${configSetting['postfix.style.fontSize'].label}`"
+          :hint="`${configSetting['postfix.style.fontSize'].hint}`"
+          :value="postfixFontSize"
+          size="small"
+          @onChanged="handlePostfixFontSizeChanged"
+        />
       </div>
       <RevertButton class="mb-3 pr-3" style="text-align: right" @click="handleRevert" />
     </div>
@@ -106,6 +142,7 @@ import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 
 @Component({ components: { PanelHeader } })
 export default class NumberDataLabelTab extends Vue {
+  private readonly configSetting = window.chartSetting['numberDataLabel.tab'];
   @Prop({ required: false, type: Object })
   private readonly setting!: NumberOptionData;
 

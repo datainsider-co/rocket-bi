@@ -8,7 +8,7 @@ import co.datainsider.bi.domain.{Directory, DirectoryType}
 import co.datainsider.bi.repository.{DashboardRepository, DeletedDirectoryRepository, DirectoryRepository}
 import co.datainsider.bi.util.Implicits._
 import co.datainsider.bi.util.ZConfig
-import co.datainsider.share.service.{DirectoryPermissionAssigner, DirectoryPermissionService, ShareService}
+import co.datainsider.share.service.{DirectoryPermissionAssigner, ShareService}
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.twitter.util.Future
@@ -29,6 +29,8 @@ trait DirectoryService {
   def get(orgId: Long, dirId: Long): Future[Directory]
 
   def create(request: CreateDirectoryRequest): Future[Directory]
+
+  def updateDirectory(orgId: Long, id: DirectoryId, data: Option[Map[UserId, Any]]): Future[Directory]
 
   def getRootDir(request: GetRootDirectoryRequest): Future[Directory]
 
@@ -239,13 +241,14 @@ class DirectoryServiceImpl @Inject() (
         val deleteOps = directories._1.map(dir => {
           // TODO: remove share when remove direction
           dir.directoryType match {
-            case DirectoryType.Directory =>
-              directoryRepository.delete(dir.id)
             case DirectoryType.Dashboard | DirectoryType.Queries =>
               for {
                 okDir <- directoryRepository.delete(dir.id)
                 okDash <- dashboardRepository.delete(dir.dashboardId.get)
               } yield okDir && okDash
+            case DirectoryType.Directory | DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis |
+                DirectoryType.EventAnalysis | DirectoryType.PathExplorer =>
+              directoryRepository.delete(dir.id)
           }
         })
         Future.collect(deleteOps).map(_.reduce(_ && _))
@@ -259,13 +262,14 @@ class DirectoryServiceImpl @Inject() (
     get(orgId, request.id)
       .map(dir => {
         dir.directoryType match {
-          case DirectoryType.Directory =>
-            directoryRepository.rename(dir.id, request.toName)
           case DirectoryType.Dashboard | DirectoryType.Queries =>
             for {
               okDir <- directoryRepository.rename(dir.id, request.toName)
               okDash <- dashboardRepository.rename(dir.dashboardId.get, request.toName)
             } yield okDir && okDash
+          case DirectoryType.Directory | DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis |
+              DirectoryType.EventAnalysis | DirectoryType.PathExplorer =>
+            directoryRepository.rename(dir.id, request.toName)
         }
       })
       .flatten
@@ -292,16 +296,17 @@ class DirectoryServiceImpl @Inject() (
         val directories: (Array[Directory], Array[DirectoryId]) = getInnerDirectories(targetDir)
         val deleteOps: Array[Future[Boolean]] = directories._1.map(dir => {
           dir.directoryType match {
-            case DirectoryType.Directory =>
-              for {
-                addTodDeletedDb <- deletedDirectoryRepository.insert(dir)
-                isDeleted <- directoryRepository.delete(dir.id)
-              } yield addTodDeletedDb && isDeleted
             case DirectoryType.Dashboard | DirectoryType.Queries =>
               for {
                 isRemoveDir <- deletedDirectoryRepository.insert(dir)
                 okDir <- directoryRepository.delete(dir.id)
               } yield okDir && isRemoveDir
+            case DirectoryType.Directory | DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis |
+                DirectoryType.EventAnalysis | DirectoryType.PathExplorer =>
+              for {
+                addTodDeletedDb <- deletedDirectoryRepository.insert(dir)
+                isDeleted <- directoryRepository.delete(dir.id)
+              } yield addTodDeletedDb && isDeleted
           }
         })
         Future.collect(deleteOps).map(_.reduce(_ && _))
@@ -366,6 +371,12 @@ class DirectoryServiceImpl @Inject() (
             to.ownerId
           )
         } yield createdDirectory
+      case DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis | DirectoryType.EventAnalysis |
+          DirectoryType.PathExplorer => {
+        // default case
+        val createReq = from.toCreateDirRequest.copy(parentId = to.id)
+        directoryRepository.create(createReq, to.ownerId, to.ownerId)
+      }
     }
   }
 
@@ -584,4 +595,11 @@ class DirectoryServiceImpl @Inject() (
     }
   }
 
+  override def updateDirectory(orgId: Long, id: DirectoryId, data: Option[Map[UserId, Any]]): Future[Directory] = {
+    for {
+      directory <- get(orgId, id)
+      newDirectory = directory.copy(data = data, updatedDate = Some(System.currentTimeMillis()))
+      _ <- directoryRepository.update(newDirectory)
+    } yield newDirectory
+  }
 }

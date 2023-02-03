@@ -14,5 +14,6 @@ export enum JobType {
   BigQuery = 'Bigquery',
   Shopify = 'Shopify',
   S3 = 'Amazon_S3',
+  Facebook = 'FacebookAds',
   Unsupported = 'Others'
 }

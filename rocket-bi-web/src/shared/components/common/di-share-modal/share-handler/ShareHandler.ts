@@ -14,7 +14,7 @@ export abstract class ShareHandler {
 
   abstract addShareUser(organizationId: string, resourceType: ResourceType, resourceId: string, userProfile: UserProfile): void;
 
-  abstract updateSharePermission(userData: SharedUserInfo, editedValue: string): void;
+  abstract updateSharePermission(userData: SharedUserInfo, toActionType: ActionType): void;
 
   abstract saveAll(resourceId: string, resourceType: ResourceType, shareAnyonePermissionType: ActionType, isChangeShareAnyone: boolean): Promise<void>;
 

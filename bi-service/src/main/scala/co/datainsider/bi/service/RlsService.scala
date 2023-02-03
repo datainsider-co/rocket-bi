@@ -25,7 +25,7 @@ trait RlsPolicyService {
       conditions: Array[Condition]
   ): Future[RlsPolicy]
 
-  def save(
+  def put(
       orgId: Long,
       dbName: String,
       tblName: String,
@@ -85,7 +85,7 @@ class RlsPolicyServiceImpl @Inject() (policyRepository: RlsPolicyRepository) ext
     } yield updatedPolicy
   }
 
-  override def save(
+  override def put(
       orgId: Long,
       dbName: String,
       tblName: String,

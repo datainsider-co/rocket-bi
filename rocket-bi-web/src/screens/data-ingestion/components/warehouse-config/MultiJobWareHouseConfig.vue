@@ -99,6 +99,15 @@ export default class MultiJobWareHouseConfig extends Vue {
     if (this.$v.$invalid && this.isEnableSyncToDataWarehouse) {
       return false;
     }
+    if (this.isEnableSyncToDataWarehouse) {
+      const isEmptyDatabase = StringUtils.isEmpty(this.syncJob.destDatabaseName);
+      const isEmptyTable = StringUtils.isEmpty(this.syncJob.destTableName);
+      if (this.isSingleTable) {
+        return !isEmptyDatabase && !isEmptyTable;
+      } else {
+        return !isEmptyDatabase;
+      }
+    }
     return true;
   }
 }

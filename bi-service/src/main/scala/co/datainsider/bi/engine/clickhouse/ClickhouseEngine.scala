@@ -39,9 +39,8 @@ class ClickhouseEngine @Inject() (@Named("clickhouse") client: JdbcClient) exten
           val (colNames, colTypes) = getColMetaData(rs)
           val rows = ArrayBuffer[Array[Object]]()
           while (rs.next()) {
-            if (rows.length > maxQueryRows) {
-              throw DbExecuteError(s"result table exceeds $maxQueryRows rows limit")
-            }
+            require(rows.length <= maxQueryRows, s"result table exceeds $maxQueryRows rows limit")
+
             val row = ArrayBuffer[Object]()
             colNames.zip(colTypes).foreach {
               case (colName, colType) =>

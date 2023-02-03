@@ -2,7 +2,7 @@ import { Inject } from 'typescript-ioc';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { DataSourceRepository } from '@core/data-ingestion/repository/DataSourceRepository';
 import { SourceId, TableSchema } from '@core/common/domain';
-import { Job, ListingResponse, PreviewResponse, S3Job, S3SourceInfo } from '@core/data-ingestion';
+import { FacebookTokenResponse, Job, ListingResponse, PreviewResponse, S3Job, S3SourceInfo } from '@core/data-ingestion';
 import { DataSourceResponse } from '@core/data-ingestion/domain/response/DataSourceResponse';
 import { ListingRequest } from '@core/lake-house/domain/request/listing-request/ListingRequest';
 
@@ -34,6 +34,8 @@ export abstract class DataSourceService {
   abstract previewSchema(sourceInfo: DataSourceInfo, job: Job): Promise<PreviewResponse>;
 
   abstract getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]>;
+
+  abstract getFacebookExchangeToken(token: string): Promise<FacebookTokenResponse>;
 }
 
 export class DataSourceServiceImpl extends DataSourceService {
@@ -94,5 +96,9 @@ export class DataSourceServiceImpl extends DataSourceService {
   }
   getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]> {
     return this.dataSourceRepository.getGoogleAdsCustomerIds(sourceId);
+  }
+
+  getFacebookExchangeToken(token: string): Promise<FacebookTokenResponse> {
+    return this.dataSourceRepository.getFacebookExchangeToken(token);
   }
 }

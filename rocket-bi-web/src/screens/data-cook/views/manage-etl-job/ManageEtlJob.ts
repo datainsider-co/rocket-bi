@@ -80,6 +80,7 @@ export default class ManageEtlJob extends Vue {
       this.handleModelChanged();
       this.updateRouter(this.model!.id, this.model.displayName);
     } catch (ex) {
+      Log.error(ex);
       this.errorMsg = ex.message;
       this.model = null;
       this.loading = false;
@@ -112,7 +113,7 @@ export default class ManageEtlJob extends Vue {
   }
 
   private rename() {
-    this.renameModal.show(this.model?.displayName || '');
+    this.renameModal.show(this.model?.displayName || '', (newName: string) => this.handleSubmitRename(newName));
   }
 
   private handleSubmitRename(newName: string) {

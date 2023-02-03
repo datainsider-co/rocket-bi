@@ -14,26 +14,38 @@
     <div class="user-privileges-title">Before deleting this user, you may want to transfer their data to another owner, just in case.</div>
     <div class="user-deletion overflow-hidden">
       <div class="group-deletion">
-        <b-form-radio class="radio unselectable" type="radio" id="one" :value="0" v-model="selectedOption">
+        <b-form-radio class="radio unselectable" type="radio" id="one" :value="TransferOption.TransferToEmail" v-model="selectedOption">
           <div class="cursor-pointer">Transfer ownership of {{ fullName }}’s data to another user (for example, a manager)</div>
         </b-form-radio>
-        <div :class="{ disabled: isTransferDataDisabled }" class="deletion-content">
+        <div :class="{ disabled: isTransferDataDisabled }" class="deletion-content pb-4">
           <b-input
-            :id="genInputId('transfer-email')"
+            debounce="300"
+            id="suggest-transfer-user-id"
             class="transferred-account col-md-6 col-lg-5 col-11"
             v-model="newOwnerEmail"
             placeholder="New owner’s email"
+            @focus="handleFocusInput"
+            @keydown.enter="handleDeleteUser"
           />
-          <div class="text">Select data to transfer:</div>
-          <b-form-checkbox-group v-model="selectedOptionDetail" class="group-checkbox">
-            <b-form-checkbox :id="genCheckboxId('transfer-data')" value="directory_dashboard_data" class="checkbox checkbox-parent" type="checkbox">
-              <div class="opa-0-8">Directory & Dashboard Data</div>
-            </b-form-checkbox>
-          </b-form-checkbox-group>
+          <UserItemListing
+            popoverId="suggestion-user-profile"
+            target="suggest-transfer-user-id"
+            :data="suggestedUsers"
+            :error="suggestUserError"
+            :is-show-popover.sync="isShowSuggestions"
+            :status="suggestStatus"
+            @handleClickUserItem="handleClickUserItem"
+          ></UserItemListing>
         </div>
       </div>
       <div class="group-deletion">
-        <b-form-radio :id="genCheckboxId('not-transfer-data')" class="radio unselectable" type="radio" :value="1" v-model="selectedOption">
+        <b-form-radio
+          :id="genCheckboxId('not-transfer-data')"
+          class="radio unselectable"
+          type="radio"
+          :value="TransferOption.NotTransfer"
+          v-model="selectedOption"
+        >
           <div class="cursor-pointer">Dont’t transfer data</div>
         </b-form-radio>
         <div class="deletion-content opacity-0dot5 pb-4">
@@ -46,70 +58,107 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import GroupListCheckbox from '@/screens/user-management/components/user-detail/GroupListCheckbox.vue';
 import { UserDetailModule } from '@/screens/user-management/store/UserDetailStore';
-import { TransferUserDataConfig } from '@core/admin/domain/request/TransferUserDataConfig';
 import { UserDetailPanelType } from '@/screens/user-management/store/Enum';
-import { PopupUtils } from '@/utils/PopupUtils';
 import { Log } from '@core/utils';
+import { Status } from '@/shared';
+import { ShareModule } from '@/store/modules/ShareStore';
+import { UserProfile } from '@core/common/domain';
+import UserItemListing from '@/shared/components/UserItemListing.vue';
+import { Modals, PopupUtils } from '@/utils';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 
+enum TransferOption {
+  TransferToEmail = 0,
+  NotTransfer = 1
+}
+
 @Component({
   components: {
-    GroupListCheckbox
+    UserItemListing
   }
 })
 export default class UserDeletion extends Vue {
+  private readonly TransferOption = TransferOption;
   private newOwnerEmail = '';
-  private selectedOption = 0;
-  private selectedOptionDetail: string[] = ['directory_dashboard_data'];
+  private selectedOption = TransferOption.TransferToEmail;
   private isDeleteBtnLoading = false;
+  private isShowSuggestions = false;
+  private isSelectingUser = false;
+
+  private suggestUserError = '';
+
+  private suggestStatus = Status.Loaded;
 
   @Prop()
   fullName!: string;
 
   get isTransferDataDisabled() {
-    return this.selectedOption == 1;
+    return this.selectedOption == TransferOption.NotTransfer;
   }
 
-  @Watch('selectedOptionDetail')
-  handleSelectSubOption(newSelectedOptionDetail: string[]) {
-    Log.debug('UserDeletion::handleSelectSubOption::newSelectedOptionDetail', newSelectedOptionDetail);
-    this.selectedOptionDetail = newSelectedOptionDetail;
+  get suggestedUsers(): UserProfile[] {
+    return ShareModule.suggestedUsers;
   }
 
-  private handleDeleteUser() {
-    Log.debug('Privileges::handleSavePrivilege::selectedCheckboxItem', this.selectedOption);
-    const transferUserDataConfig = this.buildTransferUserDataConfig();
-    this.isDeleteBtnLoading = true;
-    UserDetailModule.deleteCurrentUser(transferUserDataConfig)
-      .then(deleteStatus => {
-        if (deleteStatus) {
-          PopupUtils.showSuccess(`User ${this.fullName} is deleted successfully`);
-          this.isDeleteBtnLoading = false;
-          UserDetailModule.reset();
-          this.back();
+  private handleFocusInput() {
+    if (!this.isSelectingUser) {
+      this.isShowSuggestions = true;
+      this.handleLOadSuggestedUsers(this.newOwnerEmail);
+    }
+  }
 
+  @Watch('newOwnerEmail')
+  handleSearchInputChange(newValue: string) {
+    this.handleFocusInput();
+  }
+
+  private async handleLOadSuggestedUsers(keyword: string): Promise<void> {
+    try {
+      this.suggestStatus = Status.Loading;
+      await ShareModule.loadSuggestedUsers({ keyword: keyword, from: 0, size: 100 });
+      this.suggestStatus = Status.Loaded;
+    } catch (ex) {
+      this.suggestStatus = Status.Error;
+      this.suggestUserError = ex.message;
+      Log.debug('UserActivityHeader::handleGetSuggestedUsers::err::', ex);
+    }
+  }
+
+  private handleDeleteUser(): void {
+    Modals.showConfirmationModal('Are you sure you want to delete this user?', {
+      onOk: async () => {
+        try {
+          Log.debug('Privileges::handleSavePrivilege::selectedCheckboxItem', this.selectedOption);
+          const transferToEmail: string | undefined = this.getTransferEmail();
+          this.isDeleteBtnLoading = true;
+          const result: boolean = await UserDetailModule.deleteCurrentUser(transferToEmail);
+          // PopupUtils.showSuccess(`User ${this.fullName} is deleted successfully`);
           TrackingUtils.track(TrackEvents.SubmitDeleteUser, {
             user_id: UserDetailModule.userFullDetailInfo?.profile?.username,
             user_email: UserDetailModule.userFullDetailInfo?.profile?.email,
-            user_full_name: UserDetailModule.userFullDetailInfo?.profile?.fullName
+            user_full_name: UserDetailModule.userFullDetailInfo?.profile?.fullName,
+            result: result ? 'success' : 'failed',
+            transfer_to_email: transferToEmail
           });
+          UserDetailModule.reset();
+          this.back();
+        } catch (ex) {
+          Log.error('UserDeletion::handleDeleteUser::ex', ex);
+          PopupUtils.showError(ex.message);
+        } finally {
+          this.isDeleteBtnLoading = false;
         }
-      })
-      .catch(ex => {
-        PopupUtils.showError(ex.message);
-        this.isDeleteBtnLoading = false;
-        return Promise.resolve(false);
-      });
+      }
+    });
   }
 
-  private buildTransferUserDataConfig(): TransferUserDataConfig | undefined {
-    if (this.selectedOption == 0) {
-      return new TransferUserDataConfig(this.newOwnerEmail, this.selectedOptionDetail.includes('directory_dashboard_data'));
+  private getTransferEmail(): string | undefined {
+    if (this.selectedOption == TransferOption.TransferToEmail) {
+      return this.newOwnerEmail || void 0;
     } else {
-      return undefined;
+      return void 0;
     }
   }
 
@@ -120,11 +169,20 @@ export default class UserDeletion extends Vue {
   private async handleCancel() {
     await UserDetailModule.switchDetailPanelType(UserDetailPanelType.UserPrivilege); // back to privilege
   }
+
+  private handleClickUserItem(userProfile: UserProfile) {
+    this.isSelectingUser = true;
+    this.newOwnerEmail = userProfile.email!;
+    this.$nextTick(() => {
+      this.isSelectingUser = false;
+      this.isShowSuggestions = false;
+    });
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-@import '~@/themes/scss/mixin';
+@import '~@/themes/scss/mixin.scss';
 
 .opa-0-5 {
   opacity: 0.5;
@@ -158,6 +216,7 @@ export default class UserDeletion extends Vue {
     .di-button {
       height: 26px;
       min-width: 80px;
+
       .spinner-container span {
         font-size: 14px;
         color: var(--accent-text-color);
@@ -232,6 +291,7 @@ export default class UserDeletion extends Vue {
           &::placeholder {
             @include regular-text(0.18px, var(--secondary-text-color));
           }
+
           cursor: text;
         }
 
@@ -303,5 +363,11 @@ export default class UserDeletion extends Vue {
       }
     }
   }
+}
+</style>
+
+<style lang="scss">
+#suggestion-user-profile {
+  width: 360px;
 }
 </style>

@@ -39,9 +39,10 @@ export class MapQuerySetting extends QuerySetting<MapChartChartOption> implement
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
 
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   static fromObject(obj: MapQuerySetting): MapQuerySetting {
@@ -51,7 +52,7 @@ export class MapQuerySetting extends QuerySetting<MapChartChartOption> implement
     const geoArea = obj.geoArea ? GeoArea.fromObject(obj.geoArea) : void 0;
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new MapQuerySetting(location, value, obj.normalizedNameMap, geoArea, filters, sorts, obj.options, sqlViews);
+    return new MapQuerySetting(location, value, obj.normalizedNameMap, geoArea, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

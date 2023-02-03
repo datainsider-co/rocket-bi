@@ -1,34 +1,60 @@
 pipeline {
-    agent any
+  agent any
 
-    tools {
-        maven "M3"
-    }
+  tools {
+    maven "M3"
+  }
 
-    environment {
-        DOCKER_REGISTRY_HOST = 'https://registry.gitlab.com'
-        DOCKER_REGISTRY_CREDENTIAL = 'acc_nkt165'
-        IMAGE_NAME = 'registry.gitlab.com/datainsider/web'
-    }
+  environment {
+    DOCKER_REGISTRY_HOST = 'https://registry.gitlab.com'
+    DOCKER_REGISTRY_CREDENTIAL = 'acc_nkt165'
+    IMAGE_NAME = 'registry.gitlab.com/datainsider/web'
+  }
 
-    stages {
-        stage('deploy') {
-            when {
-                expression { BRANCH_NAME ==~ /(main|dev|oss|cdp)/ }
-            }
+  stages {
+    stage('deploy') {
+      when {
+        expression { BRANCH_NAME ==~ /(main|dev|cdp)/ }
+      }
 
-            steps {
-                script {
-                    echo "building docker image from branch ${BRANCH_NAME}..."
-                    docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_CREDENTIAL) {
-                        def image = docker.build(IMAGE_NAME)
-                        def IMAGE_TAG = BRANCH_NAME
-                        image.push(IMAGE_TAG)
-                    }
-                }
-            }
+      steps {
+        script {
+          echo "building docker image from branch ${BRANCH_NAME}..."
+          docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_CREDENTIAL) {
+            def image = docker.build(IMAGE_NAME)
+            def IMAGE_TAG = BRANCH_NAME
+            image.push(IMAGE_TAG)
+          }
         }
+      }
     }
+
+
+    stage('deploy oss') {
+      when {
+        branch 'oss'
+      }
+
+      steps {
+        sshagent(credentials: ['admin_didev']) {
+          sh '''
+                ssh -o StrictHostKeyChecking=no admin@localhost "
+                  cd /home/admin/data/rocket-bi
+                  git checkout dev && git pull || { exit 1; }
+
+                  cd rocket-bi-web
+                  git pull gitlab oss || { exit 1; }
+                  cd ..
+
+                  git add . && git commit -m '[BOT] Update rocket-bi-web: merge from datainsider oss' && git push
+                  exit 0
+                "
+            '''
+        }
+      }
+    }
+
+  }
 
   post {
     success {

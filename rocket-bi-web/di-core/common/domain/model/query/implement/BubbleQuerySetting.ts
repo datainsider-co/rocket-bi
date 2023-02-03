@@ -30,9 +30,10 @@ export class BubbleQuerySetting extends QuerySetting<BubbleChartOption> implemen
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   static fromObject(obj: BubbleQuerySetting): BubbleQuerySetting {
@@ -43,7 +44,7 @@ export class BubbleQuerySetting extends QuerySetting<BubbleChartOption> implemen
     const legend = obj.legend ? TableColumn.fromObject(obj.legend) : void 0;
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map(view => InlineSqlView.fromObject(view));
 
-    return new BubbleQuerySetting(xAxis, yAxis, value, legend, filters, sorts, obj.options, sqlViews);
+    return new BubbleQuerySetting(xAxis, yAxis, value, legend, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

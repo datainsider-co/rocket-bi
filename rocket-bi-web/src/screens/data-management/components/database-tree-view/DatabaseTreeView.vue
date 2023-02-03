@@ -123,7 +123,6 @@
       </div>
       <DiRenameModal
         ref="databaseCreationModal"
-        @rename="handleCreateDatabase"
         title="Create Database"
         action-name="Create"
         placeholder="Input database name"

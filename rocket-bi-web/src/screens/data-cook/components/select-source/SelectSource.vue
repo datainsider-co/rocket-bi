@@ -33,7 +33,7 @@
           </ul>
           <ul v-for="db in databaseSchemas" :key="db.name" class="list-events">
             <li class="list-events-title">{{ db.displayName || db.name }}</li>
-            <li v-for="tbl in db.tables" :key="`${db.name}:${tbl.name}`" class="">
+            <li v-for="(tbl, index) in db.tables" :key="`${db.name}:${tbl.name}:${index}`" class="">
               <a @click.prevent="selectTable(db, tbl)" href="#" class="list-events-item">
                 <i class="di-icon-table list-events-item-icon"></i>
                 {{ tbl.displayName || tbl.name }}

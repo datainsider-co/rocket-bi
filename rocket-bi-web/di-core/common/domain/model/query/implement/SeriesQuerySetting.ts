@@ -36,9 +36,10 @@ export class SeriesQuerySetting extends QuerySetting<SeriesChartOption> implemen
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   get zoomData(): ZoomData {
@@ -53,7 +54,7 @@ export class SeriesQuerySetting extends QuerySetting<SeriesChartOption> implemen
 
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new SeriesQuerySetting(xAxis, yAxis, legend, filters, sorts, obj.options, sqlViews);
+    return new SeriesQuerySetting(xAxis, yAxis, legend, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {
@@ -102,7 +103,8 @@ export class SeriesQuerySetting extends QuerySetting<SeriesChartOption> implemen
       this.sorts,
       this.options,
 
-      this.sqlViews
+      this.sqlViews,
+      this.parameters
     );
   }
 

@@ -20,5 +20,6 @@ export enum DataSourceType {
   ReactNative = 'ReactNative',
   Flutter = 'Flutter',
   Shopify = 'Shopify',
-  S3 = 'S3'
+  S3 = 'S3',
+  Facebook = 'Facebook'
 }

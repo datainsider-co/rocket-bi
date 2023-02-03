@@ -12,10 +12,13 @@ import {
   GetDataOperator,
   JoinOperator,
   ManageFieldOperator,
+  MultiPreviewEtlOperatorResponse,
   PersistConfiguration,
   PivotTableOperator,
   Position,
   PositionValue,
+  PythonQueryOperator,
+  QueryOperator,
   SendToGroupEmailOperator,
   SQLQueryOperator,
   TableConfiguration,
@@ -120,7 +123,7 @@ export default class ManageEtlOperator extends Vue {
   private operatorType?: OperatorType;
 
   @Ref()
-  private saveEtl?: SaveEtl;
+  private saveEtl!: SaveEtl;
 
   @Ref()
   joinTable!: JoinTable;
@@ -167,14 +170,14 @@ export default class ManageEtlOperator extends Vue {
   @Ref()
   private readonly savedEmailConfigs!: SavedEmailConfig[];
 
-  private get operators() {
+  private get leafOperators() {
     if (this.value) {
       return this.value.operators;
     }
     return [];
   }
 
-  private set operators(value: EtlOperator[]) {
+  private set leafOperators(value: EtlOperator[]) {
     if (this.value) {
       this.value.operators = value;
     }
@@ -205,20 +208,20 @@ export default class ManageEtlOperator extends Vue {
     this.model.savedThirdPartyPosition = cloneDeep(this.value.extraData?.savedThirdPartyPosition ?? {});
     this.model.stagePosition = PositionValue.fromObject(this.value.extraData?.stagePosition);
 
-    Log.info('initModel::operators', this.operators.length);
+    Log.info('initModel::operators', this.leafOperators.length);
     // Get Preview DB Name
     await this.getDatabaseName();
     // Init All Get / NotGet Operators
-    this.operators.forEach(ope => {
+    this.leafOperators.forEach(ope => {
       ope.getAllGetDataOperators().forEach(getDataOpe => {
-        this.addGetDataOperator(getDataOpe);
+        this.updateGetOperatorPosition(getDataOpe);
         // this.addGetDataOperator(getDataOpe.tableSchema);
       });
       ope.getAllNotGetDataOperators().forEach(ope => {
-        this.addNotGetDataOperator(ope);
+        this.updateNotGetOperatorPosition(ope);
       });
     });
-    this.multiPreviewOperators(this.operators);
+    this.multiPreviewOperators(this.leafOperators);
     if (this.allOperators[0]) {
       this.selectPreviewOperator(this.allOperators[0]);
     }
@@ -467,6 +470,7 @@ export default class ManageEtlOperator extends Vue {
     if (this.model.mapLoading[operator.destTableName]) {
       return null;
     }
+    Log.debug('getPreviewEtlResponse::operator.destTableName', operator.className, operator.destTableName, this.model.mapPreviewData[operator.destTableName]);
     return this.model.mapPreviewData[operator.destTableName] ?? null;
   }
 
@@ -485,6 +489,8 @@ export default class ManageEtlOperator extends Vue {
         return this.previewOperator((operator as PivotTableOperator).operator);
       case ETL_OPERATOR_TYPE.SQLQueryOperator:
         return this.previewOperator((operator as SQLQueryOperator).operator);
+      case ETL_OPERATOR_TYPE.PythonOperator:
+        return this.previewOperator((operator as PythonQueryOperator).operator);
       case ETL_OPERATOR_TYPE.GetDataOperator:
       default:
         return this.previewOperator(operator);
@@ -516,47 +522,69 @@ export default class ManageEtlOperator extends Vue {
     this.previewOperator(operator, force);
   }
 
-  private async multiPreviewOperators(operators: EtlOperator[], force = false) {
-    if (force || operators.length > 0) {
-      const allOperators = uniqBy(operators.map(ope => ope.getAllOperators()).flat(), ope => ope.destTableName);
-      allOperators.forEach(ope => {
-        Log.info('multiPreviewOperators', ope.destTableName);
-        this.$set(this.model.mapLoading, ope.destTableName, true);
-      });
-      await this.dataCookService
-        .multiPreview(this.value.id, operators, true)
-        .then(resp => {
-          Log.info('multiPreview', resp);
-          if (resp.data) {
-            resp.data.allTableSchemas.forEach(tableSchema => {
-              this.$set(this.model.mapPreviewData, tableSchema.name, new CheckProgressResponse(0, JobStatus.Synced, new EtlJobData(tableSchema), null));
-            });
-          }
-          if (resp.error) {
-            this.$set(this.model.mapPreviewData, resp.error.tableError, new CheckProgressResponse(0, resp.status, null, resp.error));
-          }
-        })
-        .catch(e => {
-          allOperators.forEach(operator => {
-            this.$set(
-              this.model.mapPreviewData,
-              operator.destTableName,
-              new CheckProgressResponse(0, JobStatus.Error, null, new EtlJobError(e.message, operator.destTableName))
-            );
-          });
-        });
+  private showLoading(operators: EtlOperator[]) {
+    operators.forEach(operator => {
+      Log.info('showLoading', operator.destTableName);
+      this.$set(this.model.mapLoading, operator.destTableName, true);
+    });
+  }
+  private hideLoading(operators: EtlOperator[]) {
+    operators.forEach(operator => {
+      Log.info('hideLoading', operator.destTableName);
+      this.$delete(this.model.mapLoading, operator.destTableName);
+    });
+  }
 
-      allOperators.forEach(operator => {
-        this.$delete(this.model.mapLoading, operator.destTableName);
+  private async multiPreviewOperators(operators: EtlOperator[], force = false) {
+    if (force || ListUtils.isNotEmpty(operators)) {
+      const allOperators = uniqBy(operators.map(ope => ope.getAllOperators()).flat(), operator => operator.destTableName);
+      try {
+        this.showLoading(allOperators);
+        const previewData: MultiPreviewEtlOperatorResponse = await this.dataCookService.multiPreview(this.value.id, operators, true);
+        Log.info('multiPreview::completed', previewData);
+        this.renderData(previewData);
+        this.renderError(previewData);
+      } catch (ex) {
+        Log.error('multiPreview::error', ex);
+        this.renderErrorByOperators(allOperators, ex.message);
+      } finally {
+        this.hideLoading(allOperators);
+      }
+    }
+  }
+
+  private renderData(previewData: MultiPreviewEtlOperatorResponse): void {
+    if (previewData.data) {
+      previewData.data.allTableSchemas.forEach(tableSchema => {
+        this.$set(this.model.mapPreviewData, tableSchema.name, new CheckProgressResponse(0, JobStatus.Synced, new EtlJobData(tableSchema), null));
       });
     }
   }
 
-  private async previewOperator(operator: EtlOperator, force = false, deep = true) {
+  private renderError(previewData: MultiPreviewEtlOperatorResponse): void {
+    if (previewData.error) {
+      this.$set(this.model.mapPreviewData, previewData.error.tableError, new CheckProgressResponse(0, JobStatus.Error, null, previewData.error));
+    }
+  }
+
+  private renderErrorByOperators(operators: EtlOperator[], message: string): void {
+    operators.forEach(operator => {
+      this.$set(
+        this.model.mapPreviewData,
+        operator.destTableName,
+        new CheckProgressResponse(0, JobStatus.Error, null, new EtlJobError(message, operator.destTableName))
+      );
+    });
+  }
+
+  /**
+   * preview operator if table is not preview or force is true
+   */
+  private async previewOperator(operator: EtlOperator, force = false): Promise<CheckProgressResponse> {
     if (force || (!this.model.mapPreviewData[operator.destTableName] && !this.model.mapLoading[operator.destTableName])) {
       Log.info('process preview force or not have preview yet', operator.destTableDisplayName);
-      let operators: EtlOperator[] = this.operators.filter(ope => ope.getAllOperators().find(o => o.destTableName === operator.destTableName));
-      if (!operators.length) {
+      let operators: EtlOperator[] = this.leafOperators.filter(leafOperator => leafOperator.isExistOperatorName(operator.destTableName));
+      if (ListUtils.isEmpty(operators)) {
         operators = [operator];
       }
       await this.multiPreviewOperators(operators, force);
@@ -636,8 +664,9 @@ export default class ManageEtlOperator extends Vue {
         this.editJoinOperator(operator as JoinOperator);
         break;
       case ETL_OPERATOR_TYPE.SQLQueryOperator:
+      case ETL_OPERATOR_TYPE.PythonOperator:
         // @ts-ignore
-        this.editQueryOperator(operator as SQLQueryOperator);
+        this.editQueryOperator(operator as QueryOperator);
         break;
       case ETL_OPERATOR_TYPE.PivotTableOperator:
         // @ts-ignore
@@ -667,6 +696,7 @@ export default class ManageEtlOperator extends Vue {
         }
         break;
       case ETL_OPERATOR_TYPE.SQLQueryOperator:
+      case ETL_OPERATOR_TYPE.PythonOperator:
         this.startQueryOperator(operator);
         break;
       case ETL_OPERATOR_TYPE.PivotTableOperator:
@@ -687,8 +717,9 @@ export default class ManageEtlOperator extends Vue {
   private async startQueryOperator(operator: EtlOperator) {
     const tableSchema = this.getTableSchema(operator);
     if (this.queryTable && tableSchema) {
+      Log.debug('startQueryOperator', this.value.id);
       // @ts-ignore
-      this.queryTable.add(operator, tableSchema, newOperator => {
+      this.queryTable.add(this.value.id, operator, tableSchema, newOperator => {
         this.handleNewOperator(operator, newOperator);
         Log.info(newOperator);
         Log.debug('startQueryOperator::', newOperator);
@@ -699,13 +730,13 @@ export default class ManageEtlOperator extends Vue {
   }
 
   @Track(TrackEvents.ETLEditSQLQuery)
-  private async editQueryOperator(operator: SQLQueryOperator) {
+  private async editQueryOperator(operator: QueryOperator) {
     const tableSchema = this.getTableSchema(operator.operator);
     if (this.queryTable && tableSchema) {
       // @ts-ignore
-      this.queryTable.edit(operator, tableSchema, (updatedOperator: SQLQueryOperator) => {
+      this.queryTable.edit(this.value.id, operator, tableSchema, (updatedOperator: QueryOperator) => {
         if (operator.query !== updatedOperator.query) {
-          this.processUpdateOperator<SQLQueryOperator>(updatedOperator.destTableName, ope => {
+          this.processUpdateOperator<QueryOperator>(updatedOperator.destTableName, ope => {
             ope.query = updatedOperator.query;
           });
           this.previewOperator(operator, true);
@@ -907,13 +938,17 @@ export default class ManageEtlOperator extends Vue {
 
   @Track(TrackEvents.ETLRemoveOperator)
   private handleRemoveOperator(operator: EtlOperator) {
-    const temps = this.operators.concat([]);
-    temps.forEach(rootOperator => {
-      const [death, alive] = this.browseDeathAndAliveNodes(rootOperator, operator);
-      death.forEach(this.removeOperator);
+    const tempOperators = this.leafOperators.concat([]);
+    this.leafOperators.forEach((rootOperator, index) => {
+      const [deathOperators, aliveOperators] = this.browseDeathAndAliveNodes(rootOperator, operator);
+      deathOperators.forEach(this.removeOperator);
       // re-calculated index
-      this.operators.splice(this.operators.indexOf(rootOperator), 1, ...alive);
+      tempOperators.splice(index, 1, ...aliveOperators);
     });
+    Log.debug('handleRemoveOperator::operators::size', this.leafOperators.length);
+    this.leafOperators = this.compactOperators(tempOperators);
+    Log.debug('handleRemoveOperator::afterCompact:operators::size', this.leafOperators.length);
+
     if (this.previewEtl && !this.allOperators.find(operator => operator.destTableName === this.previewEtl?.destTableName) && this.allOperators[0]) {
       this.selectPreviewOperator(this.allOperators[0]);
     }
@@ -921,7 +956,9 @@ export default class ManageEtlOperator extends Vue {
 
   @Track(TrackEvents.ETLRenameOperator)
   private handleRenameOperator(operator: EtlOperator) {
-    this.renameModal.show(operator.destTableDisplayName, operator);
+    this.renameModal.show(operator.destTableDisplayName, (newName: string) => {
+      this.handleSubmitRenameOperator(newName, operator);
+    });
   }
 
   private handleSubmitRenameOperator(newName: string, operator: EtlOperator) {
@@ -965,7 +1002,7 @@ export default class ManageEtlOperator extends Vue {
     return { top, left };
   }
 
-  private addNotGetDataOperator(operator: EtlOperator) {
+  private updateNotGetOperatorPosition(operator: EtlOperator) {
     if (!operator.isGetData && !this.model.map[operator.destTableName]) {
       // Prepare Position Before add Item to model
       let operatorPosition = this.getOperatorPosition(operator);
@@ -1005,7 +1042,7 @@ export default class ManageEtlOperator extends Vue {
     return operator;
   }
 
-  private addGetDataOperator(operator: GetDataOperator) {
+  private updateGetOperatorPosition(operator: GetDataOperator) {
     if (!this.model.map[operator.destTableName]) {
       // Prepare Position Before add Item to model
       let position = this.getTablePosition(operator);
@@ -1031,7 +1068,7 @@ export default class ManageEtlOperator extends Vue {
       destTableConf.dbDisplayName = database.displayName || database.name;
       const newOperator = new GetDataOperator(tableSchema, destTableConf);
       if (addToModel) {
-        this.addGetDataOperator(newOperator);
+        this.updateGetOperatorPosition(newOperator);
       }
       return newOperator;
     }
@@ -1039,7 +1076,7 @@ export default class ManageEtlOperator extends Vue {
   }
 
   private processUpdateOperator<T extends EtlOperator>(destTableName: string, processUpdate: (operator: T) => void) {
-    this.operators.forEach(rootOperator => {
+    this.leafOperators.forEach(rootOperator => {
       rootOperator.getAllNotGetDataOperators().forEach(operator => {
         if (operator.destTableName === destTableName) {
           processUpdate(operator as T);
@@ -1060,7 +1097,7 @@ export default class ManageEtlOperator extends Vue {
       Log.info('startJoinOperator::joinTable.loading');
       // @ts-ignore
       this.joinTable?.add(operator, rightOperator, leftSchema, rightSchema, (newOperator: JoinOperator) => {
-        this.addGetDataOperator(rightOperator);
+        this.updateGetOperatorPosition(rightOperator);
         this.handleNewOperator(operator, newOperator);
       });
     } else {
@@ -1110,19 +1147,49 @@ export default class ManageEtlOperator extends Vue {
     }
   }
 
-  private handleNewOperator(origin: EtlOperator | null, newOperator: EtlOperator | null, position?: Position) {
-    if (!newOperator) return;
-    const index = this.operators.findIndex(item => item.destTableName === (origin ? origin.destTableName : newOperator.destTableName));
-    if (index >= 0) {
-      this.operators[index] = newOperator;
-      this.operators = this.operators.concat([]);
-    } else {
-      this.operators = this.operators.concat(newOperator);
+  /**
+   * append new operator to original operator like. operator -> newOperator
+   */
+  private handleNewOperator(parentOperator: EtlOperator | null, newOperator: EtlOperator | null) {
+    if (newOperator) {
+      Log.debug('handleNewOperator::', newOperator?.destTableName);
+      const parentName = parentOperator?.destTableName;
+      const currentLeafIndex: number = this.leafOperators.findIndex(operator => operator.destTableName === parentName);
+      Log.debug('handleNewOperator::parentOperators::parentName', parentName, 'currentLeafIndex', currentLeafIndex);
+      if (currentLeafIndex >= 0) {
+        Log.debug('handleNewOperator:: parent is leaf node');
+        this.leafOperators[currentLeafIndex] = newOperator;
+        this.leafOperators = this.leafOperators.concat([]);
+      } else {
+        this.leafOperators = this.leafOperators.concat(newOperator);
+      }
+      Log.debug('handleNewOperator::leafOperators:size', this.leafOperators.length);
+
+      this.leafOperators = this.compactOperators(this.leafOperators);
+      Log.debug('handleNewOperator::afterCompact::leafOperators:size', this.leafOperators.length);
+
+      this.handleAfterAddOperator(newOperator);
     }
+  }
+
+  /**
+   * Remove sub leaf operator(is a child of other leaf operator)
+   */
+  private compactOperators(leafOperators: EtlOperator[]): EtlOperator[] {
+    return leafOperators.filter((leafOperator: EtlOperator) => {
+      const otherLeafOperators: EtlOperator[] = leafOperators.filter(operator => operator.destTableName !== leafOperator.destTableName);
+      const isSubOperator: boolean = otherLeafOperators.some((otherLeafOperator: EtlOperator) =>
+        otherLeafOperator.isExistOperatorName(leafOperator.destTableName)
+      );
+      return !isSubOperator;
+    });
+  }
+
+  private handleAfterAddOperator(newOperator: EtlOperator) {
     if (newOperator.isGetData) {
-      this.addGetDataOperator(newOperator as GetDataOperator);
+      this.updateGetOperatorPosition(newOperator as GetDataOperator);
     } else {
-      this.addNotGetDataOperator(newOperator);
+      this.updateNotGetOperatorPosition(newOperator);
     }
     if (!newOperator.isSendToGroupEmail) {
       this.selectPreviewOperator(newOperator);
@@ -1130,7 +1197,7 @@ export default class ManageEtlOperator extends Vue {
   }
 
   private clearAll() {
-    this.operators = [];
+    this.leafOperators = [];
     this.model = new ManageEtlModel();
     this.maxTop = MIN_TOP;
   }
@@ -1147,7 +1214,7 @@ export default class ManageEtlOperator extends Vue {
     }
     const request = new EtlJobRequest(
       this.value.displayName,
-      this.operators,
+      this.leafOperators,
       this.value.scheduleTime,
       new EtlExtraData(
         this.model.extraData,
@@ -1160,8 +1227,7 @@ export default class ManageEtlOperator extends Vue {
       ),
       this.value.config
     );
-    // @ts-ignore
-    this.saveEtl?.save(this.value.id, request);
+    this.saveEtl.save(this.value.id, request);
   }
 
   private handleSaveEtl(data: EtlJobRequest) {
@@ -1292,7 +1358,7 @@ export default class ManageEtlOperator extends Vue {
 
   @Watch('operators', { deep: true })
   private onOperatorsChanged() {
-    if (this.operators.length <= 0) {
+    if (this.leafOperators.length <= 0) {
       this.model = new ManageEtlModel();
       this.maxTop = MIN_TOP;
     }

@@ -1,6 +1,6 @@
 import { DashboardRepository } from '@core/common/repositories';
 import { Inject } from 'typescript-ioc';
-import { CreateDashboardRequest, CreateQueryRequest, ListDrillThroughDashboardRequest } from '@core/common/domain/request';
+import { CreateDashboardRequest, ListDrillThroughDashboardRequest } from '@core/common/domain/request';
 import { PageResult, PermissionTokenResponse } from '@core/common/domain/response';
 import { Dashboard, DashboardId, DashboardSetting, DIMap, DirectoryId, MainDateFilter, Position, Widget, WidgetId } from '@core/common/domain/model';
 
@@ -9,7 +9,7 @@ export abstract class DashboardService {
 
   abstract getDirectoryId(dashboardId: DashboardId): Promise<DirectoryId>;
 
-  abstract create(request: CreateDashboardRequest | CreateQueryRequest): Promise<Dashboard>;
+  abstract create(request: CreateDashboardRequest): Promise<Dashboard>;
 
   abstract rename(id: DashboardId, toName: string): Promise<boolean>;
 
@@ -53,7 +53,7 @@ export class DashboardServiceImpl extends DashboardService {
     return this.dashboardRepository.getDirectoryId(dashboardId);
   }
 
-  create(request: CreateDashboardRequest | CreateQueryRequest): Promise<Dashboard> {
+  create(request: CreateDashboardRequest): Promise<Dashboard> {
     return this.dashboardRepository.create(request);
   }
 

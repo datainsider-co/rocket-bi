@@ -41,7 +41,6 @@
     </div>
     <DiRenameModal
       ref="renameModal"
-      @rename="handleRenameOrganization"
       title="Rename organization"
       action-name="Rename"
       placeholder="Input organization name"
@@ -100,7 +99,9 @@ export default class OrganizationOverview extends Vue {
   }
 
   private showEditNameModal() {
-    this.renameModal.show(this.companyName);
+    this.renameModal.show(this.companyName, (newName: string) => {
+      this.handleRenameOrganization(newName);
+    });
   }
 
   private showEditThumbnailModal() {

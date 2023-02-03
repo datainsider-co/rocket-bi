@@ -49,7 +49,7 @@ export default class DiButtonGroup extends Vue {
     this._buttons = this.buttons;
   }
 
-  private clickButton(buttonInfo: ButtonInfo, event: MouseEvent) {
+  clickButton(buttonInfo: ButtonInfo, event: MouseEvent) {
     if (!buttonInfo.isActive) {
       Log.info('clickInfo:;', buttonInfo);
       this._buttons.forEach(button => (button.isActive = false));
@@ -60,6 +60,14 @@ export default class DiButtonGroup extends Vue {
 
       this.$forceUpdate();
       this.$emit('change', buttonInfo);
+    }
+  }
+  active(displayName: string) {
+    const buttonInfoToActive = this.buttons.find(button => button.displayName === displayName);
+    if (buttonInfoToActive) {
+      this._buttons.forEach(button => (button.isActive = false));
+      buttonInfoToActive.isActive = true;
+      this.$forceUpdate();
     }
   }
 }

@@ -5,7 +5,8 @@
       :value="minColor"
       :defaultColor="defaultSetting.min"
       class="mb-3"
-      label="Min color"
+      :label="`${configSetting['min'].label}`"
+      :hint="`${configSetting['min'].hint}`"
       size="full"
       @onChanged="handleMinColorChanged"
     />
@@ -14,16 +15,18 @@
       :value="averageColor"
       :defaultColor="defaultSetting.average"
       class="mb-3"
-      label="Average color"
+      :label="`${configSetting['average'].label}`"
+      :hint="`${configSetting['average'].hint}`"
       size="full"
       @onChanged="handleAverageColorChanged"
     />
     <ColorSetting
-      id="min-color"
+      id="max-color"
       :value="maxColor"
       :defaultColor="defaultSetting.max"
       class="mb-3"
-      label="Max color"
+      :label="`${configSetting['max'].label}`"
+      :hint="`${configSetting['max'].hint}`"
       size="full"
       @onChanged="handleMaxColorChanged"
     />
@@ -39,6 +42,7 @@ import { get } from 'lodash';
 
 @Component({ components: { PanelHeader } })
 export default class GaugeColorTab extends Vue {
+  private readonly configSetting = window.chartSetting['gaugeColor.tab'];
   private readonly defaultSetting = {
     min: '#34DA0B',
     average: '#FFAC05',

@@ -6,3 +6,5 @@ export * from './MongoDBSource';
 export * from './S3Source';
 export * from './streaming-job';
 export * from './GoogleAdsSource';
+export * from './FacebookAdsSource';
+export * from './FacebookTokenResponse';

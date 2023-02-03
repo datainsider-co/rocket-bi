@@ -61,6 +61,14 @@ export abstract class EtlOperator {
     return [];
   }
 
+  getOperatorByName(name: string): EtlOperator | undefined {
+    return this.getAllOperators().find(operator => operator.destTableName === name);
+  }
+
+  isExistOperatorName(name: string): boolean {
+    return !!this.getOperatorByName(name);
+  }
+
   static fromObject(obj: EtlOperator): EtlOperator {
     switch (obj.className) {
       case ETL_OPERATOR_TYPE.JoinOperator:
@@ -73,6 +81,8 @@ export abstract class EtlOperator {
         return PivotTableOperator.fromObject(obj);
       case ETL_OPERATOR_TYPE.SQLQueryOperator:
         return SQLQueryOperator.fromObject(obj);
+      case ETL_OPERATOR_TYPE.PythonOperator:
+        return PythonQueryOperator.fromObject(obj);
       case ETL_OPERATOR_TYPE.GetDataOperator:
         return GetDataOperator.fromObject(obj);
       case ETL_OPERATOR_TYPE.SendToGroupEmailOperator:
@@ -501,7 +511,34 @@ export class PivotTableOperator extends EtlOperator {
   }
 }
 
-export class SQLQueryOperator extends EtlOperator {
+export enum EtlQueryLanguages {
+  ClickHouse = 'ClickHouse',
+  Python = 'Python3'
+}
+
+export abstract class QueryOperator extends EtlOperator {
+  abstract query: string;
+  abstract operator: EtlOperator;
+  abstract showParameter: boolean;
+
+  abstract language: EtlQueryLanguages;
+
+  abstract requireProcessQuery(): boolean;
+
+  static isQueryOperator(operator: EtlOperator | QueryOperator | undefined | null): operator is QueryOperator {
+    return !!(operator as QueryOperator)?.language && !!(operator as QueryOperator)?.requireProcessQuery;
+  }
+}
+
+export class SQLQueryOperator extends QueryOperator {
+  language: EtlQueryLanguages = EtlQueryLanguages.ClickHouse;
+
+  requireProcessQuery(): boolean {
+    return false;
+  }
+
+  showParameter = false;
+
   constructor(
     public operator: EtlOperator,
     public query: string,
@@ -544,6 +581,75 @@ export class SQLQueryOperator extends EtlOperator {
       temp.thirdPartyPersistConfigurations.map(item => ThirdPartyPersistConfiguration.fromObject(item))
     );
   }
+
+  static default(operator: EtlOperator, destTableConfiguration: TableConfiguration): SQLQueryOperator {
+    const defaultQuery = window.queryLanguages.clickHouse.default;
+    return new SQLQueryOperator(operator, defaultQuery, destTableConfiguration, false, null, null, []);
+  }
+}
+
+export class PythonQueryOperator extends QueryOperator {
+  constructor(
+    public operator: EtlOperator,
+    public code: string,
+    public destTableConfiguration: TableConfiguration,
+    public isPersistent = false,
+    public persistConfiguration: PersistConfiguration | null,
+    public emailConfiguration: EmailConfiguration | null,
+    public thirdPartyPersistConfigurations: ThirdPartyPersistConfiguration[] = []
+  ) {
+    super(ETL_OPERATOR_TYPE.PythonOperator, destTableConfiguration, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
+  }
+
+  getLeftOperators(): EtlOperator[] {
+    return [this.operator];
+  }
+
+  getLeftTables(): TableSchema[] {
+    return this.operator.getLeftTables();
+  }
+
+  getAllGetDataOperators(): GetDataOperator[] {
+    return this.operator.getAllGetDataOperators();
+  }
+
+  getAllNotGetDataOperators(): EtlOperator[] {
+    const result: EtlOperator[] = this.operator.getAllNotGetDataOperators();
+    result.push(this);
+    return result;
+  }
+
+  language: EtlQueryLanguages = EtlQueryLanguages.Python;
+
+  static fromObject(obj: EtlOperator): EtlOperator {
+    const temp = obj as PythonQueryOperator;
+    return new PythonQueryOperator(
+      EtlOperator.fromObject(temp.operator),
+      temp.code,
+      TableConfiguration.fromObject(temp.destTableConfiguration),
+      temp.isPersistent,
+      temp.persistConfiguration,
+      temp.emailConfiguration,
+      temp.thirdPartyPersistConfigurations.map(item => ThirdPartyPersistConfiguration.fromObject(item))
+    );
+  }
+
+  static default(operator: EtlOperator, destTableConfiguration: TableConfiguration): PythonQueryOperator {
+    const defaultCode = window.queryLanguages.python3.default;
+    return new PythonQueryOperator(operator, defaultCode, destTableConfiguration, false, null, null, []);
+  }
+
+  requireProcessQuery(): boolean {
+    return true;
+  }
+
+  get query(): string {
+    return this.code;
+  }
+  set query(value: string) {
+    this.code = value;
+  }
+  showParameter = false;
 }
 
 export class JoinCondition {

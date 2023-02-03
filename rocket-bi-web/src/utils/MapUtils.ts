@@ -75,6 +75,18 @@ abstract class MapUtils {
     });
     return newMap;
   }
+
+  static fromRecord<K extends string, V>(record: Record<K, V>): Map<K, V> {
+    const newMap = new Map<K, V>();
+    if (record) {
+      Object.keys(record).forEach(key => {
+        const curKey: K = key as K;
+        const value: V = record[curKey];
+        newMap.set(curKey, value);
+      });
+    }
+    return newMap;
+  }
 }
 
 export { MapUtils };

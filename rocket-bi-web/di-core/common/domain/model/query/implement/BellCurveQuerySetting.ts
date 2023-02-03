@@ -34,9 +34,10 @@ export class BellCurveQuerySetting extends QuerySetting<BellCurveChartOption> im
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   get zoomData(): ZoomData {
@@ -50,7 +51,7 @@ export class BellCurveQuerySetting extends QuerySetting<BellCurveChartOption> im
     const legend = obj.legend ? TableColumn.fromObject(obj.legend) : void 0;
 
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map(view => InlineSqlView.fromObject(view));
-    return new BellCurveQuerySetting(xAxis, yAxis, legend, filters, sorts, obj.options, sqlViews);
+    return new BellCurveQuerySetting(xAxis, yAxis, legend, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   //
@@ -112,8 +113,15 @@ export class BellCurve2QuerySetting extends QuerySetting<BellCurveChartOption2> 
   private static readonly DEFAULT_NUM_DATA_POINT = 1000;
   readonly className = QuerySettingType.BellCurve;
 
-  constructor(public value: TableColumn, filters: Condition[] = [], sorts: OrderBy[] = [], options: Record<string, any> = {}, sqlViews: InlineSqlView[] = []) {
-    super(filters, sorts, options, sqlViews);
+  constructor(
+    public value: TableColumn,
+    filters: Condition[] = [],
+    sorts: OrderBy[] = [],
+    options: Record<string, any> = {},
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
+  ) {
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   get zoomData(): ZoomData {
@@ -125,7 +133,7 @@ export class BellCurve2QuerySetting extends QuerySetting<BellCurveChartOption2> 
     const value = TableColumn.fromObject(obj.value);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new BellCurve2QuerySetting(value, filters, sorts, obj.options, sqlViews);
+    return new BellCurve2QuerySetting(value, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   //

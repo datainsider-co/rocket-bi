@@ -1,5 +1,5 @@
 import { Dashboard, DashboardId, DashboardSetting, DIMap, DirectoryId, MainDateFilter, Position, Widget, WidgetId } from '@core/common/domain/model';
-import { CreateDashboardRequest, CreateQueryRequest, ListDrillThroughDashboardRequest } from '@core/common/domain/request';
+import { CreateDashboardRequest, ListDrillThroughDashboardRequest } from '@core/common/domain/request';
 import { BaseClient } from '@core/common/services/HttpClient';
 import { InjectValue } from 'typescript-ioc';
 import { DIKeys } from '@core/common/modules/Di';
@@ -11,7 +11,7 @@ export abstract class DashboardRepository {
 
   abstract getDirectoryId(dashboardId: DashboardId): Promise<DirectoryId>;
 
-  abstract create(request: CreateDashboardRequest | CreateQueryRequest): Promise<Dashboard>;
+  abstract create(request: CreateDashboardRequest): Promise<Dashboard>;
 
   abstract rename(id: DashboardId, toName: string): Promise<boolean>;
 
@@ -50,7 +50,7 @@ export class DashboardRepositoryImpl extends DashboardRepository {
     return this.httpClient.get<Dashboard>(`/dashboards/${id}`).then(item => Dashboard.fromObject(item));
   }
 
-  create(request: CreateDashboardRequest | CreateQueryRequest): Promise<Dashboard> {
+  create(request: CreateDashboardRequest): Promise<Dashboard> {
     return this.httpClient.post<Dashboard>(`/dashboards/create`, request).then(item => Dashboard.fromObject(item));
   }
 

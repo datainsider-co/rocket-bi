@@ -27,7 +27,7 @@ trait OrganizationRepository {
 
   def getAllOrganizations(from: Int, size: Int): Page[Organization]
 
-  def getWith(domain: String): Option[Organization]
+  def getByDomain(domain: String): Option[Organization]
 
   def update(organization: Organization): Boolean
 
@@ -53,7 +53,8 @@ object MySqlOrganizationRepository {
 
   private val SELECT_WITH_DOMAIN = "SELECT * FROM organization WHERE domain = ?"
 
-  private val UPDATE_SQL = "UPDATE organization set name=?, domain=?, thumbnail_url=?, updated_time = ?, updated_by = ?, licence_key = ? WHERE organization_id = ?"
+  private val UPDATE_SQL =
+    "UPDATE organization set name=?, domain=?, thumbnail_url=?, updated_time = ?, updated_by = ?, licence_key = ? WHERE organization_id = ?"
 }
 
 case class MySqlOrganizationRepository(client: JdbcClient) extends OrganizationRepository {
@@ -141,7 +142,7 @@ case class MySqlOrganizationRepository(client: JdbcClient) extends OrganizationR
     Page[Organization](total, organizations)
   }
 
-  override def getWith(domain: String): Option[Organization] = {
+  override def getByDomain(domain: String): Option[Organization] = {
     client.executeQuery(SELECT_WITH_DOMAIN, domain)(readOrganizations).headOption
   }
 

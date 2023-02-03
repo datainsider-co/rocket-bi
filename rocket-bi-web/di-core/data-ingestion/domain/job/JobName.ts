@@ -9,5 +9,6 @@ export enum JobName {
   MongoJob = 'mongo_db_job',
   ShopifyJob = 'shopify_job',
   S3Job = 'amazon_s3_job',
+  FacebookAdsJob = 'facebook_ads_job',
   UnsupportedJob = 'unsupported_job'
 }

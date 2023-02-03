@@ -1,10 +1,6 @@
 package co.datainsider.bi.utils
 
-import co.datainsider.bi.domain.QueryContext
-import co.datainsider.bi.domain.query.SqlQuery
-import co.datainsider.bi.domain.response.SqlQueryResponse
 import co.datainsider.bi.engine.TableExpressionUtils
-import co.datainsider.query.DbTestUtils
 import org.scalatest.FunSuite
 
 class TableExpressionUtilsTest extends FunSuite {

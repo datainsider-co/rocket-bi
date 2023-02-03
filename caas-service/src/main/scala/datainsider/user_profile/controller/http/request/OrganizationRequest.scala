@@ -178,13 +178,12 @@ case class RegisterOrgRequest(
     )
   }
 
-  def toCreateOrganizationReq(orgId: Long, ownerId: String): CreateOrganizationRequest = {
-    val mainDomain = ZConfig.getString("cloudflare.main_domain")
+  def toCreateOrganizationReq(orgId: Long, ownerId: String, domain: String): CreateOrganizationRequest = {
     CreateOrganizationRequest(
       organizationId = orgId,
       name = companyName,
       owner = ownerId,
-      domain = s"$subDomain.$mainDomain",
+      domain = domain,
       isActive = true,
       reportTimeZoneId = None,
       thumbnailUrl = None,

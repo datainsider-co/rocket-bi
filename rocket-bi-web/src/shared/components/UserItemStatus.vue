@@ -1,14 +1,21 @@
 <template>
   <div v-if="userData" class="user-status-item">
     <UserItem :user-data="userData.user"></UserItem>
-    <DiDropdown :id="genDropdownId('status', id)" boundary="window" v-model="currentValue" :appendAtRoot="true" :data="swmData" value-props="type"></DiDropdown>
+    <DiDropdown
+      :id="genDropdownId('status', id)"
+      boundary="window"
+      v-model="currentValue"
+      :appendAtRoot="true"
+      :data="selectOptions"
+      value-props="type"
+    ></DiDropdown>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import UserItem from '@/shared/components/UserItem.vue';
-import { ResourceType } from '@/utils/PermissionUtils';
+import { ActionType, PERMISSION_ACTION_NODES, ResourceType } from '@/utils/PermissionUtils';
 import { ActionNode } from '@/shared';
 import { PermissionProviders } from '@core/admin/domain/permissions/PermissionProviders';
 import { SharedUserInfo } from '@core/common/domain/response/resouce-sharing/SharedUserInfo';
@@ -17,47 +24,35 @@ import { SharedUserInfo } from '@core/common/domain/response/resouce-sharing/Sha
   components: { UserItem }
 })
 export default class UserItemStatus extends Vue {
-  @Prop({ required: true })
-  userData!: SharedUserInfo;
-
-  @Prop({ required: true })
-  resourceType!: ResourceType;
-
-  @Prop({ required: true })
-  resourceId!: string;
-
-  @Prop({ required: true })
-  organizationId!: string;
   currentValue!: string;
-  @Prop()
-  swmData!: ActionNode[];
-  @Prop({ required: true, type: Number })
-  private readonly id!: number;
+
+  @Prop({ required: true, type: Object })
+  private readonly userData!: SharedUserInfo;
+
+  @Prop({ required: true, type: String })
+  private readonly resourceType!: ResourceType;
+
+  @Prop({ required: true, type: String })
+  private readonly resourceId!: string;
+
+  @Prop({ required: true, type: [String, Number] })
+  private readonly organizationId!: string;
+
+  @Prop({ required: true, type: String })
+  private readonly id!: string;
 
   constructor() {
     super();
-    this.currentValue = this.permission;
+    this.currentValue = PermissionProviders.getActionType(this.organizationId, this.resourceType, this.resourceId, this.userData.permissions);
   }
 
-  //todo: get
-  get permission() {
-    // return this.userData.permissions[0];
-    // Log.debug(
-    //   'userStatusDAta::',
-    //   this.userData.user.email,
-    //   PermissionProviders.getActionType(this.organizationId, this.resourceType, this.resourceId, this.userData.permissions)
-    // );
-    return PermissionProviders.getActionType(this.organizationId, this.resourceType, this.resourceId, this.userData.permissions);
+  private get selectOptions(): ActionNode[] {
+    return PERMISSION_ACTION_NODES;
   }
-
-  // get isPendingRemove() {
-  //   //todo change remove value
-  //   return this.currentValue === ActionType.none;
-  // }
 
   @Watch('currentValue')
-  handleStatusChange(newValue: string) {
-    this.$emit('handleStatusChange', this.userData, newValue);
+  private handleActionTypeChanged(newValue: ActionType) {
+    this.$emit('onActionTypeChanged', newValue);
   }
 }
 </script>

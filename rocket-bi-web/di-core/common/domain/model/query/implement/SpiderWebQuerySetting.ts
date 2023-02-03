@@ -31,9 +31,10 @@ export class SpiderWebQuerySetting extends QuerySetting<SpiderWebChartOption> im
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
 
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   get zoomData(): ZoomData {
@@ -46,7 +47,7 @@ export class SpiderWebQuerySetting extends QuerySetting<SpiderWebChartOption> im
     const values = obj.values?.map(value => TableColumn.fromObject(value)) ?? [];
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new SpiderWebQuerySetting(legend, values, filters, sorts, obj.options, sqlViews);
+    return new SpiderWebQuerySetting(legend, values, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {
@@ -79,7 +80,7 @@ export class SpiderWebQuerySetting extends QuerySetting<SpiderWebChartOption> im
     const currentConditions: Condition[] = this.filters ?? [];
     const equal: Equal = ConditionUtils.buildEqualCondition(this.legend, drilldownData.value);
     const drilldownConditions: Condition[] = ConditionUtils.buildDrilldownConditions(currentConditions, equal);
-    return new SpiderWebQuerySetting(legend, this.values, drilldownConditions, this.sorts, this.options, this.sqlViews);
+    return new SpiderWebQuerySetting(legend, this.values, drilldownConditions, this.sorts, this.options, this.sqlViews, this.parameters);
   }
 
   getColumnWillDrilldown(): TableColumn {

@@ -115,7 +115,7 @@ case class SelectNull() extends ControlFunction
 
 case class CountAll(aliasName: Option[String] = None) extends ControlFunction
 
-case class SelectExpr(expr: String, aliasName: Option[String]) extends ControlFunction
+case class SelectExpr(expr: String, aliasName: Option[String] = None) extends ControlFunction
 
 case class DynamicFunction(
     dynamicWidgetId: Long,

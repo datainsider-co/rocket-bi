@@ -1,10 +1,10 @@
-import { DirectoryId } from '@core/common/domain/model';
+import { DirectoryId, DirectoryType } from '@core/common/domain/model';
 
 export class CreateDirectoryRequest {
   public name: string;
   public isRemoved: boolean;
   public parentId: DirectoryId;
-  public directoryType: string;
+  public directoryType: DirectoryType;
 
   constructor(data: any = {}) {
     this.name = data.name || void 0;

@@ -54,6 +54,7 @@ import ChartFilter from '@/screens/dashboard-detail/components/widget-container/
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Track } from '@/shared/anotation';
 import Swal from 'sweetalert2';
+import { CopiedData, CopiedDataType } from '@/screens/dashboard-detail/intefaces/CopiedData';
 
 @Component({
   components: {
@@ -275,7 +276,9 @@ export default class ChartHolder extends Vue {
         _ChartStore.setStatusLoaded(chartInfo.id);
       } else {
         _ChartStore.setStatusLoading(chartInfo.id);
+        Log.debug('ChartHolder::renderChart::chartInfo', chartInfo, chartInfo.id);
         const queryRequest: QueryRequest = this.toQueryRequest(chartInfo);
+        Log.debug('ChartHolder::renderChart::queryRequest', queryRequest);
         const response = await this.queryService.query(queryRequest);
         //Todo: Update Setting by response here
         this._renderChart(response, chartInfo);
@@ -545,6 +548,23 @@ export default class ChartHolder extends Vue {
       DashboardControllerModule.setAffectFilterWidget(newWidget);
       QuerySettingModule.setQuerySetting({ id: newWidget.id, query: newWidget.setting });
       await DashboardControllerModule.renderChartOrFilter({ widget: newWidget, forceFetch: true });
+    }
+  }
+
+  @Track(TrackEvents.CopyChart, { chart_id: (_: ChartHolder) => _.currentChartInfo.id })
+  @Provide()
+  private async copyChart(): Promise<void> {
+    try {
+      PopupUtils.hideAllPopup();
+      const copiedData = CopiedData.create(CopiedDataType.Chart, {
+        widget: this.currentChartInfo,
+        position: WidgetModule.getPosition(this.currentChartInfo.id)
+      });
+      DashboardModule.setCopiedData(copiedData);
+      await this.$copyText(JSON.stringify(copiedData));
+    } catch (ex) {
+      Log.error('copyChart::', ex);
+      PopupUtils.showError('Copy chart failed, please try again later');
     }
   }
 

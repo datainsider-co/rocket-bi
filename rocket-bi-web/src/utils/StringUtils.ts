@@ -202,4 +202,8 @@ export abstract class StringUtils {
   static vietnamese(text: string): string {
     return vietnamese(text);
   }
+
+  static insertAt(text: string, textToAdd: string, at: number) {
+    return text.slice(0, at) + textToAdd + text.slice(at);
+  }
 }

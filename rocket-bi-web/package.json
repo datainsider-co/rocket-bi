@@ -26,7 +26,7 @@
     "create-ts-index": "^1.13.6",
     "crypto-js": "^4.0.0",
     "deneric": "^1.0.6-beta",
-    "di-web-analytics": "^0.7.4",
+    "di-web-analytics": "^0.8.3",
     "draggabilly": "^2.3.0",
     "file-saver": "^2.0.5",
     "gridstack": "2.2.0",
@@ -34,6 +34,7 @@
     "highcharts-custom-events": "^3.0.10",
     "ion-rangeslider": "^2.3.1",
     "js-cookies": "^1.0.4",
+    "js-sha256": "0.9.0",
     "konva": "7",
     "leader-line-new": "^1.1.9",
     "lodash": "^4.17.15",
@@ -75,8 +76,7 @@
     "vuescroll": "4.17.3",
     "vuex": "^3.4.0",
     "vuex-class": "^0.3.2",
-    "vuex-module-decorators": "^0.17.0",
-    "js-sha256": "0.9.0"
+    "vuex-module-decorators": "^0.17.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",

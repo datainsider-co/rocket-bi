@@ -1,7 +1,7 @@
 package co.datainsider.bi.service
 
-import co.datainsider.bi.domain.request.{ChartRequest, ViewAsRequest, SqlQueryRequest}
-import co.datainsider.bi.domain.response.{ChartResponse, SqlQueryResponse}
+import co.datainsider.bi.domain.request.{ChartRequest, SqlQueryRequest, QueryViewAsRequest}
+import co.datainsider.bi.domain.response.{CsvResponse, ChartResponse, SqlQueryResponse}
 import co.datainsider.bi.repository.ChartResponseRepository
 import co.datainsider.bi.util.ZConfig
 import com.google.inject.Inject
@@ -41,7 +41,7 @@ class BoostedQueryService @Inject() (
       queryService.query(request)
     }
 
-  override def query(request: ViewAsRequest): Future[ChartResponse] =
+  override def query(request: QueryViewAsRequest): Future[ChartResponse] =
     Profiler(s"[Boost] ${this.getClass.getSimpleName}::QueryViewAsRequest") {
       queryService.query(request)
     }
@@ -67,4 +67,5 @@ class BoostedQueryService @Inject() (
 
     }
 
+  override def exportAsCsv(request: ChartRequest): Future[String] = queryService.exportAsCsv(request)
 }

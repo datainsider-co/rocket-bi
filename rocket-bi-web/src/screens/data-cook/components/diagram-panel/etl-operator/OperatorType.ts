@@ -52,6 +52,7 @@ export default class OperatorType extends DiagramItem {
       case ETL_OPERATOR_TYPE.ManageFieldOperator:
       case ETL_OPERATOR_TYPE.PivotTableOperator:
       case ETL_OPERATOR_TYPE.SQLQueryOperator:
+      case ETL_OPERATOR_TYPE.PythonOperator:
         return ETL_OPERATOR_TYPE_NAME[this.operator?.className];
       default:
         return '';

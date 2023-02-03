@@ -1,6 +1,14 @@
 <template>
   <EtlModal ref="modal" @submit="submit" @hidden="resetModel" :actionName="actionName" :width="1680" class="modal-operator" title="SQL Query">
-    <QueryBuilder v-if="model" ref="queryBuilder" :tableSchema="tableSchema" :query="model.query"></QueryBuilder>
+    <QueryBuilder
+      v-if="model"
+      ref="queryBuilder"
+      :tableSchema="tableSchema"
+      :query="model.query"
+      :query-language="model.language"
+      :showParameter="model.showParameter"
+      @selectLanguage="onSelectLanguage"
+    ></QueryBuilder>
   </EtlModal>
 </template>
 <script lang="ts" src="./QueryTable.ts"></script>

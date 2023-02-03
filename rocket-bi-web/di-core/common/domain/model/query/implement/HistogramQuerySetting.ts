@@ -29,9 +29,10 @@ export class HistogramQuerySetting extends QuerySetting<HistogramChartOption> {
     public binsNumber?: number,
     options: Record<string, any> = {},
 
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   static fromObject(obj: HistogramQuerySetting): HistogramQuerySetting {
@@ -39,7 +40,7 @@ export class HistogramQuerySetting extends QuerySetting<HistogramChartOption> {
     const value = TableColumn.fromObject(obj.value);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new HistogramQuerySetting(value, filters, sorts, obj.binsNumber, obj.options, sqlViews);
+    return new HistogramQuerySetting(value, filters, sorts, obj.binsNumber, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {

@@ -16,14 +16,13 @@
       </template>
     </LayoutSidebar>
     <router-view ref="lakeExplorer" class="my-data-listing"></router-view>
-    <DirectoryCreate ref="mdCreateDirectory" />
     <FolderCreationModal ref="folderCreationModal" @createDirectory="handleCreateDirectory" />
     <LakeBrowserFileModal ref="uploadModal" />
   </LayoutWrapper>
 </template>
 
 <script lang="ts">
-import { Component, Ref, Watch } from 'vue-property-decorator';
+import { Component, Ref } from 'vue-property-decorator';
 import HeaderBar from '@/shared/components/HeaderBar.vue';
 import DataIngestionHeader from '@/screens/data-ingestion/components/DataIngestionHeader.vue';
 import { LoggedInScreen } from '@/shared/components/vue-hook/LoggedInScreen';
@@ -33,7 +32,6 @@ import { Log } from '@core/utils';
 import DiShadowButton from '@/shared/components/common/DiShadowButton.vue';
 import ContextMenu from '@/shared/components/ContextMenu.vue';
 import { Directory } from '@core/common/domain';
-import DirectoryCreate from '@/screens/directory/components/DirectoryCreate.vue';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 import FolderCreationModal from '@/screens/lake-house/components/FolderCreationModal.vue';
 import LakeExplorer from '@/screens/lake-house/views/lake-explorer/LakeExplorer.vue';
@@ -53,7 +51,6 @@ import LakeBrowserFileModal from '@/screens/lake-house/components/lake-upload/La
     DiShadowButton,
     DataIngestionHeader,
     HeaderBar,
-    DirectoryCreate,
     LayoutWrapper,
     LayoutSidebar,
     PopoverV2,
@@ -64,9 +61,6 @@ export default class LakeHouse extends LoggedInScreen {
   content = '';
   @Ref()
   private readonly diContextMenu!: ContextMenu;
-
-  @Ref()
-  private mdCreateDirectory?: DirectoryCreate;
 
   @Ref()
   private readonly lakeExplorer?: LakeExplorer;

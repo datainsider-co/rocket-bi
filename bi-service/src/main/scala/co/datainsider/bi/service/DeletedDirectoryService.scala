@@ -4,7 +4,7 @@ import co.datainsider.bi.domain.Ids.DirectoryId
 import co.datainsider.bi.domain.request.{DeleteDirectoryRequest, ListDirectoriesRequest}
 import co.datainsider.bi.domain.{Directory, DirectoryType}
 import co.datainsider.bi.repository.{DashboardRepository, DeletedDirectoryRepository, DirectoryRepository}
-import co.datainsider.share.controller.request.{GetResourceSharingInfoRequest, RevokeShareRequest}
+import co.datainsider.share.controller.request.RevokeShareRequest
 import co.datainsider.share.service.ShareService
 import com.google.inject.Inject
 import com.twitter.util.Future
@@ -57,7 +57,8 @@ class DeletedDirectoryServiceImpl @Inject() (
         val directories: (Array[Directory], Array[DirectoryId]) = getInnerDeletedDirectories(targetDir)
         val deletedOps: Array[Future[Boolean]] = directories._1.map(dir => {
           dir.directoryType match {
-            case DirectoryType.Directory =>
+            case DirectoryType.Directory | DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis |
+                DirectoryType.EventAnalysis | DirectoryType.PathExplorer => {
               for {
                 usernames <-
                   shareService
@@ -70,6 +71,7 @@ class DeletedDirectoryServiceImpl @Inject() (
                 isDeleted <- deletedDirectoryRepository.delete(dir.id)
                 isRemoveStar <- starredDirectoryService.unstar(organizationId, request.currentUsername, dir.id)
               } yield isDeleted && isRemoveStar
+            }
             case DirectoryType.Dashboard | DirectoryType.Queries =>
               for {
                 usernames <-
@@ -97,7 +99,8 @@ class DeletedDirectoryServiceImpl @Inject() (
         val directories: (Array[Directory], Array[DirectoryId]) = getInnerDeletedDirectories(targetDir)
         val restoreOps: Array[Future[Boolean]] = directories._1.map(dir => {
           dir.directoryType match {
-            case DirectoryType.Directory =>
+            case DirectoryType.Directory | DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis |
+                 DirectoryType.EventAnalysis | DirectoryType.PathExplorer =>
               for {
                 isRestore <- directoryRepository.restore(dir)
                 isDeleted <- deletedDirectoryRepository.delete(dir.id)

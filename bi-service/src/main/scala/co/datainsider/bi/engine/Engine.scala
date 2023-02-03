@@ -1,6 +1,6 @@
 package co.datainsider.bi.engine
 
-import co.datainsider.bi.domain.query.{AggregateCondition, Condition, Function, ScalarFunction}
+import co.datainsider.bi.domain.query.{AggregateCondition, Condition, Function, ScalarFunction, SelectExpression}
 
 trait Engine[R] {
 
@@ -20,9 +20,9 @@ trait SqlParser {
 
   def toQueryString(function: Function): String
 
+  def toQueryString(scalarFn: ScalarFunction, field: String): String
+
   def toAliasName(function: Function): String
 
-  def selectWithAliasName(function: Function): String
-
-  def toQueryString(scalarFn: ScalarFunction, field: String): String
+  def toFieldWithAliasName(function: Function): String
 }

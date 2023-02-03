@@ -19,10 +19,10 @@
         <div class="group-privilege mb-3">
           <GroupListCheckbox
             :id="genMultiSelectionId('group-list-checkbox', index)"
-            :selected-items="permissions"
+            :selected-items="selectedPermissions"
             :group="group"
             :is-show-all-checkbox="true"
-            @handleChangeListCheckbox="handleChangeListCheckbox"
+            @change="handleChangeListCheckbox"
           ></GroupListCheckbox>
         </div>
       </div>
@@ -44,6 +44,7 @@ import DiButton from '@/shared/components/common/DiButton.vue';
 import { Log } from '@core/utils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
+import { PermissionGroup } from '@core/admin/domain/permissions/PermissionGroup';
 
 @Component({
   components: {
@@ -56,22 +57,42 @@ import { TrackingUtils } from '@core/tracking/TrackingUtils';
   computed: {}
 })
 export default class UserPrivilege extends Vue {
-  isSaveBtnLoading = false;
+  private isSaveBtnLoading = false;
 
-  @Prop()
-  status!: Status;
+  @Prop({ type: String, required: true })
+  private readonly status!: Status;
 
-  @Prop()
-  fullName!: string;
+  @Prop({ type: String, default: '' })
+  private readonly fullName!: string;
 
-  @Prop()
-  permissionGroups!: {};
+  @Prop({ type: Array, required: true })
+  private readonly permissionGroups!: PermissionGroup[];
 
-  @Prop()
-  permissions!: string[];
+  @Prop({ type: Array, required: true })
+  private readonly selectedPermissions!: string[];
 
-  @Prop()
-  errorMessage!: string;
+  @Prop({ type: String, default: '' })
+  private readonly errorMessage!: string;
+
+  //todo rename and move to new file
+  // transformData(permissionGroups: PermissionGroup[]): GroupCheckboxOption[] {
+  //   const result = permissionGroups.map(group => {
+  //     return {
+  //       ...group,
+  //       permissions: this.toCheckboxGroupOption(group.permissions)
+  //     };
+  //   });
+  //   return result;
+  // }
+  //
+  // toCheckboxGroupOption(permissions: PermissionInfo[]): CheckboxGroupOption[] {
+  //   return permissions.map(per => {
+  //     return {
+  //       text: per.name,
+  //       value: per.permission
+  //     };
+  //   });
+  // }
 
   private get isLoaded() {
     return this.status === Status.Loaded;
@@ -82,13 +103,6 @@ export default class UserPrivilege extends Vue {
     return this.status === Status.Loading;
   }
 
-  /**
-   * TODO: User Management
-   * TODO: - Rename this method to a a better name. Eg: handleCheckBoxItemChanged
-   * TODO: - Handle logic: toggle between permission 'All' and others
-   * @param selectedItems
-   * @private
-   */
   private handleChangeListCheckbox(selectedItems: string[]) {
     UserDetailModule.updateSelectedPermissions(selectedItems);
   }

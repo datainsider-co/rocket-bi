@@ -57,6 +57,7 @@ export enum Routers {
   FunnelAnalysis = 'FunnelAnalysis',
 
   GoogleAuthentication = 'GoogleAuthentication',
+  FacebookAuthentication = 'FacebookAuthentication',
 
   DataCook = 'DataCook',
   MyEtl = 'MyEtl',

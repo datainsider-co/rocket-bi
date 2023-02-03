@@ -4,10 +4,11 @@
       <InputSetting
         id="bin-number"
         type="number"
-        placeholder="Input bin column"
         :value="binNumber"
         class="mb-3 group-config"
-        label="Total bin column"
+        :label="`${configSetting['totalBin'].label}`"
+        :hint="`${configSetting['totalBin'].hint}`"
+        :placeholder="`${configSetting['totalBin'].placeHolder}`"
         size="full"
         @onChanged="handleBinNumberChanged"
       />
@@ -23,6 +24,7 @@ import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 
 @Component({ components: { PanelHeader } })
 export default class BinNumberTab extends Vue {
+  private readonly configSetting = window.chartSetting['histogram.tab'];
   @Prop({ required: false, type: Object })
   setting!: SeriesOptionData;
 

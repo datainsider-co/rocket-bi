@@ -16,7 +16,7 @@ case class GetOrCreatePermissionTokenRequest(
     objectType: String,
     objectId: String,
     permissions: Option[Seq[String]],
-    @Inject request: Request
+    @Inject request: Request = null
 ) extends LoggedInRequest
 
 case class UpdatePermissionTokenRequest(
@@ -33,8 +33,9 @@ case class CheckTokenActionPermittedRequest(
     @RouteParam @NotEmpty tokenId: String,
     @NotEmpty resourceId: String,
     @NotEmpty resourceType: String,
-    @NotEmpty actions: Seq[String]
-)
+    @NotEmpty actions: Seq[String],
+    @Inject request: Request = null
+) extends LoggedInRequest
 
 case class CheckTokenPermittedAllRequest(
     @RouteParam @NotEmpty tokenId: String,

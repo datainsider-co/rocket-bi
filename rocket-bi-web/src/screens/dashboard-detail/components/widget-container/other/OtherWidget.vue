@@ -43,11 +43,12 @@ import { ContextMenuItem, DashboardOptions } from '@/shared';
 import { Widget, Widgets } from '@core/common/domain/model';
 import ImageViewer from '@/screens/dashboard-detail/components/widget-container/other/ImageViewer.vue';
 import TextViewer from '@/screens/dashboard-detail/components/widget-container/other/TextViewer.vue';
-import { DashboardModeModule, WidgetModule } from '@/screens/dashboard-detail/stores';
+import { DashboardModeModule, DashboardModule, WidgetModule } from '@/screens/dashboard-detail/stores';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import DynamicFunctionViewer from '@/screens/dashboard-detail/components/widget-container/other/DynamicFunctionViewer.vue';
 import DynamicConditionViewer from '@/screens/dashboard-detail/components/widget-container/other/DynamicConditionViewer.vue';
+import { CopiedData, CopiedDataType } from '@/screens/dashboard-detail/intefaces/CopiedData';
 
 @Component({ components: { ImageViewer, TextViewer, DynamicFunctionViewer, DynamicConditionViewer } })
 export default class OtherWidget extends Vue {
@@ -113,6 +114,11 @@ export default class OtherWidget extends Vue {
   private get textWidgetActions(): ContextMenuItem[] {
     return [
       {
+        text: 'Copy widget',
+        click: this.copyWidget,
+        disabled: !DashboardModeModule.canDuplicate
+      },
+      {
         text: DashboardOptions.EDIT_TEXT,
         click: this.editText,
         disabled: !DashboardModeModule.canEdit
@@ -154,6 +160,16 @@ export default class OtherWidget extends Vue {
   private editText() {
     PopupUtils.hideAllPopup();
     this.$root.$emit(DashboardEvents.ShowEditTextModal, this.widget, true);
+  }
+
+  private copyWidget() {
+    PopupUtils.hideAllPopup();
+    const copiedData = CopiedData.create(CopiedDataType.Widget, {
+      widget: this.widget,
+      position: WidgetModule.getPosition(this.widget.id)
+    });
+    DashboardModule.setCopiedData(copiedData);
+    this.$copyText(JSON.stringify(copiedData));
   }
 }
 </script>

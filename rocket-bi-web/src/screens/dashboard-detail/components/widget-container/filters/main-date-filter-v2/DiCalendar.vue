@@ -6,6 +6,7 @@
           <div class="compare-container">
             <DiDropdown
               :id="`${id}-date-mode`"
+              v-if="listTimePresetOptions.length > 0"
               v-model="currentCalendarData.filterMode"
               :data="listTimePresetOptions"
               labelProps="label"

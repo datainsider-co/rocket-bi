@@ -18,6 +18,11 @@ export class Position {
     this.zIndex = zIndex || 0;
   }
 
+  resetRowColumn() {
+    this.row = -1;
+    this.column = -1;
+  }
+
   static fromObject(obj: Position): Position {
     return new Position(obj.row, obj.column, obj.width, obj.height, obj.zIndex ?? 1);
   }

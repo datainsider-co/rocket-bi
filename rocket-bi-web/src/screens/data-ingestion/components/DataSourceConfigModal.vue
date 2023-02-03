@@ -23,7 +23,10 @@
           <!--          <TestConnection :status="connectionStatus" @handleTestConnection="handleTestConnection"></TestConnection>-->
           <div v-if="isTestConnection" class="p-0 text-center">
             <BSpinner v-if="isTestConnectionLoading" small class="text-center"></BSpinner>
-            <div v-else :class="statusClass" class="text-right">{{ statusMessage }}</div>
+            <div v-else :class="statusClass" class="text-right">{{ getStatusMessage() }}</div>
+          </div>
+          <div v-if="errorMsg" class="p-0 text-center">
+            <div class="text-right text-danger">{{ errorMsg }}</div>
           </div>
         </div>
       </div>
@@ -48,7 +51,13 @@
         >
           <img src="@/assets/icon/data_ingestion/ic_connect.svg" class="ic-16" alt="" />
         </DiButton>
-        <DiButton id="button-submit" class="ml-auto button-add btn-primary" :title="okTitle" @click="ok"></DiButton>
+        <DiButton
+          :class="{ 'ml-auto': isHideTestConnection && isHideAddField }"
+          id="button-submit"
+          class="button-add btn-primary"
+          :title="okTitle"
+          @click="ok"
+        ></DiButton>
       </div>
     </template>
     <ManagePropertyModal ref="managePropertyModal" />
@@ -78,12 +87,22 @@ import ManagePropertyModal from '@/screens/data-ingestion/form-builder/render-im
 import { cloneDeep } from 'lodash';
 
 @Component({
-  components: { TestConnection, MessageContainer, DiButton, DiCustomModal, DataSourceConfigForm, TSLForm, ManagePropertyModal, DiDropdown }
+  components: {
+    TestConnection,
+    MessageContainer,
+    DiButton,
+    DiCustomModal,
+    DataSourceConfigForm,
+    TSLForm,
+    ManagePropertyModal,
+    DiDropdown
+  }
 })
 export default class DataSourceConfigModal extends Vue {
   private static readonly DEFAULT_ID = -1;
   private connectionStatus: ConnectionStatus = ConnectionStatus.Failed;
   private isTestConnection = false;
+  private errorMsg = '';
 
   @PropSync('isShow', { type: Boolean })
   isShowSync!: boolean;
@@ -105,7 +124,7 @@ export default class DataSourceConfigModal extends Vue {
     };
   }
 
-  private get statusMessage(): string {
+  private getStatusMessage(): string {
     switch (this.connectionStatus) {
       case ConnectionStatus.Success:
         return TestConnection.CONNECTION_SUCCESS;
@@ -171,8 +190,18 @@ export default class DataSourceConfigModal extends Vue {
     });
   }
 
-  private async handleSubmit() {
-    this.$emit('onClickOk');
+  private async handleSubmit(event: Event) {
+    try {
+      event.preventDefault();
+      this.errorMsg = '';
+      const source = this.dataSourceRender.createDataSourceInfo();
+      Log.debug('handleSubmit::', source);
+      this.dataSourceRender.validSource(source);
+      this.$emit('onClickOk', source);
+    } catch (ex) {
+      Log.error('handleSubmit', ex);
+      this.errorMsg = ex.message;
+    }
   }
 
   private onHide() {
@@ -188,6 +217,7 @@ export default class DataSourceConfigModal extends Vue {
   private async handleTestConnection(e: Event) {
     try {
       e.preventDefault();
+      this.errorMsg = '';
       this.isTestConnection = true;
       const dataSourceInfo: DataSourceInfo = this.dataSourceRender.createDataSourceInfo();
       Log.debug('DataConfigModal::handleTestConnection::request::', dataSourceInfo);
@@ -214,6 +244,7 @@ export default class DataSourceConfigModal extends Vue {
   }
 
   private reset() {
+    this.errorMsg = '';
     this.connectionStatus = ConnectionStatus.Failed;
   }
 }
@@ -316,6 +347,7 @@ export default class DataSourceConfigModal extends Vue {
         width: fit-content;
         color: var(--accent);
       }
+
       i {
         color: var(--accent);
       }

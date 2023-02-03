@@ -1,14 +1,31 @@
 <template>
   <PanelHeader header="Map Controls" target-id="map-control-tab">
     <div id="map-control">
-      <DropdownSetting id="font-family" :options="geoAreaOptions" :value="geoArea" class="mb-3" label="Select map" size="full" @onChanged="handleMapChanged" />
-      <ToggleSetting id="data-label-enable" :value="enabled" class="mb-3 group-config" label="On" @onChanged="handleDataLabelEnabled" />
+      <DropdownSetting
+        id="font-family"
+        :options="geoAreaOptions"
+        :value="geoArea"
+        class="mb-3"
+        :label="`${configSetting['map.select'].label}`"
+        :hint="`${configSetting['map.select'].hint}`"
+        size="full"
+        @onChanged="handleMapChanged"
+      />
+      <ToggleSetting
+        id="data-label-enable"
+        :value="enabled"
+        class="mb-3 group-config"
+        :label="`${configSetting['label.enabled'].label}`"
+        :hint="`${configSetting['label.enabled'].hint}`"
+        @onChanged="handleDataLabelEnabled"
+      />
       <DropdownSetting
         id="data-label-font-family"
         :options="fontOptions"
         :value="font"
         class="mb-2"
-        label="Font family"
+        :label="`${configSetting['label.fontFamily'].label}`"
+        :hint="`${configSetting['label.fontFamily'].hint}`"
         size="full"
         @onChanged="handleFontChanged"
       />
@@ -18,10 +35,20 @@
           :default-color="defaultSetting.color"
           :value="color"
           class="mr-2"
+          :label="`${configSetting['label.color'].label}`"
+          :hint="`${configSetting['label.color'].hint}`"
           size="small"
           @onChanged="handleColorChanged"
         />
-        <DropdownSetting id="data-label-font-size" :options="fontSizeOptions" :value="fontSize" size="small" @onChanged="handleFontSizeChanged" />
+        <DropdownSetting
+          id="data-label-font-size"
+          :label="`${configSetting['label.fontSize'].label}`"
+          :hint="`${configSetting['label.fontSize'].hint}`"
+          :options="fontSizeOptions"
+          :value="fontSize"
+          size="small"
+          @onChanged="handleFontSizeChanged"
+        />
       </div>
       <RevertButton class="mb-3 pr-3" style="text-align: right" @click="handleRevert" />
     </div>
@@ -38,9 +65,11 @@ import { GeolocationModule } from '@/store/modules/data-builder/GeolocationStore
 import { get } from 'lodash';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
 import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { StringUtils } from '@/utils';
 
 @Component({ components: { PanelHeader } })
 export default class MapStyleTab extends Vue {
+  private readonly configSetting = window.chartSetting['map.tab'];
   @Prop({ required: false, type: Object })
   private setting?: SeriesOptionData;
 
@@ -57,10 +86,12 @@ export default class MapStyleTab extends Vue {
   }
 
   private get geoAreaOptions(): SelectOption[] {
-    return Array.from(GeolocationModule.areaAsMap.values()).map<SelectOption>(area => ({
-      id: area.mapUrl,
-      displayName: area.displayName
-    }));
+    return Array.from(GeolocationModule.areaAsMap.values())
+      .map<SelectOption>(area => ({
+        id: area.mapUrl,
+        displayName: area.displayName
+      }))
+      .sort((a, b) => StringUtils.compare(a.displayName, b.displayName));
   }
 
   private get enabled(): boolean {

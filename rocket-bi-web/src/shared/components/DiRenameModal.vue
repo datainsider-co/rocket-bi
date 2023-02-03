@@ -1,5 +1,5 @@
 <template>
-  <BModal id="mdRename" ref="mdRename" centered ok-title="Rename" cancel-title="Cancel" :title="title" class="rounded" size="md" @ok="rename">
+  <BModal :id="id" ref="mdRename" centered ok-title="Rename" cancel-title="Cancel" :title="title" class="rounded" size="md" @ok="rename">
     <template v-slot:modal-header="{ close }">
       <h6 class="modal-title">{{ title }}</h6>
       <button type="button" class="close btn-ghost" @click.prevent="close()" aria-label="Close" v-show="false">
@@ -63,6 +63,9 @@ export default class DiRenameModal extends Vue {
   @Ref()
   private readonly mdRename!: BModal;
 
+  @Prop({ type: String, required: false, default: 'mdRename' })
+  private readonly id!: string;
+
   @Prop({ type: String, default: 'Rename' })
   title!: string;
 
@@ -76,21 +79,22 @@ export default class DiRenameModal extends Vue {
   placeholder!: string;
 
   name?: string;
-  data: object = {};
+  // data: object = {};
   loading = false;
   errorMsg = '';
+  onClickOk?: (newName: string) => void;
 
   constructor() {
     super();
     this.name = '';
   }
 
-  show(currentName: string, data?: any) {
+  show(currentName: string, onClickOk: (newName: string) => void) {
     this.loading = false;
     this.errorMsg = '';
     this.name = currentName;
     this.mdRename.show();
-    this.data = data;
+    this.onClickOk = onClickOk;
   }
 
   hide() {
@@ -113,8 +117,9 @@ export default class DiRenameModal extends Vue {
   rename(event: Event) {
     try {
       event.preventDefault();
-      if (this.validName() && this.name) {
-        this.$emit('rename', this.name, this.data);
+      if (this.validName() && this.name && this.onClickOk) {
+        // this.$emit('rename', this.name, this.data);
+        this.onClickOk(this.name);
       }
     } catch (e) {
       Log.error('DiRenameModal::rename::error::', e.message);

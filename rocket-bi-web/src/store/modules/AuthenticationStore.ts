@@ -18,6 +18,7 @@ import { Log } from '@core/utils';
 import { LoginResponse } from '@core/common/domain/response/authentication/LoginResponse';
 import { UserProfile } from '@core/common/domain';
 import { RouterUtils } from '@/utils/RouterUtils';
+import { DashboardModule } from '@/screens/dashboard-detail/stores';
 
 export enum AuthenticationStatus {
   UnIdentify,
@@ -264,6 +265,7 @@ export class AuthenticationStore extends VuexModule {
     this.dataManager.clearLocalStorage();
     this.setAuthStatus(AuthenticationStatus.UnAuthenticated);
     this.setUserProfile(UserProfile.unknown());
+    DashboardModule.setCopiedData(null);
     await RouterUtils.to(Routers.Login, { replace: true });
   }
 

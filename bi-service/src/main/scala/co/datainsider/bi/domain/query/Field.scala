@@ -73,7 +73,6 @@ case class ExpressionField(
     tblName: String,
     fieldName: String,
     fieldType: String,
-    expressionType: String = "",
     tblAliasName: Option[String] = None
 ) extends Field {
 

@@ -35,9 +35,10 @@ export class PyramidQuerySetting extends QuerySetting<PyramidChartOption> implem
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
 
-    sqlViews: InlineSqlView[] = []
+    sqlViews: InlineSqlView[] = [],
+    parameters: Record<string, string> = {}
   ) {
-    super(filters, sorts, options, sqlViews);
+    super(filters, sorts, options, sqlViews, parameters);
   }
 
   get zoomData(): ZoomData {
@@ -50,7 +51,7 @@ export class PyramidQuerySetting extends QuerySetting<PyramidChartOption> implem
     const value = TableColumn.fromObject(obj.value);
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
 
-    return new PyramidQuerySetting(legend, value, filters, sorts, obj.options, sqlViews);
+    return new PyramidQuerySetting(legend, value, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   getAllFunction(): Function[] {
