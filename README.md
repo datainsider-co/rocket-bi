@@ -21,9 +21,9 @@ Prerequisites:
 **1. Prepare:**
 
 ```bash
-wget https://raw.githubusercontent.com/datainsider-co/rocket-bi/main/docker/docker-compose.yml
+git clone https://github.com/datainsider-co/rocket-bi.git
 
-wget https://raw.githubusercontent.com/datainsider-co/rocket-bi/main/docker/.clickhouse.env
+cd rocket-bi/docker/
 ```
 
 Edit `.clickhouse.env` with your clickhouse server's host, port, username, password and cluster name.
