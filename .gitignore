@@ -4,6 +4,4 @@
 **/log
 **/data
 *.idea
-**/mysql
-**/ssdb
 */Jenkinsfile

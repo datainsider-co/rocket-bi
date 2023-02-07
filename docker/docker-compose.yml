@@ -30,8 +30,6 @@ services:
     environment:
       NAME: user-profile
       MODE: production
-    ports:
-      - 8580:8580
     depends_on:
       - mysql
       - ssdb
@@ -47,8 +45,6 @@ services:
       MODE: production
       HTTP_PORT: 8489
       THRIFT_PORT: 8487
-    ports:
-      - 8489:8489
     depends_on:
       - mysql
       - ssdb
@@ -58,8 +54,6 @@ services:
     image: datainsiderco/bi-service:dev
     container_name: rocket-bi-service
     restart: always
-    ports:
-      - 8686:8080
     env_file:
       - .clickhouse.env
     environment:
@@ -76,8 +70,6 @@ services:
     container_name: rocket-web
     volumes:
      - ./web/config:/app/config
-    ports:
-      - 5050:8080
     deploy:
       restart_policy:
         condition: on-failure
@@ -85,7 +77,19 @@ services:
         max_attempts: 3
         window: 30s
 
+  nginx:
+    image: nginx:latest
+    container_name: rocket-nginx
+    ports:
+      - 5050:80
+    volumes:
+      - ./nginx_home/conf.d/:/etc/nginx/conf.d/
+      - ./nginx_home/nginx.conf/:/etc/nginx/nginx.conf
+      - ./nginx_home/log/:/var/log/nginx/
+      - ./nginx_home/html:/var/www/html/public
+    depends_on:
+      - bi_service
+      - web
+
 networks:
-  default:
-    external:
-      name: di_network
+  rocket_network:
