@@ -65,6 +65,20 @@ services:
       - ssdb
       - caas_service
 
+  job_scheduler:
+    image: datainsiderco/job-scheduler
+    container_name: rocket-job-scheduler
+    restart: always
+    environment:
+      NAME: job-scheduler
+      MODE: production
+      HTTP_PORT: 8080
+      THRIFT_PORT: 8084
+    depends_on:
+      - mysql
+      - ssdb
+      - caas_service
+
   web:
     image: datainsiderco/rocket-bi-web:dev
     container_name: rocket-web
