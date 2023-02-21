@@ -35,7 +35,7 @@ services:
       - ssdb
 
   schema_service:
-    image: datainsiderco/schema-service:main
+    image: datainsiderco/schema-service:dev
     container_name: rocket-schema-service
     restart: always
     env_file:
@@ -45,6 +45,8 @@ services:
       MODE: production
       HTTP_PORT: 8489
       THRIFT_PORT: 8487
+    volumes:
+      - ./schema-service/logs:/app/logs
     depends_on:
       - mysql
       - ssdb
@@ -66,7 +68,7 @@ services:
       - caas_service
 
   job_scheduler:
-    image: datainsiderco/job-scheduler
+    image: datainsiderco/job-scheduler:dev
     container_name: rocket-job-scheduler
     restart: always
     environment:
@@ -74,15 +76,19 @@ services:
       MODE: production
       HTTP_PORT: 8080
       THRIFT_PORT: 8084
+    volumes:
+      - ./job-scheduler/logs:/app/logs
     depends_on:
       - mysql
       - ssdb
       - caas_service
 
   job_worker:
-    image: datainsiderco/job-worker:main
-    container_name: di-job-worker
+    image: datainsiderco/job-worker:dev
+    container_name: rocket-job-worker
     restart: always
+    volumes:
+      - ./job-worker/logs:/app/logs
     environment:
       NAME: job-worker
       MODE: production
