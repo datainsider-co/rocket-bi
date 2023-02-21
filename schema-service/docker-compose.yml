@@ -15,9 +15,9 @@ services:
       CLICKHOUSE_USERNAME: default
       CLICKHOUSE_PASSWORD: ""
       CLICKHOUSE_CLUSTER_NAME: ""
-    ports:
-      - "8489:8489"
-      - "8487:8487"
+      #ports:
+      #- "8489:8489"
+      #- "8487:8487"
     volumes:
       - ./conf:/app/conf
       - ./logs:/app/logs

@@ -1,0 +1,86 @@
+import json
+
+import clickhouse_connect
+from clickhouse_connect.driver import Client
+
+
+class ClickhouseInfo(object):
+    def __init__(self,
+                 host: str,
+                 port: int,
+                 user: str,
+                 password: str,
+                 database: str,
+                 table: str,
+                 dest_database: str,
+                 dest_table: str,
+                 query_limit: int,
+                 query_retries: int,
+                 connect_timeout: int):
+        self.host = host
+        self.port = port
+        self.user = user
+        self.password = password
+        self.database = database
+        self.table = table
+        self.dest_database = dest_database
+        self.dest_table = dest_table
+        self.query_limit = query_limit
+        self.query_retries = query_retries
+        self.connect_timeout = connect_timeout
+
+
+def execute(connection: ClickhouseInfo):
+    # Create the clickhouse client
+    with clickhouse_connect.get_client(host=connection.host,
+                                       port=connection.port,
+                                       user=connection.user,
+                                       password=connection.password,
+                                       database=connection.database,
+                                       query_limit=connection.query_limit,
+                                       connect_timeout=connection.connect_timeout,
+                                       query_retries=connection.query_retries) as client:
+        # call process function
+        process(client, connection.database, connection.table, connection.dest_database, connection.dest_table)
+
+
+#{code}
+
+# sample code
+# def process(client: Client, database: str, table: str, dest_database: str, dest_table: str):
+#     """Process the data from the table and insert into the dest_table
+#     :type client: clickhouse_driver.client.Client
+#     :type database: str
+#     :type table: str
+#     :type dest_table: str
+#     """
+#     create_table_query = "CREATE TABLE IF NOT EXISTS `{database}`.`{dest_table}`(di_timestamp Int64, di_event_name String) ENGINE MergeTree() ORDER BY di_timestamp".format(
+#         database=dest_database, dest_table=dest_table)
+#     _ = client.command(create_table_query)
+#     result_set = client.query("select di_timestamp, di_event_name as age from {database}.{table}".format(database=database, table=table)).result_set
+#     buffers = []
+#     for row in result_set:
+#         buffers.append(row)
+#         if buffers.__len__() > 1000:
+#             client.insert(database=dest_database, table=dest_table, data=buffers, column_names=['di_timestamp', 'di_event_name'])
+#             buffers.clear()
+#     if buffers.__len__() > 0:
+#         client.insert(database=dest_database, table=dest_table, data=buffers, column_names=['di_timestamp', 'di_event_name'])
+#         buffers.clear()
+
+if __name__ == '__main__':
+    # Create the connection object
+    connection = ClickhouseInfo(
+        host='#{host}',
+        port=#{port},
+        user='#{user}',
+        password='#{password}',
+        database='#{database}',
+        table='#{table}',
+        dest_database='#{dest_database}',
+        dest_table='#{dest_table}',
+        query_limit=#{query_limit},
+        query_retries=#{query_retries},
+        connect_timeout=#{connect_timeout_seconds}
+    )
+    execute(connection)
