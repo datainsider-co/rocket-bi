@@ -9,6 +9,8 @@ services:
     volumes:
       - ./mysql/data:/var/lib/mysql
       - ./mysql/conf:/etc/mysql/conf.d
+    ports:
+      - 3306:3306
     environment:
       MYSQL_USER: "di"
       MYSQL_PASSWORD: "di@2020!"
@@ -18,6 +20,8 @@ services:
   ssdb:
     image: wendal/ssdb:latest
     container_name: rocket-ssdb
+    ports:
+      - 8888:8888
     volumes:
       - ./ssdb/data:/var/lib/ssdb/data
       - ./ssdb/conf/ssdb.conf:/etc/ssdb.conf
@@ -88,6 +92,8 @@ services:
     image: datainsiderco/job-worker:dev
     container_name: rocket-job-worker
     restart: always
+    env_file:
+      - .clickhouse.env
     volumes:
       - ./job-worker/logs:/app/logs
       - ./job-worker/conf:/app/conf
