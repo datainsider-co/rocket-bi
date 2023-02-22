@@ -10,7 +10,7 @@ const productionConfig = {
   VUE_APP_LAKE_API_URL: '/api',
   VUE_APP_CDP_API_URL: '/api',
   VUE_APP_STATIC_API_URL: '/static/media/serve',
-  VUE_APP_BILLING_API_URL: '/api',
+  VUE_APP_BILLING_API_URL: 'https://license.datainsider.co/api',
   VUE_APP_WORKER_API_URL: '/api',
   VUE_APP_SCHEDULER_API_URL: '/api',
   VUE_APP_RELAY_API_URL: '/api',
@@ -30,7 +30,7 @@ const productionConfig = {
     isShowHint: true,
     hintMessage: 'Login with default account: hello@gmail.com, pass: 123456'
   },
-  VUE_APP_VERSION: 'v1.4.14'
+  VUE_APP_VERSION: 'v1.4.17'
 };
 
 window.appConfig = productionConfig;

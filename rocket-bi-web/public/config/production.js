@@ -25,12 +25,12 @@ const productionConfig = {
   VUE_APP_IS_DISABLE_INGESTION: false,
   VUE_APP_IS_DISABLE_USER_ACTIVITIES: false,
   VUE_APP_IS_ENABLE_CLICKHOUSE_CONFIG: false,
-  VUE_APP_IS_DISABLE_BILLING: true,
+  VUE_APP_IS_DISABLE_BILLING: false,
   VUE_APP_LOGIN_SAMPLE: {
     isShowHint: true,
-    hintMessage: 'You can use test account demo@datainsider.co/demo@123 to login'
+    hintMessage: 'Default account: hello@gmail.com/123456'
   },
-  VUE_APP_VERSION: 'v1.4.14'
+  VUE_APP_VERSION: 'v1.4.17'
 };
 
 window.appConfig = productionConfig;
