@@ -25,7 +25,7 @@ const productionConfig = {
   VUE_APP_IS_DISABLE_INGESTION: false,
   VUE_APP_IS_DISABLE_USER_ACTIVITIES: false,
   VUE_APP_IS_ENABLE_CLICKHOUSE_CONFIG: false,
-  VUE_APP_IS_DISABLE_BILLING: true,
+  VUE_APP_IS_DISABLE_BILLING: false,
   VUE_APP_LOGIN_SAMPLE: {
     isShowHint: true,
     hintMessage: 'Login with default account: hello@gmail.com, pass: 123456'

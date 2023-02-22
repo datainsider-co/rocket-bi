@@ -9,7 +9,6 @@ import datainsider.client.domain.query.{Limit, QueryParser, QueryParserImpl}
 import datainsider.client.service._
 import datainsider.client.util.{HikariClient, JdbcClient, NativeJdbcClient, ZConfig}
 import datainsider.data_cook.domain.Ids.EtlJobId
-import datainsider.data_cook.module.DataCookTestModule.getClass
 import datainsider.data_cook.pipeline.operator._
 import datainsider.data_cook.pipeline.operator.persist._
 import datainsider.data_cook.pipeline.{ExecutorResolver, ExecutorResolverImpl}
@@ -18,7 +17,7 @@ import datainsider.data_cook.service._
 import datainsider.data_cook.service.scheduler.{ScheduleService, ScheduleServiceImpl}
 import datainsider.data_cook.service.table.{EtlTableService, EtlTableServiceImpl}
 import datainsider.data_cook.service.worker.{WorkerService, WorkerServiceImpl}
-import datainsider.ingestion.domain.TableType
+import datainsider.ingestion.domain.{ClickhouseConnectionSetting, TableType}
 import datainsider.ingestion.repository._
 import datainsider.ingestion.service._
 import datainsider.ingestion.util.Using
@@ -27,6 +26,7 @@ import org.nutz.ssdb4j.spi.SSDB
 
 import javax.inject.{Named, Singleton}
 import scala.io.Source
+import scala.util.Try
 
 /**
   * @author tvc12 - Thien Vi
@@ -48,31 +48,50 @@ object DataCookModule extends TwitterModule {
     bind[EtlJobHistoryService].to[EtlJobHistoryServiceImpl].asEagerSingleton()
   }
 
-  // client using insert synced
   @Singleton
   @Provides
   @Named("data_cook_clickhouse")
-  def providesClickHouseClient(): JdbcClient = {
-    val driverClass: String = ZConfig.getString("db.clickhouse.driver_class")
-    val jdbcUrl: String = ZConfig.getString("db.clickhouse.url")
-    val user: String = ZConfig.getString("db.clickhouse.user")
-    val password: String = ZConfig.getString("db.clickhouse.password")
-    val maxPoolSize: Int = ZConfig.getInt("db.clickhouse.max_pool_size", 10)
+  def providesClickHouseClient(clickhouseConnSetting: Option[ClickhouseConnectionSetting]): JdbcClient = {
+    if (clickhouseConnSetting.isDefined) {
+      info(s"[DataCook] Read clickhouse connection setting from env: ${clickhouseConnSetting.get}")
 
-    HikariClient(jdbcUrl, user, password, maxPoolSize = maxPoolSize)
+      HikariClient(
+        clickhouseConnSetting.get.toJdbcUrl,
+        clickhouseConnSetting.get.username,
+        clickhouseConnSetting.get.password
+      )
+
+    } else {
+      val jdbcUrl: String = ZConfig.getString("db.clickhouse.url")
+      val user: String = ZConfig.getString("db.clickhouse.user")
+      val password: String = ZConfig.getString("db.clickhouse.password")
+
+      HikariClient(jdbcUrl, user, password)
+    }
   }
 
   @Singleton
   @Provides
   @Named("data_cook_clickhouse_writer")
-  def providesClickHouseWriterClient(): JdbcClient = {
-    val host: String = ZConfig.getString("data_cook.clickhouse.host")
-    val port: String = ZConfig.getString("data_cook.clickhouse.http_port", "8123")
-    val user: String = ZConfig.getString("data_cook.clickhouse.user")
-    val password: String = ZConfig.getString("data_cook.clickhouse.password")
-    val jdbcUrl = s"jdbc:clickhouse://${host}:${port}?socket_timeout=0"
+  def providesClickHouseWriterClient(clickhouseConnSetting: Option[ClickhouseConnectionSetting]): JdbcClient = {
+    if (clickhouseConnSetting.isDefined) {
+      info(s"Read clickhouse connection setting from env: ${clickhouseConnSetting.get}")
 
-    NativeJdbcClient(jdbcUrl, user, password)
+      HikariClient(
+        clickhouseConnSetting.get.toJdbcUrl,
+        clickhouseConnSetting.get.username,
+        clickhouseConnSetting.get.password
+      )
+
+    } else {
+      val host: String = ZConfig.getString("data_cook.clickhouse.host")
+      val port: String = ZConfig.getString("data_cook.clickhouse.http_port", "8123")
+      val user: String = ZConfig.getString("data_cook.clickhouse.user")
+      val password: String = ZConfig.getString("data_cook.clickhouse.password")
+      val jdbcUrl = s"jdbc:clickhouse://${host}:${port}?socket_timeout=0"
+
+      NativeJdbcClient(jdbcUrl, user, password)
+    }
   }
 
   @Provides
@@ -343,7 +362,9 @@ object DataCookModule extends TwitterModule {
       @Named("etl_schema_service") schemaService: SchemaService
   ): Executor[PythonOperator] = {
     val templatePath: String = ZConfig.getString("data_cook.templates.python", "templates/main.py.template")
-    val template: String = Using(Source.fromInputStream(getClass.getClassLoader.getResourceAsStream(templatePath)))(_.getLines().mkString("\n"))
+    val template: String = Using(Source.fromInputStream(getClass.getClassLoader.getResourceAsStream(templatePath)))(
+      _.getLines().mkString("\n")
+    )
     val host: String = ZConfig.getString("data_cook.clickhouse.host")
     val port: String = ZConfig.getString("data_cook.clickhouse.http_port")
     val user: String = ZConfig.getString("data_cook.clickhouse.user")
@@ -367,11 +388,13 @@ object DataCookModule extends TwitterModule {
   @Provides
   @Singleton
   def providesPythonExecutor(
-    tableService: EtlTableService,
-    schemaService: SchemaService,
+      tableService: EtlTableService,
+      schemaService: SchemaService
   ): Executor[PythonOperator] = {
     val templatePath: String = ZConfig.getString("data_cook.templates.python", "templates/main.py.template")
-    val template: String = Using(Source.fromInputStream(getClass.getClassLoader.getResourceAsStream(templatePath)))(_.getLines().mkString("\n"))
+    val template: String = Using(Source.fromInputStream(getClass.getClassLoader.getResourceAsStream(templatePath)))(
+      _.getLines().mkString("\n")
+    )
     val host: String = ZConfig.getString("data_cook.clickhouse.host")
     val port: String = ZConfig.getString("data_cook.clickhouse.http_port")
     val user: String = ZConfig.getString("data_cook.clickhouse.user")

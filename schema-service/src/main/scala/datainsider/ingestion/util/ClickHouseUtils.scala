@@ -67,22 +67,26 @@ object ClickHouseUtils {
     orgId.getOrElse(SINGLE_TENANT_ID)
   }
 
+  def dbNamePrefix(orgId: Long) = s"org${orgId}_"
+
   /**
     * for single tenant version (organizationId is always 0) do not add prefix: "org_"
-    * @param organizationId organization id
+    * @param orgId organization id
     * @param name name of db
     */
   // TODO: If change format in here, check regex of ETL_DATABASE_PATTERN & PREVIEW_ETL_DATABASE_PATTERN
-  def buildDatabaseName(organizationId: OrganizationId, name: String): String = {
-    if (organizationId == SINGLE_TENANT_ID) {
+  def buildDatabaseName(orgId: OrganizationId, name: String): String = {
+    if (orgId == SINGLE_TENANT_ID) {
       name
     } else {
-      s"org${organizationId}_$name"
+      if (!name.startsWith(dbNamePrefix(orgId))) {
+        dbNamePrefix(orgId) + name
+      } else name
     }
   }
 
-  def removeDatabasePrefix(organizationId: OrganizationId, dbName: DBName) = {
-    dbName.replaceFirst(s"org${organizationId}_", "")
+  def removeDatabasePrefix(orgId: OrganizationId, dbName: DBName) = {
+    dbName.replaceFirst(dbNamePrefix(orgId), "")
   }
 
   def validateIdentifier(name: String): Boolean = {

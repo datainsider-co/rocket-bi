@@ -47,6 +47,7 @@ services:
       THRIFT_PORT: 8487
     volumes:
       - ./schema-service/logs:/app/logs
+      - ./schema-service/conf:/app/conf
     depends_on:
       - mysql
       - ssdb
@@ -89,6 +90,7 @@ services:
     restart: always
     volumes:
       - ./job-worker/logs:/app/logs
+      - ./job-worker/conf:/app/conf
     environment:
       NAME: job-worker
       MODE: production

@@ -8,5 +8,5 @@ case class ClickhouseConnectionSetting(
     tcpPort: Int,
     clusterName: String
 ) {
-  def toJdbcUrl: String = s"jdbc:clickhouse://$host:$httpPort"
+  def toJdbcUrl: String = s"jdbc:clickhouse://$host:$httpPort?socket_timeout=0"
 }
