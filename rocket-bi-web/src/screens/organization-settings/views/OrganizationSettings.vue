@@ -49,19 +49,26 @@ export default class OrganizationSettings extends LoggedInScreen {
         to: { name: Routers.ClickhouseConfig },
         hidden: !OrganizationPermissionModule.isEnabledClickhouseConfig
       },
-      {
-        id: 'plan_detail_and_billing',
-        displayName: 'Plan Detail & Billing',
-        icon: 'di-icon-dollar',
-        to: { name: Routers.PlanAndBilling },
-        hidden: !OrganizationPermissionModule.isEnabledBilling
-      },
+      // {
+      //   id: 'plan_detail_and_billing',
+      //   displayName: 'Plan Detail & Billing',
+      //   icon: 'di-icon-dollar',
+      //   to: { name: Routers.PlanAndBilling },
+      //   hidden: !OrganizationPermissionModule.isEnabledBilling
+      // },
       {
         id: 'token_management',
         displayName: 'API Key Management',
         icon: 'di-icon-user-access',
         to: { name: Routers.APIKeyManagement },
         hidden: !OrganizationPermissionModule.isEnabledApiKey
+      },
+      {
+        id: 'premium-features',
+        displayName: 'Premium Features',
+        icon: 'di-icon-dollar',
+        to: { name: Routers.PremiumFeatures },
+        hidden: !OrganizationPermissionModule.isEnabledBilling
       }
     ];
   }

@@ -37,7 +37,8 @@ export class MockOrganizationPermissionService extends OrganizationPermissionSer
     return new Map([
       [UsageClassName.ClickhouseConfigUsage, true],
       [UsageClassName.UserManagementUsage, true],
-      [UsageClassName.DataRelationshipUsage, true]
+      [UsageClassName.DataRelationshipUsage, true],
+      [UsageClassName.GoogleOAuthUsage, true]
     ]);
   }
 

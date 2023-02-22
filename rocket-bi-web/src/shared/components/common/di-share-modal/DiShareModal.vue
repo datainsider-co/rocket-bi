@@ -69,7 +69,7 @@
           @expand="onShareAnyoneExpand"
         />
         <PasswordProtection
-          v-if="enablePasswordProtection"
+          v-if="enablePasswordProtection && isEnableDashboardPasswordUsage"
           ref="passwordProtection"
           :is-create-new="isCreatingPassword"
           :config.sync="editPasswordSetting"
@@ -121,6 +121,7 @@ import { ShareDashboardLinkHandler } from '@/shared/components/common/di-share-m
 import { DashboardMetaData } from '@core/common/domain/model/directory/directory-metadata/DashboardMetaData';
 import { Di } from '@core/common/modules';
 import { DataManager } from '@core/common/services';
+import OrganizationPermissionModule from '@/store/modules/OrganizationPermissionStore';
 
 export interface ResourceData {
   resourceType: ResourceType;
@@ -186,6 +187,10 @@ export default class DiShareModal extends Vue {
 
   private get isSharePeopleEmpty(): boolean {
     return ListUtils.isEmpty(this.resourceInfo?.usersSharing);
+  }
+
+  private get isEnableDashboardPasswordUsage() {
+    return OrganizationPermissionModule.isEnableDashboardPassword;
   }
 
   get sharedUserNames(): string {

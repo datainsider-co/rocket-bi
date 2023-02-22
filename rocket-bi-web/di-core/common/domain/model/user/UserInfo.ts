@@ -35,6 +35,7 @@ export class Organization {
   domain: string;
   thumbnailUrl?: string;
   expiredTimeMs?: number;
+  licenceKey?: string;
 
   constructor(
     organizationId: string,
@@ -45,7 +46,8 @@ export class Organization {
     createdTime?: number,
     reportTimeZoneId?: string,
     thumbnailUrl?: string,
-    expiredTimeMs?: number
+    expiredTimeMs?: number,
+    licenceKey?: string
   ) {
     this.organizationId = organizationId;
     this.owner = owner;
@@ -56,6 +58,7 @@ export class Organization {
     this.domain = domain;
     this.thumbnailUrl = thumbnailUrl;
     this.expiredTimeMs = expiredTimeMs;
+    this.licenceKey = licenceKey;
   }
 
   isExpiredCache(): boolean {
@@ -72,7 +75,8 @@ export class Organization {
       object.createdTime,
       object.reportTimeZoneId,
       object.thumbnailUrl,
-      object.expiredTimeMs ?? Date.now()
+      object.expiredTimeMs ?? Date.now(),
+      object.licenceKey
     );
   }
 

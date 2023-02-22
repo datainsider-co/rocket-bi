@@ -3,7 +3,7 @@
     <div class="user-search-input-container">
       <SearchInput id="search-users-management" :timeBound="300" hintText="Search users..." @onTextChanged="handleChangeKeyword"></SearchInput>
     </div>
-    <DiIconTextButton id="setting-login-methods" title="Login Method" @click="toggleLoginSettingsModal">
+    <DiIconTextButton v-if="isEnableGoogleOAuthSetting" id="setting-login-methods" title="Login Method" @click="toggleLoginSettingsModal">
       <i class="di-icon-setting"></i>
     </DiIconTextButton>
     <DiIconTextButton id="add-new-user" title="New User" @click="handleOnClickNewUser">
@@ -27,6 +27,7 @@ import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import DiSearchInput from '@/shared/components/DiSearchInput.vue';
 import { UserManagementModule } from '@/screens/user-management/store/UserManagementStore';
 import SearchInput from '@/shared/components/SearchInput.vue';
+import OrganizationPermissionModule from '@/store/modules/OrganizationPermissionStore';
 
 @Component({
   components: { SearchInput, DiSearchInput, DiButton, AddNewUserModal, LoginSettingsModal }
@@ -39,6 +40,10 @@ export default class UserManagementHeader extends Vue {
 
   @Ref()
   private loginSettingsModal!: LoginSettingsModal;
+
+  private get isEnableGoogleOAuthSetting() {
+    return OrganizationPermissionModule.isEnableGoogleOAuthSetting;
+  }
 
   @Track(TrackEvents.CreateUser)
   private handleOnClickNewUser() {
