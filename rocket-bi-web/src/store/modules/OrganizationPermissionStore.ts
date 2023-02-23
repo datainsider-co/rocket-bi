@@ -3,7 +3,7 @@ import { Action, getModule, Module, Mutation, VuexModule } from 'vuex-module-dec
 import store from '@/store';
 import { Stores } from '@/shared';
 
-import { GoogleOAuthUsage, Licence, OrganizationPermissionService, Usage, UsageClassName } from '@core/organization';
+import { DataCookUsage, GoogleOAuthUsage, Licence, OrganizationPermissionService, TableRelationShipUsage, Usage, UsageClassName } from '@core/organization';
 import { Log } from '@core/utils';
 import { Di } from '@core/common/modules';
 import { LogoAndCompanyNameUsage } from '@core/organization/domain/usage/LogoAndCompanyNameUsage';
@@ -48,7 +48,9 @@ export class OrganizationPermissionStore extends VuexModule {
     new GoogleAdsIngestionUsage(),
     new GoogleSheetIngestionUsage(),
     new ShopifyIngestionUsage(),
-    new S3IngestionUsage()
+    new S3IngestionUsage(),
+    new DataCookUsage(),
+    new TableRelationShipUsage()
   ];
 
   get isEnabledCDP(): boolean {
@@ -91,8 +93,8 @@ export class OrganizationPermissionStore extends VuexModule {
     return this.usageAllowedAsMap.get(UsageClassName.ApiKeyUsage) ?? false;
   }
 
-  get isEnableDataRelationship(): boolean {
-    return this.usageAllowedAsMap.get(UsageClassName.DataRelationshipUsage) ?? false;
+  get isEnableTableRelationship(): boolean {
+    return this.usageAllowedAsMap.get(UsageClassName.TableRelationshipUsage) ?? false;
   }
 
   get isEnableGoogleOAuthSetting() {

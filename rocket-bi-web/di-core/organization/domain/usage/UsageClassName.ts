@@ -11,7 +11,7 @@ export enum UsageClassName {
   ClickhouseConfigUsage = 'clickhouse_config_usage',
   UserManagementUsage = 'user_management_usage',
   ApiKeyUsage = 'api_key_usage',
-  DataRelationshipUsage = 'data_relationship_usage',
+  TableRelationshipUsage = 'table_relationship_usage',
   GoogleOAuthUsage = 'google_oauth_usage',
 
   LogoAndCompanyNameUsage = 'logo_and_company_name_usage',

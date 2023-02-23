@@ -239,7 +239,7 @@ export default class HeaderBar extends Vue {
       {
         label: 'Relationship',
         to: { name: Routers.DataRelationship },
-        hidden: !OrganizationPermissionModule.isEnableDataRelationship
+        hidden: !OrganizationPermissionModule.isEnableTableRelationship
       },
       {
         label: 'Data Cook',
