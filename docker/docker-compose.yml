@@ -58,6 +58,9 @@ services:
       NAME: bi-service
       MODE: production
       HTTP_PORT: 8080
+    volumes:
+      - ./bi-service/logs:/app/logs
+      - bi-service-data:/tmp/csv
     depends_on:
       - mysql
       - ssdb
@@ -111,9 +114,13 @@ services:
       - 5050:80
     volumes:
       - ./nginx/log/:/var/log/nginx/
+      - bi-service-data:/var/www/html/public/static/tmp/csv
     depends_on:
       - bi_service
       - web
+
+volumes:
+  bi-service-data:
 
 networks:
   rocket_network:
