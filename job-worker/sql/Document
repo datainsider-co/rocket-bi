@@ -1,0 +1,24 @@
+#### Setup database to run test
+ - Mysql: Use mysql of dev server
+ - Oracle, Sql Server, Postgres: Start with file docker-compose in /sql/docker-compose.yml
+ - Redshift and Google Bigquery: ...
+
+#### Create database, table and insert data
+ - Method 1: Use tool. Example: Dbeaver (easy and convenient)
+    + Connect to database with information in config file
+    + Copy command in create_test_table/Mysql,Oracle... and run
+    + Use import csv tool to insert data from student.csv file
+ - Method 2: Use terminal
+    + Install tool to access local database. Example: psql for Postgres, sql*plus for Oracle, sqlcmd for SqlServer
+    + Access to database:
+        * Mysql: mysql -h 127.0.0.1 -uroot -p
+        * Oracle: sqlplus / as sysdba
+        * Postgres: psql -h <hostname or ip address> -p <port number of remote machine> -d <database name which you want to connect> -U <username of the database server>
+        * Sql server: sqlcmd -S localhost -U SA -P '<YourPassword>'
+    + Create table with command in create_test_table/...
+    + Insert data with csv file.
+
+
+#### Setup mongodb database: Use mongodb atlas cloud.
+    + Enter link: https://www.mongodb.com/cloud/atlas/register
+    + Follow guide of mongodb atlas to setup database

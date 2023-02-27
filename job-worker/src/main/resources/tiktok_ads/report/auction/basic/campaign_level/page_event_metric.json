@@ -1,0 +1,731 @@
+{
+  "service_type": "AUCTION",
+  "report_type": "BASIC",
+  "data_level": "AUCTION_CAMPAIGN",
+  "dimensions": [
+    "campaign_id",
+    "stat_time_day"
+  ],
+  "metric_columns": [
+    {
+      "class_name": "string",
+      "name": "campaign_name",
+      "display_name": "campaign_name",
+      "description": "Campaign name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "campaign_dedicate_type",
+      "display_name": "campaign_dedicate_type",
+      "description": "Campaign type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "app_promotion_type",
+      "display_name": "app_promotion_type",
+      "description": "App promotion type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "double",
+      "name": "campaign_budget",
+      "display_name": "campaign_budget",
+      "description": "Campaign budget",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "complete_payment_roas",
+      "display_name": "complete_payment_roas",
+      "description": "Complete Payment ROAS",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "complete_payment",
+      "display_name": "complete_payment",
+      "description": "Total Complete Payment",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_complete_payment",
+      "display_name": "cost_per_complete_payment",
+      "description": "Cost per Complete Payment",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "complete_payment_rate",
+      "display_name": "complete_payment_rate",
+      "description": "Complete Payment Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_complete_payment",
+      "display_name": "value_per_complete_payment",
+      "description": "Value per Complete Payment",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_complete_payment_rate",
+      "display_name": "total_complete_payment_rate",
+      "description": "Total Complete Payment Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "page_browse_view",
+      "display_name": "page_browse_view",
+      "description": "Page Browse",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_page_browse_view",
+      "display_name": "cost_per_page_browse_view",
+      "description": "Cost per Page Browse",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "page_browse_view_rate",
+      "display_name": "page_browse_view_rate",
+      "description": "Page Browse Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_page_browse_view_value",
+      "display_name": "total_page_browse_view_value",
+      "description": "Value per Page Browse",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_page_browse_view",
+      "display_name": "value_per_page_browse_view",
+      "description": "Total Page Browse Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "button_click",
+      "display_name": "button_click",
+      "description": "Button Click",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_button_click",
+      "display_name": "cost_per_button_click",
+      "description": "Cost per Button Click",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "button_click_rate",
+      "display_name": "button_click_rate",
+      "description": "Button Click Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_button_click",
+      "display_name": "value_per_button_click",
+      "description": "Value per Button Click",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_button_click_value",
+      "display_name": "total_button_click_value",
+      "description": "Total Button Click Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "online_consult",
+      "display_name": "online_consult",
+      "description": "Contact",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_online_consult",
+      "display_name": "cost_per_online_consult",
+      "description": "Cost per Contact",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "online_consult_rate",
+      "display_name": "online_consult_rate",
+      "description": "Contact Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_online_consult",
+      "display_name": "value_per_online_consult",
+      "description": "Value per Contact",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_online_consult_value",
+      "display_name": "total_online_consult_value",
+      "description": "Total Contact Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "user_registration",
+      "display_name": "user_registration",
+      "description": "Total Complete Registration",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_user_registration",
+      "display_name": "cost_per_user_registration",
+      "description": "Cost per Complete Registration",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "user_registration_rate",
+      "display_name": "user_registration_rate",
+      "description": "Complete Registration Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_user_registration",
+      "display_name": "value_per_user_registration",
+      "description": "Value per Complete Registration",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_user_registration_value",
+      "display_name": "total_user_registration_value",
+      "description": "Total Complete Registration Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "product_details_page_browse",
+      "display_name": "product_details_page_browse",
+      "description": "Product Details Page Browse",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_product_details_page_browse",
+      "display_name": "cost_per_product_details_page_browse",
+      "description": "Product Details Page Browse Cost",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "product_details_page_browse_rate",
+      "display_name": "product_details_page_browse_rate",
+      "description": "Product Details Page Browse Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_product_details_page_browse",
+      "display_name": "value_per_product_details_page_browse",
+      "description": "Value per Product Details Page Browse",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_product_details_page_browse_value",
+      "display_name": "total_product_details_page_browse_value",
+      "description": "Total Product Details Page Browse Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "web_event_add_to_cart",
+      "display_name": "web_event_add_to_cart",
+      "description": "Add to Cart",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_web_event_add_to_cart",
+      "display_name": "cost_per_web_event_add_to_cart",
+      "description": "Cost per Add to Cart",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "web_event_add_to_cart_rate",
+      "display_name": "web_event_add_to_cart_rate",
+      "description": "Add to Cart Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_web_event_add_to_cart",
+      "display_name": "value_per_web_event_add_to_cart",
+      "description": "Value per Add to Cart",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_web_event_add_to_cart_value",
+      "display_name": "total_web_event_add_to_cart_value",
+      "description": "Total Add to Cart Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "on_web_order",
+      "display_name": "on_web_order",
+      "description": "Total Place an Order",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_on_web_order",
+      "display_name": "cost_per_on_web_order",
+      "description": "Cost per Place an Order",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "on_web_order_rate",
+      "display_name": "on_web_order_rate",
+      "description": "Place an Order Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_on_web_order",
+      "display_name": "value_per_on_web_order",
+      "description": "Value per Place an Order",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_on_web_order_value",
+      "display_name": "total_on_web_order_value",
+      "description": "Total Place an Order Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "initiate_checkout",
+      "display_name": "initiate_checkout",
+      "description": "Total Initiate Checkout",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_initiate_checkout",
+      "display_name": "cost_per_initiate_checkout",
+      "description": "Cost per Initiate Checkout",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "initiate_checkout_rate",
+      "display_name": "initiate_checkout_rate",
+      "description": "Initiate Checkout Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_initiate_checkout",
+      "display_name": "value_per_initiate_checkout",
+      "description": "Value per Initiate Checkout",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_initiate_checkout_value",
+      "display_name": "total_initiate_checkout_value",
+      "description": "Total Initiate Checkout Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "add_billing",
+      "display_name": "add_billing",
+      "description": "Add Billing",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_add_billing",
+      "display_name": "cost_per_add_billing",
+      "description": "Add Billing Cost",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "add_billing_rate",
+      "display_name": "add_billing_rate",
+      "description": "Add Billing Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_add_billing",
+      "display_name": "value_per_add_billing",
+      "description": "Value per Add Billing",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_add_billing_value",
+      "display_name": "total_add_billing_value",
+      "description": "Total Add Billing Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "page_event_search",
+      "display_name": "page_event_search",
+      "description": "Search",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_page_event_search",
+      "display_name": "cost_per_page_event_search",
+      "description": "Search Cost",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "page_event_search_rate",
+      "display_name": "page_event_search_rate",
+      "description": "Search Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_page_event_search",
+      "display_name": "value_per_page_event_search",
+      "description": "Value per Search",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_page_event_search_value",
+      "display_name": "total_page_event_search_value",
+      "description": "Total Search Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "form",
+      "display_name": "form",
+      "description": "Total Submit Form",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_form",
+      "display_name": "cost_per_form",
+      "description": "Cost per Submit Form",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "form_rate",
+      "display_name": "form_rate",
+      "description": "Submit Form Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_form",
+      "display_name": "value_per_form",
+      "description": "Value per Submit Form",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_form_value",
+      "display_name": "total_form_value",
+      "description": "Total Submit Form Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "download_start",
+      "display_name": "download_start",
+      "description": "Total Download",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_download_start",
+      "display_name": "cost_per_download_start",
+      "description": "Cost per Download",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "download_start_rate",
+      "display_name": "download_start_rate",
+      "description": "Download Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_download_start",
+      "display_name": "value_per_download_start",
+      "description": "Value per Download",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_download_start_value",
+      "display_name": "total_download_start_value",
+      "description": "Total Download Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "on_web_add_to_wishlist",
+      "display_name": "on_web_add_to_wishlist",
+      "description": "Total Add to Wishlist",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_on_web_add_to_wishlist",
+      "display_name": "cost_per_on_web_add_to_wishlist",
+      "description": "Cost per Add To Wishlist",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "on_web_add_to_wishlist_per_click",
+      "display_name": "on_web_add_to_wishlist_per_click",
+      "description": "Add To Wishlist Rate",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_on_web_add_to_wishlist",
+      "display_name": "value_per_on_web_add_to_wishlist",
+      "description": "Value per Add To Wishlist",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_on_web_add_to_wishlist_value",
+      "display_name": "total_on_web_add_to_wishlist_value",
+      "description": "Total Add To Wishlist Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "on_web_subscribe",
+      "display_name": "on_web_subscribe",
+      "description": "Total Subscribe",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_on_web_subscribe",
+      "display_name": "cost_per_on_web_subscribe",
+      "description": "Subscribe Cost",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "on_web_subscribe_per_click",
+      "display_name": "on_web_subscribe_per_click",
+      "description": "Subscribe Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_on_web_subscribe",
+      "display_name": "value_per_on_web_subscribe",
+      "description": "Value per Subscribe",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_on_web_subscribe_value",
+      "display_name": "total_on_web_subscribe_value",
+      "description": "Total Subscribe Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    }
+  ]
+}

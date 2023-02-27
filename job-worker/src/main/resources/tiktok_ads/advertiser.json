@@ -1,0 +1,220 @@
+[
+  {
+    "class_name": "string",
+    "name": "advertiser_id",
+    "display_name": "advertiser_id",
+    "description": "Advertiser ID",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "advertiser_account_type",
+    "display_name": "advertiser_account_type",
+    "description": "Type of the ad account. Enum values: RESERVATION (reservation ad account), AUCTION(auction ad account).",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "name",
+    "display_name": "name",
+    "description": "Advertiser name",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "address",
+    "display_name": "address",
+    "description": "Advertiser address information",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "company",
+    "display_name": "company",
+    "description": "Advertiser's company name",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "contacter",
+    "display_name": "contacter",
+    "description": "Contact Person",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "country",
+    "display_name": "country",
+    "description": "The advertiser's country",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "currency",
+    "display_name": "currency",
+    "description": "Type of currency used by advertisers",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "description",
+    "display_name": "description",
+    "description": "Brand description, i.e. promotional content",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "email",
+    "display_name": "email",
+    "description": "Advertiser contact email, masked format. For example, d*****h@test.com",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "industry",
+    "display_name": "industry",
+    "description": "Advertiser industry category. See Appendix-Industries",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "language",
+    "display_name": "language",
+    "description": "Language used by advertisers",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "license_no",
+    "display_name": "license_no",
+    "description": "License number",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "license_url",
+    "display_name": "license_url",
+    "description": "License preview address, the link is valid for an hour by default.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "cellphone_number",
+    "display_name": "cellphone_number",
+    "description": "Contact mobile number, desensitised data",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "rejection_reason",
+    "display_name": "rejection_reason",
+    "description": "Reason for rejection",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "role",
+    "display_name": "role",
+    "description": "Advertiser role, see Enumeration - Advertiser Role",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "status",
+    "display_name": "status",
+    "description": "Advertiser status, see Enumeration - Advertiser Status",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "telephone_number",
+    "display_name": "telephone_number",
+    "description": "Fixed phone number, desensitised data",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "timezone",
+    "display_name": "timezone",
+    "description": "\"Ad account time zone including GMT offset. For example, \"\"Etc/GMT\"\"\"",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "display_timezone",
+    "display_name": "display_timezone",
+    "description": "\"Timezone name in the format of \"\"Region/City\"\" (based on the TZ database name conventions. For example, \"\"Europe/London\"\"\"",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "balance",
+    "display_name": "balance",
+    "description": "Account available balance（The unit is related to the advertiser's currency type currency）",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "datetime",
+    "name": "create_time",
+    "display_name": "create_time",
+    "description": "Advertiser's create time",
+    "input_as_timestamp": false,
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "DateTime"
+  },
+  {
+    "class_name": "string",
+    "name": "owner_bc_id",
+    "display_name": "owner_bc_id",
+    "description": "The ID of a Business Center that the ad account belongs to.\nNote: This field will be returned only when the below three requirements are met:\nthe ad account is owned by the Business Center;\nthe user has admin access to the Business Center, and\nthe user has Admin/Operator/Analyst permission of the ad account.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  }
+]
+

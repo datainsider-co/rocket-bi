@@ -1,0 +1,290 @@
+{
+  "service_type": "AUCTION",
+  "report_type": "BASIC",
+  "data_level": "AUCTION_AD",
+  "dimensions": [
+    "ad_id",
+    "stat_time_day"
+  ],
+  "metric_columns": [
+    {
+      "class_name": "string",
+      "name": "campaign_name",
+      "display_name": "campaign_name",
+      "description": "Campaign name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "campaign_id",
+      "display_name": "campaign_id",
+      "description": "Campaign ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "objective_type",
+      "display_name": "objective_type",
+      "description": "Advertising objective",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "double",
+      "name": "campaign_budget",
+      "display_name": "campaign_budget",
+      "description": "Campaign budget",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "string",
+      "name": "campaign_dedicate_type",
+      "display_name": "campaign_dedicate_type",
+      "description": "Campaign type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "app_promotion_type",
+      "display_name": "app_promotion_type",
+      "description": "App promotion type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "adgroup_name",
+      "display_name": "adgroup_name",
+      "description": "Ad group name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "adgroup_id",
+      "display_name": "adgroup_id",
+      "description": "Ad group ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "promotion_type",
+      "display_name": "promotion_type",
+      "description": "Promotion type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "dpa_target_audience_type",
+      "display_name": "dpa_target_audience_type",
+      "description": "Target audience type for DPA",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "smart_target",
+      "display_name": "smart_target",
+      "description": "Optimization goal",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "pricing_category",
+      "display_name": "pricing_category",
+      "description": "Billing Event",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "bid_strategy",
+      "display_name": "bid_strategy",
+      "description": "Bid strategy",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "bid",
+      "display_name": "bid",
+      "description": "Bid",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "aeo_type",
+      "display_name": "aeo_type",
+      "description": "App Event Optimization Type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "ad_name",
+      "display_name": "ad_name",
+      "description": "Ad name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "ad_text",
+      "display_name": "ad_text",
+      "description": "Ad title",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "call_to_action",
+      "display_name": "call_to_action",
+      "description": "Call to action",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "tt_app_id",
+      "display_name": "tt_app_id",
+      "description": "TikTok App ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "tt_app_name",
+      "display_name": "tt_app_name",
+      "description": "TikTok App Name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "mobile_app_id",
+      "display_name": "mobile_app_id",
+      "description": "Mobile App ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "double",
+      "name": "profile_visits",
+      "display_name": "profile_visits",
+      "description": "Paid Profile Visit",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "profile_visits_rate",
+      "display_name": "profile_visits_rate",
+      "description": "Paid Profile Visit Rate",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "likes",
+      "display_name": "likes",
+      "description": "Paid Likes",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "comments",
+      "display_name": "comments",
+      "description": "Paid Comments",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "shares",
+      "display_name": "shares",
+      "description": "Paid Shares",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "follows",
+      "display_name": "follows",
+      "description": "Paid Followers",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "clicks_on_music_disc",
+      "display_name": "clicks_on_music_disc",
+      "description": "Music Clicks",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "anchor_click_rate",
+      "display_name": "anchor_click_rate",
+      "description": "Anchor Click Rate",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "ix_page_duration_avg",
+      "display_name": "ix_page_duration_avg",
+      "description": "Instant Experience Average View Time",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "ix_page_viewrate_avg",
+      "display_name": "ix_page_viewrate_avg",
+      "description": "Instant Experience Average View Percentage",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    }
+  ]
+}

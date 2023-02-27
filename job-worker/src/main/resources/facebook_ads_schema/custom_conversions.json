@@ -1,0 +1,164 @@
+[
+  {
+    "class_name": "string",
+    "name": "id",
+    "display_name": "id",
+    "description": "ID of the custom conversion",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "account_id",
+    "display_name": "account_id",
+    "description": "Ad Account ID assoicated to this custom conversion",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "business",
+    "display_name": "business",
+    "description": "Business that owns the custom conversion",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "datetime",
+    "name": "creation_time",
+    "display_name": "creation_time",
+    "description": "Time at which the conversion was created",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Datime"
+  },
+  {
+    "class_name": "string",
+    "name": "custom_event_type",
+    "display_name": "custom_event_type",
+    "description": "The type of the conversion event, e.g. PURCHASE",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "data_sources",
+    "display_name": "data_sources",
+    "description": "Event sources of the custom conversion",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int64",
+    "name": "default_conversion_value",
+    "display_name": "default_conversion_value",
+    "description": "When conversion is URL based, the default conversion value associated to each conversion",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "string",
+    "name": "description",
+    "display_name": "description",
+    "description": "Description of the custom conversion",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "event_source_type",
+    "display_name": "event_source_type",
+    "description": "Event source type of the custom conversion, e.g. pixel, app, etc.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "datetime",
+    "name": "first_fired_time",
+    "display_name": "first_fired_time",
+    "description": "Time at which the pixel was first fired",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Datetime"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_archived",
+    "display_name": "is_archived",
+    "description": "Whether this conversion is archived. Archived conversions are no longer tracked in the system",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_unavailable",
+    "display_name": "is_unavailable",
+    "description": "Whether this conversion is unavailable",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "datetime",
+    "name": "last_fired_time",
+    "display_name": "last_fired_time",
+    "description": "Time at which the pixel was last fired",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Datetime"
+  },
+  {
+    "class_name": "string",
+    "name": "name",
+    "display_name": "name",
+    "description": "Name of the custom conversion",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "offline_conversion_data_set",
+    "display_name": "offline_conversion_data_set",
+    "description": "The offline event set that contains events",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "pixel",
+    "display_name": "pixel",
+    "description": "The pixel that will send events",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int64",
+    "name": "retention_days",
+    "display_name": "retention_days",
+    "description": "Retention period for advanced rule",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "int64"
+  },
+  {
+    "class_name": "string",
+    "name": "rule",
+    "display_name": "rule",
+    "description": "Rule of the custom conversion",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  }
+]

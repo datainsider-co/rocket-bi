@@ -1,0 +1,596 @@
+{
+  "service_type": "AUCTION",
+  "report_type": "BASIC",
+  "data_level": "AUCTION_ADGROUP",
+  "dimensions": [
+    "adgroup_id",
+    "stat_time_day"
+  ],
+  "metric_columns": [
+    {
+      "class_name": "string",
+      "name": "campaign_name",
+      "display_name": "campaign_name",
+      "description": "Campaign name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "campaign_id",
+      "display_name": "campaign_id",
+      "description": "Campaign ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "objective_type",
+      "display_name": "objective_type",
+      "description": "Advertising objective",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "double",
+      "name": "campaign_budget",
+      "display_name": "campaign_budget",
+      "description": "Campaign budget",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "string",
+      "name": "campaign_dedicate_type",
+      "display_name": "campaign_dedicate_type",
+      "description": "Campaign type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "app_promotion_type",
+      "display_name": "app_promotion_type",
+      "description": "App promotion type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "adgroup_name",
+      "display_name": "adgroup_name",
+      "description": "Ad group name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "promotion_type",
+      "display_name": "promotion_type",
+      "description": "Promotion type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "dpa_target_audience_type",
+      "display_name": "dpa_target_audience_type",
+      "description": "Target audience type for DPA",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "smart_target",
+      "display_name": "smart_target",
+      "description": "Optimization goal",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "pricing_category",
+      "display_name": "pricing_category",
+      "description": "Billing Event",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "bid_strategy",
+      "display_name": "bid_strategy",
+      "description": "Bid strategy",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "bid",
+      "display_name": "bid",
+      "description": "Bid",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "aeo_type",
+      "display_name": "aeo_type",
+      "description": "App Event Optimization Type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "tt_app_id",
+      "display_name": "tt_app_id",
+      "description": "TikTok App ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "tt_app_name",
+      "display_name": "tt_app_name",
+      "description": "TikTok App Name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "mobile_app_id",
+      "display_name": "mobile_app_id",
+      "description": "Mobile App ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_shopping_roas",
+      "display_name": "onsite_shopping_roas",
+      "description": "Complete Payment ROAS (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_shopping",
+      "display_name": "onsite_shopping",
+      "description": "Total Complete Payment (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_onsite_shopping",
+      "display_name": "cost_per_onsite_shopping",
+      "description": "Cost per Complete Payment (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_shopping_rate",
+      "display_name": "onsite_shopping_rate",
+      "description": "Complete Payment Rate (Onsite) (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_onsite_shopping",
+      "display_name": "value_per_onsite_shopping",
+      "description": "Value per Complete Payment (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_onsite_shopping_value",
+      "display_name": "total_onsite_shopping_value",
+      "description": "Total Complete Payment Value (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_initiate_checkout_count",
+      "display_name": "onsite_initiate_checkout_count",
+      "description": "Total Initiate Checkout (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_onsite_initiate_checkout_count",
+      "display_name": "cost_per_onsite_initiate_checkout_count",
+      "description": "Cost per Initiate Checkout (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_initiate_checkout_count_rate",
+      "display_name": "onsite_initiate_checkout_count_rate",
+      "description": "Initiate Checkout Rate (Onsite) (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_onsite_initiate_checkout_count",
+      "display_name": "value_per_onsite_initiate_checkout_count",
+      "description": "Value per Initiate Checkout (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_onsite_initiate_checkout_count_value",
+      "display_name": "total_onsite_initiate_checkout_count_value",
+      "description": "Total Initiate Checkout Value (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_on_web_detail",
+      "display_name": "onsite_on_web_detail",
+      "description": "Total Product Details Page View (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_onsite_on_web_detail",
+      "display_name": "cost_per_onsite_on_web_detail",
+      "description": "Cost per Product Details Page View (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_on_web_detail_rate",
+      "display_name": "onsite_on_web_detail_rate",
+      "description": "Product Details Page View Rate (Onsite) (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_onsite_on_web_detail",
+      "display_name": "value_per_onsite_on_web_detail",
+      "description": "Value per Product Details Page View (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_onsite_on_web_detail_value",
+      "display_name": "total_onsite_on_web_detail_value",
+      "description": "Total Product Details Page View Value (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_add_to_wishlist",
+      "display_name": "onsite_add_to_wishlist",
+      "description": "Total Add To Wishlist (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_onsite_add_to_wishlist",
+      "display_name": "cost_per_onsite_add_to_wishlist",
+      "description": "Cost per Add To Wishlist (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_add_to_wishlist_rate",
+      "display_name": "onsite_add_to_wishlist_rate",
+      "description": "Add To Wishlist Rate (Onsite) (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_onsite_add_to_wishlist",
+      "display_name": "value_per_onsite_add_to_wishlist",
+      "description": "Value per Add To Wishlist (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_onsite_add_to_wishlist_value",
+      "display_name": "total_onsite_add_to_wishlist_value",
+      "description": "Total Add To Wishlist Value (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_add_billing",
+      "display_name": "onsite_add_billing",
+      "description": "Total Add Billing (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_onsite_add_billing",
+      "display_name": "cost_per_onsite_add_billing",
+      "description": "Cost per Add Billing (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_add_billing_rate",
+      "display_name": "onsite_add_billing_rate",
+      "description": "Add Billing Rate (Onsite) (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_onsite_add_billing",
+      "display_name": "value_per_onsite_add_billing",
+      "description": "Value per Add Billing (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_onsite_add_billing_value",
+      "display_name": "total_onsite_add_billing_value",
+      "description": "Total Add Billing Value (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_on_web_cart",
+      "display_name": "onsite_on_web_cart",
+      "description": "Total Add to Cart (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_onsite_on_web_cart",
+      "display_name": "cost_per_onsite_on_web_cart",
+      "description": "Cost per Add to Cart (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_on_web_cart_rate",
+      "display_name": "onsite_on_web_cart_rate",
+      "description": "Add to Cart Rate (Onsite) (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_onsite_on_web_cart",
+      "display_name": "value_per_onsite_on_web_cart",
+      "description": "Value per Add to Cart (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_onsite_on_web_cart_value",
+      "display_name": "total_onsite_on_web_cart_value",
+      "description": "Total Add to Cart Value (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_form",
+      "display_name": "onsite_form",
+      "description": "Total Form Submission (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_onsite_form",
+      "display_name": "cost_per_onsite_form",
+      "description": "Cost per Form Submission (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_form_rate",
+      "display_name": "onsite_form_rate",
+      "description": "Form Submission Rate (Onsite) (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_onsite_form",
+      "display_name": "value_per_onsite_form",
+      "description": "Value per Form Submission (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_onsite_form_value",
+      "display_name": "total_onsite_form_value",
+      "description": "Total Form Submission Value (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_download_start",
+      "display_name": "onsite_download_start",
+      "description": "Total App Store Click (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_onsite_download_start",
+      "display_name": "cost_per_onsite_download_start",
+      "description": "Cost per App Store Click (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "onsite_download_start_rate",
+      "display_name": "onsite_download_start_rate",
+      "description": "App Store Click Rate (Onsite) (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "ix_page_view_count",
+      "display_name": "ix_page_view_count",
+      "description": "Page Views (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_ix_page_view_count",
+      "display_name": "cost_per_ix_page_view_count",
+      "description": "Cost per Page Views (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "ix_page_view_count_rate",
+      "display_name": "ix_page_view_count_rate",
+      "description": "Page Views Rate (Onsite) (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "ix_button_click_count",
+      "display_name": "ix_button_click_count",
+      "description": "Call-to-Action Button Clicks (Instant Experience)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_ix_button_click_count",
+      "display_name": "cost_per_ix_button_click_count",
+      "description": "Cost per Call-to-Action Button Clicks (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "ix_button_click_count_rate",
+      "display_name": "ix_button_click_count_rate",
+      "description": "Call-to-Action Button Clicks Rate (Onsite) (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "ix_product_click_count",
+      "display_name": "ix_product_click_count",
+      "description": "Product Clicks (Instant Experience)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_ix_product_click_count",
+      "display_name": "cost_per_ix_product_click_count",
+      "description": "Cost per Product Clicks (Onsite)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "ix_product_click_count_rate",
+      "display_name": "ix_product_click_count_rate",
+      "description": "Product Clicks Rate (Onsite) (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    }
+  ]
+}

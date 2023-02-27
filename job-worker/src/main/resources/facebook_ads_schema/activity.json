@@ -1,0 +1,110 @@
+[
+  {
+    "class_name": "string",
+    "name": "actor_id",
+    "display_name": "actor_id",
+    "description": "Actor ID",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "actor_name",
+    "display_name": "actor_name",
+    "description": "Actor Name",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "application_id",
+    "display_name": "application_id",
+    "description": "Application ID",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "application_name",
+    "display_name": "application_name",
+    "description": "Application Name",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "date_time_in_timezone",
+    "display_name": "date_time_in_timezone",
+    "description": "Date/Time string in account timezone",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "datetime",
+    "name": "event_time",
+    "display_name": "event_time",
+    "description": "Timestamp",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Datetime"
+  },
+  {
+    "class_name": "string",
+    "name": "event_type",
+    "display_name": "event_type",
+    "description": "Event types by category",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "extra_data",
+    "display_name": "extra_data",
+    "description": "JSON encoded extra information",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "object_id",
+    "display_name": "object_id",
+    "description": "Object ID",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "object_name",
+    "display_name": "object_name",
+    "description": "Object Name",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "object_type",
+    "display_name": "object_type",
+    "description": "Object Type",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "translated_event_type",
+    "display_name": "translated_event_type",
+    "description": "Translated event type",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  }
+]

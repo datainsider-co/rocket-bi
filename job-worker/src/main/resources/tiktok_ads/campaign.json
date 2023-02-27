@@ -1,0 +1,219 @@
+[
+  {
+    "class_name": "string",
+    "name": "app_id",
+    "display_name": "app_id",
+    "description": "The Application ID of the promoted app. You can get app_id by using the /app/list/ endpoint.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "campaign_id",
+    "display_name": "campaign_id",
+    "description": "Campaign ID",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "campaign_name",
+    "display_name": "campaign_name",
+    "description": "Campaign name",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "campaign_type",
+    "display_name": "campaign_type",
+    "description": "Campaign Type, indicates the campaign is a regular campaign or iOS 14 campaign. Enum values: REGULAR_CAMPAIGN and IOS14_CAMPAIGN.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_smart_performance_campaign",
+    "display_name": "is_smart_performance_campaign",
+    "description": "Whether the campaign is a Smart Performance Campaign or not. Enum values: True, False.\nNote: Updates of Smart Performance Campaigns are not supported now via any endpoint.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "advertiser_id",
+    "display_name": "advertiser_id",
+    "description": "Advertiser ID",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "budget",
+    "display_name": "budget",
+    "description": "Campaign budget",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "string",
+    "name": "budget_mode",
+    "display_name": "budget_mode",
+    "description": "Budget type. See Enumeration Values-Budget Type.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "secondary_status",
+    "display_name": "secondary_status",
+    "description": "Campaign status（Secondary status ）",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "operation_status",
+    "display_name": "operation_status",
+    "description": "Operation status. Enum values: DISABLE, ENABLE",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "objective",
+    "display_name": "objective",
+    "description": "Campaign type (application or landing page). Enum values: APP(application), LANDING_PAGE(Landing page)",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "objective_type",
+    "display_name": "objective_type",
+    "description": "Advertising objective. For enum values, see Enumeration-Advertising Objectives.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "app_promotion_type",
+    "display_name": "app_promotion_type",
+    "description": "App promotion type. Enum values: APP_INSTALL, APP_RETARGETING.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "budget_optimize_on",
+    "display_name": "budget_optimize_on",
+    "description": "Whether Campaign Budget Optimization is enabled. Return only when Campaign Budget Optimization is enabled. For details about Campaign Budget Optimization (CBO), see Campaign Budget Optimization.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "int64",
+    "name": "bid_type",
+    "display_name": "bid_type",
+    "description": "Bidding strategy on the campaign level. Return only when Campaign Budget Optimization is enabled.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "string",
+    "name": "deep_bid_type",
+    "display_name": "deep_bid_type",
+    "description": "Bidding strategy for in-app events. For enum values and their descriptions, see Enumeration - Deep-level Bidding Strategy.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "roas_bid",
+    "display_name": "roas_bid",
+    "description": "ROAS goal for Value Optimization.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "string",
+    "name": "optimization_goal",
+    "display_name": "optimization_goal",
+    "description": "Optimization goal. Return only when Campaign Budget Optimization is enabled.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_new_structure",
+    "display_name": "is_new_structure",
+    "description": "Whether the campaign is a new structure (for the same campaign, the structure of campaign, ad groups and ads are the same)",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "create_time",
+    "display_name": "create_time",
+    "description": "Time at which the campaign was created.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "modify_time",
+    "display_name": "modify_time",
+    "description": "Time at which the campaign was Modified.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "campaign_app_profile_page_state",
+    "display_name": "campaign_app_profile_page_state",
+    "description": "Indicates the status of App Profile Page. Enum values: INVALID, UNSET, ON, OFF.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "special_industries",
+    "display_name": "special_industries",
+    "description": "Ad categories. Enum values:HOUSING(Ads for real estate listings, homeowners insurance, mortgage loans or other related opportunities.)\nEMPLOYMENT(Ads for job offers, internship, professional certification programs or other related opportunities.)\nCREDIT(Ads for credit card offers, auto loans, long-term financing or other related opportunities.)",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "rf_campaign_type",
+    "display_name": "rf_campaign_type",
+    "description": "When objective_type is specified as RF_REACH, this field shows whether the campaign has been set as a TikTok Pulse campaign.\n\nEnum values: STANDARD (Reach & Frequency campaign), PULSE (TikTok Pulse campaign).",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  }
+]
+

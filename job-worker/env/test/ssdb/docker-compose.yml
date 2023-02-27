@@ -1,0 +1,10 @@
+version: "3"
+services:
+  ssdb:
+    image: wendal/ssdb:latest
+    volumes:
+      - ./ssdb/ssdb.conf
+      - ./ssdb/data
+    restart: on-failure
+    ports:
+      - "8888:8888"

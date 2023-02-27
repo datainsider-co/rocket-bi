@@ -1,0 +1,19 @@
+version: '3.5'
+services:
+  job-scheduler:
+    image: datainsiderco/job-scheduler:main
+    container_name: rocket-job-scheduler
+    restart: always
+    environment:
+      NAME: job-scheduler
+      MODE: production
+      HTTP_PORT: 8080
+      THRIFT_PORT: 8084
+    volumes:
+      - ./conf:/app/conf
+      - ./logs:/app/logs
+
+networks:
+  default:
+    external:
+      name: rocket_network
