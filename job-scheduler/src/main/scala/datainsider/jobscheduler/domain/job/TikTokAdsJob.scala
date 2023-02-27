@@ -89,11 +89,11 @@ case class TikTokAdsJob(
   private def createMultiReportJob(baseJob: TikTokAdsJob, endPoint: String): Set[TikTokAdsJob] = {
     ReportType.values.map(reportType => {
       val report = baseJob.tikTokReport.get.copy(reportType = reportType.toString)
-      val tableName = s"Report:${reportType}"
+      val tableName = s"Report${reportType}"
       this.copy(
         orgId = orgId,
         creatorId = creatorId,
-        displayName = baseJob.displayName + s"(table:${tableName})",
+        displayName = baseJob.displayName + s"(database:${baseJob.destDatabaseName}, table:${tableName})",
         lastModified = System.currentTimeMillis(),
         nextRunTime = TimeUtils.calculateNextRunTime(baseJob.scheduleTime, None),
         lastSyncStatus = JobStatus.Init,
@@ -111,18 +111,20 @@ case class TikTokAdsJob(
       case TikTokAdsEndPoint.AdGroups    => "AdGroups"
       case TikTokAdsEndPoint.Campaigns   => "Campaigns"
       case TikTokAdsEndPoint.Advertisers => "Advertisers"
-      case TikTokAdsEndPoint.Report      => "Report"
+      case _                             => throw new UnsupportedOperationException(s"can not create ads job for ${endPoint}")
     }
     this.copy(
       orgId = orgId,
       creatorId = creatorId,
-      displayName = baseJob.displayName + s"(table:${tableName})",
+      displayName = baseJob.displayName + s"(database:${baseJob.destDatabaseName}, table:${tableName})",
       lastModified = System.currentTimeMillis(),
       nextRunTime = TimeUtils.calculateNextRunTime(baseJob.scheduleTime, None),
       lastSyncStatus = JobStatus.Init,
       currentSyncStatus = JobStatus.Init,
       destTableName = tableName,
-      tikTokEndPoint = endPoint
+      tikTokEndPoint = endPoint,
+      tikTokReport = None,
+      syncMode = SyncMode.FullSync
     )
   }
 

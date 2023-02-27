@@ -11,6 +11,7 @@ import datainsider.jobscheduler.domain.job.SyncMode.SyncMode
 import datainsider.jobscheduler.util.JsonUtils
 
 import java.sql.ResultSet
+import scala.util.Try
 
 case class GoogleAdsJob(
     orgId: Long = -1,
@@ -34,7 +35,7 @@ case class GoogleAdsJob(
     resourceName: String,
     incrementalColumn: Option[String],
     lastSyncedValue: String,
-    query: Option[String] = None
+    startDate: Option[String]
 ) extends Job {
 
   override def jobData: Map[String, Any] = {
@@ -45,11 +46,15 @@ case class GoogleAdsJob(
       "destinations" -> JsonUtils.toJson(destinations),
       "last_sync_value" -> lastSyncedValue,
       "incremental_column" -> incrementalColumn,
-      "query" -> query
+      "start_date" -> startDate
     )
   }
 
-  override def customCopy(lastSyncStatus: JobStatus, currentSyncStatus: JobStatus, lastSuccessfulSync: SourceId): Job = {
+  override def customCopy(
+      lastSyncStatus: JobStatus,
+      currentSyncStatus: JobStatus,
+      lastSuccessfulSync: SourceId
+  ): Job = {
     this.copy(
       currentSyncStatus = currentSyncStatus,
       lastSyncStatus = lastSyncStatus,
@@ -152,7 +157,7 @@ object GoogleAdsJob {
       destinations = dataDestinations,
       incrementalColumn = incrementalColumn,
       lastSyncedValue = jobData.get("last_sync_value").textValue(),
-      query = query
+      startDate = Try(jobData.get("start_date").textValue()).toOption
     )
   }
 }
