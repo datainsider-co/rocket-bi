@@ -41,7 +41,7 @@ class ShareController @Inject() (
   filter[ShareAccessFilters.DeleteAccessFilter]
     .delete(s"/share/:resource_type/:resource_id/revoke") { request: RevokeShareRequest =>
       Profiler("[Controller::ShareController] DELETE /share/:resource_type/:resource_id/revoke") {
-        shareService.revoke(request.getOrganizationId(), request)
+        shareService.revoke(request.getOrganizationId(), request.resourceType, request.resourceId, request.usernames)
       }
     }
 
@@ -69,7 +69,7 @@ class ShareController @Inject() (
   filter[ShareAccessFilters.DeleteAccessFilter]
     .delete(s"/share/:resource_type/:resource_id/anyone/revoke") { request: RevokeShareAnyoneRequest =>
       Profiler("[Controller::ShareController] DELETE /share/:resource_type/:resource_id/anyone/revoke") {
-        shareService.revoke(request.getOrganizationId(), request)
+        shareService.revokeShareAnyone(request.getOrganizationId(), request.resourceType, request.resourceId)
       }
     }
 

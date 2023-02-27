@@ -1,7 +1,8 @@
 package co.datainsider.bi.repository
 
 import co.datainsider.bi.client.JdbcClient
-import co.datainsider.bi.domain.Ids.{DashboardId, DirectoryId, UserId}
+import co.datainsider.bi.client.JdbcClient.Record
+import co.datainsider.bi.domain.Ids.{DashboardId, DirectoryId, OrganizationId, UserId}
 import co.datainsider.bi.domain.request.{CreateDirectoryRequest, ListDirectoriesRequest, Sort}
 import co.datainsider.bi.domain.{Directory, DirectoryType}
 import co.datainsider.bi.util.Using
@@ -12,6 +13,7 @@ import datainsider.client.exception.DbExecuteError
 import datainsider.client.util.JsonParser
 
 import java.sql.{PreparedStatement, ResultSet}
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 trait DirectoryRepository {
@@ -33,13 +35,29 @@ trait DirectoryRepository {
 
   def delete(id: DirectoryId): Future[Boolean]
 
+  def multiDelete(ids: Array[DirectoryId]): Future[Boolean]
+  def deleteByOwnerId(username: UserId): Future[Boolean]
+
   def remove(id: DirectoryId): Future[Boolean]
 
   def restore(directory: Directory): Future[Boolean]
 
+  def multiRestore(directories: Seq[Directory]): Future[Boolean]
+
+
   def refreshUpdatedDate(ids: Array[DirectoryId]): Future[Boolean]
 
   def update(directory: Directory): Future[Boolean]
+
+  def updateOwnerId(fromUsername: UserId, toUsername: UserId): Future[Boolean]
+
+  def updateCreatorId(fromUsername: UserId, toUsername: UserId): Future[Boolean]
+
+  /**
+   * all sub directories
+   */
+  def getSubDirectories(parentId: DirectoryId): Future[Array[Directory]]
+
 }
 
 class MySqlDirectoryRepository @Inject() (
@@ -86,16 +104,17 @@ class MySqlDirectoryRepository @Inject() (
       )
     }
 
-  override def list(request: ListDirectoriesRequest): Future[Array[Directory]] =
-    Future {
-      val selectClause = s"select * from $dbName.$tblName"
-      val (whereClause, conditionValues): (String, Seq[Any]) = buildWhereClause(request)
-      val orderByClause: String = buildOrderBy(request.sorts)
-      val limitClause = s"limit ${request.size} offset ${request.from}"
+  override def list(request: ListDirectoriesRequest): Future[Array[Directory]] = Future.value(listSync(request))
 
-      val query = s"$selectClause $whereClause $orderByClause $limitClause"
-      client.executeQuery(query, conditionValues: _*)(toDirectories)
-    }
+  private def listSync(request: ListDirectoriesRequest): Array[Directory] = {
+    val selectClause = s"select * from $dbName.$tblName"
+    val (whereClause, conditionValues): (String, Seq[Any]) = buildWhereClause(request)
+    val orderByClause: String = buildOrderBy(request.sorts)
+    val limitClause = s"limit ${request.size} offset ${request.from}"
+
+    val query = s"$selectClause $whereClause $orderByClause $limitClause"
+    client.executeQuery(query, conditionValues: _*)(toDirectories)
+  }
 
   override def count(request: ListDirectoriesRequest): Future[DashboardId] =
     Future {
@@ -190,6 +209,28 @@ class MySqlDirectoryRepository @Inject() (
       client.executeUpdate(query, id) >= 1
     }
 
+  override def multiDelete(ids: Array[DirectoryId]): Future[Boolean] = Future {
+    if (ids.isEmpty) {
+      true
+    } else {
+      val query =
+        s"""
+           |delete from $dbName.$tblName
+           |where id in (${Array.fill(ids.length)("?").mkString(",")});
+           |""".stripMargin
+      client.executeUpdate(query, ids: _*) >= 1
+    }
+  }
+
+    override def deleteByOwnerId(username: UserId): Future[Boolean] = Future {
+        val query =
+            s"""
+             |delete from $dbName.$tblName
+             |where owner_id = ?;
+             |""".stripMargin
+        client.executeUpdate(query, username) >= 1
+    }
+
   override def move(id: DirectoryId, toParentId: DirectoryId): Future[Boolean] =
     Future {
       client.executeUpdate(s"""
@@ -231,6 +272,37 @@ class MySqlDirectoryRepository @Inject() (
         directory.data.map(JsonParser.toJson(_, false)).orNull
       ) > 0
     }
+
+  override def multiRestore(directories: Seq[Directory]): Future[Boolean] = Future {
+    if (directories.isEmpty) {
+      true
+    } else {
+      val query =
+        s"""
+           |insert into $dbName.$tblName
+           |(id, name, creator_id, owner_id, created_date, parent_id, dir_type, dashboard_id, updated_date, data)
+           |values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+           |""".stripMargin
+      val data: Array[Record] = directories.map { directory =>
+        Array(
+          directory.id,
+          directory.name,
+          directory.creatorId,
+          directory.ownerId,
+          directory.createdDate,
+          directory.parentId,
+          directory.directoryType.toString,
+          directory.dashboardId.getOrElse(null),
+          System.currentTimeMillis(),
+          directory.data.map(JsonParser.toJson(_, false)).orNull
+        )
+      }.toArray
+
+      client.executeBatchUpdate(query, data) > 0
+    }
+  }
+
+
 
   private def toDirectory(rs: ResultSet): Directory = {
     val id = rs.getLong("id")
@@ -324,4 +396,39 @@ class MySqlDirectoryRepository @Inject() (
       directory.id
     ) > 0
   }
+
+  override def updateOwnerId(fromUsername: UserId, toUsername: UserId): Future[Boolean] = Future {
+    val query =
+      s"""
+        |UPDATE ${dbName}.${tblName}
+        |SET owner_id = ?
+        |WHERE owner_id = ?
+        |""".stripMargin
+    client.executeUpdate(query, toUsername, fromUsername) > 0
+  }
+
+  override def updateCreatorId(fromUsername: UserId, toUsername: UserId): Future[Boolean] = Future {
+    val query =
+      s"""
+        |UPDATE ${dbName}.${tblName}
+        |SET creator_id = ?
+        |WHERE creator_id = ?
+        |""".stripMargin
+    client.executeUpdate(query, toUsername, fromUsername) > 0
+  }
+
+  override def getSubDirectories(parentId: DirectoryId): Future[Array[Directory]] = Future {
+    val dirIdQueue = mutable.Queue[DirectoryId](parentId)
+    val allDirectories = ArrayBuffer[Directory]()
+    while (dirIdQueue.nonEmpty) {
+      val curDirId: DirectoryId = dirIdQueue.dequeue()
+      val directories = listSync(ListDirectoriesRequest(parentId = Some(curDirId), size = Int.MaxValue))
+      allDirectories.appendAll(directories)
+      directories.foreach { directory =>
+        dirIdQueue.enqueue(directory.id)
+      }
+    }
+    allDirectories.toArray
+  }
+
 }

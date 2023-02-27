@@ -34,7 +34,25 @@ import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
     new Type(value = classOf[DynamicFunction], name = "dynamic_function")
   )
 )
-abstract class Function
+abstract class Function {
+  def isGroupByFunc: Boolean = {
+    this match {
+      case dynamicFunc: DynamicFunction => dynamicFunc.getFinalFunction.isGroupByFunc
+      case _: GroupBy                   => true
+      case _                            => false
+    }
+  }
+
+  def isAggregateFunc: Boolean = {
+    this match {
+      case _: Min | _: Max | _: Sum | _: Count | _: CountDistinct | _: Avg | _: First | _: Last | _: CountAll |
+          _: SelectExpr | _: SelectExpression =>
+        true
+      case dynamicFunc: DynamicFunction => dynamicFunc.getFinalFunction.isAggregateFunc
+      case _                            => false
+    }
+  }
+}
 
 abstract class FieldRelatedFunction extends Function {
   val field: Field
@@ -121,7 +139,15 @@ case class DynamicFunction(
     dynamicWidgetId: Long,
     baseFunction: Function,
     finalFunction: Option[Function] = None
-) extends ControlFunction
+) extends ControlFunction {
+  def getFinalFunction: Function = {
+    require(
+      finalFunction.isDefined && !finalFunction.get.isInstanceOf[DynamicFunction],
+      "final function of dynamic function can not be another dynamic function"
+    )
+    finalFunction.get
+  }
+}
 
 // functions that apply per row to transform data
 @JsonTypeInfo(

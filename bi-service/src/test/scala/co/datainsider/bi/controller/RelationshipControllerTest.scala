@@ -3,7 +3,7 @@ package co.datainsider.bi.controller
 import co.datainsider.bi.TestServer
 import co.datainsider.bi.domain.{FieldPair, Relationship}
 import co.datainsider.bi.domain.query.{TableField, TableView}
-import co.datainsider.bi.domain.request.CreateRelationshipRequest
+import co.datainsider.bi.domain.request.UpdateRelationshipRequest
 import com.twitter.finagle.http.Status
 import com.twitter.finatra.http.EmbeddedHttpServer
 import com.twitter.inject.server.FeatureTest
@@ -15,7 +15,7 @@ class RelationshipControllerTest extends FeatureTest {
   val dashboardId: Long = 1
 
   test("test create global relationship") {
-    val request = CreateRelationshipRequest(
+    val request = UpdateRelationshipRequest(
       views = Seq(
         TableView("sales", "orders"),
         TableView("sales", "customers"),
@@ -70,7 +70,7 @@ class RelationshipControllerTest extends FeatureTest {
   }
 
   test("test create dashboard relationship") {
-    val request = CreateRelationshipRequest(
+    val request = UpdateRelationshipRequest(
       views = Seq(
         TableView("sales", "orders"),
         TableView("sales", "customers"),

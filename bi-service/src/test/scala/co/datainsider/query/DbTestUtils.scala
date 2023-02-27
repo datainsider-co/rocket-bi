@@ -192,11 +192,11 @@ object DbTestUtils {
 
   def setupActivityTbl(): Unit = {
     client.executeUpdate(s"""
-        |create database if not exists $dbName
+        |create database if not exists di_system
         |""".stripMargin)
 
     client.executeUpdate(s"""
-        |CREATE TABLE IF NOT EXISTS $dbName.$tblUserActivities
+        |CREATE TABLE IF NOT EXISTS di_system.user_activities
         |(
         |    `timestamp` UInt64,
         |    `org_id` Nullable(UInt16),
@@ -204,6 +204,7 @@ object DbTestUtils {
         |    `action_name` Nullable(String),
         |    `action_type` Nullable(String),
         |    `resource_type` Nullable(String),
+        |    `resource_id` Nullable(String),
         |    `remote_host` Nullable(String),
         |    `remote_address` Nullable(String),
         |    `method` Nullable(String),
@@ -221,39 +222,6 @@ object DbTestUtils {
         |ORDER BY timestamp
         |""".stripMargin)
 
-    val values = Seq(
-      System.currentTimeMillis(),
-      0,
-      "root",
-      "CreateDashboardRequest",
-      "Create",
-      "Dashboard",
-      "127.0.0.1",
-      "localhost",
-      "POST",
-      "/api/dashboard/create",
-      "",
-      200,
-      100,
-      "{\"name\": \"new dashboard\"}",
-      110,
-      "{\"id\": 0, \"name\": \"new dashboard\"}",
-      50,
-      "create new dashboard with name \"new dashboard\""
-    )
-
-    client.executeUpdate(
-      s"""
-          |insert into $dbName.$tblUserActivities values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-          |""".stripMargin,
-      values: _*
-    )
-  }
-
-  def cleanUpActivityTbl(): Unit = {
-    client.executeUpdate(s"""
-        |drop table if exists $dbName.$tblUserActivities
-        |""".stripMargin)
   }
 
 }

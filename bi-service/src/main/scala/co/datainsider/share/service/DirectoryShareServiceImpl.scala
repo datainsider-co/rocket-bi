@@ -18,13 +18,13 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 
 case class DirectoryShareServiceImpl @Inject() (
-    directoryService: DirectoryService,
-    dashboardService: DashboardService,
-    shareRepository: ShareRepository,
-    profileService: ProfileClientService,
-    permissionTokenService: PermissionTokenService,
-    orgAuthorizationClientService: OrgAuthorizationClientService,
-    directoryPermissionAssigner: DirectoryPermissionAssigner
+                                                 directoryService: DirectoryService,
+                                                 dashboardService: DashboardService,
+                                                 shareRepository: ShareRepository,
+                                                 profileService: ProfileClientService,
+                                                 permissionTokenService: PermissionTokenService,
+                                                 orgAuthorizationClientService: OrgAuthorizationClientService,
+                                                 permissionAssigner: PermissionAssigner
 ) extends ShareService
     with Logging {
 
@@ -194,17 +194,17 @@ case class DirectoryShareServiceImpl @Inject() (
 
     }
 
-  override def revoke(organizationId: Long, request: RevokeShareRequest): Future[Map[String, Boolean]] =
+  override def revoke(organizationId: Long, resourceType: String, resourceId: String, usernames: Seq[String]): Future[Map[String, Boolean]] =
     Profiler("[service::ShareService]::revoke(orgId, revokeShareRequest)") {
       for {
-        childrenIds <- directoryService.listChildrenIds(request.resourceId.toInt)
-        allResourceIds = childrenIds.map(_.toString) :+ request.resourceId
-        _ <- removeSharedInfos(organizationId, DirectoryType.Directory.toString, allResourceIds, request.usernames)
-        result <- removePermissions(organizationId, DirectoryType.Directory.toString, allResourceIds, request.usernames)
+        childrenIds <- directoryService.listChildrenIds(resourceId.toInt)
+        allResourceIds = childrenIds.map(_.toString) :+ resourceId
+        _ <- removeSharedInfos(organizationId, DirectoryType.Directory.toString, allResourceIds, usernames)
+        result <- removePermissions(organizationId, DirectoryType.Directory.toString, allResourceIds, usernames)
       } yield result
     }
 
-  def removePermissions(
+  private def removePermissions(
       organizationId: Long,
       resourceType: String,
       resourceIds: Seq[String],
@@ -254,9 +254,9 @@ case class DirectoryShareServiceImpl @Inject() (
     Profiler("[service::ShareService]::share(orgId, shareWithUserRequest)") {
       for {
         childrenDirIds <- directoryService.listChildrenIds(request.resourceId.toInt)
-        userAssignedAsMap <- directoryPermissionAssigner.assign(
+        userAssignedAsMap <- permissionAssigner.assignRecurPermissions(
           organizationId,
-          request.resourceId,
+          request.resourceId.toLong,
           request.userActions
         )
         _ <- saveSharedInfos(
@@ -288,9 +288,9 @@ case class DirectoryShareServiceImpl @Inject() (
     Profiler("[service::ShareService]::share(orgId, shareWithUserRequest)") {
       for {
         childrenDirIds <- directoryService.listChildrenIds(resourceId.toInt)
-        userAssignedAsMap <- directoryPermissionAssigner.assign(
+        userAssignedAsMap <- permissionAssigner.assignRecurPermissions(
           organizationId,
-          resourceId,
+          resourceId.toLong,
           userActions
         )
         _ <- saveSharedInfos(
@@ -313,9 +313,9 @@ case class DirectoryShareServiceImpl @Inject() (
       }
     }
 
-  override def revoke(organizationId: Long, request: RevokeShareAnyoneRequest): Future[Boolean] =
+  override def revokeShareAnyone(organizationId: Long, resourceType: String, resourceId: String): Future[Boolean] =
     Profiler("[service::ShareService]::revoke(orgId, shareAnyone)") {
-      permissionTokenService.deleteToken(request.resourceType, request.resourceId)
+      permissionTokenService.deleteToken(resourceType, resourceId)
     }
 
   override def getInfo(organizationId: Long, request: GetShareAnyoneInfoRequest): Future[Option[PermissionToken]] =
@@ -467,11 +467,11 @@ case class DirectoryShareServiceImpl @Inject() (
       ownerId: String
   ): Future[Map[String, Boolean]] = {
     for {
-      _ <- directoryPermissionAssigner.copyOwnerPermission(organizationId, parentId, childrenId, ownerId)
+      _ <- permissionAssigner.copyOwnerPermission(organizationId, parentId, childrenId, ownerId)
       shareInfos <- getAllInfo(organizationId, parentId, resourceType)
       userPermissions: Map[String, Seq[String]] = shareInfos.map(info => info.user.username -> info.permissions).toMap
       userAssignedAsMap <-
-        directoryPermissionAssigner.copySharedUserPermissions(organizationId, childrenId, userPermissions)
+        permissionAssigner.copySharedUserPermissions(organizationId, childrenId, userPermissions)
       _ <- saveSharedInfo(
         organizationId,
         childrenId,

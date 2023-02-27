@@ -1,18 +1,23 @@
 package co.datainsider.bi.repository
 
 import co.datainsider.bi.client.JdbcClient
+import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.bi.domain.Ids.DirectoryId
 import co.datainsider.bi.domain.request.{ListDirectoriesRequest, Sort}
 import co.datainsider.bi.domain.{Directory, DirectoryType}
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.twitter.util.Future
+import datainsider.client.exception.NotFoundError
 
 import java.sql.ResultSet
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 trait DeletedDirectoryRepository {
   def insert(directory: Directory): Future[Boolean]
+
+  def multiInsert(directories: Seq[Directory]): Future[Boolean]
 
   def list(request: ListDirectoriesRequest): Future[Array[Directory]]
 
@@ -20,7 +25,16 @@ trait DeletedDirectoryRepository {
 
   def delete(id: DirectoryId): Future[Boolean]
 
+  def multiDelete(ids: Seq[DirectoryId]): Future[Boolean]
+
+  def deleteByOwnerId(username: String): Future[Boolean]
+
   def isExist(id: DirectoryId): Future[Boolean]
+
+  /**
+   * get all sub directories of a directory
+   */
+  def getSubDirectories(parentId: DirectoryId): Future[Array[Directory]]
 }
 
 class MysqlDeletedDirectoryRepository @Inject() (
@@ -54,16 +68,45 @@ class MysqlDeletedDirectoryRepository @Inject() (
     }
   }
 
-  override def list(request: ListDirectoriesRequest): Future[Array[Directory]] =
+  override def multiInsert(directories: Seq[Directory]): Future[Boolean] = {
     Future {
-      val selectClause = s"select * from $dbName.$tblName"
-      val (whereClause, conditionValues): (String, Seq[Any]) = buildWhereClause(request)
-      val orderByClause: String = buildOrderBy(request.sorts)
-      val limitClause = s"limit ${request.size} offset ${request.from}"
-
-      val query = s"$selectClause $whereClause $orderByClause $limitClause"
-      client.executeQuery(query, conditionValues: _*)(toDirectories)
+      val query =
+        s"""
+           |insert into $dbName.$tblName
+           |(id, name, creator_id, owner_id, created_date, parent_id, dir_type, dashboard_id, deleted_date, updated_date)
+           |values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           |""".stripMargin
+      val data: Array[Record] = directories.map { directory =>
+        Array(
+          directory.id,
+          directory.name,
+          directory.creatorId,
+          directory.ownerId,
+          directory.createdDate,
+          directory.parentId,
+          directory.directoryType.toString,
+          directory.dashboardId.getOrElse(null),
+          System.currentTimeMillis(),
+          directory.updatedDate.getOrElse(System.currentTimeMillis())
+        )
+      }.toArray
+      client.executeBatchUpdate(query, data) > 0
     }
+  }
+
+  override def list(request: ListDirectoriesRequest): Future[Array[Directory]] =  {
+    Future.value(listSync(request))
+  }
+
+  private def listSync(request: ListDirectoriesRequest): Array[Directory] = {
+    val selectClause = s"select * from $dbName.$tblName"
+    val (whereClause, conditionValues): (String, Seq[Any]) = buildWhereClause(request)
+    val orderByClause: String = buildOrderBy(request.sorts)
+    val limitClause = s"limit ${request.size} offset ${request.from}"
+
+    val query = s"$selectClause $whereClause $orderByClause $limitClause"
+    client.executeQuery(query, conditionValues: _*)(toDirectories)
+  }
 
   override def get(id: DirectoryId): Future[Option[Directory]] =
     Future {
@@ -189,4 +232,40 @@ class MysqlDeletedDirectoryRepository @Inject() (
           false
       })
     }
+
+  override def getSubDirectories(parentId: DirectoryId): Future[Array[Directory]] = Future {
+    val dirIdQueue = mutable.Queue[DirectoryId](parentId)
+    val allDirectories = ArrayBuffer[Directory]()
+    while (dirIdQueue.nonEmpty) {
+      val curDirId: DirectoryId = dirIdQueue.dequeue()
+      val directories = listSync(ListDirectoriesRequest(parentId = Some(curDirId), size = Int.MaxValue))
+      allDirectories.appendAll(directories)
+      directories.foreach { directory =>
+        dirIdQueue.enqueue(directory.id)
+      }
+    }
+    allDirectories.toArray
+  }
+
+  override def multiDelete(ids: Seq[DirectoryId]): Future[Boolean] = Future {
+      if (ids.isEmpty) {
+        true
+      } else {
+        val query =
+          s"""
+             |delete from $dbName.$tblName
+             |where id in (${ids.map(_ => "?").mkString(",")})
+             |""".stripMargin
+        client.executeUpdate(query, ids: _*) >= 1
+      }
+    }
+
+  override def deleteByOwnerId(ownerId: String): Future[Boolean] = Future {
+    val query =
+      s"""
+         |delete from $dbName.$tblName
+         |where owner_id = ?;
+         |""".stripMargin
+    client.executeUpdate(query, ownerId) >= 1
+  }
 }

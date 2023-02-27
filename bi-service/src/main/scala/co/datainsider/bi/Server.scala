@@ -2,7 +2,6 @@ package co.datainsider.bi
 
 import co.datainsider.bi.controller.http._
 import co.datainsider.bi.controller.http.filter._
-import co.datainsider.bi.controller.thrift.TBIServiceController
 import co.datainsider.bi.module.{BIServiceModule, TestModule}
 import co.datainsider.bi.repository.SchemaManager
 import co.datainsider.bi.service.BoostScheduleService
@@ -14,23 +13,26 @@ import com.google.inject.util.Modules
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.filters.CommonFilters
 import com.twitter.finatra.http.routing.HttpRouter
-import com.twitter.finatra.thrift.ThriftServer
-import com.twitter.finatra.thrift.routing.ThriftRouter
 import com.twitter.util.Await
 import datainsider.client.exception.DbExecuteError
 import datainsider.client.filter.{LicenceFilter, LoggedInUserParser, MustLoggedInFilter}
-import datainsider.client.module.{CaasClientModule, MockCaasClientModule, MockSchemaClientModule, SchemaClientModule}
+import datainsider.client.module.{
+  CaasClientModule,
+  MockCaasClientModule,
+  MockScheduleClientModule,
+  MockSchemaClientModule,
+  ScheduleClientModule,
+  SchemaClientModule
+}
 
 /**
   * Created by SangDang on 9/8/
   */
 object MainApp extends Server
 
-class Server extends HttpServer with ThriftServer {
+class Server extends HttpServer {
 
   override protected def defaultHttpPort: String = ZConfig.getString("server.http.port", ":8080")
-
-  override protected def defaultThriftPort: String = ZConfig.getString("server.thrift.port", "8084")
 
   override protected def disableAdminHttpServer: Boolean = ZConfig.getBoolean("server.admin.disable", true)
 
@@ -39,7 +41,9 @@ class Server extends HttpServer with ThriftServer {
       BIServiceModule,
       ShareModule,
       CaasClientModule,
-      SchemaClientModule
+      SchemaClientModule,
+      // use module for delete or transfer data in job-scheduler
+      ScheduleClientModule
     )
 
   override protected def configureHttp(router: HttpRouter): Unit = {
@@ -52,17 +56,14 @@ class Server extends HttpServer with ThriftServer {
       .add[ShareTokenParser, DashboardController]
       .add[DirectoryController]
       .add[MustLoggedInFilter, RelationshipController]
-      .add[MustLoggedInFilter, PolicyController]
+      .add[MustLoggedInFilter, RlsPolicyController]
       .add[PermissionTokenController]
       .add[GeolocationController]
+      .add[UserActivityController]
       .add[MustLoggedInFilter, ShareController]
       .exceptionMapper[CaseClassExceptionMapping]
       .exceptionMapper[JsonParseExceptionMapping]
       .exceptionMapper[CommonExceptionMapping]
-  }
-
-  override protected def configureThrift(router: ThriftRouter): Unit = {
-    router.add[TBIServiceController]
   }
 
   override protected def warmup(): Unit = {
@@ -89,7 +90,7 @@ class Server extends HttpServer with ThriftServer {
   }
 }
 
-class TestServer extends Server with ThriftServer {
+class TestServer extends Server {
 
   override def modules: Seq[com.google.inject.Module] =
     Seq(
@@ -98,7 +99,8 @@ class TestServer extends Server with ThriftServer {
           TestModule,
           MockShareModule,
           MockCaasClientModule,
-          MockSchemaClientModule
+          MockSchemaClientModule,
+          MockScheduleClientModule
         ): _*
       )
     )

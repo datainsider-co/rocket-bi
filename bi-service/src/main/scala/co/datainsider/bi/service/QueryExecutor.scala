@@ -58,8 +58,8 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
 
       case objQuery: ObjectQuery =>
         try {
-          if (isGroupQuery(objQuery)) {
-            processGroupQuery(objQuery, tableCols, formatValues)
+          if (isGroupedQuery(objQuery)) {
+            processGroupedQuery(objQuery, tableCols, formatValues)
           } else {
             processSelectQuery(objQuery, tableCols, formatValues)
           }
@@ -95,13 +95,13 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
     * @param tableCols setting of query
     * @return
     */
-  private def processGroupQuery(
+  private def processGroupedQuery(
       objQuery: ObjectQuery,
       tableCols: Array[TableColumn],
       doFormatValues: Boolean
   ): DataTable = {
-    val groupFunctions: Array[Function] = filterGroupByFn(objQuery.functions.toArray)
-    val aggFunctions: Array[Function] = filterAggregateFn(objQuery.functions.toArray)
+    val groupFunctions: Array[Function] = objQuery.functions.filter(_.isGroupByFunc).toArray
+    val aggFunctions: Array[Function] = objQuery.functions.filter(_.isAggregateFunc).toArray
     val orderFunctions: Array[OrderBy] = objQuery.orders.toArray
 
     val verTotalValuesMap: mutable.HashMap[String, Object] = mutable.HashMap.empty
@@ -154,6 +154,7 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
     }
 
     val groupOrderBys: Array[OrderBy] = buildGroupOrderBy(groupFunctions, orderFunctions, isPriorityAggFn = false)
+
     val lastGroupSql: String = buildObjectQueryWith(
       objQuery,
       groupFunctions,
@@ -219,32 +220,8 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
     }
   }
 
-  private def isGroupQuery(objQuery: ObjectQuery): Boolean = {
-    objQuery.functions.exists {
-      case _: GroupBy => true
-      case _          => false
-    }
-  }
-
-  private def filterGroupByFn(functions: Array[Function]): Array[Function] = {
-    functions.filter {
-      case _: GroupBy => true
-      case _          => false
-    }
-  }
-
-  private def isAggregateFunction(func: Function): Boolean = {
-    func match {
-      case _: Min | _: Max | _: Sum | _: Count | _: CountDistinct | _: Avg | _: First | _: Last | _: CountAll |
-          _: SelectExpr | _: SelectExpression =>
-        true
-
-      case _ => false
-    }
-  }
-
-  private def filterAggregateFn(functions: Array[Function]): Array[Function] = {
-    functions.filter(f => isAggregateFunction(f))
+  private def isGroupedQuery(objQuery: ObjectQuery): Boolean = {
+    objQuery.functions.exists(_.isGroupByFunc)
   }
 
   private def findAsColumnIndex(tableCols: Array[TableColumn]): Int = {
@@ -274,18 +251,18 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
     val finalColTypes: ArrayBuffer[String] = ArrayBuffer.empty
     val finalRecordsTransposed: ArrayBuffer[Array[Object]] = ArrayBuffer.empty
 
-    val groupTableCols = tableCols.filter(c => c.function.isInstanceOf[GroupBy])
-    val aggFuncCols = tableCols.filter(c => isAggregateFunction(c.function))
+    val groupFuncCols = tableCols.filter(_.function.isGroupByFunc)
+    val aggFuncCols = tableCols.filter(_.function.isAggregateFunc)
 
     for (groupIndex <- 0 until toGroupIndex) {
       if (groupIndex != groupFunctions.length - 1) {
-        val curGroupColName = groupTableCols(groupIndex).name
+        val curGroupColName = groupFuncCols(groupIndex).name
         finalHeaders += curGroupColName
         finalColTypes += baseColTypes(groupIndex)
         finalRecordsTransposed +=
           baseRecordsTransposed(groupIndex).map(formatByFunction(_, groupFunctions(groupIndex)))
 
-        if (groupTableCols(groupIndex).isCalcGroupTotal) {
+        if (groupFuncCols(groupIndex).isCalcGroupTotal) {
           val numAffectedGroup = groupIndex + 1
           val intervals = findIntervals(baseRecordsTransposed, numAffectedGroup)
 
@@ -310,7 +287,7 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
 
     if (toGroupIndex == groupFunctions.length) {
       val lastGroupIndex = toGroupIndex - 1
-      finalHeaders += groupTableCols(lastGroupIndex).name
+      finalHeaders += groupFuncCols(lastGroupIndex).name
       finalColTypes += baseColTypes(lastGroupIndex)
       finalRecordsTransposed +=
         baseRecordsTransposed(lastGroupIndex).map(formatByFunction(_, groupFunctions(lastGroupIndex)))
@@ -371,8 +348,8 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
       }
       .filter(f => f != null)
 
-    val aggFnOrderBy = baseOrderFunctions.filter(f => isAggregateFunction(f.function))
-    val firstAggFnIndex = baseOrderFunctions.indexWhere(f => isAggregateFunction(f.function))
+    val aggFnOrderBy = baseOrderFunctions.filter(_.function.isAggregateFunc)
+    val firstAggFnIndex = baseOrderFunctions.indexWhere(_.function.isAggregateFunc)
 
     if (isPriorityAggFn || firstAggFnIndex == 0) {
       aggFnOrderBy ++ groupOrderBys
@@ -383,11 +360,8 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
 
   private def isFuncAppliedByOrderBy(orderBy: OrderBy, targetFunc: Function): Boolean = {
     orderBy.function match {
-      case dynamicFunc: DynamicFunction =>
-        val finalOrderByFunc = dynamicFunc.finalFunction.getOrElse(dynamicFunc.baseFunction)
-
-        finalOrderByFunc == targetFunc
-      case _ => orderBy.function == targetFunc
+      case f: DynamicFunction => f.getFinalFunction == targetFunc
+      case _                  => orderBy.function == targetFunc
     }
   }
 
@@ -429,7 +403,7 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
     val rows = table.records
 
     val totalGroupNum = groupFunctions.length
-    val aggFuncCols = tableCols.filter(c => isAggregateFunction(c.function))
+    val aggFuncCols = tableCols.filter(_.function.isAggregateFunc)
 
     val finalRows = ArrayBuffer[Array[Object]]()
     val newColHeaders = ArrayBuffer[String]()
