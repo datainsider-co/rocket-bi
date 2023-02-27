@@ -39,8 +39,8 @@ case class GaJob(
     metrics: Array[GaMetric],
     dimensions: Array[GaDimension],
     sorts: Seq[String] = Seq(),
-    @deprecated("use GaSource instead of") accessToken: String = "",
-    @deprecated("use GaSource instead of") refreshToken: String = ""
+    accessToken: String,
+    refreshToken: String
 ) extends Job {
 
   /** *

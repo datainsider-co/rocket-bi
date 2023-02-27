@@ -631,8 +631,7 @@ class JobServiceTest extends IntegrationTest with BeforeAndAfterAll {
       customerId = "123456",
       resourceName = "ad_group",
       incrementalColumn = Some("ad_group.id"),
-      lastSyncedValue = "0",
-      startDate = None
+      lastSyncedValue = "0"
     )
 
     val result = jobService.create(job.orgId, job.creatorId, job).sync()
@@ -640,7 +639,7 @@ class JobServiceTest extends IntegrationTest with BeforeAndAfterAll {
     assert(
       result.job
         .asInstanceOf[GoogleAdsJob]
-        .copy(lastModified = 0)
+        .copy(lastModified = 0, query = job.query)
         .equals(job.copy(jobId = googleAdsJobId))
     )
   }
@@ -667,8 +666,7 @@ class JobServiceTest extends IntegrationTest with BeforeAndAfterAll {
       customerId = "123456",
       resourceName = "ad_group",
       incrementalColumn = Some("ad_group.id"),
-      lastSyncedValue = "0",
-      startDate = None
+      lastSyncedValue = "0"
     )
     val result = jobService.get(1, googleAdsJobId).sync()
 
@@ -696,15 +694,14 @@ class JobServiceTest extends IntegrationTest with BeforeAndAfterAll {
       customerId = "123456",
       resourceName = "ad_group",
       incrementalColumn = Some("ad_group.id"),
-      lastSyncedValue = "0",
-      startDate = Some("2019-01-13")
+      lastSyncedValue = "0"
     )
     val result: Boolean =
       jobService.update(job.orgId, UpdateJobRequest(id = job.jobId, job = job, request = null)).sync()
     assert(result)
 
     val updatedJob: Job = jobService.get(1, googleAdsJobId).sync().job
-    assert(updatedJob.asInstanceOf[GoogleAdsJob].copy(lastModified = 0).equals(job))
+    assert(updatedJob.asInstanceOf[GoogleAdsJob].copy(lastModified = 0, query = job.query).equals(job))
   }
 
   test("test delete google ads job") {
@@ -734,8 +731,7 @@ class JobServiceTest extends IntegrationTest with BeforeAndAfterAll {
       customerId = "123456",
       resourceName = "resource",
       incrementalColumn = Some("ad_group.id"),
-      lastSyncedValue = "",
-      startDate = Some("2019-01-11")
+      lastSyncedValue = ""
     )
     val tableNames = Seq("campaign", "ad_group", "customer", "change_event")
     val result = jobService

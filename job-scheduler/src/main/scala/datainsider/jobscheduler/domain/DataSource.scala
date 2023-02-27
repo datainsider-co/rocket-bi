@@ -8,7 +8,7 @@ import com.twitter.finatra.validation.constraints.NotEmpty
 import datainsider.jobscheduler.domain.DataSourceType.DataSourceType
 import datainsider.jobscheduler.domain.DatabaseType.DatabaseType
 import datainsider.jobscheduler.domain.Ids.SourceId
-import datainsider.jobscheduler.domain.source.{FacebookAdsSource, Ga4Source, GaSource, GoogleSheetSource, TikTokAdsSource, TrackingSource}
+import datainsider.jobscheduler.domain.source.{FacebookAdsSource, Ga4Source, GoogleSheetSource, TikTokAdsSource, TrackingSource}
 import datainsider.jobscheduler.util.JsonUtils
 
 @JsonTypeInfo(
@@ -26,7 +26,6 @@ import datainsider.jobscheduler.util.JsonUtils
     new Type(value = classOf[AmazonS3Source], name = "amazon_s3"),
     new Type(value = classOf[SolanaSource], name = "solana_db_source"),
     new Type(value = classOf[ShopifySource], name = "shopify_source"),
-    new Type(value = classOf[GaSource], name = "ga_source"),
     new Type(value = classOf[Ga4Source], name = "ga4_source"),
     new Type(value = classOf[GoogleSheetSource], name = "google_sheet_source"),
     new Type(value = classOf[TrackingSource], name = "tracking_source"),
@@ -86,6 +85,7 @@ object DataSourceType extends Enumeration {
   val Jdbc: DataSourceType = Value("Jdbc")
   val GoogleAds: DataSourceType = Value("GoogleAds")
   val Service: DataSourceType = Value("Service")
+  val Ga: DataSourceType = Value("Google_Analytics")
   val FaceBookAds: DataSourceType = Value("FacebookAds")
   val File: DataSourceType = Value("File")
   val Hubspot: DataSourceType = Value("hubspot")
@@ -97,7 +97,6 @@ object DataSourceType extends Enumeration {
   val Solana: DataSourceType = Value("Solana")
   val Other: DataSourceType = Value("Others")
   val Shopify: DataSourceType = Value("Shopify")
-  val Ga: DataSourceType = Value("Ga")
   val Ga4: DataSourceType = Value("Ga4")
   val TrackingSource: DataSourceType = Value("TrackingSource")
   val FaceBookAdsSource: DataSourceType = Value("FacebookAdsSource")

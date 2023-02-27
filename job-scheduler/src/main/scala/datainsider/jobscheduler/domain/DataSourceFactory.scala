@@ -39,7 +39,6 @@ case class DataSourceFactoryImpl() extends DataSourceFactory {
       case DataSourceType.AmazonS3       => buildAmazonS3Source(orgId, id, displayName, creatorId, lastModify, config)
       case DataSourceType.Shopify        => buildShopifySource(orgId, id, displayName, creatorId, lastModify, config)
       case DataSourceType.Ga4            => buildGa4Source(orgId, id, displayName, creatorId, lastModify, config)
-      case DataSourceType.Ga             => buildGaSource(orgId, id, displayName, creatorId, lastModify, config)
       case DataSourceType.TrackingSource => buildTrackingSource(orgId, id, displayName, creatorId, lastModify, config)
       case DataSourceType.GoogleAds      => buildGoogleAdsSource(orgId, id, displayName, creatorId, lastModify, config)
       case DataSourceType.FaceBookAdsSource =>
@@ -281,26 +280,6 @@ case class DataSourceFactoryImpl() extends DataSourceFactory {
   ): DataSource = {
 
     Ga4Source(
-      orgId = orgId,
-      id = id,
-      displayName = displayName,
-      creatorId = creatorId,
-      lastModify = lastModify,
-      accessToken = config.at("/access_token").asText(),
-      refreshToken = config.at("/refresh_token").asText()
-    )
-  }
-
-  private def buildGaSource(
-      orgId: Long,
-      id: Long,
-      displayName: String,
-      creatorId: String,
-      lastModify: Long,
-      config: JsonNode
-  ): DataSource = {
-
-    GaSource(
       orgId = orgId,
       id = id,
       displayName = displayName,
