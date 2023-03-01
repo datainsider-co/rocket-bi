@@ -19,13 +19,12 @@ import com.google.inject.Inject
 import com.twitter.inject.Logging
 import com.twitter.util.Future
 import datainsider.client.domain.user.UserProfile
-import datainsider.client.exception.{BadRequestError, InternalError}
+import datainsider.client.exception.BadRequestError
 import datainsider.client.service.SchemaClientService
 import datainsider.client.util.JsonParser.mapper
 import datainsider.client.util.ZConfig
 import datainsider.profiler.Profiler
 
-import java.io.File
 import scala.collection.immutable.HashMap
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -555,12 +554,13 @@ class QueryServiceImpl @Inject() (
   private def toFirstColumnObjQuery(baseObjQuery: ObjectQuery): ObjectQuery = {
     require(baseObjQuery.functions.nonEmpty, "functions can not be empty when build FirstColumnObjQuery")
 
-    val firstFunction: Function = if (isGroupQuery(baseObjQuery)) {
-      val groupBys: Array[GroupBy] = filterGroupByFn(baseObjQuery.functions.toArray).map(_.asInstanceOf[GroupBy])
+    val firstFunction: Function = if (isGroupedQuery(baseObjQuery)) {
+      val groupBys: Array[GroupBy] = baseObjQuery.functions.filter(_.isGroupByFunc).toArray.map(_.asInstanceOf[GroupBy])
       groupBys.head
     } else {
       baseObjQuery.functions.head
     }
+
     baseObjQuery.copy(functions = Seq(firstFunction), orders = Seq.empty, limit = None)
   }
 
@@ -1281,8 +1281,9 @@ class QueryServiceImpl @Inject() (
   // only works on json pivot table
   private def buildFormatterCols(isGroupBys: Array[Boolean], tableColumns: Array[TableColumn]): Array[String] = {
     val colCount = isGroupBys.length
-    val aggFnCount: Int = filterAggregateFn(tableColumns.map(_.function)).length
+    val aggFnCount: Int = tableColumns.map(_.function).count(_.isAggregateFunc)
     val formatterCols: Array[TableColumn] = tableColumns.filter(_.formatterKey.isDefined)
+
     if (isGroupBys.contains(true)) {
       if (tableColumns.exists(col => col.isHorizontalView)) {
         // group1 value1 value2 formatter_value value1 value2 formatter_value (multi group and horizontal table)
@@ -1377,31 +1378,8 @@ class QueryServiceImpl @Inject() (
       }
     }
 
-  private def isGroupQuery(objQuery: ObjectQuery): Boolean = {
-    objQuery.functions.exists {
-      case _: GroupBy => true
-      case _          => false
-    }
-  }
-
-  private def filterGroupByFn(functions: Array[Function]): Array[Function] = {
-    functions.filter {
-      case _: GroupBy => true
-      case _          => false
-    }
-  }
-
-  private def isAggregateFunction(func: Function): Boolean = {
-    func match {
-      case _: Min | _: Max | _: Sum | _: Count | _: CountDistinct | _: Avg | _: First | _: Last | _: CountAll |
-          _: SelectExpr | _: SelectExpression =>
-        true
-      case _ => false
-    }
-  }
-
-  private def filterAggregateFn(functions: Array[Function]): Array[Function] = {
-    functions.filter(f => isAggregateFunction(f))
+  private def isGroupedQuery(objQuery: ObjectQuery): Boolean = {
+    objQuery.functions.exists(_.isGroupByFunc)
   }
 
   private def applyLimit(query: Query, limit: Option[Limit]): Query = {
@@ -1438,8 +1416,7 @@ class QueryServiceImpl @Inject() (
       val firstQuery = query.addConditions(compareRequest.firstCondition.toSeq)
       val firstResp = executeQuery(firstQuery, querySetting.toTableColumns)
 
-      val tableCols = querySetting.toTableColumns
-      if (tableCols.exists(c => isAggregateFunction(c.function))) {
+      if (querySetting.toTableColumns.exists(_.function.isAggregateFunc)) {
         val secondQuery = query.addConditions(compareRequest.secondCondition.toSeq).setLimit(None)
         val secondResponse = executeQuery(secondQuery, querySetting.toTableColumns)
 
@@ -1657,8 +1634,10 @@ class QueryServiceImpl @Inject() (
       limit: Option[Limit],
       viewAsProfile: Option[UserProfile]
   ): Future[PrepareQueryResponse] = {
-    val orgId: Option[Long] = request.currentOrganizationId
-    val userProfile: Option[UserProfile] = Seq(viewAsProfile, request.currentProfile).flatten.headOption
+    val orgId: Option[Long] = Try(request.currentOrganizationId.get).toOption
+    val userProfile: Option[UserProfile] = if (viewAsProfile.isDefined) {
+      viewAsProfile
+    } else Try(request.currentProfile).toOption.flatten
     val baseQuery: Query = request.querySetting.toQuery
 
     for {

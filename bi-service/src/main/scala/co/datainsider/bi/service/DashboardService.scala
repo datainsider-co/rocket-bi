@@ -155,7 +155,7 @@ class DashboardServiceImpl @Inject() (
     for {
       _ <- fetch(orgId, request.id)
       dirId <- directoryService.list(ListDirectoriesRequest(dashboardId = Some(request.id))).map(_.head.id)
-      response <- directoryService.delete(DeleteDirectoryRequest(dirId))
+      response <- directoryService.hardDelete(request.getOrganizationId(), dirId)
       _ <- drillThroughService.deleteDrillThroughFields(request.id)
     } yield response
   }

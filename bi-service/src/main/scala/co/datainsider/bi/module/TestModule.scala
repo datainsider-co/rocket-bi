@@ -1,76 +1,24 @@
 package co.datainsider.bi.module
 
-import co.datainsider.bi.client.{HikariClient, JdbcClient, NativeJDbcClient}
+import co.datainsider.bi.client.{JdbcClient, NativeJDbcClient}
 import co.datainsider.bi.domain.query.{QueryParser, QueryParserImpl}
 import co.datainsider.bi.domain.response.ChartResponse
 import co.datainsider.bi.engine.Engine
 import co.datainsider.bi.engine.clickhouse.{ClickhouseEngine, ClickhouseParser, DataTable}
-import co.datainsider.bi.module.BIServiceModule.{
-  dbTestName,
-  tblDashboardFieldName,
-  tblDashboardName,
-  tblDeletedDirectoryName,
-  tblDirectoryName,
-  tblGeolocation,
-  tblRecentDirectoryName,
-  tblRlsPolicyName,
-  tblShareInfoName,
-  tblStarredDirectoryName
-}
-import co.datainsider.bi.repository.{
-  ChartResponseRepository,
-  ChartResponseRepositoryImpl,
-  ClickhouseActivityRepository,
-  DrillThroughFieldRepository,
-  DashboardFieldRepositoryImpl,
-  DashboardRepository,
-  DeletedDirectoryRepository,
-  DirectoryRepository,
-  GeolocationRepository,
-  MsqlRecentDirectoryRepository,
-  MySqlDashboardRepository,
-  MySqlDirectoryRepository,
-  MySqlGeolocationRepository,
-  MySqlSchemaManager,
-  MysqlDeletedDirectoryRepository,
-  MysqlRlsPolicyRepository,
-  MysqlStarredDirectoryRepository,
-  RecentDirectoryRepository,
-  RelationshipRepository,
-  RlsPolicyRepository,
-  SchemaManager,
-  SsdbRelationshipRepository,
-  StarredDirectoryRepository,
-  UserActivityRepository
-}
-import co.datainsider.bi.service.{
-  BoostJob,
-  BoostScheduleService,
-  BoostScheduleServiceImpl,
-  CustomJobFactory,
-  DrillThroughService,
-  DashboardFieldServiceImpl,
-  GeolocationService,
-  GeolocationServiceImpl,
-  MockDashboardService,
-  MockQueryService,
-  QueryExecutor,
-  QueryExecutorImpl,
-  QueryService,
-  QueryServiceImpl,
-  RelationshipService,
-  RelationshipServiceImpl,
-  RlsPolicyService,
-  RlsPolicyServiceImpl,
-  UserActivityService,
-  UserActivityServiceImpl
-}
+import co.datainsider.bi.module.BIServiceModule._
+import co.datainsider.bi.repository._
+import co.datainsider.bi.service._
 import co.datainsider.bi.util.ZConfig
-import com.google.inject.{Inject, Provides, Singleton}
+import co.datainsider.share.service.{MockPermissionAssigner, MockShareService, PermissionAssigner}
 import com.google.inject.name.Named
+import com.google.inject.{Inject, Provides, Singleton}
 import com.twitter.inject.TwitterModule
-import datainsider.client.service.{MockSchemaClientService, SchemaClientService}
-import datainsider.client.util.TrackingClient
+import datainsider.client.service.{
+  MockOrgAuthorizationClientServiceImpl,
+  MockProfileClientServiceImpl,
+  MockSchemaClientService,
+  SchemaClientService
+}
 import education.x.commons.SsdbKVS
 import org.nutz.ssdb4j.SSDBs
 import org.nutz.ssdb4j.spi.SSDB
@@ -91,9 +39,11 @@ object TestModule extends TwitterModule {
     bind[RlsPolicyService].to[RlsPolicyServiceImpl].asEagerSingleton()
     bind[UserActivityService].to[UserActivityServiceImpl].asEagerSingleton()
     bind[SchemaClientService].to[MockSchemaClientService].asEagerSingleton()
+    bind[AdminService].to[MockAdminService].asEagerSingleton()
+    bind[StarredDirectoryService].to[StarredDirectoryServiceImpl].asEagerSingleton()
+    bind[PermissionAssigner].to[MockPermissionAssigner].asEagerSingleton()
+    bind[UserActivityRepository].to[ClickhouseActivityRepository].asEagerSingleton()
   }
-
-  TrackingClient.setIsEnable(false)
 
   val clickhouseServiceName: String = ZConfig.getString("test_environment.clickhouse.service_name")
   val clickhouseHttpInterfacePort: Int = ZConfig.getInt("test_environment.clickhouse.http_interface_port")
@@ -203,7 +153,9 @@ object TestModule extends TwitterModule {
 
   @Singleton
   @Provides
-  def provideMySqlDrillThroughFieldRepository(@Inject @Named("mysql") client: JdbcClient): DrillThroughFieldRepository = {
+  def provideMySqlDrillThroughFieldRepository(
+      @Inject @Named("mysql") client: JdbcClient
+  ): DrillThroughFieldRepository = {
     new DashboardFieldRepositoryImpl(client, dbTestName, tblDashboardFieldName)
   }
 
@@ -239,16 +191,6 @@ object TestModule extends TwitterModule {
 
   @Singleton
   @Provides
-  def providesUserActivityRepository(
-      @Named("clickhouse") client: JdbcClient
-  ): UserActivityRepository = {
-    val dbName: String = ZConfig.getString("fake_data.database.name")
-    val tblName: String = ZConfig.getString("fake_data.table.user_activities.name", "user_activities")
-    new ClickhouseActivityRepository(client, dbName, tblName)
-  }
-
-  @Singleton
-  @Provides
   def provideRelationshipRepository(ssdb: SSDB): RelationshipRepository = {
     val kvs = SsdbKVS[String, String]("di_relationships_test", ssdb)
     new SsdbRelationshipRepository(kvs)
@@ -264,5 +206,51 @@ object TestModule extends TwitterModule {
   @Provides
   def provideRlsPolicyRepository(@Named("mysql") client: JdbcClient): RlsPolicyRepository = {
     new MysqlRlsPolicyRepository(client, dbTestName, tblRlsPolicyName)
+  }
+
+  @Singleton
+  @Provides
+  def providesDeletedDirectoryService(
+      directoryRepository: DirectoryRepository,
+      dashboardRepository: DashboardRepository,
+      trashDirectoryRepository: DeletedDirectoryRepository,
+      starredDirectoryService: StarredDirectoryService
+  ): DeletedDirectoryService = {
+    new DeletedDirectoryServiceImpl(
+      directoryRepository,
+      dashboardRepository,
+      trashDirectoryRepository,
+      starredDirectoryService = starredDirectoryService,
+      shareService = new MockShareService(),
+      new MockOrgAuthorizationClientServiceImpl()
+    )
+  }
+
+  @Singleton
+  @Provides
+  @Named("root_dir")
+  def providerUserIdRootMapping(ssdb: SSDB): SsdbKVS[String, Long] = {
+    val userRootDirSsdb = ZConfig.getString("directory.user_root_dir", "test_root_dir")
+    SsdbKVS[String, Long](userRootDirSsdb, ssdb)
+  }
+
+  @Singleton
+  @Provides
+  def providesDirectoryService(
+      directoryRepository: DirectoryRepository,
+      dashboardRepository: DashboardRepository,
+      @Named("root_dir") rootDirKvs: SsdbKVS[String, Long],
+      deletedDirectoryService: DeletedDirectoryService,
+      permissionAssigner: PermissionAssigner
+  ): DirectoryService = {
+    new DirectoryServiceImpl(
+      directoryRepository,
+      dashboardRepository,
+      new MockProfileClientServiceImpl(),
+      new MockShareService(),
+      rootDirKvs,
+      deletedDirectoryService,
+      permissionAssigner
+    )
   }
 }

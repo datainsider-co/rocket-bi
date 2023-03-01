@@ -1,0 +1,8 @@
+{
+  "host": "139.99.89.154",
+  "username": "default",
+  "password": "",
+  "http_port": 8123,
+  "tcp_port": 9000,
+  "cluster_name": "datainsider_cluster"
+}

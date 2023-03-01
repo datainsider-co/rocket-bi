@@ -1,7 +1,6 @@
 <template>
   <div v-b-hover="handleHover" class="w-100 h-100 position-relative" :style="{ backgroundColor: backgroundColor }">
-    <StatusWidget :class="chartWidgetClass" :error="errorMessage" :renderWhen="renderWhen" :status="status"
-                  @retry="retryLoadData">
+    <StatusWidget :class="chartWidgetClass" :error="errorMessage" :renderWhen="renderWhen" :status="status" @retry="retryLoadData">
       <template #default>
         <template v-if="hasData">
           <CaptureException name="chart" @onError="handleChartRenderError">
@@ -63,7 +62,7 @@
           </template>
           <template v-else>
             <ActionWidgetFilter
-              v-if="hasFilter() &&showEditComponent"
+              v-if="hasFilter() && showEditComponent"
               :id="genBtnId('filter', currentChartInfo.id)"
               :filter-requests="getFilterRequests()"
               :is-apply-filter="isAffectByFilter()"

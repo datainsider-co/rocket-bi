@@ -1,0 +1,263 @@
+{
+  "service_type": "AUCTION",
+  "report_type": "BASIC",
+  "data_level": "AUCTION_ADGROUP",
+  "dimensions": [
+    "adgroup_id",
+    "stat_time_day"
+  ],
+  "metric_columns": [
+    {
+      "class_name": "string",
+      "name": "campaign_name",
+      "display_name": "campaign_name",
+      "description": "Campaign name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "campaign_id",
+      "display_name": "campaign_id",
+      "description": "Campaign ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "objective_type",
+      "display_name": "objective_type",
+      "description": "Advertising objective",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "double",
+      "name": "campaign_budget",
+      "display_name": "campaign_budget",
+      "description": "Campaign budget",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "string",
+      "name": "campaign_dedicate_type",
+      "display_name": "campaign_dedicate_type",
+      "description": "Campaign type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "app_promotion_type",
+      "display_name": "app_promotion_type",
+      "description": "App promotion type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "adgroup_name",
+      "display_name": "adgroup_name",
+      "description": "Ad group name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "promotion_type",
+      "display_name": "promotion_type",
+      "description": "Promotion type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "dpa_target_audience_type",
+      "display_name": "dpa_target_audience_type",
+      "description": "Target audience type for DPA",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "smart_target",
+      "display_name": "smart_target",
+      "description": "Optimization goal",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "pricing_category",
+      "display_name": "pricing_category",
+      "description": "Billing Event",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "bid_strategy",
+      "display_name": "bid_strategy",
+      "description": "Bid strategy",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "bid",
+      "display_name": "bid",
+      "description": "Bid",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "aeo_type",
+      "display_name": "aeo_type",
+      "description": "App Event Optimization Type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "tt_app_id",
+      "display_name": "tt_app_id",
+      "description": "TikTok App ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "tt_app_name",
+      "display_name": "tt_app_name",
+      "description": "TikTok App Name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "mobile_app_id",
+      "display_name": "mobile_app_id",
+      "description": "Mobile App ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "double",
+      "name": "video_play_actions",
+      "display_name": "video_play_actions",
+      "description": "Video Views",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "video_watched_2s",
+      "display_name": "video_watched_2s",
+      "description": "2-Second Video Views",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "video_watched_6s",
+      "display_name": "video_watched_6s",
+      "description": "6-Second Video Views",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "average_video_play",
+      "display_name": "average_video_play",
+      "description": "Video Average Watch Time Per Video View",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "average_video_play_per_user",
+      "display_name": "average_video_play_per_user",
+      "description": "Video Average Watch Time Per Person",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "video_views_p25",
+      "display_name": "video_views_p25",
+      "description": "Video Views at 25%",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "video_views_p50",
+      "display_name": "video_views_p50",
+      "description": "Video Views at 50%",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "video_views_p75",
+      "display_name": "video_views_p75",
+      "description": "Video Views at 75%",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "video_views_p100",
+      "display_name": "video_views_p100",
+      "description": "Video Views at 100%",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "engaged_view",
+      "display_name": "engaged_view",
+      "description": "6-second views (Focused view)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "engaged_view_15s",
+      "display_name": "engaged_view_15s",
+      "description": "15-second views (Focused view)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    }
+  ]
+}

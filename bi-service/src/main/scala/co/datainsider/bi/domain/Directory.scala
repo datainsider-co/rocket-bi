@@ -37,12 +37,14 @@ case class Directory(
     // save cdp data
     data: Option[Map[String, Any]] = None
 ) {
-  def toCreateDirRequest: CreateDirectoryRequest = {
+  def toCreateDirRequest(parentId: DirectoryId): CreateDirectoryRequest = {
     CreateDirectoryRequest(
-      name = name,
+      name = this.name,
       parentId = parentId,
-      directoryType = directoryType,
-      dashboardId = dashboardId
+      directoryType = this.directoryType,
+      dashboardId = this.dashboardId,
+      isRemoved = this.isRemoved,
+      data = this.data,
     )
   }
 }

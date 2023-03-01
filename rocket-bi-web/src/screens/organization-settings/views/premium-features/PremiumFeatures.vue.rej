@@ -1,0 +1,14 @@
+diff a/src/screens/organization-settings/views/premium-features/PremiumFeatures.vue b/src/screens/organization-settings/views/premium-features/PremiumFeatures.vue	(rejected hunks)
+@@ -117,6 +117,6 @@
+-import {Component, Ref, Vue, Watch} from 'vue-property-decorator';
+-import {LayoutContent, LayoutHeader} from '@/shared/components/layout-wrapper';
+-import {Status, VerticalScrollConfigs} from '@/shared';
+-import {DIException} from '@core/common/domain';
+-import {ListUtils, Modals, PopupUtils, StringUtils, TimeoutUtils} from '@/utils';
+-import {Log} from '@core/utils/Log';
++import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
++import { LayoutContent, LayoutHeader } from '@/shared/components/layout-wrapper';
++import { Status, VerticalScrollConfigs } from '@/shared';
++import { DIException } from '@core/common/domain';
++import { ListUtils, Modals, PopupUtils, StringUtils, TimeoutUtils } from '@/utils';
++import { Log } from '@core/utils/Log';

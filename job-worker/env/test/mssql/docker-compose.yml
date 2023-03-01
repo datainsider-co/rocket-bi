@@ -1,0 +1,8 @@
+mssql:
+  image: mcr.microsoft.com/mssql/server
+  user: root
+  environment:
+    - SA_PASSWORD=di@2020!
+    - ACCEPT_EULA=Y
+  ports:
+    - "1433:1433"

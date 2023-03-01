@@ -7,14 +7,14 @@
         <div class="org-overview-item">
           <div class="org-overview-item-label">Company Logo</div>
           <LogoComponent class="org-overview-item-content" :company-logo-url="companyLogoUrl"></LogoComponent>
-          <div class="org-overview-item-action btn-icon-border" @click="showEditThumbnailModal">
+          <div class="org-overview-item-action btn-icon-border" @click="showEditThumbnailModal" :class="{ 'd-none': !isEnableLogoAndCompanyNameSetting }">
             <i class="di-icon-edit"></i>
           </div>
         </div>
         <div class="org-overview-item">
           <div class="org-overview-item-label">Company Name</div>
           <div class="org-overview-item-content">{{ companyName }}</div>
-          <div class="org-overview-item-action btn-icon-border" @click="showEditNameModal">
+          <div :class="{ 'd-none': !isEnableLogoAndCompanyNameSetting }" class="org-overview-item-action btn-icon-border" @click="showEditNameModal">
             <i class="di-icon-edit"></i>
           </div>
         </div>
@@ -32,6 +32,22 @@
           <div class="org-overview-item-label">Version</div>
           <div class="org-overview-item-delete-content">
             {{ version }}
+          </div>
+          <!--          <div class="org-overview-item-action btn-icon-border" disabled>-->
+          <!--            <i class="di-icon-delete"></i>-->
+          <!--          </div>-->
+        </div>
+        <div class="org-overview-item">
+          <div class="org-overview-item-label">Primary Support</div>
+          <div title="Require subscribe primary support feature" class="org-overview-item-delete-content">
+            <a
+              v-if="isEnablePrimarySupport"
+              href="https://docs.google.com/forms/d/e/1FAIpQLSepFL_0jq7BP1QNybPLBwZSoMwivZLMIhml5qcq5ACh9hJbWg/viewform"
+              target="_blank"
+              style="text-decoration: none; font-weight: 500"
+              >Contact Us</a
+            >
+            <div v-else>Require subscribe primary support feature</div>
           </div>
           <!--          <div class="org-overview-item-action btn-icon-border" disabled>-->
           <!--            <i class="di-icon-delete"></i>-->
@@ -60,6 +76,7 @@ import { OrganizationStoreModule } from '@/store/modules/OrganizationStore';
 import OrganizationLogoModal from '@/screens/organization-settings/components/organization-logo-modal/OrganizationLogoModal.vue';
 import { PopupUtils } from '@/utils';
 import LogoComponent from '@/screens/organization-settings/components/organization-logo-modal/LogoComponent.vue';
+import OrganizationPermissionModule from '@/store/modules/OrganizationPermissionStore';
 
 @Component({
   components: {
@@ -85,12 +102,20 @@ export default class OrganizationOverview extends Vue {
     return this.organization.name || 'DATA INSIDER';
   }
 
+  private get isEnablePrimarySupport() {
+    return OrganizationPermissionModule.isEnablePrimarySupport;
+  }
+
   private get companyLogoUrl(): string {
     return this.organization.thumbnailUrl || '';
   }
 
   private get version(): string {
     return window.appConfig.VUE_APP_VERSION || 'unknown';
+  }
+
+  private get isEnableLogoAndCompanyNameSetting() {
+    return OrganizationPermissionModule.isEnableLogoAndCompanyNameSetting;
   }
 
   mounted() {

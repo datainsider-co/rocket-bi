@@ -1,0 +1,19 @@
+version: '3'
+services:
+  job-worker:
+    image: datainsiderco/job-worker:main
+    container_name: rocket-job-worker
+    restart: always
+    environment:
+      NAME: job-worker
+      MODE: production
+      HTTP_PORT: 8080
+    volumes:
+      - ./conf:/app/conf
+      - ./logs:/app/logs
+    extra_hosts:
+      - "host-internal:host-gateway"
+networks:
+  default:
+    external:
+      name: rocket_network

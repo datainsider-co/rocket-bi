@@ -1,13 +1,12 @@
 package co.datainsider.bi.domain.request
 
-import co.datainsider.bi.domain.Ids.{DashboardId, DirectoryId}
 import co.datainsider.bi.domain.DirectoryType.DirectoryType
-import co.datainsider.bi.domain.query.TableField
+import co.datainsider.bi.domain.Ids.DirectoryId
 import co.datainsider.bi.domain.{DirectoryType, DirectoryTypeRef}
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.annotations.RouteParam
-import com.twitter.finatra.validation.constraints.Min
+import com.twitter.finatra.validation.constraints.{Min, NotEmpty}
 import datainsider.client.filter.LoggedInRequest
 
 import javax.inject.Inject
@@ -61,3 +60,9 @@ case class DeleteDirectoryRequest(@RouteParam @Min(0) id: DirectoryId, @Inject r
     extends LoggedInRequest
 
 case class GetRootDirectoryRequest(@Inject request: Request = null) extends LoggedInRequest
+
+case class DeleteUserDataRequest(
+    @RouteParam @NotEmpty username: String,
+    transferToEmail: Option[String] = None,
+    @Inject request: Request = null
+) extends LoggedInRequest

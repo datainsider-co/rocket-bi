@@ -65,6 +65,8 @@ const PlanAndBilling = () =>
 const APIKeyManagement = () =>
   import(/* webpackChunkName: "organization-settings" */ '@/screens/organization-settings/views/token-management/APIKeyManagement.vue');
 const PlanDetail = () => import(/* webpackChunkName: "organization-settings" */ '@/screens/organization-settings/views/plan-detail/PlanDetail.vue');
+const PremiumFeatures = () =>
+  import(/* webpackChunkName: "organization-settings" */ '@/screens/organization-settings/views/premium-features/PremiumFeatures.vue');
 const UserManagement = () => import(/* webpackChunkName: "organization-settings" */ '@/screens/user-management/views/user-management/UserManagement.vue');
 const UserDetail = () => import(/* webpackChunkName: "organization-settings" */ '@/screens/user-management/views/user-detail/UserDetail.vue');
 
@@ -351,6 +353,12 @@ const routes: Array<RouteConfig> = [
         path: 'plan-and-billing/detail',
         name: Routers.PlanDetail,
         component: PlanDetail,
+        props: true
+      },
+      {
+        path: 'premium-features',
+        name: Routers.PremiumFeatures,
+        component: PremiumFeatures,
         props: true
       }
     ]

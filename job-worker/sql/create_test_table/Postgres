@@ -1,0 +1,10 @@
+create table public.student (
+ id serial primary key,
+ name varchar(100),
+ address varchar(100),
+ age bigint,
+ birthday timestamp,
+ gender boolean,
+ average_score real,
+ email varchar(100)
+)

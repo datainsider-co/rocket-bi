@@ -1,0 +1,12 @@
+create database of not exist `highschool`
+
+create table highschool.student (
+ id int primary key,
+ name varchar(100),
+ address varchar(100),
+ age int,
+ birthday date,
+ gender bit,
+ average_score real,
+ email varchar(100)
+)

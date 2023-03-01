@@ -102,9 +102,9 @@ trait ShareService {
 
   def share(organizationId: Long, request: ShareAnyoneRequest): Future[PermissionToken]
 
-  def revoke(organizationId: Long, request: RevokeShareRequest): Future[Map[String, Boolean]]
+  def revoke(organizationId: Long, resourceType: String, resourceId: String, usernames: Seq[String]): Future[Map[String, Boolean]]
 
-  def revoke(organizationId: Long, request: RevokeShareAnyoneRequest): Future[Boolean]
+  def revokeShareAnyone(organizationId: Long, resourceType: String, resourceId: String): Future[Boolean]
 
   def getInfo(organizationId: Long, getRequest: GetResourceSharingInfoRequest): Future[ResourceSharingInfo]
 
@@ -173,11 +173,7 @@ trait ShareService {
   ): Future[Map[String, Boolean]]
 }
 
-class MockShareService @Inject() (
-    directoryService: DirectoryService,
-    shareRepository: ShareRepository,
-    orgAuthorizationClientService: OrgAuthorizationClientService
-) extends ShareService {
+class MockShareService() extends ShareService {
   override def getInfo(
       organizationId: Long,
       getRequest: GetResourceSharingInfoRequest
@@ -277,7 +273,7 @@ class MockShareService @Inject() (
     Future.value(PermissionToken("123", "123", Seq("dashboard:view:123"), None))
   }
 
-  override def revoke(organizationId: Long, request: RevokeShareRequest): Future[Map[String, Boolean]] =
+  override def revoke(organizationId: Long, resourceType: String, resourceId: String, usernames: Seq[String]): Future[Map[String, Boolean]] =
     Future.value(Map("tvc12" -> true))
 
   override def listResourceIdSharing(
@@ -288,67 +284,15 @@ class MockShareService @Inject() (
       size: Option[Int]
   ): Future[PageResult[String]] = Future.value(PageResult(100, Seq.empty[String]))
 
-  override def share(organizationId: Long, request: ShareWithUserRequest): Future[Map[String, Boolean]] =
-    Profiler("[service::ShareService]::share(orgId, shareWithUserRequest)") {
-      for {
-        listUserAssignedPermissions <-
-          assignUserPermissions(organizationId, request.resourceType, request.resourceId, request.userActions)
-        _ <- shareRepository.shareWithUsers(
-          organizationId,
-          request.resourceType,
-          request.resourceId,
-          listUserAssignedPermissions.filter(_._2).keys.toSeq,
-          "test",
-          isRoot = false
-        )
-      } yield {
-        listUserAssignedPermissions
-      }
-    }
+  override def share(organizationId: Long, request: ShareWithUserRequest): Future[Map[String, Boolean]] = Future.value(Map.empty)
 
   private def assignUserPermissions(
       organizationId: Long,
       resourceType: String,
       resourceId: String,
       userActions: Map[String, Seq[String]]
-  ): Future[Map[String, Boolean]] =
-    Profiler("[service::ShareService]::assignUserPermissions") {
-      val fn = userActions.map {
-        case (username, actions) =>
-          val permissions = ArrayBuffer.empty[String]
-          permissions.appendAll(actions.toPermissions(organizationId, resourceType, resourceId))
-          permissions.appendAll(getChildrenPermission(organizationId, resourceId.toInt, actions))
-          username -> orgAuthorizationClientService.addPermissions(organizationId, username, permissions).rescue {
-            case ex: Throwable =>
-              Future.False
-          }
-      }
-
-      Future.collect(fn)
-    }
-
-  private def getChildrenPermission(organizationId: Long, parentId: Int, actions: Seq[String]): Seq[String] = {
-    val request = ListDirectoriesRequest(parentId = Some(parentId), isRemoved = Some(false))
-    val childrenDir = directoryService.list(request).syncGet()
-    toChildrenPermission(organizationId, childrenDir, actions)
-  }
-
-  private def toChildrenPermission(
-      organizationId: Long,
-      directories: Seq[Directory],
-      actions: Seq[String]
-  ): Seq[String] = {
-    val permissions = ArrayBuffer.empty[String]
-    directories.foreach(directory => {
-      permissions.appendAll(
-        actions.toPermissions(organizationId, directory.directoryType.toString, directory.id.toString)
-      )
-      permissions.appendAll(getChildrenPermission(organizationId, directory.id.toInt, actions))
-    })
-    permissions
-  }
-
-  override def revoke(organizationId: Long, request: RevokeShareAnyoneRequest): Future[Boolean] = Future.True
+  ): Future[Map[String, Boolean]] = Future.value(Map.empty)
+  override def revokeShareAnyone(organizationId: Long, resourceType: String, resourceId: String): Future[Boolean] = Future.True
 
   override def getInfo(organizationId: Long, request: GetShareAnyoneInfoRequest): Future[Option[PermissionToken]] =
     Future.value(Some(PermissionToken("123", "tvc12", Seq("dashboard:view:123"), None)))

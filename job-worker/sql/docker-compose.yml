@@ -1,0 +1,37 @@
+version: "3"
+services:
+  postgres:
+    image: postgres
+    container_name: postgres_container
+    volumes:
+      - ./postgres:/var/lib/postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "di"
+      POSTGRES_PASSWORD: "di@2020!"
+      POSTGRES_ROOT_PASSWORD: "di@2020!"
+      POSTGRES_ALLOW_EMPTY_PASSWORD: "yes"
+    restart: on-failure
+  oracle:
+    image: store/oracle/database-enterprise:12.2.0.1
+    volumes:
+      - ./oracle:/opt/oracle/oradata
+    ports:
+      - 1521:1521
+  mssql:
+    image: "mcr.microsoft.com/mssql/server:2019-latest"
+    container_name: mssqlserver
+    restart: always
+    hostname: mssql
+    environment:
+      SA_PASSWORD: "di@2020!"
+      ACCEPT_EULA: Y
+      # Express:
+
+    volumes:
+      - ./mssql:/var/mssql/data
+      - ./bk:/var/opt/mssql/backup
+    ports:
+      - "1433:1433"
+

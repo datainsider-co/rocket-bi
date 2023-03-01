@@ -4,16 +4,16 @@ import co.datainsider.bi.domain.Directory.{Shared, getSharedDirectory}
 import co.datainsider.bi.domain.Ids.{DashboardId, DirectoryId, OrganizationId, UserId}
 import co.datainsider.bi.domain.request._
 import co.datainsider.bi.domain.response.{PaginationResponse, ParentDirectoriesResponse}
-import co.datainsider.bi.domain.{Directory, DirectoryType}
+import co.datainsider.bi.domain.{Dashboard, Directory, DirectoryType}
 import co.datainsider.bi.repository.{DashboardRepository, DeletedDirectoryRepository, DirectoryRepository}
 import co.datainsider.bi.util.Implicits._
 import co.datainsider.bi.util.ZConfig
-import co.datainsider.share.service.{DirectoryPermissionAssigner, ShareService}
+import co.datainsider.share.service.{PermissionAssigner, ShareService}
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.twitter.util.Future
 import com.twitter.util.logging.Logging
-import datainsider.client.domain.Implicits.FutureEnhanceLike
+import datainsider.client.domain.Implicits.{FutureEnhanceLike, futurePool}
 import datainsider.client.domain.user.UserProfile
 import datainsider.client.exception.{BadRequestError, InternalError, NotFoundError}
 import datainsider.client.service.ProfileClientService
@@ -50,15 +50,22 @@ trait DirectoryService {
 
   def rename(request: RenameDirectoryRequest): Future[Boolean]
 
-  def move(request: MoveDirectoryRequest): Future[Boolean]
+  def move(organizationId: OrganizationId, fromDirId: DirectoryId, toParentId: DirectoryId): Future[Boolean]
 
-  def delete(request: DeleteDirectoryRequest): Future[Boolean]
+  @throws[NotFoundError]("if directory not found")
+  @deprecated("use remove instead of delete")
+  def hardDelete(organizationId: OrganizationId, dirId: DirectoryId): Future[Boolean]
 
-  def remove(request: DeleteDirectoryRequest): Future[Boolean]
+  def softDelete(organizationId: OrganizationId, dirId: DirectoryId): Future[Boolean]
 
-  def migrateUserData(from: UserId, to: UserId): Future[Boolean]
+  @throws[NotFoundError]("if directory not found")
+  def transferData(organizationId: OrganizationId, from: UserId, to: UserId): Future[Boolean]
 
-  def deleteUserData(userId: UserId): Future[Boolean]
+  @throws[NotFoundError]("if directory not found")
+  def copy(organizationId: OrganizationId, fromDirId: DirectoryId, toDirId: DirectoryId): Future[Boolean]
+
+  @throws[NotFoundError]("if directory not found")
+  def deleteUserData(organizationId: Long, userId: UserId): Future[Boolean]
 
   def getOwner(organizationId: Long, directoryId: DirectoryId): Future[UserProfile]
 
@@ -68,6 +75,9 @@ trait DirectoryService {
 
   def listParentIdsByDashboardId(id: DashboardId): Future[Array[DirectoryId]]
 
+  /**
+    * list all children of this directory, it will not include this directory
+    */
   def listChildrenIds(id: DirectoryId): Future[Seq[DirectoryId]]
 
   // Used by dashboard and directory
@@ -81,8 +91,8 @@ class DirectoryServiceImpl @Inject() (
     profileService: ProfileClientService,
     shareService: ShareService,
     @Named("root_dir") rootDirKvs: SsdbKVS[String, Long],
-    deletedDirectoryRepository: DeletedDirectoryRepository,
-    directoryPermissionAssigner: DirectoryPermissionAssigner
+    deletedDirectoryService: DeletedDirectoryService,
+    permissionAssigner: PermissionAssigner
 ) extends DirectoryService
     with Logging {
 
@@ -232,28 +242,8 @@ class DirectoryServiceImpl @Inject() (
 
   }
 
-  override def delete(request: DeleteDirectoryRequest): Future[Boolean] = {
-    val orgId: Long = getOrgId(request.currentOrganizationId)
-
-    get(orgId, request.id)
-      .map(targetDir => {
-        val directories = getInnerDirectories(targetDir)
-        val deleteOps = directories._1.map(dir => {
-          // TODO: remove share when remove direction
-          dir.directoryType match {
-            case DirectoryType.Dashboard | DirectoryType.Queries =>
-              for {
-                okDir <- directoryRepository.delete(dir.id)
-                okDash <- dashboardRepository.delete(dir.dashboardId.get)
-              } yield okDir && okDash
-            case DirectoryType.Directory | DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis |
-                DirectoryType.EventAnalysis | DirectoryType.PathExplorer =>
-              directoryRepository.delete(dir.id)
-          }
-        })
-        Future.collect(deleteOps).map(_.reduce(_ && _))
-      })
-      .flatten
+  override def hardDelete(organizationId: OrganizationId, dirId: DirectoryId): Future[Boolean] = {
+    Future.False
   }
 
   override def rename(request: RenameDirectoryRequest): Future[Boolean] = {
@@ -275,142 +265,137 @@ class DirectoryServiceImpl @Inject() (
       .flatten
   }
 
-  override def move(request: MoveDirectoryRequest): Future[Boolean] = {
-    val orgId: Long = getOrgId(request.currentOrganizationId)
+  override def move(
+      organizationId: OrganizationId,
+      fromDirId: DirectoryId,
+      toParentId: DirectoryId
+  ): Future[Boolean] = {
 
     for {
-      dir <- get(orgId, request.id)
-      _ <- get(orgId, request.toParentId).map(destinationDir =>
-        if (!isDestinationDirValid(dir, destinationDir))
-          throw BadRequestError("can not move directory to itself")
-      )
-      response <- directoryRepository.move(request.id, request.toParentId)
+      fromDir <- get(organizationId, fromDirId)
+      toDir <- get(organizationId, toParentId)
+      response <- moveDirectory(fromDir, toDir)
     } yield response
   }
 
-  override def remove(request: DeleteDirectoryRequest): Future[Boolean] = {
-    val orgId: Long = getOrgId(request.currentOrganizationId)
-
-    get(orgId, request.id)
-      .map(targetDir => {
-        val directories: (Array[Directory], Array[DirectoryId]) = getInnerDirectories(targetDir)
-        val deleteOps: Array[Future[Boolean]] = directories._1.map(dir => {
-          dir.directoryType match {
-            case DirectoryType.Dashboard | DirectoryType.Queries =>
-              for {
-                isRemoveDir <- deletedDirectoryRepository.insert(dir)
-                okDir <- directoryRepository.delete(dir.id)
-              } yield okDir && isRemoveDir
-            case DirectoryType.Directory | DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis |
-                DirectoryType.EventAnalysis | DirectoryType.PathExplorer =>
-              for {
-                addTodDeletedDb <- deletedDirectoryRepository.insert(dir)
-                isDeleted <- directoryRepository.delete(dir.id)
-              } yield addTodDeletedDb && isDeleted
-          }
-        })
-        Future.collect(deleteOps).map(_.reduce(_ && _))
-      })
-      .flatten
+  private def moveDirectory(fromDir: Directory, toDir: Directory): Future[Boolean] = {
+    for {
+      canMove <- isDestinationDirValid(fromDir, toDir)
+      isOk <- canMove match {
+        case true => directoryRepository.move(fromDir.id, toDir.id)
+        case false => Future.exception(BadRequestError("can not move directory to itself"))
+      }
+    } yield isOk
   }
 
-  private def copy(fromId: DirectoryId, toId: DirectoryId): Future[Boolean] = {
+  override def softDelete(organizationId: OrganizationId, id: Long): Future[Boolean] = {
+    for {
+      directory <- get(organizationId, id)
+      isDeleted <- moveToTrash(organizationId, directory)
+    } yield isDeleted
+  }
+
+  /**
+    * move directory to trash and all its children, don't hard delete them
+    */
+  private def moveToTrash(organizationId: OrganizationId, directory: Directory): Future[Boolean] = {
+    for {
+      subDirectories <- directoryRepository.getSubDirectories(directory.id)
+      directories = directory +: subDirectories
+      isInserted <- deletedDirectoryService.multiAdd(organizationId, directories)
+      isDeleted <- directoryRepository.multiDelete(directories.map(_.id))
+    } yield isInserted && isDeleted
+  }
+
+  override def copy(organizationId: OrganizationId, fromId: DirectoryId, toId: DirectoryId): Future[Boolean] = {
     for {
       fromDir <- fetch(fromId)
       toDir <- fetch(toId)
-      ok <- copyRecursion(fromDir, toDir)
-    } yield ok
+      newDirIds <- copyRecursion(fromDir, toDir)
+      isOk <- permissionAssigner.assignPermissions(organizationId, newDirIds, toDir.ownerId, Set("*"))
+    } yield isOk
   }
 
-  override def migrateUserData(fromUserId: UserId, toUserId: UserId): Future[Boolean] = {
+  override def transferData(
+      organizationId: OrganizationId,
+      fromUsername: String,
+      toUsername: String
+  ): Future[Boolean] = {
+    val isTransferSuccess = for {
+      isTransferRootDir <- transferRootDir(organizationId, fromUsername, toUsername)
+      isUpdatedDirOwner <- directoryRepository.updateOwnerId(fromUsername, toUsername)
+      isUpdatedDirCreator <- directoryRepository.updateCreatorId(fromUsername, toUsername)
+      isUpdatedDashOwner <- dashboardRepository.updateOwnerId(fromUsername, toUsername)
+      isUpdatedDashCreator <- dashboardRepository.updateCreatorId(fromUsername, toUsername)
+      _ <- deleteRootDir(organizationId, fromUsername)
+    } yield isTransferRootDir || isUpdatedDirOwner || isUpdatedDirCreator || isUpdatedDashOwner || isUpdatedDashCreator
+    isTransferSuccess.rescue {
+      case ex: Exception =>
+        logger.error(s"transfer data from $fromUsername to $toUsername failed", ex)
+        Future.False
+    }
+  }
+
+  private def transferRootDir(
+      organizationId: OrganizationId,
+      fromUsername: String,
+      toUsername: String
+  ): Future[Boolean] = {
     for {
-      fromRootId <- getOrCreateRootDir(fromUserId)
-      toRootId <- getOrCreateRootDir(toUserId)
-      ok <- copy(fromRootId, toRootId)
-    } yield ok
+      fromDirId <- getOrCreateRootDir(organizationId, fromUsername)
+      toDirId <- getOrCreateRootDir(organizationId, toUsername)
+      fromDir <- fetch(fromDirId)
+      toDir <- fetch(toDirId)
+      isMoved <- moveDirectory(fromDir, toDir)
+    } yield isMoved
   }
 
-  override def deleteUserData(userId: UserId): Future[Boolean] = {
+  override def deleteUserData(organizationId: OrganizationId, userId: UserId): Future[Boolean] = {
     for {
-      id <- getOrCreateRootDir(userId)
-      ok <- delete(DeleteDirectoryRequest(id))
-      _ <- rootDirKvs.remove(userId).asTwitterFuture
-    } yield ok
+      rootDirId <- getOrCreateRootDir(organizationId, userId)
+      rootDirectory <- fetch(rootDirId)
+      isDeleted <- moveToTrash(organizationId, rootDirectory)
+      _ <- deletedDirectoryService.permanentDeleteDirectory(organizationId, rootDirId)
+      _ <- deleteRootDir(organizationId, userId)
+    } yield isDeleted
   }
 
-  private def copyRecursion(fromDir: Directory, toDir: Directory): Future[Boolean] = {
+  private def copyRecursion(fromDir: Directory, toDir: Directory): Future[Array[DirectoryId]] = {
     for {
-      createdId <- createCopyInstance(fromDir, toDir)
-      createdDir <- fetch(createdId)
-      copiedChildren <-
-        directoryRepository
-          .list(ListDirectoriesRequest(parentId = Some(fromDir.id)))
-          .map(directories => {
-            directories.map(child => copyRecursion(child, createdDir))
-          })
-    } yield createdId.isValidLong && !copiedChildren.contains(Future.False)
+      newDirId <- createCopyInstance(fromDir, toDir)
+      newDir <- fetch(newDirId)
+      subDirectories <-
+        directoryRepository.list(ListDirectoriesRequest(parentId = Some(fromDir.id), size = Int.MaxValue))
+      newSubDirIds <- Future.collect(subDirectories.map(childDir => copyRecursion(childDir, newDir)))
+    } yield Array(newDirId) ++ newSubDirIds.flatten
   }
 
-  private def createCopyInstance(from: Directory, to: Directory): Future[DirectoryId] = {
-    from.directoryType match {
-      case DirectoryType.Directory =>
-        val createReq = from.toCreateDirRequest.copy(parentId = to.id)
-        directoryRepository.create(createReq, to.ownerId, to.ownerId)
-      case DirectoryType.Dashboard | DirectoryType.Queries =>
+  @throws[NotFoundError]("when dashboard not found")
+  private def createCopyInstance(fromDir: Directory, toDir: Directory): Future[DirectoryId] = {
+    fromDir.directoryType match {
+      case DirectoryType.Directory | DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis |
+          DirectoryType.EventAnalysis | DirectoryType.PathExplorer => {
+        val createReq: CreateDirectoryRequest = fromDir.toCreateDirRequest(parentId = toDir.id)
+        directoryRepository.create(createReq, toDir.ownerId, toDir.ownerId)
+      }
+      case DirectoryType.Dashboard | DirectoryType.Queries => {
         for {
-          dashboardOpt <- dashboardRepository.get(from.dashboardId.get)
-          createdDashboardId <- dashboardRepository.create(dashboardOpt.get.copy(ownerId = to.ownerId))
-          createdDirectory <- directoryRepository.create(
-            CreateDirectoryRequest(
-              name = dashboardOpt.get.name,
-              parentId = to.id,
-              directoryType = from.directoryType,
-              dashboardId = Some(createdDashboardId)
-            ),
-            to.ownerId,
-            to.ownerId
-          )
-        } yield createdDirectory
-      case DirectoryType.RetentionAnalysis | DirectoryType.FunnelAnalysis | DirectoryType.EventAnalysis |
-          DirectoryType.PathExplorer => {
-        // default case
-        val createReq = from.toCreateDirRequest.copy(parentId = to.id)
-        directoryRepository.create(createReq, to.ownerId, to.ownerId)
+          dashboardId <- createCopyDashboardInstance(fromDir, toDir)
+          createDirRequest = fromDir.toCreateDirRequest(parentId = toDir.id).copy(dashboardId = Some(dashboardId))
+          newDirId <- directoryRepository.create(createDirRequest, toDir.ownerId, toDir.ownerId)
+        } yield newDirId
       }
     }
   }
 
-  private def getInnerDirectoryIds(id: DirectoryId): Array[DirectoryId] = {
-    val queue = mutable.Queue[DirectoryId](id)
-    val ids = ArrayBuffer[DirectoryId](id)
-    while (queue.nonEmpty) {
-      val curId = queue.dequeue()
-      directoryRepository
-        .list(ListDirectoriesRequest(parentId = Some(curId)))
-        .map(_.foreach(dir => {
-          queue.enqueue(dir.id)
-          ids += dir.id
-        }))
-    }
-    ids.distinct.toArray
-  }
-
-  private def getInnerDirectories(directory: Directory): (Array[Directory], Array[DirectoryId]) = {
-    val queue = mutable.Queue[Directory](directory)
-    val directories = ArrayBuffer[Directory](directory)
-    val parents = ArrayBuffer[DirectoryId](-1L)
-    while (queue.nonEmpty) {
-      val cur = queue.dequeue()
-      directoryRepository
-        .list(ListDirectoriesRequest(parentId = Some(cur.id)))
-        .syncGet()
-        .foreach(dir => {
-          queue.enqueue(dir)
-          directories += dir
-          parents += dir.parentId
-        })
-    }
-    (directories.toArray, parents.toArray)
+  @throws[NotFoundError]("when dashboard not found")
+  private def createCopyDashboardInstance(fromDir: Directory, toDir: Directory): Future[DashboardId] = {
+    val dashboardId = fromDir.dashboardId.getOrElseThrow(NotFoundError("dashboard id not found"))
+    for {
+      dashboardOpt: Option[Dashboard] <- dashboardRepository.get(dashboardId)
+      dashboard = dashboardOpt.getOrElseThrow(NotFoundError(s"dashboard ${dashboardId} not found"))
+      newDashboardId <- dashboardRepository.create(dashboard.copy(ownerId = toDir.ownerId))
+    } yield newDashboardId
   }
 
   // return order: [root, child1, child2]
@@ -443,25 +428,6 @@ class DirectoryServiceImpl @Inject() (
    * if user already have rootDirId => return
    * else create new directory and save to ssdb
    */
-  private def getOrCreateRootDir(userId: UserId): Future[DirectoryId] = {
-    rootDirKvs
-      .get(userId)
-      .asTwitterFuture
-      .map {
-        case Some(id) => Future.value(id)
-        case None =>
-          val createReq = CreateDirectoryRequest(
-            name = s"root-$userId",
-            parentId = -1
-          )
-          for {
-            createdId <- directoryRepository.create(createReq, userId, userId)
-            _ <- rootDirKvs.add(userId, createdId).asTwitterFuture
-          } yield createdId
-      }
-      .flatten
-  }
-
   private def getOrCreateRootDir(organizationId: OrganizationId, userId: UserId): Future[DirectoryId] = {
     rootDirKvs
       .get(userId)
@@ -474,20 +440,28 @@ class DirectoryServiceImpl @Inject() (
   }
 
   private def createRootDir(organizationId: OrganizationId, userId: UserId): Future[DirectoryId] = {
-    val createReq = CreateDirectoryRequest(
+    val createRequest = CreateDirectoryRequest(
       name = s"root-$userId",
       parentId = -1
     )
     for {
-      createdId <- directoryRepository.create(createReq, userId, userId)
-      _ <- rootDirKvs.add(userId, createdId).asTwitterFuture
-      _ <- directoryPermissionAssigner.assign(organizationId, createdId.toString, Map(userId -> Seq("*")))
-    } yield createdId
+      dirId <- directoryRepository.create(createRequest, userId, userId)
+      _ <- rootDirKvs.add(userId, dirId).asTwitterFuture
+      _ <- permissionAssigner.assignRecurPermissions(organizationId, dirId, userId, Set("*"))
+    } yield dirId
   }
 
-  private def isDestinationDirValid(toBeMovedDir: Directory, toParentDir: Directory): Boolean = {
-    val innerDirIds = getInnerDirectoryIds(toBeMovedDir.id)
-    !innerDirIds.contains(toParentDir.id)
+  private def deleteRootDir(organizationId: OrganizationId, userId: UserId): Future[Boolean] = {
+    rootDirKvs.remove(userId).asTwitterFuture
+  }
+
+  private def isDestinationDirValid(toBeMovedDir: Directory, toParentDir: Directory): Future[Boolean] = {
+    for {
+      childDirs <- listChildrenIds(toBeMovedDir.id)
+    } yield {
+      val allDirs = childDirs :+ toBeMovedDir.id
+      !allDirs.contains(toParentDir.id)
+    }
   }
 
   @deprecated("use fetch with org if possible")
@@ -544,10 +518,11 @@ class DirectoryServiceImpl @Inject() (
       }
   }
 
-  override def listChildrenIds(id: DirectoryId): Future[Seq[DirectoryId]] =
-    Future {
-      getInnerDirectoryIds(id).filterNot(_.equals(id))
-    }
+  override def listChildrenIds(id: DirectoryId): Future[Seq[DirectoryId]] = {
+    for {
+        subDirectories <- directoryRepository.getSubDirectories(id)
+    } yield subDirectories.map(_.id).distinct
+  }
 
   override def listSharedRoot(request: ListDirectoriesRequest): Future[Array[Directory]] = {
     for {

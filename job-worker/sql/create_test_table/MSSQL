@@ -1,0 +1,10 @@
+create table dbo.student (
+ id int primary key,
+ name varchar(100),
+ address varchar(100),
+ age int,
+ birthday date,
+ gender int,
+ average_score real,
+ email varchar(100)
+)

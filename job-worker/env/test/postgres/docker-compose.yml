@@ -1,0 +1,9 @@
+postgres:
+  image: postgres:12
+  environment:
+    POSTGRES_DB: postgres
+    POSTGRES_USER: di
+    POSTGRES_PASSWORD: di@2020!
+    PGDATA: /var/lib/postgresql/data
+  ports:
+    - "5432:5432"

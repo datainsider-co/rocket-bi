@@ -1,68 +1,32 @@
 package co.datainsider.bi.controller.http
 
-import co.datainsider.bi.controller.http.filter.UserActivityTracker
-import co.datainsider.bi.domain.query.event.{ActionType, ResourceType}
-import co.datainsider.bi.domain.request.{ChartRequest, ListUserActivitiesRequest, SqlQueryRequest, QueryViewAsRequest}
-import co.datainsider.bi.service.{QueryService, UserActivityService}
+import co.datainsider.bi.domain.request.{ChartRequest, QueryViewAsRequest, SqlQueryRequest}
+import co.datainsider.bi.service.QueryService
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.twitter.finatra.http.Controller
 import datainsider.client.filter.{MustLoggedInFilter, PermissionFilter}
 import datainsider.profiler.Profiler
+import datainsider.tracker.{ActionType, ResourceType, UserActivityTracker}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class QueryController @Inject() (
     @Named("boosted") queryService: QueryService,
-    userActivityService: UserActivityService,
     permissionFilter: PermissionFilter
 ) extends Controller {
 
   post("/chart/query") { request: ChartRequest =>
-    Profiler(s"[Http] ${this.getClass.getSimpleName}::ChartRequest")
-    UserActivityTracker(
-      request = request.request,
-      actionName = request.getClass.getSimpleName,
-      actionType = ActionType.View,
-      resourceType = ResourceType.Widget,
-      description = s"query chart"
-    ) {
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::ChartRequest") {
       queryService.query(request)
     }
   }
 
   filter[MustLoggedInFilter].post("/query/sql") { request: SqlQueryRequest =>
-    Profiler(s"[Http] ${this.getClass.getSimpleName}::SqlQueryRequest")
-    UserActivityTracker(
-      request = request.request,
-      actionName = request.getClass.getSimpleName,
-      actionType = ActionType.View,
-      resourceType = ResourceType.Widget,
-      description = s"query sql"
-    ) {
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::SqlQueryRequest") {
       queryService.query(request)
     }
   }
-
-  filter(permissionFilter.require("user_activity:view:*"))
-    .post("/query/activities") { request: ListUserActivitiesRequest =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::ListUserActivitiesRequest") {
-        val organizationId = request.currentOrganizationId.get
-
-        userActivityService.list(
-          orgId = organizationId,
-          startTime = request.startTime,
-          endTime = request.endTime,
-          usernames = request.usernames,
-          actionNames = request.actionNames,
-          actionTypes = request.actionTypes.map(ActionType.withName),
-          resourceTypes = request.resourceTypes.map(ResourceType.withName),
-          statusCodes = Seq(200),
-          from = request.from,
-          size = request.size
-        )
-      }
-    }
 
   filter(permissionFilter.require("rls:view:*"))
     .post("/chart/view_as") { request: QueryViewAsRequest =>
@@ -72,7 +36,15 @@ class QueryController @Inject() (
     }
 
   post("/query/csv") { request: ChartRequest =>
-    Profiler(s"[Http] ${this.getClass.getSimpleName}::exportAsCsv") {
+    Profiler(s"[Http] ${this.getClass.getSimpleName}::exportAsCsv")
+    UserActivityTracker(
+      request = request.request,
+      actionName = request.getClass.getSimpleName,
+      actionType = ActionType.View,
+      resourceType = ResourceType.Widget,
+      resourceId = request.chartId.map(_.toString).orNull,
+      description = s"export data to csv"
+    ) {
       queryService.exportAsCsv(request)
     }
   }

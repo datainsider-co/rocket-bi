@@ -9,6 +9,7 @@ import com.twitter.util.Future
 import scala.collection.mutable.ArrayBuffer
 
 trait StarredDirectoryRepository {
+
   def list(organizationId: Long, username: String, from: Int, size: Int): Future[Array[DirectoryId]]
 
   def star(organizationId: Long, username: String, directoryId: DirectoryId): Future[Boolean]
@@ -16,6 +17,8 @@ trait StarredDirectoryRepository {
   def unstar(organizationId: Long, username: String, directoryId: DirectoryId): Future[Boolean]
 
   def count(organizationId: Long, username: String): Future[Int]
+
+  def deleteByUsername(organizationId: DirectoryId, username: String): Future[Boolean]
 }
 
 class MysqlStarredDirectoryRepository @Inject() (
@@ -41,16 +44,17 @@ class MysqlStarredDirectoryRepository @Inject() (
       })
     }
 
-  override def count(organizationId: Long, username: String): Future[Int] = Future {
-    val query =
-      s"""
+  override def count(organizationId: Long, username: String): Future[Int] =
+    Future {
+      val query =
+        s"""
          |select count(*)
          |from $dbName.$tblName
          |where organization_id = ? AND username = ?
          |""".stripMargin
 
-    client.executeQuery(query, organizationId, username)(rs => if (rs.next()) rs.getInt(1) else 0)
-  }
+      client.executeQuery(query, organizationId, username)(rs => if (rs.next()) rs.getInt(1) else 0)
+    }
 
   override def star(organizationId: Long, username: String, directoryId: DirectoryId): Future[Boolean] =
     Future {
@@ -93,4 +97,14 @@ class MysqlStarredDirectoryRepository @Inject() (
         false
     })
   }
+
+  override def deleteByUsername(organizationId: DirectoryId, username: String): Future[Boolean] =
+    Future {
+      val query =
+        s"""
+             |delete from $dbName.$tblName
+             |where organization_id = ? AND username = ?
+             |""".stripMargin
+      client.executeUpdate(query, organizationId, username) > 0
+    }
 }

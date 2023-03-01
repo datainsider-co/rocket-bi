@@ -88,6 +88,20 @@ object Implicits {
     }
   }
 
+  implicit class RichOption[T](val value: Option[T]) extends AnyVal {
+    /**
+     * method getOrElseThrow is used to throw exception when value is None
+     * @param ex: Exception which will be thrown when value is None
+     * @return value if it is not None
+     */
+    def getOrElseThrow(ex: Throwable): T = {
+      value match {
+        case Some(v) => v
+        case None    => throw ex
+      }
+    }
+  }
+
   implicit class ImplicitLoggedInRequest(val request: LoggedInRequest) extends AnyVal {
     def getOrganizationId: Long = {
       request.currentOrganizationId match {

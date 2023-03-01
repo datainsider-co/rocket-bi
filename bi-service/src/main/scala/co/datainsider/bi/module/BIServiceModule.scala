@@ -7,9 +7,11 @@ import co.datainsider.bi.domain.setting.ClickhouseConnectionSetting
 import co.datainsider.bi.engine.clickhouse.DataTable
 import co.datainsider.bi.engine.clickhouse.{ClickhouseEngine, ClickhouseParser}
 import co.datainsider.bi.engine.Engine
+import co.datainsider.bi.module.TestModule.bind
 import co.datainsider.bi.repository._
 import co.datainsider.bi.service._
 import co.datainsider.bi.util.ZConfig
+import co.datainsider.share.service.{PermissionAssigner, PermissionAssignerImpl}
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Provides, Singleton}
 import com.twitter.inject.TwitterModule
@@ -42,6 +44,9 @@ object BIServiceModule extends TwitterModule {
     bind[RelationshipService].to[RelationshipServiceImpl].asEagerSingleton()
     bind[RlsPolicyService].to[RlsPolicyServiceImpl].asEagerSingleton()
     bind[UserActivityService].to[UserActivityServiceImpl].asEagerSingleton()
+    bind[AdminService].to[AdminServiceImpl].asEagerSingleton()
+    bind[PermissionAssigner].to[PermissionAssignerImpl].asEagerSingleton()
+    bind[UserActivityRepository].to[ClickhouseActivityRepository].asEagerSingleton()
   }
 
   @Provides
@@ -166,7 +171,9 @@ object BIServiceModule extends TwitterModule {
 
   @Singleton
   @Provides
-  def provideMySqlDrillThroughFieldRepository(@Inject @Named("mysql") client: JdbcClient): DrillThroughFieldRepository = {
+  def provideMySqlDrillThroughFieldRepository(
+      @Inject @Named("mysql") client: JdbcClient
+  ): DrillThroughFieldRepository = {
     new DashboardFieldRepositoryImpl(client, dbLiveName, tblDashboardFieldName)
   }
 
@@ -219,16 +226,6 @@ object BIServiceModule extends TwitterModule {
     scheduler.setJobFactory(boostJobFactory)
 
     new BoostScheduleServiceImpl(scheduler, dashboardService)
-  }
-
-  @Singleton
-  @Provides
-  def providesUserActivityRepository(
-      @Named("clickhouse") client: JdbcClient
-  ): UserActivityRepository = {
-    val dbName: String = ZConfig.getString("tracking_schema.user_activities.db_name", "di_system")
-    val tblName: String = ZConfig.getString("tracking_schema.user_activities.tbl_name", "user_activities")
-    new ClickhouseActivityRepository(client, dbName, tblName)
   }
 
   @Singleton

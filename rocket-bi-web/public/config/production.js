@@ -7,13 +7,13 @@ const productionConfig = {
   VUE_APP_BI_API_URL: '/api',
   VUE_APP_SCHEMA_API_URL: '/api',
   VUE_APP_DATA_COOK_API_URL: '/api',
-  VUE_APP_LAKE_API_URL: 'http://localhost:8489',
-  VUE_APP_CDP_API_URL: 'http://localhost:8080',
-  VUE_APP_STATIC_API_URL: 'http://localhost:8080/static',
-  VUE_APP_BILLING_API_URL: 'http://localhost:8489',
-  VUE_APP_WORKER_API_URL: 'http://localhost:8080',
-  VUE_APP_SCHEDULER_API_URL: 'http://localhost:8080',
-  VUE_APP_RELAY_API_URL: 'http://localhost:8080',
+  VUE_APP_LAKE_API_URL: '/api',
+  VUE_APP_CDP_API_URL: '/api',
+  VUE_APP_STATIC_API_URL: '/api/static',
+  VUE_APP_BILLING_API_URL: 'https://license.datainsider.co/api',
+  VUE_APP_WORKER_API_URL: '/api',
+  VUE_APP_SCHEDULER_API_URL: '/api',
+  VUE_APP_RELAY_API_URL: '/api',
   VUE_APP_STATIC_FILE_URL: '/static',
   VUE_APP_FACEBOOK_APP_ID: '1371850590286877',
   VUE_APP_FACEBOOK_APP_SECRET: '27c4375073eeabebba910688aba028de',
@@ -24,13 +24,13 @@ const productionConfig = {
   VUE_APP_IS_DISABLE_CDP: true,
   VUE_APP_IS_DISABLE_INGESTION: false,
   VUE_APP_IS_DISABLE_USER_ACTIVITIES: false,
-  VUE_APP_IS_ENABLE_CLICKHOUSE_CONFIG: false,
-  VUE_APP_IS_DISABLE_BILLING: true,
+  VUE_APP_IS_DISABLE_CLICKHOUSE_CONFIG: false,
+  VUE_APP_IS_DISABLE_BILLING: false,
   VUE_APP_LOGIN_SAMPLE: {
     isShowHint: true,
-    hintMessage: 'You can use test account demo@datainsider.co/demo@123 to login'
+    hintMessage: 'Default account: hello@gmail.com/123456'
   },
-  VUE_APP_VERSION: 'v1.4.14'
+  VUE_APP_VERSION: 'v1.4.17'
 };
 
 window.appConfig = productionConfig;

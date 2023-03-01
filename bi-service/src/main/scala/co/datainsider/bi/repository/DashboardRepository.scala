@@ -2,7 +2,7 @@ package co.datainsider.bi.repository
 
 import co.datainsider.bi.client.JdbcClient
 import co.datainsider.bi.client.JdbcClient.Record
-import co.datainsider.bi.domain.Ids.{DashboardId, WidgetId}
+import co.datainsider.bi.domain.Ids.{DashboardId, OrganizationId, UserId, WidgetId}
 import co.datainsider.bi.domain._
 import co.datainsider.bi.domain.chart.Widget
 import co.datainsider.bi.domain.query.Field
@@ -38,6 +38,9 @@ trait DashboardRepository {
 
   def delete(id: DashboardId): Future[Boolean]
 
+  def multiDelete(ids: Array[DashboardId]): Future[Boolean]
+//  def deleteByOwnerId(ownerId: UserId): Future[Boolean]
+
   def update(id: DashboardId, dashboard: Dashboard): Future[Boolean]
 
   def listDashboards(request: ListDrillThroughDashboardRequest): Future[PageResult[Dashboard]]
@@ -45,6 +48,9 @@ trait DashboardRepository {
   // scan all database
   // method for migrate
   def scan(chunkSize: Int)(fn: Seq[Dashboard] => Future[Unit]): Future[Unit]
+
+  def updateOwnerId(fromUsername: UserId, toUsername: UserId): Future[Boolean]
+  def updateCreatorId(fromUsername: UserId, toUsername: UserId): Future[Boolean]
 }
 
 class MySqlDashboardRepository(
@@ -238,7 +244,9 @@ class MySqlDashboardRepository(
 
   private def countTotalDrillThroughDashboards(request: ListDrillThroughDashboardRequest): Long = {
     val queryData = prepareCountDrillThroughDashboards(request)
-    client.executeQuery(queryCountDrillThroughDashboard(request), queryData: _*)(rs => if (rs.next()) rs.getLong(1) else 0)
+    client.executeQuery(queryCountDrillThroughDashboard(request), queryData: _*)(rs =>
+      if (rs.next()) rs.getLong(1) else 0
+    )
   }
 
   private def querySelectDrillThroughDashboard(request: ListDrillThroughDashboardRequest): String = {
@@ -358,4 +366,30 @@ class MySqlDashboardRepository(
         }
       })
     }
+
+  override def updateOwnerId(
+      fromUsername: UserId,
+      toUsername: UserId
+  ): Future[Boolean] =
+    Future {
+      val query = s"update $dbName.$tblDashboardName set owner_id = ? where owner_id = ?"
+      client.executeUpdate(query, toUsername, fromUsername) > 0
+    }
+
+  override def updateCreatorId(
+      fromUsername: UserId,
+      toUsername: UserId
+  ): Future[Boolean] = Future {
+      val query = s"update $dbName.$tblDashboardName set creator_id = ? where creator_id = ?"
+      client.executeUpdate(query, toUsername, fromUsername) > 0
+    }
+
+  override def multiDelete(ids: Array[DashboardId]): Future[Boolean] = Future {
+    if (ids.isEmpty) {
+      true
+    } else {
+      val query = s"delete from $dbName.$tblDashboardName where id in (${createParams(ids.length)})"
+      client.executeUpdate(query, ids: _*) > 0
+    }
+  }
 }

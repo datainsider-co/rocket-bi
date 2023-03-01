@@ -2,25 +2,17 @@ version: "3"
 
 services:
   mysql:
-    image: mysql:5.7
+    image: datainsiderco/rocket-mysql
     container_name: rocket-mysql
-    command: mysqld --user=root --verbose
     restart: always
     volumes:
       - ./mysql/data:/var/lib/mysql
-      - ./mysql/conf:/etc/mysql/conf.d
-    environment:
-      MYSQL_USER: "di"
-      MYSQL_PASSWORD: "di@2020!"
-      MYSQL_ROOT_PASSWORD: "di@2020!"
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
 
   ssdb:
-    image: wendal/ssdb:latest
+    image: datainsiderco/rocket-ssdb
     container_name: rocket-ssdb
     volumes:
       - ./ssdb/data:/var/lib/ssdb/data
-      - ./ssdb/conf/ssdb.conf:/etc/ssdb.conf
     restart: always
 
   caas_service:
@@ -35,7 +27,7 @@ services:
       - ssdb
 
   schema_service:
-    image: datainsiderco/schema-service:main
+    image: datainsiderco/schema-service:dev
     container_name: rocket-schema-service
     restart: always
     env_file:
@@ -45,6 +37,8 @@ services:
       MODE: production
       HTTP_PORT: 8489
       THRIFT_PORT: 8487
+    volumes:
+      - ./schema-service/logs:/app/logs
     depends_on:
       - mysql
       - ssdb
@@ -60,16 +54,46 @@ services:
       NAME: bi-service
       MODE: production
       HTTP_PORT: 8080
+    volumes:
+      - ./bi-service/logs:/app/logs
+      - bi-service-data:/tmp/csv
     depends_on:
       - mysql
       - ssdb
       - caas_service
 
+  job_scheduler:
+    image: datainsiderco/job-scheduler:dev
+    container_name: rocket-job-scheduler
+    restart: always
+    environment:
+      NAME: job-scheduler
+      MODE: production
+      HTTP_PORT: 8080
+      THRIFT_PORT: 8084
+    volumes:
+      - ./job-scheduler/logs:/app/logs
+    depends_on:
+      - mysql
+      - ssdb
+      - caas_service
+
+  job_worker:
+    image: datainsiderco/job-worker:dev
+    container_name: rocket-job-worker
+    restart: always
+    env_file:
+      - .clickhouse.env
+    volumes:
+      - ./job-worker/logs:/app/logs
+    environment:
+      NAME: job-worker
+      MODE: production
+      HTTP_PORT: 8080
+
   web:
     image: datainsiderco/rocket-bi-web:dev
     container_name: rocket-web
-    volumes:
-     - ./web/config:/app/config
     deploy:
       restart_policy:
         condition: on-failure
@@ -78,18 +102,19 @@ services:
         window: 30s
 
   nginx:
-    image: nginx:latest
+    image: datainsiderco/rocket-nginx
     container_name: rocket-nginx
     ports:
       - 5050:80
     volumes:
-      - ./nginx_home/conf.d/:/etc/nginx/conf.d/
-      - ./nginx_home/nginx.conf/:/etc/nginx/nginx.conf
-      - ./nginx_home/log/:/var/log/nginx/
-      - ./nginx_home/html:/var/www/html/public
+      - ./nginx/log/:/var/log/nginx/
+      - bi-service-data:/var/www/html/public/static/tmp/csv
     depends_on:
       - bi_service
       - web
+
+volumes:
+  bi-service-data:
 
 networks:
   rocket_network:

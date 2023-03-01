@@ -53,6 +53,7 @@ import { ClickhouseConfigModule } from '@core/clickhouse-config/module/Clickhous
 import { RelationshipModule } from '@core/data-relationship';
 import { HttpModule } from '@core/common/modules/HttpModule';
 import { HttpTestModule } from '@core/common/modules/TestHttpModule';
+import { BillingModule } from '@core/billing';
 
 HighchartsCustomEvents(Highcharts as any);
 
@@ -74,7 +75,8 @@ switch (process.env.NODE_ENV) {
       new DataCookModule(),
       new LakeHouseModule(),
       new RelationshipModule(),
-      new ClickhouseConfigModule()
+      new ClickhouseConfigModule(),
+      new BillingModule()
     ]);
     break;
   case 'test':
@@ -92,7 +94,8 @@ switch (process.env.NODE_ENV) {
       new DataCookModule(),
       new LakeHouseModule(),
       new ClickhouseConfigModule(),
-      new RelationshipModule()
+      new RelationshipModule(),
+      new BillingModule()
     ]);
     DomUtils.bind('logLevel', LogLevel.All);
     window.dumpLog = true;
@@ -114,7 +117,8 @@ switch (process.env.NODE_ENV) {
       new DataCookModule(),
       new LakeHouseModule(),
       new ClickhouseConfigModule(),
-      new RelationshipModule()
+      new RelationshipModule(),
+      new BillingModule()
     ]);
 }
 

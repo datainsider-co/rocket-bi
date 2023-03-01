@@ -3,9 +3,8 @@ package co.datainsider.bi.controller.http
 import co.datainsider.bi.controller.http.filter._
 import co.datainsider.bi.domain.Directory.{MyData, Shared}
 import co.datainsider.bi.domain.Ids.DirectoryId
-import co.datainsider.bi.domain.query.event.{ActionType, ResourceType}
 import co.datainsider.bi.domain.request._
-import co.datainsider.bi.service.{DrillThroughService, DashboardService, DirectoryService}
+import co.datainsider.bi.service.{DashboardService, DirectoryService, DrillThroughService, RecentDirectoryService}
 import com.google.inject.Inject
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
@@ -13,15 +12,17 @@ import com.twitter.util.Future
 import datainsider.client.exception.UnsupportedError
 import datainsider.client.filter.MustLoggedInFilter
 import datainsider.profiler.Profiler
+import datainsider.tracker.{ActionType, ResourceType, UserActivityTracker}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DashboardController @Inject() (
-                                      dashboardService: DashboardService,
-                                      directoryService: DirectoryService,
-                                      drillThroughService: DrillThroughService,
-                                      dashboardFilter: DashboardPermissionFilter,
-                                      directoryFilter: DirectoryPermissionFilter
+    dashboardService: DashboardService,
+    directoryService: DirectoryService,
+    drillThroughService: DrillThroughService,
+    dashboardFilter: DashboardPermissionFilter,
+    directoryFilter: DirectoryPermissionFilter,
+    recentDirectoryService: RecentDirectoryService
 ) extends Controller {
 
   filter(
@@ -38,9 +39,14 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.View,
         resourceType = ResourceType.Dashboard,
+        resourceId = request.id.toString,
         description = s"view dashboard ${request.id}"
       ) {
-        dashboardService.get(request)
+        for {
+          directoryId <- dashboardService.getDirectoryId(request.id)
+          dashboard <- dashboardService.get(request)
+          _ <- recentDirectoryService.addOrUpdate(request.getOrganizationId(), request.currentUsername, directoryId)
+        } yield dashboard
       }
     }
 
@@ -58,6 +64,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Create,
         resourceType = ResourceType.Dashboard,
+        resourceId = null,
         description = s"create new dashboard '${request.name}''"
       ) {
         request.parentDirectoryId match {
@@ -91,6 +98,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Update,
         resourceType = ResourceType.Dashboard,
+        resourceId = request.id.toString,
         description = s"rename dashboard ${request.id} to ${request.toName}"
       ) {
         dashboardService.rename(request).map(toResponse)
@@ -111,6 +119,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Update,
         resourceType = ResourceType.Dashboard,
+        resourceId = request.id.toString,
         description = s"update main date filter of dashboard ${request.id}"
       ) {
         dashboardService.updateMainDateFilter(request).map(toResponse)
@@ -131,6 +140,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Delete,
         resourceType = ResourceType.Dashboard,
+        resourceId = request.id.toString,
         description = s"delete dashboard ${request.id}"
       ) {
         dashboardService.delete(request).map(toResponse)
@@ -151,6 +161,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Create,
         resourceType = ResourceType.Dashboard,
+        resourceId = request.id.toString,
         description = s"share dashboard ${request.id}"
       ) {
         dashboardService.share(request)
@@ -171,6 +182,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.View,
         resourceType = ResourceType.Widget,
+        resourceId = request.widgetId.toString,
         description = s"view widget ${request.widgetId} of dashboard ${request.dashboardId}"
       ) {
         dashboardService.getWidget(request)
@@ -191,6 +203,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Create,
         resourceType = ResourceType.Widget,
+        resourceId = null,
         description = s"create widget ${request.widget.name} in dashboard ${request.dashboardId}"
       ) {
         dashboardService.createWidget(request)
@@ -212,6 +225,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Update,
         resourceType = ResourceType.Widget,
+        resourceId = request.widgetId.toString,
         description = s"edit widget ${request.widget.name} in dashboard ${request.dashboardId}"
       ) {
         dashboardService.editWidget(request).map(toResponse)
@@ -232,6 +246,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Delete,
         resourceType = ResourceType.Widget,
+        resourceId = request.widgetId.toString,
         description = s"delete widget ${request.widgetId} in dashboard ${request.dashboardId}"
       ) {
         dashboardService.deleteWidget(request).map(toResponse)
@@ -251,7 +266,8 @@ class DashboardController @Inject() (
         request = request.request,
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Update,
-        resourceType = ResourceType.Widget,
+        resourceType = ResourceType.Dashboard,
+        resourceId = request.dashboardId.toString,
         description = s"resize widgets in dashboard ${request.dashboardId}"
       ) {
         dashboardService.resizeWidgets(request).map(toResponse)
@@ -272,6 +288,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Update,
         resourceType = ResourceType.Dashboard,
+        resourceId = request.id.toString,
         description = s"update settings of dashboard ${request.id}"
       ) {
         dashboardService.updateSettings(request).map(toResponse)
@@ -291,6 +308,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Update,
         resourceType = ResourceType.Dashboard,
+        resourceId = request.id.toString,
         description = s"refresh boost of dashboard ${request.id}"
       ) {
         dashboardService.refreshBoost(request).map(toResponse)
@@ -311,6 +329,7 @@ class DashboardController @Inject() (
         actionName = request.getClass.getSimpleName,
         actionType = ActionType.Update,
         resourceType = ResourceType.Dashboard,
+        resourceId = request.id.toString,
         description = s"force boost of dashboard ${request.id}"
       ) {
         dashboardService.forceBoost(request)
@@ -325,14 +344,7 @@ class DashboardController @Inject() (
     )
   )
     .get(s"/dashboards/:dashboard_id/get_directory_id") { request: Request =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::/dashboards/:dashboard_id/get_directory_id")
-      UserActivityTracker(
-        request = request,
-        actionName = "get_directory_id",
-        actionType = ActionType.View,
-        resourceType = ResourceType.Dashboard,
-        description = s"get dirId of dashboard"
-      ) {
+      Profiler(s"[Http] ${this.getClass.getSimpleName}::/dashboards/:dashboard_id/get_directory_id") {
         val id = request.getLongParam("dashboard_id")
         dashboardService.getDirectoryId(id)
       }
@@ -340,21 +352,14 @@ class DashboardController @Inject() (
 
   filter[MustLoggedInFilter]
     .post(s"/dashboards/list_drill_through") { request: ListDrillThroughDashboardRequest =>
-      Profiler(s"[Http] ${this.getClass.getSimpleName}::ListDrillThroughDashboardRequest")
-      UserActivityTracker(
-        request = request.request,
-        actionName = request.getClass.getSimpleName,
-        actionType = ActionType.View,
-        resourceType = ResourceType.Dashboard,
-        description = s"drill through from dashboard ${request.from}"
-      ) {
+      Profiler(s"[Http] ${this.getClass.getSimpleName}::ListDrillThroughDashboardRequest") {
         drillThroughService.listDashboards(request)
       }
     }
 
   filter[MustLoggedInFilter]
-    .post("/dashboards/drill_through/scan") {
-      request: Request => {
+    .post("/dashboards/drill_through/scan") { request: Request =>
+      {
         drillThroughService.scanAndUpdateDrillThroughFields()
       }
     }

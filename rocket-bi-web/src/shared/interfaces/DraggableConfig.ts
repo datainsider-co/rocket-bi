@@ -35,4 +35,5 @@ export interface ItemData {
   src: string;
   title: string;
   type: string;
+  hidden?: boolean;
 }

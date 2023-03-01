@@ -17,7 +17,8 @@ import {
   APIKeyService,
   APIKeyServiceImpl,
   MockOrganizationPermissionService,
-  OrganizationPermissionService
+  OrganizationPermissionService,
+  OrganizationPermissionServiceImpl
 } from '@core/organization';
 
 export class OrganizationModule extends BaseModule {
@@ -51,7 +52,7 @@ export class OrganizationModule extends BaseModule {
       .scope(Scope.Singleton);
 
     Container.bind(OrganizationPermissionService)
-      .to(MockOrganizationPermissionService)
+      .to(OrganizationPermissionServiceImpl)
       .scope(Scope.Singleton);
   }
 }

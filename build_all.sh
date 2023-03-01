@@ -41,7 +41,9 @@ fi
 if [[ "x$BUILD" == "xtrue" ]]; then
   cd ${DIR}/bi-service && ./build.sh
   cd ${DIR}/caas-service && ./build.sh
-#  cd ${DIR}/schema-service && ./build.sh
+  cd ${DIR}/schema-service && ./build.sh
+  cd ${DIR}/job-scheduler && ./build.sh
+  cd ${DIR}/job-worker && ./build.sh
 fi
 
 cd $DIR
@@ -54,21 +56,16 @@ if [[ "x$PUSH" == "xtrue" ]]; then
   # caas-service
   docker build -f ${DIR}/caas-service/Dockerfile -t ${REGISTRY}/caas-service:${TAG} ${DIR}/caas-service
   docker push ${REGISTRY}/caas-service:${TAG}
+  # schema-service
+  docker build -f ${DIR}/schema-service/Dockerfile -t ${REGISTRY}/schema-service:${TAG} ${DIR}/schema-service
+  docker push ${REGISTRY}/schema-service:${TAG}
+  # job-scheduler
+  docker build -f ${DIR}/job-scheduler/Dockerfile -t ${REGISTRY}/job-scheduler:${TAG} ${DIR}/job-scheduler
+  docker push ${REGISTRY}/job-scheduler:${TAG}
+  # job-worker
+  docker build -f ${DIR}/job-worker/Dockerfile -t ${REGISTRY}/job-worker:${TAG} ${DIR}/job-worker
+  docker push ${REGISTRY}/job-worker:${TAG}
   # rocket-bi-web
   docker build -f ${DIR}/rocket-bi-web/Dockerfile -t ${REGISTRY}/rocket-bi-web:${TAG} ${DIR}/rocket-bi-web
   docker push ${REGISTRY}/rocket-bi-web:${TAG}
-
-  # build tag 'latest' for every build except for tag latest itself
-  if [[ "x$TAG" != "xlatest" ]]; then
-    echo "Create latest tags..."
-    # bi-service
-    docker tag ${REGISTRY}/bi-service:${TAG} ${REGISTRY}/bi-service:latest
-    docker push ${REGISTRY}/bi-service:latest
-    # caas-service
-    docker tag ${REGISTRY}/caas-service:${TAG} ${REGISTRY}/caas-service:latest
-    docker push ${REGISTRY}/caas-service:latest
-    # rocket-bi-web
-    docker tag ${REGISTRY}/rocket-bi-web:${TAG} ${REGISTRY}/rocket-bi-web:latest
-    docker push ${REGISTRY}/rocket-bi-web:latest
-  fi
 fi

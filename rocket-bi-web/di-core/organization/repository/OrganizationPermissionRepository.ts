@@ -1,7 +1,10 @@
 import { Licence, Usage } from '@core/organization';
 import { InjectValue } from 'typescript-ioc';
-import { DIKeys } from '@core/common/modules';
+import { Di, DIKeys } from '@core/common/modules';
 import { BaseClient } from '@core/common/services/HttpClient';
+import { DataManager } from '@core/common/services';
+import { StringUtils } from '@/utils';
+import { DIException } from '@core/common/domain';
 
 export abstract class OrganizationPermissionRepository {
   abstract isAllow(...usages: Usage[]): Promise<boolean[]>;
@@ -12,11 +15,16 @@ export abstract class OrganizationPermissionRepository {
 }
 
 export class OrganizationPermissionRepositoryImpl extends OrganizationPermissionRepository {
-  @InjectValue(DIKeys.CaasClient)
+  @InjectValue(DIKeys.BillingClient)
   private httpClient!: BaseClient;
 
+  private licenseKey = Di.get(DataManager).getUserInfo()?.organization.licenceKey ?? '';
+
   isAllow(...usages: Usage[]): Promise<boolean[]> {
-    return this.httpClient.post<boolean[]>('/organization/allow', usages);
+    if (StringUtils.isEmpty(this.licenseKey)) {
+      throw new DIException('not found license key');
+    }
+    return this.httpClient.post<boolean[]>(`/billing/licenses/${this.licenseKey}/verify`, { usages });
   }
 
   isAllowAll(...usages: Usage[]): Promise<boolean> {

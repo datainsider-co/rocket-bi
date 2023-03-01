@@ -3,7 +3,7 @@ package co.datainsider.bi.controller.http.filter
 import co.datainsider.bi.domain.Directory.{MyData, Shared}
 import co.datainsider.bi.domain.DirectoryType
 import co.datainsider.bi.domain.Ids.DirectoryId
-import co.datainsider.bi.service.DirectoryService
+import co.datainsider.bi.service.{DeletedDirectoryService, DirectoryService}
 import co.datainsider.share.service.PermissionTokenService
 import com.twitter.finagle.http.Request
 import com.twitter.util.Future
@@ -26,17 +26,24 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class DirectoryPermissionFilter @Inject() (
     caasClientService: CaasClientService,
     directoryService: DirectoryService,
+    deletedDirectoryService: DeletedDirectoryService,
     @Named("token_header_key") tokenKey: String,
     permissionTokenService: PermissionTokenService
 ) extends Logging {
-  def requireDirectoryOwner(directoryParamName: String): PermissionValidator = {
+  def requireDirectoryOwner(directoryParamName: String, isDeleted: Boolean = false): PermissionValidator = {
     new PermissionValidator {
       override def isPermitted(request: Request): Future[PermissionResult] = {
         Profiler("[Filter DirectoryPermissionFilter] requireDirectoryOwner") {
           val directoryId: DirectoryId = request.getQueryOrBodyParam(directoryParamName).toLong
-          directoryId match {
+          (directoryId) match {
             case MyData | Shared => Future.value(Permitted())
-            case _               => isOwnerPermitted(request.getOrganizationId(), directoryId, request.currentUsername)
+            case _ => {
+              if (isDeleted) {
+                isOwnerDeletedDirectory(request.getOrganizationId(), directoryId, request.currentUsername)
+              } else {
+                isOwnerDirectory(request.getOrganizationId(), directoryId, request.currentUsername)
+              }
+            }
           }
         }
       }
@@ -107,15 +114,21 @@ class DirectoryPermissionFilter @Inject() (
       )
     }
 
-  private def isOwnerPermitted(orgId: Long, directoryId: DirectoryId, username: String): Future[PermissionResult] = {
-    directoryService
-      .isOwner(orgId, directoryId, username)
-      .map(isOwner => {
-        if (isOwner) {
-          Permitted()
-        } else {
-          UnPermitted("You are not the owner of this widget")
-        }
-      })
+  private def isOwnerDirectory(orgId: Long, directoryId: DirectoryId, username: String): Future[PermissionResult] = {
+    directoryService.isOwner(orgId, directoryId, username).map {
+      case true => Permitted()
+      case false => UnPermitted(s"You do not have permissions to perform this action!")
+    }
+  }
+
+  private def isOwnerDeletedDirectory(
+      orgId: Long,
+      directoryId: DirectoryId,
+      username: String
+  ): Future[PermissionResult] = {
+    deletedDirectoryService.isOwner(orgId, directoryId, username).map {
+      case true => Permitted()
+      case false => UnPermitted(s"You do not have permissions to perform this action!")
+    }
   }
 }

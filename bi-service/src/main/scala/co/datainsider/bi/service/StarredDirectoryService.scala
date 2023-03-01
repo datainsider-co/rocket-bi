@@ -16,6 +16,8 @@ trait StarredDirectoryService {
   def unstar(organizationId: Long, username: String, directoryId: DirectoryId): Future[Boolean]
 
   def count(organizationId: Long, username: String): Future[Int]
+
+  def deleteByUsername(organizationId: Long, username: String): Future[Boolean]
 }
 
 class StarredDirectoryServiceImpl @Inject() (
@@ -48,5 +50,9 @@ class StarredDirectoryServiceImpl @Inject() (
 
   override def count(organizationId: DirectoryId, username: String): Future[Int] = {
     starredDirectoryRepository.count(organizationId, username)
+  }
+
+  override def deleteByUsername(organizationId: DirectoryId, username: String): Future[Boolean] = {
+    starredDirectoryRepository.deleteByUsername(organizationId, username)
   }
 }

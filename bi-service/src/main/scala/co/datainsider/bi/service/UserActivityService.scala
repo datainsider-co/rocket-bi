@@ -1,14 +1,20 @@
 package co.datainsider.bi.service
 
-import co.datainsider.bi.domain.query.event.ActionType.ActionType
-import co.datainsider.bi.domain.query.event.ResourceType.ResourceType
-import co.datainsider.bi.domain.query.event.UserActivityEvent
 import co.datainsider.bi.repository.UserActivityRepository
 import co.datainsider.share.domain.response.PageResult
 import com.google.inject.Inject
+import com.twitter.inject.Logging
 import com.twitter.util.Future
+import datainsider.client.domain.Implicits.{FutureEnhanceLike, async}
+import datainsider.tracker.ActionType.ActionType
+import datainsider.tracker.ResourceType.ResourceType
+import datainsider.tracker.{TrackUserActivitiesRequest, UserActivityEvent}
+
+import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
 
 trait UserActivityService {
+  def track(request: TrackUserActivitiesRequest): Future[Boolean]
+
   def list(
       orgId: Long,
       startTime: Option[Long],
@@ -23,7 +29,20 @@ trait UserActivityService {
   ): Future[PageResult[UserActivityEvent]]
 }
 
-class UserActivityServiceImpl @Inject() (userActivityRepository: UserActivityRepository) extends UserActivityService {
+class UserActivityServiceImpl @Inject() (userActivityRepository: UserActivityRepository)
+    extends UserActivityService
+    with Logging {
+
+  val maxQueueSize: Int = 1000
+  val enqueueTimeoutMs: Long = 100
+
+  private val requestsQueue = new LinkedBlockingQueue[TrackUserActivitiesRequest](maxQueueSize)
+
+  override def track(request: TrackUserActivitiesRequest): Future[Boolean] =
+    Future {
+      requestsQueue.offer(request, enqueueTimeoutMs, TimeUnit.MILLISECONDS)
+    }
+
   override def list(
       orgId: Long,
       startTime: Option[Long],
@@ -61,4 +80,20 @@ class UserActivityServiceImpl @Inject() (userActivityRepository: UserActivityRep
       )
     } yield PageResult(total, activities)
   }
+
+  private def insertTrackData(): Future[Unit] = {
+    async {
+      while (true) {
+        try {
+          val request: TrackUserActivitiesRequest = requestsQueue.take()
+          userActivityRepository.insert(request.activities).syncGet
+        } catch {
+          case e: Throwable => logger.error(s"ingesting user activities event failed: ${e.getMessage}")
+        }
+      }
+    }
+  }
+
+  insertTrackData()
+
 }

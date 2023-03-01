@@ -1,0 +1,80 @@
+image: maven:3-jdk-8
+
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  MAVEN_OPTS: "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=false -DdeployAtEnd=false"
+
+  # database info
+  MYSQL_ROOT_PASSWORD: di@2020!
+
+before_script:
+  - cd libs/ && ./install.sh && cd ..
+
+services:
+  - name: mysql:5.7
+    alias: di-mysql
+
+  - name: wendal/ssdb:latest
+    alias: di-ssdb
+
+  - name: yandex/clickhouse-server:20.9.2.20
+    alias: clickhouse_server_di
+
+build:
+  stage: build
+  script:
+    - mvn $MAVEN_CLI_OPTS clean compile
+  only:
+    - dev
+    - staging
+    - merge_requests
+
+test:
+  stage: test
+  script:
+    - mvn $MAVEN_CLI_OPTS clean test -DargLine="-Dmode=production"
+  only:
+    - dev
+    - staging
+    - merge_requests
+
+deploy_dev:
+  stage: deploy
+  before_script:
+    - apt-get update -qq
+    - apt-get install -qq git
+    # Setup SSH deploy keys
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  environment:
+    name: dev
+  script:
+    - ssh $HOST "cd /data/dev/ingestion-service/ && git checkout dev && git pull && ./build_docker_image.sh && docker-compose -f ../rocket-bi/docker-compose.yml up -d && exit"
+  only:
+    - dev
+
+deploy_staing:
+  stage: deploy
+  before_script:
+    - apt-get update -qq
+    - apt-get install -qq git
+    # Setup SSH deploy keys
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  environment:
+    name: staging
+  script:
+    - ssh $HOST "cd /data/staging/ingestion-service/ && git checkout staging && git pull && ./build_docker_image.sh && docker-compose -f ../rocket-bi/docker-compose.yml up -d && exit"
+  only:
+    - staging

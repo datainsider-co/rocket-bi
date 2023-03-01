@@ -1,5 +1,6 @@
 package co.datainsider.bi.repository
 
+import co.datainsider.bi.module.BIServiceModule
 import co.datainsider.bi.util.{StringUtils, ZConfig}
 import com.twitter.util.Future
 import com.twitter.util.logging.Logging
@@ -17,7 +18,33 @@ import scala.sys.process.{Process, ProcessLogger}
 object ClickhouseCsvWriter extends Logging {
   private val WORK_DIR: String = "/tmp/csv"
   private val CLEANUP_INTERVAL_IN_MIN: Int = 15
-  private val TTL_IN_MIN: Int = 10
+  private val TTL_IN_MIN: Int = 15
+
+  private val clickhouseEnvSetting = BIServiceModule.provideClickhouseConnectionSetting()
+
+  private val clickhouseHost =
+    if (clickhouseEnvSetting.isDefined) {
+      clickhouseEnvSetting.get.host
+    } else {
+      ZConfig.getString("clickhouse_csv_writer.host")
+    }
+  private val clickhousePort = if (clickhouseEnvSetting.isDefined) {
+    clickhouseEnvSetting.get.tcpPort
+  } else {
+    ZConfig.getString("clickhouse_csv_writer.tcp_port")
+  }
+  private val clickhouseUsername =
+    if (clickhouseEnvSetting.isDefined) {
+      clickhouseEnvSetting.get.username
+    } else {
+      ZConfig.getString("clickhouse_csv_writer.username")
+    }
+  private val clickhousePassword =
+    if (clickhouseEnvSetting.isDefined) {
+      clickhouseEnvSetting.get.password
+    } else {
+      ZConfig.getString("clickhouse_csv_writer.password")
+    }
 
   prepareWorkDir()
   scheduleAutoCleanup()
@@ -38,10 +65,6 @@ object ClickhouseCsvWriter extends Logging {
   def createFile(fromSql: String, filePath: String): Future[String] =
     Profiler(s"[Writer] ${this.getClass.getSimpleName}::createFile") {
       Future {
-        val clickhouseHost = ZConfig.getString("clickhouse_csv_writer.host")
-        val clickhousePort = ZConfig.getString("clickhouse_csv_writer.tcp_port")
-        val clickhouseUsername = ZConfig.getString("clickhouse_csv_writer.username")
-        val clickhousePassword = ZConfig.getString("clickhouse_csv_writer.password")
 
         val exportQuery = s"$fromSql into outfile '$filePath' format CSV"
 
