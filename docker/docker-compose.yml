@@ -7,14 +7,10 @@ services:
     restart: always
     volumes:
       - ./mysql/data:/var/lib/mysql
-    ports:
-      - 3306:3306
 
   ssdb:
     image: datainsiderco/rocket-ssdb
     container_name: rocket-ssdb
-    ports:
-      - 8888:8888
     volumes:
       - ./ssdb/data:/var/lib/ssdb/data
     restart: always
