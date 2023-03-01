@@ -98,8 +98,6 @@ services:
   web:
     image: datainsiderco/rocket-bi-web:dev
     container_name: rocket-web
-    volumes:
-     - ./web/config:/app/config
     deploy:
       restart_policy:
         condition: on-failure
