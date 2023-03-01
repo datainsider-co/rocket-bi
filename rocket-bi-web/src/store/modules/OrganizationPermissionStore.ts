@@ -74,11 +74,11 @@ export class OrganizationPermissionStore extends VuexModule {
   }
 
   get isEnabledBilling(): boolean {
-    return true;
+    return !window.appConfig.VUE_APP_IS_DISABLE_BILLING ?? false;
   }
 
   get isEnabledClickhouseConfig(): boolean {
-    return this.usageAllowedAsMap.get(UsageClassName.ClickhouseConfigUsage) ?? false;
+    return !window.appConfig.VUE_APP_IS_DISABLE_CLICKHOUSE_CONFIG ?? false;
   }
 
   get isEnabledDataCook(): boolean {
