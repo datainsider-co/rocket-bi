@@ -1,8 +1,6 @@
 export enum PaymentStatus {
-  UpdateApproval = 'UpdateApproval',
-  BillingUpdated = 'BillingUpdated',
-  SubscribeApproval = 'SubscribeApproval',
+  BillingApproval = 'BillingApproval',
   Succeeded = 'Succeeded',
-  Failed = 'Failed',
-  Canceled = 'Canceled'
+  Canceled = 'Canceled',
+  Unknown = 'Unknown'
 }

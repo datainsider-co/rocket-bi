@@ -24,6 +24,8 @@ import { GoogleSheetIngestionUsage } from '@core/organization/domain/usage/Googl
 import { ShopifyIngestionUsage } from '@core/organization/domain/usage/ShopifyIngestionUsage';
 import { S3IngestionUsage } from '@core/organization/domain/usage/S3IngestionUsage';
 import { DataSourceType } from '@core/data-ingestion';
+import { ApiKeyUsage } from '@core/organization/domain/usage/ApiKeyUsage';
+import { UserManagementUsage } from '@core/organization/domain/usage/UserManagementUsage';
 
 @Module({ store, name: Stores.OrganizationPermission, dynamic: true, namespaced: true })
 export class OrganizationPermissionStore extends VuexModule {
@@ -50,7 +52,10 @@ export class OrganizationPermissionStore extends VuexModule {
     new ShopifyIngestionUsage(),
     new S3IngestionUsage(),
     new DataCookUsage(),
-    new TableRelationShipUsage()
+    new TableRelationShipUsage(),
+    new ApiKeyUsage(),
+    new UserManagementUsage(),
+    new GoogleOAuthUsage()
   ];
 
   get isEnabledCDP(): boolean {

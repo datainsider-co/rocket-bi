@@ -65,7 +65,7 @@ export const ALL_DATASOURCE: ItemData[] = [
   {
     title: 'Google Sheets',
     src: 'ic_google_sheet.png',
-    type: 'sheet'
+    type: DataSourceType.GoogleSheet
   },
   {
     title: 'Shopify',

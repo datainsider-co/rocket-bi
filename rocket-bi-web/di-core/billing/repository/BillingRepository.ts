@@ -1,4 +1,4 @@
-import { ProductInfo, SubscriptionInfo } from '@core/billing';
+import { ProductInfo, ProductSubscriptionInfo } from '@core/billing';
 import { PageResult } from '@core/common/domain';
 import { InjectValue } from 'typescript-ioc';
 import { DIKeys } from '@core/common/modules';
@@ -8,13 +8,13 @@ import { BaseResponse } from '@core/data-ingestion/domain/response/BaseResponse'
 export abstract class BillingRepository {
   abstract getProducts(): Promise<PageResult<ProductInfo>>;
 
-  abstract getSubscriptionInfo(licenseKey: string): Promise<SubscriptionInfo>;
+  abstract getSubscriptionInfos(licenseKey: string): Promise<ProductSubscriptionInfo[]>;
 
-  abstract subscribeProducts(licenseKey: string, productIds: string[]): Promise<SubscriptionInfo>;
+  abstract subscribeProduct(licenseKey: string, productId: string): Promise<ProductSubscriptionInfo>;
 
-  abstract updateProducts(licenseKey: string, productIds: string[]): Promise<SubscriptionInfo>;
+  abstract getSubscriptionInfo(licenseKey: string, productId: string): Promise<ProductSubscriptionInfo>;
 
-  abstract cancelSubscription(licenseKey: string): Promise<boolean>;
+  abstract cancelSubscription(licenseKey: string, productId: string): Promise<ProductSubscriptionInfo>;
 }
 
 export class BillingRepositoryImpl extends BillingRepository {
@@ -28,23 +28,27 @@ export class BillingRepositoryImpl extends BillingRepository {
     });
   }
 
-  getSubscriptionInfo(licenseKey: string): Promise<SubscriptionInfo> {
-    return this.httpClient.get<SubscriptionInfo>(`/billing/subscriptions/${licenseKey}`).then(res => SubscriptionInfo.fromObject(res));
+  getSubscriptionInfos(licenseKey: string): Promise<ProductSubscriptionInfo[]> {
+    return this.httpClient.get<ProductSubscriptionInfo[]>(`/billing/subscriptions/${licenseKey}/products`).then(res => {
+      return res.map(subscriptionInfo => ProductSubscriptionInfo.fromObject(subscriptionInfo));
+    });
   }
 
-  subscribeProducts(licenseKey: string, productIds: string[]): Promise<SubscriptionInfo> {
+  subscribeProduct(licenseKey: string, productId: string): Promise<ProductSubscriptionInfo> {
     return this.httpClient
-      .post<SubscriptionInfo>(`/billing/subscriptions/${licenseKey}`, { productIds })
-      .then(res => SubscriptionInfo.fromObject(res));
+      .post<ProductSubscriptionInfo>(`/billing/subscriptions/${licenseKey}/products/${productId}`)
+      .then(res => ProductSubscriptionInfo.fromObject(res));
   }
 
-  updateProducts(licenseKey: string, productIds: string[]): Promise<SubscriptionInfo> {
+  getSubscriptionInfo(licenseKey: string, productId: string): Promise<ProductSubscriptionInfo> {
     return this.httpClient
-      .put<SubscriptionInfo>(`/billing/subscriptions/${licenseKey}`, { productIds })
-      .then(res => SubscriptionInfo.fromObject(res));
+      .get<ProductSubscriptionInfo>(`/billing/subscriptions/${licenseKey}/products/${productId}`)
+      .then(res => ProductSubscriptionInfo.fromObject(res));
   }
 
-  cancelSubscription(licenseKey: string): Promise<boolean> {
-    return this.httpClient.put<BaseResponse>(`/billing/subscriptions/${licenseKey}/cancel`).then(res => res.success);
+  cancelSubscription(licenseKey: string, productId: string): Promise<ProductSubscriptionInfo> {
+    return this.httpClient
+      .put<ProductSubscriptionInfo>(`/billing/subscriptions/${licenseKey}/products/${productId}/cancel`)
+      .then(res => ProductSubscriptionInfo.fromObject(res));
   }
 }

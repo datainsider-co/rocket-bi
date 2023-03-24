@@ -65,7 +65,7 @@
               <div v-else>Invalid email format</div>
             </template>
             <template v-else-if="$v.password.$error">
-              <div v-if="!$v.password.required">Email is required</div>
+              <div v-if="!$v.password.required">Password is required</div>
             </template>
             <div v-else>{{ errorMessage }}</div>
           </div>

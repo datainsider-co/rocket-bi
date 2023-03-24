@@ -37,22 +37,6 @@
           <!--            <i class="di-icon-delete"></i>-->
           <!--          </div>-->
         </div>
-        <div class="org-overview-item">
-          <div class="org-overview-item-label">Primary Support</div>
-          <div title="Require subscribe primary support feature" class="org-overview-item-delete-content">
-            <a
-              v-if="isEnablePrimarySupport"
-              href="https://docs.google.com/forms/d/e/1FAIpQLSepFL_0jq7BP1QNybPLBwZSoMwivZLMIhml5qcq5ACh9hJbWg/viewform"
-              target="_blank"
-              style="text-decoration: none; font-weight: 500"
-              >Contact Us</a
-            >
-            <div v-else>Require subscribe primary support feature</div>
-          </div>
-          <!--          <div class="org-overview-item-action btn-icon-border" disabled>-->
-          <!--            <i class="di-icon-delete"></i>-->
-          <!--          </div>-->
-        </div>
       </div>
     </div>
     <DiRenameModal

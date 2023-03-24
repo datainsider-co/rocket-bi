@@ -15,6 +15,22 @@ export class PaymentInfo {
     public updatedTime?: number
   ) {}
 
+  get isCanceled() {
+    return this.status === PaymentStatus.Canceled;
+  }
+
+  get isSubscribed() {
+    return this.status === PaymentStatus.Succeeded;
+  }
+
+  get isBillingApprovalStatus() {
+    return this.status === PaymentStatus.BillingApproval;
+  }
+
+  get isUnknownStatus() {
+    return this.status === PaymentStatus.Unknown;
+  }
+
   static fromObject(obj: PaymentInfo) {
     return new PaymentInfo(
       obj.className,

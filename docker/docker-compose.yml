@@ -94,16 +94,12 @@ services:
   web:
     image: datainsiderco/rocket-bi-web:dev
     container_name: rocket-web
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 30s
+    restart: always
 
   nginx:
     image: datainsiderco/rocket-nginx
     container_name: rocket-nginx
+    restart: always
     ports:
       - 5050:80
     volumes:

@@ -341,7 +341,7 @@ export default class DataSourceScreen extends Vue {
           DiUploadDocumentActions.showUploadDocument();
           break;
         }
-        case 'sheet': {
+        case DataSourceType.GoogleSheet: {
           await this.handleSelectGoogleSourceType(`${this.googleConfig.sheetUrl}?redirect=${window.location.origin}&scope=${this.googleConfig.sheetScope}`);
           break;
         }

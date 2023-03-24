@@ -8,125 +8,90 @@
           <i class="di-icon-refresh"></i>
         </DiButton>
       </div>
-      <div class="premium-features-body ">
-        <div class="premium-features-body-subscription">
-          <StatusWidget class="position-relative" :status="status" :error="errorMessage" @retry="handleLoadSubscriptionInfo(false)">
-            <div class="premium-features-body-subscription-status" v-if="subscription">
-              <div class="premium-features-body-subscription-plan">Free plan</div>
-              <div class="premium-features-body-subscription-plan-subtitle">
-                This plan gives you access to free product trials, tutorials, and more. When you’re ready to upgrade, choose the plan that fits your needs.
+      <div class="premium-features-content">
+        <StatusWidget
+          class="premium-features-body-features-status position-relative"
+          :status="loadFeatureStatus"
+          :error="loadFeaturesErrorMessage"
+          @retry="handleLoadFeatures(true)"
+        >
+          <vuescroll ref="vuescroll" :ops="verticalScrollConfig">
+            <div class="premium-features-body ">
+              <div class="premium-features-body-subscription">
+                <div class="premium-features-body-subscription-status" v-if="listSubscriptionInfo">
+                  <div class="premium-features-body-subscription-plan">Free plan</div>
+                  <div class="premium-features-body-subscription-plan-subtitle">
+                    This plan gives you access to free product trials, tutorials, and more. When you’re ready to upgrade, choose the plan that fits your needs.
+                  </div>
+                  <div class="premium-features-body-subscription-details">
+                    <div class="premium-features-body-subscription-details-last-invoice">
+                      <div class="title">Last invoice total</div>
+                      <div class="data">{{ lastInvoice }}$/month</div>
+                    </div>
+                    <!--                <div class="premium-features-body-subscription-details-email">-->
+                    <!--                  <div class="title">Billing email</div>-->
+                    <!--                  <div class="data">-->
+                    <!--                    &lt;!&ndash;                    {{ subscriptions.email }}&ndash;&gt;-->
+                    <!--                    test@gmail.com-->
+                    <!--                  </div>-->
+                    <!--                </div>-->
+                    <div class="premium-features-body-subscription-details-status">
+                      <div class="title">Payment status</div>
+                      <div class="data">
+                        {{ paymentStatus }}
+                      </div>
+                    </div>
+                    <div class="premium-features-body-subscription-details-payment-method">
+                      <div class="title">Payment method</div>
+                      <div class="data">
+                        Paypal
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="premium-features-body-subscription-details">
-                <div class="premium-features-body-subscription-details-last-invoice">
-                  <div class="title">Last invoice total</div>
-                  <div class="data">{{ lastInvoice }}$/month</div>
+
+              <div class=" premium-features-body-features">
+                <div class="premium-features-body-features-title">
+                  <div class="title">ADD MORE PLAN</div>
+                  <div class="subtitle">Select more features below to add to your plan if needed.</div>
                 </div>
-                <div class="premium-features-body-subscription-details-email">
-                  <div class="title">Billing email</div>
-                  <div class="data">
-                    {{ subscription.email }}
-                  </div>
-                </div>
-                <div class="premium-features-body-subscription-details-status">
-                  <div class="title">Payment status</div>
-                  <div class="data">
-                    {{
-                      subscription && subscription.paymentInfo && subscription.paymentInfo.status
-                        ? formatStatus(subscription.paymentInfo.status)
-                        : 'Unsubscribed'
-                    }}
-                  </div>
-                </div>
-                <div class="premium-features-body-subscription-details-payment-method">
-                  <div class="title">Payment method</div>
-                  <div class="data">
-                    Paypal
+                <div class="premium-features-body-features-scroll">
+                  <div>
+                    <template v-for="product in allFeatures">
+                      <PremiumFeature
+                        :key="product.id"
+                        :feature="product"
+                        :product-subscription-info="productSubscriptionInfo(product.id)"
+                        @updateSubscription="handleUpdateSubscription"
+                        @removeSubscription="removeSubscription"
+                      ></PremiumFeature>
+                    </template>
                   </div>
                 </div>
               </div>
             </div>
-          </StatusWidget>
-        </div>
-
-        <div class=" premium-features-body-features">
-          <div class="premium-features-body-features-title">
-            <div class="title">ADD MORE PLAN</div>
-            <div class="subtitle">Select more features below to add to your plan if needed.</div>
-          </div>
-          <StatusWidget
-            class="premium-features-body-features-status position-relative"
-            :status="loadFeatureStatus"
-            :error="loadFeaturesErrorMessage"
-            @retry="handleLoadFeatures(true)"
-          >
-            <div>
-              <vuescroll ref="vuescroll" class="premium-features-body-features-scroll" :ops="verticalScrollConfig">
-                <div>
-                  <template v-for="product in allFeatures">
-                    <PremiumFeature :key="product.id" :feature="product" @cancel="showCancelFeatureConfirm"></PremiumFeature>
-                  </template>
-                </div>
-              </vuescroll>
-            </div>
-          </StatusWidget>
-        </div>
-      </div>
-
-      <div class="premium-features-footer d-flex align-items-center">
-        <div class="d-flex flex-column">
-          <div class="mb-2">ADDING {{ amountOfSelectedFeatures }} FEATURE</div>
-          <div>TOTAL PRICE: {{ selectedFeaturesPrice }}$</div>
-        </div>
-        <div class="premium-features-footer-actions ml-auto d-flex align-items-center">
-          <DiButton
-            v-if="subscription"
-            :is-loading="cancelSubscriptionLoading"
-            :disabled="cancelSubscriptionLoading || subscribedProductIds.length <= 0"
-            class="mr-2"
-            title="Cancel"
-            @click="showCancelSubscriptionConfirm(subscription)"
-          />
-          <DiButton
-            v-if="approvalLink && (isUpdateApproval || isSubscribeApproval)"
-            primary
-            title="Paypal Approval"
-            @click="redirectToPaymentLink(approvalLink)"
-          ></DiButton>
-          <DiButton
-            v-else-if="subscription && subscription.paymentInfo && !isCanceledStatus(subscription.paymentInfo.status)"
-            :disabled="!haveSubscribeFeatures"
-            :is-loading="isSubscribeButtonLoading"
-            primary
-            title="Subscribe"
-            @click="handleUpdateFeatures(newSubscribedProductIds)"
-          ></DiButton>
-          <DiButton
-            v-else
-            :disabled="!haveSubscribeFeatures"
-            :is-loading="isSubscribeButtonLoading"
-            primary
-            title="Subscribe"
-            @click="handleSubscribeFeatures(newSubscribedProductIds)"
-          ></DiButton>
-        </div>
+          </vuescroll>
+        </StatusWidget>
       </div>
     </div>
   </LayoutContent>
 </template>
 <script lang="ts">
-import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
+import { Component, Ref, Vue } from 'vue-property-decorator';
 import { LayoutContent, LayoutHeader } from '@/shared/components/layout-wrapper';
 import { Status, VerticalScrollConfigs } from '@/shared';
 import { DIException } from '@core/common/domain';
-import { ListUtils, Modals, PopupUtils, StringUtils } from '@/utils';
+import { StringUtils, ListUtils } from '@/utils';
 import { Log } from '@core/utils/Log';
 import PremiumFeature from '@/screens/organization-settings/views/premium-features/PremiumFeature.vue';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import { Inject } from 'typescript-ioc';
-import { BillingService, PaymentStatus, ProductInfo, SubscriptionInfo } from '@core/billing';
+import { BillingService, PaymentStatus, ProductInfo, ProductSubscriptionInfo } from '@core/billing';
 import { Di } from '@core/common/modules';
 import { DataManager } from '@core/common/services';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
+import { OrganizationStoreModule } from '@/store/modules/OrganizationStore';
 import OrganizationPermissionModule from '@/store/modules/OrganizationPermissionStore';
 
 @Component({
@@ -140,15 +105,11 @@ import OrganizationPermissionModule from '@/store/modules/OrganizationPermission
 })
 export default class PremiumFeatures extends Vue {
   private readonly verticalScrollConfig = VerticalScrollConfigs;
-  private status: Status = Status.Loaded;
   private loadFeatureStatus: Status = Status.Loaded;
-  private isSubscribeButtonLoading = false;
-  private errorMessage = '';
   private loadFeatureErrorMessage = '';
   private loadFeaturesErrorMessage = '';
   private allFeatures: ProductInfo[] = [];
-  private subscription: SubscriptionInfo | null = null;
-  private cancelSubscriptionLoading = false;
+  private listSubscriptionInfo: ProductSubscriptionInfo[] = [];
 
   @Inject
   private billingService!: BillingService;
@@ -156,21 +117,20 @@ export default class PremiumFeatures extends Vue {
   @Ref()
   private readonly vuescroll?: any;
 
-  private showLoading() {
-    this.status = Status.Loading;
+  private productSubscriptionInfo(productId: string): ProductSubscriptionInfo | null {
+    const subscription = this.listSubscriptionInfo.find(item => item.subscription.productId === productId);
+    return subscription ? subscription : null;
   }
 
-  private showUpdating() {
-    this.status = Status.Updating;
-  }
-
-  private showLoaded() {
-    this.status = Status.Loaded;
-  }
-
-  private showError(ex: DIException) {
-    this.status = Status.Error;
-    this.errorMessage = ex.getPrettyMessage();
+  private get paymentStatus(): string {
+    if (ListUtils.isEmpty(this.listSubscriptionInfo)) {
+      return 'Unsubscribed';
+    }
+    const billingApprovalProducts: ProductSubscriptionInfo[] = this.listSubscriptionInfo.filter(item => item.payment.status === PaymentStatus.BillingApproval);
+    if (ListUtils.isNotEmpty(billingApprovalProducts)) {
+      return `${billingApprovalProducts.length} Waiting Payment`;
+    }
+    return 'Subscribed';
   }
 
   private showFeatureLoading() {
@@ -202,66 +162,20 @@ export default class PremiumFeatures extends Vue {
     this.loadFeatureStatus = Status.Loaded;
   }
 
-  private get isUpdateApproval() {
-    //UpdateApproval SubscribeApproval
-    return this.subscription?.paymentInfo?.status === PaymentStatus.UpdateApproval;
-  }
-
-  private get isSubscribeApproval() {
-    return this.subscription?.paymentInfo?.status === PaymentStatus.SubscribeApproval;
-  }
-
   private showFeaturesError(ex: DIException) {
     this.loadFeatureStatus = Status.Error;
     this.loadFeaturesErrorMessage = ex.getPrettyMessage();
-  }
-
-  private get amountOfSelectedFeatures(): number {
-    return this.allFeatures.filter(feature => feature.isSelected).length;
-  }
-
-  private get selectedProductIds(): string[] {
-    const selectedProductIds: string[] = [];
-    this.allFeatures.forEach(feature => {
-      if (feature.isSelected) {
-        selectedProductIds.push(feature.id);
-      }
-    });
-    return selectedProductIds;
-  }
-
-  private get newSubscribedProductIds(): string[] {
-    const setProductIds = new Set<string>(this.selectedProductIds.concat(this.subscribedProductIds));
-    return [...setProductIds];
-  }
-
-  private get approvalLink() {
-    return this.subscription?.paymentInfo?.approvalLink ?? null;
-  }
-
-  private get selectedFeaturesPrice(): number {
-    let result = 0;
-    this.allFeatures.forEach(feature => {
-      if (feature.isSelected) {
-        result += feature.price;
-      }
-    });
-    return result;
   }
 
   private get licenseKey() {
     return Di.get(DataManager).getUserInfo()?.organization.licenceKey ?? '';
   }
 
-  private get haveSubscribeFeatures() {
-    return this.amountOfSelectedFeatures > 0;
-  }
-
   private get lastInvoice(): number {
     let lastInvoice = 0;
-    this.allFeatures.forEach(product => {
-      if (product.isSubscribed) {
-        lastInvoice += product.price;
+    this.listSubscriptionInfo.forEach(subscriptionInfo => {
+      if (subscriptionInfo.payment.isSubscribed || subscriptionInfo.payment.isCanceled) {
+        lastInvoice += 9;
       }
     });
     return lastInvoice;
@@ -269,79 +183,22 @@ export default class PremiumFeatures extends Vue {
 
   async mounted() {
     await this.handleLoadFeatures(true);
-    await this.handleLoadSubscriptionInfo();
+    // await this.handleLoadSubscriptionInfo();
   }
 
-  private async handleLoadSubscriptionInfo(force = true) {
-    try {
-      force ? this.showLoading() : this.showUpdating();
-      this.subscription = await this.billingService.getSubscriptionInfo(this.licenseKey);
-      this.renderSubscribedProduct(this.subscription.productIds);
-      this.showLoaded();
-    } catch (e) {
-      const ex = DIException.fromObject(e);
-      this.showError(ex);
-      Log.error(`PremiumFeatures::handleLoadFeatures::error::`, e);
-    }
+  private async loadSubscriptionInfos(): Promise<void> {
+    this.listSubscriptionInfo = await this.billingService.getSubscriptionInfos(this.licenseKey);
   }
 
   private async refresh() {
-    await this.handleLoadFeatures(true);
-    await this.handleLoadSubscriptionInfo(false);
-  }
-
-  private isUpdateApprovalStatus(status?: PaymentStatus) {
-    return status === PaymentStatus.UpdateApproval;
-  }
-
-  private isSubscribeApprovalStatus(status?: PaymentStatus) {
-    return status === PaymentStatus.SubscribeApproval;
-  }
-
-  private isCanceledStatus(status?: PaymentStatus) {
-    return status === PaymentStatus.Canceled;
-  }
-
-  @Watch('subscription.paymentInfo.status')
-  private autoRefresh(status?: PaymentStatus) {
-    let refreshInterval = 0;
-    if (this.isUpdateApprovalStatus(status) || this.isSubscribeApprovalStatus(status)) {
-      refreshInterval = setInterval(async () => {
-        const allFeatures = (await this.billingService.getProducts()).data;
-        const subscription = await this.billingService.getSubscriptionInfo(this.licenseKey);
-        if (!this.isUpdateApprovalStatus(subscription?.paymentInfo?.status) && !this.isUpdateApprovalStatus(subscription?.paymentInfo?.status)) {
-          Log.debug('PremiumFeatures::autoRefresh::clearInterval');
-          OrganizationPermissionModule.init();
-          this.allFeatures = allFeatures;
-          this.subscription = subscription;
-          this.renderSubscribedProduct(this.subscription.productIds);
-          clearInterval(refreshInterval);
-        }
-      }, 5000);
-    }
-  }
-
-  private renderSubscribedProduct(productIds: string[]) {
-    this.allFeatures.forEach(item => {
-      item.isSubscribed = false;
-      item.isSelected = false;
-    });
-    productIds.forEach(productId => {
-      const productInfo = this.allFeatures.find(product => productId === product.id);
-      if (productInfo) {
-        productInfo.isSubscribed = true;
-      }
-    });
-  }
-
-  private formatStatus(status?: PaymentStatus): string {
-    return status ? StringUtils.camelToCapitalizedStr(status) : 'Not Found';
+    await this.handleLoadFeatures(false);
   }
 
   private async handleLoadFeatures(force = false) {
     try {
       force ? this.showFeatureLoading() : this.showFeatureUpdating();
       this.allFeatures = (await this.billingService.getProducts()).data;
+      await this.loadSubscriptionInfos();
       this.scrollToTop();
       this.showFeatureLoaded();
     } catch (e) {
@@ -360,87 +217,23 @@ export default class PremiumFeatures extends Vue {
     );
   }
 
-  private showCancelFeatureConfirm(feature: ProductInfo) {
-    const subscribedProductIds = ListUtils.remove(this.subscribedProductIds, productId => productId === feature.id);
-    if (subscribedProductIds.length <= 0) {
-      this.showCancelSubscriptionConfirm(this.subscription!);
+  private async handleUpdateSubscription(subscription: ProductSubscriptionInfo) {
+    const foundSubscriptionIndex = this.listSubscriptionInfo.findIndex(item => item.subscription.productId === subscription.subscription.productId);
+    if (foundSubscriptionIndex >= 0) {
+      this.$set(this.listSubscriptionInfo, foundSubscriptionIndex, subscription);
     } else {
-      Modals.showConfirmationModal(`Are you sure cancel feature ${feature.name}`, {
-        onOk: () => this.handleUpdateFeatures(subscribedProductIds)
-      });
+      this.listSubscriptionInfo.push(subscription);
     }
-  }
-
-  private get subscribedProductIds() {
-    const subscribedFeature: string[] = [];
-    this.allFeatures.forEach(product => {
-      if (product.isSubscribed) {
-        subscribedFeature.push(product.id);
-      }
-    });
-    return subscribedFeature;
-  }
-
-  private showCancelSubscriptionConfirm(subscription: SubscriptionInfo) {
-    Modals.showConfirmationModal(`Are you sure cancel this subscription`, {
-      onOk: () => this.handleCancelSubscription(subscription)
-    });
-  }
-
-  private async handleUpdateFeatures(productIds: string[]) {
-    try {
-      Log.debug('PremiumFeatures::handleUpdateFeatures::subscribedProductIds::', productIds);
-      this.isSubscribeButtonLoading = true;
-      this.subscription = await this.billingService.updateProducts(this.licenseKey, productIds);
-      this.redirectToPaymentLink(this.approvalLink!);
-    } catch (e) {
-      const ex = DIException.fromObject(e);
-      PopupUtils.showError(ex.getPrettyMessage());
-      Log.error(`PremiumFeatures::handleCancelFeature::error::`, ex);
-    } finally {
-      this.isSubscribeButtonLoading = false;
+    if (subscription.payment.isSubscribed || subscription.payment.isCanceled) {
+      await OrganizationPermissionModule.init();
     }
+    this.$forceUpdate();
   }
 
-  private async handleSubscribeFeatures(productIds: string[]) {
-    try {
-      this.isSubscribeButtonLoading = true;
-      this.subscription = await this.billingService.subscribeProducts(this.licenseKey, productIds);
-      this.resetProductStatus();
-      this.renderSubscribedProduct(productIds);
-      const approvalLink = this.subscription?.paymentInfo?.approvalLink;
-      if (approvalLink) this.redirectToPaymentLink(approvalLink);
-    } catch (e) {
-      const ex = DIException.fromObject(e);
-      PopupUtils.showError(ex.getPrettyMessage());
-      Log.error('PremiumFeatures::handleSubscribeFeatures::error::', ex.message);
-    } finally {
-      this.isSubscribeButtonLoading = false;
-    }
-  }
-
-  private resetProductStatus() {
-    this.allFeatures.forEach(product => {
-      product.isSelected = false;
-      product.isSubscribed = false;
-    });
-  }
-
-  private redirectToPaymentLink(approvalLink: string) {
-    window.open(approvalLink, '_blank');
-  }
-
-  private async handleCancelSubscription(subscription: SubscriptionInfo) {
-    try {
-      this.cancelSubscriptionLoading = true;
-      await this.billingService.cancelSubscription(subscription.licenseKey);
-      await this.handleLoadSubscriptionInfo(false);
-    } catch (e) {
-      const ex = DIException.fromObject(e);
-      Log.error(`PremiumFeatures::handleCancelSubscription::error::`, e);
-      PopupUtils.showError(ex.getPrettyMessage());
-    } finally {
-      this.cancelSubscriptionLoading = false;
+  private removeSubscription(subscription: ProductSubscriptionInfo) {
+    const foundSubscriptionIndex = this.listSubscriptionInfo.findIndex(item => item.subscription.productId === subscription.subscription.productId);
+    if (foundSubscriptionIndex >= 0) {
+      this.listSubscriptionInfo.splice(foundSubscriptionIndex, 1);
     }
   }
 }
@@ -451,17 +244,28 @@ export default class PremiumFeatures extends Vue {
 
 .premium-features {
   background: var(--secondary);
-  height: calc(100% - 53px);
+  height: calc(100% - 54px);
   border-radius: 4px;
-  padding: 16px 24px 78px;
+  padding: 16px 14px 16px 24px;
+  overflow: hidden;
 
   display: flex;
   flex-direction: column;
 
   position: relative;
 
+  &-content {
+    height: calc(100% - 38px);
+    overflow: hidden;
+  }
+
   &-header {
     margin-bottom: 8px;
+    position: sticky;
+    top: 0;
+    left: 0;
+    margin-right: 10px;
+    background: #fff;
 
     .premium-features-title {
       @include regular-text(0.6, var(--text-color));
@@ -471,7 +275,8 @@ export default class PremiumFeatures extends Vue {
   }
 
   &-body {
-    height: calc(100% - 38px) !important;
+    height: calc(100%) !important;
+    margin-right: 10px;
 
     &-subscription {
       color: var(--white);
@@ -556,10 +361,10 @@ export default class PremiumFeatures extends Vue {
       height: calc(100% - 192px - 24px) !important;
 
       &-status {
-        height: calc(100% - 46px) !important;
-        > div {
-          height: 100%;
-        }
+        //height: calc(100% - 46px) !important;
+        //> div {
+        //  height: 100%;
+        //}
       }
       &-title {
         margin-bottom: 16px;

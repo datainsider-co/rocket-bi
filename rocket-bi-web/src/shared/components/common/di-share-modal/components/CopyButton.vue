@@ -5,12 +5,12 @@
         Copy link
       </a>
     </slot>
-    <b-tooltip class="success-copy-tooltip" :id="`success-tooltip-${id}`" :disabled="true" :target="genBtnId(`quick-copy-${id}`)" placement="left">
+    <b-tooltip custom-class="success-copy-tooltip" :id="`success-tooltip-${id}`" :disabled="true" :target="genBtnId(`quick-copy-${id}`)" placement="left">
       <div :class="tooltipBackground" class="custom-tooltip-body">
         {{ copyStatus }}
       </div>
     </b-tooltip>
-    <b-tooltip class="error-copy-tooltip" :id="`error-tooltip-${id}`" :disabled="true" :target="genBtnId(`quick-copy-${id}`)" placement="left">
+    <b-tooltip custom-class="error-copy-tooltip" :id="`error-tooltip-${id}`" :disabled="true" :target="genBtnId(`quick-copy-${id}`)" placement="left">
       <div :class="tooltipBackground" class="custom-tooltip-body">
         {{ copyStatus }}
       </div>
@@ -86,4 +86,15 @@ export default class CopyButton extends Vue {
 }
 </script>
 
-<style lang="scss" src="../DiShareModal.scss" />
+<style lang="scss" scoped src="../DiShareModal.scss" />
+<style lang="scss">
+.success-copy-tooltip,
+#success-quick-copy-tooltip {
+  .arrow {
+    &::before {
+      border-left-color: #009c31;
+      border-right-color: #009c31;
+    }
+  }
+}
+</style>
