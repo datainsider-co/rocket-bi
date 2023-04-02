@@ -63,6 +63,6 @@ class BoostJob(
       val nextRunTime: Long = TimeUtils.calculateNextRunTime(boostInfo.scheduleTime, Some(System.currentTimeMillis()))
       val newBoostInfo = boostInfo.copy(lastRunTime = System.currentTimeMillis(), nextRunTime = nextRunTime)
 
-      dashboardService.updateBoostInfo(dashboard, Some(newBoostInfo))
+      dashboardService.updateBoostInfo(dashboard.id, Some(newBoostInfo))
     }
 }

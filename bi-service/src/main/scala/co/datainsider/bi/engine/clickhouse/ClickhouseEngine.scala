@@ -49,7 +49,11 @@ class ClickhouseEngine @Inject() (@Named("clickhouse") client: JdbcClient) exten
                     row += rs.getString(colName)
                   case None =>
                     val rawValue = rs.getObject(colName)
-                    val finalValue = if (doFormatValues) formatValue(rawValue, colType) else rawValue
+
+                    val finalValue = if (doFormatValues) {
+                      formatValue(rawValue, colType)
+                    } else rawValue
+
                     row += finalValue
                 }
               case _ =>
@@ -59,8 +63,8 @@ class ClickhouseEngine @Inject() (@Named("clickhouse") client: JdbcClient) exten
           DataTable(colNames, colTypes, rows.toArray)
         })
       } catch {
-        case e: SQLException => throw DbExecuteError(s"execute sql '$sql' failed with exception: $e")
-        case e: Throwable    => throw InternalError(s"engine.execute failed with exception: $e")
+        case e: SQLException => throw DbExecuteError(s"execute sql '$sql' failed with exception: ${e.getMessage}", e)
+        case e: Throwable    => throw InternalError(s"engine.execute failed with exception: ${e.getMessage}", e)
       }
     }
   }
@@ -96,10 +100,12 @@ class ClickhouseEngine @Inject() (@Named("clickhouse") client: JdbcClient) exten
     val colCount = metadata.getColumnCount
     val colNames = ArrayBuffer[String]()
     val colTypes = ArrayBuffer[String]()
+
     for (i <- 1 to colCount) {
       colNames += metadata.getColumnLabel(i)
       colTypes += metadata.getColumnTypeName(i)
     }
+
     (colNames.toArray, colTypes.toArray)
   }
 

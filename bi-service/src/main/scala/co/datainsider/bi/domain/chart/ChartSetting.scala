@@ -1,6 +1,19 @@
 package co.datainsider.bi.domain.chart
 
-import co.datainsider.bi.domain.query.{AggregateCondition, Condition, Field, FieldRelatedFunction, Function, JoinCondition, ObjectQueryBuilder, Or, OrderBy, Query, SqlQuery, SqlView}
+import co.datainsider.bi.domain.query.{
+  AggregateCondition,
+  Condition,
+  Field,
+  FieldRelatedFunction,
+  Function,
+  JoinCondition,
+  ObjectQueryBuilder,
+  Or,
+  OrderBy,
+  Query,
+  SqlQuery,
+  SqlView
+}
 import co.datainsider.bi.domain.request.{CompareRequest, FilterRequest}
 import co.datainsider.bi.domain.{GeoArea, Order}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
@@ -40,7 +53,8 @@ import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
     new Type(value = classOf[SpiderWebChartSetting], name = "spider_web_chart_setting"),
     new Type(value = classOf[BellCurveChartSetting], name = "bell_curve_chart_setting"),
     new Type(value = classOf[SankeyChartSetting], name = "sankey_chart_setting"),
-    new Type(value = classOf[DonutChartSetting], name = "donut_chart_setting")
+    new Type(value = classOf[DonutChartSetting], name = "donut_chart_setting"),
+    new Type(value = classOf[BulletChartSetting], name = "bullet_chart_setting")
   )
 )
 abstract class ChartSetting {
@@ -275,17 +289,22 @@ case class HeatMapChartSetting(
 
 case class TableChartSetting(
     columns: Array[TableColumn],
+    formatters: Array[TableColumn] = Array.empty,
     filters: Array[Condition] = Array.empty,
     sorts: Array[OrderBy] = Array.empty,
     sqlViews: Array[SqlView] = Array.empty,
     options: Map[String, Any] = Map.empty
 ) extends ChartSetting {
-  override def toTableColumns: Array[TableColumn] =
-    columns.map(c => c.copy(isCalcGroupTotal = false))
+  override def toTableColumns: Array[TableColumn] = {
+    val tableCols = columns.map(c => c.copy(isCalcGroupTotal = false, isFlatten = true))
+    val formatterCols = formatters.map(c => c.copy(isCalcGroupTotal = false))
+
+    tableCols ++ formatterCols
+  }
 
   override def toQuery: Query = {
     val builder = new ObjectQueryBuilder
-    builder.addFunctions(columns.map(_.function))
+    builder.addFunctions(columns.map(_.function) ++ formatters.map(_.function))
     builder.addCondition(Or(filters))
     builder.addOrders(sorts)
     builder.addViews(sqlViews)
@@ -493,7 +512,7 @@ case class DropdownFilterChartSetting(
   override def getDrillThroughFields(): Seq[Field] = {
     value.function match {
       case function: FieldRelatedFunction => Seq(function.field)
-      case _ => Seq.empty
+      case _                              => Seq.empty
     }
   }
 }
@@ -509,7 +528,7 @@ case class TabFilterChartSetting(
     options: Map[String, Any] = Map.empty
 ) extends ChartSetting
     with FilterSetting
-    with DrillThroughSetting  {
+    with DrillThroughSetting {
   override def toTableColumns: Array[TableColumn] =
     if (label.isDefined) Array(label.get, value) else Array(value, value)
 
@@ -528,7 +547,7 @@ case class TabFilterChartSetting(
   override def getDrillThroughFields(): Seq[Field] = {
     value.function match {
       case function: FieldRelatedFunction => Seq(function.field)
-      case _ => Seq.empty
+      case _                              => Seq.empty
     }
   }
 }
@@ -564,7 +583,7 @@ case class TabControlChartSetting(
   override def getDrillThroughFields(): Seq[Field] = {
     getFirstColumn.function match {
       case function: FieldRelatedFunction => Seq(function.field)
-      case _        => Seq.empty
+      case _                              => Seq.empty
     }
   }
 }
@@ -598,7 +617,7 @@ case class InputControlChartSetting(
     if (firstColumn.isDefined) {
       firstColumn.get.function match {
         case function: FieldRelatedFunction => Seq(function.field)
-        case _        => Seq.empty
+        case _                              => Seq.empty
       }
     } else {
       Seq.empty
@@ -938,6 +957,31 @@ case class SankeyChartSetting(
   override def customCopy(options: Map[String, Any]): SankeyChartSetting = this.copy(options = options)
 }
 
+case class BulletChartSetting(
+    values: Array[TableColumn],
+    breakdown: Option[TableColumn] = None,
+    filters: Array[Condition] = Array.empty,
+    sorts: Array[OrderBy] = Array.empty,
+    sqlViews: Array[SqlView] = Array.empty,
+    options: Map[String, Any] = Map.empty
+) extends ChartSetting {
+  override def toTableColumns: Array[TableColumn] = breakdown.toArray ++ values
+
+  override def toQuery: Query = {
+    val builder = new ObjectQueryBuilder
+    if (breakdown.isDefined) {
+      builder.addFunction(breakdown.get.function)
+    }
+    builder.addFunctions(values.map(_.function))
+    builder.addCondition(Or(filters))
+    builder.addOrders(sorts)
+    builder.addViews(sqlViews)
+    builder.build()
+  }
+
+  override def customCopy(options: Map[String, Any]): BulletChartSetting = this.copy(options = options)
+}
+
 case class TableColumn(
     name: String,
     function: Function,
@@ -946,5 +990,6 @@ case class TableColumn(
     isCalcMinMax: Boolean = false,
     formatterKey: Option[String] = None,
     isDynamicFunction: Boolean = false,
-    dynamicFunctionId: Option[Long] = None
+    dynamicFunctionId: Option[Long] = None,
+    isFlatten: Boolean = false
 )

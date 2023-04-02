@@ -22,7 +22,6 @@ class DashboardRepositoryTest extends IntegrationTest {
     await(schemaManager.ensureDatabase())
   }
 
-
   private def createDashboard(): DashboardId = {
     await(repository.create(Dashboard(name = "new dashboard", creatorId = ownerId, ownerId = ownerId)))
   }
@@ -30,6 +29,16 @@ class DashboardRepositoryTest extends IntegrationTest {
   test("test create dashboard") {
     id = createDashboard()
     assert(id != 0)
+  }
+
+  test("test list dashboards") {
+    val dashboards: Seq[Dashboard] = repository.list(0, 10, Some(false)).syncGet()
+    assert(dashboards.nonEmpty)
+  }
+
+  test("test count dashboards") {
+    val dashboardCount = repository.count(Some(false)).syncGet()
+    assert(dashboardCount > 0)
   }
 
   test("test get dashboard with empty setting") {
@@ -51,7 +60,8 @@ class DashboardRepositoryTest extends IntegrationTest {
           mainDateFilter =
             Some(MainDateFilter(TableField("db", "table", "name", "string"), MainDateFilterMode.LastMonth)),
           setting = Some(Serializer.fromJson[JsonNode]("{}")),
-          boostInfo = Some(BoostInfo(enable = true, ScheduleOnce(0L)))
+          boostInfo = Some(BoostInfo(enable = true, ScheduleOnce(0L))),
+          useAsTemplate = true
         )
       )
       .syncGet()
@@ -65,6 +75,7 @@ class DashboardRepositoryTest extends IntegrationTest {
     assert(dashboard.get.mainDateFilter.isDefined)
     assert(dashboard.get.boostInfo.isDefined)
     assert(dashboard.get.setting.isDefined)
+    assert(dashboard.get.useAsTemplate)
   }
 
   test("test delete dashboard") {

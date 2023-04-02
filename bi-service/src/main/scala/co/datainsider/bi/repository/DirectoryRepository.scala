@@ -44,7 +44,6 @@ trait DirectoryRepository {
 
   def multiRestore(directories: Seq[Directory]): Future[Boolean]
 
-
   def refreshUpdatedDate(ids: Array[DirectoryId]): Future[Boolean]
 
   def update(directory: Directory): Future[Boolean]
@@ -54,8 +53,8 @@ trait DirectoryRepository {
   def updateCreatorId(fromUsername: UserId, toUsername: UserId): Future[Boolean]
 
   /**
-   * all sub directories
-   */
+    * all sub directories
+    */
   def getSubDirectories(parentId: DirectoryId): Future[Array[Directory]]
 
 }
@@ -163,6 +162,11 @@ class MySqlDirectoryRepository @Inject() (
       case None =>
     }
 
+    if (request.dashboardIds.nonEmpty) {
+      whereClause += s" && dashboard_id in (${Seq.fill(request.dashboardIds.length)("?").mkString(", ")})"
+      conditionValues ++= request.dashboardIds
+    }
+
     (whereClause, conditionValues)
   }
 
@@ -209,26 +213,28 @@ class MySqlDirectoryRepository @Inject() (
       client.executeUpdate(query, id) >= 1
     }
 
-  override def multiDelete(ids: Array[DirectoryId]): Future[Boolean] = Future {
-    if (ids.isEmpty) {
-      true
-    } else {
-      val query =
-        s"""
+  override def multiDelete(ids: Array[DirectoryId]): Future[Boolean] =
+    Future {
+      if (ids.isEmpty) {
+        true
+      } else {
+        val query =
+          s"""
            |delete from $dbName.$tblName
            |where id in (${Array.fill(ids.length)("?").mkString(",")});
            |""".stripMargin
-      client.executeUpdate(query, ids: _*) >= 1
+        client.executeUpdate(query, ids: _*) >= 1
+      }
     }
-  }
 
-    override def deleteByOwnerId(username: UserId): Future[Boolean] = Future {
-        val query =
-            s"""
+  override def deleteByOwnerId(username: UserId): Future[Boolean] =
+    Future {
+      val query =
+        s"""
              |delete from $dbName.$tblName
              |where owner_id = ?;
              |""".stripMargin
-        client.executeUpdate(query, username) >= 1
+      client.executeUpdate(query, username) >= 1
     }
 
   override def move(id: DirectoryId, toParentId: DirectoryId): Future[Boolean] =
@@ -273,36 +279,35 @@ class MySqlDirectoryRepository @Inject() (
       ) > 0
     }
 
-  override def multiRestore(directories: Seq[Directory]): Future[Boolean] = Future {
-    if (directories.isEmpty) {
-      true
-    } else {
-      val query =
-        s"""
+  override def multiRestore(directories: Seq[Directory]): Future[Boolean] =
+    Future {
+      if (directories.isEmpty) {
+        true
+      } else {
+        val query =
+          s"""
            |insert into $dbName.$tblName
            |(id, name, creator_id, owner_id, created_date, parent_id, dir_type, dashboard_id, updated_date, data)
            |values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
            |""".stripMargin
-      val data: Array[Record] = directories.map { directory =>
-        Array(
-          directory.id,
-          directory.name,
-          directory.creatorId,
-          directory.ownerId,
-          directory.createdDate,
-          directory.parentId,
-          directory.directoryType.toString,
-          directory.dashboardId.getOrElse(null),
-          System.currentTimeMillis(),
-          directory.data.map(JsonParser.toJson(_, false)).orNull
-        )
-      }.toArray
+        val data: Array[Record] = directories.map { directory =>
+          Array(
+            directory.id,
+            directory.name,
+            directory.creatorId,
+            directory.ownerId,
+            directory.createdDate,
+            directory.parentId,
+            directory.directoryType.toString,
+            directory.dashboardId.getOrElse(null),
+            System.currentTimeMillis(),
+            directory.data.map(JsonParser.toJson(_, false)).orNull
+          )
+        }.toArray
 
-      client.executeBatchUpdate(query, data) > 0
+        client.executeBatchUpdate(query, data) > 0
+      }
     }
-  }
-
-
 
   private def toDirectory(rs: ResultSet): Directory = {
     val id = rs.getLong("id")
@@ -381,54 +386,58 @@ class MySqlDirectoryRepository @Inject() (
       ) >= 1
     }
 
-  override def update(directory: Directory): Future[Boolean] = Future {
-    val query =
-      s"""
+  override def update(directory: Directory): Future[Boolean] =
+    Future {
+      val query =
+        s"""
          |UPDATE $dbName.$tblName
          |SET data = ?, updated_date = ?
          |WHERE id = ?
          |""".stripMargin
 
-    client.executeUpdate(
-      query,
-      directory.data.map(JsonParser.toJson(_, false)).orNull,
-      directory.updatedDate.getOrElse(System.currentTimeMillis()),
-      directory.id
-    ) > 0
-  }
+      client.executeUpdate(
+        query,
+        directory.data.map(JsonParser.toJson(_, false)).orNull,
+        directory.updatedDate.getOrElse(System.currentTimeMillis()),
+        directory.id
+      ) > 0
+    }
 
-  override def updateOwnerId(fromUsername: UserId, toUsername: UserId): Future[Boolean] = Future {
-    val query =
-      s"""
+  override def updateOwnerId(fromUsername: UserId, toUsername: UserId): Future[Boolean] =
+    Future {
+      val query =
+        s"""
         |UPDATE ${dbName}.${tblName}
         |SET owner_id = ?
         |WHERE owner_id = ?
         |""".stripMargin
-    client.executeUpdate(query, toUsername, fromUsername) > 0
-  }
+      client.executeUpdate(query, toUsername, fromUsername) > 0
+    }
 
-  override def updateCreatorId(fromUsername: UserId, toUsername: UserId): Future[Boolean] = Future {
-    val query =
-      s"""
+  override def updateCreatorId(fromUsername: UserId, toUsername: UserId): Future[Boolean] =
+    Future {
+      val query =
+        s"""
         |UPDATE ${dbName}.${tblName}
         |SET creator_id = ?
         |WHERE creator_id = ?
         |""".stripMargin
-    client.executeUpdate(query, toUsername, fromUsername) > 0
-  }
-
-  override def getSubDirectories(parentId: DirectoryId): Future[Array[Directory]] = Future {
-    val dirIdQueue = mutable.Queue[DirectoryId](parentId)
-    val allDirectories = ArrayBuffer[Directory]()
-    while (dirIdQueue.nonEmpty) {
-      val curDirId: DirectoryId = dirIdQueue.dequeue()
-      val directories = listSync(ListDirectoriesRequest(parentId = Some(curDirId), size = Int.MaxValue))
-      allDirectories.appendAll(directories)
-      directories.foreach { directory =>
-        dirIdQueue.enqueue(directory.id)
-      }
+      client.executeUpdate(query, toUsername, fromUsername) > 0
     }
-    allDirectories.toArray
-  }
+
+  override def getSubDirectories(parentId: DirectoryId): Future[Array[Directory]] =
+    Future {
+      val dirIdQueue = mutable.Queue[DirectoryId](parentId)
+      val allDirectories = ArrayBuffer[Directory]()
+      while (dirIdQueue.nonEmpty) {
+        val curDirId: DirectoryId = dirIdQueue.dequeue()
+        val directories = listSync(ListDirectoriesRequest(parentId = Some(curDirId), size = Int.MaxValue))
+        allDirectories.appendAll(directories)
+        directories.foreach { directory =>
+          dirIdQueue.enqueue(directory.id)
+        }
+      }
+      allDirectories.toArray
+    }
 
 }

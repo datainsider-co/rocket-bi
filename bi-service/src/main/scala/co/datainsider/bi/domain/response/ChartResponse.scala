@@ -107,7 +107,7 @@ case class ScatterLikeResponse(
 case class SeriesOneItem(name: String, data: Array[Object], stack: Option[String] = None)
 case class SeriesOneResponse(
     series: Array[SeriesOneItem],
-    xAxis: Option[Array[Object]] = None,
+    xAxis: Option[Array[String]] = None,
     yAxis: Option[Array[Object]] = None,
     compareResponses: Option[HashMap[CompareMode, SeriesOneResponse]] = None,
     lastQueryTime: Long = 0,
@@ -185,7 +185,7 @@ case class WordCloudResponse(
 
 case class MapItem(code: Geocode, name: String, value: Object)
 case class MapResponse(
-    data: Array[MapItem],
+    data: Seq[MapItem],
     unknownData: Array[MapItem],
     lastQueryTime: Long = 0,
     lastProcessingTime: Long = 0

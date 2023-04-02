@@ -8,14 +8,20 @@ import com.twitter.finatra.http.Controller
 
 class GeolocationController @Inject() (geolocationService: GeolocationService) extends Controller {
 
-  val apiPath = s"/geolocation"
-
-  get(s"$apiPath/areas") { _: Request =>
+  get("/geolocation/areas") { _: Request =>
     geolocationService.listSupportedAreas()
   }
 
-  post(s"$apiPath/list") { request: GeoArea =>
+  post("/geolocation/list") { request: GeoArea =>
     geolocationService.list(request)
+  }
+
+  post("/geolocation/verify_area") { request: Request =>
+    geolocationService.parseGeoArea(request.getContentString())
+  }
+
+  post("/geolocation/verify_location") { request: Request =>
+    geolocationService.parseGeolocation(request.getContentString())
   }
 
 }

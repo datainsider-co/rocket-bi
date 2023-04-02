@@ -16,7 +16,7 @@ import scala.util.{Failure, Success}
 
 object Implicits {
 
-  val NULL_VALUE = "<null>"
+  val NULL_VALUE = "null"
 
   /** Convert from a Twitter Future to a Scala Future */
   implicit class RichTwitterFuture[A](val tf: TwitterFuture[A]) extends AnyVal {
@@ -74,8 +74,9 @@ object Implicits {
 
   implicit class ImplicitObject(val value: Object) extends AnyVal {
     def asString: String = {
-      if (value != null) value.toString
-      else NULL_VALUE
+      if (value != null) {
+        value.toString
+      } else NULL_VALUE
     }
   }
 
@@ -89,11 +90,12 @@ object Implicits {
   }
 
   implicit class RichOption[T](val value: Option[T]) extends AnyVal {
+
     /**
-     * method getOrElseThrow is used to throw exception when value is None
-     * @param ex: Exception which will be thrown when value is None
-     * @return value if it is not None
-     */
+      * method getOrElseThrow is used to throw exception when value is None
+      * @param ex: Exception which will be thrown when value is None
+      * @return value if it is not None
+      */
     def getOrElseThrow(ex: Throwable): T = {
       value match {
         case Some(v) => v

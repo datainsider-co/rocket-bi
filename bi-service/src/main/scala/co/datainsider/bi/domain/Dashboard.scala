@@ -5,9 +5,11 @@ import co.datainsider.bi.domain.MainDateFilterMode.MainDateFilterMode
 import co.datainsider.bi.domain.chart.{Chart, FilterSetting, Widget}
 import co.datainsider.bi.domain.query.{Field, QueryView}
 import co.datainsider.bi.domain.request.{ChartRequest, FilterRequest}
+import co.datainsider.bi.util.Serializer
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
+import datainsider.client.util.JsonParser
 
 /** *
   *
@@ -25,7 +27,8 @@ case class Dashboard(
     mainDateFilter: Option[MainDateFilter] = None,
     widgets: Option[Array[Widget]] = Some(Array.empty),
     widgetPositions: Option[Map[WidgetId, Position]] = Some(Map.empty),
-    boostInfo: Option[BoostInfo] = None
+    boostInfo: Option[BoostInfo] = None,
+    useAsTemplate: Boolean = false
 ) {
   private def getCharts: Array[Chart] = {
     widgets.get.filter(_.isInstanceOf[Chart]).map(_.asInstanceOf[Chart])
@@ -43,6 +46,16 @@ case class Dashboard(
 
   def getAllQueryViews: Seq[QueryView] = {
     getCharts.toSeq.map(_.setting.toQuery).flatMap(_.allQueryViews).distinct
+  }
+
+  def copyWithReplacements(dbNamesReplacements: Map[String, String]): Dashboard = {
+    val originalDashboardJson: String = Serializer.toJson(this)
+    val newDashboardJson: String =
+      dbNamesReplacements.foldLeft(originalDashboardJson)((dashboardJson, dbNameReplacement) =>
+        dashboardJson.replace(s""""db_name":"${dbNameReplacement._1}"""", s""""db_name":"${dbNameReplacement._2}"""")
+      )
+
+    JsonParser.fromJson[Dashboard](newDashboardJson)
   }
 }
 

@@ -282,7 +282,7 @@ class DirectoryServiceImpl @Inject() (
     for {
       canMove <- isDestinationDirValid(fromDir, toDir)
       isOk <- canMove match {
-        case true => directoryRepository.move(fromDir.id, toDir.id)
+        case true  => directoryRepository.move(fromDir.id, toDir.id)
         case false => Future.exception(BadRequestError("can not move directory to itself"))
       }
     } yield isOk
@@ -520,7 +520,7 @@ class DirectoryServiceImpl @Inject() (
 
   override def listChildrenIds(id: DirectoryId): Future[Seq[DirectoryId]] = {
     for {
-        subDirectories <- directoryRepository.getSubDirectories(id)
+      subDirectories <- directoryRepository.getSubDirectories(id)
     } yield subDirectories.map(_.id).distinct
   }
 

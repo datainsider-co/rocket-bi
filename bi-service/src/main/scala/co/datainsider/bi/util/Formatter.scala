@@ -6,7 +6,8 @@ import java.time.temporal.ChronoField
 import java.util.TimeZone
 import datainsider.client.exception.NotFoundError
 
-import java.time.{LocalDate, Month, ZoneId}
+import java.time.format.{DateTimeFormatter => LocalTimeFormatter}
+import java.time.{LocalDate, LocalDateTime, Month, ZoneId}
 import java.util
 import scala.math.{abs, log10, pow}
 
@@ -30,12 +31,12 @@ object DateFormatter {
 }
 
 object DateTimeFormatter {
+
+  private val formatter = LocalTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
   def format(value: Object): Object = {
     try {
-      val timestamp = Timestamp.valueOf(value.toString)
-      val fmtr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-      fmtr.setTimeZone(TimeZone.getTimeZone("UTC"))
-      fmtr.format(timestamp).asInstanceOf[Object]
+      value.asInstanceOf[LocalDateTime].format(formatter)
     } catch {
       case _: Throwable => value
     }

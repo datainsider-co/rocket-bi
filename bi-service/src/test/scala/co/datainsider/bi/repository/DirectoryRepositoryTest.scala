@@ -2,7 +2,7 @@ package co.datainsider.bi.repository
 
 import co.datainsider.bi.domain.Ids.DirectoryId
 import co.datainsider.bi.domain._
-import co.datainsider.bi.domain.request.CreateDirectoryRequest
+import co.datainsider.bi.domain.request.{CreateDirectoryRequest, ListDirectoriesRequest}
 import co.datainsider.bi.module.TestModule
 import com.twitter.inject.app.TestInjector
 import com.twitter.inject.{Injector, IntegrationTest}
@@ -31,6 +31,7 @@ class DirectoryRepositoryTest extends IntegrationTest {
     id = -1,
     isRemoved = false,
     directoryType = DirectoryType.FunnelAnalysis,
+    dashboardId = Some(1L)
   )
 
   private def createDirectory(): DirectoryId = {
@@ -41,6 +42,7 @@ class DirectoryRepositoryTest extends IntegrationTest {
           parentId = directory.parentId,
           isRemoved = directory.isRemoved,
           directoryType = directory.directoryType,
+          dashboardId = directory.dashboardId,
           data = directory.data,
           request = MockUserContext.getLoggedInRequest(0L, ownerId)
         ),
@@ -53,6 +55,16 @@ class DirectoryRepositoryTest extends IntegrationTest {
   test("test create directory") {
     id = createDirectory()
     assert(id != 0)
+  }
+
+  test("test list directories") {
+    val directories = await(directoryRepository.list(ListDirectoriesRequest(dashboardIds = Seq(1))))
+    assert(directories.nonEmpty)
+  }
+
+  test("test count directories") {
+    val directoriesCount = await(directoryRepository.count(ListDirectoriesRequest(dashboardIds = Seq(1))))
+    assert(directoriesCount > 0)
   }
 
   test("test get directory success") {

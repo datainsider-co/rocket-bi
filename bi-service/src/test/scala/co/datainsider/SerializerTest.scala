@@ -21,10 +21,25 @@ import datainsider.client.module.{MockCaasClientModule, MockSchemaClientModule}
 import datainsider.client.util.JsonParser.mapper
 import education.x.commons.SsdbKVS
 import org.nutz.ssdb4j.spi.SSDB
+import org.quartz.SimpleScheduleBuilder.simpleSchedule
+import org.quartz.{
+  DateBuilder,
+  Job,
+  JobBuilder,
+  JobDetail,
+  JobExecutionContext,
+  JobKey,
+  SimpleScheduleBuilder,
+  Trigger,
+  TriggerBuilder
+}
+import org.quartz.impl.StdSchedulerFactory
+import org.quartz.impl.matchers.GroupMatcher
 import org.scalatest.FunSuite
 
 import java.sql.{Date, Timestamp}
 import java.text.SimpleDateFormat
+import java.util
 import scala.collection.immutable.HashMap
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
@@ -550,6 +565,41 @@ class SerializerTest extends FunSuite with Logging {
     )
 
     assert(Serializer.toJson(newDashboard).contains("all_query_views"))
+  }
+
+  test("test copy with replacements") {
+    val originalDashboard = Dashboard(
+      id = 0,
+      name = s"mock dashboard",
+      creatorId = "root",
+      ownerId = "root",
+      setting = None,
+      mainDateFilter = None,
+      widgets = Some(
+        Array(
+          Chart(
+            id = 1,
+            name = "chart",
+            description = "",
+            setting = SeriesChartSetting(
+              xAxis = TableColumn("Country", GroupBy(field = TableField("sales", "orders", "Country", "String"))),
+              yAxis = Array(
+                TableColumn("UnitCost", Count(field = TableField("sales", "orders", "UnitCost", "UInt32")))
+              ),
+              legend = None,
+              breakdown = None
+            )
+          )
+        )
+      )
+    )
+
+    val newDashboard = originalDashboard.copyWithReplacements(Map("sales" -> "org2_sales"))
+
+    val newDashboardJson = Serializer.toJson(newDashboard)
+    assert(newDashboardJson.contains(""""db_name":"org2_sales""""))
+    assert(!newDashboardJson.contains(""""db_name":"sales""""))
+
   }
 
 }

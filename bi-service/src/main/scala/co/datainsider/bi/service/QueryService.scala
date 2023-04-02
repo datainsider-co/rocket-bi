@@ -187,7 +187,9 @@ class QueryServiceImpl @Inject() (
       case s: BellCurveChartSetting =>
         toBellCurveResponse(query, s)
       case s: SankeyChartSetting =>
-        toSankeyResponse(s)
+        toSankeyResponse(s, filterRequests, relationshipInfo, rlsPolicies, expressions, request.parameters)
+      case s: BulletChartSetting =>
+        toBulletResponse(query, s)
       case _ => throw BadRequestError(s"response for setting ${request.querySetting} is not yet supported")
     }
   }
@@ -344,7 +346,7 @@ class QueryServiceImpl @Inject() (
 
       if (setting.legend.isDefined || setting.breakdown.isDefined) {
         val recordsTransposed = baseTable.records.transpose
-        val xAxis = recordsTransposed(0) // [a,b,c,d]
+        val xAxis = recordsTransposed(0).map(_.asString) // [a,b,c,d]
         val data = recordsTransposed.slice(1, recordsTransposed.length) // [[1,2,3,4]...]
         val names = baseTable.headers.slice(1, recordsTransposed.length) // [Asia.food, Asia.drink...]
         val series = data
@@ -368,7 +370,7 @@ class QueryServiceImpl @Inject() (
           val data = recordsTransposed(i)
           series += SeriesOneItem(name, data)
         }
-        val xAxis = recordsTransposed(0)
+        val xAxis: Array[String] = recordsTransposed(0).map(_.asString)
         SeriesOneResponse(series.toArray, xAxis = Some(xAxis))
       }
     }
@@ -432,8 +434,8 @@ class QueryServiceImpl @Inject() (
                 "Current config is not compatible with bubble chart, bubble chart need 3 numeric columns"
               )
 
-            records.groupBy(r => r(0)).foreach {
-              case (key, row) => series += SeriesTwoItem(key.toString, row.map(r => Array(r(1), r(2), r(3))))
+            records.groupBy(r => r(0).asString).foreach {
+              case (key, row) => series += SeriesTwoItem(key, row.map(r => Array(r(1), r(2), r(3))))
             }
             SeriesTwoResponse(series.toArray)
 
@@ -490,7 +492,7 @@ class QueryServiceImpl @Inject() (
         val baseTable: DataTable = executeQuery(query, setting.toTableColumns)
         val total: Long = getTotal(query)
         val minMaxPairs: Array[MinMaxPair] = getMinMaxPairs(query, setting.toTableColumns)
-        val (headers, records) = renderJsonTabularResponse(baseTable)
+        val (headers, records) = renderJsonTabularResponse(baseTable, setting.toTableColumns)
         JsonTableResponse(
           headers,
           records,
@@ -500,10 +502,10 @@ class QueryServiceImpl @Inject() (
       }
     }
 
-  private def getTotal(query: Query): Long =
+  private def getTotal(query: Query, useFirstGroupOnly: Boolean = false): Long =
     Profiler(s"[Builder] ${this.getClass.getSimpleName}::getTotal") {
       query match {
-        case objQuery: ObjectQuery => getTotalOfObjQuery(objQuery)
+        case objQuery: ObjectQuery => getTotalOfObjQuery(objQuery, useFirstGroupOnly)
         case sqlQuery: SqlQuery    => getTotalOfSqlQuery(sqlQuery)
       }
     }
@@ -525,7 +527,7 @@ class QueryServiceImpl @Inject() (
         val baseTable: DataTable = executeQuery(query, setting.toTableColumns)
         val (headers, records) = renderJsonPivotResponse(baseTable, setting.toTableColumns)
 
-        val total: Long = getTotal(query)
+        val total: Long = getTotal(query, useFirstGroupOnly = true)
         val minMaxPairs: Array[MinMaxPair] = getMinMaxPairs(query, setting.toTableColumns)
 
         JsonTableResponse(
@@ -537,11 +539,11 @@ class QueryServiceImpl @Inject() (
       }
     }
 
-  private def getTotalOfObjQuery(objQuery: ObjectQuery): Long =
+  private def getTotalOfObjQuery(objQuery: ObjectQuery, useFirstGroupOnly: Boolean): Long =
     Profiler(s"[Builder] ${this.getClass.getSimpleName}::getTotalOfObjQuery") {
-      val firstColumnObjQuery: Query = toFirstColumnObjQuery(objQuery)
-      val firstColSql: String = parser.parse(firstColumnObjQuery)
-      val countSql: String = ClickhouseParser.toCountSql(firstColSql)
+      val groupedColumnsObjQuery: Query = toGroupedColumnsObjQuery(objQuery, useFirstGroupOnly)
+      val groupedColumnsSql: String = parser.parse(groupedColumnsObjQuery)
+      val countSql: String = ClickhouseParser.toCountSql(groupedColumnsSql)
       val df: DataTable = engine.execute(countSql)
       df.records(0)(0).asString.toLong
     }
@@ -551,17 +553,21 @@ class QueryServiceImpl @Inject() (
     * @param baseObjQuery input query
     * @return query which only contain first function column
     */
-  private def toFirstColumnObjQuery(baseObjQuery: ObjectQuery): ObjectQuery = {
+  private def toGroupedColumnsObjQuery(baseObjQuery: ObjectQuery, useFirstGroupOnly: Boolean = false): ObjectQuery = {
     require(baseObjQuery.functions.nonEmpty, "functions can not be empty when build FirstColumnObjQuery")
 
-    val firstFunction: Function = if (isGroupedQuery(baseObjQuery)) {
-      val groupBys: Array[GroupBy] = baseObjQuery.functions.filter(_.isGroupByFunc).toArray.map(_.asInstanceOf[GroupBy])
-      groupBys.head
+    val groupFunctions: Seq[Function] = if (isGroupedQuery(baseObjQuery)) {
+      val groupBys: Seq[GroupBy] = baseObjQuery.functions.filter(_.isGroupByFunc).map(_.asInstanceOf[GroupBy])
+      if (useFirstGroupOnly) {
+        groupBys.take(1)
+      } else groupBys
     } else {
-      baseObjQuery.functions.head
+      if (useFirstGroupOnly) {
+        baseObjQuery.functions.take(1)
+      } else baseObjQuery.functions
     }
 
-    baseObjQuery.copy(functions = Seq(firstFunction), orders = Seq.empty, limit = None)
+    baseObjQuery.copy(functions = groupFunctions, orders = Seq.empty, limit = None)
   }
 
   private def getTotalOfSqlQuery(sqlQuery: SqlQuery): Long =
@@ -692,26 +698,83 @@ class QueryServiceImpl @Inject() (
     }
 
   // TODO: sankey not support build multiple breakdown layer yet, currently only use first item in breakdown list
-  private def toSankeyResponse(setting: SankeyChartSetting): Future[SeriesTwoResponse] =
+  private def toSankeyResponse(
+      setting: SankeyChartSetting,
+      filterRequests: Array[FilterRequest],
+      relationshipInfo: RelationshipInfo,
+      rlsPolicies: Seq[RlsPolicy],
+      expressions: Map[String, String],
+      parameters: Map[String, String]
+  ): Future[SeriesTwoResponse] =
     Profiler(s"[Builder] ${this.getClass.getSimpleName}::toSankeyResponse") {
       Future {
         var sankeyRecords = Array.empty[Array[Object]]
-        if (setting.breakdowns.nonEmpty) {
-          val firstHalfQuery = setting.buildSankeyQuery(setting.source, setting.breakdowns(0))
-          val secondHalfQuery = setting.buildSankeyQuery(setting.breakdowns(0), setting.destination)
 
+        if (setting.breakdowns.nonEmpty) {
+          val firstHalfQuery: Query = enhanceQuery(
+            baseQuery = setting.buildSankeyQuery(setting.source, setting.breakdowns(0)),
+            username = None,
+            limit = None,
+            filterRequests = filterRequests,
+            relationshipInfo = relationshipInfo,
+            rlsPolicies = rlsPolicies,
+            expressions = expressions,
+            parameters = parameters
+          )
           val firstBaseTable = executeQuery(firstHalfQuery, setting.toTableColumns)
+
+          val secondHalfQuery = enhanceQuery(
+            baseQuery = setting.buildSankeyQuery(setting.breakdowns(0), setting.destination),
+            username = None,
+            limit = None,
+            filterRequests = filterRequests,
+            relationshipInfo = relationshipInfo,
+            rlsPolicies = rlsPolicies,
+            expressions = expressions,
+            parameters = parameters
+          )
           val secondBaseTable = executeQuery(secondHalfQuery, setting.toTableColumns)
 
           sankeyRecords = normalizeSankeyData(firstBaseTable.records) ++ normalizeSankeyData(secondBaseTable.records)
 
         } else {
-          val query = setting.buildSankeyQuery(setting.source, setting.destination)
+          val query = enhanceQuery(
+            baseQuery = setting.buildSankeyQuery(setting.source, setting.destination),
+            username = None,
+            limit = None,
+            filterRequests = filterRequests,
+            relationshipInfo = relationshipInfo,
+            rlsPolicies = rlsPolicies,
+            expressions = expressions,
+            parameters = parameters
+          )
           val baseTable = executeQuery(query, setting.toTableColumns)
+
           sankeyRecords = normalizeSankeyData(baseTable.records)
         }
 
         SeriesTwoResponse(Array(SeriesTwoItem(name = "", data = sankeyRecords)))
+      }
+    }
+
+  private def toBulletResponse(query: Query, setting: BulletChartSetting): Future[SeriesOneResponse] =
+    Profiler(s"[Builder] ${this.getClass.getSimpleName}::toBulletResponse") {
+      Future {
+        val baseTable: DataTable = executeQuery(query, setting.toTableColumns)
+
+        if (setting.breakdown.isDefined) {
+          val seriesOneItems: Array[SeriesOneItem] =
+            baseTable.records.map(r => SeriesOneItem(name = r(0).asString, data = r.drop(1)))
+
+          SeriesOneResponse(series = seriesOneItems)
+        } else {
+          val labels: Array[Object] = setting.values.map(_.name)
+          val records: Array[Array[Object]] = (labels +: baseTable.records).transpose
+          val seriesOneItems: Array[SeriesOneItem] =
+            records.map(r => SeriesOneItem(name = r(0).asString, data = r.drop(1)))
+
+          SeriesOneResponse(series = seriesOneItems)
+        }
       }
     }
 
@@ -805,7 +868,10 @@ class QueryServiceImpl @Inject() (
         })
         val knownLocations: Array[Geocode] = locData.map(_.code)
         val unknownLocData: Array[MapItem] =
-          locations.filterNot(loc => knownLocations.contains(loc.code)).map(loc => MapItem(loc.code, loc.name, null))
+          locations.toArray
+            .filterNot(loc => knownLocations.contains(loc.code))
+            .map(loc => MapItem(loc.code, loc.name, null))
+
         MapResponse(
           data = locData.filterNot(_.code == "unknown") ++ unknownLocData,
           unknownData = locData.filter(_.code == "unknown")
@@ -831,7 +897,7 @@ class QueryServiceImpl @Inject() (
     Profiler(s"[Builder] ${this.getClass.getSimpleName}::toRawQueryResponse") {
       Future {
         val baseTable: DataTable = executeQuery(query, setting.toTableColumns)
-        val (headers, records) = renderJsonTabularResponse(baseTable)
+        val (headers, records) = renderJsonTabularResponse(baseTable, setting.toTableColumns)
         val total: Long = getTotal(query)
 
         JsonTableResponse(
@@ -914,7 +980,7 @@ class QueryServiceImpl @Inject() (
           }
         }
 
-        val total: Long = getTotal(query)
+        val total: Long = getTotal(query, useFirstGroupOnly = true)
         val minMaxPairs: Array[MinMaxPair] = getMinMaxPairs(query, setting.toTableColumns)
 
         JsonTableResponse(
@@ -1043,7 +1109,7 @@ class QueryServiceImpl @Inject() (
             val data = recordsTransposed(i)
             series += SeriesOneItem(name, data)
           }
-          val xAxis = recordsTransposed(0)
+          val xAxis = recordsTransposed(0).map(_.asString)
           SeriesOneResponse(series.toArray, xAxis = Some(xAxis))
         } else {
           SeriesOneResponse(Array.empty, xAxis = Some(Array.empty))
@@ -1061,7 +1127,7 @@ class QueryServiceImpl @Inject() (
       val intervals = table.records.map(r => {
         val lower = PrettyNumberFormatter.format(r(0))
         val upper = PrettyNumberFormatter.format(r(1))
-        s"[$lower, $upper]".asInstanceOf[Object]
+        s"[$lower, $upper]"
       })
       val data = table.records.map(r => DoubleFormatter.format(r(2)))
       val item = SeriesOneItem(name = valueName, data = data)
@@ -1150,7 +1216,8 @@ class QueryServiceImpl @Inject() (
   }
 
   private def renderJsonTabularResponse(
-      resultTbl: DataTable
+      resultTbl: DataTable,
+      tableCols: Array[TableColumn]
   ): (JsonNode, JsonNode) =
     Profiler(s"[Builder] ${this.getClass.getSimpleName}::renderJsonTabularResponse") {
       val headersJson: ArrayNode = mapper.createArrayNode()
@@ -1166,6 +1233,8 @@ class QueryServiceImpl @Inject() (
           item.put("label", h)
           item.put("is_group_by", isGroupCols(i))
           item.put("is_text_left", isTextLefts(i))
+          item.put("formatter_key", tableCols(i).formatterKey.getOrElse(""))
+
           headersJson.add(item)
       }
 
@@ -1212,7 +1281,9 @@ class QueryServiceImpl @Inject() (
             item.put("label", header.asString)
             item.put("is_group_by", isGroupCols(i))
             item.put("is_text_left", isTextLeft(i))
-            if (formatterKeys.nonEmpty && formatterKeys(i).nonEmpty) item.put("formatter_key", formatterKeys(i))
+            if (formatterKeys.nonEmpty && formatterKeys(i).nonEmpty) {
+              item.put("formatter_key", formatterKeys(i))
+            }
 
             headersJson.add(item)
             cnt += 1
@@ -1645,14 +1716,14 @@ class QueryServiceImpl @Inject() (
       rlsPolicies <- fetchRlsPolicies(orgId, userProfile)
       tableExpressions <- fetchTablesExpression(baseQuery.allQueryViews)
       finalQuery = enhanceQuery(
-        baseQuery,
-        userProfile.map(_.username),
-        limit,
-        if (request.querySetting.isInstanceOf[FilterSetting]) Array.empty else request.filterRequests,
-        relationshipInfo,
-        rlsPolicies,
-        tableExpressions,
-        request.parameters
+        baseQuery = baseQuery,
+        username = userProfile.map(_.username),
+        limit = limit,
+        filterRequests = if (request.querySetting.isInstanceOf[FilterSetting]) Array.empty else request.filterRequests,
+        relationshipInfo = relationshipInfo,
+        rlsPolicies = rlsPolicies,
+        expressions = tableExpressions,
+        parameters = request.parameters
       )
     } yield {
       PrepareQueryResponse(relationshipInfo, rlsPolicies, tableExpressions, finalQuery)

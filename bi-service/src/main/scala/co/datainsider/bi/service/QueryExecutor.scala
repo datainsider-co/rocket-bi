@@ -108,10 +108,14 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
     var firstGroupElems: Array[String] = Array.empty
     val firstGroupConditions: ArrayBuffer[Condition] = ArrayBuffer.empty
 
-    val asColFromIndex = findAsColumnIndex(tableCols)
     val isCalcGroupTotals = tableCols.filter(c => c.function.isInstanceOf[GroupBy]).map(_.isCalcGroupTotal)
     var numParentGroups = groupFunctions.length - 1
+
+    val asColFromIndex = findAsColumnIndex(tableCols)
     if (asColFromIndex != -1) numParentGroups = numParentGroups.min(asColFromIndex)
+
+    val flattenFromIndex = findFlattenColIndex(tableCols)
+    if (flattenFromIndex != -1) numParentGroups = numParentGroups.min(flattenFromIndex)
 
     for (i <- 0 until numParentGroups) {
       val curGroups = groupFunctions.slice(0, i + 1)
@@ -235,6 +239,17 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
       .indexWhere(c => c.isHorizontalView)
   }
 
+  private def findFlattenColIndex(tableCols: Array[TableColumn]): Int = {
+    tableCols
+      .filter(c =>
+        c.function match {
+          case _: Select | _: GroupBy => true
+          case _                      => false
+        }
+      )
+      .indexWhere(c => c.isFlatten)
+  }
+
   private def mergeWithVerTotalValuesMap(
       table: DataTable,
       valuesMap: mutable.HashMap[String, Object],
@@ -278,7 +293,7 @@ class QueryExecutorImpl @Inject() (parser: QueryParser, engine: Engine[DataTable
                   row ++= Array.fill(endIndex - startIndex)(valuesMap(key))
               }
               finalHeaders += s"$aggColName by $curGroupColName"
-              finalColTypes += baseColTypes(groupIndex + 1 + i)
+              finalColTypes += baseColTypes(groupFunctions.length + i)
               finalRecordsTransposed += row.toArray
           }
         }

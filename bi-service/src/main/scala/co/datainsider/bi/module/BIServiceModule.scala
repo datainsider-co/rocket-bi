@@ -90,7 +90,8 @@ object BIServiceModule extends TwitterModule {
         tcpPort = sys.env("CLICKHOUSE_TCP_PORT").toInt,
         username = sys.env("CLICKHOUSE_USERNAME"),
         password = sys.env("CLICKHOUSE_PASSWORD"),
-        clusterName = sys.env.getOrElse("CLICKHOUSE_CLUSTER_NAME", "")
+        clusterName = Try(sys.env("CLICKHOUSE_CLUSTER_NAME")).toOption,
+        useSsl = sys.env.getOrElse("CLICKHOUSE_ENCRYPTED_CONN", "false").toBoolean
       )
     }.toOption
   }
@@ -147,8 +148,9 @@ object BIServiceModule extends TwitterModule {
 
   @Singleton
   @Provides
-  def provideMySqlGeolocationRepository(@Named("mysql") client: JdbcClient): GeolocationRepository = {
-    new MySqlGeolocationRepository(client, dbLiveName, tblGeolocation)
+  def provideMySqlGeolocationRepository(): GeolocationRepository = {
+    val dataPath = ZConfig.getString("geolocation.data_path", "mapdata")
+    new InMemGeolocationRepository(dataPath)
   }
 
   @Singleton

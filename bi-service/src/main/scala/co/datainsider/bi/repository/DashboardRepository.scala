@@ -17,9 +17,9 @@ import java.sql.ResultSet
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 trait DashboardRepository {
-  def list(from: Int, size: Int): Future[Seq[Dashboard]]
+  def list(from: Int, size: Int, useAsTemplate: Option[Boolean] = None): Future[Seq[Dashboard]]
 
-  def count(): Future[Long]
+  def count(useAsTemplate: Option[Boolean] = None): Future[Long]
 
   def create(dashboard: Dashboard): Future[DashboardId]
 
@@ -63,15 +63,34 @@ class MySqlDashboardRepository(
 ) extends DashboardRepository
     with Logging {
 
-  override def list(from: Int, size: Int): Future[Seq[Dashboard]] =
+  override def list(from: Int, size: Int, useAsTemplate: Option[Boolean] = None): Future[Seq[Dashboard]] =
     Future {
-      val query = s"select * from $dbName.$tblDashboardName limit ? offset ?"
-      client.executeQuery(query, size, from)(toDashboards)
+      val (conditionClause, conditionArgs) = buildConditionClause(useAsTemplate)
+
+      val query =
+        s"""
+           |select * from $dbName.$tblDashboardName 
+           |where $conditionClause
+           |limit ? offset ?
+           |""".stripMargin
+
+      val args: Seq[Any] = conditionArgs ++ Seq(size, from)
+
+      client.executeQuery(query, args: _*)(toDashboards)
     }
 
-  override def count(): Future[DashboardId] =
+  override def count(useAsTemplate: Option[Boolean] = None): Future[DashboardId] =
     Future {
-      client.executeQuery(s"select count(1) from $dbName.$tblDashboardName")(rs => {
+      val (conditionClause, conditionArgs) = buildConditionClause(useAsTemplate)
+
+      val countQuery =
+        s"""
+           |select count(1) 
+           |from $dbName.$tblDashboardName
+           |where $conditionClause
+           |""".stripMargin
+
+      client.executeQuery(countQuery, conditionArgs: _*)(rs => {
         if (rs.next()) {
           rs.getLong(1)
         } else 0L
@@ -98,8 +117,8 @@ class MySqlDashboardRepository(
       val query =
         s"""
          |insert into $dbName.$tblDashboardName
-         |(name, creator_id, owner_id, widgets, widget_positions, main_date_filter, boost_info, setting)
-         |values(?, ?, ?, ?, ?, ?, ?, ?);
+         |(name, creator_id, owner_id, widgets, widget_positions, main_date_filter, boost_info, setting, use_as_template)
+         |values(?, ?, ?, ?, ?, ?, ?, ?, ?);
          |""".stripMargin
 
       client.executeInsert(
@@ -111,7 +130,8 @@ class MySqlDashboardRepository(
         Serializer.toJson(dashboard.widgetPositions),
         Serializer.toJson(dashboard.mainDateFilter),
         Serializer.toJson(dashboard.boostInfo),
-        Serializer.toJson(dashboard.setting)
+        Serializer.toJson(dashboard.setting),
+        dashboard.useAsTemplate
       )
     }
 
@@ -175,13 +195,14 @@ class MySqlDashboardRepository(
       client.executeUpdate(
         s"""
          |update $dbName.$tblDashboardName
-         |set name = ?, main_date_filter = ?, boost_info = ?, setting = ?
+         |set name = ?, main_date_filter = ?, boost_info = ?, setting = ?, use_as_template = ?
          |where id = ?;
          |""".stripMargin,
         dashboard.name,
         Serializer.toJson(dashboard.mainDateFilter),
         Serializer.toJson(dashboard.boostInfo),
         Serializer.toJson(dashboard.setting),
+        dashboard.useAsTemplate,
         id
       ) >= 1
     }
@@ -209,6 +230,7 @@ class MySqlDashboardRepository(
     val mainDateFilter = Serializer.fromJson[Option[MainDateFilter]](rs.getString("main_date_filter"))
     val boostInfo = Serializer.fromJson[Option[BoostInfo]](rs.getString("boost_info"))
     val setting = Serializer.fromJson[Option[JsonNode]](rs.getString("setting"))
+    val useAsTemplate = rs.getBoolean("use_as_template")
 
     Dashboard(
       id = id,
@@ -219,7 +241,8 @@ class MySqlDashboardRepository(
       widgetPositions = Some(widgetPositions),
       mainDateFilter = mainDateFilter,
       boostInfo = boostInfo,
-      setting = setting
+      setting = setting,
+      useAsTemplate = useAsTemplate
     )
   }
 
@@ -231,9 +254,23 @@ class MySqlDashboardRepository(
       )
     }
 
+  private def buildConditionClause(useAsTemplate: Option[Boolean]): (String, Seq[Any]) = {
+    var conditionClause: String = "1=1 "
+    val conditionArgs = ArrayBuffer[Any]()
+
+    if (useAsTemplate.isDefined) {
+      conditionClause += "and use_as_template = ? "
+      conditionArgs += useAsTemplate.get
+    }
+
+    (conditionClause, conditionArgs)
+  }
+
   private def toDashboards(rs: ResultSet): Seq[Dashboard] = {
     val tableFields = ListBuffer[Dashboard]()
-    while (rs.next()) tableFields += toDashboard(rs)
+    while (rs.next()) {
+      tableFields += toDashboard(rs)
+    }
     tableFields
   }
 
@@ -379,17 +416,19 @@ class MySqlDashboardRepository(
   override def updateCreatorId(
       fromUsername: UserId,
       toUsername: UserId
-  ): Future[Boolean] = Future {
+  ): Future[Boolean] =
+    Future {
       val query = s"update $dbName.$tblDashboardName set creator_id = ? where creator_id = ?"
       client.executeUpdate(query, toUsername, fromUsername) > 0
     }
 
-  override def multiDelete(ids: Array[DashboardId]): Future[Boolean] = Future {
-    if (ids.isEmpty) {
-      true
-    } else {
-      val query = s"delete from $dbName.$tblDashboardName where id in (${createParams(ids.length)})"
-      client.executeUpdate(query, ids: _*) > 0
+  override def multiDelete(ids: Array[DashboardId]): Future[Boolean] =
+    Future {
+      if (ids.isEmpty) {
+        true
+      } else {
+        val query = s"delete from $dbName.$tblDashboardName where id in (${createParams(ids.length)})"
+        client.executeUpdate(query, ids: _*) > 0
+      }
     }
-  }
 }

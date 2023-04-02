@@ -18,9 +18,12 @@ services:
       - ./conf:/app/conf
       - ./logs:/app/logs
       - biservice-csv-dir:/tmp/csv
+      - biservice-mapdata:/app/mapdata
 
 volumes:
   biservice-csv-dir:
+    external: true
+  biservice-mapdata:
     external: true
 
 networks:

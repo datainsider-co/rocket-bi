@@ -1,11 +1,12 @@
 package co.datainsider.bi.service
 
 import co.datainsider.bi.domain.Ids.{DashboardId, DirectoryId}
-import co.datainsider.bi.domain.{BoostInfo, Dashboard, PermissionToken}
+import co.datainsider.bi.domain.{BoostInfo, Dashboard, Directory, PermissionToken}
 import co.datainsider.bi.domain.chart.{Chart, SeriesChartSetting, TabFilterChartSetting, TableColumn, Widget}
 import co.datainsider.bi.domain.query.{Count, GroupBy, In, QueryView, TableField, TableView}
 import co.datainsider.bi.domain.request.{
   CreateDashboardRequest,
+  CreateFromTemplateRequest,
   CreateWidgetRequest,
   DeleteDashboardRequest,
   DeleteWidgetRequest,
@@ -14,6 +15,7 @@ import co.datainsider.bi.domain.request.{
   ForceBoostRequest,
   GetDashboardRequest,
   GetWidgetRequest,
+  ListTemplateDashboardsRequest,
   RefreshBoostRequest,
   RenameDashboardRequest,
   ResizeWidgetsRequest,
@@ -150,5 +152,9 @@ class MockDashboardService extends DashboardService {
 
   override def getWidget(orgId: DashboardId, dashboardId: DashboardId, widgetId: DashboardId): Future[Widget] = ???
 
-  override def updateBoostInfo(dashboard: Dashboard, newBoostInfo: Option[BoostInfo]): Future[Boolean] = Future.True
+  override def updateBoostInfo(dashboardId: Long, newBoostInfo: Option[BoostInfo]): Future[Boolean] = Future.True
+
+  override def createFromTemplate(request: CreateFromTemplateRequest): Future[Dashboard] = ???
+
+  override def listTemplateDashboards(request: ListTemplateDashboardsRequest): Future[Array[Directory]] = ???
 }

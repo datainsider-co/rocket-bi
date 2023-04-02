@@ -1,242 +1,58 @@
 package co.datainsider.bi.service
 
-import co.datainsider.bi.domain.{GeoArea, GeoZoneLevel, Geolocation}
+import co.datainsider.bi.domain.{GeoArea, Geolocation}
 import co.datainsider.bi.domain.Ids.Geocode
 import co.datainsider.bi.repository.GeolocationRepository
+import com.fasterxml.jackson.databind.JsonNode
 import com.google.inject.Inject
 import com.twitter.util.Future
-import education.x.commons.SsdbKVS
-import org.nutz.ssdb4j.spi.SSDB
-import co.datainsider.bi.util.Implicits._
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import datainsider.client.exception.BadRequestError
+import datainsider.client.util.JsonParser
 
 trait GeolocationService {
   def get(code: Geocode): Future[Option[Geolocation]]
 
   def insert(geolocation: Geolocation): Future[Boolean]
 
-  def listSupportedAreas(): Future[Array[GeoArea]]
+  def listSupportedAreas(): Future[Seq[GeoArea]]
 
-  def list(geoArea: GeoArea): Future[Array[Geolocation]]
+  def list(geoArea: GeoArea): Future[Seq[Geolocation]]
+
+  def parseGeoArea(json: String): Future[GeoArea]
+
+  def parseGeolocation(json: String): Future[Seq[Geolocation]]
 
 }
 
-class GeolocationServiceImpl @Inject() (repo: GeolocationRepository) extends GeolocationService {
+class GeolocationServiceImpl @Inject() (geolocationRepository: GeolocationRepository) extends GeolocationService {
 
-  override def insert(location: Geolocation): Future[Boolean] = repo.create(location)
+  override def insert(location: Geolocation): Future[Boolean] = geolocationRepository.create(location)
 
-  override def get(code: Geocode): Future[Option[Geolocation]] = repo.get(code)
+  override def get(code: Geocode): Future[Option[Geolocation]] = geolocationRepository.get(code)
 
-  override def list(geoArea: GeoArea): Future[Array[Geolocation]] = repo.list(geoArea.codePrefix, geoArea.zoneLvl)
+  override def list(geoArea: GeoArea): Future[Seq[Geolocation]] = {
+    // list children location of this geoArea => childZoneLvl = geoArea.zoneLvl + 1
+    geolocationRepository.list(geoArea.codePrefix, geoArea.zoneLvl + 1)
+  }
 
-  override def listSupportedAreas(): Future[Array[GeoArea]] =
+  override def listSupportedAreas(): Future[Seq[GeoArea]] = {
+    geolocationRepository.listAreas()
+  }
+
+  override def parseGeoArea(json: String): Future[GeoArea] =
     Future {
-      Array(
-        GeoArea("world", "World", "", GeoZoneLevel.Country, "world.json"),
-        GeoArea("viet-nam", "Việt Nam", "VN", GeoZoneLevel.Province, "vn.json"),
-        GeoArea("united-states", "The United States", "US", GeoZoneLevel.Province, "us.json"),
-        GeoArea("us-counties", "United States Counties", "US", GeoZoneLevel.City, "us_counties.json"),
-        GeoArea("afghanistan", "Afghanistan", "AF", GeoZoneLevel.Province, "countries/af/af-all.geo.json"),
-        GeoArea("albania", "Albania", "AL", GeoZoneLevel.Province, "countries/al/al-all.geo.json"),
-        GeoArea("algeria", "Algeria", "DZ", GeoZoneLevel.Province, "countries/dz/dz-all.geo.json"),
-        GeoArea("andorra", "Andorra", "AD", GeoZoneLevel.Province, "countries/ad/ad-all.geo.json"),
-        GeoArea("angola", "Angola", "AO", GeoZoneLevel.Province, "countries/ao/ao-all.geo.json"),
-        GeoArea("antigua_and_Barbuda", "Antigua and Barbuda", "AG", GeoZoneLevel.Province, "countries/ag/ag-all.geo.json"),
-        GeoArea("argentina", "Argentina", "AR", GeoZoneLevel.Province, "countries/ar/ar-all.geo.json"),
-        GeoArea("armenia", "Armenia", "AM", GeoZoneLevel.Province, "countries/am/am-all.geo.json"),
-        GeoArea("australia", "Australia", "AU", GeoZoneLevel.Province, "countries/au/au-all.geo.json"),
-        GeoArea("american_samoa", "American Samoa", "AS", GeoZoneLevel.Province, "countries/as/as-all.geo.json"),
-        GeoArea("austria", "Austria", "AT", GeoZoneLevel.Province, "countries/at/at-all.geo.json"),
-        GeoArea("azerbaijan", "Azerbaijan", "AZ", GeoZoneLevel.Province, "countries/az/az-all.geo.json"),
-        GeoArea("bahrain", "Bahrain", "BH", GeoZoneLevel.Province, "countries/bh/bh-all.geo.json"),
-        GeoArea("bangladesh", "Bangladesh", "BD", GeoZoneLevel.Province, "countries/bd/bd-all.geo.json"),
-        GeoArea("barbados", "Barbados", "BB", GeoZoneLevel.Province, "countries/bb/bb-all.geo.json"),
-        GeoArea("belarus", "Belarus", "BY", GeoZoneLevel.Province, "countries/by/by-all.geo.json"),
-        GeoArea("belgium", "Belgium", "BE", GeoZoneLevel.Province, "countries/countries/be/be-all.geo.json"),
-        GeoArea("belize", "Belize", "BZ", GeoZoneLevel.Province, "countries/bz/bz-all.geo.json"),
-        GeoArea("benin", "Benin", "BJ", GeoZoneLevel.Province, "countries/bj/bj-all.geo.json"),
-        GeoArea("bhutan", "Bhutan", "BT", GeoZoneLevel.Province, "countries/bt/bt-all.geo.json"),
-        GeoArea("bolivia", "Bolivia", "BO", GeoZoneLevel.Province, "countries/bo/bo-all.geo.json"),
-        GeoArea("bosnia_and_herzegovina", "Bosnia and Herzegovina", "BA", GeoZoneLevel.Province, "countries/ba/ba-all.geo.json"),
-        GeoArea("botswana", "Botswana", "BW", GeoZoneLevel.Province, "countries/bw/bw-all.geo.json"),
-        GeoArea("brazil", "Brazil", "BR", GeoZoneLevel.Province, "countries/br/br-all.geo.json"),
-        GeoArea("brunei", "Brunei", "BN", GeoZoneLevel.Province, "countries/bn/bn-all.geo.json"),
-        GeoArea("bulgaria", "Bulgaria", "BG", GeoZoneLevel.Province, "countries/bg/bg-all.geo.json"),
-        GeoArea("burkina Faso", "Burkina Faso", "BF", GeoZoneLevel.Province, "countries/bf/bf-all.geo.json"),
-        GeoArea("burundi", "Burundi", "BI", GeoZoneLevel.Province, "countries/bi/bi-all.geo.json"),
-        GeoArea("cambodia", "Cambodia", "KH", GeoZoneLevel.Province, "countries/kh/kh-all.geo.json"),
-        GeoArea("colombia", "Colombia", "CO", GeoZoneLevel.Province, "countries/co/co-all.geo.json"),
-        GeoArea("comoros", "Comoros", "KM", GeoZoneLevel.Province, "countries/km/km-all.geo.json"),
-        GeoArea("cook_islands", "Cook Islands", "CK", GeoZoneLevel.Province, "countries/ck/ck-all.geo.json"),
-        GeoArea("costa_rica", "Costa Rica", "CR", GeoZoneLevel.Province, "countries/cr/cr-all.geo.json"),
-        GeoArea("canada", "Canada", "CA", GeoZoneLevel.Province, "countries/ca/ca-all.geo.json"),
-        GeoArea("cape_verde", "Cape Verde", "CV", GeoZoneLevel.Province, "countries/cv/cv-all.geo.json"),
-        GeoArea("central_african_republic", "Central African Republic", "CF", GeoZoneLevel.Province, "countries/cf/cf-all.geo.json"),
-        GeoArea("chad", "Chad", "TD", GeoZoneLevel.Province, "countries/td/td-all.geo.json"),
-        GeoArea("chile", "Chile", "CL", GeoZoneLevel.Province, "countries/cl/cl-all.geo.json"),
-        GeoArea("china", "China", "CN", GeoZoneLevel.Province, "countries/cn/cn-all.geo.json"),
-        GeoArea("cameroon", "Cameroon", "CM", GeoZoneLevel.Province, "countries/cm/cm-all.geo.json"),
-        GeoArea("croatia", "Croatia", "HR", GeoZoneLevel.Province, "countries/hr/hr-all.geo.json"),
-        GeoArea("cuba", "Cuba", "CU", GeoZoneLevel.Province, "countries/cu/cu-all.geo.json"),
-        GeoArea("cyprus", "Cyprus", "CY", GeoZoneLevel.Province, "countries/cy/cy-all.geo.json"),
-        GeoArea("czech_republic", "Czech Republic", "CZ", GeoZoneLevel.Province, "countries/cz/cz-all.geo.json"),
-        GeoArea("democratic_republic_of_the_congo", "Democratic Republic of the Congo", "CD", GeoZoneLevel.Province, "countries/cd/cd-all.geo.json"),
-        GeoArea("denmark", "Denmark", "DK", GeoZoneLevel.Province, "countries/dk/dk-all.geo.json"),
-        GeoArea("djibouti", "Djibouti", "DJ", GeoZoneLevel.Province, "countries/dj/dj-all.geo.json"),
-        GeoArea("dominica", "Dominica", "DM", GeoZoneLevel.Province, "countries/dm/dm-all.geo.json"),
-        GeoArea("dominican_republic", "Dominican Republic", "DO", GeoZoneLevel.Province, "countries/do/do-all.geo.json"),
-        GeoArea("east_timor", "East Timor", "TL", GeoZoneLevel.Province, "countries/tl/tl-all.geo.json"),
-        GeoArea("ecuador", "Ecuador", "EC", GeoZoneLevel.Province, "countries/ec/ec-all.geo.json"),
-        GeoArea("egypt", "Egypt", "EG", GeoZoneLevel.Province, "countries/eg/eg-all.geo.json"),
-        GeoArea("el_salvador", "El Salvador", "SV", GeoZoneLevel.Province, "countries/sv/sv-all.geo.json"),
-        GeoArea("ethiopia", "Ethiopia", "ET", GeoZoneLevel.Province, "countries/et/et-all.geo.json"),
-        GeoArea("equatorial_guinea", "Equatorial Guinea", "GQ", GeoZoneLevel.Province, "countries/gq/gq-all.geo.json"),
-        GeoArea("eritrea", "Eritrea", "ER", GeoZoneLevel.Province, "countries/er/er-all.geo.json"),
-        GeoArea("estonia", "Estonia", "EE", GeoZoneLevel.Province, "countries/ee/ee-all.geo.json"),
-        GeoArea("faroe_islands", "Faroe Islands", "FO", GeoZoneLevel.Province, "countries/fo/fo-all.geo.json "),
-        GeoArea("fiji", "Fiji", "FJ", GeoZoneLevel.Province, "countries/fj/fj-all.geo.json"),
-        GeoArea("finland", "Finland", "FI", GeoZoneLevel.Province, "countries/fi/fi-all.geo.json"),
-        GeoArea("france", "France", "FR", GeoZoneLevel.Province, "countries/fr/fr-all.geo.json"),
-        GeoArea("gabon", "Gabon", "GA", GeoZoneLevel.Province, "countries/ga/ga-all.geo.json"),
-        GeoArea("gambia", "Gambia", "GM", GeoZoneLevel.Province, "countries/gm/gm-all.geo.json"),
-        GeoArea("georgia", "Georgia", "GE", GeoZoneLevel.Province, "countries/ge/ge-all.geo.json"),
-        GeoArea("germany", "Germany", "DE", GeoZoneLevel.Province, "countries/de/de-all.geo.json"),
-        GeoArea("ghana", "Ghana", "GH", GeoZoneLevel.Province, "countries/gh/gh-all.geo.json"),
-        GeoArea("greece", "Greece", "GR", GeoZoneLevel.Province, "countries/gr/gr-all.geo.json"),
-        GeoArea("greenland", "Greenland", "GL", GeoZoneLevel.Province, "countries/gl/gl-all.geo.json"),
-        GeoArea("grenada", "Grenada", "GD", GeoZoneLevel.Province, "countries/gd/gd-all.geo.json"),
-        GeoArea("guam", "Guam", "GU", GeoZoneLevel.Province, "countries/gu/gu-all.geo.json"),
-        GeoArea("guatemala", "Guatemala", "GT", GeoZoneLevel.Province, "countries/gt/gt-all.geo.json"),
-        GeoArea("guinea", "Guinea", "GN", GeoZoneLevel.Province, "countries/gn/gn-all.geo.json"),
-        GeoArea("guinea_bissau", "Guinea Bissau", "GW", GeoZoneLevel.Province, "countries/gw/gw-all.geo.json"),
-        GeoArea("guyana", "Guyana", "GY", GeoZoneLevel.Province, "countries/gy/gy-all.geo.json"),
-        GeoArea("haiti", "Haiti", "HT", GeoZoneLevel.Province, "countries/ht/ht-all.geo.json"),
-        GeoArea("honduras", "Honduras", "HN", GeoZoneLevel.Province, "countries/hn/hn-all.geo.json"),
-        GeoArea("hungary", "Hungary", "HU", GeoZoneLevel.Province, "countries/hu/hu-all.geo.json"),
-        GeoArea("iceland", "Iceland", "IS", GeoZoneLevel.Province, "countries/is/is-all.geo.json"),
-        GeoArea("india", "India", "IN", GeoZoneLevel.Province, "countries/in/in-all.geo.json"),
-        GeoArea("indonesia", "Indonesia", "ID", GeoZoneLevel.Province, "countries/id/id-all.geo.json"),
-        GeoArea("iran", "Iran", "IR", GeoZoneLevel.Province, "countries/ir/ir-all.geo.json"),
-        GeoArea("iraq", "Iraq", "IQ", GeoZoneLevel.Province, "countries/iq/iq-all.geo.json"),
-        GeoArea("ireland", "Ireland", "IE", GeoZoneLevel.Province, "countries/ie/ie-all.geo.json"),
-        GeoArea("israel", "Israel", "IL", GeoZoneLevel.Province, "countries/il/il-all.geo.json"),
-        GeoArea("italy", "Italy", "IT", GeoZoneLevel.Province, "countries/it/it-all.geo.json"),
-        GeoArea("ivory_coast", "Ivory Coast", "CI", GeoZoneLevel.Province, "countries/ci/ci-all.geo.json"),
-        GeoArea("jamaica", "Jamaica", "JM", GeoZoneLevel.Province, "countries/jm/jm-all.geo.json"),
-        GeoArea("japan", "Japan", "JP", GeoZoneLevel.Province, "countries/jp/jp-all.geo.json"),
-        GeoArea("jordan", "Jordan", "JO", GeoZoneLevel.Province, "countries/jo/jo-all.geo.json"),
-        GeoArea("kazakhstan", "Kazakhstan", "KZ", GeoZoneLevel.Province, "countries/kz/kz-all.geo.json"),
-        GeoArea("kenya", "Kenya", "KE", GeoZoneLevel.Province, "countries/ke/ke-all.geo.json"),
-        GeoArea("kosovo", "Kosovo", "KV", GeoZoneLevel.Province, "countries/kv/kv-all.geo.json"),
-        GeoArea("kuwait", "Kuwait", "KW", GeoZoneLevel.Province, "countries/kw/kw-all.geo.json"),
-        GeoArea("kyrgyzstan", "Kyrgyzstan", "KG", GeoZoneLevel.Province, "countries/kg/kg-all.geo.json"),
-        GeoArea("laos", "Laos", "LA", GeoZoneLevel.Province, "countries/la/la-all.geo.json"),
-        GeoArea("latvia", "Latvia", "LV", GeoZoneLevel.Province, "countries/lv/lv-all.geo.json"),
-        GeoArea("lebanon", "Lebanon", "LB", GeoZoneLevel.Province, "countries/lb/lb-all.geo.json"),
-        GeoArea("lesotho", "Lesotho", "LS", GeoZoneLevel.Province, "countries/ls/ls-all.geo.json"),
-        GeoArea("liberia", "Liberia", "LR", GeoZoneLevel.Province, "countries/lr/lr-all.geo.json"),
-        GeoArea("libya", "Libya", "LY", GeoZoneLevel.Province, "countries/ly/ly-all.geo.json"),
-        GeoArea("liechtenstein", "Liechtenstein", "LI", GeoZoneLevel.Province, "countries/li/li-all.geo.json"),
-        GeoArea("lithuania", "Lithuania", "LT", GeoZoneLevel.Province, "countries/lt/lt-all.geo.json"),
-        GeoArea("luxembourg", "Luxembourg", "LU", GeoZoneLevel.Province, "countries/lu/lu-all.geo.json"),
-        GeoArea("macedonia", "Macedonia", "MK", GeoZoneLevel.Province, "countries/mk/mk-all.geo.json"),
-        GeoArea("madagascar", "Madagascar", "MG", GeoZoneLevel.Province, "countries/mg/mg-all.geo.json"),
-        GeoArea("malawi", "Malawi", "MW", GeoZoneLevel.Province, "countries/mw/mw-all.geo.json"),
-        GeoArea("malaysia", "Malaysia", "MY", GeoZoneLevel.Province, "countries/my/my-all.geo.json"),
-        GeoArea("mali", "Mali", "ML", GeoZoneLevel.Province, "countries/ml/ml-all.geo.json"),
-        GeoArea("malta", "Malta", "MT", GeoZoneLevel.Province, "countries/mt/mt-all.geo.json"),
-        GeoArea("mauritania", "Mauritania", "MR", GeoZoneLevel.Province, "countries/mr/mr-all.geo.json"),
-        GeoArea("mauritius", "Mauritius", "MU", GeoZoneLevel.Province, "countries/mu/mu-all.geo.json"),
-        GeoArea("mexico", "Mexico", "MX", GeoZoneLevel.Province, "countries/mx/mx-all.geo.json"),
-        GeoArea("moldova", "Moldova", "MD", GeoZoneLevel.Province, "countries/md/md-all.geo.json"),
-        GeoArea("monaco", "Monaco", "MC", GeoZoneLevel.Province, "countries/mc/mc-all.geo.json"),
-        GeoArea("mongolia", "Mongolia", "MN", GeoZoneLevel.Province, "countries/mn/mn-all.geo.json"),
-        GeoArea("montenegro", "Montenegro", "ME", GeoZoneLevel.Province, "countries/me/me-all.geo.json"),
-        GeoArea("morocco", "Morocco", "MA", GeoZoneLevel.Province, "countries/ma/ma-all.geo.json"),
-        GeoArea("mozambique", "Mozambique", "MZ", GeoZoneLevel.Province, "countries/mz/mz-all.geo.json"),
-        GeoArea("myanmar", "Myanmar", "MM", GeoZoneLevel.Province, "countries/mm/mm-all.geo.json"),
-        GeoArea("namibia", "Namibia", "NA", GeoZoneLevel.Province, "countries/na/na-all.geo.json"),
-        GeoArea("nauru", "Nauru", "NR", GeoZoneLevel.Province, "countries/nr/nr-all.geo.json"),
-        GeoArea("nepal", "Nepal", "NP", GeoZoneLevel.Province, "countries/np/np-all.geo.json"),
-        GeoArea("new_caledonia", "New Caledonia", "NC", GeoZoneLevel.Province, "countries/nc/nc-all.geo.json"),
-        GeoArea("new_zealand", "New Zealand", "NZ", GeoZoneLevel.Province, "countries/nz/nz-all.geo.json"),
-        GeoArea("nicaragua", "Nicaragua", "NI", GeoZoneLevel.Province, "countries/ni/ni-all.geo.json"),
-        GeoArea("niger", "Niger", "NE", GeoZoneLevel.Province, "countries/ne/ne-all.geo.json"),
-        GeoArea("nigeria", "Nigeria", "NG", GeoZoneLevel.Province, "countries/ng/ng-all.geo.json"),
-        GeoArea("north_korea", "North Korea", "KP", GeoZoneLevel.Province, "countries/kp/kp-all.geo.json"),
-        GeoArea("northern_mariana_islands", "Northern Mariana Islands", "MP", GeoZoneLevel.Province, "countries/mp/mp-all.geo.json"),
-        GeoArea("norway", "Norway", "NO", GeoZoneLevel.Province, "countries/no/no-all.geo.json"),
-        GeoArea("oman", "Oman", "OM", GeoZoneLevel.Province, "countries/om/om-all.geo.json"),
-        GeoArea("pakistan", "Pakistan", "PK", GeoZoneLevel.Province, "countries/pk/pk-all.geo.json"),
-        GeoArea("palau", "Palau", "PW", GeoZoneLevel.Province, "countries/pw/pw-all.geo.json"),
-        GeoArea("panama", "Panama", "PA", GeoZoneLevel.Province, "countries/pa/pa-all.geo.json"),
-        GeoArea("papua_new_guinea", "Papua New Guinea", "PG", GeoZoneLevel.Province, "countries/pg/pg-all.geo.json"),
-        GeoArea("paraguay", "Paraguay", "PY", GeoZoneLevel.Province, "countries/py/py-all.geo.json"),
-        GeoArea("peru", "Peru", "PE", GeoZoneLevel.Province, "countries/pe/pe-all.geo.json"),
-        GeoArea("philippines", "Philippines", "PH", GeoZoneLevel.Province, "countries/ph/ph-all.geo.json"),
-        GeoArea("poland", "Poland", "PL", GeoZoneLevel.Province, "countries/pl/pl-all.geo.json"),
-        GeoArea("portugal", "Portugal", "PT", GeoZoneLevel.Province, "countries/pt/pt-all.geo.json"),
-        GeoArea("puerto_rico", "Puerto Rico", "PR", GeoZoneLevel.Province, "countries/pr/pr-all-all.geo.json"),
-        GeoArea("qatar", "Qatar", "QA", GeoZoneLevel.Province, "countries/qa/qa-all.geo.json"),
-        GeoArea("republic_of_serbia", "Republic of Serbia", "RS", GeoZoneLevel.Province, "countries/rs/rs-all.geo.json"),
-        GeoArea("republic_of_the_congo", "Republic of the Congo", "CG", GeoZoneLevel.Province, "countries/cg/cg-all.geo.json"),
-        GeoArea("romania", "Romania", "RO", GeoZoneLevel.Province, "countries/ro/ro-all.geo.json"),
-        GeoArea("russia", "Russia", "RU", GeoZoneLevel.Province, "countries/ru/ru-all.geo.json"),
-        GeoArea("rwanda", "Rwanda", "RW", GeoZoneLevel.Province, "countries/rw/rw-all.geo.json"),
-        GeoArea("saint_kitts_and_nevis", "Saint Kitts and Nevis", "KN", GeoZoneLevel.Province, "countries/kn/kn-all.geo.json"),
-        GeoArea("saint_lucia", "Saint Lucia", "LC", GeoZoneLevel.Province, "countries/lc/lc-all.geo.json"),
-        GeoArea("saint_vincent_and_the_grenadines", "Saint Vincent and the Grenadines", "VC", GeoZoneLevel.Province, "countries/vc/vc-all.geo.json"),
-        GeoArea("samoa", "Samoa", "WS", GeoZoneLevel.Province, "countries/ws/ws-all.geo.json"),
-        GeoArea("san_marino", "San Marino", "SM", GeoZoneLevel.Province, "countries/sm/sm-all.geo.json"),
-        GeoArea("sao_tome_and_principe", "Sao Tome and Principe", "ST", GeoZoneLevel.Province, "countries/st/st-all.geo.json"),
-        GeoArea("saudi_arabia", "Saudi Arabia", "SA", GeoZoneLevel.Province, "countries/sa/sa-all.geo.json"),
-        GeoArea("senegal", "Senegal", "SN", GeoZoneLevel.Province, "countries/sn/sn-all.geo.json"),
-        GeoArea("seychelles", "Seychelles", "SC", GeoZoneLevel.Province, "countries/sc/sc-all.geo.json"),
-        GeoArea("sierra_leone", "Sierra Leone", "SL", GeoZoneLevel.Province, "countries/sl/sl-all.geo.json"),
-        GeoArea("singapore", "Singapore", "SG", GeoZoneLevel.Province, "countries/sg/sg-all.geo.json"),
-        GeoArea("slovakia", "Slovakia", "SK", GeoZoneLevel.Province, "countries/sk/sk-all.geo.json"),
-        GeoArea("slovenia", "Slovenia", "SI", GeoZoneLevel.Province, "countries/si/si-all.geo.json"),
-        GeoArea("solomon_islands", "Solomon Islands", "SB", GeoZoneLevel.Province, "countries/sb/sb-all.geo.json"),
-        GeoArea("somalia", "Somalia", "SO", GeoZoneLevel.Province, "countries/so/so-all.geo.json"),
-        GeoArea("somaliland", "Somaliland", "SX", GeoZoneLevel.Province, "countries/sx/sx-all.geo.json"),
-        GeoArea("south_africa", "South Africa", "ZA", GeoZoneLevel.Province, "countries/za/za-all.geo.json"),
-        GeoArea("south_korea", "South Korea", "KR", GeoZoneLevel.Province, "countries/kr/kr-all.geo.json"),
-        GeoArea("south_sudan", "South Sudan", "SS", GeoZoneLevel.Province, "countries/ss/ss-all.geo.json"),
-        GeoArea("spain", "Spain", "ES", GeoZoneLevel.Province, "countries/es/es-all.geo.json"),
-        GeoArea("sri_lanka", "Sri Lanka", "LK", GeoZoneLevel.Province, "countries/lk/lk-all.geo.json"),
-        GeoArea("suriname", "Suriname", "SR", GeoZoneLevel.Province, "countries/sr/sr-all.geo.json"),
-        GeoArea("swaziland", "Swaziland", "SZ", GeoZoneLevel.Province, "countries/sz/sz-all.geo.json"),
-        GeoArea("sweden", "Sweden", "SE", GeoZoneLevel.Province, "countries/se/se-all.geo.json"),
-        GeoArea("switzerland", "Switzerland", "CH", GeoZoneLevel.Province, "countries/ch/ch-all.geo.json"),
-        GeoArea("syria", "Syria", "SY", GeoZoneLevel.Province, "countries/sy/sy-all.geo.json"),
-        GeoArea("taiwan", "Taiwan", "TW", GeoZoneLevel.Province, "countries/tw/tw-all.geo.json"),
-        GeoArea("tajikistan", "Tajikistan", "TJ", GeoZoneLevel.Province, "countries/tj/tj-all.geo.json"),
-        GeoArea("thailand", "Thailand", "TH", GeoZoneLevel.Province, "countries/th/th-all.geo.json"),
-        GeoArea("the_bahamas", "The Bahamas", "BS", GeoZoneLevel.Province, "countries/bs/bs-all.geo.json"),
-        GeoArea("the_netherlands", "The Netherlands", "NL", GeoZoneLevel.Province, "countries/nl/nl-all.geo.json"),
-        GeoArea("togo", "Togo", "TG", GeoZoneLevel.Province, "countries/tg/tg-all.geo.json"),
-        GeoArea("trinidad_and_tobago", "Trinidad and Tobago", "TT", GeoZoneLevel.Province, "countries/tt/tt-all.geo.json"),
-        GeoArea("tunisia", "Tunisia", "TN", GeoZoneLevel.Province, "countries/tn/tn-all.geo.json"),
-        GeoArea("turkey", "Turkey", "TR", GeoZoneLevel.Province, "countries/tr/tr-all.geo.json"),
-        GeoArea("turkmenistan", "Turkmenistan", "TM", GeoZoneLevel.Province, "countries/tm/tm-all.geo.json"),
-        GeoArea("uganda", "Uganda", "UG", GeoZoneLevel.Province, "countries/ug/ug-all.geo.json"),
-        GeoArea("ukraine", "Ukraine", "UA", GeoZoneLevel.Province, "countries/ua/ua-all.geo.json"),
-        GeoArea("united_arab_emirates", "United Arab Emirates", "AE", GeoZoneLevel.Province, "countries/ae/ae-all.geo.json"),
-        GeoArea("united_kingdom", "United Kingdom", "GB", GeoZoneLevel.Province, "countries/gb/gb-all.geo.json"),
-        GeoArea("united_republic_of_tanzania", "United Republic of Tanzania", "TZ", GeoZoneLevel.Province, "countries/tz/tz-all.geo.json"),
-        GeoArea("united_states_virgin_islands", "United States Virgin Islands", "VI", GeoZoneLevel.Province, "countries/vi/vi-all.geo.json"),
-        GeoArea("uruguay", "Uruguay", "UY", GeoZoneLevel.Province, "countries/uy/uy-all.geo.json"),
-        GeoArea("uzbekistan", "Uzbekistan", "UZ", GeoZoneLevel.Province, "countries/uz/uz-all.geo.json"),
-        GeoArea("vanuatu", "Vanuatu", "VU", GeoZoneLevel.Province, "countries/vu/vu-all.geo.json"),
-        GeoArea("venezuela", "Venezuela", "VE", GeoZoneLevel.Province, "countries/ve/ve-all.geo.json"),
-        GeoArea("wallis_and_futuna", "Wallis and Futuna", "WF", GeoZoneLevel.Province, "countries/wf/wf-all.geo.json"),
-        GeoArea("western_sahara", "Western Sahara", "EH", GeoZoneLevel.Province, "countries/eh/eh-all.geo.json"),
-        GeoArea("yemen", "Yemen", "YE", GeoZoneLevel.Province, "countries/ye/ye-all.geo.json"),
-        GeoArea("zambia", "Zambia", "ZM", GeoZoneLevel.Province, "countries/zm/zm-all.geo.json"),
-        GeoArea("zimbabwe", "Zimbabwe", "ZW", GeoZoneLevel.Province, "countries/zw/zw-all.geo.json"),
-        GeoArea("sai_gon", "Sài Gòn", "VN-SG", GeoZoneLevel.City, "countries/vn/hcm/hcm.json")
-      )
+      val jsonNode = JsonParser.fromJson[JsonNode](json)
+      geolocationRepository.parseGeoArea(jsonNode, null)
     }
 
+  override def parseGeolocation(json: String): Future[Seq[Geolocation]] =
+    Future {
+      try {
+        val jsonNode = JsonParser.fromJson[JsonNode](json)
+        require(jsonNode.has("features"), "missing 'features' field")
+        geolocationRepository.parseGeolocation(jsonNode.get("features"))
+      } catch {
+        case e: Throwable => throw BadRequestError(s"parse geolocation failed with exception: $e")
+      }
+    }
 }

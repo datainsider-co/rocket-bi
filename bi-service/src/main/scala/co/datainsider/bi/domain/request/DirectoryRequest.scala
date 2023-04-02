@@ -15,7 +15,9 @@ case class ListDirectoriesRequest(
     parentId: Option[Long] = None,
     ownerId: Option[String] = None,
     isRemoved: Option[Boolean] = None,
+    @deprecated("use dashboardIds instead")
     dashboardId: Option[Long] = None,
+    dashboardIds: Seq[Long] = Seq.empty,
     @JsonScalaEnumeration(classOf[DirectoryTypeRef]) directoryType: Option[DirectoryType] = None,
     sorts: Array[Sort] = Array.empty,
     from: Int = 0,

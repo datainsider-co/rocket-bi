@@ -35,7 +35,7 @@ trait DashboardService {
 
   def rename(request: RenameDashboardRequest): Future[Boolean]
 
-  @deprecated("use editSettings instead")
+  @deprecated("use updateSettings instead")
   def updateMainDateFilter(request: UpdateMainDateFilterRequest): Future[Boolean]
 
   def delete(request: DeleteDashboardRequest): Future[Boolean]
@@ -63,7 +63,11 @@ trait DashboardService {
 
   def forceBoost(request: ForceBoostRequest): Future[Unit]
 
-  def updateBoostInfo(dashboard: Dashboard, newBoostInfo: Option[BoostInfo]): Future[Boolean]
+  def updateBoostInfo(dashboardId: Long, newBoostInfo: Option[BoostInfo]): Future[Boolean]
+
+  def createFromTemplate(request: CreateFromTemplateRequest): Future[Dashboard]
+
+  def listTemplateDashboards(request: ListTemplateDashboardsRequest): Future[Array[Directory]]
 
 }
 
@@ -413,12 +417,41 @@ class DashboardServiceImpl @Inject() (
     } yield forceRunJob
   }
 
-  override def updateBoostInfo(dashboard: Dashboard, newBoostInfo: Option[BoostInfo]): Future[Boolean] = {
-    val newDashboard: Dashboard = dashboard.copy(boostInfo = newBoostInfo)
+  override def updateBoostInfo(dashboardId: Long, newBoostInfo: Option[BoostInfo]): Future[Boolean] = {
     for {
-      updated <- dashboardRepository.update(dashboard.id, newDashboard)
+      newDashboard <- dashboardRepository.get(dashboardId).map {
+        case Some(dashboard) => dashboard.copy(boostInfo = newBoostInfo)
+        case None            => throw BadRequestError(s"not found dashboard for id $dashboardId")
+      }
+      updated <- dashboardRepository.update(dashboardId, newDashboard)
       _ <- setupPerformanceBoost(newBoostInfo, newDashboard)
     } yield updated
+  }
+
+  override def createFromTemplate(request: CreateFromTemplateRequest): Future[Dashboard] = {
+    for {
+      templateDashboard <- get(request.fromOrgId, request.fromDashboardId)
+      newDashboard = templateDashboard.copyWithReplacements(Map(request.fromDbName -> request.toDbName))
+      createdDashboard <- create(
+        CreateDashboardRequest(
+          name = newDashboard.name,
+          parentDirectoryId = request.toParentDirId,
+          mainDateFilter = newDashboard.mainDateFilter,
+          widgets = newDashboard.widgets,
+          widgetPositions = newDashboard.widgetPositions,
+          setting = newDashboard.setting,
+          boostInfo = newDashboard.boostInfo,
+          request = request.request
+        )
+      )
+    } yield createdDashboard
+  }
+
+  override def listTemplateDashboards(request: ListTemplateDashboardsRequest): Future[Array[Directory]] = {
+    for {
+      dashboards <- dashboardRepository.list(request.from, request.size, Some(true))
+      directories <- directoryService.list(ListDirectoriesRequest(dashboardIds = dashboards.map(_.id)))
+    } yield directories
   }
 
   private def prepareDashboardFromRequest(
@@ -435,17 +468,17 @@ class DashboardServiceImpl @Inject() (
           })
           .toMap
       )
-      newPositions: Map[WidgetId, Position] = request
-        .widgetPositions
-        .map {
-          case (oldId: WidgetId, position: Position) => {
-            val newId: Option[WidgetId] = newWidgetAsMap.get(oldId).map(_.id)
-            newId.getOrElse(oldId) -> position
+      newPositions: Map[WidgetId, Position] =
+        request.widgetPositions
+          .getOrElse(Map.empty)
+          .map {
+            case (oldId: WidgetId, position: Position) =>
+              val newId: Option[WidgetId] = newWidgetAsMap.get(oldId).map(_.id)
+              newId.getOrElse(oldId) -> position
           }
-      }
     } yield Dashboard(
       name = request.name,
-      creatorId = request.currentUsername,
+      creatorId = creatorId,
       ownerId = ownerId,
       setting = request.setting,
       mainDateFilter = request.mainDateFilter,

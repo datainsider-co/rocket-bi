@@ -7,6 +7,7 @@ import com.google.inject.name.Named
 import com.twitter.util.Future
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 trait SchemaManager {
 
@@ -102,9 +103,10 @@ class MySqlSchemaManager @Inject() (
 
   private def ensureDashboardTable(dashboardTblName: String, dashboardFields: Set[String]): Future[Boolean] =
     Future {
-      if (isTblExist(dbName, dashboardTblName))
+      if (isTblExist(dbName, dashboardTblName)) {
+        updateDashboardSchema(dashboardTblName)
         isAllTblFieldValid(s"$dbName.$dashboardTblName", dashboardFields)
-      else createDashboardTbl(dashboardTblName)
+      } else createDashboardTbl(dashboardTblName)
     }
 
   private def ensureDirectoryTable(directoryTblName: String, directoryFields: Set[String]): Future[Boolean] =
@@ -205,7 +207,8 @@ class MySqlSchemaManager @Inject() (
          |owner_id TEXT,
          |boost_info LONGTEXT,
          |query_context LONGTEXT,
-         |setting LONGTEXT
+         |setting LONGTEXT,
+         |use_as_template BOOLEAN NOT NULL DEFAULT false
          |) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
          |""".stripMargin) >= 0
   }
@@ -353,11 +356,33 @@ class MySqlSchemaManager @Inject() (
   }
 
   private def isAllTblFieldValid(tableName: String, desiredFields: Set[String]): Boolean = {
-    val actualFields: mutable.Set[String] = mutable.Set[String]()
-    client.executeQuery(s"desc $tableName;")(rs => {
-      while (rs.next()) actualFields.add(rs.getString("Field"))
-    })
+    val actualFields: Seq[String] = getColumns(tableName)
     desiredFields.forall(actualFields.contains)
+  }
+
+  private def getColumns(tableName: String): Seq[String] = {
+    val colNames: ArrayBuffer[String] = ArrayBuffer[String]()
+
+    client.executeQuery(s"desc $tableName;")(rs => {
+      while (rs.next()) {
+        colNames += rs.getString("Field")
+      }
+    })
+
+    colNames
+  }
+
+  private def updateDashboardSchema(dashboardTblName: String): Unit = {
+    val columnNames: Seq[String] = getColumns(s"$dbName.$dashboardTblName")
+
+    if (!columnNames.contains("use_as_template")) {
+      val addUseAsTemplateColumnSql =
+        s"""
+           |alter table $dbName.$dashboardTblName add column use_as_template boolean not null default false;
+           |""".stripMargin
+
+      client.executeUpdate(addUseAsTemplateColumnSql)
+    }
   }
 
 }

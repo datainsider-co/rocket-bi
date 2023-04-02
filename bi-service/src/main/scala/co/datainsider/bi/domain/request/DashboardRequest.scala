@@ -24,11 +24,26 @@ case class CreateDashboardRequest(
     parentDirectoryId: DirectoryId,
     mainDateFilter: Option[MainDateFilter] = None,
     widgets: Option[Array[Widget]] = Some(Array.empty),
-    widgetPositions: Map[Long, Position] = Map.empty,
     @JsonScalaEnumeration(classOf[DirectoryTypeRef])
     directoryType: DirectoryType = DirectoryType.Dashboard,
+    widgetPositions: Option[Map[Long, Position]] = Some(Map.empty),
     setting: Option[JsonNode] = None,
     boostInfo: Option[BoostInfo] = None,
+    @Inject request: Request = null
+) extends LoggedInRequest
+
+case class CreateFromTemplateRequest(
+    fromOrgId: Long,
+    fromDashboardId: Long,
+    fromDbName: String,
+    toDbName: String,
+    toParentDirId: Long,
+    @Inject request: Request = null
+) extends LoggedInRequest
+
+case class ListTemplateDashboardsRequest(
+    @Min(0) from: Int = 0,
+    @Min(0) size: Int = 1000,
     @Inject request: Request = null
 ) extends LoggedInRequest
 
@@ -93,6 +108,7 @@ case class UpdateSettingsRequest(
     mainDateFilter: Option[MainDateFilter] = None,
     boostInfo: Option[BoostInfo] = None,
     setting: Option[JsonNode] = None,
+    useAsTemplate: Option[Boolean] = None,
     @Inject request: Request = null
 ) extends LoggedInRequest
 
