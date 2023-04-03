@@ -1233,7 +1233,9 @@ class QueryServiceImpl @Inject() (
           item.put("label", h)
           item.put("is_group_by", isGroupCols(i))
           item.put("is_text_left", isTextLefts(i))
-          item.put("formatter_key", tableCols(i).formatterKey.getOrElse(""))
+          if (i < tableCols.length) {
+            item.put("formatter_key", tableCols(i).formatterKey.getOrElse(""))
+          }
 
           headersJson.add(item)
       }
