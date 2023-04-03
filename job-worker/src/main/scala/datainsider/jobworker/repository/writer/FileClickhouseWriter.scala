@@ -41,6 +41,10 @@ class FileClickhouseWriter(config: Config) extends DataWriter with Logging {
     envClickhouseSetting.get.password
   } else config.getString("clickhouse-config.password")
 
+  val clickhouseUseSql: Boolean = if (envClickhouseSetting.isDefined) {
+    envClickhouseSetting.get.useSsl
+  } else false
+
   val encryptMode: String = config.getString("clickhouse-config.encryption.mode")
   val privateKey: String = config.getString("clickhouse-config.encryption.key")
   val initialVector: String = config.getString("clickhouse-config.encryption.iv")
@@ -84,6 +88,7 @@ class FileClickhouseWriter(config: Config) extends DataWriter with Logging {
       )
 
       if (clickhousePassword.nonEmpty) cmd += s"--password=$clickhousePassword"
+      if (clickhouseUseSql) cmd += s"--secure"
 
       var processLog = ""
       val processLogger = ProcessLogger(log => {

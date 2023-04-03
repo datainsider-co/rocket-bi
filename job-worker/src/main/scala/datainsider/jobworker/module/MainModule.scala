@@ -86,7 +86,8 @@ object MainModule extends TwitterModule {
         tcpPort = sys.env("CLICKHOUSE_TCP_PORT").toInt,
         username = sys.env("CLICKHOUSE_USERNAME"),
         password = sys.env("CLICKHOUSE_PASSWORD"),
-        clusterName = sys.env.getOrElse("CLICKHOUSE_CLUSTER_NAME", "")
+        clusterName = Try(sys.env("CLICKHOUSE_CLUSTER_NAME")).toOption,
+        useSsl = sys.env.getOrElse("CLICKHOUSE_ENCRYPTED_CONN", "false").toBoolean
       )
     }.toOption
   }
