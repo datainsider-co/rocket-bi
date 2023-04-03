@@ -19,18 +19,19 @@ trait SystemRepository {
   def setSystemInfo(orgId: Long, source: SystemInfo): Future[Boolean]
 }
 
-class SystemRepositoryImpl(clickhouseSource: ClickhouseSource, systemInfoDatabase: KVS[String, SystemInfo]) extends SystemRepository {
-  private def buildKey(orgId: Long): String = s"system.source"
+class SystemRepositoryImpl(clickhouseSource: ClickhouseSource, systemInfoDatabase: KVS[String, SystemInfo])
+    extends SystemRepository {
+  private def buildKey(orgId: Long): String = s"org${orgId}_system.clickhouse"
 
   override def getSystemInfo(orgId: Long): Future[SystemInfo] = {
     val key: String = buildKey(orgId)
     for {
       systemInfo <- systemInfoDatabase.get(key).asTwitter
     } yield {
-       val currentSystemInfo = systemInfo match {
-         case Some(systemInfo) => systemInfo
-         case _ => SystemInfo.default(orgId)
-       }
+      val currentSystemInfo = systemInfo match {
+        case Some(systemInfo) => systemInfo
+        case _                => SystemInfo.default(orgId)
+      }
       currentSystemInfo.copy(sources = Seq(clickhouseSource))
     }
   }
