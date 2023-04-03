@@ -10,7 +10,12 @@ import com.twitter.finatra.thrift.ThriftServer
 import com.twitter.finatra.thrift.routing.ThriftRouter
 import datainsider.client.filter.{LicenceFilter, LoggedInUserParser, MustLoggedInFilter}
 import datainsider.client.module.{CaasClientModule, MockCaasClientModule, MockLakeClientModule, SchemaClientModule}
-import datainsider.jobscheduler.controller.http.filter.{CORSFilter, CaseClassExceptionMapping, CommonExceptionMapping, JsonParseExceptionMapping}
+import datainsider.jobscheduler.controller.http.filter.{
+  CORSFilter,
+  CaseClassExceptionMapping,
+  CommonExceptionMapping,
+  JsonParseExceptionMapping
+}
 import datainsider.jobscheduler.controller.http._
 import datainsider.jobscheduler.controller.thrift.TScheduleController
 import datainsider.jobscheduler.module.{MainModule, TestModule}
@@ -61,7 +66,6 @@ class Server extends HttpServer with ThriftServer {
       .filter[CORSFilter](beforeRouting = true)
       .filter[CommonFilters]
       .filter[LoggedInUserParser]
-      .filter[LicenceFilter]
       .add[HealthController]
       .add[ScheduleController]
       .add[JobController]

@@ -21,7 +21,7 @@ trait SystemRepository {
 
 class SystemRepositoryImpl(clickhouseSource: ClickhouseSource, systemInfoDatabase: KVS[String, SystemInfo])
     extends SystemRepository {
-  private def buildKey(orgId: Long): String = s"org${orgId}_system.clickhouse"
+  private def buildKey(orgId: Long): String = s"org$orgId.system.clickhouse"
 
   override def getSystemInfo(orgId: Long): Future[SystemInfo] = {
     val key: String = buildKey(orgId)
