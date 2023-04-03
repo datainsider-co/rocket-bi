@@ -1,6 +1,5 @@
 package datainsider.data_cook.domain.response
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
 import datainsider.client.domain.scheduler.ScheduleTime
@@ -8,7 +7,7 @@ import datainsider.client.domain.user.UserProfile
 import datainsider.data_cook.domain.EtlJobStatus.EtlJobStatus
 import datainsider.data_cook.domain.Ids.{EtlJobId, JobHistoryId}
 import datainsider.data_cook.domain.operator.EtlOperator
-import datainsider.data_cook.domain.{EtlConfig, EtlJobStatusRef, OperatorInfo}
+import datainsider.data_cook.domain.{EtlConfig, EtlJobStatusRef}
 
 /**
   * @author tvc12 - Thien Vi
@@ -42,7 +41,5 @@ case class EtlJobResponse(
     @JsonScalaEnumeration(classOf[EtlJobStatusRef]) status: Option[EtlJobStatus] = None,
     nextExecuteTime: Option[Long] = None,
     lastExecuteTime: Option[Long] = None,
-    @JsonIgnore
-    operatorInfo: OperatorInfo,
     config: EtlConfig
 )

@@ -234,10 +234,10 @@ class JoinOperatorTest extends OperatorTest {
 
     val pipelineResult: PipelineResult = pipeline.execute()
     assertResult(false)(pipelineResult.isSucceed)
-    assertResult(true)(pipelineResult.operatorError.nonEmpty)
+    assertResult(true)(pipelineResult.errorOperator.nonEmpty)
     assertResult(true)(pipelineResult.exception.nonEmpty)
     assertResult(true)(pipelineResult.exception.get.isInstanceOf[InputInvalid])
-    assertResult(Some(joinOperator))(pipelineResult.operatorError)
+    assertResult(Some(joinOperator))(pipelineResult.errorOperator)
     println(pipelineResult.exception.get.getMessage)
   }
 
@@ -273,10 +273,10 @@ class JoinOperatorTest extends OperatorTest {
 
     val pipelineResult: PipelineResult = pipeline.execute()
     assertResult(false)(pipelineResult.isSucceed)
-    assertResult(true)(pipelineResult.operatorError.nonEmpty)
+    assertResult(true)(pipelineResult.errorOperator.nonEmpty)
     assertResult(true)(pipelineResult.exception.nonEmpty)
     assertResult(true)(pipelineResult.exception.get.isInstanceOf[InputInvalid])
-    assertResult(Some(joinOperator))(pipelineResult.operatorError)
+    assertResult(Some(joinOperator))(pipelineResult.errorOperator)
     println(pipelineResult.exception.get.getMessage)
   }
 

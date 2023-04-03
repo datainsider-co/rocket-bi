@@ -18,12 +18,20 @@ object Pipeline {
 }
 
 case class PipelineResult(
-    isSucceed: Boolean,
-    mapResult: Map[OperatorId, OperatorResult],
-    // updated config, if isSucceed is true always is Some(EtlConfig)
-    config: Option[EtlConfig] = None,
-    exception: Option[PipelineException],
-    operatorError: Option[Operator]
+                           isSucceed: Boolean,
+                           mapResult: Map[OperatorId, OperatorResult],
+                           // updated config, if isSucceed is true always is Some(EtlConfig)
+                           config: Option[EtlConfig] = None,
+
+                           /**
+                            * If isSucceed is false, this field is Some(PipelineException)
+                            */
+                           exception: Option[PipelineException],
+
+                           /**
+                            * If isSucceed is false, this field can be empty
+                            */
+                           errorOperator: Option[Operator]
 )
 
 object PipelineResult {

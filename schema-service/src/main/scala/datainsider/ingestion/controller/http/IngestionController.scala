@@ -57,21 +57,6 @@ case class IngestionController @Inject() (
     }
 
   filter[ServiceKeyFilter]
-    .post("/ingestion/optimize_table") { request: OptimizeTableRequest =>
-      {
-        for {
-          result <- schemaService.optimizeTable(
-            request.organizationId,
-            request.dbName,
-            request.tblName,
-            request.primaryKeys,
-            request.isUseFinal
-          )
-        } yield Map("data" -> result)
-      }
-    }
-
-  filter[ServiceKeyFilter]
     .delete("/ingestion/:db_name/:tbl_name") { request: ClearTableRequest =>
       ingestionService.clearTable(request)
     }

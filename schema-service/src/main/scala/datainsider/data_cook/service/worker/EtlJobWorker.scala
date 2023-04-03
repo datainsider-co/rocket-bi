@@ -46,7 +46,7 @@ class EtlJobWorker(
           updateProgress(jobInfo, EtlJobStatus.Done, logMsg.toString, config = pipelineResult.config).syncGet()
         } else {
           logMsg.append(s"execute failure, ${pipelineResult.exception.get.getMessage}")
-          updateProgress(jobInfo, EtlJobStatus.Error, logMsg.toString, pipelineResult.operatorError).syncGet()
+          updateProgress(jobInfo, EtlJobStatus.Error, logMsg.toString, pipelineResult.errorOperator).syncGet()
         }
       } catch {
         case ex: Throwable => {

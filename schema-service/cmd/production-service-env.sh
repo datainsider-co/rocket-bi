@@ -17,7 +17,7 @@ APP_ARGS=""
 # jvm arguments: empty means disable or not-available
 
 #auto the heap max size ($MAX_HEAP_SIZE) or leave it's empty  or custom the heap max size
-JVM_XMX=2048M
+JVM_XMX=4096M
 #auto the heap min size ($JVM_XMX) or leave it's empty  or custom the heap min size
 JVM_XMS=
 #auto the heap new size ($HEAP_NEWSIZE) or leave it's empty  or custom the heap new size
@@ -30,4 +30,3 @@ JVM_JDWP_PORT=
 
 #jvm extra options
 JVM_EXTRA_ARGS=""
-

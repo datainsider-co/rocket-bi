@@ -9,7 +9,7 @@ import datainsider.ingestion.domain._
 import datainsider.ingestion.misc.ClickHouseDDLConverter
 import datainsider.ingestion.misc.JdbcClient.Record
 import datainsider.ingestion.module.TestModule
-import datainsider.ingestion.repository.{DDLExecutorImpl, DDLExecutor}
+import datainsider.ingestion.repository.{ClusteredDDLExecutor, DDLExecutor}
 import org.scalatest.BeforeAndAfterAll
 
 import java.sql.ResultSet
@@ -41,7 +41,7 @@ class DistributedReplacingTest extends IntegrationTest with BeforeAndAfterAll {
 
     client = NativeJdbcClient(jdbcUrl, user, password)
 
-    ddlExecutor = DDLExecutorImpl(client, ClickHouseDDLConverter(), clusterName)
+    ddlExecutor = ClusteredDDLExecutor(client, clusterName)
 
     val isExisted = await(ddlExecutor.existsDatabaseSchema(dbTest))
     if (isExisted)
@@ -214,7 +214,6 @@ class DistributedReplacingTest extends IntegrationTest with BeforeAndAfterAll {
     var retryCount = 0
     breakable {
       do {
-        ddlExecutor.optimizeTable(dbName, tblName + "_shard", primaryKeys, true)
         val nDuplicate = countDuplicateRows(dbName, tblName, primaryKeys)
         if (nDuplicate == 0) {
           break

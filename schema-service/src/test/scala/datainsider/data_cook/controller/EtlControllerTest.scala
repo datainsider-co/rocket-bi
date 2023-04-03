@@ -8,7 +8,7 @@ import datainsider.client.domain.scheduler.{ScheduleMonthly, ScheduleOnce}
 import datainsider.client.util.{JsonParser, ZConfig}
 import datainsider.data_cook.domain.Ids.EtlJobId
 import datainsider.data_cook.domain.request.EtlRequest._
-import datainsider.data_cook.domain.response.{EtlDatabaseNameResponse, EtlJobHistoryResponse, EtlJobResponse, EtlJobStatusResponse, EtlQueryResponse, TableResponse}
+import datainsider.data_cook.domain.response.{EtlDatabaseNameResponse, EtlJobHistoryResponse, EtlJobResponse, PreviewETLResponse, EtlQueryResponse, TableResponse}
 import datainsider.data_cook.domain.MockData
 import datainsider.data_cook.domain.operator.{ExpressionFieldConfiguration, FieldType, NormalFieldConfiguration}
 import datainsider.data_cook.domain.persist.{MySQLJdbcPersistConfiguration, OracleJdbcPersistConfiguration, PersistentType}

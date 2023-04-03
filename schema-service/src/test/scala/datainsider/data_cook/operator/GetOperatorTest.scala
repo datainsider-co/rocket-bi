@@ -84,7 +84,7 @@ class GetOperatorTest extends OperatorTest {
     val pipelineResult: PipelineResult = pipeline.execute()
     assertResult(pipelineResult.isSucceed)(false)
     assertResult(pipelineResult.exception.isDefined)(true)
-    assertResult(pipelineResult.operatorError)(Option(getOperator))
+    assertResult(pipelineResult.errorOperator)(Option(getOperator))
   }
 
   test("run pipeline RootOperator -> GetOperation with incremental string value") {

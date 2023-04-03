@@ -10,6 +10,7 @@ import education.x.commons.SsdbKVS
 import org.nutz.ssdb4j.spi.SSDB
 
 import javax.inject.Singleton
+import scala.util.Try
 
 /**
   * created 2022-07-21 9:55 PM
@@ -45,13 +46,13 @@ object RefreshSchemaModule extends TwitterModule {
       val jdbcUrl: String = clickhouseConnSetting.get.toJdbcUrl
       val user: String = clickhouseConnSetting.get.username
       val password: String = clickhouseConnSetting.get.password
-      val clusterName: String = clickhouseConnSetting.get.clusterName
+      val clusterName: Option[String] = clickhouseConnSetting.get.clusterName
       ClickhouseSource(jdbcUrl, user, password, clusterName)
     } else {
       val jdbcUrl: String = ZConfig.getString("db.clickhouse.url")
       val user: String = ZConfig.getString("db.clickhouse.user")
       val password: String = ZConfig.getString("db.clickhouse.password")
-      val clusterName: String = ZConfig.getString("db.clickhouse.cluster_name")
+      val clusterName: Option[String] = Try(ZConfig.getString("db.clickhouse.cluster_name")).toOption
       ClickhouseSource(jdbcUrl, user, password, clusterName)
     }
 

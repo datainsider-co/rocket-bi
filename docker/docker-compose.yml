@@ -16,7 +16,7 @@ services:
     restart: always
 
   caas_service:
-    image: datainsiderco/caas-service:main
+    image: datainsiderco/caas-service:dev
     container_name: rocket-caas-service
     restart: always
     environment:
@@ -27,7 +27,7 @@ services:
       - ssdb
 
   schema_service:
-    image: datainsiderco/schema-service:main
+    image: datainsiderco/schema-service:dev
     container_name: rocket-schema-service
     restart: always
     env_file:
@@ -45,7 +45,7 @@ services:
       - caas_service
 
   bi_service:
-    image: datainsiderco/bi-service:main
+    image: datainsiderco/bi-service:dev
     container_name: rocket-bi-service
     restart: always
     env_file:
@@ -63,7 +63,7 @@ services:
       - caas_service
 
   job_scheduler:
-    image: datainsiderco/job-scheduler:main
+    image: datainsiderco/job-scheduler:dev
     container_name: rocket-job-scheduler
     restart: always
     environment:
@@ -79,7 +79,7 @@ services:
       - caas_service
 
   job_worker:
-    image: datainsiderco/job-worker:main
+    image: datainsiderco/job-worker:dev
     container_name: rocket-job-worker
     restart: always
     env_file:
@@ -92,7 +92,7 @@ services:
       HTTP_PORT: 8080
 
   web:
-    image: datainsiderco/rocket-bi-web:main
+    image: datainsiderco/rocket-bi-web:dev
     container_name: rocket-web
     restart: always
 

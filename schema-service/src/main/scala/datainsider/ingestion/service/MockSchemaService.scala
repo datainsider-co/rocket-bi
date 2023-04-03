@@ -276,14 +276,6 @@ case class MockSchemaService() extends SchemaService {
   override def getDatabaseSchemas(organizationId: OrganizationId, dbNames: Seq[DBName]): Future[Seq[FullSchemaInfo]] =
     Future.value(Seq())
 
-  override def optimizeTable(
-      organizationId: OrganizationId,
-      dbName: String,
-      tblName: String,
-      primaryKeys: Array[String],
-      isUseFinal: Boolean
-  ): Future[Boolean] = Future.True
-
   override def mergeSchemaByProperties(
       organizationId: OrganizationId,
       dbName: String,

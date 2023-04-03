@@ -17,7 +17,7 @@ case class ManageFieldOperator(
     fields: Array[NormalFieldConfiguration],
     destTableConfiguration: TableConfiguration,
     extraFields: Array[ExpressionFieldConfiguration] = Array.empty
-) extends Operator {
+) extends TableResultOperator {
   def getActiveFieldConfigs(): Array[FieldConfiguration] = {
     (fields ++: extraFields).filterNot(field => field.isHidden).toArray[FieldConfiguration]
   }

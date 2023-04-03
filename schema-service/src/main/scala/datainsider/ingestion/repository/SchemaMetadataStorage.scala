@@ -466,7 +466,7 @@ case class SchemaMetadataStorageImpl(client: SSDB, allDatabaseMap: KVS[String, D
           case None =>
         }
         newTableSchema: TableSchema =
-          tableSchema.copy(expressionColumns = tableSchema.expressionColumns :+ newExpColumn)
+          tableSchema.copy(expressionColumns = (tableSchema.expressionColumns :+ newExpColumn).distinct)
         newDbSchema: DatabaseSchema = dbSchema.addTable(newTableSchema)
         isDbUpdated <- allDatabaseMap.add(dbName, newDbSchema).asTwitter
       } yield isDbUpdated
@@ -542,7 +542,7 @@ case class SchemaMetadataStorageImpl(client: SSDB, allDatabaseMap: KVS[String, D
           case None =>
         }
         newTableSchema: TableSchema =
-          tableSchema.copy(calculatedColumns = tableSchema.calculatedColumns :+ newCalcColumn)
+          tableSchema.copy(calculatedColumns = (tableSchema.calculatedColumns :+ newCalcColumn).distinct)
         newDbSchema: DatabaseSchema = dbSchema.addTable(newTableSchema)
         isDbUpdated <- allDatabaseMap.add(dbName, newDbSchema).asTwitter
       } yield isDbUpdated

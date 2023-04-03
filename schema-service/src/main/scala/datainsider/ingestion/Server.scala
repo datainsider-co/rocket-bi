@@ -124,7 +124,7 @@ class Server extends HttpServer with ThriftServer {
       .filter[CORSFilter](beforeRouting = true)
       .filter[CommonFilters]
       .filter[LoggedInUserParser]
-      .filter[LicenceFilter]
+      //.filter[LicenceFilter]
       .add[PingController]
       .add[SchemaController]
       .add[ShareController]

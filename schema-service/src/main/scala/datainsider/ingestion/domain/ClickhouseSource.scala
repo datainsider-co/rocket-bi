@@ -39,5 +39,5 @@ case class ClickhouseSource(
     @NotEmpty jdbcUrl: String,
     @NotEmpty username: String,
     password: String,
-    clusterName: String
+    clusterName: Option[String]
 )

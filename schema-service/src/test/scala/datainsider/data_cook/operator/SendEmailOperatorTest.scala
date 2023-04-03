@@ -155,9 +155,9 @@ class SendEmailOperatorTest extends OperatorTest with Logging {
 
     assertResult(false)(result.isSucceed)
     assertResult(true)(result.exception.isDefined)
-    assertResult(true)(result.operatorError.isDefined)
+    assertResult(true)(result.errorOperator.isDefined)
 
-    assertResult(getOperator)(result.operatorError.get)
+    assertResult(getOperator)(result.errorOperator.get)
     println(s"run pipeline failure, cause ${result.exception.get.getMessage}")
   }
 

@@ -1,7 +1,8 @@
 package datainsider.ingestion.misc
 
 import com.twitter.inject.Logging
-import datainsider.client.exception.UnsupportedError
+import com.twitter.util.Future
+import datainsider.client.exception.{BadRequestError, UnsupportedError}
 import datainsider.client.util.ZConfig
 import datainsider.ingestion.domain.Types.{DBName, TblName}
 import datainsider.ingestion.domain._
@@ -11,61 +12,27 @@ import datainsider.ingestion.util.TimeUtils
   * @author andy
   * @since 7/10/20
   */
-trait DDLConverter {
-  def toCreateShardTableDDL(tableSchema: TableSchema, clusterName: String): String
-
-  def toCreateShardReplacingTableDDL(tableSchema: TableSchema, clusterName: String): String
-
-  def toCreateViewDDL(tableSchema: TableSchema, clusterName: String): String
-
-  def toCreateEtlViewDDL(tableSchema: TableSchema, clusterName: String): String
-
-  def toCreateInMemoryDDL(tableSchema: TableSchema, clusterName: String): String
-
-  def toCreateDistributedTableDDL(tableSchema: TableSchema, clusterName: String): String
-
-  def toCreateReplacingDistributedTableDDL(tableSchema: TableSchema, clusterName: String): String
-
-  def toCreateMaterializedViewDDL(tableSchema: TableSchema, clusterName: String): String
-
-  def toAddColumnDLL(dbName: String, tblName: String, column: Column, clusterName: String): String
-
-  def toUpdateColumnDLL(dbName: String, tblName: String, column: Column, clusterName: String): String
-
-  def toDeleteColumnDDL(dbName: String, tblName: String, columnName: String, clusterName: String): String
-
-  def toInsertSQL(dbName: String, tblName: String, columns: Seq[Column], isApplyEncryption: Boolean = false): String
-
-  def toInsertFromTable(
-      fromDbName: String,
-      fromTableName: String,
-      destDbName: String,
-      destTableName: String,
-      columns: Seq[Column]
-  ): String
-}
-
-case class ClickHouseDDLConverter() extends DDLConverter with Logging {
+object ClickHouseDDLConverter extends Logging {
 
   private def getReplicaPath(dbName: String, tblName: String): String =
     s"/clickhouse/tables/{cluster}/{shard}/$dbName/$tblName"
   private def getReplicaName(): String = "{replica}"
 
-  def toCreateViewDDL(tableSchema: TableSchema, clusterName: String): String = {
+  def toCreateViewDDL(tableSchema: TableSchema, clusterName: Option[String]): String = {
     s"""
-     |CREATE VIEW IF NOT EXISTS `${tableSchema.dbName}`.`${tableSchema.name}` ON CLUSTER $clusterName
+     |CREATE VIEW IF NOT EXISTS `${tableSchema.dbName}`.`${tableSchema.name}` ${ON_CLUSTER(clusterName)}
      |AS ${tableSchema.query.get}
      |""".stripMargin
   }
 
-  def toCreateEtlViewDDL(tableSchema: TableSchema, clusterName: String): String = {
+  def toCreateEtlViewDDL(tableSchema: TableSchema): String = {
     s"""
      |CREATE VIEW IF NOT EXISTS `${tableSchema.dbName}`.`${tableSchema.name}`
      |AS ${tableSchema.query.get}
      |""".stripMargin
   }
 
-  def toCreateInMemoryDDL(tableSchema: TableSchema, clusterName: String): String = {
+  def toCreateInMemoryDDL(tableSchema: TableSchema): String = {
     s"""
        |CREATE TABLE IF NOT EXISTS `${tableSchema.dbName}`.`${tableSchema.name}`(
        | ${toMultiColumnDDL(tableSchema.columns)}
@@ -73,28 +40,28 @@ case class ClickHouseDDLConverter() extends DDLConverter with Logging {
        |""".stripMargin
   }
 
-  override def toCreateDistributedTableDDL(tableSchema: TableSchema, clusterName: String): String = {
+  def toCreateDistributedTableDDL(tableSchema: TableSchema, clusterName: Option[String] = None): String = {
     val dbName = tableSchema.dbName
     val tblName = tableSchema.name
     s"""
-       |CREATE TABLE IF NOT EXISTS `$dbName`.`$tblName` ON CLUSTER $clusterName AS $dbName.${tableSchema.defaultShardTblName}
-       |ENGINE = Distributed('$clusterName', $dbName, ${tableSchema.defaultShardTblName}, rand());
+       |CREATE TABLE IF NOT EXISTS `$dbName`.`$tblName` ${ON_CLUSTER(clusterName)} AS $dbName.${tableSchema.defaultShardTblName}
+       |ENGINE = Distributed('${clusterName.get}', $dbName, ${tableSchema.defaultShardTblName}, rand());
        |""".stripMargin
   }
 
-  override def toCreateReplacingDistributedTableDDL(tableSchema: TableSchema, clusterName: String): String = {
+  def toCreateReplacingDistributedTableDDL(tableSchema: TableSchema, clusterName: Option[String] = None): String = {
     val dbName: String = tableSchema.dbName
     val tblName: String = tableSchema.name
     val shardingKeys: String = tableSchema.orderBys.mkString(", ")
     s"""
-       |CREATE TABLE IF NOT EXISTS `$dbName`.`$tblName` ON CLUSTER $clusterName AS $dbName.${tableSchema.defaultShardTblName}
-       |ENGINE = Distributed('$clusterName', $dbName, ${tableSchema.defaultShardTblName}, cityHash64(${shardingKeys}));
+       |CREATE TABLE IF NOT EXISTS `$dbName`.`$tblName` ${ON_CLUSTER(clusterName)} AS $dbName.${tableSchema.defaultShardTblName}
+       |ENGINE = Distributed('${clusterName.get}', $dbName, ${tableSchema.defaultShardTblName}, cityHash64(${shardingKeys}));
        |""".stripMargin
   }
 
-  override def toCreateMaterializedViewDDL(tableSchema: TableSchema, clusterName: String): String = {
+  def toCreateMaterializedViewDDL(tableSchema: TableSchema, clusterName: Option[String] = None): String = {
     s"""
-       |CREATE MATERIALIZED VIEW IF NOT EXISTS `${tableSchema.dbName}`.`${tableSchema.name}` ON CLUSTER $clusterName
+       |CREATE MATERIALIZED VIEW IF NOT EXISTS `${tableSchema.dbName}`.`${tableSchema.name}` ${ON_CLUSTER(clusterName)}
        |ENGINE = ${getEngineDDL(tableSchema)}
        |ORDER BY ${getOrderByDDL(tableSchema)}
        |POPULATE
@@ -103,10 +70,11 @@ case class ClickHouseDDLConverter() extends DDLConverter with Logging {
   }
 
   // this only create shard table
-  override def toCreateShardTableDDL(tableSchema: TableSchema, clusterName: String): String = {
+  def toCreateShardTableDDL(tableSchema: TableSchema, clusterName: Option[String]): String = {
     val replicaPath = getReplicaPath(tableSchema.dbName, tableSchema.name)
     s"""
-       |CREATE TABLE IF NOT EXISTS `${tableSchema.dbName}`.`${tableSchema.defaultShardTblName}` ON CLUSTER $clusterName (
+       |CREATE TABLE IF NOT EXISTS 
+       |`${tableSchema.dbName}`.`${tableSchema.defaultShardTblName}` ${ON_CLUSTER(clusterName)} (
        | ${toMultiColumnDDL(tableSchema.columns)}
        |) ENGINE = ReplicatedMergeTree('$replicaPath', '${getReplicaName()}')
        |${getPrimaryKeyDDL(tableSchema)}
@@ -115,11 +83,12 @@ case class ClickHouseDDLConverter() extends DDLConverter with Logging {
        |""".stripMargin
   }
 
-  override def toCreateShardReplacingTableDDL(tableSchema: TableSchema, clusterName: String): String = {
+  def toCreateShardReplacingTableDDL(tableSchema: TableSchema, clusterName: Option[String] = None): String = {
     val replicaPath = getReplicaPath(tableSchema.dbName, tableSchema.name)
 
     s"""
-       |CREATE TABLE IF NOT EXISTS `${tableSchema.dbName}`.`${tableSchema.defaultShardTblName}` ON CLUSTER $clusterName (
+       |CREATE TABLE IF NOT EXISTS 
+       |`${tableSchema.dbName}`.`${tableSchema.defaultShardTblName}` ${ON_CLUSTER(clusterName)} (
        | ${toMultiColumnDDL(tableSchema.columns)}
        |) ENGINE = ReplicatedReplacingMergeTree('$replicaPath', '${getReplicaName()}')
        |${getPrimaryKeyDDL(tableSchema)}
@@ -128,13 +97,71 @@ case class ClickHouseDDLConverter() extends DDLConverter with Logging {
        |""".stripMargin
   }
 
-  override def toAddColumnDLL(dbName: String, tblName: String, column: Column, clusterName: String): String = {
+  def toCreateTableDDL(tableSchema: TableSchema, clusterName: Option[String] = None): String = {
+    tableSchema.getTableType match {
+      case TableType.View         => toCreateViewDDL(tableSchema, clusterName)
+      case TableType.Materialized => toCreateMaterializedViewDDL(tableSchema, clusterName)
+      case TableType.Default      => toCreateMergeTreeTableDDL(tableSchema, clusterName)
+      case TableType.InMemory     => toCreateInMemoryDDL(tableSchema)
+      case TableType.EtlView      => toCreateEtlViewDDL(tableSchema)
+      case TableType.Replacing    => toCreateReplacingTableDDL(tableSchema, clusterName)
+      case _                      => throw BadRequestError(s"schema of type ${tableSchema.getTableType} is not supported!")
+    }
+  }
+
+  def toCreateMergeTreeTableDDL(tableSchema: TableSchema, clusterName: Option[String] = None): String = {
     s"""
-       |ALTER TABLE `$dbName`.`$tblName` ON CLUSTER $clusterName ADD COLUMN IF NOT EXISTS ${toColumnDDLExpr(column)}
+       |CREATE TABLE IF NOT EXISTS 
+       |`${tableSchema.dbName}`.`${tableSchema.name}` ${ON_CLUSTER(clusterName)} (
+       | ${toMultiColumnDDL(tableSchema.columns)}
+       |) ENGINE = MergeTree()
+       |${getPrimaryKeyDDL(tableSchema)}
+       |${getPartitionByDDL(tableSchema)}
+       |ORDER BY ${getOrderByDDL(tableSchema)}
        |""".stripMargin
   }
 
-  override def toInsertSQL(
+  def toCreateReplacingTableDDL(tableSchema: TableSchema, clusterName: Option[String] = None): String = {
+    s"""
+       |CREATE TABLE IF NOT EXISTS 
+       |`${tableSchema.dbName}`.`${tableSchema.name}` ${ON_CLUSTER(clusterName)} (
+       | ${toMultiColumnDDL(tableSchema.columns)}
+       |) ENGINE = ReplacingMergeTree()
+       |${getPrimaryKeyDDL(tableSchema)}
+       |${getPartitionByDDL(tableSchema)}
+       |ORDER BY ${getOrderByDDL(tableSchema)}
+       |""".stripMargin
+  }
+
+  def toAddColumnDLL(dbName: String, tblName: String, column: Column, clusterName: Option[String] = None): String = {
+    s"""
+       |ALTER TABLE `$dbName`.`$tblName` ${ON_CLUSTER(clusterName)}
+       |ADD COLUMN IF NOT EXISTS ${toColumnDDLExpr(column)}
+       |""".stripMargin
+  }
+
+  def toCreateDatabaseDDL(dbName: String, clusterName: Option[String] = None): String = {
+    s"CREATE DATABASE IF NOT EXISTS `$dbName` ${ON_CLUSTER(clusterName)}"
+  }
+
+  def toDropDatabaseDDL(dbName: String, clusterName: Option[String] = None): String = {
+    s"DROP DATABASE IF EXISTS $dbName ${ON_CLUSTER(clusterName)} SYNC"
+  }
+
+  def toDropTableDDL(dbName: String, tblName: String, clusterName: Option[String] = None): String = {
+    s"DROP TABLE IF EXISTS `$dbName`.`$tblName` ${ON_CLUSTER(clusterName)} SYNC"
+  }
+
+  def toRenameTableDDL(
+      dbName: String,
+      tblName: String,
+      newTblName: String,
+      clusterName: Option[String] = None
+  ): String = {
+    s"RENAME TABLE $dbName.$tblName to $dbName.$newTblName ${ON_CLUSTER(clusterName)}"
+  }
+
+  def toInsertSQL(
       dbName: String,
       tblName: String,
       columns: Seq[Column],
@@ -348,15 +375,27 @@ case class ClickHouseDDLConverter() extends DDLConverter with Logging {
     }
   }
 
-  override def toUpdateColumnDLL(dbName: String, tblName: String, column: Column, clusterName: String): String = {
+  def toUpdateColumnDLL(dbName: String, tblName: String, column: Column, clusterName: Option[String] = None): String = {
     s"""
-       |ALTER TABLE `$dbName`.`$tblName` ON CLUSTER $clusterName MODIFY COLUMN IF EXISTS ${toColumnDDLExpr(column)}
+       |ALTER TABLE `$dbName`.`$tblName` ${ON_CLUSTER(clusterName)} MODIFY COLUMN IF EXISTS ${toColumnDDLExpr(column)}
        |""".stripMargin
   }
 
-  override def toDeleteColumnDDL(dbName: String, tblName: String, columnName: String, clusterName: String): String = {
+  def toDropColumnDDL(
+      dbName: String,
+      tblName: String,
+      columnName: String,
+      clusterName: Option[String] = None
+  ): String = {
     s"""
-       |ALTER TABLE $dbName.$tblName ON CLUSTER $clusterName DROP COLUMN IF EXISTS $columnName
+       |ALTER TABLE $dbName.$tblName ${ON_CLUSTER(clusterName)} DROP COLUMN IF EXISTS $columnName
        |""".stripMargin
+  }
+
+  private def ON_CLUSTER(clusterName: Option[String]): String = {
+    clusterName match {
+      case Some(name) => s"ON CLUSTER $name"
+      case None       => ""
+    }
   }
 }

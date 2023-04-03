@@ -137,7 +137,7 @@ object TestModule extends TwitterModule {
   @Provides
   def providesDDLExecutor(client: JdbcClient): DDLExecutor = {
     val clusterName: String = ZConfig.getString("db.clickhouse.cluster_name")
-    DDLExecutorImpl(client, ClickHouseDDLConverter(), clusterName)
+    ClusteredDDLExecutor(client, clusterName)
   }
 
   @Singleton

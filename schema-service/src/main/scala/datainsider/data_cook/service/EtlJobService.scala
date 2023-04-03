@@ -12,7 +12,7 @@ import datainsider.data_cook.domain.MockData.{mockEtlJob, mockMyEtlJobs}
 import datainsider.data_cook.domain.request.EtlRequest.{CreateEtlJobRequest, ListEtlJobsRequest, UpdateEtlJobRequest}
 import datainsider.data_cook.domain.response.EtlJobResponse
 import datainsider.data_cook.domain.{EtlConfig, EtlJob, EtlJobStatus, OperatorInfo}
-import datainsider.data_cook.repository.{EtlJobRepository, TrashEtlJobRepository}
+import datainsider.data_cook.repository.EtlJobRepository
 import datainsider.ingestion.controller.http.requests.PermResourceType
 import datainsider.ingestion.domain.PageResult
 
@@ -137,7 +137,6 @@ class EtlJobServiceImpl @Inject() (
           status = Option(etlJob.status),
           nextExecuteTime = Option(etlJob.nextExecuteTime),
           lastExecuteTime = etlJob.lastExecuteTime,
-          operatorInfo = etlJob.operatorInfo,
           config = etlJob.config
         )
       )
@@ -161,7 +160,6 @@ class EtlJobServiceImpl @Inject() (
             status = Option(etlJob.status),
             nextExecuteTime = Option(etlJob.nextExecuteTime),
             lastExecuteTime = etlJob.lastExecuteTime,
-            operatorInfo = etlJob.operatorInfo,
             config = etlJob.config
           )
         })

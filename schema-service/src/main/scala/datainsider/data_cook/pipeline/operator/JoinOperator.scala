@@ -25,7 +25,7 @@ case class JoinOperator(
     id: OperatorId,
     joinConfigs: Array[JoinConfiguration],
     destTableConfiguration: TableConfiguration
-) extends Operator
+) extends TableResultOperator
 
 case class JoinOperatorExecutor(tableService: EtlTableService, limit: Option[Limit]) extends Executor[JoinOperator] {
 

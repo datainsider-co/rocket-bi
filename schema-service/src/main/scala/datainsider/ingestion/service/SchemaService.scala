@@ -143,14 +143,6 @@ trait SchemaService {
 
   def restoreDatabase(request: DeleteDBRequest): Future[Boolean]
 
-  def optimizeTable(
-      organizationId: Long,
-      dbName: String,
-      tblName: String,
-      primaryKeys: Array[String],
-      isUseFinal: Boolean
-  ): Future[Boolean]
-
   def createExprColumn(request: CreateExprColumnRequest): Future[TableSchema]
 
   def updateExprColumn(request: UpdateExprColumnRequest): Future[TableSchema]
@@ -716,30 +708,6 @@ case class SchemaServiceImpl @Inject() (
 
   override def restoreDatabase(request: DeleteDBRequest): Future[Boolean] = {
     schemaRepository.restoreDatabase(request.currentOrganizationId.get, request.dbName)
-  }
-
-  override def optimizeTable(
-      organizationId: OrganizationId,
-      dbName: String,
-      tblName: String,
-      primaryKeys: Array[String],
-      isUseFinal: Boolean
-  ): Future[Boolean] = {
-    schemaRepository
-      .getTable(organizationId, dbName, tblName)
-      .flatMap(tableSchema => {
-        tableSchema.getTableType match {
-          case TableType.Replacing | TableType.Default =>
-            schemaRepository.optimizeTable(
-              organizationId,
-              tableSchema.dbName,
-              tableSchema.defaultShardTblName,
-              primaryKeys,
-              isUseFinal
-            )
-          case _ => Future.False
-        }
-      })
   }
 
   override def mergeSchemaByProperties(

@@ -5,7 +5,7 @@ import com.twitter.util.Future
 import datainsider.client.exception.{BadRequestError, DbExecuteError, InternalError}
 import datainsider.client.util.{JdbcClient, JsonParser, ZConfig}
 import datainsider.ingestion.domain._
-import datainsider.ingestion.misc.DDLConverter
+import datainsider.ingestion.misc.ClickHouseDDLConverter
 import datainsider.ingestion.util.Implicits.async
 import datainsider.profiler.Profiler
 
@@ -50,15 +50,6 @@ trait DDLExecutor {
 
   def execute[T](query: String)(converter: ResultSet => T): Future[T]
 
-  /**
-    * Optimize table https://clickhouse.com/docs/en/sql-reference/statements/optimize/
-    * @param dbName name of db
-    * @param table name of table
-    * @param primaryKeys primary key for optimize, use all columns if empty
-    * @param isUseFinal - optimization is performed even when all the data is already in one part. Also merge is forced even if concurrent merges are performed.
-    */
-  def optimizeTable(dbName: String, table: String, primaryKeys: Array[String], isUseFinal: Boolean): Future[Boolean]
-
   def migrateDataWithEncryption(
       sourceTable: TableSchema,
       destTable: TableSchema,
@@ -75,14 +66,11 @@ trait DDLExecutor {
   *   + distributed table is the main entry point to insert or query data,
   *   distributed is the part where we store in table schema
   */
-case class DDLExecutorImpl(
+case class ClusteredDDLExecutor(
     client: JdbcClient,
-    dllConverter: DDLConverter,
     clusterName: String
 ) extends DDLExecutor
     with Logging {
-  val maxRetryTimes: Int = ZConfig.getInt("cluster_ddl.max_retry_times", 60)
-  val waitTimeMs: Int = ZConfig.getInt("cluster_ddl.wait_time_ms", 1000)
 
   override def existsDatabaseSchema(dbName: String): Future[Boolean] =
     async {
@@ -106,12 +94,12 @@ case class DDLExecutorImpl(
     }
 
   override def createDatabase(dbName: String): Future[Boolean] = {
-    val createDbSql = s"CREATE DATABASE IF NOT EXISTS `$dbName` ON CLUSTER $clusterName"
+    val createDbSql = ClickHouseDDLConverter.toCreateDatabaseDDL(dbName, Some(clusterName))
     executeUpdateWithRetries(createDbSql)
   }
 
   override def dropDatabase(dbName: String): Future[Boolean] = {
-    val dropQuery = s"DROP DATABASE IF EXISTS $dbName ON CLUSTER $clusterName SYNC"
+    val dropQuery = ClickHouseDDLConverter.toDropDatabaseDDL(dbName, Some(clusterName))
     executeUpdateWithRetries(dropQuery)
   }
 
@@ -142,7 +130,7 @@ case class DDLExecutorImpl(
   }
 
   private def createView(tableSchema: TableSchema): Future[Boolean] = {
-    val createViewSql: String = dllConverter.toCreateViewDDL(tableSchema, clusterName)
+    val createViewSql: String = ClickHouseDDLConverter.toCreateViewDDL(tableSchema, Some(clusterName))
     executeUpdateWithRetries(createViewSql)
   }
 
@@ -150,23 +138,23 @@ case class DDLExecutorImpl(
     * create etl only one node, high performance
     */
   private def createEtlView(tableSchema: TableSchema): Future[Boolean] = {
-    val createViewSql: String = dllConverter.toCreateEtlViewDDL(tableSchema, clusterName)
+    val createViewSql: String = ClickHouseDDLConverter.toCreateEtlViewDDL(tableSchema)
     executeUpdateWithRetries(createViewSql)
   }
 
   private def createInMemoryTable(tableSchema: TableSchema): Future[Boolean] = {
-    val createViewSql: String = dllConverter.toCreateInMemoryDDL(tableSchema, clusterName)
+    val createViewSql: String = ClickHouseDDLConverter.toCreateInMemoryDDL(tableSchema)
     executeUpdateWithRetries(createViewSql)
   }
 
   private def createMaterializeView(tableSchema: TableSchema): Future[Boolean] = {
-    val createMaterializedViewSql = dllConverter.toCreateMaterializedViewDDL(tableSchema, clusterName)
+    val createMaterializedViewSql = ClickHouseDDLConverter.toCreateMaterializedViewDDL(tableSchema, Some(clusterName))
     executeUpdateWithRetries(createMaterializedViewSql)
   }
 
   private def createDistributedMergeTable(tableSchema: TableSchema): Future[Boolean] = {
-    val createShardTblSql = dllConverter.toCreateShardTableDDL(tableSchema, clusterName)
-    val createDistributedTblSql = dllConverter.toCreateDistributedTableDDL(tableSchema, clusterName)
+    val createShardTblSql = ClickHouseDDLConverter.toCreateShardTableDDL(tableSchema, Some(clusterName))
+    val createDistributedTblSql = ClickHouseDDLConverter.toCreateDistributedTableDDL(tableSchema, Some(clusterName))
 
     executeUpdateWithRetries(createShardTblSql).flatMap(tblShardCreated => {
       if (tblShardCreated) {
@@ -176,8 +164,9 @@ case class DDLExecutorImpl(
   }
 
   def createDistributedReplacingTable(tableSchema: TableSchema): Future[Boolean] = {
-    val createShardTblSql = dllConverter.toCreateShardReplacingTableDDL(tableSchema, clusterName)
-    val createDistributedTblSql = dllConverter.toCreateReplacingDistributedTableDDL(tableSchema, clusterName)
+    val createShardTblSql = ClickHouseDDLConverter.toCreateShardReplacingTableDDL(tableSchema, Some(clusterName))
+    val createDistributedTblSql =
+      ClickHouseDDLConverter.toCreateReplacingDistributedTableDDL(tableSchema, Some(clusterName))
 
     executeUpdateWithRetries(createShardTblSql).flatMap(createShardTableOk => {
       if (createShardTableOk) {
@@ -190,11 +179,11 @@ case class DDLExecutorImpl(
     val shardTblName: Option[String] = findShardTblName(dbName, tblName)
 
     if (shardTblName.isDefined) {
-      val dropShardTableQuery = s"DROP TABLE IF EXISTS `$dbName`.`${shardTblName.get}` ON CLUSTER $clusterName SYNC"
+      val dropShardTableQuery = ClickHouseDDLConverter.toDropTableDDL(dbName, shardTblName.get, Some(clusterName))
       executeUpdateWithRetries(dropShardTableQuery)
     }
 
-    val dropTblQuery = s"DROP TABLE IF EXISTS `$dbName`.`$tblName` ON CLUSTER $clusterName SYNC"
+    val dropTblQuery = ClickHouseDDLConverter.toDropTableDDL(dbName, tblName, Some(clusterName))
     executeUpdateWithRetries(dropTblQuery)
   }
 
@@ -205,7 +194,7 @@ case class DDLExecutorImpl(
       oldTblName: String,
       newTblName: String
   ): Future[Boolean] = {
-    val renameSql = s"RENAME TABLE $dbName.$oldTblName to $dbName.$newTblName ON CLUSTER $clusterName"
+    val renameSql = ClickHouseDDLConverter.toRenameTableDDL(dbName, oldTblName, newTblName, Some(clusterName))
     executeUpdateWithRetries(renameSql)
   }
 
@@ -228,11 +217,12 @@ case class DDLExecutorImpl(
   ): Future[Boolean] = {
     val shardTblName = findShardTblName(dbName, tblName)
     if (shardTblName.isDefined) {
-      val updateShardColumnSql = dllConverter.toAddColumnDLL(dbName, shardTblName.get, column, clusterName)
+      val updateShardColumnSql =
+        ClickHouseDDLConverter.toAddColumnDLL(dbName, shardTblName.get, column, Some(clusterName))
       executeUpdateWithRetries(updateShardColumnSql)
     }
 
-    val updateColumnSql = dllConverter.toAddColumnDLL(dbName, tblName, column, clusterName)
+    val updateColumnSql = ClickHouseDDLConverter.toAddColumnDLL(dbName, tblName, column, Some(clusterName))
     executeUpdateWithRetries(updateColumnSql)
   }
 
@@ -261,11 +251,12 @@ case class DDLExecutorImpl(
     val shardTblName: Option[String] = findShardTblName(dbName, tblName)
 
     if (shardTblName.isDefined) {
-      val deleteShardColQuery = dllConverter.toDeleteColumnDDL(dbName, shardTblName.get, columnName, clusterName)
+      val deleteShardColQuery =
+        ClickHouseDDLConverter.toDropColumnDDL(dbName, shardTblName.get, columnName, Some(clusterName))
       executeUpdateWithRetries(deleteShardColQuery)
     }
 
-    val deleteColQuery = dllConverter.toDeleteColumnDDL(dbName, tblName, columnName, clusterName)
+    val deleteColQuery = ClickHouseDDLConverter.toDropColumnDDL(dbName, tblName, columnName, Some(clusterName))
     executeUpdateWithRetries(deleteColQuery)
   }
 
@@ -274,39 +265,13 @@ case class DDLExecutorImpl(
       val shardTblName: Option[String] = findShardTblName(dbName, tblName)
 
       if (shardTblName.isDefined) {
-        val updateShardColQuery = dllConverter.toUpdateColumnDLL(dbName, shardTblName.get, column, clusterName)
+        val updateShardColQuery =
+          ClickHouseDDLConverter.toUpdateColumnDLL(dbName, shardTblName.get, column, Some(clusterName))
         executeUpdateWithRetries(updateShardColQuery)
       }
 
-      val updateColQuery = dllConverter.toUpdateColumnDLL(dbName, tblName, column, clusterName)
+      val updateColQuery = ClickHouseDDLConverter.toUpdateColumnDLL(dbName, tblName, column, Some(clusterName))
       executeUpdateWithRetries(updateColQuery)
-    }
-
-  override def optimizeTable(
-      dbName: String,
-      tableName: String,
-      primaryKeys: Array[String],
-      isUseFinal: Boolean
-  ): Future[Boolean] =
-    Future {
-      val finalState = if (isUseFinal) "FINAL" else ""
-      val columnsDeduplication = if (primaryKeys.nonEmpty) {
-        s"BY ${primaryKeys.mkString(", ")}"
-      } else {
-        ""
-      }
-      async {
-        logger.info(s"optimize table: $dbName.$tableName")
-        client.execute(s"""
-             |OPTIMIZE TABLE `$dbName`.`$tableName`
-             |ON CLUSTER ${clusterName} ${finalState}
-             |DEDUPLICATE ${columnsDeduplication}
-             |""".stripMargin)
-      }.rescue {
-        case e: Throwable => logger.error(s"createMaterializeView(${dbName}.${tableName})", e)
-      }
-
-      true
     }
 
   override def migrateDataWithEncryption(

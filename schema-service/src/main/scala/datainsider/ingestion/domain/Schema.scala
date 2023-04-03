@@ -269,6 +269,13 @@ case class TableSchema(
         if (this.calculatedColumns != null) this.calculatedColumns ++ oldCalculatedCols else oldCalculatedCols
     )
   }
+
+  def migrateExpressionColumns: TableSchema = {
+    copy(
+      calculatedColumns = this.calculatedColumns.distinct,
+      expressionColumns = this.expressionColumns.distinct
+    )
+  }
 }
 
 @SerialVersionUID(20200715L)
@@ -311,13 +318,13 @@ case class DatabaseSchema(
 
   // for back-compatibility with before v1.4.16
   def migrateCalculatedColumns(): DatabaseSchema = {
-    copy(tables = tables.map(_.migrateCalculatedColumns))
+    copy(tables = tables.map(_.migrateCalculatedColumns).map(_.migrateExpressionColumns))
   }
 
   def addTable(newTableSchema: TableSchema): DatabaseSchema = {
     val dbSchema: DatabaseSchema = this.remove(newTableSchema.name)
     dbSchema.copy(
-        tables = dbSchema.tables ++ Seq(newTableSchema)
+      tables = dbSchema.tables ++ Seq(newTableSchema)
     )
   }
 

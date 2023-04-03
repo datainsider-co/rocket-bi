@@ -18,7 +18,7 @@ case class GetOperator(
     id: OperatorId,
     tableSchema: TableSchema,
     destTableConfiguration: TableConfiguration
-) extends Operator
+) extends TableResultOperator
 
 case class TableResult(id: OperatorId, tableSchema: TableSchema) extends OperatorResult {
 
@@ -39,7 +39,6 @@ case class TableResult(id: OperatorId, tableSchema: TableSchema) extends Operato
 case class GetOperatorExecutor(tableService: EtlTableService, limit: Option[Limit], client: JdbcClient) extends Executor[GetOperator] {
 
   private def buildQuery(operator: GetOperator, context: ExecutorContext): (Query, Option[IncrementalConfig]) = {
-    val allColumnQuery: String = operator.tableSchema.getColumnNames.map(_.escape).mkString(", ")
     val dbName: String = operator.tableSchema.dbName
     val tblName: String = operator.tableSchema.name
     val incrementalConfig: Option[IncrementalConfig] = context.config.getIncrementalConfig(operator.destTableConfiguration)
@@ -48,7 +47,7 @@ case class GetOperatorExecutor(tableService: EtlTableService, limit: Option[Limi
       case (Some(incrementalConfig), Some(column)) => {
         val maxValue: String = getMaxValue(dbName, tblName, column.name)
         val query = SqlQuery(s"""
-               |SELECT $allColumnQuery
+               |SELECT *
                |FROM `$dbName`.`$tblName`
                |${buildWhereQuery(incrementalConfig, maxValue)}
                |${buildLimitQuery(limit)}
@@ -58,7 +57,7 @@ case class GetOperatorExecutor(tableService: EtlTableService, limit: Option[Limi
       }
       case _ => {
           val query = SqlQuery(s"""
-               |SELECT $allColumnQuery
+               |SELECT *
                |FROM `$dbName`.`$tblName`
                |${buildLimitQuery(limit)}
                |""".stripMargin

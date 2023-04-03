@@ -1,4 +1,4 @@
-package datainsider.ingestion.service
+package datainsider.ingestion.repository
 
 import com.twitter.inject.{Injector, IntegrationTest}
 import com.twitter.util.Future
@@ -9,7 +9,6 @@ import datainsider.data_cook.module.DataCookTestModule
 import datainsider.ingestion.domain._
 import datainsider.ingestion.misc.ClickHouseDDLConverter
 import datainsider.ingestion.module.TestModule
-import datainsider.ingestion.repository.{DDLExecutorImpl, DDLExecutor}
 import datainsider.ingestion.util.Implicits.FutureEnhance
 import org.scalatest.BeforeAndAfterAll
 
@@ -17,7 +16,7 @@ import org.scalatest.BeforeAndAfterAll
   * @author andy
   * @since 7/10/20
  **/
-class DDLExecutorTest extends IntegrationTest with BeforeAndAfterAll {
+class ClusteredDDLExecutorTest extends IntegrationTest with BeforeAndAfterAll {
   override protected val injector: Injector =
     DiTestInjector(TestModule, MockCaasClientModule, DataCookTestModule).newInstance()
 
@@ -37,7 +36,7 @@ class DDLExecutorTest extends IntegrationTest with BeforeAndAfterAll {
 
     val client = NativeJdbcClient(jdbcUrl, user, password)
 
-    ddlExecutor = DDLExecutorImpl(client, ClickHouseDDLConverter(), clusterName)
+    ddlExecutor = ClusteredDDLExecutor(client, clusterName)
 
     val isExists = ddlExecutor.existsDatabaseSchema(testCreateDbName).syncGet()
     if (isExists)
