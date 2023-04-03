@@ -156,7 +156,7 @@ export default class SaveEtl extends Vue {
   }
 
   private get dataSources(): GetDataOperator[] {
-    const allDataSources: GetDataOperator[] = (this.model?.operators ?? []).flatMap(op => op.getAllGetDataOperators());
+    const allDataSources: GetDataOperator[] = (this.model?.operators ?? []).flatMap(op => op.getAllGetOperators());
     return EtlOperator.unique(allDataSources) as GetDataOperator[];
   }
 

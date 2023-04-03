@@ -117,13 +117,6 @@
   transition: all 750ms ease-in-out;
 }
 
-.input-link {
-  @include regular-text(0.2px);
-  opacity: 0.8;
-  font-size: 14px;
-  color: var(--secondary-text-color);
-}
-
 .copy-reset {
   display: flex;
   align-items: center;
@@ -195,41 +188,6 @@
   background-color: var(--danger);
 }
 
-.share-anyone-action {
-  display: flex;
-  align-items: flex-start;
-
-  > .img {
-    width: 20px;
-    height: 20px;
-    object-fit: cover;
-  }
-
-  > .share-anyone-info {
-    display: flex;
-    flex-direction: column;
-    margin-left: 16px;
-    flex: 3;
-
-    > span.header {
-      @include medium-text(16px);
-      opacity: 1;
-      margin-bottom: 6px;
-      font-size: 16px;
-    }
-
-    > span {
-      @include regular-text(0.23px);
-      color: var(--secondary-text-color);
-      opacity: 0.4;
-    }
-  }
-
-  > .select-container {
-    flex: 1;
-  }
-}
-
 .share-people-header,
 .share-anyone-header .get-link {
   display: flex;
@@ -271,19 +229,77 @@
   }
 }
 
-.share-anyone-header {
-  > .get-link {
-    margin-bottom: 12px;
+.share-section {
+  .share-anyone-header {
+    > .get-link {
+      margin-bottom: 16px;
+    }
+
+    > span {
+      font-size: 16px;
+      font-weight: normal;
+      font-stretch: normal;
+      font-style: normal;
+      line-height: normal;
+      letter-spacing: 0.27px;
+      color: var(--secondary-text-color);
+    }
   }
 
-  > span {
-    font-size: 16px;
-    font-weight: normal;
-    font-stretch: normal;
-    font-style: normal;
-    line-height: normal;
-    letter-spacing: 0.27px;
+  .input-link {
+    @include regular-text(0.2px);
+    opacity: 0.8;
+    font-size: 14px;
     color: var(--secondary-text-color);
+    height: 40px;
+  }
+
+  .share-anyone-permission-select {
+    height: 40px !important;
+  }
+
+  .password-protection-input {
+    box-sizing: border-box;
+    width: calc(100% - 36px);
+    margin-left: auto;
+    .di-input-component--input {
+      height: 40px !important;
+    }
+  }
+
+  .share-anyone-action {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 16px;
+
+    > .img {
+      width: 20px;
+      height: 20px;
+      object-fit: cover;
+    }
+
+    > .share-anyone-info {
+      display: flex;
+      flex-direction: column;
+      margin-left: 16px;
+      flex: 3;
+
+      > span.header {
+        @include medium-text(16px);
+        opacity: 1;
+        margin-bottom: 6px;
+        font-size: 16px;
+      }
+
+      > span {
+        @include regular-text(0.23px);
+        color: #677883;
+      }
+    }
+
+    > .select-container {
+      flex: 1;
+    }
   }
 }
 

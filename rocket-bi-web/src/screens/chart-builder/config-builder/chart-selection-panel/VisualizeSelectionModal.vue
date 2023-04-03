@@ -82,7 +82,7 @@ export default class VisualizeSelectionModal extends Vue {
   .title {
     font-size: 24px;
     font-weight: 500;
-    line-height: 1.17;
+    line-height: 1.4;
   }
 
   .sub-title {

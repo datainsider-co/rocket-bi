@@ -11,7 +11,7 @@
 </template>
 <script lang="ts">
 import { Component, Inject, Vue } from 'vue-property-decorator';
-import { ETL_OPERATOR_TYPE, EtlOperator, JoinOperator, ManageFieldOperator, PivotTableOperator, SQLQueryOperator, TransformOperator } from '@core/data-cook';
+import { ETLOperatorType, EtlOperator, JoinOperator, ManageFieldOperator, PivotTableOperator, SQLQueryOperator, TransformOperator } from '@core/data-cook';
 import PopoverV2 from '@/shared/components/common/popover-v2/PopoverV2.vue';
 import ContextMenuMinxin from '../table-context-menu/ContextMenuMinxin';
 
@@ -29,20 +29,20 @@ export default class OperatorContextMenu extends ContextMenuMinxin {
   private get isLoadingPreview() {
     if (this.isLoadingOperatorInjector && this.operator) {
       switch (this.operator.className) {
-        case ETL_OPERATOR_TYPE.JoinOperator:
+        case ETLOperatorType.JoinOperator:
           return (
             this.isLoadingOperatorInjector((this.operator as JoinOperator).joinConfigs[0].leftOperator) ||
             this.isLoadingOperatorInjector((this.operator as JoinOperator).joinConfigs[0].rightOperator)
           );
-        case ETL_OPERATOR_TYPE.TransformOperator:
+        case ETLOperatorType.TransformOperator:
           return this.isLoadingOperatorInjector((this.operator as TransformOperator).operator);
-        case ETL_OPERATOR_TYPE.ManageFieldOperator:
+        case ETLOperatorType.ManageFieldOperator:
           return this.isLoadingOperatorInjector((this.operator as ManageFieldOperator).operator);
-        case ETL_OPERATOR_TYPE.PivotTableOperator:
+        case ETLOperatorType.PivotTableOperator:
           return this.isLoadingOperatorInjector((this.operator as PivotTableOperator).operator);
-        case ETL_OPERATOR_TYPE.SQLQueryOperator:
+        case ETLOperatorType.SQLQueryOperator:
           return this.isLoadingOperatorInjector((this.operator as SQLQueryOperator).operator);
-        case ETL_OPERATOR_TYPE.GetDataOperator:
+        case ETLOperatorType.GetDataOperator:
         default:
           return this.isLoadingOperatorInjector(this.operator);
       }

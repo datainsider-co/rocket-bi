@@ -4,5 +4,6 @@ export enum ThirdPartyAuthenticationType {
   GA4 = 'ga4',
   GoogleAds = 'google-advertise',
   Facebook = 'facebook',
+  TikTok = 'tik-tok',
   NotFound = 'not-found'
 }

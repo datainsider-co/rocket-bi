@@ -2,6 +2,17 @@
   <div class="param-container">
     <div class="param-name" @click="onSelectParam">{{ param.displayName }}</div>
     <DiDatePicker :is-show-icon-date="false" class="date-picker-input" :date.sync="tempValueAsDate" v-if="param.valueType === ValueTypes.date" />
+    <DiDropdown
+      class="list-default-value"
+      v-else-if="param.valueType === ValueTypes.list"
+      :data="listItemOps"
+      labelProps="name"
+      valueProps="id"
+      v-model="tempValue"
+      :appendAtRoot="true"
+      boundary="window"
+      @change="handleListDefaultValueChanged"
+    />
     <template v-else>
       <input
         class="param-input-value"
@@ -20,15 +31,14 @@
         <div v-else>{{ displayValue }}</div>
       </div>
     </template>
-
-    <i :id="actionBtnId" class="di-icon-setting btn-ghost" @click="onEditParam" />
+    <i :id="actionBtnId" class="di-icon-setting btn-ghost p-1" @click="onEditParam" />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { ParamValueType, QueryParameter } from '@core/common/domain';
-import { DateTimeFormatter, StringUtils } from '@/utils';
+import { DateTimeFormatter, ListUtils, PopupUtils, StringUtils } from '@/utils';
 import DiInputComponent from '@/shared/components/DiInputComponent.vue';
 import { Log } from '@core/utils';
 import PopoverV2 from '@/shared/components/common/popover-v2/PopoverV2.vue';
@@ -36,8 +46,9 @@ import DiInputDateTime from '@/screens/data-management/components/DiInputDateTim
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
 import moment from 'moment';
 import { max, min } from 'lodash';
+import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
 
-@Component({ components: { DiInputDateTime, DiInputComponent, PopoverV2, DiDatePicker } })
+@Component({ components: { DiDropdown, DiInputDateTime, DiInputComponent, PopoverV2, DiDatePicker } })
 export default class ParamItem extends Vue {
   private readonly ValueTypes = ParamValueType;
   @Prop({ required: true })
@@ -61,6 +72,19 @@ export default class ParamItem extends Vue {
     };
   }
 
+  private get listItemOps() {
+    if (this.param.list) {
+      return this.param.list?.map(item => {
+        return {
+          id: item,
+          name: item
+        };
+      });
+    } else {
+      return [];
+    }
+  }
+
   private calculateInputWidth() {
     const defaultWidth = 50;
     const spaceWidth = 4;
@@ -81,6 +105,17 @@ export default class ParamItem extends Vue {
       });
     }
   }
+  mounted() {
+    this.setListDefaultValue();
+  }
+
+  setListDefaultValue() {
+    if (this.param.valueType === ParamValueType.list) {
+      if (!this.param.value && this.param.list && ListUtils.isNotEmpty(this.param.list)) {
+        this.tempValue = this.param.list[0];
+      }
+    }
+  }
 
   unfocus() {
     this.isFocus = false;
@@ -96,6 +131,7 @@ export default class ParamItem extends Vue {
   }
 
   private onEditParam(event: MouseEvent) {
+    PopupUtils.hideAllPopup();
     event.stopPropagation();
     this.$emit('edit', event, this.param, this.tempValue);
   }
@@ -143,6 +179,11 @@ export default class ParamItem extends Vue {
     this.tempValue = DateTimeFormatter.formatDateWithTime(date, '');
     this.unfocus();
   }
+
+  private handleListDefaultValueChanged(value: string) {
+    this.tempValue = value;
+    this.unfocus();
+  }
 }
 </script>
 
@@ -172,7 +213,7 @@ $height: 26px;
   .param-input-value {
     @include regular-text-14();
     color: $inputColor;
-    margin: 0 8px;
+    margin: 0 6px;
     background: transparent;
     border: unset;
   }
@@ -205,12 +246,39 @@ $height: 26px;
     }
   }
 
+  .list-default-value {
+    margin-top: 0;
+    height: 23px;
+    width: 160px;
+    overflow: hidden;
+
+    button {
+      height: 23px;
+    }
+    .dropdown-input-placeholder {
+      color: #000000;
+      font-size: 14px;
+    }
+
+    &:hover {
+      button {
+        background: rgba(242, 242, 247, 0.6);
+      }
+    }
+  }
+
   &:hover {
     //border: 1px solid var(--accent);
     background: rgba(242, 242, 247, 0.6);
 
     .param-name {
       //text-decoration: underline;
+    }
+
+    .list-default-value {
+      button {
+        background: rgba(242, 242, 247, 0.6);
+      }
     }
   }
 

@@ -17,9 +17,11 @@
     display: flex;
     flex-direction: column;
 
-    > .user-contact,
-    > .user-privilege {
+    > .user-contact {
       margin: 16px;
+    }
+    > .user-privilege {
+      margin: 0 16px 16px;
     }
   }
 }

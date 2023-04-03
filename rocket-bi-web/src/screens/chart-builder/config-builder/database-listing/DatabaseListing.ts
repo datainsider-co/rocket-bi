@@ -29,7 +29,6 @@ import UpdateTableByQueryModal from '@/screens/chart-builder/config-builder/data
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import Swal from 'sweetalert2';
 import { WidgetModule } from '@/screens/dashboard-detail/stores';
-import SearchInput from '@/shared/components/SearchInput.vue';
 import DiSearchInput from '@/shared/components/DiSearchInput.vue';
 
 enum DataManagementAction {
@@ -76,6 +75,12 @@ export default class DatabaseListing extends Vue {
   $alert!: typeof Swal;
   private readonly DatabaseEditionMode = DatabaseListingMode;
   private readonly DisplayListings = DisplayListing;
+
+  /**
+   * cached value for change tab
+   */
+  private cachingObject: any = {};
+
   @Prop({ default: DatabaseListingAs.Normal })
   databaseListingAs!: DatabaseListingAs;
 
@@ -242,12 +247,21 @@ export default class DatabaseListing extends Vue {
   }
 
   private async handleSetDatabaseSelected(dbName: string) {
-    this.$emit('updateStatus', Status.Loading);
-    if (StringUtils.isNotEmpty(dbName) && dbName != this.databaseSelected) {
-      this.displayListing = this.DisplayListings.Database;
-      await _BuilderTableSchemaStore.selectDatabase(dbName);
+    try {
+      this.setStatus(Status.Loading);
+      if (StringUtils.isNotEmpty(dbName) && dbName != this.databaseSelected) {
+        this.displayListing = this.DisplayListings.Database;
+        await _BuilderTableSchemaStore.selectDatabase(dbName);
+      }
+      this.setStatus(Status.Loaded);
+    } catch (ex) {
+      Log.error('BuilderTableSchema::handleSetDatabaseSelected', ex);
+      this.setStatus(Status.Error, `Loading the ${dbName} database has failed`);
     }
-    this.$emit('updateStatus', Status.Loaded);
+  }
+
+  private setStatus(status: Status, errorMsg?: string) {
+    this.$emit('updateStatus', status, errorMsg);
   }
 
   handleUnFocus() {
@@ -311,7 +325,7 @@ export default class DatabaseListing extends Vue {
         //drop table
         this.tableMenu?.close();
         // this.handleDropTable(tableSchema);
-        Modals.showConfirmationModal(`Are you sure to delete table '${tableSchema.displayName}'?`, {
+        Modals.showConfirmationModal(`Are you sure to permanently delete table '${tableSchema.displayName}'?`, {
           onOk: () => this.handleDropTable(tableSchema),
           onCancel: () => {
             Log.debug('onCancel');
@@ -488,22 +502,24 @@ export default class DatabaseListing extends Vue {
     }
   }
 
-  private updateTable(tableSchema: TableSchema, oldColumn: Column, newColumn: Column) {
-    const oldField: Field = new ExpressionField(
-      tableSchema.dbName,
-      tableSchema.name,
-      oldColumn.name,
-      oldColumn.className,
-      oldColumn.defaultExpression?.expr ?? ''
-    );
-    const newField: Field = new ExpressionField(
-      tableSchema.dbName,
-      tableSchema.name,
-      newColumn.name,
-      newColumn.className,
-      newColumn.defaultExpression?.expr ?? ''
-    );
-    _ConfigBuilderStore.updateField({ oldField, newField });
+  private updateTable(tableSchema: TableSchema, oldColumn: Column | undefined, newColumn: Column | undefined) {
+    if (oldColumn && newColumn) {
+      const oldField: Field = new ExpressionField(
+        tableSchema.dbName,
+        tableSchema.name,
+        oldColumn.name,
+        oldColumn.className,
+        oldColumn.defaultExpression?.expr ?? ''
+      );
+      const newField: Field = new ExpressionField(
+        tableSchema.dbName,
+        tableSchema.name,
+        newColumn.name,
+        newColumn.className,
+        newColumn.defaultExpression?.expr ?? ''
+      );
+      _ConfigBuilderStore.updateField({ oldField, newField });
+    }
     _BuilderTableSchemaStore.setTableSchema(tableSchema);
     _BuilderTableSchemaStore.expandTables([tableSchema.name]);
     this.$emit('updateTable');
@@ -525,13 +541,31 @@ export default class DatabaseListing extends Vue {
   onDisplayListingChanged() {
     switch (this.displayListing) {
       case DisplayListing.Database: {
+        this.setStatus(Status.Loading);
+        const previousStatus = this.cachingObject.status || Status.Loaded;
+        const previousError = this.cachingObject.error;
+        this.setStatus(previousStatus, previousError);
         break;
       }
       case DisplayListing.TabControl: {
-        const tabControls = WidgetModule.allTabControls;
-        _BuilderTableSchemaStore.selectTabControl(tabControls);
+        this.selectTabController();
         break;
       }
+    }
+  }
+
+  private selectTabController() {
+    try {
+      Object.assign(this.cachingObject, 'status', this.status);
+      Object.assign(this.cachingObject, 'error', this.error);
+      this.setStatus(Status.Loading);
+      const tabControls = WidgetModule.allTabControls;
+      _BuilderTableSchemaStore.loadTabControls(tabControls);
+      this.setStatus(Status.Loaded);
+    } catch (ex) {
+      const exception = DIException.fromObject(ex);
+      Log.error('selectTabController::exception', exception);
+      this.setStatus(Status.Error, 'Can not load chart controls');
     }
   }
 

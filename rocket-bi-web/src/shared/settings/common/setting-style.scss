@@ -1,0 +1,183 @@
+@import '~@/themes/scss/mixin.scss';
+@import '~bootstrap/scss/bootstrap-grid';
+
+.setting-container {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+
+  &.toggle-setting {
+    flex-direction: row;
+    height: 27px;
+    align-items: center;
+  }
+
+  &.dropdown-setting {
+    height: unset;
+    .selection {
+      margin-top: 0;
+
+      &.small {
+        width: 64px;
+      }
+
+      &.full {
+        width: 100%;
+      }
+
+      > .relative > span > button > div {
+        height: 31px;
+      }
+    }
+    .form-input {
+      &.small {
+        width: 64px;
+      }
+
+      &.full {
+        width: 100%;
+      }
+    }
+  }
+
+  &.align-setting {
+    .align-container {
+      height: 34px;
+
+      > .btn-icon {
+        padding: 8px;
+        font-size: 20px;
+
+        &:first-child {
+          padding-left: 0;
+        }
+
+        &:last-child {
+          padding-right: 0;
+        }
+      }
+
+      .active {
+        color: var(--accent) !important;
+      }
+    }
+  }
+
+  .label {
+    @include regular-text12-unselect();
+    //cursor: pointer !important;
+    line-height: 1.4;
+    font-size: 14px;
+    padding: 0;
+    margin: 0 0 4px;
+    color: var(--secondary-text-color);
+
+    p {
+      margin: 0;
+    }
+
+    &.small {
+    }
+  }
+
+  .color-component {
+    &.half {
+      width: 145px;
+    }
+    &.small {
+      width: 115px;
+    }
+
+    &.full {
+      width: 100%;
+    }
+  }
+
+  &.input-setting {
+    .form-control {
+      height: 33px;
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      /* Firefox */
+      input[type='number'] {
+        -moz-appearance: textfield;
+      }
+    }
+  }
+
+  .form-control {
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Firefox */
+    input[type='number'] {
+      -moz-appearance: textfield;
+    }
+  }
+
+  input {
+    padding: 10px 0 10px 8px;
+
+    @include media-breakpoint-down(lg) {
+      padding: 5px 10px;
+    }
+  }
+
+  &.input-date-setting .calendar-area {
+    background-color: var(--hover-color);
+    width: 100%;
+
+    .di-calendar-input-container {
+      > span {
+        flex: 1;
+        //order: 0;
+
+        > input {
+          margin-left: 0;
+          text-align: left;
+        }
+      }
+
+      > img {
+        opacity: var(--normal-opacity) !important;
+        //order: 1;
+      }
+
+      > div.icon-title {
+        order: 1;
+      }
+    }
+
+    .di-calendar-date-compare .select-container {
+      min-width: 120px !important;
+      width: unset !important;
+    }
+  }
+}
+//
+.dark .setting-container .label {
+  opacity: 0.6;
+}
+
+.revert-button {
+  @include regular-text-14();
+  color: var(--accent);
+  margin-left: auto;
+  padding: 0;
+  opacity: 1;
+  width: fit-content;
+  cursor: pointer;
+}
+
+div.disabled-setting {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: var(--disable-opacity);
+}

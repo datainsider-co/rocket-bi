@@ -1,8 +1,7 @@
 <template>
   <div>
     <div class="d-flex">
-      <DiToggle id="sync-all-table" :value="!isSingleTable" @onSelected="isSingleTable = !isSingleTable"></DiToggle>
-      <div class="ml-1">Sync all tables</div>
+      <DiToggle id="sync-all-table" :value="!isSingleTable" @onSelected="isSingleTable = !isSingleTable" title="Sync all tables"></DiToggle>
     </div>
     <template v-if="isSingleTable">
       <div class="mb-0 mt-3">Bucket name</div>

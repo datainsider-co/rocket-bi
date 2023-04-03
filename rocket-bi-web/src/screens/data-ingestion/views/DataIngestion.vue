@@ -63,6 +63,12 @@ export default class DataIngestion extends LoggedInScreen {
         to: { name: Routers.Job }
       },
       {
+        id: 'queuedJobs',
+        displayName: 'Queued Jobs',
+        icon: 'di-icon-job',
+        to: { name: Routers.QueuedJob }
+      },
+      {
         id: 'streaming',
         displayName: 'Streaming',
         icon: 'di-icon-streaming',

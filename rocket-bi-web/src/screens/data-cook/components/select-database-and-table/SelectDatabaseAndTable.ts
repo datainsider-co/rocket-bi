@@ -104,22 +104,9 @@ export default class SelectDatabaseAndTable extends Vue {
     }
   }
 
-  async getData(tableSchema: TableSchema): Promise<TableSchema | null> {
+  async getData(): Promise<TableSchema | null> {
     await this.getTargetDatabase();
-    return await this.getTargetTable(tableSchema);
-  }
-
-  async getDatabaseAndTable(): Promise<{ database: DatabaseSchema | null; table: TableSchema | null }> {
-    const db = await this.getTargetDatabase();
-    let table = null;
-    if (!this.model.table.createNewModel) {
-      // @ts-ignore
-      table = await this.getTargetTable(null);
-    }
-    return {
-      database: db,
-      table: table
-    };
+    return await this.getTargetTable();
   }
 
   private get databaseSchemas(): DatabaseSchema[] {
@@ -164,7 +151,7 @@ export default class SelectDatabaseAndTable extends Vue {
     this.model.database.error = '';
   }
 
-  private async getTargetTable(tableSchema: TableSchema): Promise<TableSchema | null> {
+  private async getTargetTable(): Promise<TableSchema | null> {
     if (!this.model.database.model) {
       this.model.table.error = 'Please select database first.';
       return null;
@@ -193,20 +180,7 @@ export default class SelectDatabaseAndTable extends Vue {
         return null;
       }
 
-      // const req = new CreateTableRequest(this.model.database.model.name, tableName, tableSchema.columns, tableSchema.primaryKeys, tableSchema.orderBys);
-      // const resp = await this.schemaService.createTable(req).catch(e => {
-      //   this.model.table.error = 'Create table fail. ${e.message}';
-      //   return null;
-      // });
-      //
-      // if (resp) {
-      //   const updatedDB = await DatabaseSchemaModule.selectDatabase(resp.dbName);
-      //   this.selectDatabase(updatedDB);
-      //   this.selectTable(resp);
-      // }
-      //
-      // return resp;
-      const table: TableSchema = cloneDeep(tableSchema);
+      const table: TableSchema = TableSchema.empty();
       table.dbName = this.model.database.model.name;
       table.name = tableName;
       return table;

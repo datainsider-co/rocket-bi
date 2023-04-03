@@ -160,8 +160,8 @@ export class GA4JobFormRender implements JobFormRender {
       this.showPropertyLoading();
       this.showDimensionMetricLoading();
       await this.loadRefreshToken();
-      await GoogleUtils.loadGA4Client(this.googleConfig.apiKey, this.gaJob.accessToken);
-      await Promise.all([this.loadSource(this.gaJob.refreshToken, this.gaJob.accessToken), this.loadAccountSummarizes()]);
+      // await GoogleUtils.loadGA4Client(this.googleConfig.apiKey, this.gaJob.accessToken);
+      // await Promise.all([this.loadSource(this.gaJob.refreshToken, this.gaJob.accessToken), this.loadAccountSummarizes()]);
       await this.loadAllMetricsAndDimensions(this.property);
       this.hidePropertyLoading();
       this.showDimensionMetricLoading();
@@ -262,8 +262,8 @@ export class GA4JobFormRender implements JobFormRender {
 
   private async loadRefreshToken() {
     if (this.isCreateMode) {
-      const refreshToken = await DataSourceModule.getRefreshToken(this.gaJob.authorizationCode);
-      this.gaJob.refreshToken = refreshToken;
+      // const refreshToken = await DataSourceModule.getRefreshToken(this.gaJob.authorizationCode);
+      // this.gaJob.refreshToken = refreshToken;
     }
   }
 

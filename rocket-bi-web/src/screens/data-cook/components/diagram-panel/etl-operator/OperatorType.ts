@@ -2,9 +2,10 @@ import DiagramItem from '../DiagramItem.vue';
 import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
 import Konva from 'konva';
 import { Log } from '@core/utils';
-import { CheckProgressResponse, ETL_OPERATOR_TYPE, ETL_OPERATOR_TYPE_NAME, EtlOperator, JOIN_TYPE_NAME, JoinOperator, Position } from '@core/data-cook';
-import { ERROR_COLOR, FONT_FAMILY, PRIMARY_COLOR, TEXT_COLOR, TEXT_SIZE } from '@/screens/data-cook/components/manage-etl-operator/Constance';
+import { CheckProgressResponse, ETLOperatorType, ETL_OPERATOR_TYPE_NAME, EtlOperator, JOIN_TYPE_NAME, JoinOperator, Position } from '@core/data-cook';
+import { ERROR_COLOR, FONT_FAMILY, ACCENT_COLOR, TEXT_COLOR, TEXT_SIZE } from '@/screens/data-cook/components/manage-etl-operator/Constance';
 import { DiagramEvent } from '@/screens/data-cook/components/diagram-panel/DiagramEvent';
+import { ListUtils } from '@/utils';
 
 const STROKE_COLOR = '#505050';
 
@@ -16,43 +17,22 @@ export default class OperatorType extends DiagramItem {
   @Prop({ type: Object, required: true })
   private operator!: EtlOperator;
 
+  @Prop({ type: Boolean, default: false })
+  private readonly isError!: boolean;
+
   @Inject() protected readonly getOperatorPosition!: (operator: EtlOperator) => Position | null;
   @Inject() protected readonly setOperatorPosition!: (operator: EtlOperator, position: Position) => void;
   @Inject() protected readonly getPreviewEtlResponse!: (operator: EtlOperator) => CheckProgressResponse | null;
 
-  private get previewResponse(): CheckProgressResponse | null {
-    if (this.operator && this.getPreviewEtlResponse) {
-      return this.getPreviewEtlResponse(this.operator);
-    }
-    return null;
-  }
-
-  private get isError(): boolean {
-    Log.info('isError');
-    let flag = this.previewResponse?.isError ?? false;
-    if (!flag) {
-      this.operator.getAllNotGetDataOperators().every(leftOperator => {
-        const previewResp = this.getPreviewEtlResponse(leftOperator);
-        if (previewResp && previewResp.isError) {
-          flag = true;
-          return false;
-        } else {
-          return true;
-        }
-      });
-    }
-    return flag;
-  }
-
   private get operatorName() {
     switch (this.operator?.className) {
-      case ETL_OPERATOR_TYPE.JoinOperator:
+      case ETLOperatorType.JoinOperator:
         return JOIN_TYPE_NAME[(this.operator as JoinOperator).joinConfigs[0].joinType];
-      case ETL_OPERATOR_TYPE.TransformOperator:
-      case ETL_OPERATOR_TYPE.ManageFieldOperator:
-      case ETL_OPERATOR_TYPE.PivotTableOperator:
-      case ETL_OPERATOR_TYPE.SQLQueryOperator:
-      case ETL_OPERATOR_TYPE.PythonOperator:
+      case ETLOperatorType.TransformOperator:
+      case ETLOperatorType.ManageFieldOperator:
+      case ETLOperatorType.PivotTableOperator:
+      case ETLOperatorType.SQLQueryOperator:
+      case ETLOperatorType.PythonOperator:
         return ETL_OPERATOR_TYPE_NAME[this.operator?.className];
       default:
         return '';
@@ -114,7 +94,7 @@ export default class OperatorType extends DiagramItem {
       if (this.stage) {
         this.stage.container().style.cursor = 'move';
       }
-      this.rhombus?.stroke(PRIMARY_COLOR);
+      this.rhombus?.stroke(ACCENT_COLOR);
       this.layer?.draw();
     });
     this.rhombus.on('mouseleave', () => {
@@ -145,13 +125,12 @@ export default class OperatorType extends DiagramItem {
 
   @Watch('isError')
   private handlePreviewResponse() {
-    Log.info('>>> handlePreviewResponse', this.operator.destTableDisplayName, this.previewResponse);
     if (this.isError) {
       this.rhombus?.stroke(ERROR_COLOR);
-      this.stage?.fire(DiagramEvent.ChangeConnectorColor, { id: this.id, color: ERROR_COLOR });
+      // this.stage?.fire(DiagramEvent.ChangeConnectorColor, { id: this.id, color: ERROR_COLOR });
     } else {
       this.rhombus?.stroke(STROKE_COLOR);
-      this.stage?.fire(DiagramEvent.ChangeConnectorColor, { id: this.id, color: PRIMARY_COLOR });
+      // this.stage?.fire(DiagramEvent.ChangeConnectorColor, { id: this.id, color: PRIMARY_COLOR });
     }
     this.layer?.draw();
   }

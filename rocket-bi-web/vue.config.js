@@ -2,13 +2,12 @@ const path = require('path');
 const WorkerPlugin = require('worker-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const webpack = require('webpack');
-const os = require('os');
 
 const getAllowMenMb = () => 2048;
 const getAllowCore = () => {
   switch (process.env.NODE_ENV) {
     case 'production':
-      return Math.max(Math.floor(os.cpus().length / 2), 1);
+      return 2;
     case 'development':
       return 1;
     case 'test':
@@ -18,14 +17,38 @@ const getAllowCore = () => {
   }
 };
 
+const isMode = env => {
+  return process.env.NODE_ENV === env;
+};
+
+const getExtraPlugins = () => {
+  if (isMode('production')) {
+    return [
+      new webpack.optimize.LimitChunkCountPlugin({
+        maxChunks: 15
+      }),
+      new webpack.optimize.MinChunkSizePlugin({
+        minChunkSize: 3000000 // 3MB
+      }),
+      new webpack.DefinePlugin({
+        'process.env': {
+          BUILD_VERSION: JSON.stringify(new Date().getTime())
+        }
+      })
+    ];
+  } else {
+    return [];
+  }
+};
+
 module.exports = {
   runtimeCompiler: true,
   configureWebpack: {
     optimization: {
-      minimize: ['production', 'test'].includes(process.env.NODE_ENV),
+      minimize: isMode('production'),
       splitChunks: {
-        minSize: 1500000,
-        maxSize: 10000000,
+        minSize: 3000000, // 3MB
+        maxSize: 15000000, // 15MB
         minChunks: 1,
         chunks: 'all'
       }
@@ -42,28 +65,22 @@ module.exports = {
       new WorkerPlugin(),
       // available options are documented at https://github.com/Microsoft/monaco-editor-webpack-plugin#options
       new MonacoWebpackPlugin(),
-      new webpack.optimize.LimitChunkCountPlugin({
-        maxChunks: 10
-      }),
-      new webpack.optimize.MinChunkSizePlugin({
-        minChunkSize: 100000
-      })
+      ...getExtraPlugins()
     ]
   },
   chainWebpack: config => {
-    config.performance.maxEntrypointSize(10000000).maxAssetSize(10000000);
-    if (process.env.NODE_ENV === 'test') {
+    config.performance.maxEntrypointSize(15000000).maxAssetSize(15000000);
+    if (isMode('test')) {
       const scssRule = config.module.rule('scss');
       scssRule.uses.clear();
       scssRule.use('null-loader').loader('null-loader');
     }
-
-    config.plugin('fork-ts-checker').tap(args => {
-      const allowUseMemMb = getAllowMenMb();
-      const allowCore = getAllowCore();
-      args[0].memoryLimit = allowUseMemMb;
-      args[0].workers = allowCore;
-      return args;
-    });
+    if (isMode('production')) {
+      config.plugin('fork-ts-checker').tap(args => {
+        args[0].memoryLimit = getAllowMenMb();
+        args[0].workers = getAllowCore();
+        return args;
+      });
+    }
   }
 };

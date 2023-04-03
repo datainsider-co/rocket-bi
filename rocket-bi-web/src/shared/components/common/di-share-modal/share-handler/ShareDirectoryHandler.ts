@@ -1,6 +1,6 @@
 import { ActionType, ResourceType } from '@/utils/PermissionUtils';
 import {
-  PasswordSetting,
+  Passwordable,
   DirectoryType,
   GetUserSharingInfoRequest,
   PasswordConfig,
@@ -77,7 +77,7 @@ export class ShareDirectoryHandler implements ShareHandler {
         directory.data = DirectoryMetadata.default(ShareDirectoryHandler.directoryMapper.get(resourceType)!);
       }
       Log.debug('savePassword::', directory.data);
-      if (PasswordSetting.is(directory.data)) {
+      if (Passwordable.is(directory.data)) {
         directory.data.setPassword(password.hashedPassword!).setEnable(password.enabled);
         await this.directoryService.update(directory);
       }
@@ -89,7 +89,7 @@ export class ShareDirectoryHandler implements ShareHandler {
   async removePassword(resourceId: string, resourceType: ResourceType) {
     try {
       const directory = await this.directoryService.get(+resourceId);
-      if (PasswordSetting.is(directory?.data)) {
+      if (Passwordable.is(directory?.data)) {
         directory.data.removePassword();
         await this.directoryService.update(directory);
       }

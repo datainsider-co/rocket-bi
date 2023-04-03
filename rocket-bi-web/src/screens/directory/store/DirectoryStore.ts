@@ -31,6 +31,7 @@ export default class DirectoryStore extends VuexModule {
   public directories: Directory[] = [];
   public parents: ListParentsResponse | null = null;
   public errorMessage = '';
+  public screenName = '';
   public status = Status.Loading;
 
   private static getDirectoryService(): DirectoryService {
@@ -48,15 +49,20 @@ export default class DirectoryStore extends VuexModule {
     const breadcrumbMode = BreadCrumbUtils.getBreadcrumbMode(this.parents);
     switch (breadcrumbMode) {
       case BreadcrumbMode.Fully:
-        return BreadCrumbUtils.getFullyBreadcrumbs(this.parents);
+        return BreadCrumbUtils.getFullyBreadcrumbs(this.parents, this.screenName);
       case BreadcrumbMode.Shortly:
-        return BreadCrumbUtils.getShortlyBreadcrumbs(this.parents);
+        return BreadCrumbUtils.getShortlyBreadcrumbs(this.parents, this.screenName);
     }
   }
 
   @Mutation
   public setDirectories(directories: Directory[]): void {
     this.directories = directories;
+  }
+
+  @Mutation
+  public setScreenName(name: string): void {
+    this.screenName = name;
   }
 
   @Mutation
@@ -313,6 +319,7 @@ export default class DirectoryStore extends VuexModule {
     this.directories = [];
     this.parents = null;
     this.errorMessage = '';
+    this.screenName = '';
   }
 
   @Action

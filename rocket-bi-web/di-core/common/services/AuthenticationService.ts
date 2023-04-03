@@ -5,6 +5,7 @@ import { SendCodeToEmailRequest } from '@core/common/domain/request/authenticati
 import { UserOAuthRequest } from '@core/common/domain/request/authentication/UserOAuthRequest';
 import { OauthConfigResponse } from '@core/common/domain/model/oauth-config/GoogleOauthConfig';
 import { LoginResponse } from '@core/common/domain/response/authentication/LoginResponse';
+import { UserResetPasswordRequest } from '@core/common/domain/request/authentication/UserResetPasswordRequest';
 
 export abstract class AuthenticationService {
   abstract register(request: UserRegisterRequest): Promise<RegisterResponse>;
@@ -17,11 +18,11 @@ export abstract class AuthenticationService {
 
   abstract directVerify(token: string): Promise<LoginResponse>;
 
-  abstract resetPassword(request: SendCodeToEmailRequest): Promise<boolean>;
+  abstract resetPassword(request: UserResetPasswordRequest): Promise<boolean>;
 
   abstract changePassword(oldPass: string, newPass: string): Promise<boolean>;
 
-  abstract forgotPassword(request: SendCodeToEmailRequest): Promise<boolean>;
+  abstract forgotPassword(email: string): Promise<boolean>;
 
   abstract loginOAuth(request: UserOAuthRequest): Promise<LoginResponse>;
 
@@ -57,7 +58,7 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     return this.repository.directVerify(token);
   }
 
-  resetPassword(request: SendCodeToEmailRequest): Promise<boolean> {
+  resetPassword(request: UserResetPasswordRequest): Promise<boolean> {
     return this.repository.resetPassword(request);
   }
 
@@ -65,8 +66,8 @@ export class AuthenticationServiceImpl implements AuthenticationService {
     return this.repository.changePassword(oldPass, newPass);
   }
 
-  forgotPassword(request: SendCodeToEmailRequest): Promise<boolean> {
-    return this.repository.forgotPassword(request);
+  forgotPassword(email: string): Promise<boolean> {
+    return this.repository.forgotPassword(email);
   }
 
   loginOAuth(request: UserOAuthRequest): Promise<LoginResponse> {

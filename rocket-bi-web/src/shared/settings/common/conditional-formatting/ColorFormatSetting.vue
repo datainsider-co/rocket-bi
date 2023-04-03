@@ -123,9 +123,13 @@ export default class ColorFormatSetting extends Vue {
     return this.selectedDefaultColor === DefaultValueFormattingType.SpecificColor;
   }
 
+  private get isGroupBy() {
+    return this.functionType === FunctionFormattingType.GroupBy;
+  }
+
   private get databaseOptions(): DropdownData[] {
     return FormattingOptions.buildTableOptions(_BuilderTableSchemaStore.tableSchemas, column =>
-      FormattingOptions.isShowColumn(column, this.colorFormatting.formatType)
+      FormattingOptions.isShowColumn(column, this.colorFormatting.formatType, this.isGroupBy)
     );
   }
 

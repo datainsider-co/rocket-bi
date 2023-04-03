@@ -91,12 +91,32 @@
                   @selectTable="fromTableChanged"
                 ></ShopifyFromDatabaseSuggestion>
               </template>
+              <template v-if="isTiktokAdsJob">
+                <TiktokSourceConfig
+                  ref="tiktokSourceConfig"
+                  :single-table="true"
+                  :job.sync="jdbcJob"
+                  hide-sync-all-table-option
+                  @selectDatabase="fromDatabaseChanged"
+                  @selectTable="fromTableChanged"
+                />
+              </template>
               <template v-if="isS3Job">
                 <S3DataSourceConfig ref="s3FromSuggestion" :job.sync="jdbcJob" />
               </template>
             </div>
           </div>
-
+          <div v-if="isGoogleAnalyticJob" class="job-section export-form">
+            <GoogleAnalyticConfig ref="googleAnalyticConfig" :job.sync="jdbcJob" :single-table="true" :hide-sync-all-table-option="true"></GoogleAnalyticConfig>
+          </div>
+          <div v-if="isGoogleAnalytic4Job" class="job-section export-form">
+            <GoogleAnalytic4Config
+              ref="googleAnalytic4Config"
+              :job.sync="jdbcJob"
+              :single-table="true"
+              :hide-sync-all-table-option="true"
+            ></GoogleAnalytic4Config>
+          </div>
           <div v-if="isMongoJob" class="job-section export-form">
             <MongoDepthConfig :mongo-job.sync="jdbcJob"></MongoDepthConfig>
           </div>
@@ -123,7 +143,20 @@
 <script lang="ts">
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
-import { DataDestination, DataSourceInfo, DataSources, DataSourceType, FormMode, JdbcJob, Job, JobType, SyncMode } from '@core/data-ingestion';
+import {
+  DataDestination,
+  DataSourceInfo,
+  DataSources,
+  DataSourceType,
+  FormMode,
+  GA4Job,
+  GoogleAnalyticJob,
+  JdbcJob,
+  Job,
+  JobType,
+  SyncMode,
+  TiktokSourceInfo
+} from '@core/data-ingestion';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
 import { DatabaseCreateRequest, DIException } from '@core/common/domain';
 import { Log } from '@core/utils';
@@ -137,8 +170,7 @@ import SingleChoiceItem from '@/shared/components/filters/SingleChoiceItem.vue';
 import { AtomicAction } from '@/shared/anotation/AtomicAction';
 import { JobModule } from '@/screens/data-ingestion/store/JobStore';
 import { minValue, required } from 'vuelidate/lib/validators';
-import { Status, VerticalScrollConfigs, ApiExceptions } from '@/shared';
-import { StringUtils } from '@/utils/StringUtils';
+import { ApiExceptions, Status, VerticalScrollConfigs } from '@/shared';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { Inject } from 'typescript-ioc';
 import { SchemaService } from '@core/schema/service/SchemaService';
@@ -165,8 +197,17 @@ import ShopifyFromDatabaseSuggestion from '@/screens/data-ingestion/components/S
 import { ShopifyJob } from '@core/data-ingestion/domain/job/ShopifyJob';
 import S3DataSourceConfig from './s3-csv/S3DataSourceConfig.vue';
 import { ChartUtils } from '@/utils';
+import GoogleAnalyticConfig from '@/screens/data-ingestion/components/google-analytics/GoogleAnalyticConfig.vue';
+import { GASourceInfo } from '@core/data-ingestion/domain/data-source/GASourceInfo';
+import TiktokAdsFromDatabaseSuggestion from '@/screens/data-ingestion/components/TiktokAdsFromDatabaseSuggestion.vue';
+import TiktokAdsSyncModeConfig from '@/screens/data-ingestion/components/tiktok/TiktokAdsSyncModeConfig.vue';
+import TiktokSourceConfig from '@/screens/data-ingestion/components/tiktok/TiktokSourceConfig.vue';
+import GoogleAnalytic4Config from './google-analytics-4/GoogleAnalytic4Config.vue';
+import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4SourceInfo';
+
 @Component({
   components: {
+    TiktokAdsSyncModeConfig,
     ShopifyFromDatabaseSuggestion,
     MongoFromDatabaseSuggestion,
     BigQueryExtraForm,
@@ -187,7 +228,11 @@ import { ChartUtils } from '@/utils';
     JobSyncConfig,
     DataSourceConfig,
     JobWareHouseConfig,
-    S3DataSourceConfig
+    S3DataSourceConfig,
+    GoogleAnalyticConfig,
+    TiktokAdsFromDatabaseSuggestion,
+    TiktokSourceConfig,
+    GoogleAnalytic4Config
   },
   validations: {
     jdbcJob: {
@@ -230,6 +275,9 @@ export default class JobCreationModal extends Vue {
   private readonly shopifyFromDatabaseSuggestion!: ShopifyFromDatabaseSuggestion;
 
   @Ref()
+  private readonly tiktokSourceConfig?: TiktokSourceConfig;
+
+  @Ref()
   private readonly jobSyncModeConfig!: JobSyncConfig;
 
   @Ref()
@@ -255,6 +303,12 @@ export default class JobCreationModal extends Vue {
 
   @Ref()
   private readonly jobWareHouseConfig!: JobWareHouseConfig;
+
+  @Ref()
+  private readonly googleAnalyticConfig!: GoogleAnalyticConfig;
+
+  @Ref()
+  private readonly googleAnalytic4Config!: GoogleAnalytic4Config;
 
   private get actionName() {
     if (Job.getJobFormConfigMode(this.jdbcJob) === FormMode.Create) {
@@ -300,6 +354,14 @@ export default class JobCreationModal extends Vue {
     return Job.isMongoJob(this.jdbcJob);
   }
 
+  private get isGoogleAnalyticJob(): boolean {
+    return Job.isGoogleAnalyticJob(this.jdbcJob);
+  }
+
+  private get isGoogleAnalytic4Job(): boolean {
+    return Job.isGoogleAnalytic4Job(this.jdbcJob);
+  }
+
   private get isGenericJdbcJob(): boolean {
     return Job.isGenericJdbcJob(this.jdbcJob);
   }
@@ -310,6 +372,10 @@ export default class JobCreationModal extends Vue {
 
   private get isShopifyJob(): boolean {
     return Job.isShopifyJob(this.jdbcJob);
+  }
+
+  private get isTiktokAdsJob() {
+    return Job.isTiktokAdsJob(this.jdbcJob);
   }
 
   private get isS3Job(): boolean {
@@ -344,7 +410,12 @@ export default class JobCreationModal extends Vue {
               await this.shopifyFromDatabaseSuggestion.handleLoadShopifyFromData();
               break;
             case JobType.S3:
+            case JobType.GoogleAnalytics:
+            case JobType.GA4:
               ///Nothing to do
+              break;
+            case JobType.Tiktok:
+              await this.tiktokSourceConfig?.loadData();
               break;
             default:
               await this.jdbcFromDatabaseSuggestion.handleLoadJdbcFromData();
@@ -440,7 +511,7 @@ export default class JobCreationModal extends Vue {
       if (this.isCreateNewDatabase && !databaseInfo) {
         const databaseInfo = await this.schemaService.createDatabase(new DatabaseCreateRequest(name, name));
         this.jdbcJob.destDatabaseName = databaseInfo.name;
-        DatabaseSchemaModule.addNewDataInfo(databaseInfo);
+        DatabaseSchemaModule.addNewDatabaseInfo(databaseInfo);
       }
     } catch (e) {
       const ex = DIException.fromObject(e);
@@ -486,10 +557,6 @@ export default class JobCreationModal extends Vue {
           case DataSources.GoogleServiceAccountSource:
             await this.handleSelectGoogleServiceAccountSource(item.source);
             break;
-          case DataSources.GA4Source:
-            //todo:fixhere
-            // await this.handleSelectGoogleServiceAccountSource(item.source);
-            break;
           case DataSources.MongoDbSource:
             await this.handleSelectMongoSource(item.source);
             break;
@@ -505,7 +572,15 @@ export default class JobCreationModal extends Vue {
             break;
           }
           case DataSources.S3Source:
-            //Nothing to do
+            break;
+          case DataSources.GASource:
+            await this.handleSelectGASource(item.source);
+            break;
+          case DataSources.TiktokAds:
+            await this.handleSelectTiktokSource(item.source);
+            break;
+          case DataSources.GA4Source:
+            await this.handleSelectGA4Source(item.source);
             break;
           default:
             await this.handleSelectJdbcSource(item.source);
@@ -540,6 +615,46 @@ export default class JobCreationModal extends Vue {
     this.jdbcJob = this.getJobFromJdbcSource(source);
     this.fromDatabaseLoading = true;
     await DataSourceModule.loadDatabaseNames({ id: source.id });
+  }
+
+  private async handleSelectGASource(source: DataSourceInfo) {
+    this.jdbcJob = this.getJobFromGASource(source as GASourceInfo);
+    this.fromDatabaseLoading = true;
+    await this.googleAnalyticConfig.loadData();
+  }
+
+  private getJobFromGASource(gaSourceInfo: GASourceInfo) {
+    const jdbcJob = GoogleAnalyticJob.default();
+    jdbcJob.jobId = this.jdbcJob.jobId;
+    jdbcJob.sourceId = gaSourceInfo.id;
+    jdbcJob.displayName = this.jdbcJob.displayName;
+    return jdbcJob;
+  }
+
+  private async handleSelectGA4Source(source: DataSourceInfo) {
+    this.jdbcJob = this.getJobFromGA4Source(source as GA4SourceInfo);
+    this.$nextTick(async () => {
+      await this.googleAnalytic4Config.loadData();
+    });
+  }
+
+  private getJobFromGA4Source(gaSourceInfo: GA4SourceInfo) {
+    const jdbcJob = GA4Job.default();
+    jdbcJob.jobId = this.jdbcJob.jobId;
+    jdbcJob.displayName = this.jdbcJob.displayName;
+    jdbcJob.sourceId = gaSourceInfo.id;
+    return jdbcJob;
+  }
+
+  private async handleSelectTiktokSource(source: TiktokSourceInfo) {
+    Log.debug('handleSelectTiktokSource::', source);
+    const jobId = this.jdbcJob.jobId;
+    this.jdbcJob = Job.default(source).withDisplayName(this.jdbcJob.displayName);
+    this.jdbcJob.sourceId = source.id;
+    this.jdbcJob.jobId = jobId;
+    this.$nextTick(async () => {
+      await this.tiktokSourceConfig?.loadData();
+    });
   }
 
   private async handleSelectMongoSource(source: DataSourceInfo) {
@@ -608,6 +723,12 @@ export default class JobCreationModal extends Vue {
         return this.shopifyFromDatabaseSuggestion.isValidDatabaseSuggestion();
       case JobType.S3:
         return this.s3FromSuggestion.isValidFromSuggestion();
+      case JobType.GoogleAnalytics:
+        return this.googleAnalyticConfig.isValidSource();
+      case JobType.Tiktok:
+        return this.tiktokSourceConfig?.isValidSource() ?? false;
+      case JobType.GA4:
+        return this.googleAnalytic4Config.isValidSource();
       default:
         return this.jdbcFromDatabaseSuggestion.isValidDatabaseSuggestion();
     }
@@ -681,9 +802,18 @@ export default class JobCreationModal extends Vue {
 
   .select-container {
     margin-top: 0;
+    height: 34px !important;
 
-    .relative > span > button > div {
+    .relative {
       height: 34px !important;
+
+      > span {
+        height: 34px !important;
+
+        > button {
+          height: 34px !important;
+        }
+      }
     }
 
     button {
@@ -767,6 +897,20 @@ export default class JobCreationModal extends Vue {
 
           .select-container {
             width: unset;
+          }
+        }
+      }
+
+      .di-calendar-input-container {
+        background: var(--primary);
+        border-radius: 4px;
+        span {
+          order: -1;
+          width: 100%;
+          .input-calendar {
+            width: 100%;
+            margin-left: 0;
+            text-align: left;
           }
         }
       }

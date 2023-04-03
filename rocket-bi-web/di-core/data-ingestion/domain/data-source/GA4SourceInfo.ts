@@ -36,7 +36,17 @@ export class GA4SourceInfo implements DataSourceInfo {
     return googleAnalyticsSourceInfo;
   }
 
-  static default(): DataSourceInfo {
+  setAccessToken(accessToken: string) {
+    this.accessToken = accessToken;
+    return this;
+  }
+
+  setRefreshToken(refreshToken: string) {
+    this.refreshToken = refreshToken;
+    return this;
+  }
+
+  static default(): GA4SourceInfo {
     return new GA4SourceInfo(-1, '-1', '', '', '', 0);
   }
 

@@ -41,8 +41,9 @@ import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvent
 import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
 import { Log, UrlUtils } from '@core/utils';
 import { ColorUtils } from '@/utils/ColorUtils';
-import { ChartUtils } from '@/utils';
+import { ChartUtils, HighchartUtils, MetricNumberMode } from '@/utils';
 import { PopupUtils } from '@/utils/PopupUtils';
+import { RangeData } from '@core/common/services';
 
 @Component({
   components: {
@@ -398,7 +399,8 @@ export default class DefaultTable extends BaseWidget {
         customHeaderCellStyle: this.customHeaderCellStyle,
         customFooterCellStyle: this.customFooterCellStyle,
         onContextMenu: this.showContextMenu
-      }
+      },
+      extraData: this.querySetting.getChartOption()?.options
     };
   }
 
@@ -478,7 +480,7 @@ export default class DefaultTable extends BaseWidget {
       '--row-font-family': currentSetting.value?.style?.fontFamily,
       '--row-font-size': StringUtils.toPx(currentSetting.value?.style?.fontSize),
       '--row-white-space': currentSetting.value?.style?.isWordWrap ? 'normal' : void 0,
-      '--row-text-align': currentSetting.value?.align,
+      // '--row-text-align': currentSetting.value?.align,
       //grid
       ...TableStyleUtils.getGridStyle(currentSetting.grid),
       '--grid-horizontal-padding': StringUtils.toPx(currentSetting.grid?.horizontal?.rowPadding),

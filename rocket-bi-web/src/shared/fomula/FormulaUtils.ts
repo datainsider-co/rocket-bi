@@ -34,7 +34,7 @@ export class FormulaUtils {
     });
   }
 
-  static createSuggestFields(fieldNames: string[]): CompletionItem[] {
+  static createSuggestCalculatedFields(fieldNames: string[]): CompletionItem[] {
     return fieldNames.map(displayName => {
       return {
         label: displayName,

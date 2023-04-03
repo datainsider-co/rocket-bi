@@ -216,10 +216,12 @@ export default Vue.extend({
         this.$refs.newTable.focus();
       });
     },
-
+    //db: Database Info
     async selectDatabase(db) {
+      Log.debug('DestDatabaseSuggestion::selectDatabase::', db);
       if (this.database.model === db && !this.database.createNew) return;
       this.database.model = db;
+      this.database.selected = db.name;
       this.database.createNew = false;
       this.table.model = null;
       if (db && db.name) {
@@ -236,6 +238,7 @@ export default Vue.extend({
     selectTable(table) {
       if (this.table.model === table && !this.table.createNew) return;
       this.table.model = table;
+      this.table.selected = table.name;
       this.table.createNew = false;
       this.table.error = '';
       this.$emit('changeTable', this.table.selected, this.table.createNew);
@@ -372,16 +375,18 @@ export default Vue.extend({
       this.$emit('submit');
     },
     setDatabaseName(name) {
-      Log.debug('DestDatabaseSuggestion::setDatabaseName', this.database.items);
-      const dbExisted = this.database.items.find(db => db.displayName === name || db.id === name) !== undefined;
-      if (dbExisted) {
-        this.selectDatabase(name);
+      Log.debug('DestDatabaseSuggestion::setDatabaseName', name, this.database.items);
+      const foundDatabaseSchema = this.database.items.find(db => db.name === name);
+      if (foundDatabaseSchema) {
+        Log.debug('DestDatabaseSuggestion::setDatabaseName::dbExisted::', foundDatabaseSchema);
+        this.selectDatabase(foundDatabaseSchema);
       } else {
         this.database.createNew = true;
         this.database.error = '';
         this.database.selected = null;
         this.database.model = null;
         this.database.createNewModel = name;
+        Log.debug('DestDatabaseSuggestion::setDatabaseName::database.createNewModel::', name, this.database.createNewModel);
         this.table.items = [];
         this.table.model = null;
         this.table.createNew = true;

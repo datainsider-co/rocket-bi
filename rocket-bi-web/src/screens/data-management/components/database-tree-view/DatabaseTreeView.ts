@@ -291,7 +291,7 @@ export default class DatabaseTreeView extends Vue {
           table_name: tableSchema.name,
           database_name: tableSchema.dbName
         });
-        Modals.showConfirmationModal(`Are you sure to delete table '${tableSchema.displayName}'?`, {
+        Modals.showConfirmationModal(`Are you sure to delete permanently table '${tableSchema.displayName}'?`, {
           onOk: () => this.handleDropTable(tableSchema),
           onCancel: () => {
             Log.debug('onCancel');

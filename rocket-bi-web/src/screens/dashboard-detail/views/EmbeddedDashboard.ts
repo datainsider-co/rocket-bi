@@ -52,6 +52,7 @@ import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchem
 import EmbeddedDashboardHeader from '@/screens/dashboard-detail/components/EmbeddedDashboardHeader.vue';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 import { Di } from '@core/common/modules';
+import PasswordModal from '@/screens/dashboard-detail/components/PasswordModal.vue';
 
 Vue.use(ChartComponents);
 Vue.use(GridStackComponents);
@@ -67,7 +68,8 @@ Vue.use(GridStackComponents);
     WidgetFullScreenModal: WidgetFullSizeModal,
     ErrorWidget,
     ChartBuilderComponent,
-    EmbeddedDashboardHeader
+    EmbeddedDashboardHeader,
+    PasswordModal
   }
 })
 export default class EmbeddedDashboard extends Vue implements WidgetFullSizeHandler {
@@ -93,6 +95,13 @@ export default class EmbeddedDashboard extends Vue implements WidgetFullSizeHand
 
   @Ref()
   private readonly dashboardHeader?: DashboardHeader;
+
+  @Ref()
+  private readonly passwordModal!: PasswordModal;
+
+  get paramInfo(): ParamInfo {
+    return RouterUtils.parseToParamInfo(this.$route.params.name);
+  }
 
   get dashboardId(): number {
     return RouterUtils.parseToParamInfo(this.$route.params.name).idAsNumber();
@@ -337,15 +346,42 @@ export default class EmbeddedDashboard extends Vue implements WidgetFullSizeHand
 
   private async loadDashboard(): Promise<void> {
     try {
-      await DashboardModule.handleLoadDashboard(+this.dashboardId);
-      await DashboardModule.handleUpdateOrAddNewWidgetFromChartBuilder();
-      // TODO: apply filter when have dashboard
-      await FilterModule.handleLoadDashboard();
-      const useBoost = DashboardModule.currentDashboard?.useBoost;
-      await DashboardControllerModule.renderAllChartOrFilters({ useBoost: useBoost });
+      await DashboardModule.handleLoadDashboard(this.paramInfo.idAsNumber());
+      await this.updateRouter(this.paramInfo.idAsNumber(), DashboardModule.title);
+      await this.passwordModal.requirePassword(
+        DashboardModule.dashboardDirectory!,
+        DashboardModule.currentDashboard!.ownerId,
+        async () => {
+          await DashboardModule.handleUpdateOrAddNewWidgetFromChartBuilder();
+          // TODO: apply filter when have dashboard
+          await FilterModule.handleLoadDashboard();
+          const useBoost = DashboardModule.currentDashboard?.useBoost;
+          await DashboardControllerModule.renderAllChartOrFilters({ useBoost: useBoost });
+          await DashboardControllerModule.renderAllChartFilter();
+        },
+        () => {
+          _ConfigBuilderStore.setAllowBack(true);
+          history.back();
+        }
+      );
     } catch (ex) {
       Log.error('loadDashboard::error', ex);
       // Ignored
+    }
+  }
+
+  private async updateRouter(dashboardId: number, name: string) {
+    if (this.paramInfo.idAsNumber() != dashboardId || this.paramInfo.name !== name) {
+      try {
+        await RouterUtils.to(this.$route.name as Routers, {
+          query: this.$route.query,
+          params: {
+            name: RouterUtils.buildParamPath(dashboardId, name)
+          }
+        });
+      } catch (ex) {
+        Log.debug('navigate duplicated');
+      }
     }
   }
 

@@ -36,10 +36,14 @@ export abstract class StringUtils {
 
   // check second text includes in firstText
   static isIncludes(keyword: string, text: string): boolean {
-    return text
+    return StringUtils.of(text)
       .trim()
       .toLocaleLowerCase()
-      .includes(keyword.trim().toLocaleLowerCase());
+      .includes(
+        StringUtils.of(keyword)
+          .trim()
+          .toLocaleLowerCase()
+      );
   }
 
   static removeWhiteSpace(text: string): string {
@@ -205,5 +209,22 @@ export abstract class StringUtils {
 
   static insertAt(text: string, textToAdd: string, at: number) {
     return text.slice(0, at) + textToAdd + text.slice(at);
+  }
+
+  // todo: don't remove this \n, it will cause the query to be executed incorrectly when query has commend in the end
+  static fixCommentInSql(query: string) {
+    return `${String(query).trim()} \n`;
+  }
+
+  static buildQueryParamRegex(key: string): RegExp {
+    return new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+  }
+
+  /**
+   * convert value to string, if value is null or undefined, return empty string
+   * @param value
+   */
+  static of(value: any): string {
+    return String(value ?? '');
   }
 }

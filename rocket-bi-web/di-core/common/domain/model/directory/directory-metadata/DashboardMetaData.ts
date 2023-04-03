@@ -1,9 +1,9 @@
 import { DirectoryMetadata } from '@core/common/domain/model/directory/directory-metadata/DirectoryMetadata';
 import { Directory, PasswordConfig } from '@core/common/domain';
-import { PasswordSetting } from '@core/common/domain/model/directory/directory-metadata/setting/PasswordSetting';
+import { Passwordable } from '@core/common/domain/model/directory/directory-metadata/setting/Passwordable';
 import { SecurityUtils } from '@/utils';
 
-export class DashboardMetaData implements DirectoryMetadata, PasswordSetting {
+export class DashboardMetaData implements DirectoryMetadata, Passwordable {
   config?: PasswordConfig;
 
   constructor(password?: PasswordConfig) {
@@ -19,7 +19,7 @@ export class DashboardMetaData implements DirectoryMetadata, PasswordSetting {
     return new DashboardMetaData(void 0);
   }
 
-  setPassword(rawPassword: string): PasswordSetting {
+  setPassword(rawPassword: string): Passwordable {
     if (!this.config) {
       this.config = { enabled: true, hashedPassword: '' };
     }
@@ -27,7 +27,7 @@ export class DashboardMetaData implements DirectoryMetadata, PasswordSetting {
     return this;
   }
 
-  setEnable(enable: boolean): PasswordSetting {
+  setEnable(enable: boolean): Passwordable {
     if (this.config) {
       this.config.enabled = enable;
     } else if (enable) {
@@ -36,7 +36,7 @@ export class DashboardMetaData implements DirectoryMetadata, PasswordSetting {
     return this;
   }
 
-  removePassword(): PasswordSetting {
+  removePassword(): Passwordable {
     this.config = void 0;
     return this;
   }

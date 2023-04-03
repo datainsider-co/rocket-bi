@@ -54,12 +54,11 @@
     <div class="d-flex flex-row">
       <RangeSlider
         :class="sliderClass"
-        :from="fromValue"
+        :from="slicerFrom"
         :max="max"
         :min="min"
         :step="step"
         :to="toValue"
-        type="number"
         @change="handleChangeCompleted"
         @update:from="updateMinValue"
         @update:to="updateMaxValue"
@@ -244,6 +243,16 @@ export default class NumberSlicer extends Vue {
   private handleFromDateChanged(newDate: Date) {
     this.fromValueAsDate = newDate;
   }
+
+  private get slicerFrom(): number | Date {
+    const value = this.range.from.value;
+    return this.isDate ? new Date(value) : toNumber(value);
+  }
+
+  private get slicerTo(): number | Date {
+    const value = this.range.to.value;
+    return this.isDate ? new Date(value) : toNumber(value);
+  }
 }
 </script>
 
@@ -285,8 +294,7 @@ export default class NumberSlicer extends Vue {
       padding-left: 0;
       background: transparent !important;
     }
-
-    //background-color: var(--tab-filter-dropdown-background) !important;
+    background-color: var(--tab-filter-dropdown-background) !important;
 
     &:hover {
       //background-color: var(--hover-color) !important;

@@ -96,6 +96,10 @@ export default class IconFormatSetting extends Vue {
     this.iconFormatting = FormattingOptions.getDefaultIconFormatting();
   }
 
+  private get isGroupBy() {
+    return this.functionType === FunctionFormattingType.GroupBy;
+  }
+
   private get canShowStyleSelection() {
     return this.iconFormatting.formatType === ConditionalFormattingType.Rules;
   }
@@ -111,7 +115,7 @@ export default class IconFormatSetting extends Vue {
 
   private get databaseOptions(): DropdownData[] {
     return FormattingOptions.buildTableOptions(_BuilderTableSchemaStore.tableSchemas, column =>
-      FormattingOptions.isShowColumn(column, this.iconFormatting.formatType)
+      FormattingOptions.isShowColumn(column, this.iconFormatting.formatType, this.isGroupBy)
     );
   }
 

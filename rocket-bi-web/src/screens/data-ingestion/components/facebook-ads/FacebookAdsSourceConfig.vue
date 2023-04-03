@@ -4,13 +4,14 @@
       <label>Select Account</label>
       <div class="input">
         <DiDropdown
-          v-model="syncedJob.customerId"
+          v-model="syncedJob.accountId"
           labelProps="name"
           valueProps="id"
           :data="accountIds"
           :class="{ 'is-invalid': accountIdError }"
           placeholder="Select Account..."
           boundary="viewport"
+          append-at-root
           :disabled="accountLoading"
           @select="resetAccountIdError"
           @change="selectCustomerId"
@@ -25,7 +26,7 @@
       <input
         v-if="isInputApplicationId"
         ref="inputCustomerId"
-        v-model.trim="syncedJob.customerId"
+        v-model.trim="syncedJob.accountId"
         :class="{ 'is-invalid': accountIdError }"
         class="form-control mt-2 new-db-input text-truncate"
         placeholder="Type your Application id here"
@@ -37,8 +38,7 @@
     </div>
     <div class="job-section">
       <div class="d-flex" v-if="isCreateNew">
-        <DiToggle id="sync-all-table" :value="!isSingleTable" @onSelected="isSingleTable = !isSingleTable"></DiToggle>
-        <div class="ml-1">Sync all Table</div>
+        <DiToggle id="sync-all-table" :value="!isSingleTable" @onSelected="isSingleTable = !isSingleTable" label="Sync all Table"></DiToggle>
       </div>
       <template v-if="isSingleTable">
         <label class="mt-2">From Table</label>
@@ -47,12 +47,13 @@
             v-model="syncedJob.tableName"
             labelProps="displayName"
             valueProps="id"
+            append-at-root
             :class="{ 'is-invalid': tableNameError }"
             :data="tableAsSelectOptions"
             placeholder="Select Table..."
             hide-placeholder-on-menu
             boundary="viewport"
-            @select="tableNameError = ''"
+            @change="resetTableError"
           >
             <template #icon-dropdown>
               <div v-if="tableLoading" class="loading">
@@ -147,7 +148,7 @@ export default class FacebookAdsSourceConfig extends Vue {
 
   isValidSource() {
     if (StringUtils.isEmpty(this.syncedJob.accountId)) {
-      this.accountIdError = 'Application is required!';
+      this.accountIdError = 'Account is required!';
       throw new DIException('');
     }
     if (this.isSingleTable && StringUtils.isEmpty(this.syncedJob.tableName)) {
@@ -183,6 +184,10 @@ export default class FacebookAdsSourceConfig extends Vue {
 
   private resetAccountIdError() {
     this.accountIdError = '';
+  }
+
+  private resetTableError() {
+    this.tableNameError = '';
   }
 
   private get isCreateNew() {

@@ -1,5 +1,5 @@
 import { Widget } from '../Widget';
-import { ChartInfo, TabControl, TreeNode, WidgetCommonData, Widgets } from '@core/common/domain';
+import { ChartInfo, WidgetCommonData, Widgets } from '@core/common/domain';
 import { isString } from 'lodash';
 import { ChartType } from '@/shared';
 import { Log, ObjectUtils } from '@core/utils';

@@ -153,7 +153,7 @@ export class MapChartChartOption extends ChartOption<SeriesOptionData> {
           }
         }
       },
-      geoArea: 'world.json',
+      geoArea: 'mapdata/world/world.geojson',
       mapNavigation: {
         enabled: true
       },

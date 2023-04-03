@@ -1,44 +1,31 @@
 <template>
-  <BModal :id="id" ref="mdRename" centered ok-title="Rename" cancel-title="Cancel" :title="title" class="rounded" size="md" @ok="rename">
-    <template v-slot:modal-header="{ close }">
-      <h6 class="modal-title">{{ title }}</h6>
-      <button type="button" class="close btn-ghost" @click.prevent="close()" aria-label="Close" v-show="false">
-        <BIconX class="button-x" />
-      </button>
-    </template>
-    <template v-slot:default="{ ok }">
-      <p class="mb-2">{{ label }}</p>
-      <b-input
+  <DiCustomModal :id="id" ref="mdRename" :ok-title="actionName" :title="title" size="md" hide-header-close @onClickOk="rename" @hidden="reset">
+    <template #default="{ok}">
+      <DiInputComponent
         :disabled="loading"
         :id="genInputId('rename')"
-        v-model="name"
+        v-model.trim="name"
         type="text"
         variant="dark"
-        class="p-3 h-42px"
         :placeholder="placeholder"
+        :label="label"
         autofocus
         autocomplete="off"
-        v-on:keyup.enter="ok()"
-      />
-      <div class="error" v-if="$v.$error">
-        <span v-if="!$v.name.maxLength">Max length is 250 chars.</span>
-        <span v-else-if="!$v.name.required">Field is required.</span>
-        <span v-else>Field can't contain any of the following characters: /\"?*&#62;&#60;:|</span>
-      </div>
-      <div class="error" v-if="errorMsg">
-        {{ errorMsg }}
-      </div>
+        @enter="ok()"
+      >
+        <template #error>
+          <div class="error" v-if="$v.$error">
+            <span v-if="!$v.name.maxLength">Max length is 250 chars.</span>
+            <span v-else-if="!$v.name.required">Field is required.</span>
+            <span v-else>Field can't contain any of the following characters: /\"?*&#62;&#60;:|</span>
+          </div>
+          <div class="error" v-if="errorMsg">
+            {{ errorMsg }}
+          </div>
+        </template>
+      </DiInputComponent>
     </template>
-    <template v-slot:modal-footer="{ cancel, ok }">
-      <b-button class="flex-fill h-42px" variant="secondary" @click="cancel()">
-        Cancel
-      </b-button>
-      <b-button :disabled="loading" class="flex-fill h-42px" variant="primary" @click="ok()">
-        <i v-if="loading" class="fa fa-spin fa-spinner"></i>
-        {{ actionName }}
-      </b-button>
-    </template>
-  </BModal>
+  </DiCustomModal>
 </template>
 
 <script lang="ts">
@@ -46,11 +33,14 @@ import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
 import { helpers, maxLength, required } from 'vuelidate/lib/validators';
 import { Log } from '@core/utils';
+import DiInputComponent from '@/shared/components/DiInputComponent.vue';
+import DiCustomModal from '@/shared/components/DiCustomModal.vue';
 
 // eslint-disable-next-line no-useless-escape
 const directoryRule = helpers.regex('directoryRule', /^[^\\\/\?\*\"\>\<\:\|]*$/);
 
 @Component({
+  components: { DiInputComponent },
   validations: {
     name: {
       required,
@@ -61,22 +51,22 @@ const directoryRule = helpers.regex('directoryRule', /^[^\\\/\?\*\"\>\<\:\|]*$/)
 })
 export default class DiRenameModal extends Vue {
   @Ref()
-  private readonly mdRename!: BModal;
+  private readonly mdRename!: DiCustomModal;
 
   @Prop({ type: String, required: false, default: 'mdRename' })
   private readonly id!: string;
 
   @Prop({ type: String, default: 'Rename' })
-  title!: string;
+  private readonly title!: string;
 
   @Prop({ type: String, default: 'Rename' })
-  actionName!: string;
+  private readonly actionName!: string;
 
   @Prop({ type: String, default: 'Name' })
-  label!: string;
+  private readonly label!: string;
 
   @Prop({ type: String, default: 'Input your title' })
-  placeholder!: string;
+  private readonly placeholder!: string;
 
   name?: string;
   // data: object = {};
@@ -127,7 +117,7 @@ export default class DiRenameModal extends Vue {
   }
 
   setLoading(loading: boolean) {
-    this.loading = loading;
+    this.mdRename.setLoading(loading);
   }
 
   setError(errorMsg: string) {
@@ -138,41 +128,13 @@ export default class DiRenameModal extends Vue {
   onChangeName(newName: string) {
     this.$v.$reset();
   }
+
+  reset() {
+    this.$v.$reset();
+    this.name = '';
+    this.loading = false;
+    this.errorMsg = '';
+    this.onClickOk = undefined;
+  }
 }
 </script>
-
-<style lang="scss" scoped>
-@import '~@/themes/scss/di-variables.scss';
-.modal-title {
-  font-size: 24px;
-  line-height: 1.17;
-  letter-spacing: 0.2px;
-  color: var(--secondary-text-color);
-}
-.button-x {
-  color: $greyTextColor;
-}
-
-.button {
-  padding: 4px;
-}
-
-.modal-header .close {
-  padding: 4px;
-  margin: -2px;
-}
-
-.error {
-  font-family: Barlow;
-  font-size: 14px;
-  font-weight: normal;
-  font-stretch: normal;
-  font-style: normal;
-  line-height: normal;
-  letter-spacing: normal;
-  color: var(--danger);
-  margin-top: 10px;
-
-  word-break: break-word;
-}
-</style>

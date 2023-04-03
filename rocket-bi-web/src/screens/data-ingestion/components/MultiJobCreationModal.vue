@@ -25,7 +25,7 @@
             <div class="input">
               <BFormInput :id="genInputId('job-name')" v-model="jdbcJob.displayName" autocomplete="off" autofocus placeholder="Input job name"></BFormInput>
               <template v-if="$v.jdbcJob.displayName.$error">
-                <div class="error-message mt-1">Job name is required.</div>
+                <div class="error-message px-0 mt-1">Job name is required.</div>
               </template>
             </div>
           </div>
@@ -106,12 +106,42 @@
               <template v-if="isFacebookAdsJob">
                 <FacebookAdsSourceConfig ref="fbAdsFromSuggestion" :single-table.sync="isSingleTable" :job.sync="jdbcJob" />
               </template>
+              <template v-if="isTiktokAdsJob">
+                <TiktokSourceConfig
+                  ref="tiktokAdsFromSuggestion"
+                  :single-table.sync="isSingleTable"
+                  :job.sync="jdbcJob"
+                  @selectDatabase="fromDatabaseChanged"
+                  @selectTable="fromTableChanged"
+                />
+              </template>
             </div>
           </div>
 
           <div v-if="isMongoJob" class="job-section export-form">
             <MongoDepthConfig :mongo-job.sync="jdbcJob"></MongoDepthConfig>
           </div>
+          <div v-if="isGoogleAnalyticJob" class="job-section export-form">
+            <GoogleAnalyticConfig
+              ref="googleAnalyticConfig"
+              :job.sync="jdbcJob"
+              :single-table.sync="isSingleTable"
+              :hide-sync-all-table-option="false"
+              @selectDatabase="fromDatabaseChanged"
+              @selectTable="fromTableChanged"
+            ></GoogleAnalyticConfig>
+          </div>
+          <div v-if="isGoogleAnalytic4Job" class="job-section export-form">
+            <GoogleAnalytic4Config
+              ref="googleAnalytic4Config"
+              :job.sync="jdbcJob"
+              :single-table.sync="isSingleTable"
+              :hide-sync-all-table-option="false"
+              @selectDatabase="fromDatabaseChanged"
+              @selectTable="fromTableChanged"
+            ></GoogleAnalytic4Config>
+          </div>
+
           <template>
             <JobWareHouseConfig
               class="job-section export-form"
@@ -131,7 +161,13 @@
 
           <JobLakeConfig v-if="jdbcJob.isShowLakeConfig" :job.sync="jdbcJob" class="job-section export-form" />
           <div class="job-section">
-            <JobSyncConfig v-if="showSyncConfig" ref="jobSyncModeConfig" :is-validate="isValidate" :job.sync="jdbcJob"></JobSyncConfig>
+            <JobSyncConfig
+              v-if="showSyncConfig"
+              ref="jobSyncModeConfig"
+              :is-validate="isValidate"
+              :job.sync="jdbcJob"
+              :single-table="isSingleTable"
+            ></JobSyncConfig>
             <SchedulerSettingV2
               ignoreMinutely
               id="setting-job-scheduler"
@@ -150,24 +186,26 @@
   </EtlModal>
 </template>
 <script lang="ts">
-import { Component, Ref, Vue } from 'vue-property-decorator';
+import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
 import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
 import {
   DataDestination,
   DataSourceInfo,
   DataSources,
   DataSourceType,
-  FacebookAdsSource,
   FacebookAdsSourceInfo,
   FormMode,
-  GoogleAdsJob,
   GoogleAdsSourceInfo,
+  GoogleAnalyticJob,
   JdbcJob,
   Job,
   JobName,
   JobType,
+  SyncMode,
+  GA4Job,
   S3Job,
-  SyncMode
+  TiktokAdsJob,
+  TiktokSourceInfo
 } from '@core/data-ingestion';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
 import { DatabaseCreateRequest, DIException } from '@core/common/domain';
@@ -212,6 +250,11 @@ import S3DataSourceConfig from './s3-csv/S3DataSourceConfig.vue';
 import DiInput from '@/shared/components/common/DiInput.vue';
 import GoogleAdsSourceConfig from '@/screens/data-ingestion/components/google-ads/GoogleAdsSourceConfig.vue';
 import FacebookAdsSourceConfig from '@/screens/data-ingestion/components/facebook-ads/FacebookAdsSourceConfig.vue';
+import GoogleAnalyticConfig from './google-analytics/GoogleAnalyticConfig.vue';
+import { GASourceInfo } from '@core/data-ingestion/domain/data-source/GASourceInfo';
+import TiktokSourceConfig from '@/screens/data-ingestion/components/tiktok/TiktokSourceConfig.vue';
+import GoogleAnalytic4Config from './google-analytics-4/GoogleAnalytic4Config.vue';
+import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4SourceInfo';
 
 type IngestionJobCallback = (job: Job, isSingleTable: boolean) => void;
 
@@ -240,7 +283,10 @@ type IngestionJobCallback = (job: Job, isSingleTable: boolean) => void;
     MultiJobWareHouseConfig,
     S3DataSourceConfig,
     GoogleAdsSourceConfig,
-    FacebookAdsSourceConfig
+    FacebookAdsSourceConfig,
+    GoogleAnalyticConfig,
+    TiktokSourceConfig,
+    GoogleAnalytic4Config
   },
   validations: {
     jdbcJob: {
@@ -290,6 +336,12 @@ export default class MultiJobCreationModal extends Vue {
   private readonly mongoFromDatabaseSuggestion!: MultiMongoFromDatabaseSuggestion;
 
   @Ref()
+  private readonly googleAnalyticConfig!: GoogleAnalyticConfig;
+
+  @Ref()
+  private readonly googleAnalytic4Config!: GoogleAnalytic4Config;
+
+  @Ref()
   private readonly jobSyncModeConfig!: JobSyncConfig;
 
   @Ref()
@@ -306,6 +358,8 @@ export default class MultiJobCreationModal extends Vue {
 
   @Ref()
   private readonly fbAdsFromSuggestion?: FacebookAdsSourceConfig;
+  @Ref()
+  private readonly tiktokAdsFromSuggestion?: TiktokSourceConfig;
 
   private readonly fromDatabaseNameDefaultOption: any = {
     label: 'Select database please...',
@@ -353,6 +407,14 @@ export default class MultiJobCreationModal extends Vue {
     return Job.isMongoJob(this.jdbcJob);
   }
 
+  private get isGoogleAnalyticJob(): boolean {
+    return Job.isGoogleAnalyticJob(this.jdbcJob);
+  }
+
+  private get isGoogleAnalytic4Job(): boolean {
+    return Job.isGoogleAnalytic4Job(this.jdbcJob);
+  }
+
   private get isGenericJdbcJob(): boolean {
     return Job.isGenericJdbcJob(this.jdbcJob);
   }
@@ -375,12 +437,15 @@ export default class MultiJobCreationModal extends Vue {
   private get isFacebookAdsJob(): boolean {
     return this.jdbcJob.className === JobName.FacebookAdsJob;
   }
+  private get isTiktokAdsJob(): boolean {
+    return this.jdbcJob.className === JobName.TiktokAdsJob;
+  }
 
   private get isEnableSyncToDataWarehouse() {
     return this.jdbcJob.destinations.some(dataDestination => dataDestination === DataDestination.Clickhouse);
   }
 
-  private get isValidSyncToDataWareHouse() {
+  private isValidSyncToDataWareHouse() {
     return this.isSingleTable ? this.jobWareHouseConfig.isValidWarehouseConfig() : this.multiJobWareHouseConfig.isValidWarehouseConfig();
     // return this.isInvalidDestinationTable || this.isInvalidDestinationDatabase;
   }
@@ -438,11 +503,19 @@ export default class MultiJobCreationModal extends Vue {
               await this.fbAdsFromSuggestion?.init(this.jdbcJob.sourceId!);
               break;
             case JobType.GoogleAds:
-              await this.ggAdsFromSuggestion?.loadCustomerIds(this.jdbcJob.sourceId!);
+              await this.ggAdsFromSuggestion?.init(this.jdbcJob.sourceId!);
               break;
-            case JobType.GoogleCredential:
             case JobType.S3:
               ///Nothing to do
+              break;
+            case JobType.Tiktok:
+              this.tiktokAdsFromSuggestion?.loadData();
+              break;
+            case JobType.GoogleAnalytics:
+              await this.googleAnalyticConfig.loadData();
+              break;
+            case JobType.GA4:
+              await this.googleAnalytic4Config.loadData();
               break;
             default:
               await this.jdbcFromDatabaseSuggestion.handleLoadJdbcFromData();
@@ -497,6 +570,11 @@ export default class MultiJobCreationModal extends Vue {
     this.status = Status.Loading;
   }
 
+  @Watch('isSingleTable')
+  onChangeSingleTable(isSingleTable: boolean) {
+    isSingleTable ? this.jobWareHouseConfig.$forceUpdate() : this.multiJobWareHouseConfig.$forceUpdate();
+  }
+
   @AtomicAction()
   private async handleSubmitJob() {
     try {
@@ -540,7 +618,7 @@ export default class MultiJobCreationModal extends Vue {
       if (this.isCreateNewDatabase && !databaseInfo) {
         const databaseInfo = await this.schemaService.createDatabase(new DatabaseCreateRequest(name, name));
         this.jdbcJob.destDatabaseName = databaseInfo.name;
-        DatabaseSchemaModule.addNewDataInfo(databaseInfo);
+        DatabaseSchemaModule.addNewDatabaseInfo(databaseInfo);
       }
     } catch (e) {
       const ex = DIException.fromObject(e);
@@ -558,7 +636,8 @@ export default class MultiJobCreationModal extends Vue {
     const isNameValid = !this.$v.$invalid;
     const isFromDatabaseValid = this.isValidFromDatabase();
     const isSyncModeValid = this.isValidSyncMode();
-    const isDestinationValid = this.isValidSyncToDataWareHouse;
+    const isDestinationValid = this.isValidSyncToDataWareHouse();
+    Log.debug('isValidJob', isNameValid, isFromDatabaseValid, isSyncModeValid, isDestinationValid);
     return isNameValid && isFromDatabaseValid && isSyncModeValid && isDestinationValid;
   }
 
@@ -597,10 +676,6 @@ export default class MultiJobCreationModal extends Vue {
           case DataSources.GoogleServiceAccountSource:
             await this.handleSelectGoogleServiceAccountSource(item.source);
             break;
-          case DataSources.GA4Source:
-            //todo:fixhere
-            // await this.handleSelectGoogleServiceAccountSource(item.source);
-            break;
           case DataSources.MongoDbSource:
             await this.handleSelectMongoSource(item.source);
             break;
@@ -627,6 +702,15 @@ export default class MultiJobCreationModal extends Vue {
             await this.handleSelectFacebookAdsSource(item.source);
             break;
           }
+          case DataSources.GASource:
+            await this.handleSelectGASource(item.source);
+            break;
+          case DataSources.TiktokAds:
+            await this.handleSelectTiktokSource(item.source);
+            break;
+          case DataSources.GA4Source:
+            await this.handleSelectGA4Source(item.source);
+            break;
           default:
             await this.handleSelectJdbcSource(item.source);
         }
@@ -691,7 +775,7 @@ export default class MultiJobCreationModal extends Vue {
     this.jdbcJob = Job.default(source).withDisplayName(this.jdbcJob.displayName);
     this.jdbcJob.sourceId = source.id;
     this.$nextTick(async () => {
-      await this.ggAdsFromSuggestion?.loadCustomerIds(source.id);
+      await this.ggAdsFromSuggestion?.init(source.id);
     });
   }
 
@@ -702,6 +786,46 @@ export default class MultiJobCreationModal extends Vue {
     this.$nextTick(async () => {
       await this.fbAdsFromSuggestion?.init(source.id);
     });
+  }
+  private async handleSelectTiktokSource(source: TiktokSourceInfo) {
+    Log.debug('handleSelectTiktokSource::', source);
+    const jobId = this.jdbcJob.jobId;
+    this.jdbcJob = Job.default(source).withDisplayName(this.jdbcJob.displayName);
+    this.jdbcJob.sourceId = source.id;
+    this.jdbcJob.jobId = jobId;
+    this.$nextTick(async () => {
+      await this.tiktokAdsFromSuggestion?.loadData();
+    });
+  }
+
+  private async handleSelectGASource(source: DataSourceInfo) {
+    this.jdbcJob = this.getJobFromGASource(source as GASourceInfo);
+    this.$nextTick(async () => {
+      await this.googleAnalyticConfig.loadData();
+    });
+  }
+
+  private getJobFromGASource(gaSourceInfo: GASourceInfo) {
+    const jdbcJob = GoogleAnalyticJob.default();
+    jdbcJob.jobId = this.jdbcJob.jobId;
+    jdbcJob.displayName = this.jdbcJob.displayName;
+    jdbcJob.sourceId = gaSourceInfo.id;
+    return jdbcJob;
+  }
+
+  private async handleSelectGA4Source(source: DataSourceInfo) {
+    this.jdbcJob = this.getJobFromGA4Source(source as GA4SourceInfo);
+    this.$nextTick(async () => {
+      await this.googleAnalytic4Config.loadData();
+    });
+  }
+
+  private getJobFromGA4Source(gaSourceInfo: GA4SourceInfo) {
+    const jdbcJob = GA4Job.default();
+    jdbcJob.jobId = this.jdbcJob.jobId;
+    jdbcJob.displayName = this.jdbcJob.displayName;
+    jdbcJob.sourceId = gaSourceInfo.id;
+    return jdbcJob;
   }
 
   private getJobFromJdbcSource(jdbcSource: DataSourceInfo) {
@@ -753,6 +877,12 @@ export default class MultiJobCreationModal extends Vue {
         return this.ggAdsFromSuggestion?.isValidSource();
       case JobType.Facebook:
         return this.fbAdsFromSuggestion?.isValidSource();
+      case JobType.GoogleAnalytics:
+        return this.googleAnalyticConfig.isValidSource();
+      case JobType.Tiktok:
+        return this.tiktokAdsFromSuggestion?.isValidSource();
+      case JobType.GA4:
+        return this.googleAnalytic4Config.isValidSource();
       default:
         return this.jdbcFromDatabaseSuggestion.isValidDatabaseSuggestion();
     }
@@ -789,8 +919,8 @@ export default class MultiJobCreationModal extends Vue {
 
   private get showSyncConfig(): boolean {
     switch (this.jdbcJob.className) {
-      case JobName.GoogleAdsJob:
-        return false;
+      // case JobName.GoogleAdsJob:
+      //   return false;
       default:
         return true;
     }
@@ -843,8 +973,16 @@ export default class MultiJobCreationModal extends Vue {
   .select-container {
     margin-top: 0;
 
-    .relative > span > button > div {
+    .relative {
       height: 34px !important;
+
+      > span {
+        height: 34px !important;
+
+        > button {
+          height: 34px !important;
+        }
+      }
     }
 
     button {
@@ -928,6 +1066,20 @@ export default class MultiJobCreationModal extends Vue {
 
           .select-container {
             width: unset;
+          }
+        }
+      }
+
+      .di-calendar-input-container {
+        background: var(--primary);
+        border-radius: 4px;
+        span {
+          order: -1;
+          width: 100%;
+          .input-calendar {
+            width: 100%;
+            margin-left: 0;
+            text-align: left;
           }
         }
       }

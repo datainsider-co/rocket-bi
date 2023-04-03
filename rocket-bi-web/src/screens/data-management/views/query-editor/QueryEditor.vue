@@ -15,18 +15,19 @@
     </SplitArea>
     <SplitArea :size="panelSize[1]" :minSize="0">
       <div class="right-panel d-flex flex-column data-schema overflow-auto layout-content-panel">
-        <LayoutNoData v-if="loadingDatabaseSchemas" icon="di-icon-query-editor">
+        <LayoutNoData v-if="loadingDatabaseSchemas || loading" icon="di-icon-query-editor">
           LOADING DATA...
         </LayoutNoData>
         <QueryComponent
           v-else
           ref="queryComponent"
-          :is-update-schema-mode="isUpdateSchemaMode"
           :showSaveQueryButton="true"
           :default-query="currentQuery"
           :formula-controller="formulaController"
           :editorController="editorController"
           :mode="mode"
+          :tempQuery="tempQuery"
+          :isReadOnly="isReadOnly"
           @onCreateTable="showCreateTableModal"
           @onUpdateTable="showUpdateTableModal"
           @onSaveAdhoc="showFilePickerModal"
@@ -38,8 +39,9 @@
       <TableCreationFromQueryModal ref="tableCreationModal" :query="currentQuery"></TableCreationFromQueryModal>
     </SplitArea>
     <DiRenameModal ref="createAnalysisModal" title="Create Analysis" action-name="Create" label="Analysis name" placeholder="Type analysis name" />
-    <MyDataPickFile ref="filePicker" @selectDirectory="handleSelectFile" />
+    <MyDataPickFile ref="filePicker" />
     <MyDataPickDirectory ref="directoryPicker" @selectDirectory="handleSelectDirectory" />
+    <PasswordModal ref="passwordModal" />
   </Split>
 </template>
 <script lang="ts" src="./QueryEditor.ts"></script>

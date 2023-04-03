@@ -7,7 +7,7 @@ import { ConditionData, ConfigType, FunctionData } from '@/shared';
 import { ChartInfo, Id } from '@core/common/domain/model';
 
 export interface WidgetExtraData {
-  configs: Record<ConfigType, FunctionData[]>;
-  filters: Record<Id, ConditionData[]>;
+  configs?: Record<ConfigType, FunctionData[]>;
+  filters?: Record<Id, ConditionData[]>;
   currentChartType: string;
 }

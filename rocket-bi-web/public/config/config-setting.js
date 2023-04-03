@@ -155,7 +155,7 @@ const setting = {
       hint: ''
     },
     'value.style.fontSize': {
-      label: '',
+      label: 'Size',
       hint: ''
     },
     'value.align': {
@@ -232,6 +232,14 @@ const setting = {
     'fieldFormatting.applyTotals': {
       hint: '',
       label: 'Apply to total'
+    },
+    'fieldFormatting.displayUnit': {
+      label: 'Display unit',
+      hint: ''
+    },
+    'fieldFormatting.precision': {
+      label: 'Precision',
+      hint: 'Choose the number of digits used to show the value'
     }
   },
   'conditionalFormatting.tab': {
@@ -767,6 +775,28 @@ const setting = {
     },
     max: {
       label: 'Max color',
+      hint: ''
+    }
+  },
+  'bulletColor.milestone': {
+    min: {
+      label: 'Min',
+      placeholder: 'Input Min Value',
+      hint: ''
+    },
+    milestone1: {
+      label: 'Milestone 1',
+      placeholder: 'Input Milestone 1 Value',
+      hint: ''
+    },
+    milestone2: {
+      label: 'Mile Stone 2',
+      placeholder: 'Input Milestone 1 Value',
+      hint: ''
+    },
+    max: {
+      label: 'Min',
+      placeholder: 'Input Max Value',
       hint: ''
     }
   },

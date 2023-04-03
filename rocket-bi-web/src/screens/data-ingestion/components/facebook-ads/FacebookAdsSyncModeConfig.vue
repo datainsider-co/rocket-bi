@@ -1,57 +1,58 @@
 <template>
   <div>
-    <!--    <label>Sync Mode</label>-->
-    <!--    <div class="input">-->
-    <!--      <BFormRadioGroup plain id="sync-mode-radio-group" v-model="syncJob.syncMode" name="radio-sub-component">-->
-    <!--        <BFormRadio :id="genCheckboxId('full-sync')" :value="syncMode.FullSync">Full sync</BFormRadio>-->
-    <!--        <BFormRadio :id="genCheckboxId('incremental-sync')" :value="syncMode.IncrementalSync">Incremental sync-->
-    <!--        </BFormRadio>-->
-    <!--      </BFormRadioGroup>-->
-    <!--    </div>-->
-    <label class="mt-2">Sync Time</label>
-    <div class="input">
-      <DiDropdown
-        :value="syncJob.datePreset"
-        labelProps="displayName"
-        valueProps="id"
-        :placeholder="syncTimePlaceHolder"
-        :data="SYNC_TIME_OPTION"
-        hidePlaceholderOnMenu
-        boundary="scrollParent"
-        @change="selectDatePreset"
-      >
-        <template slot="before-menu" slot-scope="{ hideDropdown }">
-          <li class="active color-di-primary font-weight-normal" @click.prevent="selectCustomDateRange(hideDropdown)">
-            Select Custom Sync Time...
-          </li>
-        </template>
-      </DiDropdown>
-      <DiCalendar
-        v-if="syncJob.timeRange"
-        @onCalendarSelected="v => onCalendarSelected(v)"
-        class="date-range btn-ghost mt-2 p-0"
-        :id="`di-calendar`"
-        :isShowResetFilterButton="false"
-        :mainDateFilterMode="DateMode"
-        :modeOptions="[]"
-        :getDateRangeByMode="getDateRangeByMode"
-        :defaultDateRange="defaultDateRange"
-        dateFormatPattern="MMM D, YYYY"
-        :isShowIconDate="false"
-      >
-        <template #content>
-          <div class="date-range-picker">
-            <div>{{ dateRange }}</div>
-            <i class=" di-icon-calendar"></i>
-          </div>
-        </template>
-      </DiCalendar>
-    </div>
+    <BCollapse :visible="isInsightTable || !singleTable">
+      <label>Sync Mode</label>
+      <div class="input">
+        <BFormRadioGroup plain id="sync-mode-radio-group" v-model="syncJob.syncMode" name="radio-sub-component">
+          <BFormRadio :id="genCheckboxId('full-sync')" :value="syncMode.FullSync">Full sync</BFormRadio>
+          <BFormRadio :id="genCheckboxId('incremental-sync')" :value="syncMode.IncrementalSync">Incremental sync </BFormRadio>
+        </BFormRadioGroup>
+      </div>
+      <label class="mt-2">Sync Time</label>
+      <div class="input">
+        <DiDropdown
+          :value="syncJob.datePreset"
+          labelProps="displayName"
+          valueProps="id"
+          :placeholder="syncTimePlaceHolder"
+          :data="SYNC_TIME_OPTION"
+          hidePlaceholderOnMenu
+          boundary="scrollParent"
+          @change="selectDatePreset"
+        >
+          <template slot="before-menu" slot-scope="{ hideDropdown }">
+            <li class="active color-di-primary font-weight-normal" @click.prevent="selectCustomDateRange(hideDropdown)">
+              Select Custom Sync Time...
+            </li>
+          </template>
+        </DiDropdown>
+        <DiCalendar
+          v-if="syncJob.timeRange"
+          @onCalendarSelected="v => onCalendarSelected(v)"
+          class="date-range btn-ghost mt-2 p-0"
+          :id="`di-calendar`"
+          :isShowResetFilterButton="false"
+          :mainDateFilterMode="DateMode"
+          :modeOptions="[]"
+          :getDateRangeByMode="getDateRangeByMode"
+          :defaultDateRange="defaultDateRange"
+          dateFormatPattern="MMM D, YYYY"
+          :isShowIconDate="false"
+        >
+          <template #content>
+            <div class="date-range-picker">
+              <div>{{ dateRange }}</div>
+              <i class=" di-icon-calendar"></i>
+            </div>
+          </template>
+        </DiCalendar>
+      </div>
+    </BCollapse>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, PropSync, Vue } from 'vue-property-decorator';
+import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator';
 import { FacebookAdsJob, FacebookDatePresetAsOptions, FacebookDatePresetMode, SyncMode } from '@core/data-ingestion';
 import DynamicSuggestionInput from '@/screens/data-ingestion/components/DynamicSuggestionInput.vue';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
@@ -71,6 +72,9 @@ export default class FacebookAdsSyncModeConfig extends Vue {
 
   @PropSync('job')
   syncJob!: FacebookAdsJob;
+
+  @Prop({ required: false, default: true })
+  singleTable!: boolean;
 
   @Prop()
   isValidate!: boolean;
@@ -114,6 +118,25 @@ export default class FacebookAdsSyncModeConfig extends Vue {
       return 'Select Custom Sync Time...';
     }
     return '';
+  }
+  private get isInsightTable(): boolean {
+    return FacebookAdsJob.isInsightTable(this.syncJob.tableName);
+  }
+
+  @Watch('syncJob.tableName')
+  onTableNameChanged(tableName: string) {
+    if (!FacebookAdsJob.isInsightTable(tableName)) {
+      this.syncJob.withSyncMode(SyncMode.FullSync);
+    } else {
+      this.syncJob.withSyncMode(SyncMode.FullSync).withDatePreset(FacebookDatePresetMode.last7days);
+    }
+  }
+
+  @Watch('singleTable')
+  onSingleTableChanged() {
+    if (!this.singleTable) {
+      this.syncJob.withSyncMode(SyncMode.FullSync).withDatePreset(FacebookDatePresetMode.last7days);
+    }
   }
 }
 </script>

@@ -5,7 +5,7 @@
 
 import { BodyRowData, TableBodyRenderEngine } from '@chart/custom-table/body/TableBodyRenderEngine';
 import { FooterCellData, TableFooterRenderEngine } from '@chart/custom-table/footer/TableFooterRenderEngine';
-import { HeaderData, IndexedHeaderData, RowData, ViewPort } from '@/shared/models';
+import { HeaderData, IndexedHeaderData, RowData, RowDataUtils, ViewPort } from '@/shared/models';
 import { TableHeaderRenderEngine } from '@chart/custom-table/header/TableHeaderRenderEngine';
 import { HeaderController, HeaderRowData } from '@chart/custom-table/header/HeaderController';
 import { HeaderControllerBuilder } from '@chart/custom-table/header/HeaderControllerBuilder';
@@ -15,6 +15,11 @@ import { BodyControllerBuilder } from '@chart/custom-table/body/BodyControllerBu
 import { FooterController } from '@chart/custom-table/footer/FooterController';
 import { CustomCellCallBack } from '@chart/custom-table/TableData';
 import { TableExtraData } from '@chart/custom-table/TableExtraData';
+import { HighchartUtils, MetricNumberMode, StringUtils } from '@/utils';
+import { NumberFormatter, RangeData } from '@core/common/services';
+import { get, toNumber } from 'lodash';
+import { Log } from '@core/utils';
+import { TableFieldFormatterUtils } from '@chart/table/default-table/style/TableFieldFormatterUtils';
 
 export interface TableProperties {
   rows: RowData[];
@@ -70,14 +75,22 @@ export class TableController {
       .build();
 
     this.bodyController = new BodyControllerBuilder()
-      .withDefaultFormatter()
+      .withFormatter(this.getBodyFormatter(extraData))
       .withTableData(mainHeaders, rows)
       .withMinCellWidth(cellWidth)
       .withPinnedData(hasPinned, numPinnedColumn)
       .withToggleCollapseEvent(toggleCollapse)
       .withCustomRender(customCellCallBack)
       .build();
-    this.footerController = new FooterController(mainHeaders, cellWidth, hasPinned, numPinnedColumn, extraData, customCellCallBack);
+    this.footerController = new FooterController(
+      mainHeaders,
+      cellWidth,
+      hasPinned,
+      numPinnedColumn,
+      this.getFooterFormatter(extraData),
+      extraData,
+      customCellCallBack
+    );
   }
 
   renderFooter(viewPort: ViewPort): any {
@@ -93,5 +106,55 @@ export class TableController {
   renderHeader(viewport: ViewPort): HTMLElement {
     const listCellData: HeaderRowData[] = this.headerController.getAllHeaderRowData(viewport);
     return TableHeaderRenderEngine.renderHeaders(listCellData);
+  }
+
+  private getBodyFormatter(extraData: TableExtraData) {
+    return (rowData: RowData, header: HeaderData) => {
+      const rawData = RowDataUtils.getData(rowData, header) ?? '--';
+      const canApplyFormat = !header.isGroupBy;
+      if (canApplyFormat) {
+        if (header.isTextLeft) {
+          return rawData;
+        } else {
+          Log.debug('getFormatter::header::', header, StringUtils.toCamelCase(header.label));
+          const fieldFormatter = TableFieldFormatterUtils.getFieldFormatterContainsHeaderKey(header, extraData.fieldFormatting ?? {});
+          const fieldFormatDisplayUnit: MetricNumberMode | undefined = fieldFormatter?.displayUnit;
+          const generalDisplayUnit = extraData.plotOptions?.table?.dataLabels?.displayUnit;
+          const fieldFormatPrecision: number | undefined = fieldFormatter?.precision;
+          const generalPrecision = extraData.precision;
+          const displayUnit = fieldFormatDisplayUnit ?? generalDisplayUnit ?? MetricNumberMode.None;
+          const precision = fieldFormatPrecision ?? generalPrecision;
+          return this.numberFormatter(rawData, displayUnit, precision);
+        }
+      } else {
+        return rawData;
+      }
+    };
+  }
+
+  private getFooterFormatter(extraData: TableExtraData) {
+    return (header: IndexedHeaderData) => {
+      const isFirstColumn = header.columnIndex == 0;
+      if (isFirstColumn) {
+        return extraData.total?.label?.text ?? 'Total';
+      } else {
+        const fieldFormatter = TableFieldFormatterUtils.getFieldFormatterContainsHeaderKey(header, extraData.fieldFormatting ?? {});
+        const fieldFormatDisplayUnit: MetricNumberMode | undefined = fieldFormatter?.displayUnit;
+        const generalDisplayUnit = extraData.plotOptions?.table?.dataLabels?.displayUnit;
+        const fieldFormatPrecision: number | undefined = fieldFormatter?.precision;
+        const generalPrecision = extraData.precision;
+        const displayUnit = fieldFormatDisplayUnit ?? generalDisplayUnit ?? MetricNumberMode.None;
+        const precision = fieldFormatPrecision ?? generalPrecision;
+        return this.numberFormatter(header.total, displayUnit, precision);
+      }
+    };
+  }
+
+  private numberFormatter(rawData: any, displayUnit: MetricNumberMode, precision?: number): string {
+    const newMetricNumber: string[] | undefined = HighchartUtils.toMetricNumbers(displayUnit);
+    const ranges: RangeData[] | undefined = HighchartUtils.buildRangeData(newMetricNumber);
+    const numberFormatter = new NumberFormatter(ranges, precision);
+    const num: number = toNumber(rawData);
+    return isNaN(num) ? rawData : numberFormatter.format(num, undefined, ',');
   }
 }

@@ -8,7 +8,8 @@ import {
   InputControlQuerySetting,
   InputFilterOption,
   TabFilterQuerySetting,
-  TableResponse
+  TableResponse,
+  WidgetId
 } from '@core/common/domain';
 import { WidgetRenderer } from '@chart/widget-renderer';
 import { ConditionData, ConditionFamilyTypes, InputType, NumberConditionTypes, StringConditionTypes, TableSettingColor } from '@/shared';
@@ -16,11 +17,12 @@ import { ConditionBuilder } from '@core/common/services';
 import { Di } from '@core/common/modules';
 import { ConditionUtils, Log } from '@core/utils';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
-import { ChartUtils } from '@/utils';
+import { ChartUtils, ListUtils } from '@/utils';
 import { StringUtils } from '@/utils/StringUtils';
 import { DefaultInputFilter } from '@chart/input-filter/DefaultInputFilter';
 import { PopupUtils } from '@/utils/PopupUtils';
-import './InputFilter.scss';
+import './input-filter.scss';
+import { DashboardControllerModule, DashboardModule } from '@/screens/dashboard-detail/stores';
 
 enum InputMode {
   DynamicValue = 'DynamicValue',
@@ -71,6 +73,9 @@ export default class InputFilter extends BaseWidget {
   // Inject from ChartContainer.vue
   @Inject({ default: undefined })
   private onChangeDynamicValues?: (values: string[]) => void;
+
+  @Inject({ default: undefined })
+  private getCurrentValues?: (id: WidgetId) => string[];
 
   currentValue: any = this.getInputValue();
 
@@ -132,15 +137,16 @@ export default class InputFilter extends BaseWidget {
     return this.showEditComponent ? `disable ml-1 mt-3` : `ml-1 mt-3`;
   }
 
-  handleFilterChange(value: string) {
-    this.saveCurrentValue(value);
+  handleFilterChange(value: string | Date | number) {
+    const valueAsString = String(value);
+    this.saveCurrentValue(valueAsString);
     const mode = this.getInputMode(this.query);
     switch (mode) {
       case InputMode.DynamicValue:
-        this.handleDynamicValueChanged(value);
+        this.handleDynamicValueChanged(valueAsString);
         break;
       case InputMode.Filter:
-        this.handleFilterValueChanged(value);
+        this.handleFilterValueChanged(valueAsString);
         break;
     }
   }
@@ -207,13 +213,24 @@ export default class InputFilter extends BaseWidget {
     return void 0;
   }
 
-  private saveCurrentValue(value: string | Date) {
+  private saveCurrentValue(value: string) {
     this.currentValue = value;
   }
 
   getInputValue() {
-    const isUsingDefault = this.setting.options.default?.setting?.value != null;
-    return isUsingDefault ? this.setting.options.default?.setting?.value : '';
+    const currentValues: string[] = this.getCurrentValues ? this.getCurrentValues(this.chartInfo.id) : [];
+    const isUsingDefault = !!this.setting.options.default?.setting?.value;
+    ///sử dụng data của store
+    if (!this.isPreview && ListUtils.isNotEmpty(currentValues)) {
+      return ListUtils.getHead(currentValues) ?? '';
+    } else if (!this.isPreview) {
+      ///sử dụng data của setting
+      return isUsingDefault ? String(this.setting.options.default?.setting?.value) : '';
+    } else {
+      ///default
+      Log.debug('getInputValue::', this.isPreview);
+      return isUsingDefault ? String(this.setting.options.default?.setting?.value) : '';
+    }
   }
 
   get idAsString() {
@@ -227,7 +244,7 @@ export default class InputFilter extends BaseWidget {
     if (this.query.values[0]) {
       return ChartUtils.isNumberType(this.query.values[0].function.field.fieldType);
     } else {
-      return false;
+      return this.setting.options?.isNumber ?? false;
     }
   }
 
@@ -237,7 +254,7 @@ export default class InputFilter extends BaseWidget {
       case ConditionFamilyTypes.number:
         return NumberConditionTypes.equal;
       case ConditionFamilyTypes.string:
-        return StringConditionTypes.like;
+        return StringConditionTypes.likeCaseInsensitive;
       case ConditionFamilyTypes.geospatial:
       case ConditionFamilyTypes.custom:
         return StringConditionTypes.equal;

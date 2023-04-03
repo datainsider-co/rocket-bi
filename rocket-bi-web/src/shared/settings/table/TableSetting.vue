@@ -6,7 +6,13 @@
     <HeaderTab :setting="setting" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <ValuesTab :setting="setting" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <CollapseTab v-if="enableCollapseTab" :setting="setting" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
-    <FieldFormattingTab :columns="columns" :setting="setting" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <FieldFormattingTab
+      v-if="columns.length > 0"
+      :columns="columns"
+      :setting="setting"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <ConditionalFormattingTab
       :canShowDataBar="canShowDataBar"
       :columns="columns"
@@ -62,7 +68,7 @@ export default class TableSetting extends Vue {
   private readonly chartInfo!: ChartInfo;
 
   private get functionType(): FunctionFormattingType {
-    return ChartUtils.hasOnlyNoneFunction(this.query.columns) ? FunctionFormattingType.None : FunctionFormattingType.GroupBy;
+    return ChartUtils.hasOnlyNoneFunction(this.query.columns ?? []) ? FunctionFormattingType.None : FunctionFormattingType.GroupBy;
   }
 
   private get setting(): TableChartOption {
@@ -76,14 +82,14 @@ export default class TableSetting extends Vue {
   private get columns(): TableColumn[] {
     switch (this.functionType) {
       case FunctionFormattingType.GroupBy:
-        return [...this.pickFirstGroupBy(this.query.columns), ...this.pickAggregationFunctions(this.query.columns)];
+        return [...this.pickFirstGroupBy(this.query.columns ?? []), ...this.pickAggregationFunctions(this.query.columns ?? [])];
       default:
-        return this.query.columns;
+        return this.query.columns ?? [];
     }
   }
 
   private get enableCollapseTab(): boolean {
-    const groupBys = this.query.columns.filter(column => ChartUtils.isGroupByFunction(column.function));
+    const groupBys = (this.query.columns ?? []).filter(column => ChartUtils.isGroupByFunction(column.function));
     return groupBys.length > 1;
   }
 
@@ -93,7 +99,7 @@ export default class TableSetting extends Vue {
 
   private canShowDataBar(selectedColumn: TableColumn): boolean {
     if (selectedColumn) {
-      if (ChartUtils.hasOnlyNoneFunction(this.query.columns)) {
+      if (ChartUtils.hasOnlyNoneFunction(this.query.columns ?? [])) {
         return ChartUtils.isColumnNumber(selectedColumn);
       } else {
         return ChartUtils.isAggregationFunction(selectedColumn.function);

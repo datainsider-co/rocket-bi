@@ -2,8 +2,31 @@
   <LayoutContent>
     <LayoutHeader title="Jobs" icon="di-icon-job">
       <div class="ml-auto d-flex align-items-center">
-        <SearchInput class="search-input" hint-text="Search job" :timeBound="400" @onTextChanged="handleKeywordChange" />
-        <DiIconTextButton class="ml-auto" title="Refresh" @click="handleRefresh" :event="trackEvents.JobIngestionRefresh">
+        <SearchInput class="search-input mr-2" hint-text="Search job" :timeBound="400" @onTextChanged="handleKeywordChange" />
+        <SlideXLeftTransition :duration="animationDuration" :delay="delay">
+          <div class="d-flex flex-row" v-if="enableMultiAction">
+            <DiIconTextButton
+              class="mr-2"
+              title="Force Sync"
+              @click="handleMultiForceSyncByDate(selectedIndexAsSet, new Date())"
+              :event="trackEvents.JobIngestionRefresh"
+            >
+              <i class="di-icon-sync job-action-icon"></i>
+            </DiIconTextButton>
+            <DiIconTextButton title="Delete" class="mr-2" @click="handleConfirmDeleteMultiJob(selectedIndexAsSet)" :event="trackEvents.JobIngestionRefresh">
+              <i class="di-icon-delete job-action-icon"></i>
+            </DiIconTextButton>
+          </div>
+        </SlideXLeftTransition>
+        <RefreshButton
+          class="refresh-button"
+          v-if="handler.isAutoRefresh"
+          @refresh="handleRefresh"
+          @changeOption="changeAutoRefreshOption"
+          :selected-refresh-option="refreshOption"
+          :process-parent-id="tableId"
+        />
+        <DiIconTextButton v-else class="ml-auto" title="Refresh" @click="handleRefresh" :event="trackEvents.JobIngestionRefresh">
           <i class="di-icon-reset job-action-icon"></i>
         </DiIconTextButton>
       </div>
@@ -25,7 +48,7 @@
       </LayoutNoData>
       <DiTable2
         v-else
-        id="job-listing"
+        :id="tableId"
         ref="jobTable"
         :error-msg="tableErrorMessage"
         :headers="jobHeaders"
@@ -63,7 +86,7 @@
 import MultiJobCreationModal from '@/screens/data-ingestion/components/MultiJobCreationModal.vue';
 import S3PreviewTableModal from '@/screens/data-ingestion/components/S3PreviewTableModal.vue';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
-import { Component, Ref, Vue } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { CustomCell, HeaderData, Pagination, RowData } from '@/shared/models';
 import { JobModule } from '@/screens/data-ingestion/store/JobStore';
 import { ContextMenuItem, DefaultPaging, Status } from '@/shared';
@@ -75,9 +98,24 @@ import { PopupUtils } from '@/utils/PopupUtils';
 import { JobFormRender } from '@/screens/data-ingestion/form-builder/JobFormRender';
 import { JobFormFactory } from '@/screens/data-ingestion/form-builder/JobFormFactory';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
-import { DataSourceType, FormMode, JdbcJob, JobStatus, JobType, S3Job, S3SourceInfo, SortRequest, SyncMode } from '@core/data-ingestion';
-import { DIException, SortDirection } from '@core/common/domain';
-import { DateTimeFormatter, ListUtils } from '@/utils';
+import {
+  DataSourceType,
+  FormMode,
+  GoogleAnalyticJob,
+  JdbcJob,
+  JobService,
+  JobStatus,
+  JobType,
+  S3Job,
+  S3SourceInfo,
+  SortRequest,
+  SyncMode,
+  GA4Job,
+  Ga4Dimension,
+  GA4Metric
+} from '@core/data-ingestion';
+import { DIException, JobId, SortDirection } from '@core/common/domain';
+import { DateTimeFormatter, GoogleUtils, ListUtils } from '@/utils';
 import { AtomicAction } from '@/shared/anotation/AtomicAction';
 import DataIngestionTable from '@/screens/data-ingestion/components/DataIngestionTable.vue';
 import JobConfigModal from '@/screens/data-ingestion/components/JobConfigModal.vue';
@@ -95,9 +133,20 @@ import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { cloneDeep } from 'lodash';
 import { TimeScheduler } from '@/screens/data-ingestion/components/job-scheduler-form/scheduler-time/TimeScheduler';
+import RefreshButton from '@/shared/components/common/RefreshButton.vue';
+import { JobListingHandler } from '../interfaces/job-listing-handler/JobListingHandler';
+import { RefreshOption } from '@/screens/data-ingestion/interfaces/RefreshOption';
+import NProgress from 'nprogress';
+import { CheckBoxHeaderController, CheckBoxHeaderData } from '@/shared/components/common/di-table/custom-cell/CheckBoxHeaderData';
+import EmptyDirectory from '@/screens/dashboard-detail/components/EmptyDirectory.vue';
+import { SlideXLeftTransition } from 'vue2-transitions';
+import { Inject } from 'typescript-ioc';
+import { GoogleAnalyticTables } from '@/screens/data-ingestion/components/google-analytics/GoogleAnalyticTables';
+import { GoogleAnalytic4Tables } from '@/screens/data-ingestion/components/google-analytics-4/GoogleAnalytic4Tables';
 
 @Component({
   components: {
+    RefreshButton,
     JobCreationModal,
     JobConfigModal,
     DataIngestionTable,
@@ -106,17 +155,21 @@ import { TimeScheduler } from '@/screens/data-ingestion/components/job-scheduler
     LayoutNoData,
     DiTable2,
     MultiJobCreationModal,
-    S3PreviewTableModal
+    S3PreviewTableModal,
+    EmptyDirectory,
+    SlideXLeftTransition
   }
 })
 export default class JobScreen extends Vue {
   private readonly trackEvents = TrackEvents;
   private readonly listIgnoreClassForContextMenu = ['action-more'];
+  private readonly tableId = 'job-listing';
   defaultDatasourceIcon = require('@/assets/icon/data_ingestion/datasource/ic_default.svg');
 
   //todo: add pagination for table
   private jobFormRenderer: JobFormRender = JobFormRender.default();
-
+  private readonly animationDuration = 600;
+  private readonly delay = 20;
   private from = 0;
   private size = DefaultPaging.DefaultPageSize;
   private sortName = 'last_modified';
@@ -126,6 +179,13 @@ export default class JobScreen extends Vue {
   private tableErrorMessage = '';
 
   private readonly cellWidth = 180;
+
+  private selectedIndexAsSet = new Set<JobId>();
+  private enableMultiAction = false;
+  private checkboxController = new CheckBoxHeaderController();
+
+  @Inject
+  private readonly jobService!: JobService;
 
   @Ref()
   private readonly jobCreationModal!: JobCreationModal;
@@ -144,8 +204,21 @@ export default class JobScreen extends Vue {
   @Ref()
   private readonly s3PreviewModal!: S3PreviewTableModal;
 
+  @Prop({ required: true })
+  private handler!: JobListingHandler;
+
   private get jobHeaders(): HeaderData[] {
     return [
+      new CheckBoxHeaderData(
+        this.selectedIndexAsSet,
+        'jobId',
+        this.checkboxController,
+        this.jobRecords,
+        {
+          width: this.cellWidth / 3
+        },
+        this.onSelectedIndexChanged
+      ),
       {
         key: 'name',
         label: 'Name',
@@ -264,6 +337,10 @@ export default class JobScreen extends Vue {
     return JobModule.totalRecord;
   }
 
+  private get refreshOption(): RefreshOption {
+    return JobModule.refreshOption;
+  }
+
   private get isLoaded() {
     return this.listJobStatus === Status.Loaded;
   }
@@ -273,9 +350,26 @@ export default class JobScreen extends Vue {
     // return true;
   }
 
-  @Track(TrackEvents.JobIngestionView)
-  async created() {
+  private get routerName() {
+    return this.$route.name;
+  }
+
+  @Watch('routerName')
+  async onChangeRouteName() {
+    this.searchValue = '';
+    this.checkboxController.reset();
+    this.selectedIndexAsSet = new Set<JobId>();
     await this.handleLoadJobs();
+  }
+
+  @Track(TrackEvents.JobIngestionView)
+  async mounted() {
+    Log.debug('JobScreen::mounted');
+    await this.handleLoadJobs();
+  }
+
+  private changeAutoRefreshOption(option: RefreshOption) {
+    JobModule.setRefreshOption(option);
   }
 
   @Track(TrackEvents.JobCreate)
@@ -299,12 +393,20 @@ export default class JobScreen extends Vue {
       } else {
         const clonedJob = cloneDeep(job);
         clonedJob.scheduleTime = TimeScheduler.toSchedulerV2(job.scheduleTime!);
+
+        //table event require custom metrics and dimensions
+        if (Job.isGoogleAnalytic4Job(job) && (job as GA4Job).tableName === 'event') {
+          const customMetricsAndDimension: { metrics: GA4Metric[]; dimensions: Ga4Dimension[] } = await this.getGA4CustomDimensionAndMetrics(
+            (job as GA4Job).propertyId
+          );
+          (job as GA4Job).metrics = (job as GA4Job).metrics.concat(customMetricsAndDimension.metrics);
+          (job as GA4Job).dimensions = (job as GA4Job).dimensions.concat(customMetricsAndDimension.dimensions);
+        }
         if (Job.getJobFormConfigMode(job) === FormMode.Create) {
           if (isSingleTable) {
             await JobModule.create(job);
           } else {
-            const tableNames = [...DataSourceModule.tableNames];
-            await JobModule.createMulti({ job: job, tables: tableNames });
+            await this.createMultiJob(job);
           }
         } else {
           await JobModule.update(job);
@@ -315,6 +417,78 @@ export default class JobScreen extends Vue {
       Log.error('JobScreen::createJob::error::', e);
     } finally {
       this.showLoaded();
+    }
+  }
+
+  private async createMultiJob(job: Job) {
+    switch (job.jobType) {
+      case JobType.GoogleAnalytics: {
+        const listGAJob = this.getListGAJob(job as GoogleAnalyticJob);
+        await this.jobService.multiCreateV2(listGAJob);
+        break;
+      }
+      case JobType.GA4: {
+        const listGAJob = await this.getListGA4Job(job as GA4Job);
+        await this.jobService.multiCreateV2(listGAJob);
+        break;
+      }
+      default: {
+        const tableNames = [...DataSourceModule.tableNames];
+        await JobModule.createMulti({ job: job, tables: tableNames });
+      }
+    }
+  }
+
+  private getListGAJob(job: GoogleAnalyticJob) {
+    const gaTables = GoogleAnalyticTables;
+    return gaTables.map(tbl => {
+      const gaJob = cloneDeep(job);
+      gaJob.metrics = tbl.metrics;
+      gaJob.dimensions = tbl.dimensions;
+      gaJob.tableName = tbl.id;
+      gaJob.destTableName = tbl.id;
+      gaJob.displayName = gaJob.displayName + ` (table: ${gaJob.destTableName})`;
+      return gaJob;
+    });
+  }
+
+  private async getListGA4Job(job: GA4Job): Promise<GA4Job[]> {
+    const gaTables = GoogleAnalytic4Tables;
+    return gaTables.map(tbl => {
+      const gaJob = cloneDeep(job);
+      gaJob.metrics = tbl.metrics.concat(job.metrics);
+      gaJob.dimensions = tbl.dimensions.concat(job.dimensions);
+      gaJob.tableName = tbl.id;
+      gaJob.destTableName = tbl.id;
+      gaJob.displayName = gaJob.displayName + ` (table: ${gaJob.destTableName})`;
+      return gaJob;
+    });
+  }
+
+  private customGA4Dimensions(dimensionMetadata: gapi.client.analyticsdata.DimensionMetadata[]) {
+    return dimensionMetadata.map(dimension => new Ga4Dimension(dimension.apiName!)).filter(item => item.name.includes('customEvent:'));
+  }
+
+  private customGA4Metrics(metricMetadata: gapi.client.analyticsdata.MetricMetadata[]) {
+    return metricMetadata.map(metric => new GA4Metric(metric.apiName!, this.getMetricType(metric.type!))).filter(item => item.name.includes('customEvent:'));
+  }
+
+  private async getGA4CustomDimensionAndMetrics(propertyId: string): Promise<{ metrics: GA4Metric[]; dimensions: Ga4Dimension[] }> {
+    Log.debug('JobScreen::getGA4CustomDimensionAndMetrics::propertyId::', propertyId);
+    const dimensionsAndMetrics: gapi.client.Response<gapi.client.analyticsdata.Metadata> = await GoogleUtils.getDimensionsAndMetrics(
+      `properties/${propertyId}`
+    );
+    const customDimensions: Ga4Dimension[] = this.customGA4Dimensions(dimensionsAndMetrics?.result?.dimensions ?? []);
+    const customMetrics: GA4Metric[] = this.customGA4Metrics(dimensionsAndMetrics?.result?.metrics ?? []);
+    return { metrics: customMetrics, dimensions: customDimensions };
+  }
+
+  private getMetricType(metricMetadataType: string): string {
+    switch (metricMetadataType) {
+      case 'TYPE_INTEGER':
+        return 'int64';
+      default:
+        return 'float';
     }
   }
 
@@ -331,6 +505,8 @@ export default class JobScreen extends Vue {
       case JobType.Mongo:
       case JobType.Shopify:
       case JobType.S3:
+      case JobType.GoogleAnalytics:
+      case JobType.GA4:
         this.jobCreationModal.show(jobInfo.job);
         break;
       case JobType.Facebook:
@@ -366,21 +542,66 @@ export default class JobScreen extends Vue {
     }
   }
 
+  onSelectedIndexChanged() {
+    this.enableMultiAction = this.selectedIndexAsSet.size > 0;
+  }
+
+  private showJobProcessLoading() {
+    try {
+      NProgress.configure({ parent: `#${this.tableId}` }).start();
+    } catch (e) {
+      Log.debug('JobScreen::showJobProcessLoading::error');
+    }
+  }
+
+  private hideJobProcessLoading() {
+    try {
+      NProgress.configure({ parent: `#${this.tableId}` }).done();
+    } catch (e) {
+      Log.debug('JobScreen::showJobProcessLoading::error');
+    }
+  }
+
+  private showRefreshLoading() {
+    this.handler.isAutoRefresh ? this.showJobProcessLoading() : this.showUpdating();
+  }
+
+  private hideRefreshLoading() {
+    if (this.handler.isAutoRefresh) {
+      this.hideJobProcessLoading();
+      this.showLoaded();
+    } else {
+      this.showLoaded();
+    }
+  }
+
   private async handleRefresh() {
     try {
-      this.showUpdating();
+      this.showRefreshLoading();
+      this.onSelectedIndexChanged();
       await this.loadJobs();
-      this.showLoaded();
+      this.updateCheckbox();
+      this.hideRefreshLoading();
     } catch (e) {
       const exception = DIException.fromObject(e);
       this.showError(exception.message);
       Log.error('JobScreen::loadJobs::exception::', exception.message);
       throw new DIException(exception.message);
+    } finally {
+      this.hideJobProcessLoading();
     }
   }
 
+  private updateCheckbox() {
+    const idToRemove: JobId[] = ListUtils.diff<JobId>(
+      Array.from(this.selectedIndexAsSet.values()),
+      JobModule.jobList.map(jobInfo => jobInfo.job.jobId)
+    );
+    idToRemove.forEach(id => this.selectedIndexAsSet.delete(id));
+  }
+
   private async loadJobs() {
-    await JobModule.loadJobList({ from: this.from, size: this.size, keyword: this.searchValue, sorts: [new SortRequest(this.sortName, this.sortMode)] });
+    await this.handler.list(this.from, this.size, this.searchValue, [new SortRequest(this.sortName, this.sortMode)]);
   }
 
   @Track(TrackEvents.JobDelete, {
@@ -390,6 +611,21 @@ export default class JobScreen extends Vue {
   })
   private handleConfirmDeleteJob(job: Job) {
     Modals.showConfirmationModal(`Are you sure to delete job '${job.displayName}'?`, { onOk: () => this.handleDeleteJob(job) });
+  }
+
+  // @Track(TrackEvents.JobDelete, {
+  //   job_id: (_: JobScreen, args: any) => args[0].jobId,
+  //   job_name: (_: JobScreen, args: any) => args[0].displayName,
+  //   job_type: (_: JobScreen, args: any) => args[0].className
+  // })
+  private handleConfirmDeleteMultiJob(jobIdAsSet: Set<JobId>) {
+    const jobMessage = this.getJobMessage(jobIdAsSet.size);
+    Modals.showConfirmationModal(`Are you sure to delete ${jobIdAsSet.size} ${jobMessage}?`, {
+      onOk: () => {
+        const jobIds: JobId[] = Array.from(jobIdAsSet);
+        this.handleDeleteMultiJob(jobIds);
+      }
+    });
   }
 
   @Track(TrackEvents.JobSubmitDelete, {
@@ -402,6 +638,27 @@ export default class JobScreen extends Vue {
     try {
       this.showLoading();
       await JobModule.deleteJob(job.jobId);
+      await this.loadJobs();
+    } catch (e) {
+      const exception = DIException.fromObject(e);
+      PopupUtils.showError(exception.message);
+    } finally {
+      this.showLoaded();
+    }
+  }
+
+  @Track(TrackEvents.JobSubmitDelete, {
+    job_id: (_: JobScreen, args: any) => args[0].jobId,
+    job_name: (_: JobScreen, args: any) => args[0].displayName,
+    job_type: (_: JobScreen, args: any) => args[0].className
+  })
+  @AtomicAction()
+  private async handleDeleteMultiJob(jobIds: JobId[]) {
+    try {
+      this.showLoading();
+      await JobModule.deleteJobs(jobIds);
+      this.selectedIndexAsSet = new Set<JobId>();
+      this.onSelectedIndexChanged();
       await this.loadJobs();
     } catch (e) {
       const exception = DIException.fromObject(e);
@@ -431,7 +688,11 @@ export default class JobScreen extends Vue {
   private async handleForceSyncByDate(job: Job, date: Date) {
     try {
       this.showLoading();
-      const response = await JobModule.forceSync({ jobId: job.jobId, date: date.getTime(), mode: ForceMode.Continuous });
+      const response = await JobModule.forceSync({
+        jobId: job.jobId,
+        date: date.getTime(),
+        mode: ForceMode.Continuous
+      });
       if (response) {
         PopupUtils.showSuccess('Force sync successfully.');
         await this.loadJobs();
@@ -439,6 +700,35 @@ export default class JobScreen extends Vue {
         PopupUtils.showError('Force sync failed.');
       }
       Log.debug('JobScreen::handleForceSync::job::', job, date);
+    } catch (e) {
+      const exception = DIException.fromObject(e);
+      PopupUtils.showError(exception.message);
+      Log.error('JobScreen::handleForceSync::exception', exception.message);
+    } finally {
+      this.showLoaded();
+    }
+  }
+
+  beforeDestroy() {
+    this.checkboxController.reset();
+    this.onSelectedIndexChanged();
+  }
+
+  @AtomicAction()
+  private async handleMultiForceSyncByDate(jobIdAsSet: Set<JobId>, date: Date) {
+    try {
+      this.showLoading();
+      const jobIds: JobId[] = Array.from(jobIdAsSet);
+      const response: Record<JobId, boolean> = await JobModule.multiForceSync({
+        jobIds: jobIds,
+        date: date.getTime(),
+        mode: ForceMode.Continuous
+      });
+      Log.debug('handleMultiForceSyncByDate::', typeof response);
+      this.showMultiForceSyncMessage(response);
+      this.selectedIndexAsSet = new Set<JobId>();
+      this.onSelectedIndexChanged();
+      await this.loadJobs();
     } catch (e) {
       const exception = DIException.fromObject(e);
       PopupUtils.showError(exception.message);
@@ -484,7 +774,11 @@ export default class JobScreen extends Vue {
           this.diContextMenu?.hide();
           event.stopPropagation();
           this.openJobConfigModal(jobInfo);
-          TrackingUtils.track(TrackEvents.JobEdit, { job_id: jobInfo.job.jobId, job_name: jobInfo.job.displayName, job_type: jobInfo.job.className });
+          TrackingUtils.track(TrackEvents.JobEdit, {
+            job_id: jobInfo.job.jobId,
+            job_name: jobInfo.job.displayName,
+            job_type: jobInfo.job.className
+          });
         }
       },
       {
@@ -553,11 +847,19 @@ export default class JobScreen extends Vue {
     switch (jobConfigFormMode) {
       case FormMode.Create:
         await JobModule.create(clonedJob);
-        TrackingUtils.track(TrackEvents.JobSubmitCreate, { job_id: job.jobId, job_name: job.displayName, job_type: job.className });
+        TrackingUtils.track(TrackEvents.JobSubmitCreate, {
+          job_id: job.jobId,
+          job_name: job.displayName,
+          job_type: job.className
+        });
         break;
       case FormMode.Edit:
         await JobModule.update(clonedJob);
-        TrackingUtils.track(TrackEvents.JobSubmitEdit, { job_id: job.jobId, job_name: job.displayName, job_type: job.className });
+        TrackingUtils.track(TrackEvents.JobSubmitEdit, {
+          job_id: job.jobId,
+          job_name: job.displayName,
+          job_type: job.className
+        });
         break;
       default:
         throw new DIException(`Unsupported ${jobConfigFormMode} Job`);
@@ -569,6 +871,8 @@ export default class JobScreen extends Vue {
       this.showLoading();
       this.from = (pagination.page - 1) * pagination.rowsPerPage;
       this.size = pagination.rowsPerPage;
+      this.checkboxController.reset();
+      this.onSelectedIndexChanged();
       await this.loadJobs();
       this.showLoaded();
     } catch (e) {
@@ -588,7 +892,9 @@ export default class JobScreen extends Vue {
         case JobType.GenericJdbc:
         case JobType.BigQuery:
         case JobType.Mongo:
+        case JobType.GoogleAnalytics:
         case JobType.S3:
+        case JobType.Tiktok:
           this.jobCreationModal.show(job);
           break;
         case JobType.Unsupported:
@@ -608,6 +914,8 @@ export default class JobScreen extends Vue {
     try {
       this.searchValue = newKeyword;
       this.from = 0;
+      this.checkboxController.reset();
+      this.onSelectedIndexChanged();
       this.showLoading();
       await this.loadJobs();
       this.showLoaded();
@@ -622,6 +930,8 @@ export default class JobScreen extends Vue {
       Log.debug('handleSortChange::', this.sortName, this.sortMode);
       this.updateSortMode(column);
       this.updateSortColumn(column);
+      this.checkboxController.reset();
+      this.onSelectedIndexChanged();
       this.showUpdating();
       await this.loadJobs();
       this.showLoaded();
@@ -647,6 +957,7 @@ export default class JobScreen extends Vue {
       this.sortMode = SortDirection.Asc;
     }
   }
+
   ///Hàm chỉ excute hàm create job, không có edit ở đây
   ///Khi có edit thì sẽ gọi mở modal khác và k đi vào preview modal
   private openS3PreviewModal(job: S3Job) {
@@ -661,6 +972,25 @@ export default class JobScreen extends Vue {
             (job, isSingleTable) => this.multiJobCreationModal.hide()
           )
       });
+    }
+  }
+
+  private getJobMessage(total: number): string {
+    return total > 1 ? 'jobs' : 'job';
+  }
+
+  private showMultiForceSyncMessage(response: Record<JobId, boolean>) {
+    const jobSyncSuccesses: boolean[] = Object.values(response);
+    const totalJobSyncSuccess = jobSyncSuccesses.filter(success => success).length;
+    const totalJobSyncFail = jobSyncSuccesses.filter(success => !success).length;
+    const successMessage = totalJobSyncSuccess > 0 ? `${totalJobSyncSuccess} ${this.getJobMessage(totalJobSyncSuccess)} force sync successfully` : ``;
+    const errorMessage = totalJobSyncFail > 0 ? `${totalJobSyncFail} ${this.getJobMessage(totalJobSyncFail)} force sync failed` : ``;
+    if (totalJobSyncFail === 0) {
+      PopupUtils.showSuccess(successMessage);
+    } else {
+      const andMessage = totalJobSyncSuccess > 0 && totalJobSyncFail > 0 ? `&` : ``;
+      const message = `${totalJobSyncSuccess} ${andMessage} ${errorMessage}`;
+      totalJobSyncSuccess === 0 ? PopupUtils.showError(message) : PopupUtils.showSuccess(message);
     }
   }
 }
@@ -689,7 +1019,7 @@ export default class JobScreen extends Vue {
       font-style: normal;
       font-weight: 500;
       letter-spacing: 0.2px;
-      line-height: 1.17;
+      line-height: 1.4;
       overflow: hidden;
       margin-right: 0;
 
@@ -702,6 +1032,7 @@ export default class JobScreen extends Vue {
           color: var(--directory-header-icon-color);
         }
       }
+
       .job-action-icon {
         font-size: 16px;
         color: var(--directory-header-icon-color);
@@ -738,14 +1069,17 @@ export default class JobScreen extends Vue {
     justify-content: center;
     align-items: center;
     font-size: 16px;
+
     .title {
       margin-top: 16px;
       margin-bottom: 8px;
       font-weight: 500;
     }
+
     a {
       text-decoration: underline;
     }
+
     .action {
       color: var(--secondary-text-color);
     }
@@ -765,6 +1099,7 @@ export default class JobScreen extends Vue {
     width: 24px;
     height: 24px;
   }
+
   .job-name {
     color: var(--text-color) !important;
     @include semi-bold-14();
@@ -775,6 +1110,7 @@ export default class JobScreen extends Vue {
   > .job-table {
     background-color: var(--directory-row-bg);
     flex: 1;
+    z-index: 1;
   }
 
   .action-container {

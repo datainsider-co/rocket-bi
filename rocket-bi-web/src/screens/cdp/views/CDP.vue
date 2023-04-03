@@ -93,7 +93,7 @@ export default class CDP extends LoggedInScreen {
           color: var(--text-color);
 
           span {
-            line-height: normal;
+            line-height: 1.4;
           }
         }
 

@@ -52,7 +52,7 @@ export default class TableHeader extends Vue {
     font-weight: normal;
     font-stretch: normal;
     font-style: normal;
-    line-height: normal;
+    line-height: inherit;
     text-align: center;
 
     &.title-chart {

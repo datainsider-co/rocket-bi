@@ -6,12 +6,16 @@ import { BigQuerySourceInfoV2 } from '@core/data-ingestion/domain/data-source/Bi
 import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4SourceInfo';
 import { StringUtils } from '@/utils';
 import { DIException } from '@core/common/domain';
+import { Log } from '@core/utils';
+import KeyDownEvent = JQuery.KeyDownEvent;
 
 export class Ga4SourceFormRender implements DataSourceFormRender {
   private ga4SourceInfo: GA4SourceInfo;
+  private onSubmit: (() => void) | null;
 
-  constructor(ga4SourceInfo: GA4SourceInfo) {
+  constructor(ga4SourceInfo: GA4SourceInfo, onSubmit?: () => void) {
     this.ga4SourceInfo = ga4SourceInfo;
+    this.onSubmit = onSubmit ?? null;
   }
 
   private get displayName() {
@@ -44,7 +48,13 @@ export class Ga4SourceFormRender implements DataSourceFormRender {
         <div class="form-item d-flex w-100 justify-content-center align-items-center">
           <div class="title">Display name:</div>
           <div class="input">
-            <BFormInput id="input-display-name" placeholder="Input display name" autocomplete="off" v-model={this.displayName}></BFormInput>
+            <BFormInput
+              id="input-display-name"
+              placeholder="Input display name"
+              autofocus
+              autocomplete="off"
+              v-model={this.displayName}
+              onKeydown={(event: KeyDownEvent) => this.onKeyDown(event)}></BFormInput>
           </div>
         </div>
       </div>
@@ -57,6 +67,14 @@ export class Ga4SourceFormRender implements DataSourceFormRender {
   validSource(source: GA4SourceInfo) {
     if (StringUtils.isEmpty(source.displayName)) {
       throw new DIException('Display name is required!');
+    }
+  }
+
+  private onKeyDown(event: KeyDownEvent) {
+    const isEnter = event.code === 'Enter';
+    Log.debug('onKeyDown::', this.onSubmit);
+    if (isEnter && this.onSubmit) {
+      this.onSubmit();
     }
   }
 }

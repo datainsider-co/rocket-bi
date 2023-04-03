@@ -1,7 +1,7 @@
 import { Component, Inject, Prop, Provide, Watch } from 'vue-property-decorator';
 import Konva from 'konva';
 import { Log } from '@core/utils';
-import { PRIMARY_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
+import { ACCENT_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
 import { TablePosition } from '@core/data-relationship';
 import { Column, ColumnType, TableSchema } from '@core/common/domain';
 import DiagramItem from '@/screens/data-cook/components/diagram-panel/DiagramItem.vue';
@@ -95,7 +95,7 @@ export default class TableSchemaItem extends DiagramItem {
       fill: '#fff',
       strokeEnabled: false,
       strokeWidth: 1,
-      stroke: PRIMARY_COLOR,
+      stroke: ACCENT_COLOR,
       shadowBlur: 8,
       shadowColor: 'rgba(0,0,0,0.1)',
       shadowOffset: {
@@ -183,7 +183,7 @@ export default class TableSchemaItem extends DiagramItem {
         fontSize,
         lineHeight,
         fontFamily: '"Roboto", sans-serif',
-        fill: this.isRelatedColumn(col) ? PRIMARY_COLOR : textColor,
+        fill: this.isRelatedColumn(col) ? ACCENT_COLOR : textColor,
         wrap: 'none',
         ellipsis: true
       });
@@ -222,13 +222,13 @@ export default class TableSchemaItem extends DiagramItem {
       transparentLayer.on('mouseover', () => {
         if (this.stage) {
           this.stage.container().style.cursor = 'drag';
-          txtColumnName.fill(PRIMARY_COLOR);
+          txtColumnName.fill(ACCENT_COLOR);
         }
       });
       transparentLayer.on('mouseleave', () => {
         if (this.stage) {
           this.stage.container().style.cursor = 'grab';
-          const color = this.isRelatedColumn(col) ? PRIMARY_COLOR : textColor;
+          const color = this.isRelatedColumn(col) ? ACCENT_COLOR : textColor;
           txtColumnName.fill(color);
         }
       });

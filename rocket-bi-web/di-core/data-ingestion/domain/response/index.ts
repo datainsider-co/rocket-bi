@@ -7,4 +7,7 @@ export * from './S3Source';
 export * from './streaming-job';
 export * from './GoogleAdsSource';
 export * from './FacebookAdsSource';
-export * from './FacebookTokenResponse';
+export * from './TokenResponse';
+export * from './TiktokAccessTokenResponse';
+export * from './TiktokAccessTokenResponse';
+export * from './TiktokSource';

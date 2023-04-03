@@ -1,17 +1,12 @@
 <template>
   <div>
-    <label class="export-form mb-0">
-      <div class="custom-control custom-switch">
-        <input
-          :id="genToggleId('flatten-deep')"
-          :checked="enableNestedColumn"
-          class="custom-control-input"
-          type="checkbox"
-          @input="handleEnableNestedColumn($event.target.checked)"
-        />
-        <label class="custom-control-label" :for="genToggleId('flatten-deep')">Nested Column</label>
-      </div>
-    </label>
+    <DiToggle
+      class="export-form"
+      :id="genToggleId('flatten-deep')"
+      :value="enableNestedColumn"
+      @update:value="handleEnableNestedColumn"
+      label="Nested Column"
+    ></DiToggle>
     <div class="input">
       <b-collapse :visible="enableNestedColumn" class="mt-12px">
         <label>Nested level</label>

@@ -48,7 +48,7 @@ export default class ConfigBuilder extends Vue {
   @Prop({ type: Boolean, default: true })
   private readonly showFilter!: boolean;
 
-  @Prop({ required: true, type: Array })
+  @Prop({ required: false, type: Array, default: () => [] })
   private readonly visualizationItems!: VisualizationItemData[];
 
   private get vizItemsFiltered(): VisualizationItemData[] {

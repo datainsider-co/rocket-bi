@@ -21,8 +21,7 @@
       </template>
     </div>
     <div class="d-flex mt-3">
-      <DiToggle id="sync-all-table" :value="!isSingleTable" @onSelected="isSingleTable = !isSingleTable"></DiToggle>
-      <div class="ml-1">Sync all tables</div>
+      <DiToggle id="sync-all-table" :value="!isSingleTable" @onSelected="isSingleTable = !isSingleTable" label="Sync all tables"></DiToggle>
     </div>
     <template v-if="isSingleTable">
       <label class="mb-0 mt-3">From table</label>

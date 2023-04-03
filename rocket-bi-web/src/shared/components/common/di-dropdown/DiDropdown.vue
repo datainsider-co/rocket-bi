@@ -17,13 +17,16 @@
             <div>
               <BInput
                 ref="inputKeyword"
+                name="di-dropdown"
+                type="text"
                 v-model="keyword"
                 class="dropdown-input-search"
                 :class="inputClass"
-                autocomplete="off"
+                autocomplete="new-di-dropdown"
                 @focus="showDropdown"
                 @keydown="handleKeywordChanged"
                 @keydown.enter="handleSelectItem"
+                @keydown.space="handleTypeWhitespace"
                 @keydown.up="handleMoveUp"
                 @keyup.down="handleMoveDown"
                 @click.stop="showDropdown"
@@ -74,6 +77,17 @@
                       <div>
                         <span class="unselectable block truncate font-normal">
                           Sorry, no matching options.
+                        </span>
+                      </div>
+                    </li>
+                  </slot>
+                </template>
+                <template v-else-if="isEmpty(finalOptions)">
+                  <slot name="empty">
+                    <li class="disable" role="option" tabindex="0">
+                      <div>
+                        <span class="unselectable block truncate font-normal">
+                          {{ emptyPlaceholder }}
                         </span>
                       </div>
                     </li>

@@ -1,31 +1,26 @@
 <template>
-  <b-modal ref="modal" id="passwordValidateModal" centered no-close-on-backdrop @close="handleClose">
-    <template v-slot:modal-header="{ close }">
+  <b-modal ref="modal" id="passwordValidateModal" centered no-close-on-backdrop no-close-on-esc @cancel="handleClose" @hidden="reset()">
+    <template #modal-header>
       <h5 class="modal-title">Password Validation</h5>
-      <p class="h5 mb-2 btn-ghost">
-        <b-icon-x role="button" :id="genBtnId('close')" variant="light" @click="close()"></b-icon-x>
-      </p>
     </template>
     <template v-slot:default="">
       <p class="mb-2">Password</p>
-      <b-form-input
+      <DiInputComponent
         :id="genInputId('passwordConfig-name')"
-        v-model.trim="inputValue"
-        variant="dark"
+        autocomplete="new-password"
         placeholder="Enter password"
-        class="p-3 h-42px"
-        autocomplete="off"
+        v-model="inputValue"
         type="password"
-        v-on:keydown.enter="submitPassword(inputValue)"
-        autofocus
-      ></b-form-input>
+        variant="dark"
+        @enter="submitPassword(inputValue, ...arguments)"
+      />
       <div class="error mt-1">{{ errorMsg }}</div>
     </template>
     <template #modal-footer>
       <b-button :id="genBtnId('cancel')" class="flex-fill h-42px" variant="secondary" @click="handleClose" event="cancel-password">
         Cancel
       </b-button>
-      <b-button :id="genBtnId('validate')" class="flex-fill h-42px" variant="primary" @click="submitPassword(inputValue)">
+      <b-button :id="genBtnId('validate')" class="flex-fill h-42px" variant="primary" @click="submitPassword(inputValue, ...arguments)">
         Access
       </b-button>
     </template>
@@ -36,8 +31,10 @@
 import { Component, Vue, Prop, Ref } from 'vue-property-decorator';
 import { SecurityUtils, StringUtils } from '@/utils';
 import { BModal } from 'bootstrap-vue';
-import { DIException, PasswordConfig } from '@core/common/domain';
+import { Dashboard as CoreDashboard, DIException, Directory, PasswordConfig, Passwordable } from '@core/common/domain';
 import { Log } from '@core/utils';
+import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
+import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 
 @Component({
   components: {}
@@ -51,34 +48,44 @@ export default class PasswordModal extends Vue {
   private inputValue = '';
 
   private errorMsg = '';
+  private isShowPassword = false;
 
   private onCompleted: (() => void) | null = null;
 
   private onCancel: (() => void) | null = null;
-
-  show(passwordConfig: PasswordConfig, onCompleted: () => void, onCancel: () => void) {
+  show(passwordConfig: PasswordConfig, onCompleted: () => void, onCanceled?: () => void) {
     this.reset();
     this.passwordConfig = passwordConfig;
-    this.onCancel = onCancel;
+    this.onCancel = onCanceled || null;
     this.onCompleted = onCompleted;
     this.showModal();
   }
 
   private showModal() {
-    this.modal.show();
+    this.modal?.show();
   }
 
   private hideModal() {
-    this.modal.hide();
-    this.reset();
+    Log.debug('hideModal', this.modal);
+    this.modal?.hide();
   }
 
   private reset() {
+    Log.debug('reset');
+    this.isShowPassword = false;
     this.passwordConfig = null;
     this.inputValue = '';
     this.errorMsg = '';
     this.onCancel = null;
     this.onCompleted = null;
+  }
+
+  private get currentType(): string {
+    return this.isShowPassword ? 'text' : 'password';
+  }
+
+  private toggleShowPassword() {
+    this.isShowPassword = !this.isShowPassword;
   }
 
   private validate(password: string) {
@@ -94,12 +101,17 @@ export default class PasswordModal extends Vue {
     }
   }
 
-  private async submitPassword(password: string) {
+  private async submitPassword(password: string, event: Event) {
     try {
+      event.preventDefault();
       this.errorMsg = '';
       await this.validate(password);
-      this.onCompleted ? this.onCompleted() : void 0;
-      this.hideModal();
+      if (this.onCompleted) {
+        this.onCompleted();
+      }
+      this.$nextTick(() => {
+        this.hideModal();
+      });
     } catch (ex) {
       Log.error(ex);
       this.errorMsg = ex.message;
@@ -107,9 +119,31 @@ export default class PasswordModal extends Vue {
   }
 
   private handleClose() {
+    Log.debug('handleClose');
     this.onCancel ? this.onCancel() : void 0;
+    this.hideModal();
+  }
+
+  requirePassword(directory: Directory, ownerId: string, onCompleted: () => void, onCanceled?: () => void): void {
+    if (!directory) {
+      throw new DIException('Dashboard not found!');
+    }
+    const curDirectory = Directory.fromObject(directory);
+    const isOwner: boolean = this.isOwner(ownerId);
+    const isPasswordRequired = Passwordable.is(curDirectory.data) && curDirectory.data.config?.enabled;
+    Log.debug('requirePassword::isOwner', isOwner, 'isPasswordRequired', isPasswordRequired);
+    if (isOwner || !isPasswordRequired) {
+      onCompleted();
+    } else if (isPasswordRequired) {
+      this.show((curDirectory.data as Passwordable).config!, onCompleted, onCanceled);
+    }
+  }
+
+  private isOwner(resourceOwner: string): boolean {
+    const loggedUsername = AuthenticationModule.userProfile.username;
+    Log.debug('isOwner::loggedUsername', loggedUsername, 'resource owner::', resourceOwner);
+
+    return loggedUsername === resourceOwner;
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

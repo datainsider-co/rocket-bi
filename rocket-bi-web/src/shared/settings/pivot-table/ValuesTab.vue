@@ -51,34 +51,35 @@
           @onChanged="handleWordWrapChanged"
         />
       </div>
-      <DropdownSetting
-        id="value-font-family"
-        :options="fontOptions"
-        :value="font"
-        class="mb-2"
-        :label="`${configSetting['value.style.fontFamily'].label}`"
-        :hint="`${configSetting['value.style.fontFamily'].hint}`"
-        size="full"
-        @onChanged="handleFontChanged"
-      />
+
       <div class="row-config-container">
         <DropdownSetting
+          id="value-font-family"
+          :options="fontOptions"
+          :value="font"
+          class="mb-2"
+          style="margin-right: 12px"
+          :label="`${configSetting['value.style.fontFamily'].label}`"
+          :hint="`${configSetting['value.style.fontFamily'].hint}`"
+          size="half"
+          @onChanged="handleFontChanged"
+        />
+        <DropdownSetting
           id="value-font-family-size"
-          class="mr-3"
           :options="fontSizeOptions"
           :value="fontSize"
           size="small"
-          :label="`${configSetting['value.style.fontSize'].label}`"
+          :label="`${configSetting['value.style.fontSize'].label || 'Size'}`"
           :hint="`${configSetting['value.style.fontSize'].hint}`"
           @onChanged="handleFontSizeChanged"
         />
-        <AlignSetting
-          id="value-align"
-          :value="valuesAlign"
-          :label="`${configSetting['value.align'].label}`"
-          :hint="`${configSetting['value.align'].hint}`"
-          @onChanged="handleAlignChanged"
-        />
+        <!--        <AlignSetting-->
+        <!--          id="value-align"-->
+        <!--          :value="valuesAlign"-->
+        <!--          :label="`${configSetting['value.align'].label}`"-->
+        <!--          :hint="`${configSetting['value.align'].hint}`"-->
+        <!--          @onChanged="handleAlignChanged"-->
+        <!--        />-->
       </div>
       <RevertButton class="mb-3" style="text-align: right" @click="handleRevert" />
     </div>

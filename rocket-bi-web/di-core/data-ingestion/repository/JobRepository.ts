@@ -8,7 +8,7 @@ import { BaseClient } from '@core/common/services/HttpClient';
 import { InjectValue } from 'typescript-ioc';
 import { DIKeys } from '@core/common/modules';
 import { JobId } from '@core/common/domain';
-import { DataSourceType, JobType, ListingResponse } from '@core/data-ingestion';
+import { DataSourceType, JobStatus, JobType, ListingResponse } from '@core/data-ingestion';
 import { BaseResponse } from '@core/data-ingestion/domain/response/BaseResponse';
 import { ForceMode } from '@core/lake-house/domain/lake-job/ForceMode';
 import { ListingRequest } from '@core/lake-house/domain/request/listing-request/ListingRequest';
@@ -24,17 +24,22 @@ export abstract class JobRepository {
 
   abstract multiCreate(request: Job, tables: string[]): Promise<boolean>;
 
-  abstract list(request: ListingRequest): Promise<ListingResponse<JobInfo>>;
+  abstract list(request: ListingRequest, currentStatuses?: JobStatus[]): Promise<ListingResponse<JobInfo>>;
 
   abstract delete(id: JobId): Promise<boolean>;
 
+  abstract multiDelete(ids: JobId[]): Promise<boolean>;
   abstract update(id: JobId, job: Job): Promise<boolean>;
 
   abstract testConnection(job: Job): Promise<BaseResponse>;
 
   abstract forceSync(jobId: JobId, date: number, mode: ForceMode): Promise<BaseResponse>;
 
+  abstract multiForceSync(jobIds: JobId[], date: number, mode: ForceMode): Promise<Record<JobId, boolean>>;
+
   abstract cancel(jobId: JobId): Promise<BaseResponse>;
+
+  abstract multiCreateV2(jobs: Job[]): Promise<boolean>;
 }
 
 export class JobRepositoryImpl extends JobRepository {
@@ -45,14 +50,18 @@ export class JobRepositoryImpl extends JobRepository {
     return this.httpClient.post(`scheduler/job/create`, { job: request }, void 0, headerScheduler).then(jobInfo => JobInfo.fromObject(jobInfo));
   }
 
-  list(request: ListingRequest): Promise<ListingResponse<JobInfo>> {
+  list(request: ListingRequest, currentStatuses?: JobStatus[]): Promise<ListingResponse<JobInfo>> {
     return this.httpClient
-      .post<any>(`scheduler/job/list`, request, void 0, headerScheduler)
+      .post<any>(`scheduler/job/list`, { ...request, currentStatuses: currentStatuses }, void 0, headerScheduler)
       .then(response => new ListingResponse<JobInfo>(this.parseToListJob(response.data), response.total));
   }
 
   delete(jobId: JobId): Promise<boolean> {
     return this.httpClient.delete<boolean>(`scheduler/job/${jobId}`, void 0, void 0, headerScheduler);
+  }
+
+  multiDelete(ids: JobId[]): Promise<boolean> {
+    return this.httpClient.delete<boolean>(`scheduler/job/multi_delete`, { ids: ids }, void 0, headerScheduler);
   }
 
   update(id: JobId, job: Job): Promise<boolean> {
@@ -71,12 +80,20 @@ export class JobRepositoryImpl extends JobRepository {
     return this.httpClient.put(`scheduler/schedule/job/${jobId}/now`, { atTime: date, mode: mode }, void 0, headerScheduler);
   }
 
+  multiForceSync(jobIds: JobId[], date: number, mode: ForceMode): Promise<Record<JobId, boolean>> {
+    return this.httpClient.put(`scheduler/schedule/job/multi_sync/now`, { atTime: date, mode: mode, ids: jobIds }, void 0, headerScheduler);
+  }
+
   cancel(jobId: JobId): Promise<BaseResponse> {
     return this.httpClient.put(`scheduler/schedule/job/${jobId}/kill`, {}, void 0, headerScheduler);
   }
 
   multiCreate(request: Job, tables: string[]): Promise<boolean> {
     return this.httpClient.post(`scheduler/job/multi_create`, { baseJob: request, tableNames: tables }, void 0, headerScheduler);
+  }
+
+  multiCreateV2(jobs: Job[]): Promise<boolean> {
+    return this.httpClient.post<BaseResponse>(`scheduler/job/multi_create_jobs`, { jobs }, void 0, headerScheduler).then(res => res.success);
   }
 }
 
@@ -130,11 +147,19 @@ export class JobRepositoryMock extends JobRepository {
     return Promise.resolve(false);
   }
 
+  multiDelete(ids: JobId[]): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
   forceSync(jobId: JobId, date: number, mode: ForceMode): Promise<BaseResponse> {
     return Promise.resolve({ success: false });
   }
 
-  list(request: ListingRequest): Promise<ListingResponse<JobInfo>> {
+  multiForceSync(jobIds: JobId[], date: number, mode: ForceMode): Promise<Record<JobId, boolean>> {
+    return Promise.resolve({});
+  }
+
+  list(request: ListingRequest, currentStatus?: JobStatus[]): Promise<ListingResponse<JobInfo>> {
     return Promise.resolve(
       new ListingResponse(
         [
@@ -261,6 +286,10 @@ export class JobRepositoryMock extends JobRepository {
   }
 
   multiCreate(request: Job, tables: string[]): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  multiCreateV2(jobs: Job[]): Promise<boolean> {
     return Promise.resolve(false);
   }
 }

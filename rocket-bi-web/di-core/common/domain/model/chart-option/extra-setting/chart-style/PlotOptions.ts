@@ -20,7 +20,12 @@ export interface PlotOptions {
   heatmap?: PlotSeries;
   map?: PlotSeries;
   sankey?: PlotSankey;
+  table?: PlotTable;
   displayType?: string;
+}
+
+export interface PlotTable {
+  dataLabels?: DataLabels;
 }
 
 export interface PlotGauge {

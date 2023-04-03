@@ -2,7 +2,7 @@ import { Component, Ref } from 'vue-property-decorator';
 import { ColumnType, Field, QueryRequest, RawQuerySetting, TableResponse, TableSchema } from '@core/common/domain';
 import {
   DataCookService,
-  ETL_OPERATOR_TYPE,
+  ETLOperatorType,
   EtlOperator,
   ExpressionFieldConfiguration,
   FieldConfiguration,
@@ -26,8 +26,6 @@ import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { SelectOption } from '@/shared';
 
-type TCallback = (newOperator: ManageFieldOperator) => void;
-
 @Component({
   components: {
     EtlModal,
@@ -39,11 +37,11 @@ type TCallback = (newOperator: ManageFieldOperator) => void;
   }
 })
 export default class ManageFields extends ManageOperatorModal {
-  protected operatorType = ETL_OPERATOR_TYPE.ManageFieldOperator;
+  protected operatorType = ETLOperatorType.ManageFieldOperator;
   private etlJobId: number | null = null;
   private model: ManageFieldOperator | null = null;
   private tableSchema: TableSchema | null = null;
-  private callback: TCallback | null = null;
+  private callback: ((newOperator: ManageFieldOperator) => void) | null = null;
   private errorMsg = '';
   private queryData: TableResponse | null = null;
   private queryLoading = false;
@@ -171,7 +169,7 @@ export default class ManageFields extends ManageOperatorModal {
     table_name: (_: ManageFields, args: any) => args[2].name,
     database_name: (_: ManageFields, args: any) => args[2].dbName
   })
-  private add(etlJobId: number, operator: EtlOperator, tableSchema: TableSchema, callback: TCallback) {
+  public add(etlJobId: number, operator: EtlOperator, tableSchema: TableSchema, callback: (newOperator: ManageFieldOperator) => void) {
     this.startCreate();
     this.etlJobId = etlJobId;
     this.tableSchema = tableSchema;
@@ -204,14 +202,21 @@ export default class ManageFields extends ManageOperatorModal {
     table_name: (_: ManageFields, args: any) => args[2].name,
     database_name: (_: ManageFields, args: any) => args[2].dbName
   })
-  private edit(etlJobId: number, operator: ManageFieldOperator, tableSchema: TableSchema, callback: TCallback) {
+  public edit(etlJobId: number, operator: ManageFieldOperator, tableSchema: TableSchema | null, callback: (updatedOperator: ManageFieldOperator) => void) {
     this.startEdit();
     this.etlJobId = etlJobId;
-    this.tableSchema = tableSchema;
+    this.tableSchema = tableSchema || this.makeTableSchema(operator);
     this.callback = callback;
     this.model = this.getSerializeModel(operator, true, false);
     this.show();
     this.getData();
+  }
+
+  private makeTableSchema(operator: ManageFieldOperator): TableSchema {
+    const tableSchema = TableSchema.empty();
+    tableSchema.dbName = this.getEtlDbName();
+    tableSchema.name = operator.destTableName;
+    return tableSchema;
   }
 
   private async getData() {

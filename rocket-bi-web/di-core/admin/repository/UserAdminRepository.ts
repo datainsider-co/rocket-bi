@@ -10,6 +10,7 @@ import { RegisterResponse } from '@core/common/domain/response';
 import { SearchUserRequest } from '@core/admin/domain/request/SearchUserRequest';
 import { UserSearchResponse } from '@core/common/domain/response/user/UserSearchResponse';
 import { EditUserPropertyRequest } from '@core/admin/domain/request/EditUserPropertyRequest';
+import { BaseResponse } from '@core/data-ingestion/domain/response/BaseResponse';
 
 export abstract class UserAdminRepository {
   abstract create(newUser: CreateUserRequest): Promise<RegisterResponse>;
@@ -31,6 +32,8 @@ export abstract class UserAdminRepository {
   abstract getSuggestedUsers(request: SearchUserRequest): Promise<UsersResponse>;
 
   abstract updateUserProperties(request: EditUserPropertyRequest): Promise<UserProfile>;
+
+  abstract resetPassword(username: string): Promise<boolean>;
 }
 
 export class UserAdminRepositoryImpl extends UserAdminRepository {
@@ -108,5 +111,9 @@ export class UserAdminRepositoryImpl extends UserAdminRepository {
 
   updateUserProperties(request: EditUserPropertyRequest): Promise<UserProfile> {
     return this.httpClient.put(`/admin/users/${request.username}/property`, request).then(res => UserProfile.fromObject(res));
+  }
+
+  resetPassword(username: string): Promise<boolean> {
+    return this.httpClient.put<{ isSuccess: boolean }>(`/admin/users/${username}/reset_password`).then(res => res.isSuccess);
   }
 }

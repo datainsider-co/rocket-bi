@@ -17,6 +17,7 @@ import { SchedulerName } from '@/shared/enums/SchedulerName';
 import { DateRange } from '@/shared';
 
 export class FacebookAdsJob implements Job {
+  static readonly INSIGHT_TABLE = ['AccountInsight', 'CampaignInsight', 'AdSetInsight', 'AdInsight'];
   className = JobName.FacebookAdsJob;
   orgId: string;
   jobId: JobId;
@@ -110,6 +111,7 @@ export class FacebookAdsJob implements Job {
       obj.timeRange
     );
   }
+
   //
   static default(): FacebookAdsJob {
     return new FacebookAdsJob(
@@ -185,6 +187,7 @@ export class FacebookAdsJob implements Job {
     this.destDatabaseName = dbName;
     return this;
   }
+
   withDisplayName(displayName: string): Job {
     this.displayName = displayName;
     return this;
@@ -195,10 +198,24 @@ export class FacebookAdsJob implements Job {
     this.timeRange = void 0;
     return this;
   }
+
   withDateRange(dateRange: DateRange): FacebookAdsJob {
     const { start, end } = dateRange;
     this.datePreset = void 0;
     this.timeRange = { since: formatToFacebookDateTime(start), until: formatToFacebookDateTime(end) };
     return this;
+  }
+
+  withSyncMode(mode: SyncMode): FacebookAdsJob {
+    this.syncMode = mode;
+    if (mode === SyncMode.FullSync) {
+      this.timeRange = void 0;
+      this.datePreset = void 0;
+    }
+    return this;
+  }
+
+  static isInsightTable(tableName: string): boolean {
+    return FacebookAdsJob.INSIGHT_TABLE.includes(tableName);
   }
 }

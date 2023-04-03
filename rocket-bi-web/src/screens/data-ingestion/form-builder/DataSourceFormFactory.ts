@@ -10,11 +10,10 @@ import { PostgreSqlDataSourceFormRender } from '@/screens/data-ingestion/form-bu
 import { RedshiftDataSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/RedshiftDataSourceFormRender';
 import { S3SourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/S3SourceFormRender';
 import { ShopifySourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/ShopifySourceFormRender';
-import { FacebookAdsSourceInfo, GoogleAdsSourceInfo, MongoDBSourceInfo, S3SourceInfo } from '@core/data-ingestion';
+import { FacebookAdsSourceInfo, GoogleAdsSourceInfo, MongoDBSourceInfo, S3SourceInfo, TiktokSourceInfo } from '@core/data-ingestion';
 import { BigQuerySourceInfoV2 } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfoV2';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { DataSourceType } from '@core/data-ingestion/domain/data-source/DataSourceType';
-import { GoogleAnalyticsSourceInfo } from '@core/data-ingestion/domain/data-source/GoogleAnalyticsSourceInfo';
 import { JdbcUrlSourceInfo } from '@core/data-ingestion/domain/data-source/JdbcUrlSourceInfo';
 import { MSSqlSourceInfo } from '@core/data-ingestion/domain/data-source/MSSqlSourceInfo';
 import { MySqlSourceInfo } from '@core/data-ingestion/domain/data-source/MySqlSourceInfo';
@@ -26,6 +25,8 @@ import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4Source
 import { Ga4SourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/Ga4SourceFormRender';
 import { GoogleAdsSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/GoogleAdsSourceFormRender';
 import { FacebookAdsSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/FacebookAdsSourceFormRender';
+import { GASourceInfo } from '@core/data-ingestion/domain/data-source/GASourceInfo';
+import { TiktokSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/TiktokSourceFormRender';
 
 export class DataSourceFormFactory {
   createRender(dataSource: DataSourceInfo, onSubmit?: () => void): DataSourceFormRender {
@@ -48,10 +49,10 @@ export class DataSourceFormFactory {
         return new BigQueryDataSourceFormRender(dataSource as BigQuerySourceInfoV2);
       case DataSourceType.PostgreSql:
         return new PostgreSqlDataSourceFormRender(dataSource as RedshiftSourceInfo);
-      case DataSourceType.GoogleAnalytics:
-        return new GoogleAnalyticsSourceFormRender(dataSource as GoogleAnalyticsSourceInfo);
+      case DataSourceType.GA:
+        return new GoogleAnalyticsSourceFormRender(dataSource as GASourceInfo, onSubmit);
       case DataSourceType.GA4:
-        return new Ga4SourceFormRender(dataSource as GA4SourceInfo);
+        return new Ga4SourceFormRender(dataSource as GA4SourceInfo, onSubmit);
       case DataSourceType.MongoDB: {
         return new MongoDBDataSourceFormRender(dataSource as MongoDBSourceInfo);
       }
@@ -65,6 +66,8 @@ export class DataSourceFormFactory {
         return new GoogleAdsSourceFormRender(dataSource as GoogleAdsSourceInfo, onSubmit);
       case DataSourceType.Facebook:
         return new FacebookAdsSourceFormRender(dataSource as FacebookAdsSourceInfo, onSubmit);
+      case DataSourceType.Tiktok:
+        return new TiktokSourceFormRender(dataSource as TiktokSourceInfo, onSubmit);
       default:
         throw new UnsupportedException(`Unsupported data source type ${dataSource.sourceType}`);
     }

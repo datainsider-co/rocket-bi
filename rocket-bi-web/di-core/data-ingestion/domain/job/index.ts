@@ -21,3 +21,4 @@ export * from './ShopifyJob';
 export * from './UnsupportedJob';
 export * from './google-ads';
 export * from './facebook-ads';
+export * from './tiktok-job';

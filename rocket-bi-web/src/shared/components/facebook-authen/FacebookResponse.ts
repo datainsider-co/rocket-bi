@@ -39,7 +39,7 @@ export function validFacebookResponse(response: FacebookResponse | undefined, ex
     throw new DIException('Facebook not connected!', 401, ApiExceptions.unauthorized);
   }
   const expectScopesAsList = expectScopes.split(',');
-  const grantedScopesASList = response.authResponse.grantedScopes.split(',');
+  const grantedScopesASList = response.authResponse?.grantedScopes?.split(',') ?? [];
   const remainScopes = expectScopesAsList.filter(expectScope => !grantedScopesASList.includes(expectScope));
   if (remainScopes.length > 0) {
     const displayNamePermission = remainScopes.map(scope => scopesDisplayNames.get(scope));

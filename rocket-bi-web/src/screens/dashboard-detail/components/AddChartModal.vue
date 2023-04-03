@@ -20,11 +20,19 @@
     </template>
     <div class="add-chart-modal-container">
       <DiSearchInput class="mb-2" border placeholder="Search..." v-model.trim="keyword" />
-      <template v-if="charts.length > 0">
+      <template v-if="containChart">
         <vuescroll :ops="scrollOption" style="position:unset">
           <div class="chart-item" v-for="chart in charts" :key="`chart-${chart.id}`" @click="toggleChart(chart.id)">
             <div class="chart-info">
-              <img :src="require(`@/assets/icon/charts/${getSrc(chart)}`)" class="unselectable text-center chart-icon" alt="chart" />
+              <template>
+                <img
+                  v-if="getSrc(chart).length > 0"
+                  :src="require(`@/assets/icon/charts/${getSrc(chart)}`)"
+                  class="unselectable text-center chart-icon"
+                  alt="chart"
+                />
+                <div v-else class="chart-icon"></div>
+              </template>
               <div class="chart-title">{{ chart.setting.getChartOption().getTitle() }}</div>
             </div>
             <MultiChoiceItem :is-selected="isChartSelected(chart.id)" :item="choiceOption" />
@@ -52,6 +60,7 @@ import { Inject } from 'typescript-ioc';
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import { Config } from 'vuescroll';
 import DiSearchInput from '@/shared/components/DiSearchInput.vue';
+import { Log } from '@core/utils';
 
 @Component({ components: { DiSearchInput, MultiChoiceItem, EtlModal } })
 export default class AddChartModal extends Vue {
@@ -79,6 +88,10 @@ export default class AddChartModal extends Vue {
   private error = '';
 
   private action: 'add' | 'remove' = 'add';
+
+  private get containChart(): boolean {
+    return this.charts.length > 0;
+  }
 
   private get emptyText(): string {
     return this.action === 'add' ? 'No charts have been added to this tab' : 'No charts have been removed from this tab';
@@ -123,7 +136,12 @@ export default class AddChartModal extends Vue {
 
   private getSrc(chart: ChartInfo): string {
     const chartType = chart.extraData?.currentChartType;
-    return DataBuilderConstantsV35.ALL_ITEMS_AS_MAP.get(chartType!)?.src ?? '';
+    Log.debug('getSrc', DataBuilderConstantsV35.ALL_ITEMS_AS_MAP.get(chartType!)?.src);
+    if (chartType) {
+      return DataBuilderConstantsV35.ALL_ITEMS_AS_MAP.get(chartType!)?.src ?? '';
+    } else {
+      return '';
+    }
   }
 
   private toggleChart(id: WidgetId) {

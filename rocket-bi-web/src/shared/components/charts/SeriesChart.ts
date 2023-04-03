@@ -320,7 +320,7 @@ export default class SeriesChart extends BaseHighChartWidget<SeriesOneResponse, 
         }
         return result;
       });
-    // Log.debug('SeriesChart::load::', seriesWithType);
+    Log.debug('SeriesChart::load::', seriesWithType);
     HighchartUtils.addSeries(this.getChart(), seriesWithType);
   }
 

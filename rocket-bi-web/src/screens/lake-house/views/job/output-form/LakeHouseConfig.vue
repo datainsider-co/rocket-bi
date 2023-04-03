@@ -1,9 +1,6 @@
 <template>
   <div class="section">
-    <div class="custom-control custom-switch" style="margin-bottom: 12px">
-      <input id="toggle-sync-data-lake" v-model="dataLake.enable" class="custom-control-input" type="checkbox" />
-      <label class="custom-control-label" for="toggle-sync-data-lake">Data Lake</label>
-    </div>
+    <DiToggle style="margin-bottom: 12px" :value.sync="dataLake.enable" label="Data Lake"> </DiToggle>
     <b-collapse id="data-lake-config" v-model="dataLake.enable">
       <div class="input position-relative mb-2 mt-1">
         <BFormInput

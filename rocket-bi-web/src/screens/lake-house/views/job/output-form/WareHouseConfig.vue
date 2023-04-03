@@ -1,9 +1,6 @@
 <template>
   <div class="section">
-    <div class="custom-control custom-switch">
-      <input id="toggle-sync-to-warehouse" v-model="dataWareHouse.enable" class="custom-control-input" type="checkbox" />
-      <label class="custom-control-label" for="toggle-sync-to-warehouse">Data WareHouse</label>
-    </div>
+    <DiToggle id="toggle-sync-to-warehouse" :value.sync="dataWareHouse.enable" label="Data WareHouse"></DiToggle>
     <!-- Data warehouse Config -->
     <b-collapse id="data-warehouse-config" v-model="dataWareHouse.enable" class="mb-2">
       <DestDatabaseSuggestion
@@ -41,8 +38,9 @@ import { SelectOption } from '@/shared';
 import { ResultOutput } from '@core/lake-house/domain/lake-job/output-info/ResultOutput';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
+import DiToggle from '@/shared/components/common/DiToggle.vue';
 
-@Component({ components: { LakeHouseOutputForm, SingleChoiceItem, DestDatabaseSuggestion } })
+@Component({ components: { DiToggle, LakeHouseOutputForm, SingleChoiceItem, DestDatabaseSuggestion } })
 export default class WareHouseConfig extends Vue {
   private readonly saveModes: SelectOption[] = [
     { displayName: 'Append', id: WriteMode.Append },

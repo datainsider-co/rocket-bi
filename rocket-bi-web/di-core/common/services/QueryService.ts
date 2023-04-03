@@ -8,9 +8,11 @@ import { QueryRepository } from '@core/common/repositories';
 import { VisualizationResponse } from '@core/common/domain/response';
 import { QueryRequest } from '@core/common/domain/request';
 import { cloneDeep } from 'lodash';
-import { DIException, UserProfile } from '@core/common/domain';
+import { DIException, RawQuerySetting, UserProfile } from '@core/common/domain';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
+import { StringUtils } from '@/utils';
+import { Log } from '@core/utils';
 
 export abstract class QueryService {
   abstract query(request: QueryRequest): Promise<VisualizationResponse>;
@@ -23,7 +25,7 @@ export class QueryServiceImpl implements QueryService {
 
   query(request: QueryRequest): Promise<VisualizationResponse> {
     const startTime = Date.now();
-    const newRequest = this.removeUnusedData(request);
+    const newRequest = this.processQuery(request);
     return this.repository
       .query(newRequest)
       .then(data => {
@@ -43,7 +45,7 @@ export class QueryServiceImpl implements QueryService {
 
   viewAsQuery(request: QueryRequest, userProfile: UserProfile): Promise<VisualizationResponse> {
     const startTime = Date.now();
-    const newRequest = this.removeUnusedData(request);
+    const newRequest = this.processQuery(request);
     return this.repository
       .queryWithUser(newRequest, userProfile)
       .then(data => {
@@ -61,15 +63,31 @@ export class QueryServiceImpl implements QueryService {
       });
   }
 
-  private removeUnusedData(request: QueryRequest): QueryRequest {
+  private processQuery(request: QueryRequest): QueryRequest {
     const newRequest = cloneDeep(request);
+    // clean options
     newRequest.querySetting.options = {};
+    this.fixCommentInSql(newRequest);
     return newRequest;
+  }
+
+  private fixCommentInSql(newRequest: QueryRequest): void {
+    try {
+      if (RawQuerySetting.isRawQuerySetting(newRequest.querySetting)) {
+        newRequest.querySetting.sql = StringUtils.fixCommentInSql(newRequest.querySetting.sql);
+      }
+      newRequest.querySetting.sqlViews = newRequest.querySetting.sqlViews.map(sqlView => {
+        sqlView.query.query = StringUtils.fixCommentInSql(sqlView.query.query);
+        return sqlView;
+      });
+    } catch (ex) {
+      Log.error('QueryService::fixCommentInSql', ex);
+    }
   }
 
   queryAsCsv(request: QueryRequest): Promise<string> {
     const startTime = Date.now();
-    const newRequest = this.removeUnusedData(request);
+    const newRequest = this.processQuery(request);
     return this.repository
       .queryAsCsv(newRequest)
       .then(data => {

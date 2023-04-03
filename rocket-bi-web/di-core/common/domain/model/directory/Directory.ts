@@ -65,7 +65,7 @@ export class Directory {
   }
 
   static default(directoryType: DirectoryType) {
-    return new Directory(-100, '', UserProfile.unknown(), Date.now(), -1, -1, directoryType, Date.now(), DirectoryMetadata.default(directoryType), -1, false);
+    return new Directory(-100, '', UserProfile.unknown(), Date.now(), '-1', -1, directoryType, Date.now(), DirectoryMetadata.default(directoryType), -1, false);
   }
 
   get isUpdateDirectory() {

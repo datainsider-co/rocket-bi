@@ -30,6 +30,7 @@
       <DiShareModal ref="shareModal" />
       <WidgetFullScreenModal ref="widgetFullScreenModal"></WidgetFullScreenModal>
       <ChartBuilderComponent ref="chartBuilderComponent"></ChartBuilderComponent>
+      <PasswordModal ref="passwordModal" />
     </template>
   </div>
 </template>

@@ -13,7 +13,7 @@ import {
   NormalFieldConfiguration,
   ExpressionFieldConfiguration,
   ParseQueryResponse,
-  MultiPreviewEtlOperatorResponse
+  PreviewEtlResponse
 } from '../domain';
 import { EtlJobHistory } from '@core/data-cook/domain/etl/EtlJobHistory';
 import { ThirdPartyPersistConfiguration } from '@core/data-cook/domain/etl/third-party-persist-configuration/ThirdPartyPersistConfiguration';
@@ -41,8 +41,7 @@ export abstract class DataCookRepository {
   abstract hardDeleteEtl(id: number): Promise<boolean>;
   abstract restoreEtl(id: number): Promise<boolean>;
   abstract preview(id: number, etlOperator: EtlOperator, force: boolean): Promise<PreviewEtlOperatorResponse>;
-  abstract multiPreview(id: number, operators: EtlOperator[], force: boolean): Promise<MultiPreviewEtlOperatorResponse>;
-  abstract checkProgressId(id: number, progressId: number): Promise<CheckProgressResponse>;
+  abstract multiPreview(id: number, operators: EtlOperator[], force: boolean): Promise<PreviewEtlResponse>;
 
   abstract getListEtlHistory(request: GetListEtlRequest): Promise<ListingResponse<EtlJobHistory>>;
   abstract getDatabaseName(id: number): Promise<EtlDatabaseNameResponse>;
@@ -94,18 +93,15 @@ export class DataCookRepositoryImpl extends DataCookRepository {
   restoreEtl(id: number): Promise<boolean> {
     return this.httpClient.post<boolean>(`/data_cook/trash/${id}/restore`);
   }
-  checkProgressId(id: number, progressId: number): Promise<CheckProgressResponse> {
-    return this.httpClient.get<CheckProgressResponse>(`/data_cook/${id}/${progressId}/check`).then(CheckProgressResponse.fromObject);
-  }
   preview(id: number, operator: EtlOperator, force: boolean): Promise<PreviewEtlOperatorResponse> {
     return this.httpClient
       .post<PreviewEtlOperatorResponse>(`/data_cook/${id}/preview`, { operator, force })
       .then(PreviewEtlOperatorResponse.fromObject);
   }
-  multiPreview(id: number, operators: EtlOperator[], force: boolean): Promise<MultiPreviewEtlOperatorResponse> {
+  multiPreview(id: number, operators: EtlOperator[], force: boolean): Promise<PreviewEtlResponse> {
     return this.httpClient
-      .post<MultiPreviewEtlOperatorResponse>(`/data_cook/${id}/preview_sync`, { operators, force })
-      .then(MultiPreviewEtlOperatorResponse.fromObject);
+      .post<PreviewEtlResponse>(`/data_cook/${id}/preview_sync`, { operators, force })
+      .then(PreviewEtlResponse.fromObject);
   }
   getListEtlHistory(request: GetListEtlRequest): Promise<ListingResponse<EtlJobHistory>> {
     return this.httpClient

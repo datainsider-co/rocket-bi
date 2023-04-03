@@ -9,6 +9,7 @@ import BuilderComponents from '@/shared/components/builder';
 import DatabaseListing from '@/screens/chart-builder/config-builder/database-listing/DatabaseListing.vue';
 import { DatabaseSchema, Field, TableSchema } from '@core/common/domain/model';
 import QueryComponent from '@/screens/data-management/components/QueryComponent.vue';
+import QueryComponentCtrl from '@/screens/data-management/components/QueryComponent.ts';
 import { FormulaController } from '@/shared/fomula/FormulaController';
 import { FormulaSuggestionModule } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
 import { EtlQueryFormulaController } from '@/shared/fomula/EtlQueryFormulaController';
@@ -22,6 +23,7 @@ import DiButtonGroup, { ButtonInfo } from '@/shared/components/common/DiButtonGr
 import Swal from 'sweetalert2';
 import { PythonFormulaController } from '@/shared/fomula/python/PythonFormulaController';
 import { Log } from '@core/utils';
+import { ListUtils } from '@/utils';
 
 Vue.use(BuilderComponents);
 @Component({
@@ -39,8 +41,8 @@ export default class QueryBuilder extends Vue {
 
   private readonly editorController = new EditorController();
 
-  @Prop({ required: true })
-  private readonly tableSchema!: TableSchema;
+  @Prop({ required: true, type: Object })
+  private readonly databaseSchema!: DatabaseSchema;
 
   @Prop({ required: false, type: String, default: '' })
   private readonly query?: string;
@@ -51,42 +53,41 @@ export default class QueryBuilder extends Vue {
   private readonly showParameter!: boolean;
 
   @Ref()
-  private readonly queryComponent!: QueryComponent;
+  private readonly queryComponent!: QueryComponentCtrl;
 
   @Ref()
   private readonly buttonGroup!: DiButtonGroup;
 
   created() {
-    this.initFormulaController(this.tableSchema, this.queryLanguage);
-    this.selectTable(this.tableSchema);
+    this.initFormulaController(this.databaseSchema, this.queryLanguage);
+    this.autoSelectTable();
     if (StringUtils.isNotEmpty(this.query)) {
-      this.defaultQuery = this.removeDatabase(this.query, this.tableSchema);
+      this.defaultQuery = this.removeDatabase(this.query, this.databaseSchema.name);
     }
   }
 
   @Watch('queryLanguage')
   onQueryLanguageChanged() {
-    this.initFormulaController(this.tableSchema, this.queryLanguage);
+    this.initFormulaController(this.databaseSchema, this.queryLanguage);
   }
 
   @Watch('query')
   onQueryChanged() {
-    this.defaultQuery = this.removeDatabase(this.query ?? '', this.tableSchema);
+    this.defaultQuery = this.removeDatabase(this.query ?? '', this.databaseSchema.name);
   }
 
-  private removeDatabase(query: string, tableSchema: TableSchema): string {
-    const dbName = tableSchema.dbName;
-    return query.replaceAll(new RegExp(`(?:\\b${dbName}.\\b)|(?:\`${dbName}\`.)`, 'gm'), '');
+  private removeDatabase(query: string, dbName: string): string {
+    const newQuery: string = query.replaceAll(new RegExp(`(?:\\b${dbName}.\\b)|(?:\`${dbName}\`.)`, 'gm'), '');
+    return newQuery;
   }
 
   beforeDestroy() {
-    DatabaseSchemaModule.removeDatabaseSchema(this.tableSchema.dbName);
+    DatabaseSchemaModule.removeDatabaseSchema(this.databaseSchema.name);
   }
 
-  private async selectTable(tableSchema: TableSchema) {
-    const databaseSchema = DatabaseSchema.etlDatabase(tableSchema.dbName, 'Table & Field', [this.tableSchema]);
-    _BuilderTableSchemaStore.setDbNameSelected(databaseSchema.name);
-    _BuilderTableSchemaStore.setDatabaseSchema(databaseSchema);
+  private autoSelectTable(): void {
+    _BuilderTableSchemaStore.setDbNameSelected(this.databaseSchema.name);
+    _BuilderTableSchemaStore.setDatabaseSchema(this.databaseSchema);
     _BuilderTableSchemaStore.expandFirstTable();
   }
 
@@ -95,12 +96,11 @@ export default class QueryBuilder extends Vue {
     return true;
   }
 
-  private initFormulaController(tableSchema: TableSchema, queryLanguage: EtlQueryLanguages) {
+  private initFormulaController(database: DatabaseSchema, queryLanguage: EtlQueryLanguages): void {
     const syntaxPathFile: string = this.getSyntaxPath(queryLanguage);
     FormulaSuggestionModule.initSuggestFunction({
       fileNames: StringUtils.isNotEmpty(syntaxPathFile) ? [syntaxPathFile] : []
     });
-    const database = DatabaseSchema.etlDatabase(tableSchema.dbName, 'ETL Database', [tableSchema]);
     this.controller = this.getFormulaController(queryLanguage, [database]);
   }
 
@@ -122,8 +122,15 @@ export default class QueryBuilder extends Vue {
     }
   }
 
+  /**
+   * add database name to query if not exist
+   */
   private convertQuery(query: string): string {
-    return FormulaUtils.toETLQuery(query, this.tableSchema.dbName, this.tableSchema.name);
+    let newQuery = query ?? '';
+    this.databaseSchema.tables.forEach(table => {
+      newQuery = FormulaUtils.toETLQuery(newQuery, table.dbName, table.name);
+    });
+    return newQuery;
   }
 
   getQuery(): string {

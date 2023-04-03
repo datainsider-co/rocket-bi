@@ -1,5 +1,5 @@
 <template>
-  <div class="di-input-component">
+  <div class="di-input-component" :class="{ 'di-input-component--disabled': disabled }">
     <div class="di-input-component--label" v-if="label">
       <div class="di-input-component--label-left" v-if="label">{{ label }}</div>
       <slot name="subtitle">
@@ -15,15 +15,19 @@
         @input="input => $emit('input', input)"
         @change="value => $emit('change', value)"
         @onfocusout="$emit('onfocusout')"
+        :readonly="readonly"
         v-bind="$attrs"
         :type="currentType"
+        :disabled="disabled"
       ></b-form-input>
-      <slot name="suffix">
-        <div v-if="isPassword">
-          <i v-if="isShowPassword" class="btn-icon-border fas fa-eye" @click="toggleShowPassword"></i>
-          <i v-else class="btn-icon-border fas fa-eye-slash" @click="toggleShowPassword"></i>
-        </div>
-      </slot>
+      <div class="di-input-component--input--icon">
+        <slot name="suffix">
+          <div v-if="isPassword">
+            <i v-if="isShowPassword" class="fas fa-eye" @click="toggleShowPassword"></i>
+            <i v-else class="fas fa-eye-slash" @click="toggleShowPassword"></i>
+          </div>
+        </slot>
+      </div>
     </div>
     <slot name="error"></slot>
   </div>
@@ -52,6 +56,12 @@ export default class DiInputComponent extends Vue {
   @Prop({ required: false, type: String, default: 'off' })
   private readonly autocomplete!: string;
 
+  @Prop({ required: false, type: Boolean, default: false })
+  private readonly disabled!: string;
+
+  @Prop({ required: false, type: Boolean, default: false })
+  private readonly readonly!: string;
+
   private get currentType(): string {
     return this.isShowPassword ? 'text' : this.type;
   }
@@ -79,6 +89,7 @@ export default class DiInputComponent extends Vue {
 </script>
 
 <style lang="scss">
+@import '~@/themes/scss/_button.scss';
 .di-input-component {
   &--label {
     font-size: 14px;
@@ -106,37 +117,45 @@ export default class DiInputComponent extends Vue {
     border-radius: 4px;
 
     .form-control {
-      padding: 12px;
+      padding: 0 12px;
       background: unset !important;
 
       font-style: normal;
       font-weight: 400;
       font-size: 14px;
-      line-height: 18px;
+      line-height: 1.4;
+      height: unset;
 
       &::placeholder {
         font-style: normal;
         font-weight: 400;
         font-size: 14px;
-        line-height: 18px;
+        line-height: 1.4;
 
         color: #677883;
       }
     }
 
-    > div {
-      margin-right: 12px;
-      height: 24px;
+    &--icon {
       width: 24px;
-
+      height: 24px;
+      margin-right: 7px;
       i {
         font-size: 16px;
+        @extend .btn-icon-border;
       }
     }
   }
 
   > * + * {
     margin-top: 8px;
+  }
+}
+
+.di-input-component--disabled {
+  opacity: var(--disable-opacity);
+  > * {
+    cursor: not-allowed;
   }
 }
 </style>

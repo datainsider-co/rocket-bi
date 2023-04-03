@@ -30,6 +30,8 @@ export abstract class UserAdminService {
   abstract getSuggestedUsers(request: SearchUserRequest): Promise<UsersResponse>;
 
   abstract updateUserProperties(request: EditUserPropertyRequest): Promise<UserProfile>;
+
+  abstract resetPassword(username: string): Promise<boolean>;
 }
 
 export class UserAdminServiceImpl implements UserAdminService {
@@ -74,5 +76,9 @@ export class UserAdminServiceImpl implements UserAdminService {
 
   updateUserProperties(request: EditUserPropertyRequest): Promise<UserProfile> {
     return this.userRepository.updateUserProperties(request);
+  }
+
+  resetPassword(username: string): Promise<boolean> {
+    return this.userRepository.resetPassword(username);
   }
 }

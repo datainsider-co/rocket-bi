@@ -3,7 +3,7 @@ import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
 import Konva from 'konva';
 import { Log } from '@core/utils';
 import { EtlOperator, Position } from '@core/data-cook';
-import { PRIMARY_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
+import { ACCENT_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
 import { ThirdPartyPersistConfiguration } from '@core/data-cook/domain/etl/third-party-persist-configuration/ThirdPartyPersistConfiguration';
 import { Image } from 'konva/types/shapes/Image';
 
@@ -100,7 +100,7 @@ export default class ThirdPartyPersistConfig extends DiagramItem {
       fill: '#fff',
       strokeEnabled: false,
       strokeWidth: 2,
-      stroke: PRIMARY_COLOR,
+      stroke: ACCENT_COLOR,
       shadowBlur: 8,
       shadowColor: 'rgba(0,0,0,0.1)',
       shadowOffset: {

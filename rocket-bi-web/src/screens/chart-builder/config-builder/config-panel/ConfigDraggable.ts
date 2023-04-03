@@ -12,17 +12,15 @@ import CalculatedFieldModal from '@/screens/chart-builder/config-builder/databas
 import { FunctionFamilyBuilder } from '@/screens/chart-builder/config-builder/function-builder/FunctionFamilyBuilder';
 import { FunctionNodeBuilder } from '@/screens/chart-builder/config-builder/function-builder/FunctionNodeBuilder';
 import EmptyDirectory from '@/screens/dashboard-detail/components/EmptyDirectory.vue';
-import { ConfigType, DataBuilderConstants, FunctionFamilyInfo, FunctionFamilyTypes, SortTypes, Status } from '@/shared';
-import { DropdownData } from '@/shared/components/common/di-dropdown';
+import { ConfigType, DataBuilderConstants, FunctionFamilyInfo, FunctionFamilyTypes, SortTypes } from '@/shared';
 import DropArea from '@/shared/components/DropArea.vue';
 import DropItem from '@/shared/components/DropItem.vue';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { ConditionTreeNode, DataFlavor, DraggableConfig, FunctionData, FunctionNode, FunctionTreeNode, LabelNode } from '@/shared/interfaces';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
-import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
-import { ChartUtils, DomUtils, ListUtils, RandomUtils, SchemaUtils, TimeoutUtils } from '@/utils';
+import { ChartConfigUtils, ChartUtils, DomUtils, ListUtils, RandomUtils } from '@/utils';
 import { PopupUtils } from '@/utils/PopupUtils';
-import { Column, DatabaseSchema, ExpressionField, Field, FieldType, TableSchema } from '@core/common/domain/model';
+import { Column, ExpressionField, Field, FieldType, TableSchema } from '@core/common/domain/model';
 import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
 import { DataType } from '@core/schema/service/FieldFilter';
 import { FunctionDataUtils, Log } from '@core/utils';
@@ -31,6 +29,7 @@ import { cloneDeep, isNumber } from 'lodash';
 import VueContext from 'vue-context';
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
+import SelectFieldContext from '@/screens/chart-builder/config-builder/config-panel/SelectFieldContext.vue';
 
 export interface ContextData {
   data: { node: FunctionTreeNode; i: number };
@@ -46,48 +45,43 @@ export interface ContextData {
     StatusWidget,
     DraggableItem,
     EmptyDirectory,
-    CalculatedFieldModal
+    CalculatedFieldModal,
+    SelectFieldContext
   }
 })
 export default class ConfigDraggable extends Vue {
   // private readonly functions: FunctionNode[] = DataBuilderConstants.FUNCTION_NODES;
-  private readonly sorts: LabelNode[] = DataBuilderConstants.SORTS_NODES;
+  private readonly sorts: LabelNode[] = DataBuilderConstants.SortOptions;
 
   @Prop({ required: true })
-  private config!: DraggableConfig;
+  private readonly config!: DraggableConfig;
 
   @Prop({ type: Boolean, default: false })
-  private hasDragging!: boolean;
+  private readonly hasDragging!: boolean;
 
   @Prop({ type: Boolean, default: true })
-  private showTitle!: boolean;
+  private readonly showTitle!: boolean;
 
   @Prop({ type: Boolean, default: true })
-  private showHelpIcon!: boolean;
+  private readonly showHelpIcon!: boolean;
   private currentFunctions: FunctionTreeNode[] = [];
   private selectedNode: FunctionTreeNode | null = null;
   private editingNode: FunctionTreeNode | null = null;
   private isModalOpen = false;
   private isItemDragging = false;
   private titleOfModal = '';
-  private selectedDatabaseSchema: DatabaseSchema | null = null;
-  private fieldContextStatus = Status.Loading;
-  private errorMessage = '';
-  private profileFields: FieldDetailInfo[] = [];
 
-  private fieldOptions: DropdownData[] = [];
   @Ref()
-  private fnFamilyContext!: any;
+  private readonly fnFamilyContext!: any;
   @Ref()
-  private fnTypeContext!: any;
+  private readonly fnTypeContext!: any;
   @Ref()
-  private menu!: any;
+  private readonly menu!: any;
   @Ref()
-  private sortingContext!: any;
+  private readonly sortingContext!: any;
+
   @Ref()
-  private fieldContext!: any;
-  @Ref()
-  private dbFieldContext!: any;
+  private readonly selectFieldContext!: SelectFieldContext;
 
   @Ref()
   private calculatedFieldModal!: CalculatedFieldModal;
@@ -109,8 +103,8 @@ export default class ConfigDraggable extends Vue {
   }
 
   private subFunctionGroups(node: FunctionTreeNode | null): any[] {
-    const mainFunction = node ? this.functionOfTreeNode(node) : [];
-    const subFunctions = this.selectedNode?.functionFamily ? mainFunction.find(func => func.label === this.selectedNode?.functionFamily)?.subFunctions : null;
+    const mainFunctions = node ? this.listAcceptableFunctions(node) : [];
+    const subFunctions = this.selectedNode?.functionFamily ? mainFunctions.find(func => func.label === this.selectedNode?.functionFamily)?.subFunctions : null;
     const options: any[] = [];
     if (subFunctions && Array.isArray(subFunctions)) {
       subFunctions.forEach(item => {
@@ -124,8 +118,8 @@ export default class ConfigDraggable extends Vue {
   }
 
   private subFunctions(node: FunctionTreeNode | null): FunctionNode[] | null {
-    const mainFunction = node ? this.functionOfTreeNode(node) : [];
-    const _subFunctions = this.editingNode?.functionFamily ? mainFunction.find(func => func.label === this.editingNode?.functionFamily)?.subFunctions : null;
+    const mainFunctions = node ? this.listAcceptableFunctions(node) : [];
+    const _subFunctions = this.editingNode?.functionFamily ? mainFunctions.find(func => func.label === this.editingNode?.functionFamily)?.subFunctions : null;
     return _subFunctions && isArray(_subFunctions) ? _subFunctions : null;
   }
 
@@ -193,7 +187,7 @@ export default class ConfigDraggable extends Vue {
 
     _ConfigBuilderStore.updateConfig({
       configType: this.configType,
-      data: ConfigDataUtils.createFunctionData(functionNode)
+      data: ConfigDataUtils.toFunctionData(functionNode)
     });
     this.$emit('onConfigChange');
   }
@@ -204,7 +198,7 @@ export default class ConfigDraggable extends Vue {
     currentConfig.functionType = node.label;
     _ConfigBuilderStore.updateConfig({
       configType: this.configType,
-      data: ConfigDataUtils.createFunctionData(context.data.node)
+      data: ConfigDataUtils.toFunctionData(context.data.node)
     });
     this.$emit('onConfigChange');
   }
@@ -215,7 +209,7 @@ export default class ConfigDraggable extends Vue {
     currentConfig.sorting = sort.label;
     _ConfigBuilderStore.updateConfig({
       configType: this.configType,
-      data: ConfigDataUtils.createFunctionData(contextData.data.node)
+      data: ConfigDataUtils.toFunctionData(contextData.data.node)
     });
     this.$emit('onConfigChange');
   }
@@ -245,7 +239,7 @@ export default class ConfigDraggable extends Vue {
         .build();
       Log.debug('handleDrop::newData::', newData);
       this.currentFunctions.push(newData);
-      const func: FunctionData = ConfigDataUtils.createFunctionData(newData);
+      const func: FunctionData = ConfigDataUtils.toFunctionData(newData);
       _ConfigBuilderStore.addConfig({
         configType: this.configType,
         data: func
@@ -334,7 +328,7 @@ export default class ConfigDraggable extends Vue {
     this.isItemDragging = false;
     this.emitItemDragging(false);
     if (this.isSameDropSection(event) && this.isIndexChanged(event)) {
-      const listFunctionData = this.currentFunctions.map(config => ConfigDataUtils.createFunctionData(config));
+      const listFunctionData = this.currentFunctions.map(config => ConfigDataUtils.toFunctionData(config));
       _ConfigBuilderStore.changeIndex({
         configs: listFunctionData,
         configType: this.configType
@@ -343,26 +337,25 @@ export default class ConfigDraggable extends Vue {
     }
   }
 
-  private handleRemoveOldFunction(event: DragCustomEvent) {
-    const canRemoveOldFunction = this.config.key != ConfigType.sorting;
-    const fromConfig: DraggableConfig | undefined = ConfigDataUtils.getDraggableConfig(event.from);
-    if (canRemoveOldFunction && fromConfig && fromConfig.key != ConfigType.sorting) {
+  private removeFunction(currentDragConfig: DraggableConfig, removeAtIndex: number): void {
+    const canRemoveFunction: boolean = this.config.key != ConfigType.sorting;
+    if (canRemoveFunction && currentDragConfig.key != ConfigType.sorting) {
       _ConfigBuilderStore.removeFunctionAt({
-        configType: fromConfig.key,
-        index: event.oldDraggableIndex
+        configType: currentDragConfig.key,
+        index: removeAtIndex
       });
     }
   }
 
-  private async handleDropFromOtherSection(event: DragCustomEvent): Promise<void> {
-    if (ConfigDataUtils.isFromFilterSection(event)) {
-      await this.dropFromFilterSection(event);
+  private async handleDropFromOtherConfig(event: DragCustomEvent): Promise<void> {
+    if (ConfigDataUtils.isFromFilter(event)) {
+      await this.dropFilterToFunction(event);
     } else {
-      await this.dropFromFunctionSection(event);
+      await this.dropFunctionToFunction(event);
     }
   }
 
-  private async dropFromFilterSection(event: DragCustomEvent): Promise<void> {
+  private async dropFilterToFunction(event: DragCustomEvent): Promise<void> {
     const { group, groupIndex } = ConfigDataUtils.getFilterGroupInfo(event.from);
     if (!!group && isNumber(groupIndex)) {
       const fromIndex = event.oldDraggableIndex;
@@ -370,21 +363,24 @@ export default class ConfigDraggable extends Vue {
       const conditionNode: ConditionTreeNode = group[fromIndex];
       DomUtils.bind('conditionNode', conditionNode);
       const currentFunction: FunctionTreeNode = ConfigDataUtils.toFunctionNode(conditionNode, this.config, this.enableSorting);
-      await this.handleInsertFunction([currentFunction, toIndex]);
+      await this.insertFunction([currentFunction, toIndex]);
     }
   }
 
-  private async dropFromFunctionSection(event: DragCustomEvent): Promise<void> {
+  private async dropFunctionToFunction(event: DragCustomEvent): Promise<void> {
     const index = event.newDraggableIndex;
     const currentFunction: FunctionTreeNode = this.currentFunctions[index];
     // Remove current function at index
     // Because lib auto assign new function in to currentFunctions, before handleAdd called
     this.currentFunctions.splice(index, 1);
-    this.handleRemoveOldFunction(event);
-    await this.handleInsertFunction([currentFunction, index]);
+    const fromConfig: DraggableConfig | undefined = ConfigDataUtils.getDraggableConfig(event.from);
+    if (fromConfig) {
+      this.removeFunction(fromConfig, event.oldDraggableIndex);
+    }
+    await this.insertFunction([currentFunction, index]);
   }
 
-  private async handleInsertFunction(payload: [FunctionTreeNode, number]): Promise<void> {
+  private async insertFunction(payload: [FunctionTreeNode, number]): Promise<void> {
     Log.debug('handleInsertFunction::payload', payload);
     const [node, index] = payload;
     if (node) {
@@ -393,7 +389,7 @@ export default class ConfigDraggable extends Vue {
         .withSortInfo(this.enableSorting)
         .build();
       this.currentFunctions.splice(index, 0, newData);
-      const data = ConfigDataUtils.createFunctionData(newData);
+      const data = ConfigDataUtils.toFunctionData(newData);
       _ConfigBuilderStore.addConfig({
         data: data,
         configType: this.configType,
@@ -418,7 +414,7 @@ export default class ConfigDraggable extends Vue {
   private async updateConfig(newConfig: FunctionTreeNode, index: number): Promise<void> {
     this.currentFunctions.splice(index, 1, newConfig);
     _ConfigBuilderStore.updateConfig({
-      data: ConfigDataUtils.createFunctionData(newConfig),
+      data: ConfigDataUtils.toFunctionData(newConfig),
       configType: this.configType
     });
     this.$emit('onConfigChange');
@@ -450,71 +446,40 @@ export default class ConfigDraggable extends Vue {
 
     this.closeOptions();
     _ConfigBuilderStore.updateConfig({
-      data: ConfigDataUtils.createFunctionData(data),
+      data: ConfigDataUtils.toFunctionData(data),
       configType: this.configType
     });
     this.$emit('onConfigChange');
   }
 
-  private handleChangeField(child: ContextData, profileField: FieldDetailInfo) {
-    let clonedNode = ConfigDataUtils.createNewNode(child.data.node, profileField);
-    if (ChartUtils.isDifferentFieldType(child.data.node.field, profileField.field)) {
+  private handleChangeField(child: ContextData, fieldDetail: FieldDetailInfo) {
+    let clonedNode = ConfigDataUtils.clone(child.data.node, fieldDetail);
+    if (ChartUtils.isDifferentFieldType(child.data.node.field, fieldDetail.field)) {
       clonedNode = this.setDefaultFunction(clonedNode);
     }
     this.updateConfig(clonedNode, child.data.i);
   }
 
-  private async handleClickField(target: any, event: any, data: ContextData['data']) {
-    Log.debug('handleClickField::', target, event, data);
-    this.openContext(target, event, data);
-
-    if (this.selectedNode && this.selectedNode.field) {
-      if (this.selectedNode.field.dbName === _BuilderTableSchemaStore.dbNameSelected) {
-        this.fieldContextStatus = Status.Loaded;
-        const selectedTable = _BuilderTableSchemaStore.databaseSchema?.tables.find(table => table.name === this.selectedNode?.field?.tblName);
-        if (selectedTable) {
-          const profileFields: FieldDetailInfo[] = selectedTable.columns.map(
-            column =>
-              new FieldDetailInfo(
-                Field.new(selectedTable.dbName, selectedTable.name, column.name, column.className),
-                column.name,
-                column.displayName,
-                SchemaUtils.isNested(selectedTable.name),
-                false
-              )
-          );
-          this.profileFields = profileFields;
-        } else {
-          this.fieldContextStatus = Status.Error;
-          this.errorMessage = "Can't find fields of this table";
-        }
-      } else {
-        try {
-          this.selectedDatabaseSchema =
-            _BuilderTableSchemaStore.databaseSchema || (await DatabaseSchemaModule.handleGetDatabaseSchema(this.selectedNode.field.dbName));
-          if (this.selectedDatabaseSchema) {
-            const selectedTable = this.selectedDatabaseSchema.tables.find(table => table.name === this.selectedNode?.field?.tblName);
-            if (selectedTable) {
-              this.profileFields = selectedTable.columns.map(
-                column =>
-                  new FieldDetailInfo(
-                    Field.new(selectedTable.dbName, selectedTable.name, column.name, column.className),
-                    column.name,
-                    column.displayName,
-                    SchemaUtils.isNested(selectedTable.name),
-                    false
-                  )
-              );
-              this.fieldContextStatus = Status.Loaded;
-              Log.debug(this.fieldContextStatus, 'status');
-            }
-          }
-        } catch (ex) {
-          this.fieldContextStatus = Status.Error;
-          this.errorMessage = ex;
-        }
-      }
+  private handleClickChangeField(event: any, data: ContextData['data']) {
+    Log.debug('handleClickField::', event, data);
+    const node = data.node;
+    const dynamicFunction = ConfigDataUtils.getTabControlData(node);
+    if (dynamicFunction) {
+      this.selectFieldContext.showSuggestChartControls(event, data);
+    } else {
+      this.selectFieldContext.showSuggestFields(event, data);
     }
+  }
+
+  private async handleSelectColumn(fieldDetail: FieldDetailInfo) {
+    //build func family & sub function
+    //convert field to function data (field + func family + sub function)
+    //build function tree node from function data
+    //handle insert function tree node (index is current)
+    const functionData = this.buildFunctionData(fieldDetail);
+    Log.debug('ConfigDraggable::handleSelectColumn', functionData);
+    const treeNode = FunctionDataUtils.toFunctionTreeNodes([functionData])[0];
+    return this.insertFunction([treeNode, this.currentFunctions.length]);
   }
 
   private setDefaultFunction(newNode: FunctionTreeNode): FunctionTreeNode {
@@ -541,9 +506,10 @@ export default class ConfigDraggable extends Vue {
     this.emitItemDragging(true);
   }
 
-  private functionOfTreeNode(node: FunctionTreeNode | null): FunctionNode[] {
-    Log.debug('functionOfTreeNode::', node);
-    switch (node?.field?.getDataType()) {
+  private listAcceptableFunctions(node: FunctionTreeNode | null): FunctionNode[] {
+    const dataType = node?.field ? Field.fromObject(node.field).getDataType() : void 0;
+    Log.debug('functionOfTreeNode::dataType', dataType);
+    switch (dataType) {
       case DataType.Text:
         return DataBuilderConstants.TEXT_FUNCTION_NODES;
       case DataType.Number:
@@ -555,31 +521,6 @@ export default class ConfigDraggable extends Vue {
       default:
         return [];
     }
-  }
-
-  private async handleClickTooltip(target: any, event: any): Promise<void> {
-    TimeoutUtils.waitAndExec(null, () => this.openContext(target, event), 150);
-    const dbName = _BuilderTableSchemaStore.dbNameSelected;
-    await this.initTablesOptions(dbName);
-  }
-
-  private async initTablesOptions(dbName: string): Promise<void> {
-    this.fieldContextStatus = Status.Loading;
-    const dbSchema = _BuilderTableSchemaStore.databaseSchema || (await DatabaseSchemaModule.handleGetDatabaseSchema(dbName));
-    this.selectedDatabaseSchema = dbSchema;
-    this.fieldOptions = SchemaUtils.toFieldDetailInfoOptions(cloneDeep(dbSchema));
-    this.fieldContextStatus = Status.Loaded;
-  }
-
-  private async handleSelectColumn(fieldDetail: FieldDetailInfo) {
-    //build func family & sub function
-    //convert field to function data (field + func family + sub function)
-    //build function tree node from function data
-    //handle insert function tree node (index is current)
-    const functionData = this.buildFunctionData(fieldDetail);
-    Log.debug('ConfigDraggable::handleSelectColumn', functionData);
-    const treeNode = FunctionDataUtils.toFunctionTreeNodes([functionData])[0];
-    return this.handleInsertFunction([treeNode, this.currentFunctions.length]);
   }
 
   private buildFunctionData(fieldDetail: FieldDetailInfo) {
@@ -603,5 +544,10 @@ export default class ConfigDraggable extends Vue {
       data: tblSchema,
       sorting: SortTypes.Unsorted
     };
+  }
+
+  private async handleClickSuggestTableAndField(event: MouseEvent): Promise<void> {
+    Log.debug('handleClickTooltip::', event);
+    this.selectFieldContext.showSuggestTableAndFields(event);
   }
 }

@@ -170,13 +170,3 @@ export default class DynamicSettingTab extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.comparison-setting {
-  font-size: 12px;
-
-  .to-comparison-setting {
-    margin: 13px 0 0 8px;
-  }
-}
-</style>

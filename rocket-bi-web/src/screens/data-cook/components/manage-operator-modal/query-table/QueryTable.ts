@@ -1,11 +1,11 @@
 import { Component, Provide, Ref } from 'vue-property-decorator';
-import { DIException, TableSchema } from '@core/common/domain';
+import { DatabaseSchema, DIException, TableSchema } from '@core/common/domain';
 import {
   DataCookService,
-  ETL_OPERATOR_TYPE,
+  ETLOperatorType,
   EtlOperator,
   EtlQueryLanguages,
-  MultiPreviewEtlOperatorResponse,
+  PreviewEtlResponse,
   PythonQueryOperator,
   QueryOperator,
   SQLQueryOperator
@@ -18,9 +18,7 @@ import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Track } from '@/shared/anotation';
 import { Inject as InjectService } from 'typescript-ioc';
 import { Log } from '@core/utils';
-import { PopupUtils } from '@/utils';
-
-type TSQLQueryCallback = (newOperator: EtlOperator) => void;
+import { ListUtils, PopupUtils } from '@/utils';
 
 @Component({
   components: {
@@ -29,10 +27,10 @@ type TSQLQueryCallback = (newOperator: EtlOperator) => void;
   }
 })
 export default class QueryTable extends ManageOperatorModal {
-  protected operatorType = ETL_OPERATOR_TYPE.SQLQueryOperator;
+  protected operatorType = ETLOperatorType.SQLQueryOperator;
   private model: QueryOperator | null = null;
-  private tableSchema: TableSchema | null = null;
-  private callback: TSQLQueryCallback | null = null;
+  private previousTableSchema: TableSchema | null = null;
+  private callback: ((newOperator: QueryOperator) => void) | null = null;
   private etlId = -1;
 
   @Ref()
@@ -41,15 +39,23 @@ export default class QueryTable extends ManageOperatorModal {
   @InjectService
   private readonly dataCookService!: DataCookService;
 
+  private get etlDatabase(): DatabaseSchema {
+    if (this.previousTableSchema) {
+      return DatabaseSchema.etlDatabase(this.previousTableSchema.dbName, this.etlDbDisplayName, [this.previousTableSchema]);
+    } else {
+      return DatabaseSchema.etlDatabase(this.getEtlDbName(), this.etlDbDisplayName, []);
+    }
+  }
+
   protected resetModel(): void {
     this.model = null;
-    this.tableSchema = null;
+    this.previousTableSchema = null;
     this.callback = null;
     this.etlId = -1;
   }
 
-  private add(etlId: number, operator: EtlOperator, tableSchema: TableSchema, callback: TSQLQueryCallback) {
-    this.tableSchema = tableSchema;
+  public add(etlId: number, operator: EtlOperator, tableSchema: TableSchema, callback: (newOperator: EtlOperator) => void) {
+    this.previousTableSchema = tableSchema;
     this.etlId = etlId;
     this.startCreate();
     this.callback = callback;
@@ -57,9 +63,9 @@ export default class QueryTable extends ManageOperatorModal {
     this.show();
   }
 
-  private edit(etlId: number, operator: QueryOperator, tableSchema: TableSchema, callback: TSQLQueryCallback) {
+  public edit(etlId: number, operator: QueryOperator, previousTableSchema: TableSchema | null, callback: (newOperator: QueryOperator) => void): void {
     this.startEdit();
-    this.tableSchema = tableSchema;
+    this.previousTableSchema = previousTableSchema;
     this.etlId = etlId;
     this.callback = callback;
     this.model = cloneDeep(operator);
@@ -108,7 +114,7 @@ export default class QueryTable extends ManageOperatorModal {
   private async processPython(code: string, operator: QueryOperator): Promise<string> {
     const previewOperator = cloneDeep(operator);
     previewOperator.query = code;
-    const previewResponse: MultiPreviewEtlOperatorResponse = await this.dataCookService.multiPreview(this.etlId, [previewOperator], true);
+    const previewResponse: PreviewEtlResponse = await this.dataCookService.multiPreview(this.etlId, [previewOperator], true);
     this.ensurePreviewResponse(previewResponse);
     const tableSchemas: TableSchema[] = previewResponse.data?.allTableSchemas ?? [];
     const foundTableSchema = tableSchemas.find(table => operator.destTableName === table.name);
@@ -122,10 +128,10 @@ export default class QueryTable extends ManageOperatorModal {
     }
   }
 
-  private ensurePreviewResponse(response: MultiPreviewEtlOperatorResponse) {
+  private ensurePreviewResponse(response: PreviewEtlResponse) {
     if (response.isError) {
-      Log.error(response);
-      throw new DIException(response.error!.message);
+      Log.error('ensurePreviewResponse::error');
+      throw new DIException(ListUtils.getHead(response.errors)?.message ?? 'Unknown error!');
     }
   }
 }

@@ -10,6 +10,8 @@ import { DateHistogramConditionTypes } from '@/shared';
 export interface InputOptionData extends ChartOptionData {
   default?: DefaultSettings;
   placeHolder?: string;
+
+  isNumber?: boolean;
 }
 
 export class InputFilterOption extends ChartOption<InputOptionData> {

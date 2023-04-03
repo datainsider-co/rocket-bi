@@ -170,7 +170,6 @@ export default class DiagramPanel extends Vue {
     if (!this.noScroll && this.stage && this.mainLayer) {
       e.evt.preventDefault();
       const oldScale = this.stage.scaleX();
-      Log.info('wheel', { e, deltaY: e.evt.deltaY });
       const pointer = this.stage.getPointerPosition();
       if (pointer) {
         const mousePointTo = {

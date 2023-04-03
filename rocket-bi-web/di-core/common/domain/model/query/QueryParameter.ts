@@ -1,18 +1,21 @@
 export enum ParamValueType {
   text = 'text',
   number = 'number',
-  date = 'date'
+  date = 'date',
+  list = 'list'
 }
 export interface QueryParameter {
   displayName: string;
   valueType: ParamValueType;
   value: any;
+  list: string[] | null;
 }
 
 export function defaultQueryParameter(): QueryParameter {
   return {
     displayName: '',
     value: '',
-    valueType: ParamValueType.text
+    valueType: ParamValueType.text,
+    list: null
   };
 }

@@ -25,7 +25,9 @@ import { IdGenerator } from '@/utils/IdGenerator';
 
 export abstract class SchemaService {
   abstract createDatabase(request: DatabaseCreateRequest): Promise<DatabaseInfo>;
-
+  /**
+   * @deprecated
+   * */
   abstract dropDatabase(dbName: string): Promise<boolean>;
 
   abstract deleteDatabase(dbName: string): Promise<boolean>;
@@ -68,13 +70,9 @@ export abstract class SchemaService {
 
   abstract revokeUsersPermission(request: RevokeShareRequest): Promise<Map<string, boolean>>;
 
-  abstract updateDatabase(request: UpdateDatabaseSchema): Promise<DatabaseSchema>;
-
   abstract updateTable(request: UpdateTableSchemaRequest): Promise<TableSchema>;
 
   abstract getTable(databaseName: string, tableName: string): Promise<TableSchema>;
-
-  abstract updateTableName(dbName: string, oldTbName: string, newName: string): Promise<boolean>;
 
   abstract createMeasureColumn(request: CreateColumnRequest): Promise<TableSchema>;
 
@@ -95,6 +93,7 @@ export class SchemaServiceImpl extends SchemaService {
   }
 
   createDatabase(request: DatabaseCreateRequest): Promise<DatabaseInfo> {
+    request.name = StringUtils.vietnamese(request.name);
     return this.schemaRepository.createDatabase(request);
   }
 
@@ -181,20 +180,12 @@ export class SchemaServiceImpl extends SchemaService {
     return this.schemaRepository.revokeUsersPermission(request);
   }
 
-  updateDatabase(request: UpdateDatabaseSchema): Promise<DatabaseSchema> {
-    return this.schemaRepository.updateDatabase(request);
-  }
-
   updateTable(request: UpdateTableSchemaRequest): Promise<TableSchema> {
     return this.schemaRepository.updateTable(request);
   }
 
   getTable(databaseName: string, tableName: string): Promise<TableSchema> {
     return this.schemaRepository.getTable(databaseName, tableName);
-  }
-
-  updateTableName(dbName: string, oldTbName: string, newName: string): Promise<boolean> {
-    return this.schemaRepository.updateTableName(dbName, oldTbName, newName);
   }
 
   detectTableSchema(query: string): Promise<TableSchema> {

@@ -1,6 +1,6 @@
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import { ChartInfo, FlattenPivotTableQuerySetting, PivotTableQuerySetting, QuerySetting, TableSchema, WidgetExtraData } from '@core/common/domain';
-import { EtlOperator, PivotTableOperator, ETL_OPERATOR_TYPE } from '@core/data-cook';
+import { EtlOperator, PivotTableOperator, ETLOperatorType } from '@core/data-cook';
 import cloneDeep from 'lodash/cloneDeep';
 import QueryBuilder from '@/screens/chart-builder/data-cook/QueryBuilder.vue';
 import ChartBuilder from '@/screens/chart-builder/data-cook/ChartBuilder.vue';
@@ -10,8 +10,6 @@ import ManageOperatorModal from '@/screens/data-cook/components/manage-operator-
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 
-type TPivotTableCallback = (newOperator: PivotTableOperator, extraData: WidgetExtraData | undefined) => void;
-
 @Component({
   components: {
     EtlModal,
@@ -20,10 +18,10 @@ type TPivotTableCallback = (newOperator: PivotTableOperator, extraData: WidgetEx
   }
 })
 export default class PivotTable extends ManageOperatorModal {
-  protected operatorType = ETL_OPERATOR_TYPE.PivotTableOperator;
+  protected operatorType = ETLOperatorType.PivotTableOperator;
   private model: PivotTableOperator | null = null;
   private tableSchema: TableSchema | null = null;
-  private callback: TPivotTableCallback | null = null;
+  private callback: ((newOperator: PivotTableOperator, extraData: WidgetExtraData | undefined) => void) | null = null;
   private readonly chartType = ChartType.FlattenPivotTable;
   private querySetting: FlattenPivotTableQuerySetting | null = null;
   private extraData: WidgetExtraData | null = null;
@@ -40,7 +38,7 @@ export default class PivotTable extends ManageOperatorModal {
   }
 
   @Track(TrackEvents.ETLAddPivotTable)
-  private add(operator: EtlOperator, tableSchema: TableSchema, callback: TPivotTableCallback) {
+  public add(operator: EtlOperator, tableSchema: TableSchema, callback: (newOperator: PivotTableOperator, extraData: WidgetExtraData | undefined) => void) {
     this.tableSchema = tableSchema;
     this.startCreate();
     this.callback = callback;
@@ -52,7 +50,12 @@ export default class PivotTable extends ManageOperatorModal {
   }
 
   @Track(TrackEvents.ETLEditPivotTable)
-  private edit(operator: PivotTableOperator, tableSchema: TableSchema, extraData: WidgetExtraData | undefined, callback: TPivotTableCallback) {
+  public edit(
+    operator: PivotTableOperator,
+    tableSchema: TableSchema | null,
+    extraData: WidgetExtraData | undefined,
+    callback: (newOperator: PivotTableOperator, extraData: WidgetExtraData | undefined) => void
+  ) {
     this.tableSchema = tableSchema;
     this.startEdit();
     this.callback = callback;

@@ -5,25 +5,15 @@
 
 import { ConditionTreeNode, DraggableConfig, FunctionData, FunctionTreeNode } from '@/shared';
 import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
-import { cloneDeep, compact, isNumber, replace, toLength } from 'lodash';
-import { ChartUtils, ListUtils } from '@/utils';
-import {
-  Condition,
-  DynamicFunctionWidget,
-  Field,
-  FieldRelatedCondition,
-  NestedCondition,
-  TableColumn,
-  TabControlData,
-  ValueCondition,
-  WidgetId
-} from '@core/common/domain/model';
+import { cloneDeep, isNumber } from 'lodash';
+import { ChartUtils } from '@/utils';
+import { ChartControlField, Field, TabControl, TabControlData, TableColumn, WidgetId } from '@core/common/domain/model';
 import { DragCustomEvent } from '@/screens/chart-builder/config-builder/config-panel/DragConfig';
 import { FunctionNodeBuilder } from '@/screens/chart-builder/config-builder/function-builder/FunctionNodeBuilder';
 import { Log } from '@core/utils';
 
 export class ConfigDataUtils {
-  static createNewNode(currentNode: FunctionTreeNode, fieldInfo: FieldDetailInfo): FunctionTreeNode {
+  static clone(currentNode: FunctionTreeNode, fieldInfo: FieldDetailInfo): FunctionTreeNode {
     const clonedNode = cloneDeep(currentNode);
     clonedNode.field = fieldInfo.field;
     clonedNode.displayName = fieldInfo.displayName;
@@ -31,8 +21,10 @@ export class ConfigDataUtils {
     return clonedNode;
   }
 
-  static createFunctionData(node: FunctionTreeNode): FunctionData {
+  static toFunctionData(node: FunctionTreeNode): FunctionData {
     const field = ChartUtils.getField(node) as Field;
+    const dynamicFunction = this.getTabControlData(node);
+    // todo: don't inject full data of field, cause it's too big
     return {
       id: node.id,
       field: field,
@@ -46,8 +38,18 @@ export class ConfigDataUtils {
       isNested: node.isNested || node?.path?.length > 2 || false,
       numElemsShown: node.numElemsShown,
       isShowNElements: node.isShowNElements,
-      dynamicFunction: Field.isField(node.tag) ? void 0 : (node.tag as TabControlData)
+      dynamicFunction: dynamicFunction
     };
+  }
+
+  static getTabControlData(node: FunctionTreeNode): TabControlData | undefined {
+    if (TabControl.isTabControlData(node.tag)) {
+      return node.tag;
+    } else if (TabControl.isTabControlData(node.data)) {
+      return node.data;
+    } else if (ChartControlField.isChartControlField(node.field)) {
+      return node.field.controlData;
+    }
   }
 
   static getDraggableConfig(element: any): DraggableConfig | undefined {
@@ -55,7 +57,7 @@ export class ConfigDataUtils {
     return dragComponent?.componentData;
   }
 
-  static isFromFilterSection(event: DragCustomEvent) {
+  static isFromFilter(event: DragCustomEvent) {
     const { group, groupIndex } = this.getFilterGroupInfo(event.from);
     return !!group && isNumber(groupIndex);
   }
@@ -66,8 +68,7 @@ export class ConfigDataUtils {
     return fromDraggableConfig?.componentData ?? {};
   }
 
-  static toFunctionNode(conditionNode: ConditionTreeNode, config: DraggableConfig, enableSorting: boolean) {
-    // TODO
+  static toFunctionNode(conditionNode: ConditionTreeNode, config: DraggableConfig, enableSorting: boolean): FunctionTreeNode {
     const clonedConditionNode = cloneDeep(conditionNode);
     return new FunctionNodeBuilder(clonedConditionNode as any, config)
       .withRandomId()
@@ -118,19 +119,5 @@ export class ConfigDataUtils {
       .flat();
     Log.debug('replaceDynamicFunctions::res', res);
     return res;
-  }
-
-  static getValueConditions(conditions: Condition[], result: ValueCondition[]): ValueCondition[] {
-    if (ListUtils.isEmpty(conditions)) {
-      return result;
-    }
-    const head = conditions[0];
-    const rest = conditions.slice(1);
-    if (NestedCondition.isNestedCondition(head)) {
-      return this.getValueConditions(head.getConditions().concat(rest), result);
-    } else if (FieldRelatedCondition.isFieldRelatedCondition(head) && ValueCondition.isValueCondition(head)) {
-      result.push(head);
-    }
-    return this.getValueConditions(rest, result);
   }
 }

@@ -4,7 +4,7 @@ import { Column, Field, TableSchema } from '@core/common/domain';
 import {
   EQUAL_FIELD_TYPE,
   EQUAL_FIELD_TYPE_NAME,
-  ETL_OPERATOR_TYPE,
+  ETLOperatorType,
   EtlOperator,
   GetDataOperator,
   JOIN_TYPE,
@@ -21,19 +21,17 @@ import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import SelectSource from '@/screens/data-cook/components/select-source/SelectSource.vue';
 
-type TJoinTableCallback = (newOperator: JoinOperator) => void;
-
 @Component({
   components: {
     EtlModal
   }
 })
 export default class JoinTable extends ManageOperatorModal {
-  protected readonly operatorType = ETL_OPERATOR_TYPE.JoinOperator;
+  protected readonly operatorType = ETLOperatorType.JoinOperator;
   private model: JoinOperator | null = null;
   private leftTableSchema: TableSchema | null = null;
   private rightTableSchema: TableSchema | null = null;
-  private callback: TJoinTableCallback | null = null;
+  private callback: ((newOperator: JoinOperator) => void) | null = null;
   private errorMsg = '';
 
   private get joinTypes() {
@@ -78,12 +76,12 @@ export default class JoinTable extends ManageOperatorModal {
   }
 
   @Track(TrackEvents.JoinTableShowCreateModal)
-  private add(
+  public add(
     leftOperator: EtlOperator,
     rightOperator: EtlOperator,
     leftTableSchema: TableSchema,
     rightTableSchema: TableSchema,
-    callback: TJoinTableCallback
+    callback: (newOperator: JoinOperator) => void
   ) {
     this.startCreate();
     this.callback = callback;
@@ -101,13 +99,28 @@ export default class JoinTable extends ManageOperatorModal {
   }
 
   @Track(TrackEvents.JoinTableShowEditModal)
-  private edit(operator: JoinOperator, leftTableSchema: TableSchema, rightTableSchema: TableSchema, callback: TJoinTableCallback) {
+  public edit(
+    operator: JoinOperator,
+    leftTableSchema: TableSchema | null,
+    rightTableSchema: TableSchema | null,
+    callback: (updatedOperator: JoinOperator) => void
+  ) {
     this.startEdit();
     this.callback = callback;
-    this.leftTableSchema = leftTableSchema;
-    this.rightTableSchema = rightTableSchema;
+    this.leftTableSchema = leftTableSchema || this.makeTableSchema(operator.joinConfigs[0].leftOperator);
+    this.rightTableSchema = rightTableSchema || this.makeTableSchema(operator.joinConfigs[0].rightOperator);
     this.model = cloneDeep(operator);
     this.show();
+  }
+
+  private makeTableSchema(operator: EtlOperator | null | undefined): TableSchema {
+    const tableSchema = TableSchema.empty();
+    tableSchema.dbName = this.getEtlDbName();
+    if (operator) {
+      tableSchema.name = operator.destTableName;
+      tableSchema.displayName = operator.destTableName;
+    }
+    return tableSchema;
   }
 
   @Track(TrackEvents.JoinTableSubmit, {

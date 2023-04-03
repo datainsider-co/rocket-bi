@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { Field, FlattenPivotTableQuerySetting, ScalarFunction, TableQueryChartSetting, TableSchema } from '@core/common/domain';
-import { EQUAL_FIELD_TYPE, ETL_OPERATOR_TYPE, JOIN_TYPE, PERSISTENT_TYPE } from './EtlEnum';
+import { EQUAL_FIELD_TYPE, ETLOperatorType, JOIN_TYPE, PERSISTENT_TYPE } from './EtlEnum';
 import cloneDeep from 'lodash/cloneDeep';
 import { ThirdPartyPersistConfiguration } from '@core/data-cook/domain/etl/third-party-persist-configuration/ThirdPartyPersistConfiguration';
 import { EmailConfiguration } from '@core/data-cook';
@@ -14,7 +14,7 @@ export abstract class EtlOperator {
   readonly isSendToGroupEmail: boolean = false;
 
   protected constructor(
-    public className: ETL_OPERATOR_TYPE,
+    public className: ETLOperatorType,
     public destTableConfiguration: TableConfiguration,
     public isPersistent: boolean,
     public persistConfiguration: PersistConfiguration | null,
@@ -34,58 +34,69 @@ export abstract class EtlOperator {
     return this.destTableConfiguration.dbDisplayName;
   }
 
-  getAllGetDataOperators(): GetDataOperator[] {
-    return [];
+  /**
+   * list only get operators from this operator and previous operators
+   */
+  abstract getAllGetOperators(): GetDataOperator[];
+
+  /**
+   * list all operators from this operator and previous operators. not include get operators
+   */
+  abstract getAllNotGetOperators(): EtlOperator[];
+
+  /**
+   * list all operators from this operator and previous operators
+   */
+  public getAllOperators(): EtlOperator[] {
+    return (this.getAllGetOperators() as EtlOperator[]).concat(this.getAllNotGetOperators());
   }
 
-  getAllNotGetDataOperators(): EtlOperator[] {
-    return [this];
-  }
+  /**
+   * get previous operators of this operator, not include this operator and not nested
+   */
+  abstract getParentOperators(): EtlOperator[];
 
-  getAllOperators(): EtlOperator[] {
-    return (this.getAllGetDataOperators() as EtlOperator[]).concat(this.getAllNotGetDataOperators());
-  }
-
-  getLeftTables(): TableSchema[] {
-    return [];
-  }
-
-  getLeftOperators(): EtlOperator[] {
-    return [];
-  }
-
-  getDestTables(): TableConfiguration[] {
+  /**
+   * list all destination table configurations from this operator and previous operators
+   */
+  getAllDestTableConfigs(): TableConfiguration[] {
     if (this.destTableConfiguration) {
       return [this.destTableConfiguration];
     }
     return [];
   }
 
-  getOperatorByName(name: string): EtlOperator | undefined {
+  findOperator(name: string): EtlOperator | undefined {
     return this.getAllOperators().find(operator => operator.destTableName === name);
   }
 
-  isExistOperatorName(name: string): boolean {
-    return !!this.getOperatorByName(name);
+  /**
+   * check name of operator is include
+   * @param name
+   */
+  isIncludeOperator(name: string): boolean {
+    return !!this.findOperator(name);
   }
+
+  abstract getReadableOperatorClassName(): string;
 
   static fromObject(obj: EtlOperator): EtlOperator {
     switch (obj.className) {
-      case ETL_OPERATOR_TYPE.JoinOperator:
+      case ETLOperatorType.JoinOperator:
         return JoinOperator.fromObject(obj);
-      case ETL_OPERATOR_TYPE.TransformOperator:
+      case ETLOperatorType.TransformOperator:
         return TransformOperator.fromObject(obj);
-      case ETL_OPERATOR_TYPE.ManageFieldOperator:
+      case ETLOperatorType.ManageFieldOperator:
         return ManageFieldOperator.fromObject(obj);
-      case ETL_OPERATOR_TYPE.PivotTableOperator:
+      case ETLOperatorType.PivotTableOperator:
         return PivotTableOperator.fromObject(obj);
-      case ETL_OPERATOR_TYPE.SQLQueryOperator:
+      case ETLOperatorType.SQLQueryOperator:
         return SQLQueryOperator.fromObject(obj);
-      case ETL_OPERATOR_TYPE.PythonOperator:
+      case ETLOperatorType.PythonOperator:
         return PythonQueryOperator.fromObject(obj);
-      case ETL_OPERATOR_TYPE.GetDataOperator:
+      case ETLOperatorType.GetDataOperator:
         return GetDataOperator.fromObject(obj);
-      case ETL_OPERATOR_TYPE.SendToGroupEmailOperator:
+      case ETLOperatorType.SendToGroupEmailOperator:
         return SendToGroupEmailOperator.fromObject(obj);
       default:
         return GetDataOperator.fromObject(obj);
@@ -121,7 +132,7 @@ export class GetDataOperator extends EtlOperator {
     emailConfiguration: EmailConfiguration | null = null,
     thirdPartyPersistConfigurations: ThirdPartyPersistConfiguration[] = []
   ) {
-    super(ETL_OPERATOR_TYPE.GetDataOperator, destTableConfig, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
+    super(ETLOperatorType.GetDataOperator, destTableConfig, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
   }
 
   get destTableConfiguration(): TableConfiguration {
@@ -132,20 +143,20 @@ export class GetDataOperator extends EtlOperator {
     this.destTableConfig = value;
   }
 
-  getAllGetDataOperators(): GetDataOperator[] {
+  getAllGetOperators(): GetDataOperator[] {
     return [this];
   }
 
-  getLeftTables(): TableSchema[] {
-    return [this.tableSchema];
-  }
-
-  getDestTables(): TableConfiguration[] {
+  getAllDestTableConfigs(): TableConfiguration[] {
     return [];
   }
 
-  getAllNotGetDataOperators(): EtlOperator[] {
+  getAllNotGetOperators(): EtlOperator[] {
     return [];
+  }
+
+  getReadableOperatorClassName(): string {
+    return 'Load Dataset';
   }
 
   static fromObject(obj: EtlOperator): EtlOperator {
@@ -158,6 +169,10 @@ export class GetDataOperator extends EtlOperator {
       temp.emailConfiguration,
       (temp.thirdPartyPersistConfigurations as []).map(item => ThirdPartyPersistConfiguration.fromObject(item))
     );
+  }
+
+  getParentOperators(): EtlOperator[] {
+    return [];
   }
 }
 
@@ -172,30 +187,16 @@ export class JoinOperator extends EtlOperator {
     public emailConfiguration: EmailConfiguration | null,
     public thirdPartyPersistConfigurations: ThirdPartyPersistConfiguration[] = []
   ) {
-    super(ETL_OPERATOR_TYPE.JoinOperator, destTableConfiguration, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
+    super(ETLOperatorType.JoinOperator, destTableConfiguration, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
   }
 
-  getAllGetDataOperators(): GetDataOperator[] {
-    let result: GetDataOperator[] = [];
-
-    this.joinConfigs.forEach(joinConfig => {
-      result = result.concat(joinConfig.leftOperator.getAllGetDataOperators(), joinConfig.rightOperator.getAllGetDataOperators());
+  getAllGetOperators(): GetDataOperator[] {
+    return this.joinConfigs.flatMap(joinConfig => {
+      return [...joinConfig.leftOperator.getAllGetOperators(), ...joinConfig.rightOperator.getAllGetOperators()];
     });
-
-    return result;
   }
 
-  getLeftTables(): TableSchema[] {
-    let result: TableSchema[] = [];
-
-    this.joinConfigs.forEach(joinConfig => {
-      result = result.concat(joinConfig.leftOperator.getLeftTables(), joinConfig.rightOperator.getLeftTables());
-    });
-
-    return result;
-  }
-
-  getLeftOperators(): EtlOperator[] {
+  getParentOperators(): EtlOperator[] {
     let result: EtlOperator[] = [];
 
     this.joinConfigs.forEach(joinConfig => {
@@ -205,15 +206,15 @@ export class JoinOperator extends EtlOperator {
     return result;
   }
 
-  getDestTables(): TableConfiguration[] {
+  getAllDestTableConfigs(): TableConfiguration[] {
     let result: TableConfiguration[] = [];
 
     this.joinConfigs.forEach(joinConfig => {
       if (joinConfig.leftOperator.destTableConfiguration) {
-        result = result.concat(joinConfig.leftOperator.getDestTables());
+        result = result.concat(joinConfig.leftOperator.getAllDestTableConfigs());
       }
       if (joinConfig.rightOperator.destTableConfiguration) {
-        result = result.concat(joinConfig.rightOperator.getDestTables());
+        result = result.concat(joinConfig.rightOperator.getAllDestTableConfigs());
       }
     });
 
@@ -224,20 +225,24 @@ export class JoinOperator extends EtlOperator {
     return result;
   }
 
-  getAllNotGetDataOperators(): EtlOperator[] {
-    let result: EtlOperator[] = [];
+  getAllNotGetOperators(): EtlOperator[] {
+    let operators: EtlOperator[] = [];
     this.joinConfigs.forEach(joinConfig => {
       if (joinConfig.leftOperator.destTableConfiguration) {
-        result = result.concat(joinConfig.leftOperator.getAllNotGetDataOperators());
+        operators = operators.concat(joinConfig.leftOperator.getAllNotGetOperators());
       }
       if (joinConfig.rightOperator.destTableConfiguration) {
-        result = result.concat(joinConfig.rightOperator.getAllNotGetDataOperators());
+        operators = operators.concat(joinConfig.rightOperator.getAllNotGetOperators());
       }
     });
 
-    result.push(this);
+    operators.push(this);
 
-    return result;
+    return operators;
+  }
+
+  getReadableOperatorClassName(): string {
+    return 'Join';
   }
 
   static fromObject(obj: EtlOperator): EtlOperator {
@@ -268,7 +273,7 @@ export class TransformOperator extends EtlOperator {
     public emailConfiguration: EmailConfiguration | null,
     public thirdPartyPersistConfigurations: ThirdPartyPersistConfiguration[] = []
   ) {
-    super(ETL_OPERATOR_TYPE.TransformOperator, destTableConfiguration, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
+    super(ETLOperatorType.TransformOperator, destTableConfiguration, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
     this.query = query;
   }
 
@@ -281,22 +286,22 @@ export class TransformOperator extends EtlOperator {
     this._query.options = {};
   }
 
-  getLeftOperators(): EtlOperator[] {
+  getParentOperators(): EtlOperator[] {
     return [this.operator];
   }
 
-  getLeftTables(): TableSchema[] {
-    return this.operator.getLeftTables();
+  getAllGetOperators(): GetDataOperator[] {
+    return this.operator.getAllGetOperators();
   }
 
-  getAllGetDataOperators(): GetDataOperator[] {
-    return this.operator.getAllGetDataOperators();
-  }
-
-  getAllNotGetDataOperators(): EtlOperator[] {
-    const result: EtlOperator[] = this.operator.getAllNotGetDataOperators();
+  getAllNotGetOperators(): EtlOperator[] {
+    const result: EtlOperator[] = this.operator.getAllNotGetOperators();
     result.push(this);
     return result;
+  }
+
+  getReadableOperatorClassName(): string {
+    return 'Transform Table';
   }
 
   static fromObject(obj: EtlOperator): EtlOperator {
@@ -326,36 +331,29 @@ export class ManageFieldOperator extends EtlOperator {
     public emailConfiguration: EmailConfiguration | null,
     public thirdPartyPersistConfigurations: ThirdPartyPersistConfiguration[] = []
   ) {
-    super(
-      ETL_OPERATOR_TYPE.ManageFieldOperator,
-      destTableConfiguration,
-      isPersistent,
-      persistConfiguration,
-      emailConfiguration,
-      thirdPartyPersistConfigurations
-    );
+    super(ETLOperatorType.ManageFieldOperator, destTableConfiguration, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
   }
 
   get totalFields() {
     return this.fields.length + this.extraFields.length;
   }
 
-  getLeftOperators(): EtlOperator[] {
+  getParentOperators(): EtlOperator[] {
     return [this.operator];
   }
 
-  getLeftTables(): TableSchema[] {
-    return this.operator.getLeftTables();
+  getAllGetOperators(): GetDataOperator[] {
+    return this.operator.getAllGetOperators();
   }
 
-  getAllGetDataOperators(): GetDataOperator[] {
-    return this.operator.getAllGetDataOperators();
-  }
-
-  getAllNotGetDataOperators(): EtlOperator[] {
-    const result: EtlOperator[] = this.operator.getAllNotGetDataOperators();
+  getAllNotGetOperators(): EtlOperator[] {
+    const result: EtlOperator[] = this.operator.getAllNotGetOperators();
     result.push(this);
     return result;
+  }
+
+  getReadableOperatorClassName(): string {
+    return 'Manage Fields';
   }
 
   static fromObject(obj: EtlOperator): EtlOperator {
@@ -398,7 +396,7 @@ export class SendToGroupEmailOperator extends EtlOperator {
     displayName?: string | null,
     isZip = false
   ) {
-    super(ETL_OPERATOR_TYPE.SendToGroupEmailOperator, destTableConfiguration, false, null, null, []);
+    super(ETLOperatorType.SendToGroupEmailOperator, destTableConfiguration, false, null, null, []);
     this.receivers = receivers;
     this.cc = cc;
     this.bcc = bcc;
@@ -409,22 +407,22 @@ export class SendToGroupEmailOperator extends EtlOperator {
     this.isZip = isZip;
   }
 
-  getLeftOperators(): EtlOperator[] {
+  getParentOperators(): EtlOperator[] {
     return this.operators ?? [];
   }
 
-  getLeftTables(): TableSchema[] {
-    return this.operators.flatMap(operator => operator.getLeftTables());
+  getAllGetOperators(): GetDataOperator[] {
+    return this.operators.flatMap(operator => operator.getAllGetOperators());
   }
 
-  getAllGetDataOperators(): GetDataOperator[] {
-    return this.operators.flatMap(operator => operator.getAllGetDataOperators());
-  }
-
-  getAllNotGetDataOperators(): EtlOperator[] {
-    const operators: EtlOperator[] = this.operators.flatMap(operator => operator.getAllNotGetDataOperators());
+  getAllNotGetOperators(): EtlOperator[] {
+    const operators: EtlOperator[] = this.operators.flatMap(operator => operator.getAllNotGetOperators());
     operators.push(this);
     return operators;
+  }
+
+  getReadableOperatorClassName(): string {
+    return 'Send Email';
   }
 
   static fromObject(obj: EtlOperator): SendToGroupEmailOperator {
@@ -459,14 +457,7 @@ export class PivotTableOperator extends EtlOperator {
     public emailConfiguration: EmailConfiguration | null,
     public thirdPartyPersistConfigurations: ThirdPartyPersistConfiguration[] = []
   ) {
-    super(
-      ETL_OPERATOR_TYPE.PivotTableOperator,
-      destTableConfiguration,
-      isPersistent,
-      persistConfiguration,
-      emailConfiguration,
-      thirdPartyPersistConfigurations
-    );
+    super(ETLOperatorType.PivotTableOperator, destTableConfiguration, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
     this.query = query;
   }
 
@@ -479,22 +470,22 @@ export class PivotTableOperator extends EtlOperator {
     this._query.options = {};
   }
 
-  getLeftOperators(): EtlOperator[] {
+  getParentOperators(): EtlOperator[] {
     return [this.operator];
   }
 
-  getLeftTables(): TableSchema[] {
-    return this.operator.getLeftTables();
+  getAllGetOperators(): GetDataOperator[] {
+    return this.operator.getAllGetOperators();
   }
 
-  getAllGetDataOperators(): GetDataOperator[] {
-    return this.operator.getAllGetDataOperators();
-  }
-
-  getAllNotGetDataOperators(): EtlOperator[] {
-    const result: EtlOperator[] = this.operator.getAllNotGetDataOperators();
+  getAllNotGetOperators(): EtlOperator[] {
+    const result: EtlOperator[] = this.operator.getAllNotGetOperators();
     result.push(this);
     return result;
+  }
+
+  getReadableOperatorClassName(): string {
+    return 'Pivot Table';
   }
 
   static fromObject(obj: EtlOperator): EtlOperator {
@@ -548,25 +539,25 @@ export class SQLQueryOperator extends QueryOperator {
     public emailConfiguration: EmailConfiguration | null,
     public thirdPartyPersistConfigurations: ThirdPartyPersistConfiguration[] = []
   ) {
-    super(ETL_OPERATOR_TYPE.SQLQueryOperator, destTableConfiguration, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
+    super(ETLOperatorType.SQLQueryOperator, destTableConfiguration, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
   }
 
-  getLeftOperators(): EtlOperator[] {
+  getParentOperators(): EtlOperator[] {
     return [this.operator];
   }
 
-  getLeftTables(): TableSchema[] {
-    return this.operator.getLeftTables();
+  getAllGetOperators(): GetDataOperator[] {
+    return this.operator.getAllGetOperators();
   }
 
-  getAllGetDataOperators(): GetDataOperator[] {
-    return this.operator.getAllGetDataOperators();
-  }
-
-  getAllNotGetDataOperators(): EtlOperator[] {
-    const result: EtlOperator[] = this.operator.getAllNotGetDataOperators();
+  getAllNotGetOperators(): EtlOperator[] {
+    const result: EtlOperator[] = this.operator.getAllNotGetOperators();
     result.push(this);
     return result;
+  }
+
+  getReadableOperatorClassName(): string {
+    return 'SQL Query';
   }
 
   static fromObject(obj: EtlOperator): EtlOperator {
@@ -598,25 +589,25 @@ export class PythonQueryOperator extends QueryOperator {
     public emailConfiguration: EmailConfiguration | null,
     public thirdPartyPersistConfigurations: ThirdPartyPersistConfiguration[] = []
   ) {
-    super(ETL_OPERATOR_TYPE.PythonOperator, destTableConfiguration, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
+    super(ETLOperatorType.PythonOperator, destTableConfiguration, isPersistent, persistConfiguration, emailConfiguration, thirdPartyPersistConfigurations);
   }
 
-  getLeftOperators(): EtlOperator[] {
+  getParentOperators(): EtlOperator[] {
     return [this.operator];
   }
 
-  getLeftTables(): TableSchema[] {
-    return this.operator.getLeftTables();
+  getAllGetOperators(): GetDataOperator[] {
+    return this.operator.getAllGetOperators();
   }
 
-  getAllGetDataOperators(): GetDataOperator[] {
-    return this.operator.getAllGetDataOperators();
-  }
-
-  getAllNotGetDataOperators(): EtlOperator[] {
-    const result: EtlOperator[] = this.operator.getAllNotGetDataOperators();
+  getAllNotGetOperators(): EtlOperator[] {
+    const result: EtlOperator[] = this.operator.getAllNotGetOperators();
     result.push(this);
     return result;
+  }
+
+  getReadableOperatorClassName(): string {
+    return 'Python Query';
   }
 
   language: EtlQueryLanguages = EtlQueryLanguages.Python;
