@@ -57,6 +57,8 @@ export class FunctionFamilyBuilder {
         return this.draggableConfig?.defaultNumberFunctionInfo ?? this.getDefaultNumberFunction(this.selectedFunctionFamily);
       case DataType.Expression:
         return this.getDefaultExpressionFunction();
+      default:
+        return new FunctionFamilyInfo(FunctionFamilyTypes.dynamic);
     }
   }
 

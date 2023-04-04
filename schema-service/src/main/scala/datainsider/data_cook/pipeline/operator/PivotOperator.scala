@@ -13,7 +13,7 @@ import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 
 case class PivotOperator(id: OperatorId, query: PivotTableSetting, destTableConfiguration: TableConfiguration)
-    extends Operator
+    extends TableResultOperator
 
 case class PivotOperatorExecutor(tableService: EtlTableService) extends Executor[PivotOperator] {
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 import datainsider.data_cook.domain.{EtlConfig, IncrementalConfig}
 import datainsider.data_cook.domain.Ids.{EtlJobId, OrganizationId}
+import datainsider.data_cook.domain.operator.TableConfiguration
 import datainsider.data_cook.pipeline.exception.{InputInvalid, OperatorException}
 import datainsider.data_cook.pipeline.operator.Operator.OperatorId
 import datainsider.data_cook.pipeline.operator.persist._
@@ -56,6 +57,14 @@ trait Operator {
   // Trả ra tên format: ClassName(id)
   def debugName: String = s"${getClass.getSimpleName}(${String.valueOf(this.id)})"
 }
+
+/**
+ * name of abstract class, for a result of operator can be a table.
+ */
+trait TableResultOperator extends Operator {
+  val destTableConfiguration: TableConfiguration
+}
+
 
 trait OperatorResult {
   val id: OperatorId

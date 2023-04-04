@@ -13,7 +13,7 @@ import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 
 case class TransformOperator(id: OperatorId, query: GroupTableChartSetting, destTableConfiguration: TableConfiguration)
-    extends Operator
+    extends TableResultOperator
 
 case class TransformOperatorExecutor(tableService: EtlTableService) extends Executor[TransformOperator] {
 

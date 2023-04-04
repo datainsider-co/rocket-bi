@@ -3,7 +3,7 @@ import { RouterUtils } from '@/utils/RouterUtils';
 
 export abstract class UrlUtils {
   static getFullUrl(path: string): string {
-    const staticHost = window.appConfig.VUE_APP_STATIC_API_URL;
+    const staticHost = window.appConfig.VUE_APP_STATIC_FILE_URL;
     return staticHost + path;
   }
 
@@ -17,6 +17,8 @@ export abstract class UrlUtils {
     switch (type) {
       case ResourceType.directory:
         return `${window.location.origin}/shared/${paramPath}?token=${token}`;
+      case ResourceType.query:
+        return `${window.location.origin}/data-warehouse/query-editor?token=${token}&adhoc=${id}`;
       default:
         return `${window.location.origin}/${type}/${paramPath}?token=${token}`;
     }

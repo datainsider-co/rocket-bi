@@ -97,7 +97,7 @@ export class NumberChartOption extends ChartOption<NumberOptionData> {
         style: {
           color: secondaryTextColor,
           fontFamily: 'Roboto',
-          fontSize: '16px'
+          fontSize: '11px'
         }
       },
       style: {

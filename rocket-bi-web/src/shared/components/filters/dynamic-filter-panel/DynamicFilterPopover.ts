@@ -236,6 +236,14 @@ export default class DynamicFilterPopover extends Vue {
   }
 
   private get dashboardControls(): TabControlData[] {
-    return WidgetModule.allTabControls.map(tabControl => tabControl.toTreeNode().data);
+    return WidgetModule.allTabControls.map(tabControl => tabControl.toTabControlData());
+  }
+
+  private get customPopoverClass(): string {
+    if (this.isDefaultStyle) {
+      return 'filter-popover-area filter-popover-area-default-style';
+    } else {
+      return 'filter-popover-area';
+    }
   }
 }

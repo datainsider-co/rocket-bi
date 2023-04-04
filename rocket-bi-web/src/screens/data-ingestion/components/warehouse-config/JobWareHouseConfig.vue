@@ -1,17 +1,13 @@
 <template>
   <div>
-    <label class="export-form mb-0">
-      <div class="custom-control custom-switch">
-        <input
-          :id="genToggleId('sync-to-data-warehouse')"
-          :checked="isEnableSyncToDataWarehouse"
-          class="custom-control-input"
-          type="checkbox"
-          @input="handleClickSyncToDataWareHouseOption(!isEnableSyncToDataWarehouse)"
-        />
-        <label class="custom-control-label" :for="genToggleId('sync-to-data-warehouse')">Sync To Data Warehouse</label>
-      </div>
-    </label>
+    <DiToggle
+      class="export-form"
+      :id="genToggleId('sync-to-data-warehouse')"
+      :value="isEnableSyncToDataWarehouse"
+      @update:value="handleClickSyncToDataWareHouseOption"
+      label="Sync To Data Warehouse"
+    >
+    </DiToggle>
     <div class="input">
       <b-collapse id="data-warehouse-config" :visible="isEnableSyncToDataWarehouse">
         <DestDatabaseSuggestion
@@ -34,12 +30,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, PropSync, Ref, Vue } from 'vue-property-decorator';
+import { Component, PropSync, Ref, Vue } from 'vue-property-decorator';
 import { DataDestination, Job } from '@core/data-ingestion';
 import { StringUtils } from '@/utils/StringUtils';
 import DestDatabaseSuggestion from '@/screens/data-ingestion/form-builder/render-impl/dest-database-suggestion/DestDatabaseSuggestion.vue';
-import { Log } from '@core/utils';
-import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { required } from 'vuelidate/lib/validators';
 
 @Component({
@@ -109,5 +103,3 @@ export default class JobWareHouseConfig extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

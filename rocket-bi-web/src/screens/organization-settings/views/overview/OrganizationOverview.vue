@@ -30,12 +30,7 @@
 
         <div class="org-overview-item">
           <div class="org-overview-item-label">Version</div>
-          <div class="org-overview-item-delete-content">
-            {{ version }}
-          </div>
-          <!--          <div class="org-overview-item-action btn-icon-border" disabled>-->
-          <!--            <i class="di-icon-delete"></i>-->
-          <!--          </div>-->
+          <div class="org-overview-item-delete-content">{{ version }}.{{ buildVersion }}</div>
         </div>
       </div>
     </div>
@@ -60,9 +55,15 @@ import { OrganizationStoreModule } from '@/store/modules/OrganizationStore';
 import OrganizationLogoModal from '@/screens/organization-settings/components/organization-logo-modal/OrganizationLogoModal.vue';
 import { PopupUtils } from '@/utils';
 import LogoComponent from '@/screens/organization-settings/components/organization-logo-modal/LogoComponent.vue';
+import builder from '../../../../shared/components/builder';
 import OrganizationPermissionModule from '@/store/modules/OrganizationPermissionStore';
 
 @Component({
+  computed: {
+    builder() {
+      return builder;
+    }
+  },
   components: {
     LogoComponent,
     LayoutContent,
@@ -100,6 +101,10 @@ export default class OrganizationOverview extends Vue {
 
   private get isEnableLogoAndCompanyNameSetting() {
     return OrganizationPermissionModule.isEnableLogoAndCompanyNameSetting;
+  }
+
+  private get buildVersion(): string {
+    return process.env.BUILD_VERSION;
   }
 
   mounted() {

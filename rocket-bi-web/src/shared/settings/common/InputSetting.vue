@@ -1,7 +1,7 @@
 <template>
   <div :class="{ 'disabled-setting': disable }" class="setting-container input-setting dropdown-setting no-gutters">
-    <div class="d-flex flex-row align-items-center">
-      <p v-if="label != null" class="m-0">{{ label }}</p>
+    <div v-if="isLabel || showHint" class="d-flex flex-row align-items-center label">
+      <p v-if="isLabel">{{ label }}</p>
       <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
     </div>
     <b-input-group class="form-control">
@@ -263,6 +263,10 @@ export default class InputSetting extends Vue {
   private get showHint(): boolean {
     return StringUtils.isNotEmpty(this.hint);
   }
+
+  private get isLabel(): boolean {
+    return StringUtils.isNotEmpty(this.label);
+  }
 }
 </script>
 
@@ -270,7 +274,7 @@ export default class InputSetting extends Vue {
 .input-setting {
   .form-control {
     background-color: var(--tab-filter-dropdown-background);
-    height: 40px;
+    height: auto;
 
     &::placeholder {
       color: var(--secondary-text-color);

@@ -19,7 +19,7 @@
         <DatabaseListing
           :isDragging.sync="isDragging"
           :status="databaseStatus"
-          :error="databaseErrorMessage"
+          :error="databaseErrorMsg"
           :hideRetry="true"
           :showSelectDatabase="config.databaseConfig.showSelectDatabase"
           :showSelectTabControl="config.databaseConfig.useTabControl"

@@ -357,12 +357,23 @@ export class FormattingOptions {
       .filter(table => ListUtils.isNotEmpty(table.options));
   }
 
-  static isShowColumn(column: SlTreeNodeModel<any>, formatType: ConditionalFormattingType): boolean {
-    if (formatType === ConditionalFormattingType.FieldValue) {
-      const field: Field = column.tag as Field;
-      return ChartUtils.isTextType(field.fieldType);
-    } else {
-      return true;
+  static isShowColumn(column: SlTreeNodeModel<any>, formatType: ConditionalFormattingType, isGroupBy: boolean): boolean {
+    switch (formatType) {
+      case ConditionalFormattingType.FieldValue: {
+        const field: Field = column.tag as Field;
+        return ChartUtils.isTextType(field.fieldType);
+      }
+      case ConditionalFormattingType.ColorScale: {
+        if (isGroupBy) {
+          return true;
+        } else {
+          const field: Field = column.tag as Field;
+          return ChartUtils.isNumberType(field.fieldType);
+        }
+      }
+      case ConditionalFormattingType.Rules: {
+        return true;
+      }
     }
   }
 

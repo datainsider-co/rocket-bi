@@ -45,7 +45,7 @@ class Clickhouse2CsvTest extends FunSuite {
       "-j",
       "file.zip",
       getClass.getClassLoader.getResource("datasets/customers2.csv").getPath,
-      getClass.getClassLoader.getResource("datasets/customers.csv").getPath,
+      getClass.getClassLoader.getResource("datasets/customers.csv").getPath
     )
     println(s"zip file cmd ${zipCmd}")
     val process: String = zipCmd.!!

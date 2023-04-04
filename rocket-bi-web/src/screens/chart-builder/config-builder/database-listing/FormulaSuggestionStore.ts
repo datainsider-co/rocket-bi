@@ -71,23 +71,23 @@ export class FormulaSuggestionStore extends VuexModule {
   initSuggestFunction(payload: { fileNames: string[]; useFunctions?: string[]; ignoreFunctions?: string[] }): void {
     const { fileNames, useFunctions, ignoreFunctions } = payload;
 
-    const allSupportedFunctions: SupportedFunctionInfo[] = fileNames.map(fileName => require('@/shared/data/' + fileName));
-    const finalSupportedFunctionInfo = SupportedFunctionInfo.empty();
-    allSupportedFunctions.forEach(supportedInfo => Object.assign(finalSupportedFunctionInfo, supportedInfo));
+    const functionsList: SupportedFunctionInfo[] = fileNames.map(fileName => require('@/shared/data/' + fileName));
+    const functionInfoList = SupportedFunctionInfo.empty();
+    functionsList.forEach(supportedInfo => Object.assign(functionInfoList, supportedInfo));
 
     // tu dong lay useFunctions, neu khong co thi lay all keys -> useFunctions
-    const supportedFunctions: string[] = ListUtils.isNotEmpty(useFunctions) ? useFunctions! : Object.keys(finalSupportedFunctionInfo);
+    const supportedFunctions: string[] = ListUtils.isNotEmpty(useFunctions) ? useFunctions! : Object.keys(functionInfoList);
     // always ignore useFunctions keys
     const ignoreFunctionAsSet: Set<string> = new Set((ignoreFunctions ?? []).concat('useFunctions'));
     const finalSupportedFunctions: string[] = ListUtils.remove(supportedFunctions, item => ignoreFunctionAsSet.has(item));
 
-    Object.assign(finalSupportedFunctionInfo, { useFunctions: finalSupportedFunctions });
+    Object.assign(functionInfoList, { useFunctions: finalSupportedFunctions });
 
-    this.supportedFunctionInfo = finalSupportedFunctionInfo;
+    this.supportedFunctionInfo = functionInfoList;
   }
 
   @Mutation
-  initSuggestField(tableSchema: TableSchema): void {
+  setTableSchema(tableSchema: TableSchema): void {
     this.tableSchema = tableSchema;
   }
 }

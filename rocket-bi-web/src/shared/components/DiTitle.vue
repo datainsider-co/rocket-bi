@@ -18,7 +18,7 @@ export default class DiTitle extends Vue {
   font-weight: var(--builder-font-weight, 500);
   font-stretch: normal;
   font-style: normal;
-  line-height: 1.17;
+  line-height: 1.4;
   letter-spacing: 0.2px;
   color: var(--text-color);
 }

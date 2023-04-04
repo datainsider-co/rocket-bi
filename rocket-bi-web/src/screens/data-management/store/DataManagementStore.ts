@@ -115,27 +115,6 @@ class DataManagementStore extends VuexModule {
   }
 
   @Action
-  async updateTableName(payload: { newName: string; dbSchema: DatabaseSchema; table: TableSchema }) {
-    const { dbSchema, newName, table } = payload;
-    const dbName: string = dbSchema.name;
-    const oldTbName: string = table.name;
-    const normalizedNewName: string = StringUtils.normalizeTableName(newName);
-    const success = await this.schemaService.updateTableName(dbName, oldTbName, normalizedNewName);
-    if (success) {
-      return this.schemaService.getDatabaseSchema(dbName);
-    } else {
-      throw new DIException(`Rename table ${oldTbName} failed!`);
-    }
-  }
-
-  @Action
-  async updateDatabaseDisplayName(payload: { newDisplayName: string; dbSchema: DatabaseSchema }) {
-    const { dbSchema, newDisplayName } = payload;
-    const request = new UpdateDatabaseSchema(dbSchema).withDbName(newDisplayName);
-    return this.schemaService.updateDatabase(request);
-  }
-
-  @Action
   async updateTableInfo(payload: { table: TableSchema }) {
     const { table } = payload;
     const request: UpdateTableSchemaRequest = {

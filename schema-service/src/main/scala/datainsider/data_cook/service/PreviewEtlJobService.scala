@@ -11,10 +11,10 @@ import datainsider.data_cook.domain.EtlJob.ImplicitEtlOperator2Operator
 import datainsider.data_cook.domain.Ids.{EtlJobId, OrganizationId}
 import datainsider.data_cook.domain.operator.{EtlOperator, ExpressionFieldConfiguration, FieldConfiguration, NormalFieldConfiguration}
 import datainsider.data_cook.domain.request.EtlRequest.PreviewEtlRequest
-import datainsider.data_cook.domain.response.EtlJobStatusResponse
+import datainsider.data_cook.domain.response.{ErrorPreviewETLData, PreviewETLResponse}
 import datainsider.data_cook.domain.{EtlInPreviewData, EtlJob, EtlJobStatus, OperatorInfo}
-import datainsider.data_cook.pipeline.operator.Operator
 import datainsider.data_cook.pipeline.operator.Operator.OperatorId
+import datainsider.data_cook.pipeline.operator.{Operator, TableResultOperator}
 import datainsider.data_cook.pipeline.{ExecutorResolver, Pipeline, PipelineResult}
 import datainsider.data_cook.service.table.EtlTableService
 import datainsider.ingestion.domain.TableSchema
@@ -22,6 +22,8 @@ import datainsider.profiler.Profiler
 
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.jdk.CollectionConverters.mapAsScalaConcurrentMapConverter
 
@@ -31,7 +33,7 @@ import scala.jdk.CollectionConverters.mapAsScalaConcurrentMapConverter
   */
 trait PreviewEtlJobService {
 
-  def previewSync(organizationId: OrganizationId, request: PreviewEtlRequest): Future[EtlJobStatusResponse]
+  def previewSync(organizationId: OrganizationId, request: PreviewEtlRequest): Future[PreviewETLResponse]
 
   /**
     * End session preview
@@ -79,8 +81,8 @@ class MockPreviewEtlJobService extends PreviewEtlJobService {
     Future.value("select * from analytics.docs")
   }
 
-  override def previewSync(organizationId: OrganizationId, request: PreviewEtlRequest): Future[EtlJobStatusResponse] =
-    Future.value(EtlJobStatusResponse(1, EtlJobStatus.Done, None, None))
+  override def previewSync(organizationId: OrganizationId, request: PreviewEtlRequest): Future[PreviewETLResponse] =
+    Future.value(PreviewETLResponse(1, EtlJobStatus.Done, None, Array.empty))
 
   override def listEtlInPreview(): Future[Array[EtlInPreviewData]] = Future.value(Array.empty[EtlInPreviewData])
 }
@@ -96,7 +98,7 @@ class PreviewEtlJobServiceImpl @Inject() (
   private val expireTime = ZConfig.getLong("data_cook.engine_cache.expire_time_in_second", 1800) // 30m
   private val maxSize = ZConfig.getLong("data_cook.engine_cache.max_size", 500)
 
-  private val previewEtlCache: Cache[EtlInPreviewData, EtlInPreviewData] = CacheBuilder
+  private val previewETLCache: Cache[EtlInPreviewData, EtlInPreviewData] = CacheBuilder
     .newBuilder()
     .expireAfterAccess(expireTime, TimeUnit.SECONDS)
     .maximumSize(maxSize)
@@ -106,7 +108,7 @@ class PreviewEtlJobServiceImpl @Inject() (
     * End session preview
     */
   override def endPreview(organizationId: OrganizationId, id: EtlJobId): Future[Boolean] = {
-    previewEtlCache.invalidate(id)
+    previewETLCache.invalidate(id)
     tableService.removeAllTables(organizationId, id)
   }
 
@@ -131,15 +133,47 @@ class PreviewEtlJobServiceImpl @Inject() (
     Future.value(query)
   }
 
-  private def buildPipeline(request: PreviewEtlRequest): Pipeline = {
-    val job: EtlJob = request.toPreviewJob()
+  override def previewSync(organizationId: OrganizationId, request: PreviewEtlRequest): Future[PreviewETLResponse] = async {
+    if (request.force) {
+      clearPreviewData(organizationId, request.id, operators = request.operators).syncGet()
+    }
+    val result: PreviewETLResponse = executePreview(organizationId, request.toPreviewJob())
+    result
+  }
 
+  private def clearPreviewData(organizationId: OrganizationId, id: EtlJobId, operators: Array[EtlOperator]): Future[Unit] =
+    Profiler(s"[${getClass.getSimpleName}]::clearPreviewData") {
+      previewETLCache.invalidate(id)
+      val tables: Array[String] = operators.flatMap(EtlOperator.getDestTables)
+      tableService
+        .removeTables(organizationId, id, tables)
+        .rescue {
+          case ex: Throwable =>
+            logger.error("clearPreviewData::dropEtlDatabase failure", ex)
+            Future.False
+        }
+        .unit
+    }
+
+  private def executePreview(organizationId: OrganizationId, job: EtlJob): PreviewETLResponse =  Profiler(s"[${getClass.getSimpleName}]::executePreview") {
+      val previewData = EtlInPreviewData(organizationId, job.id)
+      previewETLCache.put(previewData, previewData)
+      val pipelines: Seq[Pipeline] = job.operators.map(operator => buildPipeline(organizationId, job.id, operator))
+      val pipelineResults: Seq[PipelineResult] = pipelines.map(_.execute())
+      val previewResponse: PreviewETLResponse = toPreviewETLResponse(previewData, pipelineResults)
+      previewResponse
+  }
+
+  /**
+   * build pipeline from a operator
+   */
+  private def buildPipeline(organizationId: OrganizationId, id: EtlJobId, operator: EtlOperator): Pipeline = {
     val pipelineBuilder = Pipeline
       .builder()
-      .setOrganizationId(job.organizationId)
-      .setJobId(job.id)
+      .setOrganizationId(organizationId)
+      .setJobId(id)
 
-    val operatorInfo: OperatorInfo = job.operators.toOperatorInfo()
+    val operatorInfo: OperatorInfo = Array(operator).toOperatorInfo()
 
     operatorInfo.connections.foreach {
       case (from: OperatorId, to: OperatorId) => {
@@ -152,53 +186,49 @@ class PreviewEtlJobServiceImpl @Inject() (
     pipelineBuilder.build()
   }
 
-  override def previewSync(organizationId: OrganizationId, request: PreviewEtlRequest): Future[EtlJobStatusResponse] = async {
-    if (request.force) {
-      clearPreviewData(organizationId, request.id, operators = request.operators).syncGet()
+  private def toPreviewETLResponse(previewData: EtlInPreviewData, pipelineResults: Seq[PipelineResult]): PreviewETLResponse = {
+    val tableSchemasMap = mutable.Map.empty[String, TableSchema]
+    val errorDataList = ArrayBuffer.empty[ErrorPreviewETLData]
+    pipelineResults.foreach(result => {
+      tableSchemasMap ++= (getTableSchemaMap(result))
+
+      val errorData: Option[ErrorPreviewETLData] = getErrorPreviewETLData(result)
+      if (errorData.isDefined) {
+        errorDataList.append(errorData.get)
+      }
+    })
+
+    if (errorDataList.isEmpty) {
+      PreviewETLResponse.success(previewData.etlJobId, tableSchemasMap.values.toArray)
+    } else {
+      PreviewETLResponse.failure(previewData.etlJobId, tableSchemasMap.values.toArray, errorDataList.toArray)
     }
-    val result: EtlJobStatusResponse = executePreview(organizationId, request)
-    result
   }
 
-  private def clearPreviewData(organizationId: OrganizationId, id: EtlJobId, operators: Array[EtlOperator]): Future[Unit] =
-    Profiler(s"[${getClass.getSimpleName}]::clearPreviewData") {
-      previewEtlCache.invalidate(id)
-      val tables: Array[String] = operators.flatMap(EtlOperator.getDestTables)
-      tableService
-        .removeTables(organizationId, id, tables)
-        .rescue {
-          case ex: Throwable =>
-            logger.error("clearPreviewData::dropEtlDatabase failure", ex)
-            Future.False
-        }
-        .unit
-    }
+  private def getTableSchemaMap(pipelineResult: PipelineResult): Map[String, TableSchema] = {
+    val tableSchemas: Map[String, TableSchema] = pipelineResult.mapResult.values
+      .map(_.getData[TableSchema]())
+      .filter(_.isDefined)
+      .map(_.get)
+      .map(tableSchema => (tableSchema.name, tableSchema))
+      .toMap
+    tableSchemas
+  }
 
-  private def executePreview(organizationId: OrganizationId, request: PreviewEtlRequest): EtlJobStatusResponse = {
-      try {
-        val etlPreviewData = EtlInPreviewData(organizationId, request.id)
-        previewEtlCache.put(etlPreviewData, etlPreviewData)
-        val pipeline = buildPipeline(request)
-        val result: PipelineResult = pipeline.execute()
-        val tableSchemas: Array[TableSchema] = result.mapResult.values
-          .map(_.getData[TableSchema]())
-          .filter(_.isDefined)
-          .map(_.get)
-          .toArray
-        if (result.isSucceed) {
-          EtlJobStatusResponse.success(request.id, tableSchemas)
-        } else {
-          EtlJobStatusResponse.failure(request.id, tableSchemas, result.exception.get, result.operatorError)
-        }
-      } catch {
-        case ex: Throwable =>
-          logger.error(s"[${getClass.getSimpleName}].previewSync failure ${ex.getMessage}", ex)
-          EtlJobStatusResponse.failure(request.id, Array.empty, ex, None)
+  private def getErrorPreviewETLData(pipelineResult: PipelineResult): Option[ErrorPreviewETLData] = {
+    if (pipelineResult.isSucceed) {
+      None
+    } else {
+      val errorTblName: String = pipelineResult.errorOperator match {
+        case operator: Option[TableResultOperator] => operator.get.destTableConfiguration.tblName
+        case _ => ""
       }
+      Some(ErrorPreviewETLData(pipelineResult.exception.get.getMessage, errorTblName))
     }
+  }
 
   override def listEtlInPreview(): Future[Array[EtlInPreviewData]] = {
-    val previewEtlData: Array[EtlInPreviewData] = previewEtlCache.asMap().asScala.keys.toArray
+    val previewEtlData: Array[EtlInPreviewData] = previewETLCache.asMap().asScala.keys.toArray
     Future.value(previewEtlData)
   }
 }

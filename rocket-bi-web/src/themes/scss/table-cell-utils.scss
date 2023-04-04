@@ -26,7 +26,7 @@ td > .directory-name-cell {
     font-weight: 500;
     font-stretch: normal;
     font-style: normal;
-    line-height: normal;
+    line-height: 1.4;
     letter-spacing: 0.6px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -59,7 +59,7 @@ td > .directory-owner-cell {
     font-weight: normal;
     font-stretch: normal;
     font-style: normal;
-    line-height: normal;
+    line-height: 1.4;
     letter-spacing: 0.23px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -137,7 +137,7 @@ td > .action-container {
 }
 
 td .suspended-status {
-  color: var(--suspend-status-color, #ff6b4e) !important;
+  color: var(--suspend-status-color, #ea6b6b) !important;
 }
 
 td .active-status {

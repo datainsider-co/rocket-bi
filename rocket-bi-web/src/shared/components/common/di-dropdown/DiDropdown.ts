@@ -5,7 +5,7 @@
 
 import { Component, Model, Prop, Ref, Vue } from 'vue-property-decorator';
 import ClickOutside from 'vue-click-outside';
-import { RandomUtils } from '@/utils';
+import { ListUtils, RandomUtils } from '@/utils';
 import { DropdownData } from '@/shared/components/common/di-dropdown/DropdownData';
 import { DropdownType } from '@/shared/components/common/di-dropdown/DropdownType';
 import { StringUtils } from '@/utils/StringUtils';
@@ -51,6 +51,9 @@ export default class DiDropdown extends Vue {
 
   @Prop({ required: false, default: false, type: Boolean })
   private readonly canHideOtherPopup!: boolean;
+
+  @Prop({ required: false, type: String, default: 'No options available.' })
+  private readonly emptyPlaceholder!: string;
 
   @Ref()
   private readonly scroller?: any;
@@ -146,6 +149,12 @@ export default class DiDropdown extends Vue {
     if (!this.isDropdownOpen) {
       this.showDropdown();
     }
+  }
+
+  // prevent unfocus input cause white space will trigger button click.
+  private handleTypeWhitespace(event: KeyboardEvent): void {
+    event.preventDefault();
+    this.keyword = this.keyword + ' ';
   }
 
   private scrollToIndex(index: number, animation = true): void {
@@ -339,5 +348,9 @@ export default class DiDropdown extends Vue {
     if (this.id !== id) {
       this.hideDropdown();
     }
+  }
+
+  private isEmpty(list: any[]): boolean {
+    return ListUtils.isEmpty(list);
   }
 }

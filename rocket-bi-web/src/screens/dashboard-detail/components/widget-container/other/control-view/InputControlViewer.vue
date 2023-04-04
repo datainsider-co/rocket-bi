@@ -103,7 +103,7 @@ export default class InputControlViewer extends Vue {
         this.saveTempSelectedValue(StringUtils.isEmpty(this.currentValue) ? [] : [this.currentValue]);
       } else {
         Log.debug('handleValueChange');
-        DashboardControllerModule.replaceDynamicFilter({
+        DashboardControllerModule.replaceDynamicValues({
           widget: this.widget,
           values: StringUtils.isEmpty(this.currentValue) ? [] : [this.currentValue],
           apply: true

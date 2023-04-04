@@ -120,7 +120,7 @@ export class DashboardStore extends VuexModule {
     if (ListUtils.isEmpty(WidgetModule.allQueryWidgets)) {
       return [];
     } else {
-      return WidgetUtils.getDatabaseNamesFromQueryRelatedWidget(WidgetModule.allQueryWidgets);
+      return WidgetUtils.getDatabaseNames(WidgetModule.allQueryWidgets);
     }
   }
 
@@ -356,7 +356,7 @@ export class DashboardStore extends VuexModule {
   }
 
   @Action
-  private async loadDashboardDirectory(id: DashboardId): Promise<void> {
+  async loadDashboardDirectory(id: DashboardId): Promise<void> {
     const directoryId = await this.dashboardService.getDirectoryId(id);
     const directory = await this.directoryService.get(directoryId);
     this.setDashboardDirectory(directory);

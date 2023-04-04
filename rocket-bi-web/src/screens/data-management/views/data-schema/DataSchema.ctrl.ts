@@ -394,40 +394,6 @@ export default class DataSchema extends Mixins(DataManagementChild, SplitPanelMi
         }
       },
       {
-        text: `Rename database`,
-        click: () => {
-          const data: any = {
-            model: model,
-            action: RenameActions.database
-          };
-          this.renameModalTitle = `Rename database`;
-          this.contextMenu.hide();
-          this.renameModal.show(model.database.displayName, (newName: string) => {
-            this.handleRenameTable(newName, data);
-          });
-          TrackingUtils.track(TrackEvents.DataSchemaRenameDatabase, { database: this.model!.database.name });
-        }
-      },
-      {
-        text: `Rename table`,
-        disabled: !this.model?.database && !this.model?.table,
-        click: () => {
-          const data: any = {
-            model: model,
-            action: RenameActions.table
-          };
-          this.renameModalTitle = `Rename table`;
-          this.contextMenu.hide();
-          this.renameModal.show(model.table!.name, (newName: string) => {
-            this.handleRenameTable(newName, data);
-          });
-          TrackingUtils.track(TrackEvents.DataSchemaRenameTable, {
-            database: this.model!.database.name,
-            table: this.model!.table?.name
-          });
-        }
-      },
-      {
         text: `Update schema by query`,
         hidden: !this.isShowUpdateTableByQuery,
         click: () => {
@@ -489,60 +455,6 @@ export default class DataSchema extends Mixins(DataManagementChild, SplitPanelMi
     return (
       this.model?.database && this.model?.table && (this.model.table.tableType === TableType.View || this.model.table.tableType === TableType.Materialized)
     );
-  }
-
-  private async handleRenameTable(newName: string, data: { model: DataSchemaModel; action: RenameActions }) {
-    try {
-      const { model, action } = data;
-      this.renameModal.hide();
-      switch (action) {
-        case RenameActions.database: {
-          TrackingUtils.track(TrackEvents.DatabaseSubmitRename, {
-            database_new_name: newName,
-            database_old_name: this.model?.database.name
-          });
-          const schemaUpdated = await DataManagementModule.updateDatabaseDisplayName({
-            newDisplayName: newName,
-            dbSchema: model.database
-          });
-          if (this.model?.database?.name === model.database?.displayName) {
-            await this.$router.replace({ query: { ...this.$router.currentRoute.query, database: newName } });
-            this.model!.database = schemaUpdated;
-          }
-          return DatabaseSchemaModule.setDatabaseSchema(schemaUpdated);
-        }
-        case RenameActions.table: {
-          TrackingUtils.track(TrackEvents.TableSubmitRename, {
-            table_new_name: newName,
-            table_old_name: this.model?.table?.name,
-            database_name: data.model.table?.dbName
-          });
-          const schemaUpdated = await DataManagementModule.updateTableName({
-            newName: newName,
-            dbSchema: model.database,
-            table: model.table!
-          });
-          if (this.model?.table?.name === model.table?.name) {
-            this.model!.table!.name = newName;
-            await this.$router.replace({ query: { ...this.$router.currentRoute.query, table: newName } });
-            const tableUpdated = schemaUpdated.tables.find(table => table.name === newName);
-            if (tableUpdated) {
-              this.model = { database: schemaUpdated, table: tableUpdated };
-            }
-          }
-          return DatabaseSchemaModule.setDatabaseSchema(schemaUpdated);
-        }
-        case RenameActions.column:
-          break;
-      }
-    } catch (e) {
-      Log.error(e);
-      await Swal.fire({
-        icon: 'error',
-        title: 'Rename Error',
-        html: e.message
-      });
-    }
   }
 
   private get editingSchema(): boolean {

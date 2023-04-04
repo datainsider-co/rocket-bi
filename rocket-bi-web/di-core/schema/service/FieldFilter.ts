@@ -11,7 +11,9 @@ export enum DataType {
   Text = 'TEXT',
   Date = 'DATE',
   Number = 'NUMBER',
-  Expression = 'EXPRESSION'
+  Expression = 'EXPRESSION',
+
+  TabControl = 'TAB_CONTROL'
 }
 
 export abstract class FieldFilter {

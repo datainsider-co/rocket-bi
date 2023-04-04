@@ -47,6 +47,10 @@
       font-weight: bold;
     }
 
+    .text-align-right {
+      text-align: var(--row-text-align, right) !important;
+    }
+
     @mixin row-common-style() {
       font-size: var(--row-font-size, $default-row-font-size);
       font-family: var(--row-font-family, $default-row-font-family), sans-serif;

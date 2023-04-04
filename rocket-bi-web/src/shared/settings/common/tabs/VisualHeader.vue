@@ -103,7 +103,6 @@ export default class VisualHeader extends Vue {
     isCrossFilter: false,
     enableDrilldown: false,
     enableMore: false,
-    displayUnit: MetricNumberMode.Default,
     precision: 2
   };
 
@@ -169,8 +168,20 @@ export default class VisualHeader extends Vue {
     return DisplayUnitOptions;
   }
 
+  private get defaultDisplayUnit() {
+    switch (this.widgetType) {
+      case ChartType.Table:
+      case ChartType.FlattenTable:
+      case ChartType.PivotTable:
+      case ChartType.FlattenPivotTable:
+        return MetricNumberMode.None;
+      default:
+        return MetricNumberMode.Default;
+    }
+  }
+
   private get displayUnit(): string {
-    return get(this.setting, `${this.seriesKey}.dataLabels.displayUnit`, this.defaultSetting.displayUnit);
+    return get(this.setting, `${this.seriesKey}.dataLabels.displayUnit`, this.defaultDisplayUnit);
   }
 
   private get seriesKey(): string {
@@ -191,6 +202,11 @@ export default class VisualHeader extends Vue {
         return 'item';
       case ChartType.Sankey:
         return 'sankey';
+      case ChartType.Table:
+      case ChartType.FlattenTable:
+      case ChartType.PivotTable:
+      case ChartType.FlattenPivotTable:
+        return 'table';
       default:
         return 'series';
     }
@@ -199,10 +215,10 @@ export default class VisualHeader extends Vue {
   private get enableDisplayUnit() {
     if (this.widgetType) {
       switch (this.widgetType) {
-        case ChartType.Table:
-        case ChartType.FlattenTable:
-        case ChartType.PivotTable:
-        case ChartType.FlattenPivotTable:
+        // case ChartType.Table:
+        // case ChartType.FlattenTable:
+        // case ChartType.PivotTable:
+        // case ChartType.FlattenPivotTable:
         case ChartType.Parliament:
         case ChartType.Kpi:
         case ChartType.InputControl:
@@ -232,10 +248,10 @@ export default class VisualHeader extends Vue {
   private get enablePrecision() {
     if (this.widgetType) {
       switch (this.widgetType) {
-        case ChartType.Table:
-        case ChartType.FlattenTable:
-        case ChartType.PivotTable:
-        case ChartType.FlattenPivotTable:
+        // case ChartType.Table:
+        // case ChartType.FlattenTable:
+        // case ChartType.PivotTable:
+        // case ChartType.FlattenPivotTable:
         case ChartType.Parliament:
         case ChartType.InputControl:
         case ChartType.InputFilter:

@@ -67,6 +67,27 @@
         :hint="`${configSetting['fieldFormatting.applyTotals'].hint}`"
         @onChanged="handleApplyTotals"
       />
+      <div class="row-config-container">
+        <DropdownSetting
+          id="column-display-unit"
+          :options="displayUnitOptions"
+          :value="displayUnit"
+          class="mr-2"
+          :label="`${configSetting['fieldFormatting.displayUnit'].label}`"
+          :hint="`${configSetting['fieldFormatting.displayUnit'].hint}`"
+          size="half"
+          @onChanged="handleDisplayUnitChanged"
+        />
+        <DropdownSetting
+          id="column-precision-setting"
+          :options="precisionOptions"
+          :value="precision"
+          :label="`${configSetting['fieldFormatting.precision'].label}`"
+          :hint="`${configSetting['fieldFormatting.precision'].hint}`"
+          size="small"
+          @onChanged="handlePrecisionChanged"
+        />
+      </div>
       <RevertButton class="mb-3" style="text-align: right" @click="handleRevertDefault" />
     </div>
   </PanelHeader>
@@ -79,6 +100,8 @@ import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { SelectOption } from '@/shared';
 import { get } from 'lodash';
 import { AlignOptions } from '@/shared/settings/common/options/AlignOptions';
+import { DisplayUnitOptions, PrecisionOptions } from '@/shared/settings/common/options';
+import { MetricNumberMode } from '@/utils';
 
 @Component({ components: { PanelHeader } })
 export default class FieldFormattingTab extends Vue {
@@ -101,7 +124,9 @@ export default class FieldFormattingTab extends Vue {
     },
     applyHeader: false,
     applyTotals: false,
-    applyValues: false
+    applyValues: false,
+    displayUnit: MetricNumberMode.None,
+    precision: 2
   };
 
   private get columnOptions(): SelectOption[] {
@@ -133,6 +158,24 @@ export default class FieldFormattingTab extends Vue {
 
   private get fieldAlign() {
     return get(this.setting, `options.fieldFormatting.${this.selectedColumn}.align`, this.defaultSetting.align);
+  }
+
+  private get displayUnitOptions(): SelectOption[] {
+    return DisplayUnitOptions;
+  }
+
+  private get displayUnit(): string {
+    const generalDisplayUnit = get(this.setting, `options.plotOptions.table.dataLabels.displayUnit`);
+    const fieldDisplayUnit = get(this.setting, `options.fieldFormatting.${this.selectedColumn}.displayUnit`);
+    return fieldDisplayUnit ?? generalDisplayUnit ?? MetricNumberMode.None;
+  }
+
+  private get precision() {
+    return get(this.setting, `options.fieldFormatting.${this.selectedColumn}.precision`, this.defaultSetting.precision);
+  }
+
+  private get precisionOptions() {
+    return PrecisionOptions;
   }
 
   private handleColumnSelect(id: string) {
@@ -187,7 +230,17 @@ export default class FieldFormattingTab extends Vue {
     settingAsMap.set(`fieldFormatting.${this.selectedColumn}.backgroundColor`, this.defaultSetting.background);
     settingAsMap.set(`fieldFormatting.${this.selectedColumn}.style.color`, this.defaultSetting.style.color);
     settingAsMap.set(`fieldFormatting.${this.selectedColumn}.align`, this.defaultSetting.align);
+    settingAsMap.set(`fieldFormatting.${this.selectedColumn}.displayUnit`, this.defaultSetting.displayUnit);
+    settingAsMap.set(`fieldFormatting.${this.selectedColumn}.precision`, this.defaultSetting.precision);
     this.$emit('onMultipleChanged', settingAsMap);
+  }
+
+  private handleDisplayUnitChanged(newDisplayUnit: string) {
+    return this.$emit('onChanged', `fieldFormatting.${this.selectedColumn}.displayUnit`, newDisplayUnit);
+  }
+
+  private handlePrecisionChanged(newPrecision: number) {
+    return this.$emit('onChanged', `fieldFormatting.${this.selectedColumn}.precision`, newPrecision);
   }
 }
 </script>

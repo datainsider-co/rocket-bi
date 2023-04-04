@@ -45,6 +45,12 @@ object ClickhouseCsvWriter extends Logging {
     } else {
       ZConfig.getString("clickhouse_csv_writer.password")
     }
+  private def clickhouseUseSsl: Boolean =
+    if (clickhouseEnvSetting.isDefined) {
+      clickhouseEnvSetting.get.useSsl
+    } else {
+      ZConfig.getBoolean("clickhouse_csv_writer.use_ssl", default = false)
+    }
 
   prepareWorkDir()
   scheduleAutoCleanup()
@@ -77,6 +83,7 @@ object ClickhouseCsvWriter extends Logging {
         )
 
         if (clickhousePassword.nonEmpty) cmd += s"--password=$clickhousePassword"
+        if (clickhouseUseSsl) cmd += s"--secure"
 
         var processLog = ""
         val processLogger = ProcessLogger(log => {

@@ -18,6 +18,10 @@
         </div>
         <div class="user-details-contact-header-actions">
           <!--   todo handle disable if dont have enough permission-->
+          <DiIconTextButton :id="genBtnId('reset-password')" title="Reset Password" @click="showResetPasswordConfirm(userFullDetailInfo)">
+            <i v-if="isResetPasswordLoading" class="fa fa-spin fa-spinner"></i>
+            <i v-else class="di-icon-reset-password"></i>
+          </DiIconTextButton>
           <DiIconTextButton :id="genBtnId('delete-user')" title="Delete User" @click="handleDeleteUserButtonClicked">
             <i class="di-icon-delete"></i>
           </DiIconTextButton>
@@ -68,7 +72,7 @@ import { CollapseTransition, FadeTransition } from 'vue2-transitions';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import AddNewFieldModal from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
 import moment from 'moment';
-import { UserFullDetailInfo, UserProfile } from '@core/common/domain/model';
+import { UserFullDetailInfo, UserInfo, UserProfile } from '@core/common/domain/model';
 import ContactDetailsForm from '@/screens/user-management/components/user-detail/ContactDetailsForm.vue';
 import { PopupUtils } from '@/utils/PopupUtils';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
@@ -80,6 +84,8 @@ import { UserDetailPanelType } from '@/screens/user-management/store/Enum';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import Contact from '@/screens/tracking-profile/components/tracking-profile-detail/Contact.vue';
+import { Modals } from '@/utils/Modals';
+import Swal from 'sweetalert2';
 
 @Component({
   components: {
@@ -94,6 +100,7 @@ import Contact from '@/screens/tracking-profile/components/tracking-profile-deta
 export default class UserContact extends Vue {
   private isShowContactDetailsForm: boolean;
   private maxSpanWidth: number;
+  private isResetPasswordLoading = false;
 
   @Prop({ required: true })
   private readonly status!: Status;
@@ -221,6 +228,39 @@ export default class UserContact extends Vue {
     const panelType = UserDetailModule.currentDetailPanelType;
     if (panelType !== UserDetailPanelType.UserDeletion) await UserDetailModule.switchDetailPanelType(UserDetailPanelType.UserDeletion);
   }
+
+  private showResetPasswordConfirm(user: UserFullDetailInfo) {
+    Modals.showConfirmationModal(`Are you sure you want to reset the password for ${user.profile?.email ?? user.user.username} account?`, {
+      onOk: () => this.handleResetPassword(user)
+    });
+  }
+
+  @Track(TrackEvents.AdminResetPassword, {
+    user_id: (_: UserContact, args: any) => _.userFullDetailInfo?.profile?.username,
+    user_email: (_: UserContact, args: any) => _.userFullDetailInfo?.profile?.email,
+    user_full_name: (_: UserContact, args: any) => _.userFullDetailInfo?.profile?.fullName
+  })
+  private async handleResetPassword(user: UserFullDetailInfo) {
+    try {
+      this.isResetPasswordLoading = true;
+      await UserDetailModule.resetPassword(user.user.username);
+      this.isResetPasswordLoading = false;
+      await Swal.fire({
+        icon: 'success',
+        title: 'Password Changed!',
+        html: `The ${user.profile?.email ?? user.user.username}'s new password is ${window.appConfig.VUE_APP_DEFAULT_PASSWORD}`
+      });
+    } catch (e) {
+      Log.error('Contact::handleResetPassword::error', e);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Reset password fail',
+        html: e.message
+      });
+    } finally {
+      this.isResetPasswordLoading = false;
+    }
+  }
 }
 </script>
 
@@ -293,7 +333,7 @@ export default class UserContact extends Vue {
         font-size: 16px;
 
         &.full-name {
-          @include medium-text(24px, 0.2px, 1.17);
+          @include medium-text(24px, 0.2px, inherit);
         }
 
         &.active {

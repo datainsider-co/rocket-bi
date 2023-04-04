@@ -180,7 +180,7 @@ case class SaveDwhOperatorExecutor(
     * write data from source table to destination table
     */
   private def writeData(fromTable: TableSchema, destTable: TableSchema): Long = {
-    val insertQuery: String = ClickHouseDDLConverter().toInsertFromTable(
+    val insertQuery: String = ClickHouseDDLConverter.toInsertFromTable(
       fromTable.dbName,
       fromTable.name,
       destTable.dbName,

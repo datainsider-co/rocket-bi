@@ -146,7 +146,7 @@ export class GoogleAnalyticsJobFormRender implements JobFormRender {
       this.showPropertyLoading();
       this.showViewLoading();
       await this.loadRefreshToken();
-      await GoogleUtils.loadGoogleAnalyticClient(this.googleConfig.apiKey, this.gaJob.accessToken);
+      await GoogleUtils.loadGoogleAnalyticClient(this.googleConfig.apiKey, '');
       const propertyResponse = await GoogleUtils.getGoogleAnalyticProperty('~all');
       Log.debug('response::', propertyResponse);
       await this.processProperty(propertyResponse);
@@ -217,8 +217,8 @@ export class GoogleAnalyticsJobFormRender implements JobFormRender {
 
   private async loadRefreshToken() {
     if (this.isCreateMode) {
-      const refreshToken = await DataSourceModule.getRefreshToken(this.gaJob.authorizationCode);
-      this.gaJob.refreshToken = refreshToken;
+      // const refreshToken = await DataSourceModule.getRefreshToken(this.gaJob.authorizationCode);
+      // this.gaJob.refreshToken = refreshToken;
     }
   }
 
@@ -392,8 +392,7 @@ export class GoogleAnalyticsJobFormRender implements JobFormRender {
 
   toDimensionsData(data: DropdownData): DimensionInfo {
     return {
-      name: data?.name ?? data.text,
-      histogramBuckets: []
+      name: data?.name ?? data.text
     };
   }
 

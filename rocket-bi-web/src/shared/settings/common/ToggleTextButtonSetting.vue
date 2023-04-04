@@ -1,8 +1,10 @@
 <template>
   <div :class="{ 'disabled-setting': disable }" class="toggle-text-button">
     <ToggleSetting :id="toggleId" :label="toggleLabel" :value="value" @onChanged="emitToggleValueChanged" />
-    <h6 :title="buttonLabel" v-show="value" @click="emitClickedButton">{{ buttonLabel }}</h6>
-    <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
+    <div class="d-flex align-items-center text-truncate">
+      <h6 class="toggle-text-button--advance" :title="buttonLabel" v-show="value" @click="emitClickedButton">{{ buttonLabel }}</h6>
+      <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
+    </div>
   </div>
 </template>
 
@@ -59,9 +61,10 @@ export default class ToggleTextButtonSetting extends Vue {
 
 <style lang="scss">
 .toggle-text-button {
-  align-items: baseline;
+  align-items: center;
   display: flex;
   flex-direction: row;
+  width: 100%;
   justify-content: space-between;
 
   > div {
@@ -72,13 +75,13 @@ export default class ToggleTextButtonSetting extends Vue {
     margin-right: 8px;
   }
 
-  > h6 {
+  &--advance {
     flex-shrink: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--accent);
-    margin: unset;
+    margin: 0;
   }
 }
 </style>

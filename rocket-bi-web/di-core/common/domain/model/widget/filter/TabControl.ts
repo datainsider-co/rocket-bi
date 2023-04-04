@@ -1,4 +1,5 @@
-import { TableColumn, WidgetId } from '@core/common/domain';
+import { Field, TableColumn, WidgetId } from '@core/common/domain';
+import { ListUtils } from '@/utils';
 
 export interface TabControlData {
   tableColumns: TableColumn[]; ///Sử dụng cho Dynamic Function,
@@ -9,22 +10,20 @@ export interface TabControlData {
   chartType: string;
 }
 
-export interface TreeNode {
-  data: TabControlData;
-  icon: string;
-}
-
 export abstract class TabControl {
   abstract isControl(): boolean;
 
-  abstract toTreeNode(): TreeNode;
+  abstract toTabControlData(): TabControlData;
 
-  static isTabControl(obj: any): obj is TabControl {
-    return !!obj?.toTreeNode;
+  static getDefaultField(obj: TabControlData): Field | undefined {
+    return ListUtils.getHead(obj.defaultTableColumns)?.function?.field || void 0;
   }
 
-  static isTabControlData(obj: any): obj is TabControlData {
-    return !!obj.tableColumns && !!obj.defaultTableColumns && !!obj.values && !!obj.displayName && !!obj.id!!;
-    obj.chartType;
+  static isTabControl(obj: any & TabControl): obj is TabControl {
+    return obj && obj.isControl && obj.toTabControlData;
+  }
+
+  static isTabControlData(obj: any & TabControlData): obj is TabControlData {
+    return obj && obj.tableColumns && obj.defaultTableColumns && obj.values && obj.displayName && obj.id && obj.chartType;
   }
 }

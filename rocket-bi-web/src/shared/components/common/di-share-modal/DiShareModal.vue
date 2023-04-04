@@ -34,8 +34,8 @@
     <template #default="{ cancel, ok }">
       <CollapseTransition>
         <b-container v-if="isCollapsed" v-bind:key="'collapsed'" class="p-md-0 pad-y-15">
-          <SearchUserInput @select="handleClickUserItem" ref="searchUserInput" />
-          <StatusWidget :error="getSharedUserError" :status="getSharedUserStatus"></StatusWidget>
+          <SearchUserInput class="search-user-input" placeholder="Add people and groups" @select="handleClickUserItem" ref="searchUserInput" />
+          <StatusWidget :error="getSharedUserError" :status="getSharedUserStatus" @retry="loadResourceInfo(resourceData)"></StatusWidget>
           <SharePermissionManager
             v-if="getSharedUserStatus === Statuses.Loaded"
             :data="resourceInfo.usersSharing"
@@ -63,22 +63,14 @@
           :link="link"
           :is-btn-loading="isBtnLoading"
           :permission-token-response="permissionTokenResponse"
+          :is-create-new-password="isCreatingPassword"
+          :show-password-protection="isShowPasswordProtection"
           :link-handler="linkHandler"
+          :passwordConfig.sync="editPasswordSetting"
           @ok="ok"
           @cancel="cancel"
           @expand="onShareAnyoneExpand"
-        />
-        <PasswordProtection
-          v-if="enablePasswordProtection && isEnableDashboardPasswordUsage"
-          ref="passwordProtection"
-          :is-create-new="isCreatingPassword"
-          :config.sync="editPasswordSetting"
-          :is-btn-loading="isBtnLoading"
-          class="mt-2"
-          @ok="ok"
-          @cancel="cancel"
-          @expand="onPasswordProtectionExpand"
-          @reset="resetPassword"
+          @resetPassword="resetPassword"
         />
       </div>
     </template>
@@ -114,14 +106,13 @@ import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import CopyButton from '@/shared/components/common/di-share-modal/components/CopyButton.vue';
 import SharePermissionManager from '@/shared/components/SharePermissionManager.vue';
 import SearchUserInput from '@/shared/components/common/di-share-modal/components/share-user/SearchUserInput.vue';
-import PasswordProtection from '@/shared/components/common/di-share-modal/components/password-protection/PasswordProtection.vue';
 import ShareAnyone from '@/shared/components/common/di-share-modal/components/share-anyone/ShareAnyone.vue';
 import { ShareDirectoryLinkHandler } from '@/shared/components/common/di-share-modal/link-handler/ShareDirectoryLinkHandler';
 import { ShareDashboardLinkHandler } from '@/shared/components/common/di-share-modal/link-handler/ShareDashboardLinkHandler';
 import { DashboardMetaData } from '@core/common/domain/model/directory/directory-metadata/DashboardMetaData';
 import { Di } from '@core/common/modules';
 import { DataManager } from '@core/common/services';
-import OrganizationPermissionModule from '@/store/modules/OrganizationPermissionStore';
+import { ShareQueryLinkHandler } from '@/shared/components/common/di-share-modal/link-handler/ShareQueryLinkHandler';
 
 export interface ResourceData {
   resourceType: ResourceType;
@@ -141,12 +132,12 @@ export interface ResourceData {
     CollapseTransition,
     FadeTransition,
     SearchUserInput,
-    PasswordProtection,
     ShareAnyone
   }
 })
 export default class DiShareModal extends Vue {
   private readonly Statuses = Status;
+  private resourceData: ResourceData | null = null;
   shareHandler: ShareHandler = new ShareDirectoryHandler();
   linkHandler: LinkHandler | null = null;
   isHeaderCollapsed = false;
@@ -162,7 +153,7 @@ export default class DiShareModal extends Vue {
   //
   permissionTokenResponse: PermissionTokenResponse | null = null;
   enableShareAnyone = false;
-  enablePasswordProtection = false;
+  isShowPasswordProtection = false;
 
   localPasswordSetting: PasswordConfig | null = null; ///Use for valid/reset password
 
@@ -177,9 +168,7 @@ export default class DiShareModal extends Vue {
   searchUserInput?: SearchUserInput;
 
   @Ref()
-  shareAnyone!: ShareAnyone;
-  @Ref()
-  passwordProtection!: PasswordProtection;
+  shareAnyone?: ShareAnyone;
 
   private currentPermission: ActionType = ActionType.none;
 
@@ -187,10 +176,6 @@ export default class DiShareModal extends Vue {
 
   private get isSharePeopleEmpty(): boolean {
     return ListUtils.isEmpty(this.resourceInfo?.usersSharing);
-  }
-
-  private get isEnableDashboardPasswordUsage() {
-    return OrganizationPermissionModule.isEnableDashboardPassword;
   }
 
   get sharedUserNames(): string {
@@ -236,6 +221,7 @@ export default class DiShareModal extends Vue {
     enablePassword: boolean,
     passwordSetting: PasswordConfig | null = null
   ) {
+    this.resourceData = resourceData;
     this.init(resourceData, handler, linkHandler); ///K load
     this.loadResourceInfo(resourceData);
     this.initShareAnyone(enableShareAnyone);
@@ -261,7 +247,7 @@ export default class DiShareModal extends Vue {
 
   showShareDashboard(directory: Directory) {
     const directoryName = directory.name;
-    const resourceData: ResourceData = {
+    this.resourceData = {
       organizationId: this.dataManager.getUserInfo()?.organization.organizationId!,
       resourceType: ResourceType.directory,
       resourceId: directory.id.toString(),
@@ -270,8 +256,21 @@ export default class DiShareModal extends Vue {
     const linkHandler = new ShareDashboardLinkHandler(directory.dashboardId!.toString(), directoryName);
     const currentPassword = directory?.data ? (directory.data as DashboardMetaData)?.config ?? null : null;
     Log.debug('showShareDashboard::', currentPassword);
-    const enableShareAnyone = directory.directoryType === DirectoryType.Dashboard;
-    this.showShareModal(resourceData, new ShareDirectoryHandler(), enableShareAnyone, linkHandler, true, currentPassword);
+    this.showShareModal(this.resourceData, new ShareDirectoryHandler(), true, linkHandler, true, currentPassword);
+  }
+
+  showShareAdhocQuery(directory: Directory) {
+    const directoryName = directory.name;
+    this.resourceData = {
+      organizationId: this.dataManager.getUserInfo()?.organization.organizationId!,
+      resourceType: ResourceType.directory,
+      resourceId: directory.id.toString(),
+      creator: directory?.owner?.username
+    };
+    const linkHandler = new ShareQueryLinkHandler(directory.dashboardId!.toString(), directoryName);
+    const currentPassword = directory?.data ? (directory.data as DashboardMetaData)?.config ?? null : null;
+    Log.debug('showShareDashboard::', currentPassword);
+    this.showShareModal(this.resourceData, new ShareDirectoryHandler(), true, linkHandler, true, currentPassword);
   }
 
   init(resource: ResourceData, handler: ShareHandler, linkHandler: LinkHandler | null = null) {
@@ -296,8 +295,8 @@ export default class DiShareModal extends Vue {
   }
 
   private initPassword(enablePassword: boolean, passwordSetting: PasswordConfig | null = null) {
-    Log.debug('initPassword::', enablePassword, this.isOwner);
-    this.enablePasswordProtection = enablePassword && this.isOwner;
+    Log.debug('initPassword::', enablePassword, this.isOwner, passwordSetting);
+    this.isShowPasswordProtection = enablePassword && this.isOwner;
     this.localPasswordSetting = passwordSetting;
     this.editPasswordSetting = passwordSetting;
   }
@@ -342,7 +341,7 @@ export default class DiShareModal extends Vue {
       this.isBtnLoading = true;
       const isShareAnyoneActionChange = this.checkShareAnyoneChange();
       await this.shareHandler.saveAll(this.resourceId.toString(), this.resourceType, this.currentPermission, isShareAnyoneActionChange);
-      await this.updatePassword(this.enablePasswordProtection, this.editPasswordSetting);
+      await this.updatePassword(this.editPasswordSetting?.enabled ?? false, this.editPasswordSetting);
       TrackingUtils.track(TrackEvents.SubmitShareOk, {});
       this.mdShare.hide();
       this.$emit('shared');
@@ -360,7 +359,7 @@ export default class DiShareModal extends Vue {
     this.searchUserInput?.reset();
     this.link = '';
     this.permissionTokenResponse = null;
-    this.enablePasswordProtection = false;
+    this.isShowPasswordProtection = false;
     this.localPasswordSetting = null;
     this.editPasswordSetting = null;
     this.isBtnLoading = false;
@@ -445,18 +444,13 @@ export default class DiShareModal extends Vue {
   }
 
   private async resetPassword() {
-    try {
-      await this.shareHandler.removePassword(this.resourceId, this.resourceType);
-      this.localPasswordSetting = null;
-      this.editPasswordSetting = { enabled: true, hashedPassword: '' };
-    } catch (ex) {
-      Log.error(ex);
-    }
+    this.localPasswordSetting = null;
   }
 
   async updatePassword(enabled: boolean, config: PasswordConfig | null) {
     Log.debug('updatePassword::', enabled, config);
-    if (!enabled) {
+    if (!enabled || StringUtils.isEmpty(config?.hashedPassword ?? '')) {
+      await this.shareHandler.removePassword(this.resourceId, this.resourceType);
       return;
     }
     if (this.isCreatingPassword && config && StringUtils.isNotEmpty(config.hashedPassword)) {
@@ -467,21 +461,11 @@ export default class DiShareModal extends Vue {
 
   private expandShareUser() {
     this.isHeaderCollapsed = !this.isHeaderCollapsed;
-    this.shareAnyone.collapse();
-    this.passwordProtection?.collapse();
+    this.shareAnyone?.collapse();
   }
 
   private onShareAnyoneExpand() {
     this.isHeaderCollapsed = true;
-    this.passwordProtection?.collapse();
-  }
-
-  private onPasswordProtectionExpand() {
-    this.isHeaderCollapsed = true;
-    this.shareAnyone.collapse();
-    if (this.editPasswordSetting === null) {
-      this.editPasswordSetting = { enabled: true, hashedPassword: '' };
-    }
   }
 }
 </script>
@@ -503,10 +487,6 @@ export default class DiShareModal extends Vue {
 
   .select-container {
     margin: 0;
-  }
-
-  #swm-select-share-anyone {
-    height: 32px;
   }
 }
 </style>

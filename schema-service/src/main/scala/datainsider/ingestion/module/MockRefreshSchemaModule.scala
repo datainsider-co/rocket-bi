@@ -9,14 +9,15 @@ import datainsider.ingestion.service.{RefreshSchemaWorker, RefreshSchemaWorkerIm
 import education.x.commons.SsdbKVS
 import org.nutz.ssdb4j.spi.SSDB
 
-import javax.inject.Singleton;
+import javax.inject.Singleton
+import scala.util.Try;
 
 /**
- * created 2022-08-03 11:36 AM
- *
- * @author tvc12 - Thien Vi
- */
- object MockRefreshSchemaModule extends TwitterModule {
+  * created 2022-08-03 11:36 AM
+  *
+  * @author tvc12 - Thien Vi
+  */
+object MockRefreshSchemaModule extends TwitterModule {
 
   @Singleton
   @Provides
@@ -26,7 +27,7 @@ import javax.inject.Singleton;
     val jdbcUrl: String = ZConfig.getString("db.clickhouse.url")
     val user: String = ZConfig.getString("db.clickhouse.user")
     val password: String = ZConfig.getString("db.clickhouse.password")
-    val clusterName: String = ZConfig.getString("db.clickhouse.cluster_name")
+    val clusterName: Option[String] = Try(ZConfig.getString("db.clickhouse.cluster_name")).toOption
     val clickhouseSource = ClickhouseSource(jdbcUrl, user, password, clusterName)
 
     new SystemRepositoryImpl(clickhouseSource, systemInfoDatabase)

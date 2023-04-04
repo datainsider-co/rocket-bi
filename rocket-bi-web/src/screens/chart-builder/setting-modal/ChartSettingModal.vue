@@ -269,7 +269,7 @@ export default class VizSettingModal extends Vue {
 </style>
 
 <style lang="scss">
-@import '~@/shared/settings/common/SettingStyle';
+@import '~@/shared/settings/common/setting-style';
 
 #viz-setting-modal {
   .modal-content {

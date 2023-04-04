@@ -82,7 +82,6 @@ class TrashEtlJobServiceImpl @Inject() (
           status = Option(etlJob.status),
           nextExecuteTime = Option(etlJob.nextExecuteTime),
           lastExecuteTime = etlJob.lastExecuteTime,
-          operatorInfo = etlJob.operatorInfo,
           config = etlJob.config
         )
       )
@@ -106,7 +105,6 @@ class TrashEtlJobServiceImpl @Inject() (
             status = Option(etlJob.status),
             nextExecuteTime = Option(etlJob.nextExecuteTime),
             lastExecuteTime = etlJob.lastExecuteTime,
-            operatorInfo = etlJob.operatorInfo,
             config = etlJob.config
           )
         })

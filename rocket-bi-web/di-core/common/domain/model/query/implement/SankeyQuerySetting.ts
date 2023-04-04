@@ -1,4 +1,4 @@
-import { QuerySetting } from '../QuerySetting';
+import { getFiltersAndSorts, QuerySetting } from '../QuerySetting';
 import { Condition, OrderBy, QuerySettingType, SankeyChartOption, TableColumn, Function, InlineSqlView, WidgetId } from '@core/common/domain/model';
 import { ListUtils } from '@/utils';
 import { clone } from 'lodash';
@@ -29,10 +29,14 @@ export class SankeyQuerySetting extends QuerySetting<SankeyChartOption> {
     return [this.source, this.destination, ...this.breakdowns, this.weight];
   }
   static fromObject(obj: SankeyQuerySetting) {
+    const source = TableColumn.fromObject(obj.source);
+    const destination = TableColumn.fromObject(obj.destination);
+    const weight = TableColumn.fromObject(obj.weight);
     const breakdowns: TableColumn[] = obj.breakdowns?.map(breakdown => TableColumn.fromObject(breakdown)) ?? [];
     const sqlViews: InlineSqlView[] = (obj.sqlViews ?? []).map((view: any) => InlineSqlView.fromObject(view));
+    const [filters, sorts] = getFiltersAndSorts(obj);
 
-    return new SankeyQuerySetting(obj.source, obj.destination, breakdowns, obj.weight, obj.filters, obj.sorts, obj.options, sqlViews, obj.parameters);
+    return new SankeyQuerySetting(source, destination, breakdowns, weight, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
   setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {

@@ -52,7 +52,8 @@ import { HeadComparisonOptions, TailComparisonOptions } from '@/shared/settings/
 import { SelectOption } from '@/shared';
 import SlicerPreview from '@/shared/settings/slicer-filter-setting/SlicerPreview.vue';
 import { SlicerDisplay } from '@chart/slicer-filter/NumberSlicer.vue';
-import { ChartUtils } from '@/utils';
+import { ChartUtils, ListUtils } from '@/utils';
+import { Log } from '@core/utils';
 
 @Component({ components: { DefaultValueSetting, PanelHeader, SlicerPreview } })
 export default class SlicerTabControl extends Vue {
@@ -110,7 +111,8 @@ export default class SlicerTabControl extends Vue {
   }
 
   private get slicerDisplay(): SlicerDisplay {
-    const fieldType: string = get(this.query, 'columns[0].function.field.fieldType', '');
+    const fieldType: string = ListUtils.getHead(this.query.values)?.function?.field?.fieldType ?? '';
+    Log.debug('slicerDisplay', this.query);
     //column là cột date thì check xem phải predior k
     if (ChartUtils.isDateType(fieldType)) {
       const dateFunctionType = this.query.values[0]!.function?.scalarFunction?.className ?? '';
@@ -121,12 +123,12 @@ export default class SlicerTabControl extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .comparison-setting {
   font-size: 12px;
 
   .to-comparison-setting {
-    margin: 13px 0 0 8px;
+    margin: 23px 0 0 8px;
   }
 }
 </style>

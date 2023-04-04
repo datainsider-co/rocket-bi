@@ -25,8 +25,8 @@ class GeolocationStore extends VuexModule {
 
   @Action({ commit: 'saveArea' })
   async loadGeolocationMap(): Promise<GeoArea[]> {
-    const areas = await this.geoService.listAreas();
-    const areaSelected = areas[0];
+    const areas: GeoArea[] = await this.geoService.listAreas();
+    const areaSelected = areas.find(area => area.zoneLvl === 1) ?? areas[0];
     this.saveCurrentArea(areaSelected.mapUrl);
     await this.loadListGeolocation(areaSelected);
     return areas;

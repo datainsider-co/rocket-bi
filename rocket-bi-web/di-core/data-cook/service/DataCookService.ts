@@ -9,7 +9,7 @@ import {
   EtlOperator,
   ExpressionFieldConfiguration,
   GetListEtlRequest,
-  MultiPreviewEtlOperatorResponse,
+  PreviewEtlResponse,
   NormalFieldConfiguration,
   ParseQueryResponse,
   PreviewEtlOperatorResponse
@@ -33,8 +33,7 @@ export abstract class DataCookService {
   abstract restoreEtl(id: number): Promise<boolean>;
 
   abstract preview(id: number, etlOperator: EtlOperator, force: boolean): Promise<PreviewEtlOperatorResponse>;
-  abstract multiPreview(id: number, operators: EtlOperator[], force: boolean): Promise<MultiPreviewEtlOperatorResponse>;
-  abstract checkProgressId(id: number, progressId: number): Promise<CheckProgressResponse>;
+  abstract multiPreview(id: number, operators: EtlOperator[], force: boolean): Promise<PreviewEtlResponse>;
   abstract getListEtlHistory(request: GetListEtlRequest): Promise<ListingResponse<EtlJobHistory>>;
   abstract getDatabaseName(id: number): Promise<EtlDatabaseNameResponse>;
   abstract parseQuery(id: number, fields: NormalFieldConfiguration[], extraFields: ExpressionFieldConfiguration[]): Promise<ParseQueryResponse>;
@@ -81,15 +80,11 @@ export class DataCookServiceImpl extends DataCookService {
     return this.dataCookRepository.restoreEtl(id);
   }
 
-  checkProgressId(id: number, progressId: number): Promise<CheckProgressResponse> {
-    return this.dataCookRepository.checkProgressId(id, progressId);
-  }
-
   preview(id: number, etlOperator: EtlOperator, force: boolean): Promise<PreviewEtlOperatorResponse> {
     return this.dataCookRepository.preview(id, etlOperator, force);
   }
 
-  multiPreview(id: number, operators: EtlOperator[], force: boolean): Promise<MultiPreviewEtlOperatorResponse> {
+  multiPreview(id: number, operators: EtlOperator[], force: boolean): Promise<PreviewEtlResponse> {
     return this.dataCookRepository.multiPreview(id, operators, force);
   }
 

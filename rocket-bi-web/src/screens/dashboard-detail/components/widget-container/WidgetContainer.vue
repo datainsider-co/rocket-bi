@@ -1,6 +1,5 @@
 <template>
   <ChartHolder v-if="isChart(widget.className)" :meta-data="widget" :showEditComponent="isShowEdit" />
-  <!--    <FilterContainer v-else-if="isFilter(widget.className)" :filter="widget" :showEditComponent="isShowEdit" />-->
   <OtherWidget v-else :showEditComponent="isShowEdit" :widget="widget" />
 </template>
 
@@ -8,13 +7,11 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Widget, Widgets } from '@core/common/domain/model';
 import OtherWidget from '@/screens/dashboard-detail/components/widget-container/other/OtherWidget.vue';
-import FilterContainer from '@filter/FilterContainer.vue';
 import ChartHolder from './charts/ChartHolder.vue';
 
 @Component({
   components: {
     ChartHolder,
-    FilterContainer,
     OtherWidget
   }
 })

@@ -25,7 +25,7 @@ case class PythonOperator(
     id: OperatorId,
     code: String,
     destTableConfiguration: TableConfiguration
-) extends Operator
+) extends TableResultOperator
 
 case class PythonOperatorExecutor(
     etlTableService: EtlTableService,

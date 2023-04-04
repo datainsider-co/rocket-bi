@@ -40,14 +40,14 @@ export class DynamicValuesChartHandler extends ChartHandler {
   }
 
   async onAdd(widget: ChartInfo): Promise<void> {
-    await DashboardControllerModule.setDynamicFilter({ id: widget.id, values: ((widget.setting as any) as DynamicValues).getDefaultValues() });
+    await DashboardControllerModule.setDynamicValues({ id: widget.id, values: ((widget.setting as any) as DynamicValues).getDefaultValues() });
   }
 
   async onUpdate(widget: ChartInfo): Promise<void> {
     const currentFilterValues = DashboardControllerModule.dynamicFilter.get(widget.id);
     const updateFilterValues = ((widget.setting as any) as DynamicValues).getDefaultValues();
     if (!isEqual(currentFilterValues, updateFilterValues)) {
-      await DashboardControllerModule.replaceDynamicFilter({ widget: widget, values: updateFilterValues, apply: true });
+      await DashboardControllerModule.replaceDynamicValues({ widget: widget, values: updateFilterValues, apply: true });
     }
   }
 }

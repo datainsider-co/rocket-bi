@@ -11,6 +11,7 @@ import { SchedulerName } from '@/shared';
 export class GA4Job implements Job {
   className = JobName.GA4Job;
   displayName: string;
+  tableName: string;
   destDatabaseName: string;
   destTableName: string;
   destinations: DataDestination[];
@@ -28,19 +29,18 @@ export class GA4Job implements Job {
   lastSyncedValue: string;
 
   propertyId: string;
+  accountId: string;
+
   dateRanges: GaDateRange[];
   metrics: GA4Metric[];
   dimensions: Ga4Dimension[];
-
-  accessToken: string;
-  refreshToken: string;
-  authorizationCode: string;
 
   constructor(
     jobId: JobId,
     orgId: string,
     sourceId: SourceId,
     displayName: string,
+    tableName: string,
     destDatabaseName: string,
     destTableName: string,
     destinations: DataDestination[],
@@ -53,18 +53,17 @@ export class GA4Job implements Job {
     currentSyncStatus: JobStatus,
 
     propertyId: string,
+    accountId: string,
     dateRanges: GaDateRange[],
     metrics: GA4Metric[],
     dimensions: Ga4Dimension[],
-    accessToken: string,
-    refreshToken: string,
-    authorizationCode: string,
     syncMode?: SyncMode
   ) {
     this.jobId = jobId;
     this.orgId = orgId;
     this.sourceId = sourceId;
     this.displayName = displayName;
+    this.tableName = tableName;
     this.destDatabaseName = destDatabaseName;
     this.destTableName = destTableName;
     this.destinations = destinations;
@@ -77,13 +76,11 @@ export class GA4Job implements Job {
     this.currentSyncStatus = currentSyncStatus;
 
     this.propertyId = propertyId;
+    this.accountId = accountId;
     this.dateRanges = dateRanges;
     this.metrics = metrics;
     this.dimensions = dimensions;
 
-    this.accessToken = accessToken;
-    this.refreshToken = refreshToken;
-    this.authorizationCode = authorizationCode;
     this.syncMode = syncMode || SyncMode.FullSync;
   }
 
@@ -93,6 +90,7 @@ export class GA4Job implements Job {
       obj.orgId,
       obj.sourceId,
       obj.displayName,
+      obj.tableName,
       obj.destDatabaseName,
       obj.destTableName,
       obj.destinations,
@@ -104,12 +102,10 @@ export class GA4Job implements Job {
       obj.lastSyncStatus,
       obj.currentSyncStatus,
       obj.propertyId,
+      obj.accountId,
       obj.dateRanges,
       obj.metrics,
       obj.dimensions,
-      obj.accessToken,
-      obj.refreshToken,
-      '',
       obj.syncMode
     );
   }
@@ -122,6 +118,7 @@ export class GA4Job implements Job {
       '',
       '',
       '',
+      '',
       [DataDestination.Clickhouse],
       0,
       '',
@@ -131,30 +128,12 @@ export class GA4Job implements Job {
       JobStatus.Initialized,
       JobStatus.Initialized,
       '',
+      '',
       [{ startDate: new Date(), endDate: GaDate.Today }],
       [],
       [],
-      '',
-      '',
-      '',
       SyncMode.FullSync
     );
-  }
-
-  setToken(accessToken: string, refreshToken: string) {
-    this.refreshToken = refreshToken;
-    this.accessToken = accessToken;
-    return this;
-  }
-
-  setAccessToken(accessToken: string) {
-    this.accessToken = accessToken;
-    return this;
-  }
-
-  setAuthorizationCode(authCode: string) {
-    this.authorizationCode = authCode;
-    return this;
   }
 
   setOrgId(dataSource: DataSourceInfo): Job {

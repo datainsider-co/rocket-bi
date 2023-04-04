@@ -1,8 +1,7 @@
 <template>
   <div class="tsl-config">
     <div class="d-flex row pl-3 cursor-pointer" @click="handleEnable(!internalConfig.enable)">
-      <DiToggle id="enable-ssl-config" :value="internalConfig.enable" />
-      <div>Enable TLS/SSL Config</div>
+      <DiToggle id="enable-ssl-config" :value="internalConfig.enable" label="Enable TLS/SSL Config" />
     </div>
     <b-collapse :visible="internalConfig.enable" class="mt-2">
       <div class="title">Certificate key file</div>

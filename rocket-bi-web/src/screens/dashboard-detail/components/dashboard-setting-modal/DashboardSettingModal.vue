@@ -54,7 +54,7 @@
 #dashboard-setting {
   .modal-title {
     font-size: 24px;
-    line-height: 1.17;
+    line-height: 1.4;
     letter-spacing: 0.2px;
     font-weight: bold;
   }

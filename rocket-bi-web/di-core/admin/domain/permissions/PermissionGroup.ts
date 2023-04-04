@@ -29,7 +29,7 @@ export class PermissionGroup {
    */
   getExcludedPermissions(selectedPermissions: string[]): string[] {
     const allPermissions: string[] = this.getAllPermissions();
-    return ListUtils.diff(allPermissions, selectedPermissions);
+    return ListUtils.diff<string>(allPermissions, selectedPermissions);
   }
 
   getIncludedPermissions(selectedPermissions: string[]): string[] {
@@ -58,6 +58,7 @@ export class SupportPermissionGroups {
         new PermissionInfo('View Users', `user:view:*`),
         new PermissionInfo('Add New Users', `user:create:*`),
         new PermissionInfo('Edit Users', `user:edit:*`),
+        new PermissionInfo('Reset Password', `user:reset_password:*`),
         new PermissionInfo('Suspend Users', `user:suspend:*`),
         new PermissionInfo('Delete Users', `user:delete:*`),
         new PermissionInfo('View User Permissions', `permission:view:*`),

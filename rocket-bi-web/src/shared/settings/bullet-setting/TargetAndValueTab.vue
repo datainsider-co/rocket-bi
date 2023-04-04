@@ -83,7 +83,7 @@ import RevertButton from '@/shared/settings/common/RevertButton.vue';
 
 @Component({ components: { PanelHeader, RevertButton } })
 export default class TargetAndValueTab extends Vue {
-  private readonly configSetting = window.chartSetting['bulletColor.tab'];
+  private readonly configSetting = window.chartSetting['bulletTarget.tab'];
 
   private readonly defaultSetting = {
     target: 7500,

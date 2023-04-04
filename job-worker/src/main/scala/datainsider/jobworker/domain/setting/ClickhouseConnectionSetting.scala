@@ -6,7 +6,8 @@ case class ClickhouseConnectionSetting(
     password: String,
     httpPort: Int,
     tcpPort: Int,
-    clusterName: String
+    clusterName: Option[String],
+    useSsl: Boolean = false
 ) {
-  def toJdbcUrl: String = s"jdbc:clickhouse://$host:$httpPort"
+  def toJdbcUrl: String = s"jdbc:clickhouse://$host:$httpPort?ssl=$useSsl"
 }

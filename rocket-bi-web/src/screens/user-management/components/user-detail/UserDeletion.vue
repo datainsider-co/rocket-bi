@@ -18,24 +18,7 @@
           <div class="cursor-pointer">Transfer ownership of {{ fullName }}’s data to another user (for example, a manager)</div>
         </b-form-radio>
         <div :class="{ disabled: isTransferDataDisabled }" class="deletion-content pb-4">
-          <b-input
-            debounce="300"
-            id="suggest-transfer-user-id"
-            class="transferred-account col-md-6 col-lg-5 col-11"
-            v-model="newOwnerEmail"
-            placeholder="New owner’s email"
-            @focus="handleFocusInput"
-            @keydown.enter="handleDeleteUser"
-          />
-          <UserItemListing
-            popoverId="suggestion-user-profile"
-            target="suggest-transfer-user-id"
-            :data="suggestedUsers"
-            :error="suggestUserError"
-            :is-show-popover.sync="isShowSuggestions"
-            :status="suggestStatus"
-            @handleClickUserItem="handleClickUserItem"
-          ></UserItemListing>
+          <SearchUserInput class="col-md-6 col-lg-5 col-11 p-0" placeholder="New owner's email" @select="handleClickUserItem" ref="searchUserInput" />
         </div>
       </div>
       <div class="group-deletion">
@@ -57,7 +40,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { UserDetailModule } from '@/screens/user-management/store/UserDetailStore';
 import { UserDetailPanelType } from '@/screens/user-management/store/Enum';
 import { Log } from '@core/utils';
@@ -68,6 +51,7 @@ import UserItemListing from '@/shared/components/UserItemListing.vue';
 import { Modals, PopupUtils } from '@/utils';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
+import SearchUserInput from '@/shared/components/common/di-share-modal/components/share-user/SearchUserInput.vue';
 
 enum TransferOption {
   TransferToEmail = 0,
@@ -76,54 +60,23 @@ enum TransferOption {
 
 @Component({
   components: {
-    UserItemListing
+    UserItemListing,
+    SearchUserInput
   }
 })
 export default class UserDeletion extends Vue {
   private readonly TransferOption = TransferOption;
-  private newOwnerEmail = '';
   private selectedOption = TransferOption.TransferToEmail;
   private isDeleteBtnLoading = false;
-  private isShowSuggestions = false;
-  private isSelectingUser = false;
 
-  private suggestUserError = '';
-
-  private suggestStatus = Status.Loaded;
+  @Ref()
+  private searchUserInput!: SearchUserInput;
 
   @Prop()
   fullName!: string;
 
   get isTransferDataDisabled() {
     return this.selectedOption == TransferOption.NotTransfer;
-  }
-
-  get suggestedUsers(): UserProfile[] {
-    return ShareModule.suggestedUsers;
-  }
-
-  private handleFocusInput() {
-    if (!this.isSelectingUser) {
-      this.isShowSuggestions = true;
-      this.handleLOadSuggestedUsers(this.newOwnerEmail);
-    }
-  }
-
-  @Watch('newOwnerEmail')
-  handleSearchInputChange(newValue: string) {
-    this.handleFocusInput();
-  }
-
-  private async handleLOadSuggestedUsers(keyword: string): Promise<void> {
-    try {
-      this.suggestStatus = Status.Loading;
-      await ShareModule.loadSuggestedUsers({ keyword: keyword, from: 0, size: 100 });
-      this.suggestStatus = Status.Loaded;
-    } catch (ex) {
-      this.suggestStatus = Status.Error;
-      this.suggestUserError = ex.message;
-      Log.debug('UserActivityHeader::handleGetSuggestedUsers::err::', ex);
-    }
   }
 
   private handleDeleteUser(): void {
@@ -156,7 +109,7 @@ export default class UserDeletion extends Vue {
 
   private getTransferEmail(): string | undefined {
     if (this.selectedOption == TransferOption.TransferToEmail) {
-      return this.newOwnerEmail || void 0;
+      return this.searchUserInput.inputValue || void 0;
     } else {
       return void 0;
     }
@@ -171,11 +124,9 @@ export default class UserDeletion extends Vue {
   }
 
   private handleClickUserItem(userProfile: UserProfile) {
-    this.isSelectingUser = true;
-    this.newOwnerEmail = userProfile.email!;
+    userProfile?.email ? this.searchUserInput.setInputValue(userProfile.email) : PopupUtils.showError(`${userProfile.getName}'s email does not exist.`);
     this.$nextTick(() => {
-      this.isSelectingUser = false;
-      this.isShowSuggestions = false;
+      this.searchUserInput.unFocus();
     });
   }
 }
@@ -363,11 +314,5 @@ export default class UserDeletion extends Vue {
       }
     }
   }
-}
-</style>
-
-<style lang="scss">
-#suggestion-user-profile {
-  width: 360px;
 }
 </style>

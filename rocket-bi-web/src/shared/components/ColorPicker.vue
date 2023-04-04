@@ -1,6 +1,6 @@
 <template>
   <div>
-    <BPopover :show.sync="isShow" :target="id" placement="top" triggers="blur" custom-class="popover-color-picker">
+    <BPopover :show.sync="isShow" :target="id" placement="top" triggers="blur" custom-class="popover-color-picker" boundary="window">
       <template>
         <div id="main-picker-area" class="main-picker-area">
           <Sketch v-model="colors" :presetColors="[]"></Sketch>

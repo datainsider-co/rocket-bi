@@ -233,7 +233,7 @@ class ConfigBuilderStore extends VuexModule {
 
   @Mutation
   setConfigs(extraData: WidgetExtraData) {
-    this.configsAsMap = FunctionDataUtils.toConfigAsMap(extraData.configs);
+    this.configsAsMap = FunctionDataUtils.toConfigAsMap(extraData?.configs ?? ({} as any));
   }
 
   // Filter
@@ -340,7 +340,7 @@ class ConfigBuilderStore extends VuexModule {
 
   @Mutation
   setFilters(extraData: WidgetExtraData) {
-    this.filterAsMap = ConditionDataUtils.toFilters(extraData.filters);
+    this.filterAsMap = ConditionDataUtils.toFilters(extraData.filters ?? {});
     Log.debug('ConfigBuilderStore::', this.filterAsMap);
   }
 

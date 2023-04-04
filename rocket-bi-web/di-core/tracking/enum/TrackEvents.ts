@@ -446,6 +446,7 @@ export enum TrackEvents {
   SuspendUser = 'suspend_user', //user_id user_email user_full_name
   ActiveUser = 'active_user', //user_id user_email user_full_name
   DeleteUser = 'delete_user', //user_id user_email user_full_name
+  AdminResetPassword = 'admin_reset_password', //user_id user_email user_full_name
   SubmitDeleteUser = 'submit_delete_user', //user_id user_email user_full_name
   SubmitSaveUserPrivilege = 'submit_save_user_privilege', //permissions user_id user_email user_full_name
   UpdateUserInfo = 'update_user_info', //field_name value user_id user_email

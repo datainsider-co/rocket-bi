@@ -1,7 +1,7 @@
 <template>
-  <div class="setting-container no-gutters" :class="{ 'disabled-setting': disable }">
-    <div class="d-flex flex-row align-items-center mb-2">
-      <p v-if="label != null" class="label single-line m-0">{{ label }}</p>
+  <div class="setting-container align-setting no-gutters" :class="{ 'disabled-setting': disable }">
+    <div v-if="isLabel || showHint" class="label d-flex flex-row align-items-center">
+      <p v-if="isLabel" class="single-line m-0">{{ label }}</p>
       <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
     </div>
     <div class="d-flex align-items-center justify-content-between align-container" style="height: 34px;">
@@ -14,7 +14,6 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import { Log } from '@core/utils';
 import { StringUtils } from '@/utils';
 
 @Component({})
@@ -49,35 +48,13 @@ export default class AlignSetting extends Vue {
     const classString = 'btn-icon btn-ghost di-popup ic-16';
     return this.selectValue == align ? `${classString} active` : `${classString}`;
   }
+
   private get showHint(): boolean {
     return StringUtils.isNotEmpty(this.hint);
   }
+
+  private get isLabel(): boolean {
+    return StringUtils.isNotEmpty(this.label);
+  }
 }
 </script>
-
-<style lang="scss">
-@import '~@/themes/scss/mixin.scss';
-
-.align-container {
-  height: 34px;
-
-  > .btn-icon {
-    padding: 8px;
-    font-size: 20px;
-    &:first-child {
-      padding-left: 0;
-    }
-    &:last-child {
-      padding-right: 0;
-    }
-  }
-
-  .active {
-    color: var(--accent) !important;
-  }
-}
-
-.align-item {
-  @include ic-16;
-}
-</style>

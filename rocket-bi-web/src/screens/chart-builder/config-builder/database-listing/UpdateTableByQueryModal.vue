@@ -46,7 +46,6 @@
               ref="queryComponent"
               v-if="tableSchema"
               :showAdHocAnalysis="false"
-              :is-update-schema-mode="false"
               :default-query="query"
               :formula-controller="formulaController"
               :editorController="editorController"
@@ -80,6 +79,7 @@ import { PopupUtils } from '@/utils/PopupUtils';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { ListUtils } from '@/utils';
+// import QueryComponentCtrl from '@/screens/data-management/components/QueryComponent.ts';
 
 const QueryComponent = () => import('@/screens/data-management/components/QueryComponent.vue');
 

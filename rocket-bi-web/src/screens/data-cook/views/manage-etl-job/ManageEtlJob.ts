@@ -124,13 +124,15 @@ export default class ManageEtlJob extends Vue {
       return;
     }
     this.renameModal.setLoading(true);
-    const temp = new EtlJobRequest(
+    const request = new EtlJobRequest(
       newName,
       this.model?.operators ?? [],
-      this.model?.scheduleTime ? TimeScheduler.toSchedulerV2(this.model.scheduleTime) : new NoneScheduler()
+      this.model?.scheduleTime ? TimeScheduler.toSchedulerV2(this.model.scheduleTime) : new NoneScheduler(),
+      this.manageEtlOperator?.getETLExtraData(),
+      this.model?.config
     );
     this.dataCookService
-      .updateEtl(this.model?.id ?? 0, temp)
+      .updateEtl(this.model?.id ?? 0, request)
       .then(() => {
         this.model ? (this.model.displayName = newName) : null;
         this.renameModal.hide();

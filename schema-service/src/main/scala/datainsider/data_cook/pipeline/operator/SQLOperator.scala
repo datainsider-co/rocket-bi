@@ -12,7 +12,7 @@ import datainsider.profiler.Profiler
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class SQLOperator(id: OperatorId, query: String, destTableConfiguration: TableConfiguration) extends Operator
+case class SQLOperator(id: OperatorId, query: String, destTableConfiguration: TableConfiguration) extends TableResultOperator
 
 case class SQLOperatorExecutor(tableService: EtlTableService) extends Executor[SQLOperator] {
 

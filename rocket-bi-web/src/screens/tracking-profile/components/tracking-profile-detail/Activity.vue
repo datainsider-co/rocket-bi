@@ -308,7 +308,7 @@ export default class Activity extends Vue {
       order: 0;
       @include regular-text;
       font-size: 24px;
-      line-height: 1.17;
+      line-height: 1.4;
       letter-spacing: 0.2px;
     }
 
@@ -335,7 +335,7 @@ export default class Activity extends Vue {
           order: 0;
           @include regular-text;
           font-size: 14px;
-          line-height: 1.17;
+          line-height: 1.4;
           letter-spacing: 0.2px;
           margin-right: 8px;
           align-self: center;
@@ -358,7 +358,7 @@ export default class Activity extends Vue {
           order: 0;
           @include regular-text;
           font-size: 14px;
-          line-height: 1.17;
+          line-height: 1.4;
           letter-spacing: 0.2px;
           margin-right: 8px;
           align-self: center;

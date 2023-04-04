@@ -14,14 +14,17 @@ import { SchedulerOnce } from '@/screens/data-ingestion/components/job-scheduler
 import { SchedulerName } from '@/shared/enums/SchedulerName';
 import { GaDate } from '@core/data-ingestion/domain/job/google-analytic/GaDate';
 import { GaDateRange } from '@core/data-ingestion/domain/job/google-analytic/GaDateRange';
+import moment from 'moment';
+import { DateTimeFormatter, DateUtils } from '@/utils';
 
 export class GoogleAnalyticJob implements Job {
   className = JobName.GoogleAnalyticJob;
   displayName: string;
+  tableName: string;
   destDatabaseName: string;
   destTableName: string;
   destinations: DataDestination[];
-  jobType = JobType.GoogleCredential;
+  jobType = JobType.GoogleAnalytics;
   jobId: JobId;
   orgId: string;
   sourceId: SourceId;
@@ -34,20 +37,18 @@ export class GoogleAnalyticJob implements Job {
   syncMode: SyncMode;
 
   viewId: string | undefined;
+  propertyId: string;
   dateRanges: GaDateRange[];
   metrics: MetricInfo[];
   dimensions: DimensionInfo[];
   sorts: string[];
-
-  accessToken: string;
-  refreshToken: string;
-  authorizationCode: string;
 
   constructor(
     jobId: JobId,
     orgId: string,
     sourceId: SourceId,
     displayName: string,
+    tableName: string,
     destDatabaseName: string,
     destTableName: string,
     destinations: DataDestination[],
@@ -59,19 +60,18 @@ export class GoogleAnalyticJob implements Job {
     currentSyncStatus: JobStatus,
 
     viewId: string,
+    propertyId: string,
     dateRanges: GaDateRange[],
     metrics: MetricInfo[],
     dimensions: DimensionInfo[],
     sorts: string[],
-    accessToken: string,
-    refreshToken: string,
-    authorizationCode: string,
     syncMode?: SyncMode
   ) {
     this.jobId = jobId;
     this.orgId = orgId;
     this.sourceId = sourceId;
     this.displayName = displayName;
+    this.tableName = tableName;
     this.destDatabaseName = destDatabaseName;
     this.destTableName = destTableName;
     this.destinations = destinations;
@@ -83,14 +83,11 @@ export class GoogleAnalyticJob implements Job {
     this.currentSyncStatus = currentSyncStatus;
 
     this.viewId = viewId;
+    this.propertyId = propertyId;
     this.dateRanges = dateRanges;
     this.metrics = metrics;
     this.dimensions = dimensions;
     this.sorts = sorts;
-
-    this.accessToken = accessToken;
-    this.refreshToken = refreshToken;
-    this.authorizationCode = authorizationCode;
     this.syncMode = syncMode || SyncMode.FullSync;
   }
 
@@ -100,6 +97,7 @@ export class GoogleAnalyticJob implements Job {
       obj.orgId,
       obj.sourceId,
       obj.displayName,
+      obj.tableName,
       obj.destDatabaseName,
       obj.destTableName,
       obj.destinations,
@@ -110,13 +108,11 @@ export class GoogleAnalyticJob implements Job {
       obj.lastSyncStatus,
       obj.currentSyncStatus,
       obj.viewId,
+      obj.propertyId,
       obj.dateRanges,
       obj.metrics,
       obj.dimensions,
       obj.sorts,
-      obj.accessToken,
-      obj.refreshToken,
-      '',
       obj.syncMode
     );
   }
@@ -129,6 +125,7 @@ export class GoogleAnalyticJob implements Job {
       '',
       '',
       '',
+      '',
       [DataDestination.Clickhouse],
       0,
       60,
@@ -137,31 +134,17 @@ export class GoogleAnalyticJob implements Job {
       JobStatus.Initialized,
       JobStatus.Initialized,
       '',
-      [{ startDate: new Date(), endDate: GaDate.Today }],
+      '',
+      [{ startDate: DateTimeFormatter.formatDateWithTime(GoogleAnalyticJob.defaultStartDate(), ''), endDate: GaDate.Today }],
       [],
       [],
       [],
-      '',
-      '',
-      '',
       SyncMode.FullSync
     );
   }
 
-  setToken(accessToken: string, refreshToken: string) {
-    this.refreshToken = refreshToken;
-    this.accessToken = accessToken;
-    return this;
-  }
-
-  setAccessToken(accessToken: string) {
-    this.accessToken = accessToken;
-    return this;
-  }
-
-  setAuthorizationCode(authCode: string) {
-    this.authorizationCode = authCode;
-    return this;
+  static defaultStartDate(): Date {
+    return DateUtils.getLast30Days().start as Date;
   }
 
   setOrgId(dataSource: DataSourceInfo): Job {

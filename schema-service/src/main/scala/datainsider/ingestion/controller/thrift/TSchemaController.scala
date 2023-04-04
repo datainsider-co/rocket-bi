@@ -32,6 +32,9 @@ case class TSchemaController @Inject() (
       .map(_.asDatabaseShortInfo())
       .map(JsonParser.toJson(_))
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(GetDatabaseSchema).withFn { request: Request[GetDatabaseSchema.Args] =>
@@ -39,6 +42,9 @@ case class TSchemaController @Inject() (
       .getDatabaseSchema(request.args.organizationId, request.args.dbName)
       .map(JsonParser.toJson(_))
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(GetTableSchema).withFn { request: Request[GetTableSchema.Args] =>
@@ -46,6 +52,9 @@ case class TSchemaController @Inject() (
       .getTableSchema(request.args.organizationId, request.args.dbName, request.args.tblName)
       .map(JsonParser.toJson(_))
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(GetAnalyticsDatabaseSchema).withFn { request: Request[GetAnalyticsDatabaseSchema.Args] =>
@@ -60,6 +69,9 @@ case class TSchemaController @Inject() (
       .getUserProfileSchema(request.args.organizationId)
       .map(JsonParser.toJson(_))
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(GetAnalyticsEventSchema).withFn { request: Request[GetAnalyticsEventSchema.Args] =>
@@ -67,6 +79,9 @@ case class TSchemaController @Inject() (
       .getEventSchema(request.args.organizationId)
       .map(JsonParser.toJson(_))
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(GetAnalyticsEventDetailSchema).withFn { request: Request[GetAnalyticsEventDetailSchema.Args] =>
@@ -77,6 +92,9 @@ case class TSchemaController @Inject() (
         case _            => TEventDetailSchemaResult(0, None)
       }
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(MultiGetAnalyticsEventDetailSchema).withFn { request: Request[MultiGetAnalyticsEventDetailSchema.Args] =>
@@ -89,6 +107,9 @@ case class TSchemaController @Inject() (
         TEventDetailSchemaMapResult(0, Some(result))
       })
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(CreateOrMergeTableSchema).withFn { request: Request[CreateOrMergeTableSchema.Args] =>
@@ -97,13 +118,18 @@ case class TSchemaController @Inject() (
       .createOrMergeTableSchema(tableSchema)
       .map(JsonParser.toJson(_))
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(EnsureDatabaseCreated).withFn { request: Request[EnsureDatabaseCreated.Args] =>
     val orgId = request.args.organizationId
     val dbName = ClickHouseUtils.buildDatabaseName(orgId, request.args.name)
     val displayName = request.args.displayName
-    schemaService.ensureDatabaseCreated(orgId, dbName, displayName).map(Response(_))
+    schemaService.ensureDatabaseCreated(orgId, dbName, displayName).map(Response(_)).rescue {
+      case e: Throwable => throw e
+    }
   }
 
   handle(RenameTableSchema).withFn { request: Request[RenameTableSchema.Args] =>
@@ -111,14 +137,18 @@ case class TSchemaController @Inject() (
     val dbName = request.args.dbName
     val tblName = request.args.tblName
     val newTblName = request.args.newTblName
-    schemaService.renameTableSchema(orgId, dbName, tblName, newTblName).map(Response(_))
+    schemaService.renameTableSchema(orgId, dbName, tblName, newTblName).map(Response(_)).rescue {
+      case e: Throwable => throw e
+    }
   }
 
   handle(DeleteTableSchema).withFn { request: Request[DeleteTableSchema.Args] =>
     val orgId = request.args.organizationId
     val dbName = request.args.dbName
     val tblName = request.args.tblName
-    schemaService.deleteTableSchema(orgId, dbName, tblName).map(Response(_))
+    schemaService.deleteTableSchema(orgId, dbName, tblName).map(Response(_)).rescue {
+      case e: Throwable => throw e
+    }
   }
 
   handle(GetTemporaryTables).withFn { request: Request[GetTemporaryTables.Args] =>
@@ -126,6 +156,9 @@ case class TSchemaController @Inject() (
       .getTemporaryTables(request.args.organizationId, request.args.dbName)
       .map(JsonParser.toJson(_))
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(Verify).withFn { request: Request[Verify.Args] =>
@@ -153,6 +186,9 @@ case class TSchemaController @Inject() (
       .mergeEventDetailSchema(request.args.organizationId, request.args.event, eventProperties)
       .map(JsonParser.toJson(_))
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(GetApiKey).withFn { request: Request[GetApiKey.Args] =>
@@ -162,6 +198,9 @@ case class TSchemaController @Inject() (
       .map(Response(_))
       .map(JsonParser.toJson(_))
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(MergeSchemaByProperties).withFn { request: Request[MergeSchemaByProperties.Args] =>
@@ -175,6 +214,9 @@ case class TSchemaController @Inject() (
       )
       .map(JsonParser.toJson(_))
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(GetExpressions).withFn { request: Request[GetExpressions.Args] =>
@@ -182,6 +224,9 @@ case class TSchemaController @Inject() (
       .getExpressions(request.args.dbName, request.args.tblName)
       .map(JsonParser.toJson(_))
       .map(_.toScroogeResponse)
+      .rescue {
+        case e: Throwable => throw e
+      }
   }
 
   handle(ExecLongRunningProcess).withFn { request: Request[ExecLongRunningProcess.Args] =>
@@ -216,6 +261,9 @@ case class TSchemaController @Inject() (
             Future.False
         }
         .map(Response(_))
+        .rescue {
+          case e: Throwable => throw e
+        }
     }
   }
 
@@ -236,6 +284,9 @@ case class TSchemaController @Inject() (
             Future.False
         }
         .map(Response(_))
+        .rescue {
+          case e: Throwable => throw e
+        }
     }
   }
 }

@@ -182,7 +182,7 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
       const padding = this.id === -2 ? 'p-2' : '';
       return `tab-filter-container ${background} ${padding}`;
     }
-    return `tab-filter-container pt-2`;
+    return `tab-filter-container`;
   }
 
   get isFreezeTitle(): boolean {

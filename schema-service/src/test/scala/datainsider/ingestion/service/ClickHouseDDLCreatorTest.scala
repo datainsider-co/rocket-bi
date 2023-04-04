@@ -11,7 +11,7 @@ import datainsider.ingestion.misc.ClickHouseDDLConverter
   */
 class ClickHouseDDLCreatorTest extends Test {
 
-  val ddlCreator = ClickHouseDDLConverter()
+  val ddlCreator = ClickHouseDDLConverter
   val clusterName = "datainsider_test_cluster"
 
   test("Create table script should ok") {
@@ -41,7 +41,7 @@ class ClickHouseDDLCreatorTest extends Test {
       orderBys = Seq("id")
     )
 
-    val ddl = ddlCreator.toCreateShardTableDDL(request, clusterName).trim
+    val ddl = ddlCreator.toCreateShardTableDDL(request, Some(clusterName)).trim
 
     println(ddl)
 
@@ -132,7 +132,7 @@ class ClickHouseDDLCreatorTest extends Test {
       orderBys = Seq("id")
     )
 
-    val ddl = ddlCreator.toCreateShardTableDDL(tableSchema, clusterName).trim
+    val ddl = ddlCreator.toCreateShardTableDDL(tableSchema, Some(clusterName)).trim
 
     println(ddl)
 
@@ -194,7 +194,7 @@ class ClickHouseDDLCreatorTest extends Test {
       orderBys = Seq("id")
     )
 
-    val ddl = ddlCreator.toCreateShardTableDDL(request, clusterName).trim
+    val ddl = ddlCreator.toCreateShardTableDDL(request, Some(clusterName)).trim
 
     println(ddl)
 

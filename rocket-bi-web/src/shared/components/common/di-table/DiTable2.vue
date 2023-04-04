@@ -1,5 +1,5 @@
 <template>
-  <div class="di-table-2">
+  <div :id="id" class="di-table-2">
     <div class="di-table-2-rule" ref="tableRule"></div>
     <div class="di-table-2-container">
       <StatusWidget :error="errorMsg" :status="status" loading-class="di-table-2-container-loading" @retry="emitRetry">

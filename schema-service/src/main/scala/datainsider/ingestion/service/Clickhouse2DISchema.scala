@@ -21,21 +21,25 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * Class dam nhiem vu lay schema tu clickhouse convert ve schema cua DI System
   */
 class Clickhouse2DISchema(
-   organizationId: OrganizationId,
-   clickhouseMetaDataHandler: ClickhouseMetaDataHandler,
-   storage: SchemaMetadataStorage,
-   refreshConfig: RefreshConfig,
-   setRefreshStatus: (RefreshStatus, Option[String]) => Future[Unit]
+    organizationId: OrganizationId,
+    clickhouseMetaDataHandler: ClickhouseMetaDataHandler,
+    storage: SchemaMetadataStorage,
+    refreshConfig: RefreshConfig,
+    setRefreshStatus: (RefreshStatus, Option[String]) => Future[Unit]
 ) extends Logging {
+
+  private val ignoreDbNames = Seq("system")
 
   def run(): Unit =
     Profiler("[Clickhouse2DISchema].run") {
       try {
-        val clickhouseDbNames = clickhouseMetaDataHandler.getDatabaseNames()
+        val clickhouseDbNames: Seq[String] =
+          clickhouseMetaDataHandler.getDatabaseNames().filterNot(ignoreDbNames.contains)
         dropUnknownDatabase(organizationId, clickhouseDbNames)
         clickhouseDbNames.foreach(dbName => {
           try {
-            val tableSchemas: Seq[TableSchema] = clickhouseMetaDataHandler.getTables(organizationId, dbName, refreshConfig.ignoredEngines)
+            val tableSchemas: Seq[TableSchema] =
+              clickhouseMetaDataHandler.getTables(organizationId, dbName, refreshConfig.ignoredEngines)
             ensureDatabase(organizationId, dbName, tableSchemas)
           } catch {
             case ex: Throwable =>
@@ -100,7 +104,8 @@ class Clickhouse2DISchema(
       clickhouseTableSchemas: Seq[TableSchema],
       diTableSchemas: Seq[TableSchema]
   ): Seq[TableSchema] = {
-    val clickhouseTableSchemaAsMap: Map[String, TableSchema] = clickhouseTableSchemas.map(tableSchema => tableSchema.name -> tableSchema).toMap
+    val clickhouseTableSchemaAsMap: Map[String, TableSchema] =
+      clickhouseTableSchemas.map(tableSchema => tableSchema.name -> tableSchema).toMap
     val diTableSchemaAsMap = diTableSchemas.map(tableSchema => tableSchema.name -> tableSchema).toMap
     val allTableNames: Set[String] = clickhouseTableSchemaAsMap.keys.toSet.union(diTableSchemaAsMap.keys.toSet)
     val tableSchemas: Seq[TableSchema] = allTableNames
@@ -140,14 +145,14 @@ class Clickhouse2DISchema(
   }
 
   /**
-   * Merge columns from clickhouse to di-system, keep meta data from di-system
-   */
+    * Merge columns from clickhouse to di-system, keep meta data from di-system
+    */
   private def mergeColumns(clickhouseColumns: Seq[Column], diColumns: Seq[Column]): Seq[Column] = {
     val diColumnsMap: Map[String, Column] = diColumns.map(column => column.name -> column).toMap
     clickhouseColumns.map(clickhouseColumn => {
       diColumnsMap.get(clickhouseColumn.name) match {
         case Some(diColumn) => diColumn
-        case _ => clickhouseColumn
+        case _              => clickhouseColumn
       }
     })
   }

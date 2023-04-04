@@ -2,15 +2,19 @@ import '@/screens/data-ingestion/components/data-source-config-form/scss/Form.sc
 import { BFormInput } from 'bootstrap-vue';
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
-import { GoogleAnalyticsSourceInfo } from '@core/data-ingestion/domain/data-source/GoogleAnalyticsSourceInfo';
 import { StringUtils } from '@/utils';
 import { DIException } from '@core/common/domain';
+import { GASourceInfo } from '@core/data-ingestion/domain/data-source/GASourceInfo';
+import KeyDownEvent = JQuery.KeyDownEvent;
+import { Log } from '@core/utils';
 
 export class GoogleAnalyticsSourceFormRender implements DataSourceFormRender {
-  private googleAnalyticsSourceInfo: GoogleAnalyticsSourceInfo;
+  private googleAnalyticsSourceInfo: GASourceInfo;
+  private onSubmit: (() => void) | null;
 
-  constructor(googleAnalyticsSourceInfo: GoogleAnalyticsSourceInfo) {
+  constructor(googleAnalyticsSourceInfo: GASourceInfo, onSubmit?: () => void) {
     this.googleAnalyticsSourceInfo = googleAnalyticsSourceInfo;
+    this.onSubmit = onSubmit ?? null;
   }
 
   private get displayName() {
@@ -27,7 +31,12 @@ export class GoogleAnalyticsSourceFormRender implements DataSourceFormRender {
         <div class="form-item d-flex w-100 justify-content-center align-items-center">
           <div class="title">Display name:</div>
           <div class="input">
-            <BFormInput placeholder="Input display name" autocomplete="off" v-model={this.displayName}></BFormInput>
+            <BFormInput
+              placeholder="Input display name"
+              autofocus
+              autocomplete="off"
+              v-model={this.displayName}
+              onKeydown={(event: KeyDownEvent) => this.onKeyDown(event)}></BFormInput>
           </div>
         </div>
       </div>
@@ -35,11 +44,19 @@ export class GoogleAnalyticsSourceFormRender implements DataSourceFormRender {
   }
 
   createDataSourceInfo(): DataSourceInfo {
-    return GoogleAnalyticsSourceInfo.fromObject(this.googleAnalyticsSourceInfo);
+    return GASourceInfo.fromObject(this.googleAnalyticsSourceInfo);
   }
-  validSource(source: GoogleAnalyticsSourceInfo) {
+  validSource(source: GASourceInfo) {
     if (StringUtils.isEmpty(source.displayName)) {
       throw new DIException('Display name is required!');
+    }
+  }
+
+  private onKeyDown(event: KeyDownEvent) {
+    const isEnter = event.code === 'Enter';
+    Log.debug('onKeyDown::', this.onSubmit);
+    if (isEnter && this.onSubmit) {
+      this.onSubmit();
     }
   }
 }

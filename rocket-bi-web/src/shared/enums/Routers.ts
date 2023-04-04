@@ -31,6 +31,7 @@ export enum Routers {
   DataIngestion = 'DataIngestion',
   DataSource = 'DataSource',
   Job = 'Job',
+  QueuedJob = 'QueuedJob',
   Streaming = 'Streaming',
   JobHistory = 'JobHistory',
 
@@ -58,6 +59,7 @@ export enum Routers {
   FunnelAnalysis = 'FunnelAnalysis',
 
   GoogleAuthentication = 'GoogleAuthentication',
+  ThirdPartyAuthentication = 'ThirdPartyAuthentication',
   FacebookAuthentication = 'FacebookAuthentication',
 
   DataCook = 'DataCook',

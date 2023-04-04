@@ -49,7 +49,7 @@
 
           <JobLakeConfig :job.sync="job" class="job-section export-form" />
           <div class="job-section">
-            <JobSyncConfig ref="jobSyncModeConfig" :is-validate="isValidate" :job.sync="job"></JobSyncConfig>
+            <JobSyncConfig ref="jobSyncModeConfig" :is-validate="isValidate" :job.sync="job" :single-table="isSingleTable"></JobSyncConfig>
             <SchedulerSettingV2
               id="setting-job-scheduler"
               :scheduler-time="job.scheduleTime"
@@ -251,7 +251,7 @@ export default class S3JobConfigModal extends Vue {
       if (this.isCreateNewDatabase && !databaseInfo) {
         const databaseInfo = await this.schemaService.createDatabase(new DatabaseCreateRequest(name, name));
         this.job!.destDatabaseName = databaseInfo.name;
-        DatabaseSchemaModule.addNewDataInfo(databaseInfo);
+        DatabaseSchemaModule.addNewDatabaseInfo(databaseInfo);
       }
     } catch (e) {
       const ex = DIException.fromObject(e);

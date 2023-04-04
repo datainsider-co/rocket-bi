@@ -191,24 +191,6 @@ export default class TableManagement extends Vue {
 
   private renderTableAction(rowData: RowData, rowIndex: number, header: IndexedHeaderData, columnIndex: number): HTMLElement {
     const table: TableSchema = TableSchema.fromObject(rowData as any);
-    //Button Rename
-    const buttonRename = HtmlElementRenderUtils.renderIcon('di-icon-edit btn-icon-border p-1 share-icon', event => {
-      event.stopPropagation();
-      this.renameModalTitle = `Rename table`;
-      const data: any = {
-        model: {
-          database: this.model?.database,
-          table: table
-        },
-        action: RenameActions.table
-      };
-      this.renameModal.show(table.name, (newName: string) => {
-        this.handleRename(newName, data);
-      });
-      TrackingUtils.track(TrackEvents.DataSchemaRenameTable, { database: this.model?.database, table: table });
-    });
-    buttonRename.setAttribute('data-title', 'Rename');
-    TableTooltipUtils.configTooltip(buttonRename);
     //Button Delete
     const buttonDelete = HtmlElementRenderUtils.renderIcon('di-icon-delete btn-icon-border p-1 delete-icon', event => {
       event.stopPropagation();
@@ -216,7 +198,7 @@ export default class TableManagement extends Vue {
     });
     buttonDelete.setAttribute('data-title', 'Delete');
     TableTooltipUtils.configTooltip(buttonDelete);
-    return HtmlElementRenderUtils.renderAction([buttonRename, buttonDelete], 16, 'action-container');
+    return HtmlElementRenderUtils.renderAction([buttonDelete], 16, 'action-container');
   }
 
   @Track(TrackEvents.DataSchemaHardRemoveTable, {
@@ -225,7 +207,7 @@ export default class TableManagement extends Vue {
   })
   private handleConfirmDeleteTable(event: MouseEvent, table: TableSchema) {
     event.stopPropagation();
-    Modals.showConfirmationModal(`Are you sure to delete table '${table.displayName}'?`, {
+    Modals.showConfirmationModal(`Are you sure to permanently delete table '${table.displayName}'?`, {
       onOk: () => this.handleDeleteTable(table)
     });
   }
@@ -249,22 +231,6 @@ export default class TableManagement extends Vue {
     this.contextMenu.show(buttonEvent, actions);
   }
 
-  @Track(TrackEvents.DataSchemaRenameDatabase, {
-    database_name: (_: TableManagement) => _.model?.database.name
-  })
-  private renameDatabase() {
-    if (this.model) {
-      const data: any = {
-        model: this.model,
-        action: RenameActions.database
-      };
-      this.renameModalTitle = `Rename database`;
-      this.renameModal.show(this.model.database.displayName, (newName: string) => {
-        this.handleRename(newName, data);
-      });
-    }
-  }
-
   @Track(TrackEvents.DataSchemaShareDatabase, {
     database_name: (_: TableManagement) => _.model?.database.name
   })
@@ -283,28 +249,13 @@ export default class TableManagement extends Vue {
     database_name: (_: TableManagement) => _.model?.database.name
   })
   private deleteDatabase() {
-    Modals.showConfirmationModal(`Are you sure to delete database '${this.model!.database.displayName}'?`, {
+    Modals.showConfirmationModal(`Are you sure you want to permanently delete database '${this.model!.database.displayName}'?`, {
       onOk: () => this.handleDeleteDatabase(this.model!.database)
     });
   }
 
   private getMenuAction(model: DataSchemaModel): ContextMenuItem[] {
     return [
-      {
-        text: `Rename database`,
-        click: () => {
-          const data: any = {
-            model: model,
-            action: RenameActions.database
-          };
-          this.renameModalTitle = `Rename database`;
-          this.contextMenu.hide();
-          this.renameModal.show(model.database.displayName, (newName: string) => {
-            this.handleRename(newName, data);
-          });
-        }
-      },
-
       {
         text: `Share database`,
         disabled: this.model?.database == undefined,
@@ -325,7 +276,7 @@ export default class TableManagement extends Vue {
         disabled: this.model?.database == undefined,
         click: () => {
           this.contextMenu.hide();
-          Modals.showConfirmationModal(`Are you sure to delete database '${this.model!.database.displayName}'?`, {
+          Modals.showConfirmationModal(`Are you sure to permanently delete database '${this.model!.database.displayName}'?`, {
             onOk: () => this.handleDeleteDatabase(this.model!.database)
           });
         }
@@ -409,49 +360,6 @@ export default class TableManagement extends Vue {
     }
   }
 
-  private async handleRename(newName: string, data: { model: DataSchemaModel; action: RenameActions }) {
-    try {
-      const { model, action } = data;
-      this.renameModal.hide();
-      this.tableStatus = Status.Updating;
-      switch (action) {
-        case RenameActions.database: {
-          TrackingUtils.track(TrackEvents.DatabaseSubmitRename, { database_new_name: newName, database_old_name: this.model?.database.name });
-          const schemaUpdated = await DataManagementModule.updateDatabaseDisplayName({
-            newDisplayName: newName,
-            dbSchema: model.database
-          });
-          DatabaseSchemaModule.setDatabaseSchema(schemaUpdated);
-          this.tableStatus = Status.Loaded;
-          break;
-        }
-        case RenameActions.table: {
-          TrackingUtils.track(TrackEvents.TableSubmitRename, { table_new_name: newName, table_old_name: this.model?.table?.name });
-          const schemaUpdated = await DataManagementModule.updateTableName({
-            newName: newName,
-            dbSchema: model.database,
-            table: model.table!
-          });
-          DatabaseSchemaModule.setDatabaseSchema(schemaUpdated);
-          this.$emit('updateDatabase', schemaUpdated);
-          this.tableStatus = Status.Loaded;
-          break;
-        }
-        case RenameActions.column:
-          this.tableStatus = Status.Loaded;
-          break;
-      }
-    } catch (e) {
-      Log.error(e);
-      this.tableStatus = Status.Loaded;
-      await Swal.fire({
-        icon: 'error',
-        title: 'Rename Error',
-        html: e.message
-      });
-    }
-  }
-
   @Track(TrackEvents.DataSchemaSubmitHardRemoveDatabase, {
     database_name: (_: TableManagement) => _.model?.database.name
   })
@@ -459,7 +367,7 @@ export default class TableManagement extends Vue {
     try {
       this.tableStatus = Status.Updating;
       //todo: deleteData
-      await DatabaseSchemaModule.moveToTrash(db.name);
+      await DatabaseSchemaModule.deleteDatabase(db.name);
       await DatabaseSchemaModule.loadAllDatabaseSchemas();
       await this.$router.push({
         name: Routers.AllDatabase

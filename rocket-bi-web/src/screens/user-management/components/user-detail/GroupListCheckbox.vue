@@ -91,7 +91,7 @@ export default class GroupListCheckbox extends Vue {
 
   private changePermissions(newPermissions: string[]) {
     const isSame: boolean =
-      ListUtils.isEmpty(ListUtils.diff(newPermissions, this.selectedItems)) && ListUtils.isEmpty(ListUtils.diff(this.selectedItems, newPermissions));
+      ListUtils.isEmpty(ListUtils.diff<string>(newPermissions, this.selectedItems)) && ListUtils.isEmpty(ListUtils.diff(this.selectedItems, newPermissions));
     if (isSame) {
       return;
     } else {

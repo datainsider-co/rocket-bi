@@ -225,7 +225,7 @@ export default class FieldCreationManagement extends Vue {
           }
 
           code {
-            color: #ff6b4e;
+            color: #ea6b6b;
           }
 
           th:last-child,

@@ -68,16 +68,16 @@
         style="width: 64px;margin-right: 12px;"
         @onChanged="handleHorizontalThicknessChanged"
       />
-      <DropdownSetting
-        id="horizontal-row-padding"
-        :options="rowPaddingOptions"
-        :value="horizontalRowPadding"
-        disable
-        :label="`${configSetting['grid.horizontal.rowPadding'].label}`"
-        :hint="`${configSetting['grid.horizontal.rowPadding'].hint}`"
-        size="small"
-        @onChanged="handleHorizontalRowPaddingChanged"
-      />
+      <!--      <DropdownSetting-->
+      <!--        id="horizontal-row-padding"-->
+      <!--        :options="rowPaddingOptions"-->
+      <!--        :value="horizontalRowPadding"-->
+      <!--        disable-->
+      <!--        :label="`${configSetting['grid.horizontal.rowPadding'].label}`"-->
+      <!--        :hint="`${configSetting['grid.horizontal.rowPadding'].hint}`"-->
+      <!--        size="small"-->
+      <!--        @onChanged="handleHorizontalRowPaddingChanged"-->
+      <!--      />-->
     </div>
     <div class="row-config-container">
       <ToggleSetting

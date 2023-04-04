@@ -4,7 +4,6 @@ import datainsider.client.domain.query.SqlQuery
 import datainsider.client.domain.scheduler.{ScheduleHourly, ScheduleOnce}
 import datainsider.client.domain.user.{UserGender, UserProfile}
 import datainsider.client.util.JsonParser
-import datainsider.data_cook.domain.EtlJob.ImplicitEtlOperator2Operator
 import datainsider.data_cook.domain.operator._
 import datainsider.data_cook.domain.response.{EtlJobHistoryResponse, EtlJobResponse, TableResponse}
 import datainsider.ingestion.domain.{DateColumn, PageResult, StringColumn, TableSchema}
@@ -81,7 +80,6 @@ object MockData {
               )
             ),
             config = EtlConfig(),
-            operatorInfo = Array(mockOperator).toOperatorInfo()
           )
         )
       ),
@@ -105,7 +103,6 @@ object MockData {
         ScheduleHourly(1),
         Some(System.currentTimeMillis()),
         config = EtlConfig(),
-        operatorInfo = Array(mockOperator).toOperatorInfo()
       ),
       EtlJobResponse(
         2,
@@ -116,7 +113,6 @@ object MockData {
         Some(System.currentTimeMillis()),
         Some(System.currentTimeMillis()),
         config = EtlConfig(),
-        operatorInfo = Array(mockOperator).toOperatorInfo()
       ),
       EtlJobResponse(
         4,
@@ -126,7 +122,6 @@ object MockData {
         ScheduleHourly(1),
         Some(System.currentTimeMillis()),
         config = EtlConfig(),
-        operatorInfo = Array(mockOperator).toOperatorInfo()
       )
     )
   )
@@ -152,7 +147,6 @@ object MockData {
           )
         ),
         config = EtlConfig(),
-        operatorInfo = Array(mockOperator).toOperatorInfo()
       ),
       EtlJobResponse(
         2,
@@ -163,7 +157,6 @@ object MockData {
         Some(System.currentTimeMillis()),
         Some(System.currentTimeMillis()),
         config = EtlConfig(),
-        operatorInfo = Array(mockOperator).toOperatorInfo()
       ),
       EtlJobResponse(
         4,
@@ -173,7 +166,6 @@ object MockData {
         ScheduleHourly(1),
         Some(System.currentTimeMillis()),
         config = EtlConfig(),
-        operatorInfo = Array(mockOperator).toOperatorInfo()
       )
     )
   )
@@ -196,7 +188,6 @@ object MockData {
       )
     ),
     config = EtlConfig(),
-    operatorInfo = Array(mockOperator).toOperatorInfo()
   )
 
   lazy val mockSqlQuery = new SqlQuery("select * from animal")

@@ -110,7 +110,7 @@ export default class OrganizationSettings extends LoggedInScreen {
           font-style: normal;
           font-weight: 500;
           letter-spacing: 0.2px;
-          line-height: 1.17;
+          line-height: 1.4;
           margin-right: 8px;
           overflow: hidden;
           justify-content: space-between;

@@ -256,12 +256,6 @@ export default class DatabaseListing extends Vue {
     const database: ShortSchemaInfo = ShortSchemaInfo.fromObject(rowData);
     switch (this.label) {
       case DatabaseCategory.Database: {
-        //Button Rename
-        const buttonRename = HtmlElementRenderUtils.renderIcon('di-icon-edit btn-icon-border border-24px share-icon', event =>
-          this.showRenameDatabaseModal(event, database)
-        );
-        buttonRename.setAttribute('data-title', 'Rename');
-        TableTooltipUtils.configTooltip(buttonRename);
         //Button Share
         const buttonShare = HtmlElementRenderUtils.renderIcon('di-icon-share btn-icon-border border-24px share-icon', event =>
           this.showShareDatabaseModal(event, database)
@@ -309,24 +303,13 @@ export default class DatabaseListing extends Vue {
     Log.debug('onClickDeleteInRow::', schemaInfo);
   }
 
-  @Track(TrackEvents.DatabaseManagementRename, {
-    database_name: (_: DatabaseListing, args: any) => args[1].database.name
-  })
-  private showRenameDatabaseModal(event: MouseEvent, schemaInfo: ShortSchemaInfo) {
-    event.stopPropagation();
-    this.renameModal?.show(schemaInfo.database.displayName, (newName: string) => {
-      this.handleRenameDatabase(newName, schemaInfo);
-    });
-    Log.debug('showRenameDatabaseModal::', schemaInfo);
-  }
-
   @Track(TrackEvents.DatabaseManagementMoveToTrash, {
     database_name: (_: DatabaseListing, args: any) => args[1].database.name
   })
   private handleConfirmSortDeleteDatabase(event: MouseEvent, schemaInfo: ShortSchemaInfo) {
     event.stopPropagation();
-    Modals.showConfirmationModal(`Are you sure to delete database '${schemaInfo.database.displayName}'?`, {
-      onOk: () => this.handleMoveToTrashDatabase(schemaInfo)
+    Modals.showConfirmationModal(`Are you sure you want to permanently delete database '${schemaInfo.database.displayName}'?`, {
+      onOk: () => this.handleDeleteDatabase(schemaInfo)
     });
   }
 
@@ -335,7 +318,7 @@ export default class DatabaseListing extends Vue {
   })
   private handleConfirmDeleteDatabase(event: MouseEvent, schemaInfo: ShortSchemaInfo) {
     event.stopPropagation();
-    Modals.showConfirmationModal(`Are you sure to delete database '${schemaInfo.database.displayName}'?`, {
+    Modals.showConfirmationModal(`Are you sure you want to permanently delete database '${schemaInfo.database.displayName}'?`, {
       onOk: () => this.handleDeleteDatabase(schemaInfo)
     });
   }
@@ -454,35 +437,6 @@ export default class DatabaseListing extends Vue {
       }
     });
   }
-
-  @Track(TrackEvents.DatabaseSubmitRename, {
-    database_old_name: (_: DatabaseListing, args: any) => args[1].database.name,
-    database_new_name: (_: DatabaseListing, args: any) => args[0]
-  })
-  private async handleRenameDatabase(newName: string, schemaInfo: ShortSchemaInfo) {
-    try {
-      this.renameModal?.hide();
-      this.showUpdating();
-      await this.renameDatabase(newName, schemaInfo);
-      await this.loadData(0, 1000);
-    } catch (e) {
-      PopupUtils.showError('Rename database failed!');
-      Log.error('DatabaseManagement::handleRenameDatabase::error::', e);
-    } finally {
-      this.showLoaded();
-    }
-  }
-
-  private async renameDatabase(newName: string, schemaInfo: ShortSchemaInfo) {
-    const dbSchema = await DatabaseSchemaModule.handleGetDatabaseSchema(schemaInfo.database.name);
-    if (dbSchema) {
-      const schemaUpdated = await DataManagementModule.updateDatabaseDisplayName({
-        newDisplayName: newName,
-        dbSchema: dbSchema
-      });
-      return DatabaseSchemaModule.setDatabaseSchema(schemaUpdated);
-    }
-  }
 }
 </script>
 
@@ -549,7 +503,7 @@ export default class DatabaseListing extends Vue {
       font-weight: 500;
       height: 28px;
       letter-spacing: 0.2px;
-      line-height: 1.17;
+      line-height: 1.4;
       margin-right: 8px;
       overflow: hidden;
 

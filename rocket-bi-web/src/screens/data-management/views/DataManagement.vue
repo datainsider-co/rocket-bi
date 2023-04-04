@@ -1,7 +1,11 @@
 <template>
   <LayoutWrapper v-if="isNotDatabaseRoute" no-sidebar class="data-management-container">
     <LayoutContent>
-      <LayoutHeader :title="dataManagementRoute.title" :icon="dataManagementRoute.icon"></LayoutHeader>
+      <LayoutHeader :title="dataManagementRoute.title" :icon="dataManagementRoute.icon" :route="dataManagementRoute.router">
+        <template v-if="breadcrums.length > 0">
+          <BreadcrumbComponent :breadcrumbs="breadcrums" />
+        </template>
+      </LayoutHeader>
       <router-view></router-view>
     </LayoutContent>
   </LayoutWrapper>
@@ -9,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Provide, ProvideReactive, Vue } from 'vue-property-decorator';
+import { Component, Provide, ProvideReactive, Vue, Watch } from 'vue-property-decorator';
 import HeaderBar from '@/shared/components/HeaderBar.vue';
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
 import { FormulaController } from '@/shared/fomula/FormulaController';
@@ -21,11 +25,16 @@ import { Log } from '@core/utils';
 import DiPage from '@/screens/lake-house/components/query-builder/DiPage.vue';
 import { LayoutContent, LayoutWrapper, LayoutHeader } from '@/shared/components/layout-wrapper';
 import { ListUtils } from '@/utils';
+import { AccessibleScreen } from '@/shared/components/vue-hook/AccessibleScreen';
+import BreadcrumbIcon from '@/shared/components/Icon/BreadcrumbIcon.vue';
+import BreadcrumbComponent from '@/screens/directory/components/BreadcrumbComponent.vue';
+import { Breadcrumbs } from '@/shared/models';
 
 Vue.use(DataComponents);
 
 @Component({
   components: {
+    BreadcrumbComponent,
     HeaderBar,
     DiPage,
     LayoutWrapper,
@@ -33,9 +42,10 @@ Vue.use(DataComponents);
     LayoutHeader
   }
 })
-export default class DataManagement extends LoggedInScreen {
+export default class DataManagement extends AccessibleScreen {
   private initedDatabaseSchemasCallbacks: Function[] = [];
   private initedDatabaseSchemas = false;
+  private breadcrums: Breadcrumbs[] = [];
 
   private get isNotDatabaseRoute() {
     Log.debug('DataManagement::RouteName::', this.$route.name);
@@ -148,19 +158,32 @@ export default class DataManagement extends LoggedInScreen {
       case Routers.QueryEditor:
         return {
           icon: 'di-icon-query-editor',
-          title: 'Query Analysis'
+          title: 'Query Analysis',
+          router: { name: Routers.QueryEditor }
         };
       case Routers.DataRelationship:
         return {
           icon: 'di-icon-relationship',
-          title: 'Relationship'
+          title: 'Relationship',
+          router: { name: Routers.DataRelationship }
         };
       default:
         return {
           icon: 'di-icon-schema',
-          title: 'Schema'
+          title: 'Schema',
+          router: { name: Routers.DataSchema }
         };
     }
+  }
+
+  @Provide('setBreadcrumbs')
+  setBreadcrumbs(breadcrums: Breadcrumbs[]) {
+    this.breadcrums = breadcrums;
+  }
+
+  @Watch('dataManagementRoute')
+  onRouterChanged() {
+    this.breadcrums = [];
   }
 }
 </script>
@@ -186,6 +209,7 @@ export default class DataManagement extends LoggedInScreen {
     .modal-body {
       > div {
         margin: 0;
+
         > div {
           margin: 0;
         }
@@ -197,6 +221,7 @@ export default class DataManagement extends LoggedInScreen {
         text-align: center !important;
       }
     }
+
     .data-management-body {
       flex: 1;
       margin: 24px 32px 24px 16px;
@@ -253,6 +278,7 @@ export default class DataManagement extends LoggedInScreen {
             font-size: 14px;
             opacity: 0.5;
           }
+
           .data-management-tips--title.text-danger {
             opacity: 1;
           }

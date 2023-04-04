@@ -7,7 +7,7 @@ export enum JobType {
   Jdbc = 'Jdbc',
   GenericJdbc = 'GenericJdbc',
   GoogleSheet = 'Google_Sheets',
-  GoogleCredential = 'Google_Analytics',
+  GoogleAnalytics = 'Google_Analytics',
   GoogleAds = 'GoogleAds',
   GA4 = 'Ga4',
   Mongo = 'MongoDb',
@@ -15,5 +15,6 @@ export enum JobType {
   Shopify = 'Shopify',
   S3 = 'Amazon_S3',
   Facebook = 'FacebookAds',
+  Tiktok = 'TikTokAds',
   Unsupported = 'Others'
 }

@@ -26,8 +26,6 @@ case class SystemInfo(
     updatedTime: Long = System.currentTimeMillis()
 )
 
-
-
 object SystemInfo {
   def default(orgId: Long): SystemInfo = {
     SystemInfo(
@@ -35,15 +33,7 @@ object SystemInfo {
       SystemStatus.Healthy,
       sources = Seq.empty,
       refreshConfig = RefreshConfig(
-        ignoredEngines = Seq(
-          "ReplicatedMergeTree",
-          "ReplicatedSummingMergeTree",
-          "ReplicatedReplacingMergeTree",
-          "ReplicatedAggregatingMergeTree",
-          "ReplicatedCollapsingMergeTree",
-          "ReplicatedVersionedCollapsingMergeTree",
-          "ReplicatedGraphiteMergeTree"
-        )
+        ignoredEngines = Seq.empty
       )
     )
   }

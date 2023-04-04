@@ -42,8 +42,7 @@
     </div>
     <div class="job-section">
       <div class="d-flex" v-if="isCreateNew">
-        <DiToggle id="sync-all-table" :value="!isSingleTable" @onSelected="isSingleTable = !isSingleTable"></DiToggle>
-        <div class="ml-1">Sync all Resource</div>
+        <DiToggle id="sync-all-table" :value="!isSingleTable" @onSelected="isSingleTable = !isSingleTable" label="Sync all resources"></DiToggle>
       </div>
       <template v-if="isSingleTable">
         <label class="mt-2">Resource Name</label>
@@ -52,9 +51,10 @@
             v-model="syncedJob.resourceName"
             labelProps="displayName"
             valueProps="id"
+            append-at-root
             :data="allResources"
             placeholder="Select Resource..."
-            boundary="viewport"
+            boundary="window"
             @select="resourceNameError = ''"
           />
         </div>
@@ -65,7 +65,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, PropSync } from 'vue-property-decorator';
+import { Component, Vue, Prop, PropSync, Watch } from 'vue-property-decorator';
 import { FormMode, GoogleAdsJob, GoogleAdsSourceInfo, Job } from '@core/data-ingestion';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown';
 import { Inject } from 'typescript-ioc';
@@ -74,17 +74,18 @@ import { Log } from '@core/utils';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
 import { SelectOption } from '@/shared';
 import DiToggle from '@/shared/components/common/DiToggle.vue';
-import { StringUtils } from '@/utils';
+import { ListUtils, StringUtils } from '@/utils';
 import { DIException, SourceId } from '@core/common/domain';
 
 @Component({ components: { DiToggle } })
 export default class GoogleAdsSourceConfig extends Vue {
-  private readonly ggAds = require('./google-ads-resources.json');
   private loading = false;
   private customerIds: string[] = [];
   private customerIdError = '';
-  private resourceNameError = '';
   private isInputCustomerId = false;
+  private loadingResource = false;
+  private resources: string[] = [];
+  private resourceNameError = '';
   @Inject
   private readonly sourcesService!: DataSourceService;
   @PropSync('job')
@@ -102,10 +103,13 @@ export default class GoogleAdsSourceConfig extends Vue {
     DataSourceModule.setTableNames([]);
   }
 
-  async loadCustomerIds(id: SourceId): Promise<void> {
+  private get isUsingExtraSegment(): boolean {
+    return ListUtils.isNotEmpty(this.syncedJob.extraSegments);
+  }
+  async init(id: SourceId): Promise<void> {
     try {
-      this.initResourceNames();
       await this.initCustomerIds(id);
+      await this.initResourceNames(id, this.syncedJob.customerId);
     } catch (ex) {
       Log.error(ex);
       this.customerIds = [];
@@ -115,7 +119,14 @@ export default class GoogleAdsSourceConfig extends Vue {
   }
 
   private get allResources(): SelectOption[] {
-    return [...this.ggAds.v11.resources.name, ...this.ggAds.v11.resourceWithoutMetric.name].sort((a, b) => StringUtils.compare(a.displayName, b.displayName));
+    return this.resources
+      .map(resource => {
+        return {
+          id: resource,
+          displayName: resource
+        } as SelectOption;
+      })
+      .sort((a, b) => StringUtils.compare(a.displayName, b.displayName));
   }
 
   private get customerIdsAsSelectOption(): SelectOption[] {
@@ -127,14 +138,36 @@ export default class GoogleAdsSourceConfig extends Vue {
     });
   }
 
-  private initResourceNames() {
-    this.loading = true;
-    const allTables = this.allResources.map(resource => `${resource.id}`);
-    DataSourceModule.setTableNames(allTables);
+  @Watch('syncedJob.customerId')
+  onCustomerIdChanged() {
+    try {
+      this.initResourceNames(this.syncedJob.sourceId, this.syncedJob.customerId);
+    } catch (e) {
+      Log.error('onSourceChanged::', e);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  private async initResourceNames(sourceId: SourceId, customerId: string) {
+    if (StringUtils.isNotEmpty(customerId)) {
+      this.loadingResource = true;
+      const allTables: string[] = await this.sourcesService.listTableName(sourceId, customerId, '', '');
+      Log.debug('GoogleAdsSourceConfig::initResourceNames::', allTables);
+      // const allTables = this.allResources.map(resource => `${resource.id}`);
+      this.resources = allTables;
+      DataSourceModule.setTableNames(allTables);
+      this.loadingResource = false;
+    }
   }
 
   private async initCustomerIds(id: SourceId) {
+    this.loading = true;
     this.customerIds = await this.sourcesService.listDatabaseName(id, '', '');
+    if (ListUtils.hasOnlyOneItem(this.customerIds)) {
+      this.syncedJob.customerId = this.customerIds[0];
+    }
+    this.loading = false;
   }
 
   isValidSource() {
@@ -165,6 +198,7 @@ export default class GoogleAdsSourceConfig extends Vue {
   private resetCustomerIdError() {
     this.customerIdError = '';
   }
+
   private get isCreateNew(): boolean {
     return Job.getJobFormConfigMode(this.syncedJob) === FormMode.Create;
   }

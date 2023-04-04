@@ -545,7 +545,7 @@ export default class PivotTable extends BaseWidget {
       '--row-font-family': currentSetting.value?.style?.fontFamily,
       '--row-font-size': StringUtils.toPx(currentSetting.value?.style?.fontSize),
       '--row-white-space': currentSetting.value?.style?.isWordWrap ? 'normal' : void 0,
-      '--row-text-align': currentSetting.value?.align,
+      // '--row-text-align': currentSetting.value?.align,
       // footer
       '--footer-color': ColorUtils.parseColor(currentSetting.total?.label?.style?.color),
       '--footer-background-color': TableStyleUtils.combineColor(baseThemeColor, currentSetting.total?.backgroundColor, widgetColor),

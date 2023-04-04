@@ -12,9 +12,10 @@ import {
   DIException,
   DynamicValues,
   FilterRequest,
-  FlattenPivotTableQuerySetting,
   FunctionControl,
+  ParamValueType,
   PivotTableQuerySetting,
+  QueryParameter,
   QueryRelatedWidget,
   QueryRequest,
   QuerySetting,
@@ -318,7 +319,7 @@ export class DataControllerStore extends VuexModule {
       if (FunctionControl.isFunctionControl(widget.setting) && widget.setting.enableFunctionControl()) {
         this.replaceDynamicFunction({ widget: widget, selected: widget.setting.getDefaultFunctions(), apply: false });
       } else if (DynamicValues.isValuesControl(widget.setting) && widget.setting.enableDynamicValues()) {
-        this.replaceDynamicFilter({ widget: widget, values: widget.setting.getDefaultValues(), apply: false });
+        this.replaceDynamicValues({ widget: widget, values: widget.setting.getDefaultValues(), apply: false });
       }
     });
   }
@@ -366,7 +367,7 @@ export class DataControllerStore extends VuexModule {
   }
 
   @Mutation
-  setDynamicFilter(payload: { id: WidgetId; values: string[] }) {
+  setDynamicValues(payload: { id: WidgetId; values: string[] }) {
     const { id, values } = payload;
     this.dynamicFilter.set(id, values);
   }
@@ -427,18 +428,32 @@ export class DataControllerStore extends VuexModule {
   }
 
   @Action
-  async replaceDynamicFilter(payload: { widget: Widget; values: string[]; apply: boolean }) {
+  async replaceDynamicValues(payload: { widget: Widget; values: string[]; apply: boolean }) {
     const { widget, values, apply } = payload;
     const { id } = widget;
-    this.setDynamicFilter({ id: id, values: values });
-    ///Apply cho tất cả widget nào có Tab control
+
+    const queryParam: QueryParameter | undefined =
+      ChartInfo.isChartInfo(widget) && widget.setting.isQueryParameter() ? widget.setting.toQueryParameter() : void 0;
+    this.setDynamicValues({ id: id, values: values });
     WidgetModule.allQueryWidgets
-      .filter(widget => widget.setting.affectByDynamicCondition(id))
-      .forEach(widget => {
-        widget.setting.setDynamicFilter(new Map([[id, this.dynamicFilter.get(id)!]]));
-        const useBoost = DashboardModule.currentDashboard?.useBoost ?? false;
-        if (apply) {
-          this.renderChartOrFilter({ widget: widget, useBoost: useBoost });
+      .filter(widget => widget.setting.affectByDynamicCondition(id) || widget.setting.isAffectByQueryParameter(id))
+      .forEach(queryWidget => {
+        ///Apply cho tất cả widget nào có Tab control
+        const existTabControl = queryWidget.setting.affectByDynamicCondition(id);
+        if (existTabControl) {
+          queryWidget.setting.setDynamicFilter(new Map([[id, this.dynamicFilter.get(id)!]]));
+        }
+        ///Apply cho tất cả widget nào có Query Param
+        const existQueryParam = queryParam && queryWidget.setting.isAffectByQueryParameter(id);
+        if (existQueryParam) {
+          const cloneParams = cloneDeep(queryWidget.setting.parameters);
+          cloneParams[queryParam!.displayName] = QuerySetting.formatParamValue(queryParam!.valueType, ListUtils.getHead(values) ?? '');
+          queryWidget.setting.withQueryParameters(cloneParams);
+        }
+        //
+        if (apply && (existTabControl || existQueryParam)) {
+          const useBoost = DashboardModule.currentDashboard?.useBoost ?? false;
+          this.renderChartOrFilter({ widget: queryWidget, useBoost: useBoost });
         }
       });
   }

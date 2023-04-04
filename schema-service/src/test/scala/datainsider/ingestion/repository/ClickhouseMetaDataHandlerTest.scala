@@ -67,7 +67,7 @@ class ClickhouseMetaDataHandlerTest extends IntegrationTest {
     super.beforeAll()
     val clusterName: String = ZConfig.getString("db.clickhouse.cluster_name")
 
-    executor = DDLExecutorImpl(client, ClickHouseDDLConverter(), clusterName)
+    executor = ClusteredDDLExecutor(client, clusterName)
 
     val isExisted = await(executor.existsDatabaseSchema(dbTest))
     if (isExisted) {

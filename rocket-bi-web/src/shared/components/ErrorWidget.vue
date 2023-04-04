@@ -1,7 +1,13 @@
 <template>
-  <div class="chart-error h-100 d-flex flex-column align-items-center justify-content-center">
+  <div
+    class="chart-error h-100 d-flex flex-column align-items-center justify-content-center"
+    :class="{
+      'chart-error--show-all': isShowAllError
+    }"
+  >
     <i class="di-icon-warning unselectable chart-error-icon"></i>
-    <h6>{{ error }}</h6>
+    <h6 v-if="isHtmlError" v-html="errorMsg"></h6>
+    <h6 v-else>{{ errorMsg }}</h6>
     <div v-if="!hideRetry" class="btn btn-primary" @click="retry">Try Again</div>
   </div>
 </template>
@@ -17,6 +23,16 @@ export default class ErrorWidget extends Vue {
   @Prop({ required: false, default: false })
   private readonly hideRetry!: boolean;
 
+  @Prop({ type: Boolean, default: false })
+  private readonly isShowAllError!: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  private readonly isHtmlError!: boolean;
+
+  private get errorMsg(): string {
+    return this.error || 'Something went wrong, please try again later';
+  }
+
   @Emit('onRetry')
   private retry(event: MouseEvent): MouseEvent {
     return event;
@@ -24,7 +40,7 @@ export default class ErrorWidget extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .chart-error {
   padding: 15px;
   overflow: auto;
@@ -56,6 +72,12 @@ export default class ErrorWidget extends Vue {
     font-size: 58px;
     color: #9799ac;
     margin-bottom: 17px;
+  }
+
+  &.chart-error--show-all h6 {
+    overflow: unset;
+    text-overflow: unset;
+    display: block;
   }
 }
 </style>

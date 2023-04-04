@@ -61,7 +61,6 @@ class Server extends HttpServer {
       .filter[CORSFilter](beforeRouting = true)
       .filter[CommonFilters]
       .filter[LoggedInUserParser]
-      .filter[LicenceFilter]
       .add[HealthController]
       .add[WorkerController]
       .add[MetadataController]

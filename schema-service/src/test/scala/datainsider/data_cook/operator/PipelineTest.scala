@@ -139,8 +139,8 @@ class PipelineTest extends OperatorTest {
     println(s"pipeline execute fail, actual execute result ${pipelineResult.isSucceed}")
     assertResult(pipelineResult.isSucceed)(false)
     assertResult(pipelineResult.exception.isDefined)(true)
-    assertResult(pipelineResult.operatorError.isDefined)(true)
-    println(s"operator failed ${pipelineResult.operatorError.get}, cause ${pipelineResult.exception.get.getMessage}")
+    assertResult(pipelineResult.errorOperator.isDefined)(true)
+    println(s"operator failed ${pipelineResult.errorOperator.get}, cause ${pipelineResult.exception.get.getMessage}")
 
   }
 }

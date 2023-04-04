@@ -21,9 +21,13 @@ class SystemControllerTest extends FeatureTest {
 
   test("test connection source") {
     val testConnectionRequest = TestConnectionRequest(
-      sourceConfig = ClickhouseSource("jdbc:clickhouse://tvc12", "tvc12", "123456","")
+      sourceConfig = ClickhouseSource("jdbc:clickhouse://tvc12", "tvc12", "123456", Some(""))
     )
-    val response: Response = server.httpPost("/system/test-connection", postBody = JsonParser.toJson(testConnectionRequest), andExpect = Status.Ok)
+    val response: Response = server.httpPost(
+      "/system/test-connection",
+      postBody = JsonParser.toJson(testConnectionRequest),
+      andExpect = Status.Ok
+    )
     val connectionResponse = JsonParser.fromJson[TestConnectionResponse](response.contentString)
     assert(connectionResponse != null)
     assert(connectionResponse.isSuccess == false)

@@ -251,7 +251,7 @@ export default class UserActivityLog extends Vue {
 
   private async handleUpdateUserActivities(getUserActivityRequest: GetUserActivityRequest) {
     try {
-      this.showUpdating();
+      this.showLoading();
       this.from = 0;
       this.getCreateUserActivityRequest = { ...getUserActivityRequest, from: this.from, size: this.size };
       this.activityPageResult = await this.activityService.getUserActivities(this.getCreateUserActivityRequest);

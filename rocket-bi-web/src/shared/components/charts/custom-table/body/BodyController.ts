@@ -3,12 +3,12 @@
  * @created: 5/16/21, 4:30 PM
  */
 
-import { CustomCell, IndexedHeaderData, RowData, RowDataUtils, ViewPort } from '@/shared/models';
+import { CustomCell, HeaderData, IndexedHeaderData, RowData, RowDataUtils, ViewPort } from '@/shared/models';
 import { BodyCellData, BodyRowData } from '@chart/custom-table/body/TableBodyRenderEngine';
 import { ListUtils } from '@/utils';
 import { TableDataUtils } from '@chart/custom-table/TableDataUtils';
 import { CustomCellCallBack } from '@chart/custom-table/TableData';
-import { isFunction, isNumber } from 'lodash';
+import { head, isFunction, isNumber } from 'lodash';
 import { StringUtils } from '@/utils/StringUtils';
 import { Table } from 'ant-design-vue';
 import { JsonUtils, Log } from '@core/utils';
@@ -123,7 +123,7 @@ export class BodyController {
     };
 
     this.bindDataToCell(cell, rowData, rowIndex, header, columnIndex);
-    this.bindClassToCell(cell, isExpandable);
+    this.bindClassToCell(cell, header, isExpandable);
     this.bindPaddingToCell(cell, isExpandable, rowData);
     this.bindCustomWidthToCell(cell, header.width);
     this.bindStyleToCell(cell, rowData, rowIndex, header, columnIndex);
@@ -168,9 +168,12 @@ export class BodyController {
     }
   }
 
-  private bindClassToCell(cell: BodyCellData, isExpandable: boolean) {
+  private bindClassToCell(cell: BodyCellData, header: HeaderData, isExpandable: boolean) {
     if (isExpandable) {
       cell.classList.push('expandable');
+    }
+    if (header?.isTextLeft === false) {
+      cell.classList.push('text-align-right');
     }
   }
 

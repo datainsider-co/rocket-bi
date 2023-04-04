@@ -3,7 +3,7 @@
  * @created: 5/30/21, 9:41 PM
  */
 
-import { QueryParameter, TextSetting, ThemeColor } from '@core/common/domain/model';
+import { QueryParameter, TextSetting, ThemeColor, WidgetId } from '@core/common/domain/model';
 import { MetricNumberMode } from '@/utils';
 
 export interface ChartOptionData {
@@ -28,6 +28,9 @@ export interface ChartOptionData {
 
   isCrossFilter?: boolean;
   queryParameter?: Record<string, QueryParameter>;
+  parameterConfig?: QueryParameter;
+
+  parameterWidgetIds?: WidgetId[];
 
   [key: string]: any;
 }

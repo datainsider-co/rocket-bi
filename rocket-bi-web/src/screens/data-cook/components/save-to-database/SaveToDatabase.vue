@@ -93,8 +93,6 @@ import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 
-type TThirdPartyPersistConfigurationCallback = (thirdPartyPersistConfiguration: ThirdPartyPersistConfiguration, index: number) => void;
-
 @Component({
   components: {
     MsSQLDestConfigForm,
@@ -139,8 +137,7 @@ export default class SaveToDatabase extends Vue {
 
   private model: ThirdPartyPersistConfiguration | null = null;
   private thirdPartyConfigIndex = -1;
-  private tableSchema: TableSchema | null = null;
-  private callback: TThirdPartyPersistConfigurationCallback | null = null;
+  private callback: ((thirdPartyPersistConfiguration: ThirdPartyPersistConfiguration, index: number) => void) | null = null;
   private isUpdate = false;
   private loading = false;
 
@@ -199,9 +196,12 @@ export default class SaveToDatabase extends Vue {
     }
   }
 
-  save(operator: EtlOperator, tableSchema: TableSchema, callback: TThirdPartyPersistConfigurationCallback, thirdPartyConfigIndex: number) {
+  save(
+    operator: EtlOperator,
+    callback: (thirdPartyPersistConfiguration: ThirdPartyPersistConfiguration, index: number) => void,
+    thirdPartyConfigIndex: number
+  ) {
     this.isUpdate = thirdPartyConfigIndex >= 0 ? true : false;
-    this.tableSchema = tableSchema;
     this.thirdPartyConfigIndex = thirdPartyConfigIndex;
     //todo: Add third party default if select new
     this.model = this.isUpdate
@@ -235,7 +235,6 @@ export default class SaveToDatabase extends Vue {
   private resetModel() {
     this.model = null;
     this.callback = null;
-    this.tableSchema = null;
     this.loading = false;
   }
 
@@ -261,7 +260,7 @@ export default class SaveToDatabase extends Vue {
     this.loading = true;
     const data = this.getDatabaseNameAndTableName();
     this.loading = false;
-    if (data.table && data.database && this.tableSchema && this.model && this.callback) {
+    if (data.table && data.database && this.model && this.callback) {
       this.model.databaseName = data.database;
       this.model.tableName = data.table;
       this.callback(this.model, this.thirdPartyConfigIndex);

@@ -42,12 +42,12 @@ export const FONT_FAMILY = '"Roboto", sans-serif';
 export const TEXT_LINE_HEIGHT = 21;
 export const TEXT_COLOR = '#4f4f4f';
 export const TEXT_SIZE = 14;
-export const PRIMARY_COLOR = '#597fff';
-export const ERROR_COLOR = '#ff6b4e';
+export const ACCENT_COLOR = '#597fff';
+export const ERROR_COLOR = '#ea6b6b';
 
 export const LLOption: LeaderLine.Options = {
   size: 1,
-  color: PRIMARY_COLOR,
+  color: ACCENT_COLOR,
   endPlug: 'arrow1',
   endPlugSize: 2,
   path: 'grid',

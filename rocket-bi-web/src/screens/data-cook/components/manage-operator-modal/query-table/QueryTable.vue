@@ -3,7 +3,7 @@
     <QueryBuilder
       v-if="model"
       ref="queryBuilder"
-      :tableSchema="tableSchema"
+      :database-schema="etlDatabase"
       :query="model.query"
       :query-language="model.language"
       :showParameter="model.showParameter"

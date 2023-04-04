@@ -1,2 +1,2 @@
 export * from './PasswordConfig';
-export * from './PasswordSetting';
+export * from './Passwordable';

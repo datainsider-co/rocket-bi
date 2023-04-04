@@ -127,7 +127,7 @@ export default class DashboardHeader extends Vue {
     }
   }
 
-  private showEditComponent(): boolean {
+  public showEditComponent(): boolean {
     return isEdit(this.mode);
   }
 

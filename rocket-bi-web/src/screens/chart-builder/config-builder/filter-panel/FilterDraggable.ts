@@ -359,7 +359,7 @@ export default class FilterDraggable extends Vue {
     if (this.preventTooltip) {
       this.$emit('onClickTooltip');
     } else {
-      TimeoutUtils.waitAndExec(null, () => this.openContext(target, event), 150);
+      TimeoutUtils.waitAndExec(null, () => this.openContext(target, event), 110);
       const dbName = _BuilderTableSchemaStore.dbNameSelected;
       await this.initTablesOptions(dbName);
     }

@@ -15,6 +15,7 @@ import {
   QueryRelatedWidget,
   QuerySettingType,
   TableColumn,
+  ValueCondition,
   Widget,
   WidgetId,
   Widgets
@@ -410,7 +411,17 @@ export default class ChartHolder extends Vue {
 
   @Provide()
   async onChangeDynamicValues(values: string[]): Promise<void> {
-    return DashboardControllerModule.replaceDynamicFilter({ widget: this.metaData, values: values, apply: true });
+    await DashboardControllerModule.replaceDynamicValues({ widget: this.metaData, values: values, apply: true });
+  }
+
+  @Provide()
+  getCurrentValues(id: WidgetId): string[] {
+    if (FilterModule.filterRequests.has(id)) {
+      const filterRequest: FilterRequest = FilterModule.filterRequests.get(id)!;
+      return ValueCondition.isValueCondition(filterRequest!.condition) ? filterRequest!.condition.getValues() : [];
+    } else {
+      return DashboardControllerModule.dynamicFilter.get(id) ?? [];
+    }
   }
 
   private setChartInfo(chartInfo: ChartInfo) {

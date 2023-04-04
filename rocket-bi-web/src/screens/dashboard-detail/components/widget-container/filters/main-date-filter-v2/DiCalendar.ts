@@ -74,6 +74,9 @@ export default class DiCalendar extends Vue {
   @Prop({ required: false, default: DateUtils.DefaultLocale })
   private readonly locale!: string;
 
+  @Prop({ required: false, default: false })
+  private readonly hideTimePresetOptions!: string;
+
   // Provide from DashboardControlBar.ts
   @Inject({ default: undefined })
   private handleResetMainDate?: () => void;

@@ -2,8 +2,6 @@ import '@/screens/data-ingestion/components/data-source-config-form/scss/Form.sc
 import { BFormInput } from 'bootstrap-vue';
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
-import { BigQuerySourceInfoV2 } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfoV2';
-import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4SourceInfo';
 import { GoogleAdsSourceInfo } from '@core/data-ingestion';
 import KeyDownEvent = JQuery.KeyDownEvent;
 import { Log } from '@core/utils';

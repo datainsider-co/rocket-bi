@@ -14,7 +14,6 @@ import org.nutz.ssdb4j.spi.SSDB
 
 import javax.inject.{Named, Singleton}
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
-import scala.io.{BufferedSource, Source}
 import scala.util.Try
 
 object MainModule extends TwitterModule {
@@ -89,7 +88,8 @@ object MainModule extends TwitterModule {
         tcpPort = sys.env("CLICKHOUSE_TCP_PORT").toInt,
         username = sys.env("CLICKHOUSE_USERNAME"),
         password = sys.env("CLICKHOUSE_PASSWORD"),
-        clusterName = sys.env.getOrElse("CLICKHOUSE_CLUSTER_NAME", "")
+        clusterName = Try(sys.env("CLICKHOUSE_CLUSTER_NAME")).toOption,
+        useSsl = sys.env.getOrElse("CLICKHOUSE_ENCRYPTED_CONN", "false").toBoolean
       )
     }.toOption
   }
@@ -116,12 +116,15 @@ object MainModule extends TwitterModule {
       @Named("clickhouse") client: JdbcClient,
       clickhouseConnSetting: Option[ClickhouseConnectionSetting]
   ): DDLExecutor = {
-    val clusterName: String = if (clickhouseConnSetting.isDefined) {
+    val clusterName: Option[String] = if (clickhouseConnSetting.isDefined) {
       clickhouseConnSetting.get.clusterName
+    } else None
+
+    if (clusterName.isEmpty || clusterName.get.isEmpty) {
+      NonClusteredDDLExecutor(client)
     } else {
-      ZConfig.getString("db.clickhouse.cluster_name")
+      ClusteredDDLExecutor(client, clusterName.get)
     }
-    DDLExecutorImpl(client, ClickHouseDDLConverter(), clusterName)
   }
 
   @Singleton

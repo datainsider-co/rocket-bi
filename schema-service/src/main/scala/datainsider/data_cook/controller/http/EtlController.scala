@@ -52,74 +52,74 @@ class EtlController @Inject() (
 
   post("/data_cook/my_etl") { request: ListEtlJobsRequest =>
     Profiler("[DataCook]::my_etl") {
-      jobService.listEtlJobs(request.currentOrganizationId.get, request)
+      jobService.listEtlJobs(request.getOrganizationId(), request)
     }
   }
 
   post("/data_cook/shared") { request: ListEtlJobsRequest =>
     Profiler("[DataCook]::shared") {
-      shareService.listSharedEtlJobs(request.currentOrganizationId.get, request)
+      shareService.listSharedEtlJobs(request.getOrganizationId(), request)
     }
   }
 
   post("/data_cook/history") { request: ListEtlJobsRequest =>
     Profiler("[DataCook]::history") {
-      historyService.listHistories(request.currentOrganizationId.get, request)
+      historyService.listHistories(request.getOrganizationId(), request)
     }
   }
 
   post("/data_cook/trash") { request: ListEtlJobsRequest =>
     Profiler("[DataCook]::trash") {
-      trashService.listEtlJobs(request.currentOrganizationId.get, request)
+      trashService.listEtlJobs(request.getOrganizationId(), request)
     }
   }
 
   filter(permissionFilter.require("etl:view:[id]"))
     .get("/data_cook/:id") { request: GetEtlJobRequest =>
       Profiler("[DataCook]::get_etl") {
-        jobService.get(request.currentOrganizationId.get, request.id)
+        jobService.get(request.getOrganizationId(), request.id)
       }
     }
 
   filter(permissionFilter.require("etl:create:*"))
     .post("/data_cook/create") { request: CreateEtlJobRequest =>
       Profiler("[DataCook]::create_etl") {
-        jobService.create(request.currentOrganizationId.get, request)
+        jobService.create(request.getOrganizationId(), request)
       }
     }
 
   filter(permissionFilter.require("etl:edit:[id]"))
     .put("/data_cook/:id") { request: UpdateEtlJobRequest =>
       Profiler("[DataCook]::update_etl") {
-        jobService.update(request.currentOrganizationId.get, request)
+        jobService.update(request.getOrganizationId(), request)
       }
     }
 
   filter(permissionFilter.require("etl:delete:[id]"))
     .delete("/data_cook/:id") { request: DeleteEtlJobRequest =>
       Profiler("[DataCook]::soft_delete") {
-        jobService.softDelete(request.currentOrganizationId.get, request.id)
+        jobService.softDelete(request.getOrganizationId(), request.id)
       }
     }
 
   filter(permissionFilter.require("etl:delete:[id]"))
     .delete("/data_cook/trash/:id") { request: DeleteEtlJobRequest =>
       Profiler("[DataCook]::hard_delete") {
-        trashService.hardDelete(request.currentOrganizationId.get, request.id)
+        trashService.hardDelete(request.getOrganizationId(), request.id)
       }
     }
 
   filter(permissionFilter.require("etl:delete:[id]"))
     .post("/data_cook/trash/:id/restore") { request: RestoreEtlJobRequest =>
       Profiler("[DataCook]::restore_etl") {
-        trashService.restore(request.currentOrganizationId.get, request.id)
+        trashService.restore(request.getOrganizationId(), request.id)
       }
     }
 
   filter(permissionFilter.require("etl:view:[id]"))
     .post("/data_cook/:id/preview_sync") { request: PreviewEtlRequest =>
       Profiler("[DataCook]::preview_etl_sync") {
-        previewJobService.previewSync(request.currentOrganizationId.get, request)
+        previewJobService.previewSync(request.getOrganizationId(), request)
       }
     }
 
@@ -127,7 +127,7 @@ class EtlController @Inject() (
     .post("/data_cook/:id/end_preview") { request: EndPreviewEtlJobRequest =>
       Profiler("[DataCook]::end_preview") {
         for {
-          success <- previewJobService.endPreview(request.currentOrganizationId.get, request.id)
+          success <- previewJobService.endPreview(request.getOrganizationId(), request.id)
         } yield {
           Map("data" -> success)
         }
@@ -138,7 +138,7 @@ class EtlController @Inject() (
     .get("/data_cook/:id/preview/database_name") { request: GetPreviewDatabaseName =>
       Profiler("[DataCook]::database_name") {
         previewJobService
-          .getDatabaseName(request.currentOrganizationId.get, request.id)
+          .getDatabaseName(request.getOrganizationId(), request.id)
           .map(dbName => EtlDatabaseNameResponse(id = request.id, databaseName = dbName))
       }
     }
@@ -147,7 +147,7 @@ class EtlController @Inject() (
     .post("/data_cook/:id/view_query") { request: ViewQueryRequest =>
       Profiler("[DataCook]::view_query") {
         previewJobService
-          .toQuery(request.currentOrganizationId.get, request.id, request.fields, request.extraFields)
+          .toQuery(request.getOrganizationId(), request.id, request.fields, request.extraFields)
           .map(query => EtlQueryResponse(id = request.id, query = query))
       }
     }
@@ -176,7 +176,7 @@ class EtlController @Inject() (
     .put("/data_cook/:id/kill") { request: Request =>
       {
         val jobId: EtlJobId = request.getLongParam("id")
-        val ordId: OrganizationId = request.currentOrganizationId.get
+        val ordId: OrganizationId = request.getOrganizationId()
         scheduleService.killJob(ordId, jobId).map(_ => Map("success" -> true))
       }
     }
@@ -185,7 +185,7 @@ class EtlController @Inject() (
     .put("/data_cook/:id/force_run") { request: ForceRunRequest =>
       {
         scheduleService
-          .forceRun(request.currentOrganizationId.get, request.id, request.atTime)
+          .forceRun(request.getOrganizationId(), request.id, request.atTime)
           .map(_ => Map("success" -> true))
       }
     }

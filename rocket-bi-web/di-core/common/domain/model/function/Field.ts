@@ -5,7 +5,7 @@
  * @created: 5/30/21, 8:59 PM
  */
 
-import { Column, DefaultExpression, Expression, MaterializedExpression, SelectExpression, TableColumn } from '@core/common/domain';
+import { Column, DefaultExpression, Expression, MaterializedExpression, SelectExpression, TabControlData, TableColumn } from '@core/common/domain';
 import { Equatable } from '@core/common/domain/model/Equatable';
 import { DataType } from '@core/schema/service/FieldFilter';
 import { ChartUtils } from '@/utils';
@@ -14,7 +14,8 @@ export enum FieldType {
   TableField = 'table_field',
   ViewField = 'view_field',
   ExpressionField = 'expression_field',
-  CalculatedField = 'calculated_field'
+  CalculatedField = 'calculated_field',
+  ChartControlField = 'chart_control_field'
 }
 
 export abstract class Field extends Equatable {
@@ -43,6 +44,8 @@ export abstract class Field extends Equatable {
         return ExpressionField.fromObject(obj);
       case FieldType.CalculatedField:
         return CalculationField.fromObject(obj);
+      case FieldType.ChartControlField:
+        return ChartControlField.fromObject(obj);
     }
   }
 
@@ -231,5 +234,54 @@ export class CalculationField extends Field {
 
   static isCalculatedField(obj: any): obj is CalculationField {
     return obj?.className === FieldType.CalculatedField;
+  }
+}
+
+export class ChartControlField extends Field {
+  controlData: TabControlData;
+  constructor(controlData: TabControlData) {
+    super(FieldType.ChartControlField, '', '', '', '');
+    this.controlData = controlData;
+  }
+
+  static fromObject(obj: any): TableField {
+    return new ChartControlField(obj.controlData);
+  }
+
+  static default() {
+    return new ChartControlField({
+      displayName: '',
+      chartType: '',
+      defaultTableColumns: [],
+      values: [],
+      tableColumns: [],
+      id: -1
+    });
+  }
+
+  equals(obj: any): boolean {
+    if (obj) {
+      const json = JSON.stringify(this.controlData);
+      const objJson = JSON.stringify(obj.controlData);
+      return json === objJson;
+    } else {
+      return false;
+    }
+  }
+
+  isNested(): boolean {
+    return false;
+  }
+
+  getDataType(): DataType {
+    return DataType.TabControl;
+  }
+
+  toColumn(): Column {
+    throw new Error('Method not implemented.');
+  }
+
+  static isChartControlField(obj: any): obj is ChartControlField {
+    return obj?.className === FieldType.ChartControlField;
   }
 }

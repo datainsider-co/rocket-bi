@@ -2,10 +2,7 @@
   <BPopover
     :show.sync="isShowPopoverSynced"
     :target="btnId"
-    :custom-class="{
-      'filter-popover-area': true,
-      'filter-popover-area-default-style': isDefaultStyle
-    }"
+    :custom-class="customPopoverClass"
     :placement="placement"
     ref="popover"
     triggers="manual"

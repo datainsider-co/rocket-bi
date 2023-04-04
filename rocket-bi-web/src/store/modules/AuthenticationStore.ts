@@ -19,6 +19,7 @@ import { LoginResponse } from '@core/common/domain/response/authentication/Login
 import { UserProfile } from '@core/common/domain';
 import { RouterUtils } from '@/utils/RouterUtils';
 import { DashboardModule } from '@/screens/dashboard-detail/stores';
+import { UserResetPasswordRequest } from '@core/common/domain/request/authentication/UserResetPasswordRequest';
 
 export enum AuthenticationStatus {
   UnIdentify,
@@ -134,11 +135,15 @@ export class AuthenticationStore extends VuexModule {
 
       case ApiExceptions.expired:
         this.errorMessage = 'License expired. Please contact us to renew your license.';
-
       default:
         this.errorMessage = 'Incorrect email or password';
         break;
     }
+  }
+
+  @Mutation
+  setErrorMessage(message: string) {
+    this.errorMessage = message;
   }
 
   @Action
@@ -270,18 +275,31 @@ export class AuthenticationStore extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async resetPassword(payload: { email: string }) {
+  async resetPassword(payload: { request: UserResetPasswordRequest }) {
     try {
-      const { email } = payload;
-      Log.debug(email, 'on reset password');
-      await this.noAuthenticationService.resetPassword({
-        email: email
-      });
+      this.setErrorMessage('');
+      Log.debug(payload.request, 'on reset password');
+      await this.noAuthenticationService.resetPassword(payload.request);
     } catch (e) {
       const error = DIException.fromObject(e);
       Log.error(error.message, error.reason, 'at authenStore resetPassword function');
       Log.debug('AuthenticationStore :: resetPassword :: Error:', e);
-      this.setError(e);
+      throw error;
+    }
+  }
+
+  @Action({ rawError: true })
+  async forgotPassword(payload: { email: string }) {
+    try {
+      const { email } = payload;
+      Log.debug(email, 'on forgot password');
+      this.setErrorMessage('');
+      await this.noAuthenticationService.forgotPassword(email);
+    } catch (e) {
+      const error = DIException.fromObject(e);
+      Log.error(error.message, error.reason, 'at authenStore forgotPassword function');
+      Log.debug('AuthenticationStore :: forgotPassword :: Error:', e);
+      throw error;
     }
   }
 

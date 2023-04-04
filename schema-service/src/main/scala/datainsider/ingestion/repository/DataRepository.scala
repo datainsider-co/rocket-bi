@@ -69,7 +69,7 @@ case class ClickHouseDataRepository(client: JdbcClient) extends DataRepository w
   ): Future[Int] = {
     Future {
       val insertColumns = dropMaterializedColumns(columns)
-      val insertQuery = ClickHouseDDLConverter().toInsertSQL(dbName, tblName, insertColumns)
+      val insertQuery = ClickHouseDDLConverter.toInsertSQL(dbName, tblName, insertColumns)
 
       records
         .map(ClickHouseUtils.normalizeToCorrespondingType(insertColumns, _))
@@ -90,7 +90,7 @@ case class ClickHouseDataRepository(client: JdbcClient) extends DataRepository w
   ): Future[Int] = {
     Future {
       val insertColumns: Seq[Column] = dropMaterializedColumns(columns)
-      val insertQuery = ClickHouseDDLConverter().toInsertSQL(dbName, tblName, insertColumns, isApplyEncryption = true)
+      val insertQuery = ClickHouseDDLConverter.toInsertSQL(dbName, tblName, insertColumns, isApplyEncryption = true)
 
       records
         .map(ClickHouseUtils.normalizeToCorrespondingType(insertColumns, _))

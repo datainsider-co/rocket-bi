@@ -3,7 +3,7 @@ import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
 import Konva from 'konva';
 import { Log } from '@core/utils';
 import { EtlOperator, Position, SendToGroupEmailOperator } from '@core/data-cook';
-import { PRIMARY_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
+import { ACCENT_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
 import { ListUtils } from '@/utils';
 import { DiagramEvent } from '@/screens/data-cook/components/diagram-panel/DiagramEvent';
 
@@ -83,7 +83,7 @@ export default class SavedEmailConfig extends DiagramItem {
       fill: '#fff',
       strokeEnabled: false,
       strokeWidth: 2,
-      stroke: PRIMARY_COLOR,
+      stroke: ACCENT_COLOR,
       shadowBlur: 8,
       shadowColor: 'rgba(0,0,0,0.1)',
       shadowOffset: {

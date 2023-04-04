@@ -1,53 +1,73 @@
 # CHANGELOG
 
+### V1.4.19 28/02/2023
+
+#### NEW FEATURES
+
+- Forgot password
+- Admin reset password
+- Support multi delete source, job
+- Show job queues listing in ingestion
+- Show line number in query editor
+- Show query analysis name in query editor when edit
+- Support export csv in query editor
+- [Query analysis] Support list in parameter
+- [Query Analysis] Support readonly when view mode
+
+#### BUG FIXES
+
+- Cannot comment in query editor
+- Cannot create database with vietnamese name
+- Cannot share anyone, password production in query editor
+
 ### V1.4.18 30/01/2023
 
 #### BUG FIXES
 
-+ [Bug] Unable to find dashboard to drill through
-+ [Bug] Cannot Save User Management Privileges
-+ [Bug] Slicer invalid date value
-+ [Bug] Dashboard cannot copy/duplicate with editor permission
-+ [Bug] Schema show duplicate dataset
-+ [Bug] Recent dashboard do not updated
-+ [Bug] User Create Organization does not have admin permission
+- [Bug] Unable to find dashboard to drill through
+- [Bug] Cannot Save User Management Privileges
+- [Bug] Slicer invalid date value
+- [Bug] Dashboard cannot copy/duplicate with editor permission
+- [Bug] Schema show duplicate dataset
+- [Bug] Recent dashboard do not updated
+- [Bug] User Create Organization does not have admin permission
 
 #### NEW FEATURES
 
-+ Support Delete user & Transfer resource
-+ Support Copy Widget
-+ Support Copy Dashboard
+- Support Delete user & Transfer resource
+- Support Copy Widget
+- Support Copy Dashboard
 
 ### V1.4.17 12/01/2023
 
 #### NEW FEATURES
 
-+ Duplicate a dashboard
+- Duplicate a dashboard
 
 ### v1.4.16 05/12/2022
 
 #### BUG FIXES
 
-+ Cannot rename Gauge Chart
-+ Cannot update inner chart filter
+- Cannot rename Gauge Chart
+- Cannot update inner chart filter
 
 #### NEW FEATURES
 
-+ Required password to access to shared dashboard
+- Required password to access to shared dashboard
 
 ### V1.4.15 23/11/2022
 
 #### NEW FEATURES
 
-+ Add trigger with/without Others in Top N elements
-+ Support changing logo and company name of the organization
+- Add trigger with/without Others in Top N elements
+- Support changing logo and company name of the organization
 
 #### BUG FIXES
 
-+ Day of month and Day of week in Change date function show the wrong date
-+ Dark theme for filter is not correct
-+ Cannot remove chart from tab widget
-+ Changing the font size of the Data Label can be saved, but when refreshing the page, it won't update
+- Day of month and Day of week in Change date function show the wrong date
+- Dark theme for filter is not correct
+- Cannot remove chart from tab widget
+- Changing the font size of the Data Label can be saved, but when refreshing the page, it won't update
 
 ### V1.4 22/11/2021
 
@@ -294,13 +314,16 @@ Dashboard
 
 - Show background theme in data builder
 - Update setting charts:
+
   - Number:
+
     - Setting title & subtitle
     - Setting data label
     - Setting tooltips
     - Setting background
 
   - Line, Area, Column, Bar:
+
     - Setting title & subtitle
     - Setting legend
     - Setting X Axis
@@ -312,6 +335,7 @@ Dashboard
     - Setting tooltip
 
   - Parliament:
+
     - Setting title & subtitle
     - Setting legend
     - Setting data color
@@ -320,6 +344,7 @@ Dashboard
     - Setting tooltip
 
   - Pie:
+
     - Setting title & subtitle
     - Setting legend
     - Setting data color
@@ -328,6 +353,7 @@ Dashboard
     - Setting tooltip
 
   - Scatter:
+
     - Setting title & subtitle
     - Setting general
     - Setting legend
@@ -338,6 +364,7 @@ Dashboard
     - Setting tooltip
 
   - Bubble:
+
     - Setting title & subtitle
     - Setting general
     - Setting legend
@@ -348,6 +375,7 @@ Dashboard
     - Setting tooltip
 
   - Funnel:
+
     - Setting title & subtitle
     - Setting data label
     - Setting data color
@@ -355,6 +383,7 @@ Dashboard
     - Setting tooltip
 
   - Pyramid:
+
     - Setting title & subtitle
     - Setting data label
     - Setting data color
@@ -362,6 +391,7 @@ Dashboard
     - Setting tooltip
 
   - Pareto:
+
     - Setting title & subtitle
     - Setting legend
     - Setting X Axis
@@ -372,6 +402,7 @@ Dashboard
     - Setting shape
 
   - Bell Curve:
+
     - Setting title & subtitle
     - Setting legend
     - Setting X Axis
@@ -383,6 +414,7 @@ Dashboard
     - Setting tooltip
 
   - Gauges:
+
     - Setting title & subtitle
     - Setting Gauge Axis
     - Setting data color
@@ -392,6 +424,7 @@ Dashboard
     - Setting tooltip
 
   - Heatmap:
+
     - Setting title & subtitle
     - Setting X Axis
     - Setting Y Axis
@@ -401,12 +434,14 @@ Dashboard
     - Setting tooltip
 
   - Wordcloud:
+
     - Setting title & subtitle
     - Setting data color
     - Setting background
     - Setting tooltip
 
   - Treemap:
+
     - Setting title & subtitle
     - Setting data label
     - Setting data color
@@ -414,6 +449,7 @@ Dashboard
     - Setting tooltip
 
   - Stacked column:
+
     - Setting title & subtitle
     - Setting legend
     - Setting stack
@@ -425,6 +461,7 @@ Dashboard
     - Setting tooltip
 
   - Stacked bar:
+
     - Setting title & subtitle
     - Setting legend
     - Setting stack
@@ -436,6 +473,7 @@ Dashboard
     - Setting tooltip
 
   - Histogram:
+
     - Setting title & subtitle
     - Setting general
     - Setting legend
@@ -447,6 +485,7 @@ Dashboard
     - Setting tooltip
 
   - Map:
+
     - Setting title & subtitle
     - Setting map controls
     - Setting data label
@@ -454,6 +493,7 @@ Dashboard
     - Setting tooltip
 
   - Spider web:
+
     - Setting title & subtitle
     - Setting legend
     - Setting data color

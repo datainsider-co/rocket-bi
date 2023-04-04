@@ -5,6 +5,7 @@ export abstract class DirectoryMetadata {
   static fromObject(obj: any) {
     switch (obj.directoryType) {
       case DirectoryType.Dashboard:
+      case DirectoryType.Query:
         return DashboardMetaData.fromObject(obj);
       default:
         throw new UnsupportedException(`Unsupported DirectoryType ${obj.directoryType}`);
@@ -14,6 +15,7 @@ export abstract class DirectoryMetadata {
   static default(directoryType: DirectoryType) {
     switch (directoryType) {
       case DirectoryType.Dashboard:
+      case DirectoryType.Query:
         return DashboardMetaData.default();
     }
   }

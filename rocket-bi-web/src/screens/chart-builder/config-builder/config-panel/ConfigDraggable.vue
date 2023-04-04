@@ -8,7 +8,7 @@
     :showPlaceHolder="isShowPlaceHolder"
     :showTitle="showTitle"
     :title="config.title"
-    @onClickTooltip="handleClickTooltip(dbFieldContext, $event)"
+    @onClickTooltip="handleClickSuggestTableAndField($event)"
     @onDrop="handleDrop"
   >
     <template #drop-area>
@@ -23,7 +23,7 @@
         :group="groupConfig"
         class="draggable"
         draggable=".drag-item"
-        @add="handleDropFromOtherSection"
+        @add="handleDropFromOtherConfig"
         @end="handleFunctionChanged"
         @start="handleDragItem"
       >
@@ -35,9 +35,9 @@
           :index="index"
           :isItemDragging="isItemDragging"
           class="drag-item"
-          @onInsert="handleInsertFunction"
+          @onInsert="insertFunction"
           @onReplace="handleReplaceFunction"
-          @onInsertDynamic="handleInsertFunction"
+          @onInsertDynamic="insertFunction"
           @onReplaceDynamic="handleReplaceFunction"
         >
           <template #default="{ opacity }">
@@ -48,7 +48,7 @@
               @clickFuncFamily="openContext(fnFamilyContext, $event, { node: node, i: index })"
               @clickFuncType="openContext(fnTypeContext, $event, { node: node, i: index })"
               @clickMore="openContext(menu, $event, { node: node, i: index })"
-              @clickName="handleClickField(fieldContext, $event, { node: node, i: index })"
+              @clickName="handleClickChangeField($event, { node: node, i: index })"
               @clickSorting="openContext(sortingContext, $event, { node: node, i: index })"
             >
             </DraggableItem>
@@ -59,14 +59,14 @@
         <div class="tutorial-drop">
           <div v-once class="unselectable">
             <img alt="drag" src="@/assets/icon/ic-drag.svg" /> {{ config.placeholder }} or
-            <a href="#" style="cursor: pointer;" @click="handleClickTooltip(dbFieldContext, $event)">click here</a>
+            <a href="#" style="cursor: pointer;" @click="handleClickSuggestTableAndField($event)">click here</a>
           </div>
         </div>
       </template>
       <template>
         <ConfigModal
           :configType="configType"
-          :functions="functionOfTreeNode(editingNode)"
+          :functions="listAcceptableFunctions(editingNode)"
           :isOpen.sync="isModalOpen"
           :node="editingNode"
           :subFunctions="subFunctions(editingNode)"
@@ -86,24 +86,15 @@
             </li>
           </template>
         </vue-context>
-        <vue-context ref="fieldContext">
-          <template v-if="child.data" slot-scope="child">
-            <StatusWidget :error="errorMessage" :status="fieldContextStatus">
-              <div class="context field-context">
-                <div v-for="(profileField, i) in profileFields" :key="i" class="active" @click.prevent="handleChangeField(child, profileField)">
-                  <li>
-                    <a href="#" style="cursor: pointer">{{ profileField.displayName }}</a>
-                    <span v-if="child.data.node.displayName === profileField.displayName">&#10003;</span>
-                  </li>
-                </div>
-              </div>
-            </StatusWidget>
-          </template>
-        </vue-context>
         <vue-context ref="fnFamilyContext">
           <template v-if="child.data" slot-scope="child">
             <div class="context">
-              <div v-for="(func, i) in functionOfTreeNode(child.data.node)" :key="i" class="active" @click.prevent="handleFunctionFamilyChanged(func, child)">
+              <div
+                v-for="(func, i) in listAcceptableFunctions(child.data.node)"
+                :key="i"
+                class="active"
+                @click.prevent="handleFunctionFamilyChanged(func, child)"
+              >
                 <li>
                   <a href="#" style="cursor: pointer">{{ func.label }}</a>
                   <span v-if="child.data.node.functionFamily === func.label">&#10003;</span>
@@ -148,31 +139,7 @@
             </div>
           </template>
         </vue-context>
-        <vue-context ref="dbFieldContext">
-          <template>
-            <StatusWidget :error="errorMessage" :status="fieldContextStatus">
-              <div class="context field-context">
-                <template v-if="fieldOptions.length === 0">
-                  <div class="d-flex align-items-center justify-content-center" style="height:  316px;width:250px">
-                    <EmptyDirectory :is-hide-create-hint="true" title="Database empty" />
-                  </div>
-                </template>
-                <template v-for="(table, tableIndex) in fieldOptions" v-else>
-                  <li :key="`table_${tableIndex}`" class="p-2">
-                    <b href="#">{{ table.displayName }}</b>
-                  </li>
-                  <template v-for="(field, i) in table.options">
-                    <div :key="`table_${tableIndex}_${i}`" class="active p-2" @click="handleSelectColumn(field)">
-                      <li class="px-2 overflow-hidden" style="white-space: nowrap; text-overflow: ellipsis">
-                        <a href="#" style="cursor: pointer">{{ field.displayName }}</a>
-                      </li>
-                    </div>
-                  </template>
-                </template>
-              </div>
-            </StatusWidget>
-          </template>
-        </vue-context>
+        <SelectFieldContext ref="selectFieldContext" @field-changed="handleChangeField" @select-column="handleSelectColumn"></SelectFieldContext>
         <CalculatedFieldModal ref="calculatedFieldModal" @updated="handleUpdateTableSchema" />
       </template>
     </template>

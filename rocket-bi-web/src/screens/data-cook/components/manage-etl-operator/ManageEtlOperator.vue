@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="loading" class="etl-operator-container h-100">
-      <div class="etl-operator-container">
+      <div class="etl-operator-container--loading">
         <LoadingComponent></LoadingComponent>
       </div>
     </div>
@@ -18,42 +18,46 @@
           <DiagramPanel ref="diagramPanel" :position="model.stagePosition">
             <!--              :ref="getTableRef(operator.tableSchema.dbName, operator.tableSchema.name)"-->
 
-            <template v-for="operator in model.getDataItems">
+            <template v-for="(operator, index) in model.getDataItems">
               <TableItem
-                @click="e => showSelectOperatorType(operator, e)"
-                :id="getDestTableRef(operator.destTableName)"
-                :key="getDestTableRef(operator.destTableName)"
+                ref="sourceTableItems"
+                @click="e => showGetOperatorMenu(operator, e)"
+                :id="getOperatorId(operator)"
+                :key="getOperatorId(operator)"
                 :operator="operator"
                 :loading="isLoadingOperator(operator)"
+                :is-error="isError(operator)"
                 draggable
               >
               </TableItem>
               <template v-if="operator.persistConfiguration">
                 <ArrowConnector
-                  :key="'saved_connector' + getDestTableRef(operator.destTableName)"
-                  :fromId="getDestTableRef(operator.destTableName)"
-                  :toId="'saved' + getDestTableRef(operator.destTableName)"
+                  :key="getOperatorId(operator, `persist_arrow_${index}`)"
+                  :fromId="getOperatorId(operator)"
+                  :toId="getOperatorId(operator, 'persist')"
+                  :is-error="isError(operator)"
                 ></ArrowConnector>
                 <SavedTable
                   @click="e => showSavedTableContextMenu(operator, e)"
-                  :id="'saved' + getDestTableRef(operator.destTableName)"
-                  :key="'saved' + getDestTableRef(operator.destTableName)"
+                  :id="getOperatorId(operator, 'persist')"
+                  :key="getOperatorId(operator, `persist_${index}`)"
                   :operator="operator"
                 >
                 </SavedTable>
               </template>
               <template v-if="operator.emailConfiguration">
                 <ArrowConnector
-                  :key="getEmailConnectorId(operator.emailConfiguration.subject)"
-                  :fromId="getDestTableRef(operator.destTableName)"
-                  :toId="getEmailConfigId(operator.emailConfiguration.subject)"
+                  :key="getOperatorId(operator, `email_arrow_${index}`)"
+                  :fromId="getOperatorId(operator)"
+                  :toId="getOperatorId(operator, 'email')"
+                  :is-error="isError(operator)"
                 ></ArrowConnector>
                 <SavedEmailConfig
                   ref="savedEmailConfigs"
                   @click="e => showSavedEmailConfigContextMenu(operator, e)"
                   @dragmove="handleDragEmailConfig"
-                  :id="getEmailConfigId(operator.emailConfiguration.subject)"
-                  :key="getEmailConfigId(operator.emailConfiguration.subject)"
+                  :id="getOperatorId(operator, 'email')"
+                  :key="getOperatorId(operator, `email_${index}`)"
                   :operator="operator"
                 >
                 </SavedEmailConfig>
@@ -61,14 +65,15 @@
               <template v-if="operator.thirdPartyPersistConfigurations">
                 <template v-for="(thirdPartyConfig, index) in operator.thirdPartyPersistConfigurations">
                   <ArrowConnector
-                    :key="'saved_connector' + thirdPartyConfig.getId() + index.toString()"
-                    :fromId="getDestTableRef(operator.destTableName)"
-                    :toId="'saved_to_database' + thirdPartyConfig.getId() + index.toString()"
+                    :key="getOperatorId(operator, `third_party_arrow_${index}`)"
+                    :fromId="getOperatorId(operator)"
+                    :toId="getOperatorId(operator, `third_party_${index}`)"
+                    :is-error="isError(operator)"
                   ></ArrowConnector>
                   <ThirdPartyPersistConfig
                     @click="e => showSavedThirdPartyConfigContextMenu(operator, thirdPartyConfig, index, e)"
-                    :id="'saved_to_database' + thirdPartyConfig.getId() + index.toString()"
-                    :key="'saved_to_database' + thirdPartyConfig.getId() + index.toString()"
+                    :id="getOperatorId(operator, `third_party_${index}`)"
+                    :key="getOperatorId(operator, `third_party_${index}`)"
                     :operator="operator"
                     :third-party-config-index="index"
                     :third-party-config="thirdPartyConfig"
@@ -76,87 +81,92 @@
                   </ThirdPartyPersistConfig>
                 </template>
               </template>
-
-              <!--              <TableSaved v-if="operator.persistConfiguration" :persistConfiguration="operator.persistConfiguration"></TableSaved>-->
             </template>
 
-            <template v-for="operator in model.notGetDataItems">
+            <template v-for="(operator, childIndex) in model.notGetDataItems">
               <template v-if="operator.isSendToGroupEmail">
-                <template v-for="leftOpe in operator.getLeftOperators()">
+                <template v-for="parentOperator in operator.getParentOperators()">
                   <ArrowConnector
-                    :key="getOperatorTypeRef(leftOpe) + getOperatorTypeRef(operator)"
-                    :fromId="getDestTableRef(leftOpe.destTableName)"
-                    :toId="getDestTableRef(operator.destTableName)"
+                    :key="getOperatorId(parentOperator, 'group_email_arrow')"
+                    :fromId="getOperatorId(parentOperator)"
+                    :toId="getOperatorId(operator, 'group_email')"
+                    :is-error="isError(parentOperator)"
                   ></ArrowConnector>
                 </template>
                 <SavedEmailConfig
                   ref="savedEmailConfigs"
                   @click="e => showSavedEmailConfigContextMenu(operator, e)"
                   @dragmove="handleDragEmailConfig"
-                  :id="getDestTableRef(operator.destTableName)"
-                  :key="getDestTableRef(operator.destTableName)"
+                  :id="getOperatorId(operator, 'group_email')"
+                  :key="getOperatorId(operator, 'group_email')"
                   :operator="operator"
                 >
                 </SavedEmailConfig>
               </template>
               <template v-else>
-                <template v-for="leftOpe in operator.getLeftOperators()">
+                <template v-for="(parentOperator, parentIndex) in operator.getParentOperators()">
                   <ArrowConnector
-                    :key="getOperatorTypeRef(leftOpe) + getOperatorTypeRef(operator)"
-                    :fromId="getDestTableRef(leftOpe.destTableName)"
-                    :toId="getOperatorTypeRef(operator)"
+                    :key="getOperatorId(parentOperator, String(parentIndex)) + '_to_' + getOperatorId(operator, String(childIndex))"
+                    :fromId="getOperatorId(parentOperator)"
+                    :toId="getOperatorId(operator, 'type')"
+                    :is-error="isError(parentOperator)"
                   ></ArrowConnector>
                 </template>
                 <OperatorType
-                  @click="e => showOperatorContextMenu(operator, e)"
-                  :key="getOperatorTypeRef(operator)"
-                  :id="getOperatorTypeRef(operator)"
+                  @click="e => showNotGetOperatorMenu(operator, e)"
+                  :key="getOperatorId(operator, 'type')"
+                  :id="getOperatorId(operator, 'type')"
                   :operator="operator"
+                  :isError="isError(operator)"
                   draggable
                 >
                 </OperatorType>
                 <ArrowConnector
-                  :key="getOperatorTypeRef(operator) + getDestTableRef(operator.destTableName)"
-                  :fromId="getOperatorTypeRef(operator)"
-                  :toId="getDestTableRef(operator.destTableName)"
+                  :key="getOperatorId(operator, 'type_arrow_to')"
+                  :fromId="getOperatorId(operator, 'type')"
+                  :toId="getOperatorId(operator)"
+                  :is-error="isError(operator)"
                 ></ArrowConnector>
                 <TableItem
                   v-if="!operator.isSendToGroupEmail"
-                  @click="e => showSelectOperatorType(operator, e)"
-                  :id="getDestTableRef(operator.destTableName)"
-                  :key="getDestTableRef(operator.destTableName)"
+                  @click="e => showGetOperatorMenu(operator, e)"
+                  :id="getOperatorId(operator)"
+                  :key="getOperatorId(operator)"
                   :operator="operator"
                   :loading="isLoadingOperator(operator)"
+                  :is-error="isError(operator)"
                   draggable
                 >
                 </TableItem>
               </template>
               <template v-if="operator.persistConfiguration">
                 <ArrowConnector
-                  :key="'saved_connector' + getDestTableRef(operator.destTableName)"
-                  :fromId="getDestTableRef(operator.destTableName)"
-                  :toId="'saved' + getDestTableRef(operator.destTableName)"
+                  :key="getOperatorId(operator, 'persist_arrow')"
+                  :fromId="getOperatorId(operator)"
+                  :toId="getOperatorId(operator, 'persist')"
+                  :is-error="isError(operator)"
                 ></ArrowConnector>
                 <SavedTable
                   @click="e => showSavedTableContextMenu(operator, e)"
-                  :id="'saved' + getDestTableRef(operator.destTableName)"
-                  :key="'saved' + getDestTableRef(operator.destTableName)"
+                  :id="getOperatorId(operator, 'persist')"
+                  :key="getOperatorId(operator, 'persist')"
                   :operator="operator"
                 >
                 </SavedTable>
               </template>
               <template v-if="operator.emailConfiguration">
                 <ArrowConnector
-                  :key="getEmailConnectorId(operator.emailConfiguration.subject)"
-                  :fromId="getDestTableRef(operator.destTableName)"
-                  :toId="getEmailConfigId(operator.emailConfiguration.subject)"
+                  :key="getOperatorId(operator, 'email_arrow')"
+                  :fromId="getOperatorId(operator)"
+                  :toId="getOperatorId(operator, 'email')"
+                  :is-error="isError(operator)"
                 ></ArrowConnector>
                 <SavedEmailConfig
                   ref="savedEmailConfigs"
                   @click="e => showSavedEmailConfigContextMenu(operator, e)"
                   @dragmove="handleDragEmailConfig"
-                  :id="getEmailConfigId(operator.emailConfiguration.subject)"
-                  :key="getEmailConfigId(operator.emailConfiguration.subject)"
+                  :id="getOperatorId(operator, 'email')"
+                  :key="getOperatorId(operator, 'email')"
                   :operator="operator"
                 >
                 </SavedEmailConfig>
@@ -164,14 +174,14 @@
               <template v-if="operator.thirdPartyPersistConfigurations">
                 <template v-for="(thirdPartyConfig, index) in operator.thirdPartyPersistConfigurations">
                   <ArrowConnector
-                    :key="'saved_connector' + thirdPartyConfig.getId() + index.toString()"
-                    :fromId="getDestTableRef(operator.destTableName)"
-                    :toId="'saved_to_database' + thirdPartyConfig.getId() + index.toString()"
+                    :key="getOperatorId(operator, `third_party_arrow_${index}`)"
+                    :fromId="getOperatorId(operator)"
+                    :toId="getOperatorId(operator, `third_party_${index}`)"
                   ></ArrowConnector>
                   <ThirdPartyPersistConfig
                     @click="e => showSavedThirdPartyConfigContextMenu(operator, thirdPartyConfig, index, e)"
-                    :id="'saved_to_database' + thirdPartyConfig.getId() + index.toString()"
-                    :key="'saved_to_database' + thirdPartyConfig.getId() + index.toString()"
+                    :id="getOperatorId(operator, `third_party_${index}`)"
+                    :key="getOperatorId(operator, `third_party_${index}`)"
                     :operator="operator"
                     :third-party-config-index="index"
                     :third-party-config="thirdPartyConfig"
@@ -180,25 +190,14 @@
                 </template>
               </template>
             </template>
-
-            <!--              :ref="getDestTableRef(operator.destTableName)"-->
-
-            <!--            <OperatorType-->
-            <!--              @click="e => showOperatorContextMenu(operator, e)"-->
-            <!--              :ref="getOperatorTypeRef(operator)"-->
-            <!--              :data="operator"-->
-            <!--              @move="repositionConnections"-->
-            <!--            ></OperatorType>-->
-
             <template #controls>
-              <!--              <button :disabled="!allOperators.length" @click.prevent="autoArrangement" class="btn btn-secondary mr-2 ml-auto">Auto Arrangement</button>-->
               <button :disabled="!allOperators.length" @click.prevent="clearAll" class="btn btn-secondary mr-2 ml-auto">Clear All</button>
               <button :disabled="!allOperators.length" @click.prevent="save" class="btn btn-primary">Save</button>
             </template>
           </DiagramPanel>
         </div>
       </div>
-      <div v-if="allOperators.length > 0" class="etl-operator-container h-50 mb-0">
+      <div v-if="allOperators.length > 0" class="etl-operator-container h-50 mt-3 mb-0">
         <div class="etl-preview-header">
           <vuescroll>
             <div class="d-flex align-items-center">
@@ -208,8 +207,8 @@
                   <a
                     :title="operator.destDatabaseDisplayName + '.' + operator.destTableDisplayName"
                     class="preview-header-item"
-                    @click.prevent="selectPreviewOperator(operator)"
-                    :class="{ 'font-weight-bold': previewEtl === operator, 'text-truncate': idx !== allOperators.length - 1 }"
+                    @click.prevent="selectOperator(operator, false)"
+                    :class="{ 'font-weight-bold': selectedOperator === operator, 'text-truncate': idx !== allOperators.length - 1 }"
                     :key="idx"
                     href="#"
                   >
@@ -227,20 +226,16 @@
               v-if="previewEtlResponse.data"
               :tableSchema="previewEtlResponse.data.tableSchema"
               :disableEmptyChart="true"
-              :retry="() => retryPreviewOperator(previewEtl)"
+              :retry="() => retryPreviewOperator(selectedOperator)"
               class="h-100"
             ></PreviewTableData>
             <div v-else class="etl-preview-response">
-              <vuescroll>
-                <ErrorWidget @onRetry="retryPreviewOperator(previewEtl)" :error="previewEtlResponse.error.message"></ErrorWidget>
-                <!--                <p class="text-center text-danger mb-2">-->
-                <!--                  <strong>Error:</strong>-->
-                <!--                  {{ previewEtlResponse.error.message }}-->
-                <!--                </p>-->
-                <!--                <div class="text-center">-->
-                <!--                  <button @click.prevent="retryPreviewOperator(previewEtl)" class="btn btn-sm btn-primary">Retry</button>-->
-                <!--                </div>-->
-              </vuescroll>
+              <ErrorWidget
+                @onRetry="retryPreviewOperator(selectedOperator)"
+                :error="previewEtlResponse.error.message"
+                is-show-all-error
+                is-html-error
+              ></ErrorWidget>
             </div>
           </template>
           <div v-else class="h-100">
@@ -292,7 +287,7 @@
   </div>
 </template>
 <script lang="ts" src="./ManageEtlOperator.ts"></script>
-<style lang="scss" scoped>
+<style lang="scss">
 .etl-operator-container {
   //height: 100%;
   display: flex;
@@ -301,7 +296,18 @@
   border-radius: 4px;
   background-color: var(--panel-background-color);
   padding: 16px;
-  margin-bottom: 16px;
+
+  &--loading {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    border-radius: 4px;
+    background-color: var(--panel-background-color);
+  }
+
+  &:has(.etl-operator-container--loading) {
+    padding: 0;
+  }
 
   .cdp-body-content-block-nodata {
     display: flex;
@@ -327,161 +333,6 @@
     position: relative;
     overflow: hidden;
   }
-
-  .etl-operator-controls {
-    //padding: 15px;
-    text-align: right;
-  }
-
-  .etl-column-container {
-    display: flex;
-    flex-wrap: nowrap;
-    min-width: 100vw;
-    min-height: 100vh;
-  }
-
-  .etl-column {
-    display: inline-flex;
-    flex-direction: column;
-    max-width: 300px;
-    width: 30%;
-  }
-
-  ::v-deep .ope-relationship-line {
-    transform: translate(var(--ll-translate-x), var(--ll-translate-y));
-    z-index: 2;
-  }
-
-  ::v-deep .etl-operator {
-    display: flex;
-    align-items: center;
-    margin: 30px 0;
-    height: 70px;
-    //justify-content: flex-end;
-  }
-
-  ::v-deep .etl-list-table {
-    display: flex;
-    flex-direction: column;
-  }
-
-  ::v-deep .etl-table {
-    display: inline-block;
-    background-color: var(--sencondary);
-    min-width: 130px;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
-    position: absolute;
-    cursor: move;
-    margin: 10px 20px;
-    display: flex;
-    flex-direction: column;
-    z-index: 3;
-
-    $table-mw: 300px;
-
-    &-title {
-      background-color: var(--tooltip-background-color);
-      padding: 8px 12px;
-      border-radius: 4px 4px 0 0;
-      border: 1px solid var(--tooltip-background-color);
-      border-bottom: 0;
-      display: inline-block;
-      white-space: nowrap;
-      max-width: $table-mw;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    &-body {
-      background-color: var(--secondary);
-      padding: 8px 12px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      border: 1px solid transparent;
-      border-top: 0;
-      border-radius: 0 0 4px 4px;
-      max-width: $table-mw;
-
-      .etl-table-name {
-        display: inline-block;
-        width: 100%;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
-
-    &-action {
-      display: flex;
-      position: absolute;
-      width: 100px;
-      left: calc(100% - 8px);
-      top: calc(50% - 8px);
-      z-index: 3;
-
-      &-button {
-        border: none;
-        outline: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        width: 17px;
-        height: 17px;
-        align-items: center;
-        justify-content: center;
-        color: var(--secondary);
-        background-color: var(--accent);
-        border-radius: 50%;
-        font-size: 9px;
-        text-decoration: none;
-      }
-    }
-
-    .etl-icon {
-      margin-right: 8px;
-    }
-
-    &:hover {
-      z-index: 4;
-      .etl-table {
-        &-title,
-        &-body {
-          border-color: var(--accent);
-        }
-
-        //&-action {
-        //  display: flex;
-        //}
-      }
-    }
-
-    &.etl-highlight {
-      .etl-table {
-        &-title,
-        &-body {
-          border-color: var(--accent);
-          animation: flash_border linear infinite 1000ms;
-        }
-      }
-
-      @keyframes flash_border {
-        0% {
-          border-color: var(--accent);
-        }
-        25% {
-          border-color: transparent;
-        }
-        50% {
-          border-color: var(--accent);
-        }
-        75% {
-          border-color: transparent;
-        }
-      }
-    }
-  }
 }
 
 .etl-preview-header {
@@ -493,6 +344,7 @@
   top: 0;
   white-space: nowrap;
   height: 30px;
+
   .preview-header-item {
     max-width: 250px;
   }
@@ -509,7 +361,6 @@
   width: 100%;
   height: 100%;
   justify-content: center;
-  //background-color: var(--active-color);
-  padding: 15px;
+  align-items: center;
 }
 </style>

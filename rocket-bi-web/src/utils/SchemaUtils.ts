@@ -1,5 +1,6 @@
 import {
   CalculationField,
+  ChartControlField,
   Column,
   Condition,
   DatabaseInfo,
@@ -39,12 +40,13 @@ export abstract class SchemaUtils {
 
   static buildTabControlNodes(controls: TabControl[], isExpanded = true): SlTreeNodeModel<TabControlData>[] {
     return controls.map(control => {
-      const treeNode = control.toTreeNode();
+      const tabControlData: TabControlData = control.toTabControlData();
       return {
-        title: treeNode.data.displayName,
-        tag: treeNode.data,
-        data: treeNode.data,
-        icon: treeNode.icon,
+        title: tabControlData.displayName,
+        tag: tabControlData,
+        data: tabControlData,
+        icon: 'DynamicFunctionIcon',
+        field: new ChartControlField(tabControlData),
         isExpanded: isExpanded,
         isLeaf: true,
         children: []

@@ -12,6 +12,8 @@ import { RecentDirectoryListingHandler } from '@/screens/directory/views/mydata/
 import { LIST_ETL_JOB_TYPE } from '@/screens/data-cook/views/list-etl-job/ListEtlTypes';
 import { LakeExplorerTrashPath } from '@/screens/lake-house/LakeHouseConstant';
 import DiAnalytics from 'di-web-analytics';
+import { AllJobListingHandler } from '@/screens/data-ingestion/interfaces/job-listing-handler/AllJobListingHandler';
+import { QueuedJobListingHandler } from '@/screens/data-ingestion/interfaces/job-listing-handler/QueuedJobListingHandler';
 
 Vue.use(VueRouter);
 
@@ -49,6 +51,7 @@ const Jobs = () => import(/* webpackChunkName: "data-ingestion" */ '@/screens/da
 const Streaming = () => import(/* webpackChunkName: "data-ingestion" */ '@/screens/data-ingestion/components/streaming/Streaming.vue');
 const JobHistories = () => import(/* webpackChunkName: "data-ingestion" */ '@/screens/data-ingestion/components/JobHistoryScreen.vue');
 
+const ThirdPartyAuthentication = () => import(/* webpackChunkName: "data-ingestion" */ '@/shared/components/google-authen/ThirdPartyAuthentication.vue');
 const GoogleAuthentication = () => import(/* webpackChunkName: "data-ingestion" */ '@/shared/components/google-authen/GoogleAuthen.vue');
 
 const FacebookAuthentication = () => import(/* webpackChunkName: "data-ingestion" */ '@/shared/components/facebook-authen/FacebookAuthentication.vue');
@@ -259,7 +262,17 @@ const routes: Array<RouteConfig> = [
         path: '/data-ingestion/job',
         name: Routers.Job,
         component: Jobs,
-        props: true
+        props: route => ({
+          handler: new AllJobListingHandler(true)
+        })
+      },
+      {
+        path: '/data-ingestion/queued-job',
+        name: Routers.QueuedJob,
+        component: Jobs,
+        props: route => ({
+          handler: new QueuedJobListingHandler(true)
+        })
       },
       {
         path: '/data-ingestion/streaming',
@@ -285,6 +298,12 @@ const routes: Array<RouteConfig> = [
     path: '/shopify/redirect',
     name: Routers.ShopifyIntegrationStep2,
     component: ShopifyIntegrationStep2,
+    props: true
+  },
+  {
+    path: '/third-party-auth/:config_type',
+    name: Routers.ThirdPartyAuthentication,
+    component: ThirdPartyAuthentication,
     props: true
   },
   {

@@ -193,7 +193,7 @@ export class OrganizationPermissionStore extends VuexModule {
           return this.isEnableBigQueryIngestion;
         case DataSourceType.PostgreSql:
           return this.isEnablePostgreIngestion;
-        case DataSourceType.GoogleAnalytics:
+        case DataSourceType.GA:
           return this.isEnableGA3Ingestion;
         case DataSourceType.GA4:
           return this.isEnableGA4Ingestion;

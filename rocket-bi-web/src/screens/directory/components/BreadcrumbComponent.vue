@@ -59,7 +59,7 @@ export default class BreadcrumbComponent extends Vue {
   font-weight: 500;
   font-stretch: normal;
   font-style: normal;
-  line-height: 1.17;
+  line-height: 1.4;
   letter-spacing: 0.2px;
   flex-wrap: nowrap;
 
@@ -99,7 +99,7 @@ export default class BreadcrumbComponent extends Vue {
       font-weight: 500;
       font-stretch: normal;
       font-style: normal;
-      line-height: 1.17;
+      line-height: 1.4;
       letter-spacing: 0.2px;
     }
   }

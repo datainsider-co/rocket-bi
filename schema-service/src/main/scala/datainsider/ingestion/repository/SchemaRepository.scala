@@ -124,21 +124,6 @@ trait SchemaRepository {
 
   def listDeletedDatabases(organizationId: Long): Future[Seq[DatabaseSchema]]
 
-  /**
-    * Optimize table https://clickhouse.com/docs/en/sql-reference/statements/optimize/
-    * @param dbName name of db
-    * @param table name of table
-    * @param primaryKeys primary key for optimize, use all columns if empty
-    * @param isUseFinal - optimization is performed even when all the data is already in one part. Also merge is forced even if concurrent merges are performed.
-    */
-  def optimizeTable(
-      organizationId: Long,
-      dbName: String,
-      table: String,
-      primaryKeys: Array[String],
-      isUseFinal: Boolean
-  ): Future[Boolean]
-
   def updateTableMetadata(tableSchema: TableSchema): Future[TableSchema]
 
   def migrateDataWithEncryption(
@@ -313,10 +298,10 @@ case class SchemaRepositoryImpl(
       tblName: String
   ): Future[Boolean] = {
     for {
-      isStorageExists <- schemaStorage.isExists(organizationId, dbName)
-      isDDLDeleted <- isStorageExists match {
+      isDDLExists <- ddlExecutor.existTableSchema(dbName, tblName)
+      isDDLDeleted <- isDDLExists match {
         case true  => ddlExecutor.dropTable(dbName, tblName)
-        case false => Future.False
+        case false => Future.True
       }
       isStorageDeleted <- isDDLDeleted match {
         case true  => schemaStorage.dropTable(organizationId, dbName, tblName)
@@ -473,16 +458,6 @@ case class SchemaRepositoryImpl(
 
   override def listDeletedDatabases(organizationId: Long): Future[Seq[DatabaseSchema]] = {
     schemaStorage.listDeletedDatabases(organizationId)
-  }
-
-  override def optimizeTable(
-      organizationId: Long,
-      dbName: String,
-      table: String,
-      primaryKeys: Array[String],
-      isUseFinal: Boolean
-  ): Future[Boolean] = {
-    ddlExecutor.optimizeTable(dbName, table, primaryKeys, isUseFinal = isUseFinal)
   }
 
   override def updateTable(
