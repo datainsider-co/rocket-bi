@@ -29,7 +29,7 @@
     <BFormInput
       v-if="inputMode"
       ref="input"
-      v-model.trim="inputValue"
+      v-model="inputValue"
       :debounce="300"
       class="form-control text-truncate mt-12px"
       :placeholder="inputPlaceholder"
@@ -37,7 +37,6 @@
       @input="resetErrorMessage"
       @keydown.enter="handleEnterEvent"
     />
-    <div class="invalid-feedback" v-html="errorMessage"></div>
   </div>
 </template>
 <script lang="ts">

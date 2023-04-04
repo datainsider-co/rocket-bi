@@ -143,14 +143,15 @@ export default class EditableColumnFormInput extends Vue {
       border-top-left-radius: 4px;
       border-bottom-left-radius: 4px;
       background: transparent;
-      height: 40px;
+      height: auto;
+      min-height: 40px;
       padding-left: 16px;
 
       font-size: 14px;
       font-weight: normal;
       font-stretch: normal;
       font-style: normal;
-      line-height: normal;
+      line-height: inherit;
       letter-spacing: 0.18px;
       text-align: left;
       color: var(--secondary-text-color);

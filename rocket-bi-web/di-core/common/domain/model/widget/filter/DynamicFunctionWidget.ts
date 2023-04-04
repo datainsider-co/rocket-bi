@@ -1,15 +1,5 @@
 import { Widget } from '../Widget';
-import {
-  ChartInfo,
-  GroupMeasurementOption,
-  GroupMeasurementQuerySetting,
-  QuerySetting,
-  TabControl,
-  TableColumn,
-  TreeNode,
-  WidgetCommonData,
-  Widgets
-} from '@core/common/domain';
+import { ChartInfo, GroupMeasurementOption, GroupMeasurementQuerySetting, QuerySetting, TableColumn, WidgetCommonData, Widgets } from '@core/common/domain';
 import { get, isString, toNumber } from 'lodash';
 import { ChartType } from '@/shared';
 import { ListUtils } from '@/utils';

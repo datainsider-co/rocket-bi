@@ -33,7 +33,7 @@ import EtlModal from '../../../etl-modal/EtlModal.vue';
 import { ExpressionFieldConfiguration, FieldConfiguration, ManageFieldOperator, NormalFieldConfiguration } from '@core/data-cook';
 import { TableSchema } from '@core/common/domain';
 import { FormulaSuggestionModule } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
-import { ClickhouseFormulaController } from '@/shared/fomula/ClickhouseFormulaController';
+import { ClickhouseCalculatedFieldController } from '@/shared/fomula/ClickhouseCalculatedFieldController';
 import FormulaCompletionInput from '@/shared/components/formula-completion-input/FormulaCompletionInput.vue';
 import { ExpressionParser, RawExpressionData } from '@core/schema/service/ExpressionParser';
 import { Track } from '@/shared/anotation';
@@ -55,7 +55,7 @@ export default class ManageExpressionField extends Vue {
   private target: ExpressionFieldConfiguration | null = null;
   private displayName = '';
   private formula = '';
-  private formulaController: ClickhouseFormulaController | null = null;
+  private formulaController: ClickhouseCalculatedFieldController | null = null;
   private tableSchema: TableSchema | null = null;
   private displayNameError = '';
   private formulaError = '';
@@ -165,10 +165,10 @@ export default class ManageExpressionField extends Vue {
   private initFormulaSuggestion(tableSchema: TableSchema) {
     FormulaSuggestionModule.initSuggestFunction({
       fileNames: ['clickhouse-syntax.json'],
-      useFunctions: ['Conditional', 'String', 'Date', 'JSON', 'Searching in string', 'Data Types']
+      ignoreFunctions: ['Keyword']
     });
-    FormulaSuggestionModule.initSuggestField(tableSchema);
-    this.formulaController = new ClickhouseFormulaController(FormulaSuggestionModule.allFunctions, FormulaSuggestionModule.columns);
+    FormulaSuggestionModule.setTableSchema(tableSchema);
+    this.formulaController = new ClickhouseCalculatedFieldController(FormulaSuggestionModule.allFunctions, FormulaSuggestionModule.columns);
   }
 
   private handleSelectKeyword(keyword: string): void {

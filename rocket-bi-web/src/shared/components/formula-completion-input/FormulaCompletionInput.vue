@@ -64,6 +64,11 @@ export default class FormulaCompletionInput extends Vue {
   @Prop({ required: false, type: String, default: 'Enter your query here...' })
   private readonly placeholder!: string;
 
+  @Prop({ required: false, type: Boolean, default: false })
+  private readonly isReadOnly!: boolean;
+
+  @Prop({ required: false, type: Boolean, default: false })
+  private readonly isFixedScroll!: boolean;
   @Ref()
   private monacoEditor?: any;
 
@@ -79,7 +84,7 @@ export default class FormulaCompletionInput extends Vue {
     minimap: {
       enabled: false
     },
-    lineNumbers: 'off',
+    lineNumbers: 'on',
     scrollbar: {
       horizontal: 'hidden',
       vertical: 'hidden'
@@ -113,6 +118,8 @@ export default class FormulaCompletionInput extends Vue {
   mounted() {
     this.formulaController.init(monaco);
     this.catchKeyAction();
+    this.setReadOnly(this.isReadOnly);
+    this.setFixedScroll(this.isFixedScroll);
     if (this.monacoEditor.editor) {
       this.cursorChangeListener = this.monacoEditor.editor.onDidChangeCursorPosition(this.handleOnCursorChanged);
       this.blurEditorWidgetListener = this.monacoEditor.editor.onDidBlurEditorWidget(this.handleOnBlurEditorWidget);
@@ -124,6 +131,14 @@ export default class FormulaCompletionInput extends Vue {
     this.formulaController.dispose();
     this.cursorChangeListener?.dispose();
     this.blurEditorWidgetListener?.dispose();
+  }
+
+  private setReadOnly(readOnly: boolean) {
+    this.monacoEditor.editor.updateOptions({ readOnly: readOnly });
+  }
+
+  private setFixedScroll(enabled: boolean) {
+    this.monacoEditor.editor.updateOptions({ scrollbar: { handleMouseWheel: !enabled } });
   }
 
   catchKeyAction() {
@@ -193,7 +208,7 @@ export default class FormulaCompletionInput extends Vue {
     top: 0;
     opacity: 0.5;
     color: var(--secondary-text-color);
-    padding-left: 20px;
+    padding-left: 50px;
     pointer-events: none;
     font-size: 14px;
   }

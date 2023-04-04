@@ -64,10 +64,24 @@ import { Component, Ref, Vue } from 'vue-property-decorator';
 import { HeaderData, Pagination, RowData } from '@/shared/models';
 import { DefaultPaging, Routers, Status } from '@/shared';
 import { Log } from '@core/utils';
-import { DataSourceInfo, DataSourceType, JdbcJob, SortRequest, S3Job, S3SourceInfo, Job } from '@core/data-ingestion';
+import {
+  DataSourceInfo,
+  DataSourceType,
+  JdbcJob,
+  SortRequest,
+  S3Job,
+  S3SourceInfo,
+  Job,
+  JobType,
+  GoogleAnalyticJob,
+  JobService,
+  GA4Job,
+  GA4Metric,
+  Ga4Dimension
+} from '@core/data-ingestion';
 import { JobHistoryModule } from '@/screens/data-ingestion/store/JobHistoryStore';
 import { DIException, SortDirection } from '@core/common/domain';
-import { DateTimeFormatter, ListUtils } from '@/utils';
+import { DateTimeFormatter, GoogleUtils, ListUtils } from '@/utils';
 import { StringUtils } from '@/utils/StringUtils';
 import { JobFormRender } from '@/screens/data-ingestion/form-builder/JobFormRender';
 import JobCreationModal from '@/screens/data-ingestion/components/JobCreationModal.vue';
@@ -75,6 +89,9 @@ import { LayoutContent, LayoutHeader, LayoutNoData } from '@/shared/components/l
 import DiTable2 from '@/shared/components/common/di-table/DiTable2.vue';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
+import { GoogleAnalyticTables } from '@/screens/data-ingestion/components/google-analytics/GoogleAnalyticTables';
+import { Inject } from 'typescript-ioc';
+import { GoogleAnalytic4Tables } from '@/screens/data-ingestion/components/google-analytics-4/GoogleAnalytic4Tables';
 
 @Component({
   components: {
@@ -109,6 +126,9 @@ export default class JobHistoryScreen extends Vue {
 
   @Ref()
   private readonly s3PreviewModal!: S3PreviewTableModal;
+
+  @Inject
+  private readonly jobService!: JobService;
 
   private get jobHistoryHeaders(): HeaderData[] {
     return JobHistoryModule.jobHistoryHeaders;
@@ -190,13 +210,91 @@ export default class JobHistoryScreen extends Vue {
     if (Job.isS3Job(job)) {
       this.openS3PreviewModal(job as S3Job);
     } else {
+      if (Job.isGoogleAnalytic4Job(job) && (job as GA4Job).tableName === 'event') {
+        const customMetricsAndDimension: { metrics: GA4Metric[]; dimensions: Ga4Dimension[] } = await this.getGA4CustomDimensionAndMetrics(
+          (job as GA4Job).propertyId
+        );
+        (job as GA4Job).metrics = (job as GA4Job).metrics.concat(customMetricsAndDimension.metrics);
+        (job as GA4Job).dimensions = (job as GA4Job).dimensions.concat(customMetricsAndDimension.dimensions);
+      }
       if (isSingleTable) {
         await JobModule.create(job);
       } else {
+        await this.createMultiJob(job);
+      }
+    }
+  }
+
+  private async createMultiJob(job: Job) {
+    switch (job.jobType) {
+      case JobType.GoogleAnalytics: {
+        const listGAJob = this.getListGAJob(job as GoogleAnalyticJob);
+        await this.jobService.multiCreateV2(listGAJob);
+        break;
+      }
+      case JobType.GA4: {
+        const listGAJob = this.getListGA4Job(job as GA4Job);
+        await this.jobService.multiCreateV2(listGAJob);
+        break;
+      }
+      default: {
         const tableNames = [...DataSourceModule.tableNames];
         await JobModule.createMulti({ job: job, tables: tableNames });
       }
     }
+  }
+
+  private async getGA4CustomDimensionAndMetrics(propertyId: string): Promise<{ metrics: GA4Metric[]; dimensions: Ga4Dimension[] }> {
+    Log.debug('JobScreen::getGA4CustomDimensionAndMetrics::propertyId::', propertyId);
+    const dimensionsAndMetrics: gapi.client.Response<gapi.client.analyticsdata.Metadata> = await GoogleUtils.getDimensionsAndMetrics(
+      `properties/${propertyId}`
+    );
+    const customDimensions: Ga4Dimension[] = this.customGA4Dimensions(dimensionsAndMetrics?.result?.dimensions ?? []);
+    const customMetrics: GA4Metric[] = this.customGA4Metrics(dimensionsAndMetrics?.result?.metrics ?? []);
+    return { metrics: customMetrics, dimensions: customDimensions };
+  }
+
+  private customGA4Dimensions(dimensionMetadata: gapi.client.analyticsdata.DimensionMetadata[]) {
+    return dimensionMetadata.map(dimension => new Ga4Dimension(dimension.apiName!)).filter(item => item.name.includes('customEvent:'));
+  }
+
+  private customGA4Metrics(metricMetadata: gapi.client.analyticsdata.MetricMetadata[]) {
+    return metricMetadata.map(metric => new GA4Metric(metric.apiName!, this.getMetricType(metric.type!))).filter(item => item.name.includes('customEvent:'));
+  }
+
+  private getMetricType(metricMetadataType: string): string {
+    switch (metricMetadataType) {
+      case 'TYPE_INTEGER':
+        return 'int64';
+      default:
+        return 'float';
+    }
+  }
+
+  private getListGA4Job(job: GA4Job) {
+    const gaTables = GoogleAnalytic4Tables;
+    return gaTables.map(tbl => {
+      const gaJob = cloneDeep(job);
+      gaJob.metrics = tbl.metrics.concat(job.metrics);
+      gaJob.dimensions = tbl.dimensions.concat(job.dimensions);
+      gaJob.tableName = tbl.id;
+      gaJob.destTableName = tbl.id;
+      gaJob.displayName = gaJob.displayName + ` (table: ${gaJob.destTableName})`;
+      return gaJob;
+    });
+  }
+
+  private getListGAJob(job: GoogleAnalyticJob) {
+    const gaTables = GoogleAnalyticTables;
+    return gaTables.map(tbl => {
+      const gaJob = cloneDeep(job);
+      gaJob.metrics = tbl.metrics;
+      gaJob.dimensions = tbl.dimensions;
+      gaJob.tableName = tbl.id;
+      gaJob.destTableName = tbl.id;
+      gaJob.displayName = gaJob.displayName + ` (table: ${gaJob.destTableName})`;
+      return gaJob;
+    });
   }
 
   private async loadJobHistories() {
@@ -360,7 +458,7 @@ export default class JobHistoryScreen extends Vue {
       font-style: normal;
       font-weight: 500;
       letter-spacing: 0.2px;
-      line-height: 1.17;
+      line-height: 1.4;
       display: flex;
       align-items: center;
       overflow: hidden;

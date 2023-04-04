@@ -141,7 +141,7 @@ export default class ViewPropertiesModal extends Vue {
     cursor: default;
     font-size: 24px;
     letter-spacing: 0.2px;
-    line-height: 1.17;
+    line-height: 1.4;
   }
 
   .modal-body {

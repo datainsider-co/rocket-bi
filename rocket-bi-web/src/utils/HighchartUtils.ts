@@ -119,7 +119,7 @@ export class HighchartUtils {
 
   static async initMapData(path: string): Promise<any> {
     if (path) {
-      const apiUrl = window.appConfig.VUE_APP_STATIC_API_URL;
+      const apiUrl = window.appConfig.VUE_APP_STATIC_FILE_URL;
       const response = await fetch(`${apiUrl}/${path}`);
       return response.json();
     } else {

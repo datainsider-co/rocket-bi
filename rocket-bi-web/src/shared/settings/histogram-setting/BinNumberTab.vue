@@ -12,7 +12,7 @@
         size="full"
         @onChanged="handleBinNumberChanged"
       />
-      <RevertButton class="mb-3 pr-3" style="text-align: right" @click="handleRevert" />
+      <RevertButton class="mb-3" style="text-align: right" @click="handleRevert" />
     </div>
   </PanelHeader>
 </template>

@@ -3,7 +3,7 @@
  * @created: 5/10/21, 7:17 PM
  */
 
-import { IndexedHeaderData, ViewPort } from '@/shared/models';
+import { IndexedHeaderData, RowData, ViewPort } from '@/shared/models';
 import { StringUtils } from '@/utils/StringUtils';
 import { TableDataUtils } from '@chart/custom-table/TableDataUtils';
 import { FooterCellData } from '@chart/custom-table/footer/TableFooterRenderEngine';
@@ -19,6 +19,7 @@ export class FooterController {
   private hasPinned: boolean;
   private extraData: TableExtraData;
   private defaultFooterLabel: string;
+  private formatter: (header: IndexedHeaderData) => string;
   private customCellCallBack?: CustomCellCallBack;
 
   constructor(
@@ -26,6 +27,7 @@ export class FooterController {
     cellWidth: number,
     hasPinned: boolean,
     numPinnedColumn: number,
+    formatter: (header: IndexedHeaderData) => string,
     extraData?: TableExtraData,
     customCellCallBack?: CustomCellCallBack
   ) {
@@ -33,6 +35,7 @@ export class FooterController {
     this.cellWidth = cellWidth;
     this.hasPinned = hasPinned;
     this.numPinnedColumn = numPinnedColumn;
+    this.formatter = formatter;
     this.extraData = extraData ?? {};
     this.defaultFooterLabel = this.extraData.total?.label?.text ?? 'Total';
     this.customCellCallBack = customCellCallBack;
@@ -98,7 +101,7 @@ export class FooterController {
       columnIndex: header.columnIndex,
       colSpan: 1,
       rowSpan: 1,
-      data: this.getTextWillRender(header),
+      data: this.formatter(header),
       classList: [],
       customStyle: this.createCustomStyle(header)
     };

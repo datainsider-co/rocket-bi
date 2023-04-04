@@ -3,6 +3,7 @@ import { Breadcrumbs } from '@/shared/models';
 import { ListUtils } from '@/utils/ListUtils';
 import { RouterUtils } from '@/utils/RouterUtils';
 import router from '@/router/Router';
+import { Routers } from '@/shared';
 
 export enum BreadcrumbMode {
   Shortly = 'shortly',
@@ -29,7 +30,7 @@ export class BreadCrumbUtils {
     }
   }
 
-  static getFullyBreadcrumbs(parents: ListParentsResponse | null): Breadcrumbs[] {
+  static getFullyBreadcrumbs(parents: ListParentsResponse | null, screenName: string): Breadcrumbs[] {
     const parentsWithoutRoot = parents?.parentDirectories.filter(parentDirectory => parentDirectory.parentId > 0);
     return (
       parentsWithoutRoot?.map(
@@ -37,6 +38,7 @@ export class BreadCrumbUtils {
           new Breadcrumbs({
             text: parentDirectory.name,
             to: {
+              name: screenName,
               params: { name: RouterUtils.buildParamPath(parentDirectory.id, parentDirectory.name) },
               query: {
                 token: RouterUtils.getToken(router.currentRoute)
@@ -48,8 +50,8 @@ export class BreadCrumbUtils {
     );
   }
 
-  static getShortlyBreadcrumbs(parents: ListParentsResponse | null): Breadcrumbs[] {
-    return [this.defaultBreadcrumb()].concat(ListUtils.removeAt(this.getFullyBreadcrumbs(parents), 0));
+  static getShortlyBreadcrumbs(parents: ListParentsResponse | null, screenName: string): Breadcrumbs[] {
+    return [this.defaultBreadcrumb()].concat(ListUtils.removeAt(this.getFullyBreadcrumbs(parents, screenName), 0));
   }
 
   static defaultBreadcrumb(): Breadcrumbs {

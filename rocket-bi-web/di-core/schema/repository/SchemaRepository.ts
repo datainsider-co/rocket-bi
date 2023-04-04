@@ -77,13 +77,9 @@ export abstract class SchemaRepository {
 
   abstract deleteMeasurementColumn(request: DeleteColumnRequest): Promise<TableSchema>;
 
-  abstract updateDatabase(request: UpdateDatabaseSchema): Promise<DatabaseSchema>;
-
   abstract updateTable(request: UpdateTableSchemaRequest): Promise<TableSchema>;
 
   abstract getTable(databaseName: string, tableName: string): Promise<TableSchema>;
-
-  abstract updateTableName(dbName: string, oldTbName: string, newName: string): Promise<boolean>;
 
   abstract detectTableSchema(query: string): Promise<TableSchema>;
 }
@@ -215,10 +211,6 @@ export class SchemaRepositoryImpl extends SchemaRepository {
     return this.httpClient.delete(`/databases/${request.resourceId}/share/revoke`, request).then(resp => new Map(Object.entries(resp as any)));
   }
 
-  updateDatabase(request: UpdateDatabaseSchema): Promise<DatabaseSchema> {
-    return this.httpClient.put(`/databases/${request.dbSchema.name}`, request).then(obj => DatabaseSchema.fromObject(obj as DatabaseSchema));
-  }
-
   updateTable(request: UpdateTableSchemaRequest): Promise<TableSchema> {
     return this.httpClient
       .put(`/databases/${request.tableSchema.dbName}/tables/${request.tableSchema.name}`, request)
@@ -226,10 +218,6 @@ export class SchemaRepositoryImpl extends SchemaRepository {
   }
   getTable(databaseName: string, tableName: string): Promise<TableSchema> {
     return this.httpClient.get(`/databases/${databaseName}/tables/${tableName}`).then(obj => TableSchema.fromObject(obj as TableSchema));
-  }
-
-  updateTableName(dbName: string, oldTbName: string, newName: string): Promise<boolean> {
-    return this.httpClient.put(`/databases/${dbName}/tables/${oldTbName}/name`, { newName: newName });
   }
 
   detectTableSchema(query: string): Promise<TableSchema> {

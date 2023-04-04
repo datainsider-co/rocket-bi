@@ -110,7 +110,7 @@ export abstract class ListUtils {
   /**
    * find difference between two list, return list of element in listA but not in listB
    */
-  static diff(listA: string[], listB: string[]): string[] {
+  static diff<T>(listA: T[], listB: T[]): T[] {
     return listA.filter(item => !listB.includes(item));
   }
 

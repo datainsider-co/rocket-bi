@@ -5,6 +5,7 @@ import { OauthConfigResponse } from '@core/common/domain/model/oauth-config/Goog
 import { OauthConfig } from '@core/common/domain/model/oauth-config/OauthConfig';
 import { LoginResponse } from '@core/common/domain/response/authentication/LoginResponse';
 import { BaseResponse } from '@core/data-ingestion/domain/response/BaseResponse';
+import { UserResetPasswordRequest } from '@core/common/domain/request/authentication/UserResetPasswordRequest';
 
 export abstract class AuthenticationRepository {
   abstract register(request: UserRegisterRequest): Promise<RegisterResponse>;
@@ -17,9 +18,9 @@ export abstract class AuthenticationRepository {
 
   abstract directVerify(token: string): Promise<LoginResponse>;
 
-  abstract resetPassword(request: SendCodeToEmailRequest): Promise<boolean>;
+  abstract resetPassword(request: UserResetPasswordRequest): Promise<boolean>;
 
-  abstract forgotPassword(request: SendCodeToEmailRequest): Promise<boolean>;
+  abstract forgotPassword(email: string): Promise<boolean>;
 
   abstract changePassword(oldPass: string, newPass: string): Promise<boolean>;
 
@@ -59,7 +60,7 @@ export class HttpAuthenticationRepository implements AuthenticationRepository {
     });
   }
 
-  resetPassword(request: SendCodeToEmailRequest): Promise<boolean> {
+  resetPassword(request: UserResetPasswordRequest): Promise<boolean> {
     return this.httpClient.post(`${this.apiPath}/reset_password`, request).then(() => true);
   }
 
@@ -69,8 +70,8 @@ export class HttpAuthenticationRepository implements AuthenticationRepository {
       .then(response => response.success);
   }
 
-  forgotPassword(request: SendCodeToEmailRequest): Promise<boolean> {
-    return this.httpClient.post(`${this.apiPath}/forgot_password`, request).then(() => true);
+  forgotPassword(email: string): Promise<boolean> {
+    return this.httpClient.post(`${this.apiPath}/forgot_password`, { email }).then(() => true);
   }
 
   loginOAuth(request: UserOAuthRequest): Promise<LoginResponse> {

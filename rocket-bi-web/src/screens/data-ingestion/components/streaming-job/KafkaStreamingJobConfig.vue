@@ -148,8 +148,7 @@ export default class KafkaStreamingJobConfig extends Vue implements StreamingJob
 
   async updateWarehouseConfig() {
     const warehouseConfigIndex = this.kafkaStreamingJob.destinationConfigs.findIndex(config => DestinationConfig.isClickhouseConfig(config));
-    //todo: fixhere not create table
-    const tableSchema: TableSchema | undefined | null = await this.selectDatabaseAndTable?.getData(TableSchema.empty());
+    const tableSchema: TableSchema | undefined | null = await this.selectDatabaseAndTable?.getData();
     Log.debug('KafkaStreamingJobConfig::updateWarehouseConfig::error::', tableSchema);
     if (tableSchema) {
       const warehouseConfig = new ClickhouseDestinationConfig(tableSchema.dbName, tableSchema.name);

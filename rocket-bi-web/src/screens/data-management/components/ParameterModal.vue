@@ -14,11 +14,11 @@
       </template>
     </DiInputComponent>
     <div class="mt-1 mb-3">{{ description }}</div>
-    <div class="mb-4">
+    <div class="mb-3">
       <div>Parameter Type</div>
       <DiDropdown :data="paramTypeOptions" v-model="param.valueType" valueProps="id" labelProps="displayName" @change="onParamTypeChanged" />
     </div>
-    <DynamicInputValue :type="param.valueType" :value.sync="param.value" @enter="onSubmitParam" />
+    <DynamicInputValue :type="param.valueType" :value.sync="param.value" :list="param.list" @enter="onSubmitParam" @setList="setList" />
   </DiCustomModal>
 </template>
 
@@ -33,7 +33,7 @@ import { SelectOption } from '@/shared';
 import DynamicInputValue from '@/screens/data-management/components/DynamicInputValue.vue';
 import moment from 'moment';
 import { Log } from '@core/utils';
-import { DateTimeFormatter, StringUtils } from '@/utils';
+import { DateTimeFormatter, ListUtils, StringUtils } from '@/utils';
 
 @Component({ components: { DiDropdown, DiInputComponent, DiCustomModal, DynamicInputValue } })
 export default class ParameterModal extends Vue {
@@ -49,6 +49,10 @@ export default class ParameterModal extends Vue {
     {
       displayName: 'Date',
       id: ParamValueType.date
+    },
+    {
+      displayName: 'List',
+      id: ParamValueType.list
     }
   ];
   private param: QueryParameter = defaultQueryParameter();
@@ -85,11 +89,17 @@ export default class ParameterModal extends Vue {
   private onParamTypeChanged(newType: ParamValueType) {
     this.param.valueType = newType;
     this.param.value = this.getDefaultValue(newType);
+    if (newType === ParamValueType.list) {
+      this.param.list = [];
+    } else {
+      this.param.list = null;
+    }
   }
 
   private getDefaultValue(type: ParamValueType) {
     switch (type) {
       case ParamValueType.text:
+      case ParamValueType.list:
         return ``;
       case ParamValueType.number:
         return 0;
@@ -101,13 +111,19 @@ export default class ParameterModal extends Vue {
   private onSubmitParam(event?: MouseEvent) {
     try {
       Log.debug('onSubmitParam');
+      this.updateList();
       event?.preventDefault();
-      // this.param.displayName = StringUtils.toSnakeCase(name);
       this.valid(this.param);
       this.callback ? this.callback(this.param) : void 0;
       this.hide();
     } catch (ex) {
       Log.error(ex);
+    }
+  }
+
+  private updateList() {
+    if (this.param.list) {
+      this.param.list = ListUtils.unique(this.param.list);
     }
   }
 
@@ -142,6 +158,10 @@ export default class ParameterModal extends Vue {
 
   private onDisplayNameEnter() {
     this.inputValue.focus();
+  }
+
+  private setList(list: string[]) {
+    this.param.list = list;
   }
 }
 </script>

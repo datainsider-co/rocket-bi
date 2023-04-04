@@ -2,16 +2,18 @@
   <div class="user-management-details-privilege text-left">
     <StatusWidget v-if="isLoading" :status="status" :error="errorMessage"></StatusWidget>
     <MessageContainer :message="errorMessage"></MessageContainer>
-    <div class="user-management-details-privilege-header-container">
-      <div v-if="isLoaded" class="user-management-details-privilege-header ">
-        <span>Privileges</span>
-        <DiButton title="Save" primary @click="handleSavePrivilege">
-          <div v-if="isSaveBtnLoading" class="spinner-container">
-            <BSpinner small></BSpinner>
-          </div>
-        </DiButton>
+    <div v-if="isLoaded" class="user-management-details-privilege-header">
+      <div class="user-management-details-privilege-header-container">
+        <div class="user-management-details-privilege-header-container-header ">
+          <span>Privileges</span>
+          <DiButton title="Save" primary @click="handleSavePrivilege">
+            <div v-if="isSaveBtnLoading" class="spinner-container">
+              <BSpinner small></BSpinner>
+            </div>
+          </DiButton>
+        </div>
+        <div v-if="isLoaded" class="user-privileges-title">Here are the admin privileges assigned to {{ fullName }}</div>
       </div>
-      <div v-if="isLoaded" class="user-privileges-title">Here are the admin privileges assigned to {{ fullName }}</div>
     </div>
 
     <div v-if="isLoaded" class="user-privilege overflow-hidden">
@@ -141,32 +143,39 @@ export default class UserPrivilege extends Vue {
   //padding-bottom: 16px;
   background: var(--secondary-2);
 
-  .user-management-details-privilege-header-container {
-    z-index: 5;
-    border-radius: 4px;
+  .user-management-details-privilege-header {
     position: sticky;
-    background: var(--secondary-2);
-    top: 0;
-    padding: 16px 16px 0;
-    .user-management-details-privilege-header {
-      order: 0;
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      align-items: center;
-      justify-content: space-between;
+    top: 0px;
+    background: #fff;
+    z-index: 6;
 
-      span {
+    .user-management-details-privilege-header-container {
+      z-index: 5;
+      border-radius: 4px;
+
+      background: var(--secondary-2);
+      margin-top: 16px;
+      padding: 16px 16px 0;
+      &-header {
         order: 0;
-        @include medium-text(24px, 0.2px, 1.17);
-      }
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
 
-      .di-button {
-        height: 26px;
-        min-width: 80px;
-        .spinner-container span {
-          font-size: 14px;
-          color: var(--accent-text-color);
+        span {
+          order: 0;
+          @include medium-text(24px, 0.2px, 1.17);
+        }
+
+        .di-button {
+          height: 26px;
+          min-width: 80px;
+          .spinner-container span {
+            font-size: 14px;
+            color: var(--accent-text-color);
+          }
         }
       }
     }

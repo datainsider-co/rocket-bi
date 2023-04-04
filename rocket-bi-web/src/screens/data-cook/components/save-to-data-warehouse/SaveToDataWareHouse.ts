@@ -7,8 +7,7 @@ import { TableSchema } from '@core/common/domain';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Track } from '@/shared/anotation';
-
-type TPersistConfigurationCallback = (persistConfiguration: PersistConfiguration) => void;
+import { Log } from '@core/utils';
 
 @Component({
   components: {
@@ -18,8 +17,7 @@ type TPersistConfigurationCallback = (persistConfiguration: PersistConfiguration
 })
 export default class SaveToDataWareHouse extends Vue {
   private model: PersistConfiguration | null = null;
-  private tableSchema: TableSchema | null = null;
-  private callback: TPersistConfigurationCallback | null = null;
+  private callback: ((persistConfiguration: PersistConfiguration) => void) | null = null;
   private isUpdate = false;
   private loading = false;
 
@@ -37,9 +35,8 @@ export default class SaveToDataWareHouse extends Vue {
     return [PERSISTENT_TYPE.Update, PERSISTENT_TYPE.Append];
   }
 
-  save(operator: EtlOperator, tableSchema: TableSchema, callback: TPersistConfigurationCallback) {
+  save(operator: EtlOperator, callback: (persistConfiguration: PersistConfiguration) => void) {
     this.isUpdate = !!operator.persistConfiguration;
-    this.tableSchema = tableSchema;
     this.model = this.isUpdate ? cloneDeep(operator.persistConfiguration) : new PersistConfiguration('', '', PERSISTENT_TYPE.Update);
     this.callback = callback;
     // @ts-ignore
@@ -58,23 +55,25 @@ export default class SaveToDataWareHouse extends Vue {
   private resetModel() {
     this.model = null;
     this.callback = null;
-    this.tableSchema = null;
     this.loading = false;
   }
 
   @Track(TrackEvents.ETLSubmitSaveToDataWarehouse)
   private async submit() {
     if (!this.selectDatabaseAndTable) return;
-    this.loading = true;
-    // @ts-ignore
-    const data = await this.selectDatabaseAndTable.getData(this.tableSchema);
-    this.loading = false;
-    if (data && this.tableSchema && this.model && this.callback) {
-      this.model.dbName = data.dbName;
-      this.model.tblName = data.name;
-      this.callback(this.model);
-      // @ts-ignore
-      this.modal.hide();
+    try {
+      this.loading = true;
+      const newTableSchema: TableSchema | null = await this.selectDatabaseAndTable.getData();
+      if (newTableSchema && this.model && this.callback) {
+        this.model.dbName = newTableSchema.dbName;
+        this.model.tblName = newTableSchema.name;
+        this.callback(this.model);
+        this.modal.hide();
+      }
+    } catch (ex) {
+      Log.error('SaveToDataWareHouse.submit::error', ex);
+    } finally {
+      this.loading = false;
     }
   }
 }

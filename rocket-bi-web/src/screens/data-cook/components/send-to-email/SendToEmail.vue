@@ -60,7 +60,7 @@
 <script lang="ts">
 import { Component, Inject, Ref, Vue } from 'vue-property-decorator';
 import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
-import { EmailConfiguration, ETL_OPERATOR_TYPE, EtlOperator, SendToGroupEmailOperator, TableConfiguration } from '@core/data-cook';
+import { EmailConfiguration, ETLOperatorType, EtlOperator, SendToGroupEmailOperator, TableConfiguration } from '@core/data-cook';
 import SelectDatabaseAndTable from '@/screens/data-cook/components/select-database-and-table/SelectDatabaseAndTable.vue';
 import OracleSourceInfo from '@/screens/data-cook/components/save-to-database/oracle-source-form/OracleSourceInfo.vue';
 import DestConfigurationForm from '@/screens/data-cook/components/save-to-database/oracle-source-form/DestConfigurationForm.vue';
@@ -113,7 +113,7 @@ export default class SendToEmail extends Vue {
   private model: SendToGroupEmailOperator | null = null;
   private callback: ((operator: SendToGroupEmailOperator) => void) | null = null;
   @Inject()
-  private readonly makeDestTableConfig!: (operators: EtlOperator[], newOperatorType: ETL_OPERATOR_TYPE) => TableConfiguration;
+  private readonly makeDestTableConfig!: (operators: EtlOperator[], newOperatorType: ETLOperatorType) => TableConfiguration;
   private isUpdate = false;
   private loading = false;
 
@@ -157,7 +157,7 @@ export default class SendToEmail extends Vue {
   showCreateModal(operators: EtlOperator[], callback: (operator: SendToGroupEmailOperator) => void) {
     this.callback = callback;
     this.isUpdate = false;
-    const tableConfiguration: TableConfiguration = this.makeDestTableConfig(operators, ETL_OPERATOR_TYPE.SendToGroupEmailOperator);
+    const tableConfiguration: TableConfiguration = this.makeDestTableConfig(operators, ETLOperatorType.SendToGroupEmailOperator);
     const fileNames: string[] = operators.map(operator => operator.destTableDisplayName);
     this.model = new SendToGroupEmailOperator(operators, tableConfiguration, [], [], [], '', fileNames, '', '', false);
     this.model!.fileNames = fileNames;

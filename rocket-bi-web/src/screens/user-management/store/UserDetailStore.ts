@@ -120,6 +120,12 @@ class UserDetailStore extends VuexModule {
   }
 
   @Action({ rawError: true })
+  async resetPassword(username: string): Promise<boolean> {
+    Log.debug('UserDetailStore::resetPassword::username::', this.selectedUsername);
+    return this.userManagementService.resetPassword(username);
+  }
+
+  @Action({ rawError: true })
   deactivateUser() {
     return this.userManagementService.deactivate(this.selectedUsername).then(() => this.loadUserFullDetailInfo());
   }

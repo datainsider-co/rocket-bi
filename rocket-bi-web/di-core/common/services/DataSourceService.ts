@@ -2,7 +2,7 @@ import { Inject } from 'typescript-ioc';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { DataSourceRepository } from '@core/data-ingestion/repository/DataSourceRepository';
 import { SourceId, TableSchema } from '@core/common/domain';
-import { FacebookTokenResponse, Job, ListingResponse, PreviewResponse, S3Job, S3SourceInfo } from '@core/data-ingestion';
+import { TokenResponse, Job, ListingResponse, PreviewResponse, S3Job, S3SourceInfo, TokenRequest, TiktokAccessTokenResponse } from '@core/data-ingestion';
 import { DataSourceResponse } from '@core/data-ingestion/domain/response/DataSourceResponse';
 import { ListingRequest } from '@core/lake-house/domain/request/listing-request/ListingRequest';
 
@@ -16,6 +16,8 @@ export abstract class DataSourceService {
   abstract list(request: ListingRequest): Promise<ListingResponse<DataSourceResponse>>;
 
   abstract delete(id: SourceId): Promise<boolean>;
+
+  abstract multiDelete(ids: SourceId[]): Promise<boolean>;
 
   abstract update(id: SourceId, dataSourceInfo: DataSourceInfo): Promise<boolean>;
 
@@ -35,7 +37,13 @@ export abstract class DataSourceService {
 
   abstract getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]>;
 
-  abstract getFacebookExchangeToken(token: string): Promise<FacebookTokenResponse>;
+  abstract getFacebookExchangeToken(token: string): Promise<TokenResponse>;
+
+  abstract getTiktokAccessToken(authCode: string): Promise<TiktokAccessTokenResponse>;
+
+  abstract listTiktokReport(): Promise<string[]>;
+
+  abstract getGoogleToken(request: TokenRequest): Promise<TokenResponse>;
 }
 
 export class DataSourceServiceImpl extends DataSourceService {
@@ -94,11 +102,28 @@ export class DataSourceServiceImpl extends DataSourceService {
   previewSchema(sourceInfo: DataSourceInfo, job: Job): Promise<PreviewResponse> {
     return this.dataSourceRepository.previewS3Job(sourceInfo, job);
   }
+
   getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]> {
     return this.dataSourceRepository.getGoogleAdsCustomerIds(sourceId);
   }
 
-  getFacebookExchangeToken(token: string): Promise<FacebookTokenResponse> {
+  getFacebookExchangeToken(token: string): Promise<TokenResponse> {
     return this.dataSourceRepository.getFacebookExchangeToken(token);
+  }
+
+  getTiktokAccessToken(authCode: string): Promise<TiktokAccessTokenResponse> {
+    return this.dataSourceRepository.getTiktokAccessToken(authCode);
+  }
+
+  listTiktokReport(): Promise<string[]> {
+    return this.dataSourceRepository.listTiktokReport();
+  }
+
+  multiDelete(ids: SourceId[]): Promise<boolean> {
+    return this.dataSourceRepository.multiDelete(ids);
+  }
+
+  getGoogleToken(request: TokenRequest): Promise<TokenResponse> {
+    return this.dataSourceRepository.getGoogleToken(request);
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <div :class="{ 'disabled-setting': disable }" class="input-date-setting setting-container dropdown-setting no-gutters">
-    <div class="d-flex flex-row align-items-center">
-      <p v-if="label != null" class="m-0">{{ label }}</p>
+    <div v-if="showHint || isLabel" class="label d-flex flex-row align-items-center">
+      <p v-if="isLabel">{{ label }}</p>
       <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
     </div>
     <div class="calendar-area">
@@ -107,38 +107,9 @@ export default class InputDateSetting extends Vue {
   private get showHint(): boolean {
     return StringUtils.isNotEmpty(this.hint);
   }
-}
-</script>
 
-<style lang="scss">
-.input-date-setting .calendar-area {
-  background-color: var(--hover-color);
-  width: 100%;
-
-  .di-calendar-input-container {
-    > span {
-      flex: 1;
-      //order: 0;
-
-      > input {
-        margin-left: 0;
-        text-align: left;
-      }
-    }
-
-    > img {
-      opacity: var(--normal-opacity) !important;
-      //order: 1;
-    }
-
-    > div.icon-title {
-      order: 1;
-    }
+  private get isLabel(): boolean {
+    return StringUtils.isNotEmpty(this.label);
   }
 }
-
-.di-calendar-date-compare .select-container {
-  min-width: 120px !important;
-  width: unset !important;
-}
-</style>
+</script>

@@ -237,7 +237,7 @@ export default class JobConfigModal extends Vue {
       const databaseInfo = DatabaseSchemaModule.databaseInfos.find(db => db.name === name);
       if (this.isCreateDestDb && !databaseInfo) {
         const dbInfo = await this.schemaService.createDatabase(new DatabaseCreateRequest(name, name));
-        DatabaseSchemaModule.addNewDataInfo(dbInfo);
+        DatabaseSchemaModule.addNewDatabaseInfo(dbInfo);
         job.copyWithDestDbName(dbInfo.name);
       }
     } catch (e) {

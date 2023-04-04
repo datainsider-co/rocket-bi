@@ -106,12 +106,12 @@ di-theme .table-striped tbody td {
 .di-theme .dropdown.is-invalid .btn,
 .di-theme .form-control.is-invalid,
 .di-theme .select-container.is-invalid > .relative > span > button {
-  border-color: #ff6b4e !important;
+  border-color: var(--danger) !important;
 }
 
 /*
 .di-theme .invalid-feedback {
-  color: #ff6b4e !important;
+  color: var(--danger) !important;
 } */
 
 .di-theme .dropdown-toggle {
@@ -451,7 +451,7 @@ di-theme .table-striped tbody td {
 }
 
 .di-theme .upload-container.has-error {
-  border-color: #ff6b4e;
+  border-color: var(--danger);
 }
 
 /*.upload-container:hover .upload-body,*/
@@ -460,11 +460,11 @@ di-theme .table-striped tbody td {
 }
 
 .di-theme .text-success {
-  color: #4eff86 !important;
+  color: var(--success) !important;
 }
 
 .di-theme .text-danger {
-  color: #ff6b4e !important;
+  color: var(--danger) !important;
 }
 
 /************* Style for BrowseFile Component *************/
@@ -501,6 +501,9 @@ di-theme .table-striped tbody td {
 /************* END for BrowseFile Component *************/
 
 /************* CUSTOM STYLE FOR SWAL *************/
+.swal2-height-auto {
+  height: 100vh !important;
+}
 .swal2-popup {
   border-radius: 4px !important;
   background-color: var(--primary, #272a36) !important;

@@ -1,6 +1,6 @@
 import EtlModal from '../etl-modal/EtlModal.vue';
 import { Inject, Ref, Vue } from 'vue-property-decorator';
-import { ETL_OPERATOR_TYPE, ETL_OPERATOR_TYPE_NAME, EtlOperator, TableConfiguration } from '@core/data-cook';
+import { ETLOperatorType, ETL_OPERATOR_TYPE_NAME, EtlOperator, TableConfiguration } from '@core/data-cook';
 
 enum VIEW_MODE {
   Add = 'Add',
@@ -8,15 +8,21 @@ enum VIEW_MODE {
 }
 
 export default abstract class ManageOperatorModal extends Vue {
-  protected abstract readonly operatorType: ETL_OPERATOR_TYPE;
+  protected abstract readonly operatorType: ETLOperatorType;
   protected viewMode: VIEW_MODE = VIEW_MODE.Add;
   protected abstract resetModel(): void;
 
   @Ref()
   protected modal!: EtlModal;
 
+  @Inject('etlDbDisplayName')
+  protected readonly etlDbDisplayName!: string;
+
+  @Inject('getEtlDbName')
+  protected readonly getEtlDbName!: () => string;
+
   @Inject('makeDestTableConfig')
-  private readonly makeDestTableConfigInjector!: (leftOperators: EtlOperator[], newOperatorType: ETL_OPERATOR_TYPE) => TableConfiguration;
+  private readonly makeDestTableConfigInjector!: (leftOperators: EtlOperator[], newOperatorType: ETLOperatorType) => TableConfiguration;
 
   protected makeDestTableConfig(leftOperators: EtlOperator[]): TableConfiguration {
     return this.makeDestTableConfigInjector(leftOperators, this.operatorType);

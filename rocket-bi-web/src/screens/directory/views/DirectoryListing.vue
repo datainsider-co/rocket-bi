@@ -2,7 +2,7 @@
   <LayoutWrapper ref="layoutWrapper">
     <LayoutSidebar :items="navItems">
       <template v-slot:top>
-        <PopoverV2 class="dropdown" auto-hide>
+        <PopoverV2 class="dropdown" auto-hide placement="bottom-start">
           <DiShadowButton id="create-directory" class="create-directory mb-0" title="New" :event="trackEvents.MyDataCreate">
             <i class="di-icon-add"></i>
           </DiShadowButton>
@@ -24,6 +24,7 @@
 
     <MyDataPickDirectory ref="directoryPicker" @selectDirectory="handleMoveToDirectory" />
     <MyDataPickDirectory ref="copyDashboardPicker" @selectDirectory="copy" />
+    <PasswordModal ref="passwordModal"></PasswordModal>
   </LayoutWrapper>
 </template>
 
@@ -32,7 +33,16 @@ import { Component, Ref, Vue } from 'vue-property-decorator';
 import DirectoryRename from '@/screens/directory/components/DirectoryRename.vue';
 import DiShareModal from '@/shared/components/common/di-share-modal/DiShareModal.vue';
 import ContextMenu from '@/shared/components/ContextMenu.vue';
-import { CreateDashboardRequest, CreateDirectoryRequest, Dashboard, DIException, Directory, DirectoryId, DirectoryType } from '@core/common/domain';
+import {
+  CreateDashboardRequest,
+  CreateDirectoryRequest,
+  Dashboard,
+  DashboardId,
+  DIException,
+  Directory,
+  DirectoryId,
+  DirectoryType
+} from '@core/common/domain';
 import { Log } from '@core/utils';
 import { DirectoryModule } from '@/screens/directory/store/DirectoryStore';
 import { PopupUtils } from '@/utils/PopupUtils';
@@ -55,7 +65,7 @@ import { Track } from '@/shared/anotation';
 import MyDataPickDirectory from '@/screens/lake-house/components/move-file/MyDataPickDirectory.vue';
 import DiRenameModal from '@/shared/components/DiRenameModal.vue';
 import router from '@/router/Router';
-import { DashboardModule } from '@/screens/dashboard-detail/stores';
+import PasswordModal from '@/screens/dashboard-detail/components/PasswordModal.vue';
 
 export enum DirectoryListingEvents {
   ShowMenuCreateDirectory = 'show-menu-create-directory',
@@ -72,7 +82,8 @@ export enum DirectoryListingEvents {
     LayoutWrapper,
     LayoutSidebar,
     PopoverV2,
-    MyDataPickDirectory
+    MyDataPickDirectory,
+    PasswordModal
   }
 })
 export default class DirectoryListing extends Vue implements RouterEnteringHook {
@@ -95,6 +106,9 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
 
   @Ref()
   private mdShareDirectory!: DiShareModal;
+
+  @Ref()
+  private readonly passwordModal!: PasswordModal;
 
   @Ref()
   private readonly myData?: MyData;
@@ -183,10 +197,17 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
 
   private showShareModal(item: Directory) {
     this.diContextMenu.hide();
-    if (item.dashboardId) {
-      this.mdShareDirectory.showShareDashboard(item);
-    } else {
-      this.mdShareDirectory.showShareDirectory(item);
+
+    switch (item.directoryType) {
+      case DirectoryType.Directory:
+        this.mdShareDirectory.showShareDirectory(item);
+        break;
+      case DirectoryType.Query:
+        this.mdShareDirectory.showShareAdhocQuery(item);
+        break;
+      case DirectoryType.Dashboard:
+        this.mdShareDirectory.showShareDashboard(item);
+        break;
     }
     Log.debug('Share::item', item);
   }
@@ -205,9 +226,13 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
       switch (item.directoryType) {
         case DirectoryType.Dashboard:
         case DirectoryType.Query: {
-          await this.duplicateDashboard(item);
-          await this.reload();
-          // DirectoryModule.setStatus(Status.Loaded);
+          this.passwordModal.requirePassword(item, item.owner?.username || item.ownerId, async () => {
+            await this.duplicateDashboard(item, this.parentId);
+            await this.reload();
+            // DirectoryModule.setStatus(Status.Loaded);
+          });
+
+          DirectoryModule.setStatus(Status.Loaded);
           break;
         }
         default: {
@@ -223,11 +248,12 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
     }
   }
 
-  private async duplicateDashboard(item: Directory): Promise<Dashboard> {
+  private async duplicateDashboard(item: Directory, parentId: DashboardId): Promise<Dashboard> {
+    Log.debug('duplicate dashboard', item);
     if (item.dashboardId) {
       const dashboardService = Di.get<DashboardService>(DashboardService);
       const dashboard = await dashboardService.get(item.dashboardId);
-      const request: CreateDashboardRequest = CreateDashboardRequest.fromDashboard(item.directoryType, item.parentId, dashboard);
+      const request: CreateDashboardRequest = CreateDashboardRequest.fromDashboard(item.directoryType, parentId, dashboard);
       return await DirectoryModule.createDashboard(request);
     } else {
       return Promise.reject(new DIException('Dashboard id is not found'));
@@ -455,17 +481,18 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
     }
   }
 
-  private async copyDashboardTo(parentId: DirectoryId, directory: Directory) {
-    try {
-      DirectoryModule.setStatus(Status.Updating);
-      const dashboard: Dashboard = await this.duplicateDashboard(directory);
-      const directoryId = await DashboardModule.getDirectoryId(dashboard.id);
-      await this.handleMoveToDirectory(parentId, directoryId);
-      DirectoryModule.setStatus(Status.Loaded);
-    } catch (ex) {
-      PopupUtils.showError(ex.message);
-      DirectoryModule.setStatus(Status.Loaded);
-    }
+  private async copyDashboardTo(toParentId: DirectoryId, currentDashboard: Directory) {
+    this.passwordModal.requirePassword(currentDashboard, currentDashboard.owner?.username || currentDashboard.ownerId, async () => {
+      try {
+        DirectoryModule.setStatus(Status.Updating);
+        await this.duplicateDashboard(currentDashboard, toParentId);
+        await this.navigateToDirectory(toParentId, '');
+        DirectoryModule.setStatus(Status.Loaded);
+      } catch (ex) {
+        PopupUtils.showError(ex.message);
+        DirectoryModule.setStatus(Status.Loaded);
+      }
+    });
   }
 
   private async reload() {

@@ -19,7 +19,7 @@
         ></DiDropdown>
       </div>
       <template v-if="$v.syncJob.sourceId.$error">
-        <div class="error-message mt-1">Select data source, please.</div>
+        <div class="error-message px-0 mt-1">Select data source, please.</div>
       </template>
     </div>
   </div>

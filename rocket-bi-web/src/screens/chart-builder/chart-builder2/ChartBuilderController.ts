@@ -48,7 +48,7 @@ export default class ChartBuilderController extends Vue {
   private readonly PREVIEW_CHART_ID = -1;
   private isDragging = false;
   private databaseStatus = Status.Loading;
-  private databaseErrorMessage = '';
+  private databaseErrorMsg = '';
   private config: ChartBuilderConfig = DefaultChartBuilderConfig;
 
   @Prop({ required: false, type: String, default: BuilderMode.Create })
@@ -121,8 +121,10 @@ export default class ChartBuilderController extends Vue {
       ]);
       await this.selectDatabaseAndTable(chartInfo, options);
     } catch (ex) {
-      Log.error(ex);
+      Log.error('ChartBuilderController::init', ex);
       this.preventWatchQueryChange = false;
+      this.databaseStatus = Status.Error;
+      this.databaseErrorMsg = 'Cannot load database schema';
       throw ex;
     }
   }
@@ -149,7 +151,7 @@ export default class ChartBuilderController extends Vue {
       this.showDatabaseLoaded();
     } catch (e) {
       this.databaseStatus = Status.Error;
-      this.databaseErrorMessage = e.message;
+      this.databaseErrorMsg = e.message;
     }
   }
 
@@ -187,7 +189,7 @@ export default class ChartBuilderController extends Vue {
     if (mainDatabase) {
       await _BuilderTableSchemaStore.selectDatabase(mainDatabase);
       _BuilderTableSchemaStore.collapseAllTable();
-      const tablesUsedName = WidgetUtils.getFieldsFromQueryWidgets([chart]).map(fieldUsed => fieldUsed.tblName);
+      const tablesUsedName = WidgetUtils.getFields([chart]).map(fieldUsed => fieldUsed.tblName);
       if (ListUtils.isNotEmpty(tablesUsedName)) {
         _BuilderTableSchemaStore.expandTables(tablesUsedName);
         // @ts-ignore
@@ -332,7 +334,10 @@ export default class ChartBuilderController extends Vue {
     }
   }
 
-  private updateDatabaseStatus(status: Status) {
-    this.databaseStatus = status;
+  private updateDatabaseStatus(newStatus: Status, errorMsg: string) {
+    this.databaseStatus = newStatus;
+    if (newStatus === Status.Error) {
+      this.databaseErrorMsg = errorMsg;
+    }
   }
 }

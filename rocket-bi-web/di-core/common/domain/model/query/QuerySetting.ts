@@ -175,6 +175,10 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
     return void 0;
   }
 
+  /**
+   * Get all table column of this query, including all table column of sub query
+   * Method support for suggest database and table
+   */
   abstract getAllFunction(): Function[];
 
   abstract getAllTableColumn(): TableColumn[];
@@ -221,6 +225,11 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
     const dynamicConditions = FilterUtils.getDynamicConditions(this.filters, []);
     Log.debug('affectByDynamicControl::', dynamicConditions, this.filters);
     return ListUtils.isNotEmpty(dynamicConditions.filter(condition => condition.dynamicWidgetId === id));
+  }
+
+  isAffectByQueryParameter(id: WidgetId): boolean {
+    const parameterWidgetIds: WidgetId[] = this.getChartOption()?.options?.parameterWidgetIds ?? [];
+    return parameterWidgetIds.includes(id);
   }
 
   /*
@@ -295,6 +304,14 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
     return result;
   }
 
+  isQueryParameter(): boolean {
+    return !!this.getChartOption()?.options?.parameterConfig;
+  }
+
+  toQueryParameter(): QueryParameter {
+    return this.getChartOption()?.options.parameterConfig!;
+  }
+
   updateInlineView(aliasName: string, newQuery: string): void {
     Log.debug('updateInlineView::', aliasName, newQuery);
     const inlineView = this.getInlineView(aliasName);
@@ -314,9 +331,10 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
     switch (type) {
       case ParamValueType.text:
       case ParamValueType.date:
+      case ParamValueType.list:
         return `'${value}'`;
       case ParamValueType.number:
-        return value;
+        return +value;
     }
   }
 }

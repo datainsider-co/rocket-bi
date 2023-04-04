@@ -1,6 +1,6 @@
 import { Component, Ref } from 'vue-property-decorator';
-import { ChartInfo, GroupedTableQuerySetting, QuerySetting, TableQueryChartSetting, TableSchema, WidgetExtraData } from '@core/common/domain';
-import { EtlOperator, TransformOperator, ETL_OPERATOR_TYPE } from '@core/data-cook';
+import { ChartInfo, TableQueryChartSetting, TableSchema, WidgetExtraData } from '@core/common/domain';
+import { EtlOperator, ETLOperatorType, TransformOperator } from '@core/data-cook';
 import cloneDeep from 'lodash/cloneDeep';
 import QueryBuilder from '@/screens/chart-builder/data-cook/QueryBuilder.vue';
 import ChartBuilder from '@/screens/chart-builder/data-cook/ChartBuilder.vue';
@@ -10,8 +10,6 @@ import ManageOperatorModal from '@/screens/data-cook/components/manage-operator-
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 
-type TTransformTableCallback = (newOperator: TransformOperator, extraData: WidgetExtraData | undefined) => void;
-
 @Component({
   components: {
     EtlModal,
@@ -20,12 +18,12 @@ type TTransformTableCallback = (newOperator: TransformOperator, extraData: Widge
   }
 })
 export default class TransformTable extends ManageOperatorModal {
-  protected operatorType = ETL_OPERATOR_TYPE.TransformOperator;
+  protected operatorType = ETLOperatorType.TransformOperator;
 
   private readonly chartType = ChartType.FlattenTable;
   private model: TransformOperator | null = null;
   private tableSchema: TableSchema | null = null;
-  private callback: TTransformTableCallback | null = null;
+  private callback: ((newOperator: TransformOperator, extraData: WidgetExtraData | undefined) => void) | null = null;
   private querySetting: TableQueryChartSetting | null = null;
   private extraData: WidgetExtraData | null = null;
 
@@ -41,7 +39,7 @@ export default class TransformTable extends ManageOperatorModal {
   }
 
   @Track(TrackEvents.ETLAddTransformTable)
-  private add(operator: EtlOperator, tableSchema: TableSchema, callback: TTransformTableCallback) {
+  public add(operator: EtlOperator, tableSchema: TableSchema, callback: (newOperator: TransformOperator, extraData: WidgetExtraData | undefined) => void) {
     this.startCreate();
     this.tableSchema = tableSchema;
     this.callback = callback;
@@ -53,7 +51,12 @@ export default class TransformTable extends ManageOperatorModal {
   }
 
   @Track(TrackEvents.ETLEditTransformTable)
-  private edit(operator: TransformOperator, tableSchema: TableSchema, extraData: WidgetExtraData | undefined, callback: TTransformTableCallback) {
+  public edit(
+    operator: TransformOperator,
+    tableSchema: TableSchema | null,
+    extraData: WidgetExtraData | undefined,
+    callback: (newOperator: TransformOperator, extraData: WidgetExtraData | undefined) => void
+  ) {
     this.startEdit();
     this.tableSchema = tableSchema;
     this.querySetting = operator?.query ?? null;

@@ -3,7 +3,7 @@
  * @created: 6/24/21, 9:55 AM
  */
 
-import { IndexedHeaderData } from '@/shared/models';
+import { HeaderData, IndexedHeaderData } from '@/shared/models';
 import { AbstractTableQuerySetting, FieldFormatter, FieldFormatting, TableChartOption } from '@core/common/domain';
 import { StringUtils } from '@/utils/StringUtils';
 import { ListUtils } from '@/utils';
@@ -22,7 +22,7 @@ export class TableFieldFormatterUtils {
     }
   }
 
-  private static getFieldFormatterContainsHeaderKey(header: IndexedHeaderData, fieldFormatting: FieldFormatting) {
+  static getFieldFormatterContainsHeaderKey(header: HeaderData, fieldFormatting: FieldFormatting): FieldFormatter | undefined {
     const normalizedName = StringUtils.toCamelCase(header.label);
     // hardcode: fix auto add by in column
     const normalizedKey = ListUtils.getHead(normalizedName.split('By')) ?? '';

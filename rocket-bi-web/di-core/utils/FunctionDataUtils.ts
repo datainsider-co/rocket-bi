@@ -1,5 +1,6 @@
 import { ConfigType, FunctionData, FunctionTreeNode } from '@/shared';
 import { Field, ScalarFunction, TabControlData, TableColumn } from '@core/common/domain/model';
+import { Log } from '@core/utils/Log';
 
 export abstract class FunctionDataUtils {
   static toFunctionTreeNodes(defaultConfigs: FunctionData[]): FunctionTreeNode[] {
@@ -28,6 +29,7 @@ export abstract class FunctionDataUtils {
   }
 
   static toConfigAsMap(configs: Record<ConfigType, FunctionData[]>): Map<ConfigType, FunctionData[]> {
+    Log.debug('toConfigAsMap::', configs);
     const entries: [ConfigType, FunctionData[]][] = Object.entries(configs).map(([key, values], index) => {
       return [key as ConfigType, this.cloneListFunctionData(values)];
     });

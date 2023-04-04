@@ -27,4 +27,8 @@ export abstract class FieldRelatedFunction extends Function {
     this.scalarFunction = scalarFunction;
     return this;
   }
+
+  static isFieldRelatedFunction(func: any): func is FieldRelatedFunction {
+    return func && func.field;
+  }
 }

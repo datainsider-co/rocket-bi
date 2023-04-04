@@ -122,7 +122,7 @@ export class TableSchema {
     return new Map<DisplayName, FieldName>(displayNameAndFieldNames);
   }
 
-  get sqlAddress() {
+  get tableIdAddress() {
     return [this.dbName, this.name].join('.');
   }
 

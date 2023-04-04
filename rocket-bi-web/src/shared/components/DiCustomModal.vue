@@ -9,21 +9,27 @@
     centered
     :scrollable="scrollable"
     :no-close-on-esc="false"
+    :ok-disabled="okDisabled"
+    :modal-class="modalClass"
+    :dialog-class="dialogClass"
+    :hide-footer="hideFooter"
     class="rounded"
     v-bind="$attrs"
     @ok="handleClickOk"
-    :ok-disabled="okDisabled"
     @cancel="handleCancel"
     @hide="handleClose"
     @close="handleCancel"
     @hidden="handleHidden"
-    :modal-class="modalClass"
-    :dialog-class="dialogClass"
   >
     <template #modal-header="{ close }">
       <slot name="modal-header" :close="close">
         <div class="custom-header d-inline-flex w-100">
-          <h6 class="modal-title cursor-default">
+          <h6
+            class="modal-title cursor-default"
+            :class="{
+              'modal-title-center': isCenterTitle
+            }"
+          >
             <div>{{ title }}</div>
             <slot name="subtitle"></slot>
           </h6>
@@ -41,8 +47,8 @@
         </div>
       </slot>
     </template>
-    <template #default>
-      <slot></slot>
+    <template #default="{ok, cancel}">
+      <slot :ok="ok" :cancel="cancel"></slot>
     </template>
   </BModal>
 </template>
@@ -64,7 +70,7 @@ export default class DiCustomModal extends Vue {
   @Prop({ type: String, default: 'custom-modal' })
   private id!: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: false, type: String, default: '' })
   private title!: string;
 
   @Prop({ type: String, default: 'Cancel' })
@@ -91,6 +97,12 @@ export default class DiCustomModal extends Vue {
   @Prop({ type: Boolean, required: false, default: false })
   private readonly scrollable!: boolean;
 
+  @Prop({ type: Boolean, required: false, default: false })
+  private readonly hideFooter!: boolean;
+
+  @Prop({ type: Boolean, required: false, default: false })
+  private readonly isCenterTitle!: boolean;
+
   @Ref()
   private modal!: BModal;
 
@@ -99,7 +111,6 @@ export default class DiCustomModal extends Vue {
   }
 
   hide() {
-    Log.debug('hide::');
     this.modal.hide();
   }
 
@@ -137,7 +148,7 @@ export default class DiCustomModal extends Vue {
   min-height: 28px;
 
   .modal-title {
-    @include medium-text(24px, 0.2px, 1.17);
+    @include medium-text(24px, 0.2px, inherit);
   }
 
   .button-x {
@@ -158,6 +169,13 @@ export default class DiCustomModal extends Vue {
 </style>
 
 <style lang="scss">
+.custom-header {
+  .modal-title-center {
+    text-align: center;
+    width: 100%;
+    justify-content: center;
+  }
+}
 .modal-small {
   max-width: 350px !important;
 

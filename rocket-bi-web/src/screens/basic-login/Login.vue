@@ -2,74 +2,33 @@
   <div class="login-screen">
     <div class="login-screen-left-panel">
       <div class="login-screen-left-panel-body">
-        <div class="login-screen-left-panel-body-form">
-          <CompanyLogoNameComponent class="login-screen-left-panel-body-form-logo"></CompanyLogoNameComponent>
-          <div class="login-screen-left-panel-body-form-header">
-            <div class="login-screen-left-panel-body-form-header-title">Login</div>
-            <div class="login-screen-left-panel-body-form-header-subtitle" v-if="isShowHint">
-              {{ hintMessage }}
-            </div>
-          </div>
-          <div class="login-screen-left-panel-body-form-body">
-            <DiInputComponent
-              class="login-screen-left-panel-body-form-body-email"
-              autofocus
-              autocomplete="off"
-              :id="genInputId('email')"
-              label="EMAIL"
-              v-model="email"
-              placeholder="Your email"
-              @enter="handleLogin"
-            >
-              <template v-if="!isEmailEmpty" #suffix>
-                <div>
-                  <i class="di-icon-close btn-icon-border" @click="handleResetEmail"></i>
-                </div>
-              </template>
-            </DiInputComponent>
-            <DiInputComponent
-              class="login-screen-left-panel-body-form-body-password"
-              :id="genInputId('password')"
-              placeholder="Your password"
-              autocomplete="off"
-              label="PASSWORD"
-              v-model="password"
-              type="password"
-              @enter="handleLogin"
-            ></DiInputComponent>
-          </div>
-          <div class="login-screen-left-panel-body-form-action">
-            <DiButton
-              id="google-login-btn"
-              v-if="isActiveGoogleLogin"
-              :disabled="isLoginLoading"
-              border
-              class="login-screen-left-panel-body-form-action-google-login"
-              title="Login with Gmail"
-              @click="handleLoginWithGoogle"
-            >
-              <img class="mr-2" id="ic_google" src="@/assets/icon/ic_google.svg" />
-            </DiButton>
-            <DiButton
-              id="basic-login-btn"
-              :isLoading="isLoginLoading"
-              class="login-screen-left-panel-body-form-action-login"
-              primary
-              title="Login"
-              @click="handleLogin"
-            />
-          </div>
-          <div v-if="!isLoginLoading" class="login-screen-left-panel-body-form-error display-error">
-            <template v-if="$v.email.$error">
-              <div v-if="!$v.email.required">Email is required</div>
-              <div v-else>Invalid email format</div>
-            </template>
-            <template v-else-if="$v.password.$error">
-              <div v-if="!$v.password.required">Password is required</div>
-            </template>
-            <div v-else>{{ errorMessage }}</div>
-          </div>
-        </div>
+        <LoginForm
+          v-if="isLoginMode"
+          ref="loginForm"
+          :error-message="errorMessage"
+          :is-login-loading="isLoginLoading"
+          @login="handleLogin"
+          @loginWithGoogle="handleLoginWithGoogle"
+          @forgotPassword="selectMode(FormLoginMode.ForgotPassword)"
+        />
+        <ForgotPasswordForm
+          v-else-if="isForgotPasswordForm"
+          ref="forgotPasswordForm"
+          :error-message="errorMessage"
+          :isLoading="isForgotPasswordLoading"
+          @back="selectMode(FormLoginMode.Login)"
+          @forgotPassword="handleForgotPassword"
+        />
+        <ResetPasswordForm
+          v-else
+          ref="resetPasswordForm"
+          :is-loading="isResetPasswordLoading"
+          :isResendLoading="isForgotPasswordLoading"
+          :error-message="errorMessage"
+          @resetPassword="handleResetPassword"
+          @resendCode="handleResendVerificationCode(forgotPasswordEmail)"
+          @back="selectMode(FormLoginMode.ForgotPassword)"
+        />
       </div>
       <div class="deco1">
         <img id="deco1" alt="deco1" src="@/assets/icon/ic_deco_1.svg" />
@@ -78,6 +37,7 @@
         <img alt="deco2" src="@/assets/icon/ic_deco_2.svg" />
       </div>
     </div>
+
     <div class="login-screen-right-panel col-md-8 w-100 p-0 d-none d-xl-block">
       <div>
         <div class="deco3">
@@ -95,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Prop, Ref, Watch } from 'vue-property-decorator';
 import { Route } from 'vue-router';
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { AtomicAction } from '@/shared/anotation';
@@ -106,51 +66,75 @@ import { LoginConstants, OauthType, Routers } from '@/shared';
 import { GoogleUtils } from '@/utils/GoogleUtils';
 import { RouterUtils } from '@/utils/RouterUtils';
 import DiInputComponent from '@/shared/components/DiInputComponent.vue';
-import { StringUtils } from '@/utils/StringUtils';
-import { required, email } from 'vuelidate/lib/validators';
 import CompanyLogoNameComponent from '@/screens/organization-settings/components/organization-logo-modal/CompanyLogoNameComponent.vue';
+import ForgotPasswordForm from '@/screens/login/components/forgot-password/ForgotPasswordForm.vue';
+import LoginForm from '@/screens/basic-login/components/LoginForm.vue';
+import ResetPasswordForm from '@/screens/login/components/forgot-password/ResetPasswordForm.vue';
+import { UserResetPasswordRequest } from '@core/common/domain/request/authentication/UserResetPasswordRequest';
+import Swal from 'sweetalert2';
+import { Modals } from '@/utils';
+
+enum FormLoginMode {
+  Login = 'login',
+  ForgotPassword = 'forgot_password',
+  ResetPassword = 'reset_password'
+}
 
 @Component({
   components: {
+    ForgotPasswordForm,
+    LoginForm,
+    ResetPasswordForm,
     CompanyLogoNameComponent,
     DiInputComponent
-  },
-  validations: {
-    email: { required, email },
-    password: { required }
   }
 })
 export default class Login extends Vue {
-  email = '';
-  password = '';
+  $alert!: typeof Swal;
+
+  private FormLoginMode = FormLoginMode;
+  private mode = FormLoginMode.Login;
   errorMessage = '';
+  forgotPasswordEmail = '';
 
   private isLoginLoading = false;
+  private isForgotPasswordLoading = false;
+  private isResetPasswordLoading = false;
 
-  private get isEmailEmpty() {
-    return StringUtils.isEmpty(this.email);
+  @Ref()
+  private readonly loginForm?: LoginForm;
+
+  @Ref()
+  private readonly forgotPasswordForm?: ForgotPasswordForm;
+
+  @Ref()
+  private readonly resetPasswordForm?: ResetPasswordForm;
+
+  private get isLoginMode() {
+    return this.mode === FormLoginMode.Login;
   }
 
-  private get isActiveGoogleLogin() {
-    return AuthenticationModule.googleOauthConfig?.isActive ?? false;
+  private get isForgotPasswordForm() {
+    return this.mode === FormLoginMode.ForgotPassword;
   }
 
-  private get isShowHint(): boolean {
-    return window.appConfig.VUE_APP_LOGIN_SAMPLE.isShowHint;
+  private get isResetPasswordForm() {
+    return this.mode === FormLoginMode.ResetPassword;
   }
 
-  private get hintMessage(): string {
-    return window.appConfig.VUE_APP_LOGIN_SAMPLE.hintMessage ?? '';
+  private resetErrorMessage() {
+    this.errorMessage = '';
   }
 
   @AtomicAction()
-  async handleLogin() {
+  async handleLogin(email: string, password: string) {
     try {
       this.isLoginLoading = true;
       if (this.isValidFormLogin()) {
+        this.resetErrorMessage();
         await AuthenticationModule.login({
-          email: this.email,
-          password: this.password,
+          email: email,
+          password: password,
           remember: true
         });
         Di.get(DataManager).setLoginType(OauthType.DEFAULT);
@@ -191,6 +175,69 @@ export default class Login extends Vue {
     }
   }
 
+  @AtomicAction()
+  private async handleForgotPassword(email: string) {
+    try {
+      this.isForgotPasswordLoading = true;
+      if (this.isValidForgotPasswordForm()) {
+        this.resetErrorMessage();
+        await AuthenticationModule.forgotPassword({ email: email });
+        this.forgotPasswordEmail = email;
+        this.selectMode(FormLoginMode.ResetPassword);
+        this.isForgotPasswordLoading = false;
+      }
+    } catch (e) {
+      this.errorMessage = e.message;
+    } finally {
+      this.isForgotPasswordLoading = false;
+    }
+  }
+
+  @AtomicAction()
+  private async handleResendVerificationCode(email: string) {
+    try {
+      this.isForgotPasswordLoading = true;
+      this.resetErrorMessage();
+      await AuthenticationModule.forgotPassword({ email: email });
+      this.selectMode(FormLoginMode.ResetPassword);
+      this.isForgotPasswordLoading = false;
+      Swal.fire({
+        icon: 'success',
+        title: 'Email Sent Successfully!',
+        html: `Please check verify code in your email and type your new password.`,
+        showCancelButton: false
+      });
+    } catch (e) {
+      this.errorMessage = e.message;
+    } finally {
+      this.isForgotPasswordLoading = false;
+    }
+  }
+
+  @AtomicAction()
+  private async handleResetPassword(request: UserResetPasswordRequest) {
+    try {
+      request.setEmail(this.forgotPasswordEmail);
+      Log.debug('Login::handleResetPassword::', request);
+      this.isResetPasswordLoading = true;
+      if (this.isValidResetPasswordForm()) {
+        await AuthenticationModule.resetPassword({ request: request });
+        this.selectMode(FormLoginMode.Login);
+        this.isResetPasswordLoading = false;
+        Swal.fire({
+          icon: 'success',
+          title: 'Password Changed!',
+          html: 'Your new password is updated.',
+          showCancelButton: false
+        });
+      }
+    } catch (e) {
+      this.errorMessage = e.message;
+    } finally {
+      this.isResetPasswordLoading = false;
+    }
+  }
+
   private handleNextPage(currentRoute: Route) {
     const previousScreenName: Routers = currentRoute.query['previous_screen'] as Routers;
     Log.debug('handleNextPage::', previousScreenName);
@@ -205,15 +252,20 @@ export default class Login extends Vue {
   }
 
   private isValidFormLogin(): boolean {
-    this.$v.$touch();
-    if (this.$v.$invalid) {
-      return false;
-    }
-    return true;
+    return this.loginForm?.isValidFormLogin() ?? false;
   }
 
-  private handleResetEmail() {
-    this.email = '';
+  private isValidForgotPasswordForm(): boolean {
+    return this.forgotPasswordForm?.isValidForgotPasswordForm() ?? false;
+  }
+
+  private isValidResetPasswordForm(): boolean {
+    return this.resetPasswordForm?.isValidResetPasswordForm() ?? false;
+  }
+
+  private selectMode(mode: FormLoginMode) {
+    this.resetErrorMessage();
+    this.mode = mode;
   }
 }
 </script>
@@ -292,6 +344,11 @@ export default class Login extends Vue {
             @include regular-text(0.77px, var(--text-color));
             font-size: 18px;
             margin-bottom: 8px;
+            height: 21px;
+
+            display: flex;
+            align-items: center;
+            //box-sizing: border-box;
           }
 
           &-subtitle {
@@ -304,6 +361,7 @@ export default class Login extends Vue {
         &-body {
           padding: 16px;
           opacity: 0.8;
+          text-align: left;
 
           .di-input-component--label {
             font-size: 12px;
@@ -333,20 +391,27 @@ export default class Login extends Vue {
 
           &-login {
             width: 146px;
-            height: 42px;
+            height: 40px;
           }
-          &-google-login {
-            width: 146px;
-            height: 42px;
-            justify-content: center;
-            margin-right: 8px;
+        }
 
-            .title {
-              width: fit-content;
-              padding-left: 0;
-              color: var(--accent);
-              font-size: 14px;
-            }
+        .login-screen-left-panel-body-form-action--google-active {
+          padding: 8px 16px 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          column-gap: 8px;
+
+          .login-screen-left-panel-body-form-action-login {
+            flex: 1;
+            width: unset;
+            height: 40px;
+          }
+
+          .login-screen-left-panel-body-form-action-google-login {
+            flex: 1;
+            display: flex;
+            height: 40px;
           }
         }
       }

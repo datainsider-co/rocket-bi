@@ -83,10 +83,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100vh;
-
-  &.swal2-height-auto {
-    height: unset !important;
-  }
+  line-height: 1.4;
 }
 
 body:not(.modal-open) {

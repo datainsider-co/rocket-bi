@@ -25,7 +25,31 @@
     ></ShopifySyncModeConfig>
     <S3SyncModeConfig v-if="isS3Job" ref="s3SyncModeConfig" class="mb-3" :is-validate="isValidate" :job.sync="syncJob"></S3SyncModeConfig>
     <GoogleAdsSyncModeConfig v-if="isGoogleAdsJob" ref="ggAdsSyncModeConfig" class="mb-3" :is-validate="isValidate" :job.sync="syncJob" />
-    <FacebookAdsSyncModeConfig v-if="isFacebookAdsJob" ref="fbAdsSyncModeConfig" class="mb-3" :is-validate="isValidate" :job.sync="syncJob" />
+    <FacebookAdsSyncModeConfig
+      v-if="isFacebookAdsJob"
+      ref="fbAdsSyncModeConfig"
+      class="mb-3"
+      :is-validate="isValidate"
+      :job.sync="syncJob"
+      :singleTable="singleTable"
+    />
+    <GoogleAnalyticSyncModeConfig
+      v-if="isGoogleAnalyticJob"
+      ref="googleAnalyticSyncModeConfig"
+      class="mb-3"
+      :is-validate="isValidate"
+      :job.sync="syncJob"
+      :single-table="singleTable"
+    />
+    <TiktokAdsSyncModeConfig v-if="isTiktokAdsJob" class="mb-3" :is-validate="isValidate" :job.sync="syncJob" :single-table="singleTable" />
+    <GoogleAnalytic4SyncModeConfig
+      v-if="isGoogleAnalytic4Job"
+      ref="googleAnalytic4SyncModeConfig"
+      class="mb-3"
+      :is-validate="isValidate"
+      :job.sync="syncJob"
+      :single-table="singleTable"
+    />
   </div>
 </template>
 
@@ -40,9 +64,14 @@ import { Component, Prop, PropSync, Ref, Vue } from 'vue-property-decorator';
 import S3SyncModeConfig from './S3SyncModeConfig.vue';
 import GoogleAdsSyncModeConfig from '@/screens/data-ingestion/components/GoogleAdsSyncModeConfig.vue';
 import FacebookAdsSyncModeConfig from '@/screens/data-ingestion/components/facebook-ads/FacebookAdsSyncModeConfig.vue';
+import { Log } from '@core/utils';
+import GoogleAnalyticSyncModeConfig from '@/screens/data-ingestion/components/google-analytics/GoogleAnalyticSyncModeConfig.vue';
+import TiktokAdsSyncModeConfig from '@/screens/data-ingestion/components/tiktok/TiktokAdsSyncModeConfig.vue';
+import GoogleAnalytic4SyncModeConfig from '@/screens/data-ingestion/components/google-analytics-4/GoogleAnalytic4SyncModeConfig.vue';
 
 @Component({
   components: {
+    TiktokAdsSyncModeConfig,
     ShopifySyncModeConfig,
     S3SyncModeConfig,
     JdbcSyncModeConfig,
@@ -50,7 +79,9 @@ import FacebookAdsSyncModeConfig from '@/screens/data-ingestion/components/faceb
     MongoSyncModeConfig,
     BigQuerySyncModeConfig,
     GoogleAdsSyncModeConfig,
-    FacebookAdsSyncModeConfig
+    FacebookAdsSyncModeConfig,
+    GoogleAnalyticSyncModeConfig,
+    GoogleAnalytic4SyncModeConfig
   }
 })
 export default class JobSyncConfig extends Vue {
@@ -61,6 +92,9 @@ export default class JobSyncConfig extends Vue {
 
   @Prop()
   isValidate!: boolean;
+
+  @Prop({ required: false, default: true })
+  singleTable!: boolean;
 
   @Ref()
   private readonly bigQuerySyncModeConfig?: BigQuerySyncModeConfig;
@@ -84,6 +118,12 @@ export default class JobSyncConfig extends Vue {
 
   @Ref()
   private readonly fbAdsSyncModeConfig?: FacebookAdsSyncModeConfig;
+
+  @Ref()
+  private readonly googleAnalyticSyncModeConfig?: GoogleAnalyticSyncModeConfig;
+
+  @Ref()
+  private readonly googleAnalytic4SyncModeConfig?: GoogleAnalytic4SyncModeConfig;
 
   private get isJdbcJob(): boolean {
     return Job.isJdbcJob(this.syncJob);
@@ -116,7 +156,20 @@ export default class JobSyncConfig extends Vue {
     return this.syncJob.className === JobName.FacebookAdsJob;
   }
 
+  private get isGoogleAnalyticJob(): boolean {
+    return this.syncJob.className === JobName.GoogleAnalyticJob;
+  }
+
+  private get isTiktokAdsJob(): boolean {
+    return this.syncJob.className === JobName.TiktokAdsJob;
+  }
+
+  private get isGoogleAnalytic4Job(): boolean {
+    return this.syncJob.className === JobName.GA4Job;
+  }
+
   public validSyncMode() {
+    Log.debug('validSyncMode', this.ggAdsSyncModeConfig);
     switch (this.syncJob.className) {
       case JobName.Jdbc:
         return this.jdbcSyncModeConfig?.validSyncMode();
@@ -134,10 +187,13 @@ export default class JobSyncConfig extends Vue {
         return this.ggAdsSyncModeConfig?.validSyncMode();
       case JobName.FacebookAdsJob:
         return this.fbAdsSyncModeConfig?.validSyncMode();
-      case JobName.GoogleAnalyticJob:
       case JobName.GoogleSheetJob:
       case JobName.UnsupportedJob:
         return false;
+      case JobName.GoogleAnalyticJob:
+        return this.googleAnalyticSyncModeConfig?.validSyncMode();
+      case JobName.GA4Job:
+        return this.googleAnalytic4SyncModeConfig?.validSyncMode();
       default:
         return true;
     }

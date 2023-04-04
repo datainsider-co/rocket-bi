@@ -1,9 +1,7 @@
 <template>
-  <div class="d-flex align-items-center h-100 w-100 justify-content-center">
-    <DiButton class="access-gg-btn" primary title="Access to Google Account" @click="authorize">
-      <i v-if="loading" class="fa fa-spin fa-spinner"></i>
-      <img v-else src="@/assets/icon/ic_google.svg" />
-    </DiButton>
+  <div class="google-authen">
+    <h3>DataInsider requires authorization to connect to your {{ productTitle }}</h3>
+    <DiButton class="access-gg-btn" :is-loading="loading" primary title="AUTHORIZE" @click="authorize"> </DiButton>
   </div>
 </template>
 <script lang="ts">
@@ -16,6 +14,9 @@ import { StringUtils } from '@/utils/StringUtils';
 import { DIException } from '@core/common/domain';
 import { ThirdPartyAuthenticationType } from '@/shared/components/google-authen/enum/ThirdPartyAuthenticationType';
 
+/**
+ * @deprecated use GoogleAuthen2 instead
+ */
 @Component({
   components: { DiButton }
 })
@@ -24,6 +25,21 @@ export default class GoogleAuthentication extends Vue {
   private loading = false;
 
   googleAuthenticationType = this.$attrs.config_type as ThirdPartyAuthenticationType;
+
+  private get productTitle(): string {
+    switch (this.googleAuthenticationType) {
+      case ThirdPartyAuthenticationType.GoogleAnalytic:
+        return 'Google Analytics';
+      case ThirdPartyAuthenticationType.GoogleSheet:
+        return 'Google Sheet';
+      case ThirdPartyAuthenticationType.GA4:
+        return 'Google Analytics';
+      case ThirdPartyAuthenticationType.GoogleAds:
+        return 'Google Ads';
+      default:
+        return '';
+    }
+  }
 
   private get scope(): string {
     const scope = this.$route.query.scope as string;
@@ -97,8 +113,19 @@ export default class GoogleAuthentication extends Vue {
 #app {
   height: 100vh;
 
-  .access-gg-btn {
-    width: fit-content;
+  .google-authen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background: white;
+
+    .access-gg-btn {
+      width: fit-content;
+      height: 42px;
+      padding: 12px 24px;
+    }
   }
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div :class="{ 'disabled-setting': disable }" class="setting-container no-gutters">
-    <div class="d-flex flex-row align-items-center">
-      <p v-if="label != null" class="m-0">{{ label }}</p>
+    <div v-if="isLabel || showHint" class="d-flex flex-row align-items-center label">
+      <p v-if="isLabel">{{ label }}</p>
       <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
     </div>
     <div class="w-100 d-flex justify-content-between align-items-center">
@@ -73,19 +73,9 @@ export default class ColorSetting extends Vue {
   private get showHint(): boolean {
     return StringUtils.isNotEmpty(this.hint);
   }
-}
-</script>
 
-<style lang="scss">
-@import '~bootstrap/scss/bootstrap-grid';
-
-.setting-container {
-  input {
-    padding: 10px 0 10px 8px;
-
-    @include media-breakpoint-down(lg) {
-      padding: 5px 10px;
-    }
+  private get isLabel(): boolean {
+    return StringUtils.isNotEmpty(this.label);
   }
 }
-</style>
+</script>

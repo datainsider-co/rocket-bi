@@ -1,10 +1,6 @@
 <template>
   <div :id="genBtnId(`${id}`)" :class="{ 'disabled-setting': disable }" class="setting-container toggle toggle-setting">
-    <div class="custom-control custom-switch" @click.prevent="toggleButton">
-      <input :id="`toggle-${id}`" v-model="selectedValue" class="custom-control-input" type="checkbox" />
-      <label :for="`toggle-${id}`" class="custom-control-label"> </label>
-    </div>
-    <p :title="label" class="label text-break">{{ label }}</p>
+    <DiToggle :value="selectedValue" @update:value="toggleButton" :disable="disable" :label="label"></DiToggle>
     <span v-if="showHint" :id="`tooltip-icon-${id}`" class="di-icon-help ml-2"></span>
     <b-tooltip v-if="showHint" :target="`tooltip-icon-${id}`" triggers="hover">
       <div v-html="hint" />
@@ -20,14 +16,19 @@ import { StringUtils } from '@/utils';
 export default class ToggleSetting extends Vue {
   @Prop({ required: true, type: String })
   private readonly id!: string;
+
   @Prop({ required: true, type: String })
   private readonly label!: string;
+
   @Prop({ required: true, type: Boolean })
   private readonly value!: boolean;
+
   @Prop({ required: false, type: Boolean, default: false })
   private readonly disable!: boolean;
+
   @Prop({ type: String, default: '' })
   private readonly hint!: string;
+
   private selectedValue = this.value;
 
   @Watch('value')
@@ -35,11 +36,10 @@ export default class ToggleSetting extends Vue {
     this.selectedValue = newValue;
   }
 
-  toggleButton() {
-    // Log.debug('toggle button::', this.disable);
+  toggleButton(newValue: boolean) {
     if (!this.disable) {
-      this.selectedValue = !this.selectedValue;
-      this.$emit('onChanged', this.selectedValue);
+      this.selectedValue = newValue;
+      this.$emit('onChanged', newValue);
     }
   }
 
@@ -48,31 +48,3 @@ export default class ToggleSetting extends Vue {
   }
 }
 </script>
-
-<style lang="scss">
-@import '~@/themes/scss/mixin.scss';
-
-.toggle-setting {
-  .custom-control-label::after {
-    cursor: pointer;
-    top: 0.3rem;
-    left: -2.4rem;
-    width: 0.7rem;
-    height: 0.7rem;
-    border-radius: 0.35rem;
-  }
-
-  .custom-control-input:checked ~ .custom-control-label::after {
-    background-size: cover;
-    background-color: var(--primary);
-    cursor: pointer;
-  }
-
-  .custom-control-label {
-    font-weight: bold;
-    padding-left: 4px;
-    letter-spacing: 0.27px;
-    cursor: pointer;
-  }
-}
-</style>

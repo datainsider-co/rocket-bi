@@ -18,6 +18,8 @@ const productionConfig = {
   VUE_APP_FACEBOOK_APP_ID: '1371850590286877',
   VUE_APP_FACEBOOK_APP_SECRET: '27c4375073eeabebba910688aba028de',
   VUE_APP_FACEBOOK_SCOPE: 'ads_management,ads_read',
+  VUE_APP_TIKTOK_REDIRECT_URL: 'https://rocketbi.cf/third-party-auth/tik-tok',
+  VUE_APP_TIKTOK_ID: '7174346320419766274',
 
   VUE_APP_IS_DISABLE_LAKE_HOUSE: true,
   VUE_APP_IS_DISABLE_STREAMING: true,
@@ -30,7 +32,8 @@ const productionConfig = {
     isShowHint: true,
     hintMessage: 'Default account: hello@gmail.com/123456'
   },
-  VUE_APP_VERSION: 'v1.4.17'
+  VUE_APP_DEFAULT_PASSWORD: 'di@123456',
+  VUE_APP_VERSION: 'v1.4.19'
 };
 
 window.appConfig = productionConfig;

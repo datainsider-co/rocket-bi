@@ -53,8 +53,9 @@ declare global {
     VUE_APP_RELAY_API_URL: string;
     VUE_APP_STATIC_FILE_URL: string;
     VUE_APP_FACEBOOK_APP_ID: string;
-    VUE_APP_FACEBOOK_APP_SECRET: string;
     VUE_APP_FACEBOOK_SCOPE: string;
+    VUE_APP_TIKTOK_REDIRECT_URL: string;
+    VUE_APP_TIKTOK_ID: string;
 
     VUE_APP_IS_DISABLE_LAKE_HOUSE: boolean;
     VUE_APP_IS_DISABLE_CDP: boolean;
@@ -67,6 +68,8 @@ declare global {
       isShowHint: boolean;
       hintMessage: string;
     };
+
+    VUE_APP_DEFAULT_PASSWORD: string;
   }
   export interface QueryLanguage {
     clickHouse: { default: string };

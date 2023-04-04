@@ -2,6 +2,7 @@ import { HeaderData, IndexedHeaderData, RowData, RowDataUtils } from '@/shared/m
 import { StringUtils } from '@/utils/StringUtils';
 import { BodyController } from '@chart/custom-table/body/BodyController';
 import { CustomCellCallBack } from '@chart/custom-table/TableData';
+import { NumberFormatter } from '@core/common/services';
 
 export class BodyControllerBuilder {
   private mainHeaders: IndexedHeaderData[] = [];

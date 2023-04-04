@@ -31,7 +31,6 @@
                 class="form-control calculated-field-name"
                 placeholder="Column name"
                 type="text"
-                @keydown.enter="formulaInput.focus"
               />
             </template>
           </div>
@@ -123,7 +122,7 @@
 
 <script lang="ts">
 import { Component, Ref, Vue } from 'vue-property-decorator';
-import { Column, TableSchema } from '@core/common/domain/model';
+import { Column, MaterializedExpression, TableSchema } from '@core/common/domain/model';
 import { required } from 'vuelidate/lib/validators';
 import { DIException, FormulaException } from '@core/common/domain/exception';
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
@@ -134,15 +133,14 @@ import { FormulaSuggestionModule, FunctionInfo } from '@/screens/chart-builder/c
 import FormulaCompletionInput from '@/shared/components/formula-completion-input/FormulaCompletionInput.vue';
 import { Log } from '@core/utils';
 import { FormulaController } from '@/shared/fomula/FormulaController';
-import { ClickhouseFormulaController } from '@/shared/fomula/ClickhouseFormulaController';
+import { ClickhouseCalculatedFieldController } from '@/shared/fomula/ClickhouseCalculatedFieldController';
 import { CalculatedFieldModalMode, CreateFieldData, EditFieldData } from '@/screens/chart-builder/config-builder/database-listing/CalculatedFieldData';
 import { AtomicAction } from '@/shared/anotation/AtomicAction';
 import Modal from '@/shared/components/builder/Modal.vue';
-import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
-import { TrackingUtils } from '@core/tracking/TrackingUtils';
-import { RandomUtils } from '@/utils';
+import { StringUtils } from '@/utils';
+import { ClickhouseMeasureController } from '@/shared/fomula/ClickhouseMeasureController';
 
 @Component({
   components: {
@@ -188,9 +186,11 @@ export default class CalculatedFieldModal extends Vue {
   }
 
   private get supportedFunctions(): SelectOption[] {
-    const supportedFunctions = FormulaSuggestionModule.supportedFunctionNames.map((name, index) => {
-      return { id: index, displayName: name, data: name };
-    });
+    const supportedFunctions = FormulaSuggestionModule.supportedFunctionNames
+      .map((name, index) => {
+        return { id: index, displayName: name, data: name };
+      })
+      .sort((a, b) => StringUtils.compare(a.displayName, b.displayName));
     const allFunctions = { id: -1, displayName: 'All', data: this.ALL_SUPPORTED_FUNCTION };
     return [allFunctions, ...supportedFunctions];
   }
@@ -211,15 +211,15 @@ export default class CalculatedFieldModal extends Vue {
     table_name: (_: CalculatedFieldModal, args: any) => args[0].name,
     database_name: (_: CalculatedFieldModal, args: any) => args[0].dbName
   })
-  public showCreateModal(tableSchema: TableSchema, isCalculatedField?: boolean): void {
+  public showCreateModal(tableSchema: TableSchema, isCalculatedField = true): void {
     this.resetData();
 
     this.mode = CalculatedFieldModalMode.Create;
     this.tableSchema = tableSchema;
     this.isModalShowing = true;
-    this.isCalculatedField = isCalculatedField ?? true;
+    this.isCalculatedField = isCalculatedField;
 
-    this.initFormulaSuggestion(tableSchema);
+    this.initSuggestion(tableSchema, isCalculatedField);
   }
 
   @Track(TrackEvents.CalculatedFieldUpdate, {
@@ -227,49 +227,56 @@ export default class CalculatedFieldModal extends Vue {
     database_name: (_: CalculatedFieldModal, args: any) => args[0].dbName,
     column_name: (_: CalculatedFieldModal, args: any) => args[1].name
   })
-  public showEditModal(tableSchema: TableSchema, column: Column, isCalculatedField?: boolean): void {
+  public showEditModal(tableSchema: TableSchema, column: Column, isCalculatedField = true): void {
     this.resetData();
-    this.initDefaultData(tableSchema, column);
+    this.initFormula(tableSchema, column, isCalculatedField);
 
     this.mode = CalculatedFieldModalMode.Edit;
     this.tableSchema = tableSchema;
     this.isModalShowing = true;
-    this.isCalculatedField = isCalculatedField ?? true;
+    this.isCalculatedField = isCalculatedField;
 
-    this.initFormulaSuggestion(tableSchema);
+    this.initSuggestion(tableSchema, isCalculatedField);
   }
 
   hide() {
     this.isModalShowing = false;
   }
 
-  private initDefaultData(tableSchema: TableSchema, column: Column) {
-    this.formula = this.getFormula(tableSchema, column);
-    this.displayName = column.displayName;
-    this.editingColumn = column;
-  }
-
-  private getFormula(tableSchema: TableSchema, column: Column): string {
-    const expression: string | undefined = column.defaultExpression?.expr;
-    if (expression) {
-      try {
-        return ExpressionParser.bindDisplayNameOfSchema(tableSchema, expression);
-      } catch (ex) {
-        return '';
-      }
+  private initFormula(tableSchema: TableSchema, column: Column, isCalculatedField: boolean) {
+    if (isCalculatedField) {
+      this.formula = this.parseFormula(tableSchema, column);
+      this.displayName = column.displayName;
+      this.editingColumn = column;
     } else {
-      return '';
+      this.formula = column.defaultExpression?.expr ?? '';
+      this.displayName = column.displayName;
+      this.editingColumn = column;
     }
   }
 
-  private initFormulaSuggestion(tableSchema: TableSchema) {
-    const supportedFunctions = this.isCalculatedField ? ['Conditional', 'String', 'Date', 'JSON', 'Searching in string', 'Data Types'] : [];
+  private parseFormula(tableSchema: TableSchema, column: Column): string {
+    try {
+      const expression: string = column.defaultExpression?.expr ?? '';
+      return ExpressionParser.bindDisplayNameOfSchema(tableSchema, expression);
+    } catch (ex) {
+      Log.error('CalculatedFieldModal::toFormula', ex);
+      return column.defaultExpression?.expr ?? '';
+    }
+  }
+
+  private initSuggestion(tableSchema: TableSchema, isCalculatedField: boolean) {
+    const ignoredFunctions: string[] = this.isCalculatedField ? ['Keyword'] : [];
     FormulaSuggestionModule.initSuggestFunction({
       fileNames: ['clickhouse-syntax.json'],
-      useFunctions: supportedFunctions
+      ignoreFunctions: ignoredFunctions
     });
-    FormulaSuggestionModule.initSuggestField(tableSchema);
-    this.formulaController = new ClickhouseFormulaController(FormulaSuggestionModule.allFunctions, FormulaSuggestionModule.columns);
+    FormulaSuggestionModule.setTableSchema(tableSchema);
+    if (isCalculatedField) {
+      this.formulaController = new ClickhouseCalculatedFieldController(FormulaSuggestionModule.allFunctions, FormulaSuggestionModule.columns);
+    } else {
+      this.formulaController = new ClickhouseMeasureController(FormulaSuggestionModule.allFunctions, tableSchema);
+    }
 
     this.$nextTick(() => {
       this.displayNameInput?.focus();
@@ -286,7 +293,7 @@ export default class CalculatedFieldModal extends Vue {
     this.$v.$reset();
   }
 
-  private validateCalculatedFieldData(): boolean {
+  private isValidField(): boolean {
     this.$v.$touch();
     return !this.$v.$error;
   }
@@ -300,7 +307,7 @@ export default class CalculatedFieldModal extends Vue {
   @AtomicAction({ timeUnlockAfterComplete: 500 })
   private async createCalculatedField(): Promise<void> {
     Log.debug('createCalculatedField::');
-    if (!this.isLoading && this.validateCalculatedFieldData()) {
+    if (!this.isLoading && this.isValidField()) {
       try {
         this.showLoading(true);
         const createFieldData: CreateFieldData = {
@@ -328,7 +335,7 @@ export default class CalculatedFieldModal extends Vue {
   })
   @AtomicAction({ timeUnlockAfterComplete: 500 })
   private async editCalculatedField(): Promise<void> {
-    if (!this.isLoading && this.validateCalculatedFieldData() && this.editingColumn) {
+    if (!this.isLoading && this.isValidField() && this.editingColumn) {
       try {
         this.showLoading(true);
         const editFieldData: EditFieldData = {
@@ -338,8 +345,8 @@ export default class CalculatedFieldModal extends Vue {
           newExpression: ExpressionParser.parse(new RawExpressionData(this.formula, this.tableSchema))
         };
 
-        await DatabaseSchemaModule.editCalculatedField(editFieldData);
-        this.$emit('updated', editFieldData.tableSchema);
+        const newTableSchema = await DatabaseSchemaModule.editCalculatedField(editFieldData);
+        this.$emit('updated', newTableSchema);
         this.showLoading(false);
         this.hide();
       } catch (ex) {
@@ -388,14 +395,14 @@ export default class CalculatedFieldModal extends Vue {
   @AtomicAction({ timeUnlockAfterComplete: 500 })
   private async createMeasurementField(): Promise<void> {
     Log.debug('createMeasurementField::');
-    if (!this.isLoading && this.validateCalculatedFieldData()) {
+    if (!this.isLoading && this.isValidField()) {
       try {
         this.showLoading(true);
         const createFieldData: CreateFieldData = {
           displayName: this.displayName,
           tableSchema: this.tableSchema,
           description: 'Measurement Field',
-          expression: ExpressionParser.parse(new RawExpressionData(this.formula, this.tableSchema))
+          expression: new MaterializedExpression(this.formula)
         };
 
         await DatabaseSchemaModule.createMeasurementField(createFieldData);
@@ -410,14 +417,14 @@ export default class CalculatedFieldModal extends Vue {
 
   @AtomicAction({ timeUnlockAfterComplete: 500 })
   private async editMeasurementField(): Promise<void> {
-    if (!this.isLoading && this.validateCalculatedFieldData() && this.editingColumn) {
+    if (!this.isLoading && this.isValidField() && this.editingColumn) {
       try {
         this.showLoading(true);
         const editFieldData: EditFieldData = {
           displayName: this.displayName,
           tableSchema: this.tableSchema,
           editingColumn: this.editingColumn,
-          newExpression: ExpressionParser.parse(new RawExpressionData(this.formula, this.tableSchema))
+          newExpression: new MaterializedExpression(this.formula)
         };
 
         const tableSchema = await DatabaseSchemaModule.editMeasurementField(editFieldData);

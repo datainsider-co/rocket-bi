@@ -29,7 +29,7 @@
 </template>
 <script lang="ts">
 import { Component, Inject, Vue } from 'vue-property-decorator';
-import { ETL_OPERATOR_TYPE, ETL_OPERATOR_TYPE_NAME, EtlOperator } from '@core/data-cook';
+import { ETLOperatorType, ETL_OPERATOR_TYPE_NAME, EtlOperator } from '@core/data-cook';
 import SelectSource from '../select-source/SelectSource.vue';
 import { DatabaseSchema, TableSchema } from '@core/common/domain';
 import ContextMenuMinxin from './ContextMenuMinxin';
@@ -65,11 +65,11 @@ export default class TableContextMenu extends ContextMenuMinxin {
 
   private get operators() {
     return [
-      ETL_OPERATOR_TYPE.JoinOperator,
-      ETL_OPERATOR_TYPE.ManageFieldOperator,
-      ETL_OPERATOR_TYPE.SQLQueryOperator,
-      ETL_OPERATOR_TYPE.PivotTableOperator,
-      ETL_OPERATOR_TYPE.TransformOperator
+      ETLOperatorType.JoinOperator,
+      ETLOperatorType.ManageFieldOperator,
+      ETLOperatorType.SQLQueryOperator,
+      ETLOperatorType.PivotTableOperator,
+      ETLOperatorType.TransformOperator
     ];
   }
 
@@ -103,8 +103,8 @@ export default class TableContextMenu extends ContextMenuMinxin {
     this.hide();
   }
 
-  private selectType(operatorType: ETL_OPERATOR_TYPE) {
-    if (operatorType === ETL_OPERATOR_TYPE.JoinOperator) {
+  private selectType(operatorType: ETLOperatorType) {
+    if (operatorType === ETLOperatorType.JoinOperator) {
       this.viewMode = VIEW_MODE.SelectTable;
       // this.$nextTick(() => {
       //   if (this.$refs.selectSource) {
@@ -119,12 +119,12 @@ export default class TableContextMenu extends ContextMenuMinxin {
   }
 
   private onSelectTable(database: DatabaseSchema, table: TableSchema) {
-    this.$emit('select', this.operator, ETL_OPERATOR_TYPE.JoinOperator, { database, table });
+    this.$emit('select', this.operator, ETLOperatorType.JoinOperator, { database, table });
     this.hidePopover();
   }
 
   private onSelectOperator(operator: EtlOperator) {
-    this.$emit('select', this.operator, ETL_OPERATOR_TYPE.JoinOperator, { operator });
+    this.$emit('select', this.operator, ETLOperatorType.JoinOperator, { operator });
     this.hidePopover();
   }
 

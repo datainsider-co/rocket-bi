@@ -1,17 +1,13 @@
 <template>
   <div>
-    <label class="export-form mb-0">
-      <div class="custom-control custom-switch">
-        <input
-          :id="genToggleId('sync-to-lake-house')"
-          :checked="isEnableSyncToLakeHouse"
-          class="custom-control-input"
-          type="checkbox"
-          @input="handleClickSyncToDataLakeOption(!isEnableSyncToLakeHouse)"
-        />
-        <label class="custom-control-label" :for="genToggleId('sync-to-lake-house')">Sync To Data Lake</label>
-      </div>
-    </label>
+    <DiToggle
+      class="export-form"
+      :id="genToggleId('sync-to-lake-house')"
+      :value="isEnableSyncToLakeHouse"
+      @update:value="handleClickSyncToDataLakeOption"
+      label="Sync To Data Lake"
+    >
+    </DiToggle>
     <div class="input">
       <b-collapse id="data-lake-config" :visible="isEnableSyncToLakeHouse" class="mt-12px">
         <BInputGroupAppend class="input-group-append">
@@ -49,5 +45,3 @@ export default class JobLakeConfig extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

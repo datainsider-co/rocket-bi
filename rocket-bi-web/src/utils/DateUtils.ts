@@ -654,4 +654,14 @@ export class DateUtils {
   static toEndTime(date: Date): number {
     return date.setHours(23, 59, 59, 999);
   }
+
+  static yesterday(): Date {
+    const date = new Date();
+    date.setDate(date.getDate() - 1);
+    return date;
+  }
+
+  static laterThan(date1: Date, date2: Date) {
+    return date1.getTime() > date2.getTime();
+  }
 }

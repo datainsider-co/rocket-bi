@@ -6,10 +6,10 @@
 import {
   ChartOption,
   ChartOptionData,
-  FunctionControl,
   DynamicValues,
+  FunctionControl,
   TabControl,
-  TreeNode,
+  TabControlData,
   WidgetCommonData,
   WidgetExtraData,
   WidgetId,
@@ -102,7 +102,7 @@ export class ChartInfo implements QueryRelatedWidget, TabControl {
     return false;
   }
 
-  toTreeNode(): TreeNode {
+  toTabControlData(): TabControlData {
     const name = this.setting.getChartOption()?.getTitle() ?? this.name ?? '';
     const allTableColumns = this.setting.getAllTableColumn().map(tblColumn => tblColumn.copyWith({ dynamicFunctionId: this.id }));
     const defaultTableColumns = FunctionControl.isFunctionControl(this.setting)
@@ -110,15 +110,12 @@ export class ChartInfo implements QueryRelatedWidget, TabControl {
       : [];
     const values = DynamicValues.isValuesControl(this.setting) ? this.setting.getDefaultValues() : [];
     return {
-      data: {
-        id: this.id,
-        displayName: name,
-        tableColumns: allTableColumns,
-        defaultTableColumns: defaultTableColumns,
-        values: values,
-        chartType: this.extraData?.currentChartType ?? ''
-      },
-      icon: 'DynamicFunctionIcon'
+      id: this.id,
+      displayName: name,
+      tableColumns: allTableColumns,
+      defaultTableColumns: defaultTableColumns,
+      values: values,
+      chartType: this.extraData?.currentChartType ?? ''
     };
   }
 

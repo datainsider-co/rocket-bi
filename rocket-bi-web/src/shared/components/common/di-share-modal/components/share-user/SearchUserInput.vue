@@ -1,31 +1,36 @@
 <template>
   <div class="d-flex flex-column mt-2 text-uppercase">
-    <b-input
+    <BInput
       :id="genInputId('search-share-with-people-and-group')"
+      ref="input"
       v-model="searchInput"
       class="p-3 h-42px"
       debounce="500"
-      placeholder="Add people and groups"
+      autocomplete="off"
+      :placeholder="placeholder"
       variant="dark"
-    ></b-input>
+      @focus="handleOnFocus"
+    />
     <UserItemListing
       :data="suggestedUsers"
       :error="suggestUserError"
       :is-show-popover.sync="isShowPopover"
       :status="getSuggestUserStatus"
       :target="genInputId('search-share-with-people-and-group')"
+      :is-show-empty-data="!isEmptySearchInput"
       @handleClickUserItem="handleClickUserItem"
     ></UserItemListing>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator';
+import { Component, Vue, Prop, Watch, Ref } from 'vue-property-decorator';
 import UserItemListing from '@/shared/components/UserItemListing.vue';
 import { UserProfile } from '@core/common/domain';
 import { ShareModule } from '@/store/modules/ShareStore';
 import { Status } from '@/shared';
 import { Log } from '@core/utils';
+import { ListUtils, StringUtils } from '@/utils';
 
 @Component({ components: { UserItemListing } })
 export default class SearchUserInput extends Vue {
@@ -35,22 +40,50 @@ export default class SearchUserInput extends Vue {
 
   getSuggestUserStatus: Status = Status.Loaded;
 
+  @Ref()
+  input!: HTMLInputElement;
+
+  @Prop({ required: false, default: 'Input' })
+  placeholder!: string;
+
   get suggestedUsers(): UserProfile[] {
     return ShareModule.suggestedUsers;
   }
 
+  public get inputValue() {
+    return this.searchInput;
+  }
+
+  private get isEmptySearchInput() {
+    return StringUtils.isEmpty(this.searchInput);
+  }
+
   private handleClickUserItem(user: UserProfile) {
     this.$emit('select', user);
+    this.isShowPopover = false;
+  }
+
+  mounted() {
+    if (ListUtils.isEmpty(this.suggestedUsers)) {
+      this.handleGetSuggestedUsers();
+    }
   }
 
   @Watch('searchInput')
   handleSearchInputChange(newValue: string) {
-    if (newValue.trim() !== '') {
+    this.isShowPopover = true;
+    this.handleGetSuggestedUsers();
+  }
+
+  private handleOnFocus() {
+    if (!this.isShowPopover) {
       this.isShowPopover = true;
-      this.handleGetSuggestedUsers();
-    } else {
-      this.isShowPopover = false;
     }
+  }
+
+  public unFocus() {
+    this.isShowPopover = false;
+    this.input.blur();
   }
 
   private handleGetSuggestedUsers() {
@@ -70,6 +103,10 @@ export default class SearchUserInput extends Vue {
 
   reset() {
     this.searchInput = '';
+  }
+
+  setInputValue(value: string) {
+    this.searchInput = value;
   }
 }
 </script>

@@ -1,5 +1,7 @@
 import { RandomUtils } from '@/utils/RandomUtils';
 import { StringUtils } from '@/utils/StringUtils';
+import { IconUtils } from '@/utils/IconUtils';
+import { Log } from '@core/utils';
 
 type IconType = 'di-icon-edit' | 'di-icon-delete';
 
@@ -154,6 +156,47 @@ export class HtmlElementRenderUtils {
     }
   }
 
+  static renderUserPropertyTag(text: string, iconSrc: string): Promise<string> {
+    const canvas = document.createElement('canvas');
+    const promise: Promise<string> = new Promise<string>((resolve, reject) => {
+      try {
+        const context = canvas.getContext('2d');
+        if (context) {
+          context.font = '26px sans-serif';
+          canvas.width = context.measureText(text).width + 64 + 8;
+          canvas.height = 52;
+
+          // Draw background
+          context.fillStyle = '#fff';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+
+          const img: HTMLImageElement = document.createElement('img');
+          img.src = iconSrc;
+          img.onload = function() {
+            try {
+              context.drawImage(img, 16, 10, 28, 28);
+              // context
+              context.font = '26px sans-serif';
+
+              context.fillStyle = '#000';
+              context.textAlign = 'left';
+              // context.textBaseline = 'middle';
+              context.fillText(text, 56, canvas.height / 1.5);
+              resolve(canvas.toDataURL('image/png'));
+            } catch (e) {
+              Log.error('HtmlElementRenderUtils::renderUserPropertyTag::error::', e);
+              reject(e);
+            }
+          };
+        }
+      } catch (e) {
+        reject(e);
+        Log.error('HtmlElementRenderUtils::renderUserPropertyTag::error::', e);
+      }
+    });
+    return promise;
+  }
+
   static renderAvatar(name: string, avatarUrl?: string | null, classHtml = '', disabled = false): HTMLElement {
     const img = document.createElement('img');
     img.src = avatarUrl || HtmlElementRenderUtils.renderAvatarAsDataUrl(name) || '';
@@ -221,9 +264,12 @@ export class HtmlElementRenderUtils {
     } as Event;
   }
 
-  static renderCheckBox(selected: boolean, onClick: (event: MouseEvent) => void) {
+  static renderCheckBox(selected: boolean, onClick: (event: MouseEvent) => void, generateId?: () => string): HTMLElement {
     const radio = document.createElement('input');
     radio.setAttribute('type', 'checkbox');
+    if (generateId) {
+      radio.setAttribute('id', generateId());
+    }
     radio.checked = selected;
     const radioContent: HTMLElement = document.createElement('div');
     const container = document.createElement('div');

@@ -16,10 +16,11 @@
   .input {
     width: 340px;
     input {
-      height: 34px;
-      padding-left: 16px;
+      height: auto;
+      min-height: 40px;
+      padding: 0 12px;
       @include regular-text();
-      font-size: 12px;
+      font-size: 14px;
       color: var(text-color);
       letter-spacing: 0.17px;
       cursor: text;

@@ -120,9 +120,11 @@ export default Vue.extend({
         this.$refs.newDatabase.focus();
       });
     },
+    //db: Database Schema
     async selectDatabase(db) {
       if (this.database.model === db && !this.database.createNew) return;
       this.database.model = db;
+      this.database.selected = db.name;
       this.database.createNew = false;
       this.database.error = '';
       this.$emit('changeDatabase', this.database.selected, this.database.createNew);
@@ -214,9 +216,10 @@ export default Vue.extend({
     },
     setDatabaseName(name) {
       Log.debug('DestDatabaseSuggestion::setDatabaseName', this.database.items);
-      const dbExisted = this.database.items.find(db => db.displayName === name || db.id === name) !== undefined;
-      if (dbExisted) {
-        this.selectDatabase(name);
+      const foundDatabaseSchema = this.database.items.find(db => db.name === name);
+      Log.debug('DestOnlyDatabaseSuggestion::setDatabaseName::foundDatabaseSchema::', foundDatabaseSchema);
+      if (foundDatabaseSchema) {
+        this.selectDatabase(foundDatabaseSchema);
       } else {
         this.database.createNew = true;
         this.database.error = '';

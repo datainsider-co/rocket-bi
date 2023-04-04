@@ -8,10 +8,10 @@ export class EtlJobData {
   }
 }
 
-export class EtlJobError {
-  constructor(public message: string, public tableError: string) {}
+export class ErrorPreviewETLData {
+  constructor(public message: string, public errorTblName: string) {}
 
-  static fromObject(obj: EtlJobError): EtlJobError {
-    return new EtlJobError(obj.message, obj.tableError);
+  static fromObject(obj: ErrorPreviewETLData): ErrorPreviewETLData {
+    return new ErrorPreviewETLData(obj.message, obj.errorTblName);
   }
 }

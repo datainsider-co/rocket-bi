@@ -18,7 +18,7 @@ export const ALL_DATASOURCE: ItemData[] = [
     type: DataSourceType.Oracle
   },
   {
-    title: 'MSSql',
+    title: 'Microsoft SQL',
     src: 'ic_sql_server.png',
     type: DataSourceType.MSSql
   },
@@ -45,17 +45,17 @@ export const ALL_DATASOURCE: ItemData[] = [
   {
     title: 'Google Analytics',
     src: 'ic_ga.png',
-    type: DataSourceType.GoogleAnalytics
+    type: DataSourceType.GA
+  },
+  {
+    title: 'Google Analytics 4',
+    src: 'ic_ga_4.svg',
+    type: DataSourceType.GA4
   },
   {
     title: 'Google Ads',
     src: 'ic_gg_ads.png',
     type: DataSourceType.GoogleAds
-  },
-  {
-    title: 'Google Analytics 4',
-    src: 'ic_ga.png',
-    type: DataSourceType.GA4
   },
   {
     title: 'Csv',
@@ -79,8 +79,13 @@ export const ALL_DATASOURCE: ItemData[] = [
   },
   {
     title: 'Facebook',
-    src: 'ic_fb.png',
+    src: 'ic_fb_ads.svg',
     type: DataSourceType.Facebook
+  },
+  {
+    title: 'TikTok',
+    src: 'ic_tiktok_ads.svg',
+    type: DataSourceType.Tiktok
   }
   // {
   //   title: 'iOS',

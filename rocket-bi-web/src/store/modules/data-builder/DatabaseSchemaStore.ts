@@ -108,9 +108,10 @@ class DatabaseSchemaStore extends VuexModule {
   }
 
   @Action
-  addNewDataInfo(dataInfo: DatabaseInfo) {
+  addNewDatabaseInfo(dataInfo: DatabaseInfo) {
     const updatedDataInfos = [...this.databaseInfos];
-    this.databaseInfos.push(dataInfo);
+    updatedDataInfos.push(dataInfo);
+    Log.debug('DatabaseSchemaStore::addNewDataInfo::databaseInfos::', updatedDataInfos);
     this.setDatabases(updatedDataInfos);
   }
 
@@ -161,7 +162,7 @@ class DatabaseSchemaStore extends VuexModule {
   }
 
   @Action
-  async editCalculatedField(payload: EditFieldData): Promise<void> {
+  async editCalculatedField(payload: EditFieldData): Promise<TableSchema> {
     const { tableSchema, newExpression, displayName, editingColumn } = payload;
     const expressionType = await this.detectExpressionType({ tableSchema: tableSchema, expression: newExpression });
     const newColumn: Column = Object.assign({}, editingColumn, {
@@ -171,7 +172,7 @@ class DatabaseSchemaStore extends VuexModule {
     });
     const request = new UpdateColumnRequest(tableSchema.dbName, tableSchema.name, newColumn);
     try {
-      await this.schemaService.updateCalculatedColumn(request);
+      return await this.schemaService.updateCalculatedColumn(request);
     } catch (ex) {
       Log.error('editCalculatedField::exception', ex);
       return Promise.reject(new DIException(`Can not edit column ${payload.editingColumn.displayName}`));
@@ -230,6 +231,9 @@ class DatabaseSchemaStore extends VuexModule {
     this.totalRecord = totalRecord;
   }
 
+  /**
+   * @deprecated
+   * */
   @Action
   moveToTrash(dbName: string) {
     return this.schemaService.dropDatabase(dbName);

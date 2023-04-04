@@ -2,11 +2,12 @@
   <span></span>
 </template>
 <script lang="ts">
-import { Component, Inject, Prop, Vue } from 'vue-property-decorator';
+import { Component, Inject, Prop, Vue, Watch } from 'vue-property-decorator';
 import Konva from 'konva';
-import { PRIMARY_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
+import { ERROR_COLOR, ACCENT_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
 import { DiagramEvent, DiagramZIndex } from '@/screens/data-cook/components/diagram-panel/DiagramEvent';
 import { Log } from '@core/utils/Log';
+import { TimeoutUtils } from '@/utils';
 
 const MIN_EDGE = 16;
 
@@ -28,6 +29,23 @@ export default class ArrowConnector extends Vue {
   @Prop({ type: Boolean })
   protected readonly draggable!: boolean;
 
+  @Prop({ type: Boolean, default: false })
+  protected readonly isError!: boolean;
+
+  @Watch('isError', { immediate: true })
+  onIsErrorChange() {
+    if (this.isError) {
+      this.arrow?.fill(ERROR_COLOR);
+      this.arrow?.stroke(ERROR_COLOR);
+      this.arrow?.zIndex(DiagramZIndex.ConnectorError);
+    } else {
+      this.arrow?.fill(ACCENT_COLOR);
+      this.arrow?.stroke(ACCENT_COLOR);
+      this.arrow?.zIndex(DiagramZIndex.Connector);
+    }
+    this.layer?.draw();
+  }
+
   mounted() {
     this.onInitStage((stage: Konva.Stage, layer: Konva.Layer) => {
       this.stage = stage;
@@ -37,7 +55,6 @@ export default class ArrowConnector extends Vue {
 
       this.stage.on(DiagramEvent.AddItem, this.handleAddItemEvent);
       this.stage.on(DiagramEvent.MoveItem, this.handleMoveItemEvent);
-      this.stage.on(DiagramEvent.ChangeConnectorColor, this.handleChangeColorEvent);
 
       this.layer.add(this.arrow);
       this.arrow.zIndex(DiagramZIndex.Connector);
@@ -54,7 +71,6 @@ export default class ArrowConnector extends Vue {
     if (this.stage) {
       this.stage.off(DiagramEvent.AddItem, this.handleAddItemEvent);
       this.stage.off(DiagramEvent.MoveItem, this.handleMoveItemEvent);
-      this.stage.off(DiagramEvent.ChangeConnectorColor, this.handleChangeColorEvent);
     }
     if (this.layer) {
       this.layer.draw();
@@ -70,15 +86,6 @@ export default class ArrowConnector extends Vue {
   protected handleMoveItemEvent(e: any) {
     if ([this.fromId, this.toId].includes(e.id)) {
       this.updatePosition(true);
-    }
-  }
-
-  protected handleChangeColorEvent(e: any) {
-    Log.info('handleChangeColorEvent', e);
-    if (e.color && [this.fromId, this.toId].includes(e.id)) {
-      this.arrow?.fill(e.color);
-      this.arrow?.stroke(e.color);
-      this.layer?.draw();
     }
   }
 
@@ -120,9 +127,9 @@ export default class ArrowConnector extends Vue {
 
   protected draw(fromId: string, toId: string): Konva.Arrow {
     const arrow = new Konva.Arrow({
-      stroke: PRIMARY_COLOR,
+      stroke: ACCENT_COLOR,
       strokeWidth: 1,
-      fill: PRIMARY_COLOR,
+      fill: ACCENT_COLOR,
       points: this.getLinePoints(fromId, toId),
       lineJoin: 'round'
     });

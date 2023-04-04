@@ -455,9 +455,16 @@ $border-radius: 4px;
       .grid-item-container {
         height: 100%;
         width: 100%;
-        border-style: solid;
         border-radius: 4px;
-        border-color: var(--tab-border-color, #f0f0f0);
+        border: 1px solid var(--tab-border-color, #f0f0f0) !important;
+
+        .tab-filter-container {
+          border-radius: 4px;
+          padding: 4px 8px;
+        }
+        > div {
+          border-radius: 4px;
+        }
       }
 
       .nav-tabs {

@@ -1,6 +1,13 @@
 <template>
   <div class="gg-setting-item">
-    <ToggleSettingComponent :settingItem="settingItem" class="btn-gg-toggle" @onChanged="handleIsActiveChange" />
+    <DiToggle
+      class="w-100"
+      :label="settingItem.name"
+      :value="settingItem.value"
+      @update:value="value => handleIsActiveChange(settingItem.key, value)"
+      label-at="left"
+      is-fill
+    ></DiToggle>
     <CollapseTransition v-show="settingItem.value" :delay="5000" easing="ease-in-out">
       <div class="gg-input-area">
         <label>Client Id</label>
@@ -168,19 +175,8 @@ export default class GoogleSettingItem extends Vue implements BaseOAuthConfigIte
     margin-top: 12px;
   }
 
-  > .btn-gg-toggle {
-    align-items: center;
-    display: flex;
-    padding: 0;
-
-    > p {
-      flex: unset;
-      margin-bottom: 0;
-      padding-left: 0;
-      padding-right: 10px;
-      width: unset;
-      @include regular-text(0.2px, var(--secondary-text-color));
-    }
+  > .di-toggle-component {
+    align-self: start;
   }
 
   > .gg-input-area {

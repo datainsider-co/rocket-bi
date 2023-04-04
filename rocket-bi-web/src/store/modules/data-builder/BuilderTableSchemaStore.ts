@@ -14,7 +14,7 @@ import { Log } from '@core/utils';
 import { cloneDeep } from 'lodash';
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
 
-@Module({ store: store, name: Stores.TableSchemaStore, dynamic: true, namespaced: true })
+@Module({ store: store, name: Stores.builderStore, dynamic: true, namespaced: true })
 class BuilderTableSchemaStore extends VuexModule {
   tableSchemas: SlTreeNodeModel<TableSchema>[] = [];
   dbNameSelected = '';
@@ -102,12 +102,12 @@ class BuilderTableSchemaStore extends VuexModule {
   }
 
   @Action
-  selectTabControl(tabs: TabControl[]): void {
-    this.setTabControl(tabs);
+  loadTabControls(tabs: TabControl[]): void {
+    this.setTabControls(tabs);
   }
 
   @Mutation
-  setTabControl(tabs: TabControl[]): void {
+  setTabControls(tabs: TabControl[]): void {
     this.tabControls = SchemaUtils.buildTabControlNodes(tabs).sort((node, otherNode) => StringUtils.compare(node.title, otherNode.title));
   }
 

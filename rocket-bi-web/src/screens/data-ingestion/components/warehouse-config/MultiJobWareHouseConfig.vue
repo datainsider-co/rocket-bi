@@ -1,17 +1,12 @@
 <template>
   <div>
-    <label class="export-form mb-0">
-      <div class="custom-control custom-switch">
-        <input
-          :id="genToggleId('sync-to-data-warehouse')"
-          :checked="isEnableSyncToDataWarehouse"
-          class="custom-control-input"
-          type="checkbox"
-          @input="handleClickSyncToDataWareHouseOption(!isEnableSyncToDataWarehouse)"
-        />
-        <label class="custom-control-label" :for="genToggleId('sync-to-data-warehouse')">Sync To Data Warehouse</label>
-      </div>
-    </label>
+    <DiToggle
+      class="export-form"
+      :id="genToggleId('sync-to-data-warehouse')"
+      :value="isEnableSyncToDataWarehouse"
+      @update:value="handleClickSyncToDataWareHouseOption"
+      label="Sync To Data Warehouse"
+    ></DiToggle>
     <div class="input">
       <b-collapse id="data-warehouse-config" :visible="isEnableSyncToDataWarehouse">
         <DestOnlyDatabaseSuggestion
@@ -86,6 +81,7 @@ export default class MultiJobWareHouseConfig extends Vue {
     }
   }
   setDatabaseName(name: string) {
+    Log.debug('MultiJobWareHouseConfig::setDatabaseName::', name);
     this.destDatabase.setDatabaseName(name);
   }
 

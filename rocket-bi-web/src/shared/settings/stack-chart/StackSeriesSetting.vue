@@ -85,11 +85,12 @@ export default class StackSeriesSetting extends Vue {
   private get responseAsSelectOption(): SelectOption[] {
     return (
       this.response?.series
-        ?.sort((item, nextItem) => StringUtils.compare(item.name, nextItem.name))
+
         ?.map(legend => ({
           displayName: legend.name,
           id: StringUtils.toCamelCase(legend.name)
-        })) ?? []
+        }))
+        ?.sort((item, nextItem) => StringUtils.compare(item.displayName, nextItem.displayName)) ?? []
     );
   }
 

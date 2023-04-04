@@ -432,7 +432,7 @@ export abstract class DataBuilderConstants {
     // }
   ];
 
-  static readonly SORTS_NODES: LabelNode[] = [{ label: SortTypes.Unsorted }, { label: SortTypes.AscendingOrder }, { label: SortTypes.DescendingOrder }];
+  static readonly SortOptions: LabelNode[] = [{ label: SortTypes.Unsorted }, { label: SortTypes.AscendingOrder }, { label: SortTypes.DescendingOrder }];
 }
 
 export abstract class DataBuilderConstantsV35 {
@@ -896,30 +896,30 @@ export abstract class DataBuilderConstantsV35 {
       title: 'X-Axis',
       placeholder: 'Drag and drop your fields',
       maxItem: 1,
-      preferFunctionTypes: [FunctionFamilyTypes.none, FunctionFamilyTypes.groupBy, FunctionFamilyTypes.dateHistogram],
-      defaultTextFunctionInfo: NONE_FUNCTION_FOR_TEXT,
-      defaultNumberFunctionInfo: NONE_FUNCTION_FOR_NUMBER,
-      defaultDateFunctionInfo: NONE_FUNCTION_FOR_DATE
+      preferFunctionTypes: [FunctionFamilyTypes.aggregation, FunctionFamilyTypes.dateHistogram],
+      defaultTextFunctionInfo: AGGREGATION_FUNCTION_FOR_TEXT,
+      defaultNumberFunctionInfo: AGGREGATION_FUNCTION_FOR_NUMBER,
+      defaultDateFunctionInfo: GROUP_FUNCTION_FOR_DATE
     },
     {
       key: ConfigType.yAxis,
       title: 'Y-Axis',
       placeholder: 'Drag and drop your fields',
       maxItem: 1,
-      preferFunctionTypes: [FunctionFamilyTypes.none, FunctionFamilyTypes.groupBy, FunctionFamilyTypes.dateHistogram],
-      defaultTextFunctionInfo: NONE_FUNCTION_FOR_TEXT,
-      defaultNumberFunctionInfo: NONE_FUNCTION_FOR_NUMBER,
-      defaultDateFunctionInfo: NONE_FUNCTION_FOR_DATE
+      preferFunctionTypes: [FunctionFamilyTypes.aggregation, FunctionFamilyTypes.dateHistogram],
+      defaultTextFunctionInfo: AGGREGATION_FUNCTION_FOR_TEXT,
+      defaultNumberFunctionInfo: AGGREGATION_FUNCTION_FOR_NUMBER,
+      defaultDateFunctionInfo: GROUP_FUNCTION_FOR_DATE
     },
     {
       key: ConfigType.value,
       title: 'Value',
       placeholder: 'Drag and drop your fields',
       maxItem: 1,
-      preferFunctionTypes: [FunctionFamilyTypes.none, FunctionFamilyTypes.aggregation],
-      defaultTextFunctionInfo: NONE_FUNCTION_FOR_TEXT,
-      defaultNumberFunctionInfo: NONE_FUNCTION_FOR_NUMBER,
-      defaultDateFunctionInfo: NONE_FUNCTION_FOR_DATE
+      preferFunctionTypes: [FunctionFamilyTypes.aggregation, FunctionFamilyTypes.dateHistogram],
+      defaultTextFunctionInfo: AGGREGATION_FUNCTION_FOR_TEXT,
+      defaultNumberFunctionInfo: AGGREGATION_FUNCTION_FOR_NUMBER,
+      defaultDateFunctionInfo: GROUP_FUNCTION_FOR_DATE
     },
     {
       key: ConfigType.legendOptional,
@@ -927,10 +927,10 @@ export abstract class DataBuilderConstantsV35 {
       placeholder: 'Drag and drop your fields',
       maxItem: 1,
       isOptional: true,
-      preferFunctionTypes: [FunctionFamilyTypes.none],
-      defaultTextFunctionInfo: NONE_FUNCTION_FOR_TEXT,
-      defaultNumberFunctionInfo: NONE_FUNCTION_FOR_NUMBER,
-      defaultDateFunctionInfo: NONE_FUNCTION_FOR_DATE
+      preferFunctionTypes: [FunctionFamilyTypes.groupBy, FunctionFamilyTypes.aggregation],
+      defaultTextFunctionInfo: GROUP_FUNCTION_FOR_TEXT,
+      defaultNumberFunctionInfo: AGGREGATION_FUNCTION_FOR_NUMBER,
+      defaultDateFunctionInfo: GROUP_FUNCTION_FOR_DATE
     }
   ];
 

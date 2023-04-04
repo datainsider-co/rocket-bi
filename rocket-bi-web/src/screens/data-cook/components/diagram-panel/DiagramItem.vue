@@ -77,7 +77,6 @@ export default class DiagramItem extends Vue {
   }
 
   protected onDragMove() {
-    Log.debug('DiagramItem::onDragMove::');
     // if (this.group && this.group.x() < 0) {
     //   this.group.x(0);
     // }

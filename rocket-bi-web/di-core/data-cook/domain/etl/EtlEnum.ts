@@ -17,7 +17,7 @@ export enum DAY_OF_WEEK {
   Sunday = 'Sunday'
 }
 
-export enum ETL_OPERATOR_TYPE {
+export enum ETLOperatorType {
   GetDataOperator = 'get_data_operator',
   JoinOperator = 'join_operator',
   TransformOperator = 'transform_operator',
@@ -28,26 +28,26 @@ export enum ETL_OPERATOR_TYPE {
   SendToGroupEmailOperator = 'send_to_group_email_operator'
 }
 
-export const ETL_OPERATOR_TYPE_NAME: Record<ETL_OPERATOR_TYPE, string> = Object.freeze({
-  [ETL_OPERATOR_TYPE.GetDataOperator]: 'Preview Data',
-  [ETL_OPERATOR_TYPE.JoinOperator]: 'Join Table',
-  [ETL_OPERATOR_TYPE.TransformOperator]: 'Transform Table',
-  [ETL_OPERATOR_TYPE.ManageFieldOperator]: 'Manage Fields',
-  [ETL_OPERATOR_TYPE.PivotTableOperator]: 'Pivot Table',
-  [ETL_OPERATOR_TYPE.SQLQueryOperator]: 'SQL Query',
-  [ETL_OPERATOR_TYPE.PythonOperator]: 'Python',
-  [ETL_OPERATOR_TYPE.SendToGroupEmailOperator]: 'Send Email'
+export const ETL_OPERATOR_TYPE_NAME: Record<ETLOperatorType, string> = Object.freeze({
+  [ETLOperatorType.GetDataOperator]: 'Preview Data',
+  [ETLOperatorType.JoinOperator]: 'Join Table',
+  [ETLOperatorType.TransformOperator]: 'Transform Table',
+  [ETLOperatorType.ManageFieldOperator]: 'Manage Fields',
+  [ETLOperatorType.PivotTableOperator]: 'Pivot Table',
+  [ETLOperatorType.SQLQueryOperator]: 'SQL Query',
+  [ETLOperatorType.PythonOperator]: 'Python',
+  [ETLOperatorType.SendToGroupEmailOperator]: 'Send Email'
 });
 
-export const ETL_OPERATOR_TYPE_SHORT_NAME: Record<ETL_OPERATOR_TYPE, string> = Object.freeze({
-  [ETL_OPERATOR_TYPE.GetDataOperator]: '',
-  [ETL_OPERATOR_TYPE.JoinOperator]: 'Join',
-  [ETL_OPERATOR_TYPE.TransformOperator]: 'Transform',
-  [ETL_OPERATOR_TYPE.ManageFieldOperator]: 'Manage Fields',
-  [ETL_OPERATOR_TYPE.PivotTableOperator]: 'Pivot',
-  [ETL_OPERATOR_TYPE.SQLQueryOperator]: 'SQL Query',
-  [ETL_OPERATOR_TYPE.PythonOperator]: 'Python Query',
-  [ETL_OPERATOR_TYPE.SendToGroupEmailOperator]: 'Send Email'
+export const ETL_OPERATOR_TYPE_SHORT_NAME: Record<ETLOperatorType, string> = Object.freeze({
+  [ETLOperatorType.GetDataOperator]: '',
+  [ETLOperatorType.JoinOperator]: 'Join',
+  [ETLOperatorType.TransformOperator]: 'Transform',
+  [ETLOperatorType.ManageFieldOperator]: 'Manage Fields',
+  [ETLOperatorType.PivotTableOperator]: 'Pivot',
+  [ETLOperatorType.SQLQueryOperator]: 'SQL Query',
+  [ETLOperatorType.PythonOperator]: 'Python Query',
+  [ETLOperatorType.SendToGroupEmailOperator]: 'Send Email'
 });
 
 export enum PERSISTENT_TYPE {

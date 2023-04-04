@@ -9,6 +9,7 @@
     @ok="handleSubmit"
     @cancel="handleTestConnection"
     @hide="onHide"
+    @hidden="onHidden"
     @show="onShowModal"
   >
     <img class="btn-close btn-ghost position-absolute" src="@/assets/icon/ic_close.svg" alt="" @click="closeModal" />
@@ -33,6 +34,15 @@
     </div>
     <template #modal-footer="{ok}">
       <div class="custom-footer d-flex col-12 p-0 m-0 mr-1">
+        <DiButton
+          id="button-add-field"
+          :class="{ 'd-none': !isShowReAuthenButton }"
+          class="button-test btn-ghost"
+          title="Re-Connect"
+          @click="handleReAuthentication(dataSourceRender.createDataSourceInfo())"
+        >
+          <img id="ic_google" src="@/assets/icon/ic_google.svg" />
+        </DiButton>
         <DiButton
           id="button-add-field"
           :class="{ 'd-none': isHideAddField }"
@@ -85,6 +95,7 @@ import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
 import { NewFieldData } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
 import ManagePropertyModal from '@/screens/data-ingestion/form-builder/render-impl/ManagePropertyModal.vue';
 import { cloneDeep } from 'lodash';
+import { MySqlDataSourceFormRender } from '../form-builder/render-impl/source-form-render/MySqlDataSourceFormRender';
 
 @Component({
   components: {
@@ -122,6 +133,16 @@ export default class DataSourceConfigModal extends Vue {
       'status-error': this.connectionStatus === ConnectionStatus.Failed,
       'status-success': this.connectionStatus === ConnectionStatus.Success
     };
+  }
+
+  private get isShowReAuthenButton() {
+    switch (this.dataSourceRender.createDataSourceInfo().sourceType) {
+      case DataSourceType.GA4:
+      case DataSourceType.GA:
+        return true;
+      default:
+        return false;
+    }
   }
 
   private getStatusMessage(): string {
@@ -190,6 +211,10 @@ export default class DataSourceConfigModal extends Vue {
     });
   }
 
+  private handleReAuthentication(sourceInfo: DataSourceInfo) {
+    this.$emit('reAuthen', sourceInfo);
+  }
+
   private async handleSubmit(event: Event) {
     try {
       event.preventDefault();
@@ -206,6 +231,10 @@ export default class DataSourceConfigModal extends Vue {
 
   private onHide() {
     this.isTestConnection = false;
+  }
+
+  private onHidden() {
+    this.$emit('reset');
   }
 
   @Track(TrackEvents.DataSourceTestConnection, {

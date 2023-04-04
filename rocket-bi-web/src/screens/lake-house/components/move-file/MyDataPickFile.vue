@@ -58,11 +58,14 @@ export default class MyDataPickFile extends Vue {
   @Ref()
   private readonly filePickerContext!: ContextMenu;
 
+  private callback: ((id: DirectoryId) => void) | null = null;
+
   private get directories(): Directory[] {
     return this.loadHandler.directories.filter(directory => directory.directoryType);
   }
 
   private async handleBackDirectory(id: DirectoryId) {
+    Log.debug('handleBackDirectory::', this.currentDirectory.id, id);
     if (id !== DefaultDirectoryId.MyData) {
       await DirectoryModule.getDirectory(id)
         .then(directory => this.handleClickDirectory(directory))
@@ -95,6 +98,7 @@ export default class MyDataPickFile extends Vue {
     setTimeout(async () => {
       try {
         // event.stopPropagation();
+        this.reset();
         this.showContextMenu(event);
         await this.initData();
         const pagination = DirectoryPagingRequest.default();
@@ -103,6 +107,25 @@ export default class MyDataPickFile extends Vue {
         Log.error('LakeExplorerMoveFile::handleShowPopover::error::', e.message);
       }
     }, 150);
+  }
+
+  async show2(event: Event, onSelected: (id: DirectoryId) => void) {
+    setTimeout(async () => {
+      try {
+        // event.stopPropagation();
+        this.reset();
+        this.showContextMenu(event);
+        this.callback = onSelected;
+        await this.initData();
+        const pagination = DirectoryPagingRequest.default();
+        await this.loadDirectoryListing(this.currentDirectory.id, pagination);
+      } catch (e) {
+        Log.error('LakeExplorerMoveFile::handleShowPopover::error::', e.message);
+      }
+    }, 150);
+  }
+  private reset() {
+    this.callback = null;
   }
 
   private async initData() {
@@ -118,7 +141,8 @@ export default class MyDataPickFile extends Vue {
     try {
       const isRoot = directory.id === this.rootId;
       const isDirectory = directory.directoryType === DirectoryType.Directory;
-      if (!isRoot && isDirectory) {
+      Log.debug('handleClickDirectory', isRoot, isDirectory);
+      if (isDirectory) {
         const pagination = DirectoryPagingRequest.default();
         await this.loadDirectoryListing(directory.id, pagination);
         this.updateCurrentDirectory(directory);
@@ -134,6 +158,7 @@ export default class MyDataPickFile extends Vue {
   private async handlePickFolder(id: DirectoryId | null) {
     try {
       if (id !== null) {
+        this.callback ? this.callback(id) : void 0;
         this.$emit('selectDirectory', id);
       }
     } catch (e) {

@@ -4,7 +4,7 @@ import { DIKeys } from '@core/common/modules';
 import { BaseClient } from '@core/common/services/HttpClient';
 import { DataSource } from '@core/data-ingestion/domain/response/DataSource';
 import { DIException, SourceId, TableSchema } from '@core/common/domain';
-import { FacebookTokenResponse, Job, ListingResponse, PreviewResponse, S3Job, S3SourceInfo } from '@core/data-ingestion';
+import { TokenResponse, Job, ListingResponse, PreviewResponse, S3Job, S3SourceInfo, TokenRequest, TiktokAccessTokenResponse } from '@core/data-ingestion';
 import { BaseResponse } from '@core/data-ingestion/domain/response/BaseResponse';
 import { Log } from '@core/utils';
 import { GoogleToken } from '@core/data-ingestion/domain/response/GoogleToken';
@@ -28,6 +28,8 @@ export abstract class DataSourceRepository {
 
   abstract delete(id: SourceId): Promise<boolean>;
 
+  abstract multiDelete(ids: SourceId[]): Promise<boolean>;
+
   abstract update(id: SourceId, dataSourceInfo: DataSourceInfo): Promise<boolean>;
 
   abstract listDatabaseName(id: SourceId, projectName: string, location: string): Promise<string[]>;
@@ -46,7 +48,13 @@ export abstract class DataSourceRepository {
 
   abstract getGoogleAdsCustomerIds(sourceId: SourceId): Promise<string[]>;
 
-  abstract getFacebookExchangeToken(token: string): Promise<FacebookTokenResponse>;
+  abstract getFacebookExchangeToken(token: string): Promise<TokenResponse>;
+
+  abstract getTiktokAccessToken(authCode: string): Promise<TiktokAccessTokenResponse>;
+
+  abstract listTiktokReport(): Promise<string[]>;
+
+  abstract getGoogleToken(request: TokenRequest): Promise<TokenResponse>;
 }
 
 export class DataSourceRepositoryImpl extends DataSourceRepository {
@@ -164,8 +172,24 @@ export class DataSourceRepositoryImpl extends DataSourceRepository {
     return this.httpClient.get(`/source/google_ads/customer_id/${sourceId}`);
   }
 
-  getFacebookExchangeToken(token: string): Promise<FacebookTokenResponse> {
-    return this.httpClient.get(`worker/source/fb_ads/${token}/exchange_token`).then(res => FacebookTokenResponse.fromObject(res));
+  getFacebookExchangeToken(token: string): Promise<TokenResponse> {
+    return this.httpClient.get(`worker/source/fb_ads/${token}/exchange_token`).then(res => TokenResponse.fromObject(res));
+  }
+
+  getGoogleToken(request: TokenRequest): Promise<TokenResponse> {
+    return this.httpClient.post<TokenResponse>(`worker/source/google/access_token/refresh`, request).then(res => TokenResponse.fromObject(res));
+  }
+
+  getTiktokAccessToken(authCode: string): Promise<TiktokAccessTokenResponse> {
+    return this.httpClient.post(`worker/source/tiktok_ads/exchange_token`, { authCode: authCode });
+  }
+
+  listTiktokReport(): Promise<string[]> {
+    return this.httpClient.get(`worker//source/tiktok_ads/report/table`);
+  }
+
+  multiDelete(ids: SourceId[]): Promise<boolean> {
+    return this.httpClient.delete(`/scheduler/source/multi_delete`, { ids: ids }, void 0, headerScheduler);
   }
 }
 
@@ -238,7 +262,22 @@ export class DataSourceRepositoryMock extends DataSourceRepository {
     throw new DIException('Not supported');
   }
 
-  getFacebookExchangeToken(token: string): Promise<FacebookTokenResponse> {
+  getFacebookExchangeToken(token: string): Promise<TokenResponse> {
     throw new DIException('Not supported');
+  }
+  getTiktokAccessToken(authCode: string): Promise<TiktokAccessTokenResponse> {
+    throw new DIException('Not supported');
+  }
+
+  listTiktokReport(): Promise<string[]> {
+    throw new DIException('Not supported');
+  }
+
+  getGoogleToken(request: TokenRequest): Promise<TokenResponse> {
+    throw new DIException('Not supported');
+  }
+
+  multiDelete(ids: SourceId[]): Promise<boolean> {
+    return Promise.resolve(false);
   }
 }

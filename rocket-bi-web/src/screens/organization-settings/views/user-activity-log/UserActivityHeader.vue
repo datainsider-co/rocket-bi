@@ -26,9 +26,9 @@
     >
       <div v-click-outside="hideFilterConfigForm" class="user-activity-log-filter-form">
         <div class="user-activity-log-filter-form-control">
-          <div class="title">User</div>
+          <div class="title">Email</div>
           <div class="input">
-            <BFormInput :id="genInputId('filter-username')" v-model="username" autocomplete="off" autofocus placeholder="User name"></BFormInput>
+            <BFormInput :id="genInputId('filter-username')" v-model="username" autocomplete="off" autofocus placeholder="demo@gmail.com..."></BFormInput>
 
             <UserItemListing
               popoverId="activity-suggest-user-popover"
@@ -190,7 +190,7 @@ export default class UserActivityHeader extends Vue {
     const startDate: number | undefined = this.dateRange?.start ? cloneDeep(this.dateRange.start as Date).setHours(0, 0, 0, 0) : undefined;
     const endDate: number | undefined = this.dateRange?.end ? cloneDeep(this.dateRange.end as Date).setHours(23, 59, 59, 999) : undefined;
     return new GetUserActivityRequest(
-      this.userProfiles.map(user => user.username),
+      this.userProfiles.map(user => user.email ?? ''),
       this.activityFilterValue ? [this.activityFilterValue] : [],
       this.resourceFilterValue ? [this.resourceFilterValue] : [],
       0,
@@ -255,7 +255,7 @@ export default class UserActivityHeader extends Vue {
 
   private handleClickUserItem(userProfile: UserProfile) {
     this.popupItem = document.querySelector('#activity-suggest-user-popover');
-    const user = this.userProfiles.find(item => item.username === userProfile.username);
+    const user = this.userProfiles.find(item => item.email === userProfile.email);
     if (!user) {
       this.userProfiles.push(userProfile);
       this.username = '';

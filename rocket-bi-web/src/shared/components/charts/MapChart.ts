@@ -168,8 +168,8 @@ export default class MapChart extends BaseHighChartWidget<MapResponse, MapChartC
       HighchartUtils.reset(this.getChart());
       this.getChart()?.zoomOut();
       const code = this.currentQuery.geoArea?.mapUrl ?? this.query.geoArea?.mapUrl ?? this.setting.options.geoArea;
+      Log.debug('buildHighchart::', code);
       const mapModule = GeolocationModule.getMapData(code) ?? (await HighchartUtils.initMapData(code));
-      Log.debug('buildHighchart', mapModule);
       const series: Series[] = this.load(mapModule);
       HighchartUtils.updateChart(this.getChart(), this.setting.options);
       this.updateChartInfo();

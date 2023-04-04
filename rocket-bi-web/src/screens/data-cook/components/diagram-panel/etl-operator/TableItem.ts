@@ -3,17 +3,34 @@ import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
 import Konva from 'konva';
 import { Log } from '@core/utils';
 import { EtlOperator, Position } from '@core/data-cook';
-import { PRIMARY_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
+import { ACCENT_COLOR, ERROR_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
+import { DiagramZIndex } from '@/screens/data-cook/components/diagram-panel/DiagramEvent';
 
 const MAX_WIDTH = 300;
 
 @Component({})
 export default class TableItem extends DiagramItem {
+  private rectContainer: Konva.Rect | null = null;
   @Inject() protected readonly getTablePosition!: (operator: EtlOperator) => Position | null;
   @Inject() protected readonly setTablePosition!: (operator: EtlOperator, position: Position) => void;
 
   @Prop({ type: Object, required: true })
-  private operator!: EtlOperator;
+  public readonly operator!: EtlOperator;
+
+  @Prop({ type: Boolean, required: true })
+  public readonly isError!: boolean;
+
+  @Watch('isError', { immediate: true })
+  onIsErrorChange() {
+    if (this.isError) {
+      this.rectContainer?.stroke(ERROR_COLOR);
+      this.rectContainer?.strokeEnabled(true);
+    } else {
+      this.rectContainer?.stroke(ACCENT_COLOR);
+      this.rectContainer?.strokeEnabled(false);
+    }
+    this.layer?.draw();
+  }
 
   protected draw(): Konva.Group {
     const height = 76;
@@ -59,7 +76,7 @@ export default class TableItem extends DiagramItem {
       fill: '#f2f2f7',
       strokeEnabled: false,
       strokeWidth: 2,
-      stroke: PRIMARY_COLOR,
+      stroke: ACCENT_COLOR,
       shadowBlur: 8,
       shadowColor: 'rgba(0,0,0,0.1)',
       shadowOffset: {
@@ -67,6 +84,7 @@ export default class TableItem extends DiagramItem {
         y: 2
       }
     });
+    this.rectContainer = rectContainer;
 
     const rectDb = new Konva.Rect({
       x: 0,
@@ -199,11 +217,18 @@ export default class TableItem extends DiagramItem {
       }
     });
     group.on('mouseover', () => {
+      rectContainer.stroke(ACCENT_COLOR);
       rectContainer.strokeEnabled(true);
       this.layer?.draw();
     });
     group.on('mouseleave', () => {
-      rectContainer.strokeEnabled(false);
+      // only remove stroke if not in error state
+      if (this.isError) {
+        rectContainer.stroke(ERROR_COLOR);
+      } else {
+        rectContainer.stroke(ACCENT_COLOR);
+        rectContainer.strokeEnabled(false);
+      }
       this.layer?.draw();
     });
     group.on('dragend', () => {

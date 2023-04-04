@@ -6,8 +6,7 @@
   "scripts": {
     "serve": "yarn && vue-cli-service serve --open ",
     "build": "export NODE_OPTIONS=\"--max-old-space-size=4096\" && vue-cli-service build",
-    "lint": "export NODE_OPTIONS=\"--max-old-space-size=4096\" && vue-cli-service lint",
-    "lint:fix": "export NODE_OPTIONS=\"--max-old-space-size=4096\" && vue-cli-service lint --fix",
+    "lint": "export NODE_OPTIONS=\"--max-old-space-size=4096\" && vue-cli-service lint --fix .",
     "start": "npx serve -s dist -p 8080",
     "test": "export NODE_OPTIONS=\"--max-old-space-size=4096\" && vue-cli-service test:unit",
     "create:index": "./create_file_index.sh"
@@ -143,13 +142,10 @@
     }
   },
   "lint-staged": {
-    "*.(js|ts|tsx|vue)": [
-      "yarn lint:fix",
+    "(src|di-core)/**/*.(js|ts|js|tsx|vue)": [
+      "yarn lint",
       "pretty-quick --staged",
       "git add"
-    ],
-    "tests/**/*.(ts|vue)": [
-      "yarn test"
     ]
   }
 }

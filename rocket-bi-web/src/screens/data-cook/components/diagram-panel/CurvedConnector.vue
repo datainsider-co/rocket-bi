@@ -4,7 +4,7 @@
 <script lang="ts">
 import { Component, Inject, Prop, Vue } from 'vue-property-decorator';
 import Konva from 'konva';
-import { PRIMARY_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
+import { ACCENT_COLOR } from '@/screens/data-cook/components/manage-etl-operator/Constance';
 import { DiagramEvent, DiagramZIndex } from '@/screens/data-cook/components/diagram-panel/DiagramEvent';
 import { Log } from '@core/utils/Log';
 import Context = Konva.Context;
@@ -42,7 +42,6 @@ export default class CurvedConnector extends Vue {
 
       this.stage.on(DiagramEvent.AddItem, this.handleAddItemEvent);
       this.stage.on(DiagramEvent.MoveItem, this.handleMoveItemEvent);
-      this.stage.on(DiagramEvent.ChangeConnectorColor, this.handleChangeColorEvent);
 
       this.layer.add(this.line!);
       // this.layer.add(group)
@@ -92,7 +91,6 @@ export default class CurvedConnector extends Vue {
     if (this.stage) {
       this.stage.off(DiagramEvent.AddItem, this.handleAddItemEvent);
       this.stage.off(DiagramEvent.MoveItem, this.handleMoveItemEvent);
-      this.stage.off(DiagramEvent.ChangeConnectorColor, this.handleChangeColorEvent);
     }
     if (this.layer) {
       this.layer.draw();
@@ -110,15 +108,6 @@ export default class CurvedConnector extends Vue {
     Log.debug('CurvedConnector::handleMoveItemEvent::e::', e);
     if (this.fromId.includes(e.id) || this.toId.includes(e.id)) {
       this.updatePosition(true);
-    }
-  }
-
-  protected handleChangeColorEvent(e: any) {
-    Log.info('handleChangeColorEvent', e);
-    if (e.color && [this.fromId, this.toId].includes(e.id)) {
-      this.line?.fill(e.color);
-      this.line?.stroke(e.color);
-      this.layer?.draw();
     }
   }
 
@@ -232,7 +221,7 @@ export default class CurvedConnector extends Vue {
   protected draw(fromId: string, toId: string) {
     const points = this.isToPointer ? this.getPointerLinePoints(fromId) : this.getLinePoints(fromId, toId);
     const line = new Konva.Shape({
-      stroke: PRIMARY_COLOR,
+      stroke: ACCENT_COLOR,
       strokeWidth: 2,
       sceneFunc: this.updateSceneFunc(points),
       hitStrokeWidth: 10

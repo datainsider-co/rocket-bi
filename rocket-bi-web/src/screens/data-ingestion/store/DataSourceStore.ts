@@ -14,6 +14,7 @@ import { DataSourceResponse } from '@core/data-ingestion/domain/response/DataSou
 import { DateTimeFormatter } from '@/utils';
 import { ListingRequest } from '@core/lake-house/domain/request/listing-request/ListingRequest';
 import { JdbcUrlSourceInfo } from '@core/data-ingestion/domain/data-source/JdbcUrlSourceInfo';
+import { CheckBoxHeaderController, CheckBoxHeaderData } from '@/shared/components/common/di-table/custom-cell/CheckBoxHeaderData';
 
 @Module({ dynamic: true, namespaced: true, store: store, name: Stores.dataSourceStore })
 class DataSourceStore extends VuexModule {
@@ -22,60 +23,9 @@ class DataSourceStore extends VuexModule {
   databaseNames: string[] = [];
   tableNames: string[] = [];
   incrementalColumns: string[] = [];
-  defaultDatasourceIcon = require('@/assets/icon/data_ingestion/datasource/ic_default.svg');
 
   @Inject
   private dataSourceService!: DataSourceService;
-
-  get dataSourceHeaders(): HeaderData[] {
-    return [
-      {
-        key: 'name',
-        label: 'Name',
-        customRenderBodyCell: new CustomCell(rowData => {
-          const dataSourceResponse = DataSourceResponse.fromObject(rowData);
-          const data = dataSourceResponse.dataSource.getDisplayName();
-          // eslint-disable-next-line
-          const datasourceImage = require(`@/assets/icon/data_ingestion/datasource/${DataSourceInfo.dataSourceIcon(rowData.dataSource.sourceType)}`);
-
-          const imgElement = HtmlElementRenderUtils.renderImg(datasourceImage, 'data-source-icon', this.defaultDatasourceIcon);
-          const dataElement = HtmlElementRenderUtils.renderText(data, 'span', 'source-name text-truncate');
-          return HtmlElementRenderUtils.renderAction([imgElement, dataElement], 8, 'source-name-container');
-        })
-      },
-      {
-        key: 'creatorId',
-        label: 'Owner',
-        customRenderBodyCell: new UserAvatarCell('creator.avatar', ['creator.fullName', 'creator.lastName', 'creator.email', 'creator.username']),
-        width: 200
-      },
-      {
-        key: 'dataSourceType',
-        label: 'Type',
-        customRenderBodyCell: new CustomCell(rowData => {
-          const sourceType = DataSourceResponse.fromObject(rowData).dataSource.sourceType;
-          return HtmlElementRenderUtils.renderText(sourceType, 'span', 'text-truncate');
-        }),
-        width: 180
-      },
-      {
-        key: 'lastModified',
-        label: 'Last Modified',
-        customRenderBodyCell: new CustomCell(rowData => {
-          const lastModify = DataSourceResponse.fromObject(rowData).dataSource.lastModify;
-          const data = lastModify !== 0 ? DateTimeFormatter.formatAsMMMDDYYYHHmmss(lastModify) : '--';
-          return HtmlElementRenderUtils.renderText(data, 'span', 'text-truncate');
-        }),
-        width: 180
-      },
-      {
-        key: 'action',
-        label: 'Action',
-        width: 120,
-        disableSort: true
-      }
-    ];
-  }
 
   @Action
   loadDataSources(payload: { from: number; size: number; keyword?: string; sorts?: SortRequest[] }): Promise<DataSourceResponse[]> {
@@ -121,6 +71,12 @@ class DataSourceStore extends VuexModule {
   }
 
   @Action
+  deleteMultiDataSource(indexs: Set<SourceId>) {
+    const sourceIds = Array.from(indexs);
+    return this.dataSourceService.multiDelete(sourceIds);
+  }
+
+  @Action
   loadDatabaseNames(payload: { id: SourceId; projectName?: string; location?: string }): Promise<string[]> {
     return this.dataSourceService
       .listDatabaseName(payload.id, payload.projectName ?? '', payload.location ?? '')
@@ -154,6 +110,7 @@ class DataSourceStore extends VuexModule {
         return [];
       });
   }
+
   @Mutation
   setTableNames(tableNames: string[]) {
     this.tableNames = tableNames;

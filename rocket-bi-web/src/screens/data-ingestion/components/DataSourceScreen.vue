@@ -3,6 +3,14 @@
     <LayoutHeader title="Data Sources" icon="di-icon-datasource">
       <div class="ml-auto d-flex align-items-center">
         <SearchInput :timeBound="400" class="search-input" hint-text="Search data source" @onTextChanged="handleKeywordChange" />
+        <SlideXLeftTransition :duration="animationDuration" :delay="delay">
+          <div v-if="enableMultiAction">
+            <DiIconTextButton title="Delete" @click="handleConfirmDeleteMultiDataSource(selectedIndexAsSet)" :event="trackEvents.JobIngestionRefresh">
+              <i class="di-icon-delete job-action-icon"></i>
+            </DiIconTextButton>
+          </div>
+        </SlideXLeftTransition>
+
         <DiIconTextButton title="Refresh" @click="handleRefresh" :event="trackEvents.DataSourceRefresh">
           <i class="di-icon-reset datasource-action-icon"></i>
         </DiIconTextButton>
@@ -50,6 +58,8 @@
       :data-source-render="dataSourceFormRender"
       :isShow.sync="isShowDataSourceConfigModal"
       @onClickOk="handleSubmitDataSource"
+      @reAuthen="handleReAuthen"
+      @reset="handleResetDataSourceFormRender"
     ></DataSourceConfigModal>
     <DataSourceTypeSelection :is-show.sync="isShowDatabaseSelectionModal" @onDataSourceTypeSelected="handleSelectDataSource"></DataSourceTypeSelection>
     <DiUploadGoogleSheetComponent ref="diUp"></DiUploadGoogleSheetComponent>
@@ -81,7 +91,7 @@ import { JobFormFactory } from '@/screens/data-ingestion/form-builder/JobFormFac
 import { JobFormRender } from '@/screens/data-ingestion/form-builder/JobFormRender';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
 import { JobModule } from '@/screens/data-ingestion/store/JobStore';
-import { DefaultPaging, ItemData, Routers, Status, VisualizationItemData, ApiExceptions } from '@/shared';
+import { ApiExceptions, DefaultPaging, ItemData, Routers, Status, VisualizationItemData } from '@/shared';
 import { Track } from '@/shared/anotation';
 import { AtomicAction } from '@/shared/anotation/AtomicAction';
 import DiButton from '@/shared/components/common/DiButton.vue';
@@ -89,16 +99,28 @@ import DiTable2 from '@/shared/components/common/di-table/DiTable2.vue';
 import { LayoutContent, LayoutHeader, LayoutNoData } from '@/shared/components/layout-wrapper';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { CustomCell, HeaderData, IndexedHeaderData, Pagination, RowData } from '@/shared/models';
-import { ListUtils } from '@/utils';
+import { DateTimeFormatter, GoogleUtils, ListUtils } from '@/utils';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 
 import { Modals } from '@/utils/Modals';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { StringUtils } from '@/utils/StringUtils';
 import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
-import { DataSources, DataSourceType, FormMode, GoogleAdsSourceInfo, Job, JobInfo, S3Job, S3SourceInfo, SortRequest } from '@core/data-ingestion';
+import {
+  DataSources,
+  DataSourceType,
+  GoogleAnalyticJob,
+  FormMode,
+  GoogleAdsSourceInfo,
+  Job,
+  JobInfo,
+  S3Job,
+  S3SourceInfo,
+  SortRequest,
+  TiktokAccessTokenResponse,
+  TiktokSourceInfo
+} from '@core/data-ingestion';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
-import { GoogleAnalyticJob } from '@core/data-ingestion/domain/job/google-analytic/GoogleAnalyticJob';
 import { DataSourceResponse } from '@core/data-ingestion/domain/response/DataSourceResponse';
 import { DIException, SortDirection, SourceId } from '@core/common/domain';
 import { UnsupportedException } from '@core/common/domain/exception/UnsupportedException';
@@ -110,10 +132,14 @@ import { Component, Ref, Vue } from 'vue-property-decorator';
 import DocumentModal from './DocumentModal.vue';
 import { ThirdPartyAuthenticationType } from '@/shared/components/google-authen/enum/ThirdPartyAuthenticationType';
 import { GA4Job } from '@core/data-ingestion/domain/job/ga4/GA4Job';
-import { FacebookResponse, validFacebookResponse } from '@/shared/components/facebook-authen/FacebookResponse';
 import { FacebookAdsSourceInfo } from '@core/data-ingestion/domain/data-source/FacebookAdsSourceInfo';
 import { Inject } from 'typescript-ioc';
 import { DataSourceService } from '@core/common/services/DataSourceService';
+import { CheckBoxHeaderController, CheckBoxHeaderData } from '@/shared/components/common/di-table/custom-cell/CheckBoxHeaderData';
+import { UserAvatarCell } from '@/shared/components/common/di-table/custom-cell';
+import { SlideXLeftTransition } from 'vue2-transitions';
+import { GASourceInfo } from '@core/data-ingestion/domain/data-source/GASourceInfo';
+import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4SourceInfo';
 
 @Component({
   components: {
@@ -132,12 +158,14 @@ import { DataSourceService } from '@core/common/services/DataSourceService';
     LayoutHeader,
     LayoutNoData,
     S3SourceConfigModal,
-    S3PreviewTableModal
+    S3PreviewTableModal,
+    SlideXLeftTransition
   }
 })
 export default class DataSourceScreen extends Vue {
   private readonly trackEvents = TrackEvents;
-
+  private readonly animationDuration = 600;
+  private readonly delay = 20;
   @Ref()
   dataSourceTypeSelectionModal?: DataSourceTypeSelection;
   @Ref()
@@ -172,14 +200,85 @@ export default class DataSourceScreen extends Vue {
   private jobFormRenderer: JobFormRender = JobFormRender.default();
   private tableErrorMessage = '';
   private tableStatus: Status = Status.Loading;
-  private dataSourceFormRender: DataSourceFormRender = new DataSourceFormFactory().createRender(
-    DataSourceInfo.default(DataSourceType.MySql),
-    this.handleSubmitDataSource
-  );
+  private dataSourceFormRender: DataSourceFormRender = this.defaultDataSourceFormRender();
   private googleConfig = require('@/screens/data-ingestion/constants/google-config.json');
+  defaultDatasourceIcon = require('@/assets/icon/data_ingestion/datasource/ic_default.svg');
+  private checkboxController = new CheckBoxHeaderController();
+  selectedIndexAsSet = new Set<SourceId>();
+  enableMultiAction = false;
+  private readonly cellWidth = 180;
 
+  private defaultDataSourceFormRender() {
+    return new DataSourceFormFactory().createRender(DataSourceInfo.default(DataSourceType.MySql), this.handleSubmitDataSource);
+  }
+
+  onSelectedIndexChanged() {
+    Log.debug('onSelectedIndexChanged', this.selectedIndexAsSet.size > 0);
+    this.enableMultiAction = this.selectedIndexAsSet.size > 0;
+  }
+
+  beforeDestroy() {
+    this.checkboxController.reset();
+    this.onSelectedIndexChanged();
+  }
   private get dataSourceHeaders(): HeaderData[] {
-    return DataSourceModule.dataSourceHeaders;
+    return [
+      new CheckBoxHeaderData(
+        this.selectedIndexAsSet,
+        'dataSource.id',
+        this.checkboxController,
+        this.dataSources,
+        {
+          width: this.cellWidth / 3
+        },
+        this.onSelectedIndexChanged
+      ),
+      {
+        key: 'name',
+        label: 'Name',
+        customRenderBodyCell: new CustomCell(rowData => {
+          const dataSourceResponse = DataSourceResponse.fromObject(rowData);
+          const data = dataSourceResponse.dataSource.getDisplayName();
+          // eslint-disable-next-line
+          const datasourceImage = require(`@/assets/icon/data_ingestion/datasource/${DataSourceInfo.dataSourceIcon(rowData.dataSource.sourceType)}`);
+
+          const imgElement = HtmlElementRenderUtils.renderImg(datasourceImage, 'data-source-icon', this.defaultDatasourceIcon);
+          const dataElement = HtmlElementRenderUtils.renderText(data, 'span', 'source-name text-truncate');
+          return HtmlElementRenderUtils.renderAction([imgElement, dataElement], 8, 'source-name-container');
+        })
+      },
+      {
+        key: 'creatorId',
+        label: 'Owner',
+        customRenderBodyCell: new UserAvatarCell('creator.avatar', ['creator.fullName', 'creator.lastName', 'creator.email', 'creator.username']),
+        width: 200
+      },
+      {
+        key: 'dataSourceType',
+        label: 'Type',
+        customRenderBodyCell: new CustomCell(rowData => {
+          const sourceType = DataSourceResponse.fromObject(rowData).dataSource.sourceType;
+          return HtmlElementRenderUtils.renderText(sourceType, 'span', 'text-truncate');
+        }),
+        width: 180
+      },
+      {
+        key: 'lastModified',
+        label: 'Last Modified',
+        customRenderBodyCell: new CustomCell(rowData => {
+          const lastModify = DataSourceResponse.fromObject(rowData).dataSource.lastModify;
+          const data = lastModify !== 0 ? DateTimeFormatter.formatAsMMMDDYYYHHmmss(lastModify) : '--';
+          return HtmlElementRenderUtils.renderText(data, 'span', 'text-truncate');
+        }),
+        width: 180
+      },
+      {
+        key: 'action',
+        label: 'Action',
+        width: 120,
+        disableSort: true
+      }
+    ];
   }
 
   private get record(): number {
@@ -195,7 +294,6 @@ export default class DataSourceScreen extends Vue {
     return DataSourceModule.dataSources;
     // return []
   }
-
   private get isLoaded() {
     return this.tableStatus === Status.Loaded;
   }
@@ -272,6 +370,13 @@ export default class DataSourceScreen extends Vue {
     });
   }
 
+  private handleConfirmDeleteMultiDataSource() {
+    const dataSourceText: string = this.selectedIndexAsSet.size > 1 ? 'data sources' : 'data source';
+    Modals.showConfirmationModal(`Are you sure to delete ${this.selectedIndexAsSet.size} ${dataSourceText}?`, {
+      onOk: () => this.handleDeleteMultiDataSource(this.selectedIndexAsSet)
+    });
+  }
+
   @Track(TrackEvents.DataSourceSubmitDelete, {
     source_id: (_: DataSourceScreen, args: any) => args[0].id,
     source_type: (_: DataSourceScreen, args: any) => args[0].sourceType,
@@ -286,6 +391,21 @@ export default class DataSourceScreen extends Vue {
       const exception = DIException.fromObject(e);
       PopupUtils.showError(exception.message);
       Log.error('DataSourceScreen::deleteDataSource::error::', e.message);
+    } finally {
+      this.showLoaded();
+    }
+  }
+  private async handleDeleteMultiDataSource(indexs: Set<SourceId>) {
+    try {
+      this.showLoading();
+      await DataSourceModule.deleteMultiDataSource(indexs);
+      this.selectedIndexAsSet = new Set<SourceId>();
+      this.onSelectedIndexChanged();
+      await this.reloadDataSources();
+    } catch (e) {
+      const exception = DIException.fromObject(e);
+      PopupUtils.showError(exception.message);
+      Log.error('DataSourceScreen::handleDeleteMultiDataSource::error::', e.message);
     } finally {
       this.showLoaded();
     }
@@ -320,9 +440,9 @@ export default class DataSourceScreen extends Vue {
   }
 
   @Track(TrackEvents.DataSourceEdit, {
-    source_id: (_: DataSourceScreen, args: any) => args[0]?.id,
-    source_type: (_: DataSourceScreen, args: any) => args[0]?.sourceType,
-    source_name: (_: DataSourceScreen, args: any) => args[0]?.getDisplayName()
+    source_id: (_: DataSourceScreen, args: any) => args[1]?.id,
+    source_type: (_: DataSourceScreen, args: any) => args[1]?.sourceType,
+    source_name: (_: DataSourceScreen, args: any) => args[1]?.getDisplayName()
   })
   private handleEditDataSource(event: Event, dataSource: DataSourceInfo) {
     event.stopPropagation();
@@ -345,7 +465,7 @@ export default class DataSourceScreen extends Vue {
           await this.handleSelectGoogleSourceType(`${this.googleConfig.sheetUrl}?redirect=${window.location.origin}&scope=${this.googleConfig.sheetScope}`);
           break;
         }
-        case DataSourceType.GoogleAnalytics: {
+        case DataSourceType.GA: {
           await this.handleSelectGoogleSourceType(`${this.googleConfig.gaUrl}?redirect=${window.location.origin}&scope=${this.googleConfig.gaScope}`);
           break;
         }
@@ -367,7 +487,16 @@ export default class DataSourceScreen extends Vue {
           break;
         }
         case DataSourceType.Facebook: {
-          await this.loginFacebook(this.handleFacebookLogin);
+          await this.handleSelectGoogleSourceType(
+            `${this.googleConfig.facebookUrl}?redirect=${window.location.origin}&scope=${window.appConfig.VUE_APP_FACEBOOK_SCOPE}`
+          );
+          // await this.loginFacebook(this.handleFacebookLogin);
+          break;
+        }
+        case DataSourceType.Tiktok: {
+          Log.debug('link::', `${this.googleConfig.tiktokUrl}&redirect=${window.location.origin}`);
+          await this.handleSelectGoogleSourceType(`${this.googleConfig.tiktokUrl}?redirect=${window.location.origin}`);
+          // await this.loginFacebook(this.handleFacebookLogin);
           break;
         }
         //TODO: Add here
@@ -396,11 +525,13 @@ export default class DataSourceScreen extends Vue {
     (window as any).FB.login(callback, { scope: window.appConfig.VUE_APP_FACEBOOK_SCOPE, return_scopes: true });
   }
 
-  private async handleFacebookLogin(response: FacebookResponse | undefined) {
+  private async handleFacebookLogin(accessToken: string) {
     try {
-      validFacebookResponse(response, window.appConfig.VUE_APP_FACEBOOK_SCOPE);
-      const tokenResponse = await this.dataSourceService.getFacebookExchangeToken(response!.authResponse!.accessToken);
+      // validFacebookResponse(response, window.appConfig.VUE_APP_FACEBOOK_SCOPE);
+      this.showUpdating();
+      const tokenResponse = await this.dataSourceService.getFacebookExchangeToken(accessToken);
       const fbSource: FacebookAdsSourceInfo = FacebookAdsSourceInfo.default().withAccessToken(tokenResponse.accessToken);
+      this.showLoaded();
       this.openDataSourceForm(fbSource);
     } catch (e) {
       const exception = DIException.fromObject(e);
@@ -479,6 +610,23 @@ export default class DataSourceScreen extends Vue {
     } finally {
       this.showLoaded();
     }
+  }
+
+  private async handleReAuthen(sourceInfo: DataSourceInfo) {
+    switch (sourceInfo.sourceType) {
+      case DataSourceType.GA: {
+        await this.handleSelectGoogleSourceType(`${this.googleConfig.gaUrl}?redirect=${window.location.origin}&scope=${this.googleConfig.gaScope}`);
+        break;
+      }
+      case DataSourceType.GA4: {
+        await this.handleSelectGoogleSourceType(`${this.googleConfig.ga4Url}?redirect=${window.location.origin}&scope=${this.googleConfig.ga4Scope}`);
+        break;
+      }
+    }
+  }
+
+  private handleResetDataSourceFormRender() {
+    this.dataSourceFormRender = this.defaultDataSourceFormRender();
   }
 
   private async submitDataSource(sourceInfo: DataSourceInfo) {
@@ -577,6 +725,8 @@ export default class DataSourceScreen extends Vue {
       this.showLoading();
       this.from = (pagination.page - 1) * pagination.rowsPerPage;
       this.size = pagination.rowsPerPage;
+      this.checkboxController.reset();
+      this.onSelectedIndexChanged();
       await this.reloadDataSources();
       this.showLoaded();
     } catch (e) {
@@ -613,6 +763,7 @@ export default class DataSourceScreen extends Vue {
   }
 
   private verifyMessage(event: MessageEvent) {
+    Log.debug('verifyMessage::', event);
     const origin = event.origin;
     const error = event.data?.error ?? null;
     if (origin !== this.googleConfig.rootOrigin) {
@@ -624,8 +775,9 @@ export default class DataSourceScreen extends Vue {
   }
 
   private async handleMessageData(event: MessageEvent) {
+    Log.debug('handleMessageData::', event);
     const responseType = event.data?.responseType ?? ThirdPartyAuthenticationType.NotFound;
-    const authorizeResponse: gapi.auth2.AuthorizeResponse | null = event.data?.authResponse ?? null;
+    const authorizeResponse: any | null = event.data?.authResponse ?? null;
     if (authorizeResponse) {
       Log.debug('DataSourceScreen::handleMessageData::event::', event);
       Log.debug('DataSourceScreen::handleMessageData::authorizeResponse::', event.data);
@@ -648,9 +800,12 @@ export default class DataSourceScreen extends Vue {
           break;
         }
         case ThirdPartyAuthenticationType.Facebook: {
-          await this.handleFacebookMessage(authorizeResponse);
+          await this.handleFacebookLogin((authorizeResponse as any).accessToken);
           break;
         }
+        case ThirdPartyAuthenticationType.TikTok:
+          await this.handleTiktokMessage((authorizeResponse as any).authCode);
+          break;
         default:
           throw new UnsupportedException(`Unsupported google response type ${responseType}`);
       }
@@ -678,22 +833,42 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private handleGoogleAnalyticMessage(accessToken: string, authorizationCode: string) {
-    const dataSource: DataSourceInfo = DataSourceInfo.default(DataSourceType.GoogleAnalytics);
-    const job = GoogleAnalyticJob.default()
-      .setAccessToken(accessToken)
-      .setAuthorizationCode(authorizationCode);
-    Log.debug('DataSourceScreen::handleSelectGoogleAnalytics::GoogleAnalyticJob::', job);
-    this.openJobConfigModal(new JobInfo(job, dataSource));
+  private async handleGoogleAnalyticMessage(accessToken: string, authorizationCode: string) {
+    try {
+      ///handle loading here
+      Log.debug('DateSourceScreen::handleGoogleAnalyticMessage::', this.dataSourceFormRender.createDataSourceInfo());
+      const gaSourceInfo: GASourceInfo = this.isDefaultSource ? GASourceInfo.default() : (this.renderSource as GASourceInfo);
+      gaSourceInfo.setAccessToken(accessToken);
+      const refreshToken = await DataSourceModule.getRefreshToken(authorizationCode);
+      gaSourceInfo.setRefreshToken(refreshToken);
+      Log.debug('DataSourceScreen::handleSelectGoogleAnalytics::GoogleAnalyticJob::', gaSourceInfo);
+      this.openDataSourceForm(gaSourceInfo);
+    } catch (e) {
+      PopupUtils.showError(e.message);
+    }
   }
 
-  private handleGA4Message(accessToken: string, authorizationCode: string) {
-    const dataSource: DataSourceInfo = DataSourceInfo.default(DataSourceType.GA4);
-    const job = GA4Job.default()
-      .setAccessToken(accessToken)
-      .setAuthorizationCode(authorizationCode);
-    Log.debug('DataSourceScreen::handleSelectGoogleAnalytics::GoogleAnalyticJob::', job);
-    this.openJobConfigModal(new JobInfo(job, dataSource));
+  private get renderSource() {
+    return this.dataSourceFormRender.createDataSourceInfo();
+  }
+
+  private get isDefaultSource() {
+    return this.renderSource.id === DataSourceInfo.DEFAULT_ID;
+  }
+
+  private async handleGA4Message(accessToken: string, authorizationCode: string) {
+    try {
+      ///handle loading here
+      const gaSourceInfo: GA4SourceInfo = this.isDefaultSource ? GA4SourceInfo.default() : (this.renderSource as GA4SourceInfo);
+      Log.debug('DateSourceScreen::handleGA4Message::', gaSourceInfo);
+      gaSourceInfo.setAccessToken(accessToken);
+      const refreshToken = await DataSourceModule.getRefreshToken(authorizationCode);
+      gaSourceInfo.setRefreshToken(refreshToken);
+      Log.debug('DataSourceScreen::handleSelectGoogleAnalytics::GoogleAnalyticJob::', gaSourceInfo);
+      this.openDataSourceForm(gaSourceInfo);
+    } catch (e) {
+      PopupUtils.showError(e.message);
+    }
   }
 
   private handleGoogleSheetMessage(accessToken: string, authorizationCode: string) {
@@ -714,8 +889,13 @@ export default class DataSourceScreen extends Vue {
     // this.openMultiJobConfigModal(job);
   }
 
-  private async handleFacebookMessage(response: any) {
-    //
+  private async handleTiktokMessage(authCode: string) {
+    this.showUpdating();
+    const tokenResponse: TiktokAccessTokenResponse = await this.dataSourceService.getTiktokAccessToken(authCode);
+    Log.debug('handleTiktokMessage', tokenResponse);
+    const tiktokSource: TiktokSourceInfo = TiktokSourceInfo.default().withAccessToken(tokenResponse.accessToken);
+    this.showLoaded();
+    this.openDataSourceForm(tiktokSource);
   }
 
   @AtomicAction()
@@ -724,12 +904,12 @@ export default class DataSourceScreen extends Vue {
       const job: Job = this.jobFormRenderer.createJob();
       Log.debug('Submit Job', job);
       const jobInfo = await JobModule.create(job);
-      this.$router.push({ name: Routers.Job });
       TrackingUtils.track(TrackEvents.CreateGoogleAnalyticJob, {
         job_name: job.displayName,
         job_type: job.jobType,
         job_id: job.jobId
       });
+      await this.$router.push({ name: Routers.Job });
     } catch (e) {
       const exception = DIException.fromObject(e);
       PopupUtils.showError(exception.message);
@@ -760,6 +940,8 @@ export default class DataSourceScreen extends Vue {
   private async handleKeywordChange(newKeyword: string) {
     try {
       this.searchValue = newKeyword;
+      this.checkboxController.reset();
+      this.onSelectedIndexChanged();
       this.from = 0;
       this.showLoading();
       await this.reloadDataSources();
@@ -775,6 +957,8 @@ export default class DataSourceScreen extends Vue {
       Log.debug('handleSortChange::', this.sortName, this.sortMode);
       this.updateSortMode(column);
       this.updateSortColumn(column);
+      this.checkboxController.reset();
+      this.onSelectedIndexChanged();
       this.showUpdating();
       await this.reloadDataSources();
       this.showLoaded();
@@ -800,18 +984,6 @@ export default class DataSourceScreen extends Vue {
       this.sortMode = SortDirection.Asc;
     }
   }
-
-  // async initFacebookClient(appId: string) {
-  //   Log.debug('initFacebookClient::', appId);
-  //   (window as any).fbAsyncInit = function() {
-  //     (window as any).FB.init({
-  //       appId: appId,
-  //       cookie: true, // This is important, it's not enabled by default
-  //       version: 'v13.0'
-  //     });
-  //     jQuery(document).trigger('FBSDKLoaded');
-  //   };
-  // }
 }
 </script>
 
@@ -838,7 +1010,7 @@ export default class DataSourceScreen extends Vue {
       font-style: normal;
       font-weight: 500;
       letter-spacing: 0.2px;
-      line-height: 1.17;
+      line-height: 1.4;
       overflow: hidden;
 
       > .root-title {

@@ -160,7 +160,7 @@ export default class TitleTab extends Vue {
       enabled: true,
       fontFamily: 'Roboto',
       color: ChartOption.getThemeTextColor(),
-      fontSize: '16px',
+      fontSize: '11px',
       align: 'center'
     }
   };

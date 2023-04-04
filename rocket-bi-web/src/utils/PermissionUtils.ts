@@ -21,6 +21,7 @@ export const PERMISSION_ACTION_NODES: ActionNode[] = [
 
 export enum ResourceType {
   dashboard = 'dashboard',
+  query = 'queries',
   directory = 'directory',
   widget = 'widget',
   database = 'database',

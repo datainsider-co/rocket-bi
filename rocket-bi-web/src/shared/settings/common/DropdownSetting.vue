@@ -1,8 +1,8 @@
 <template>
-  <div :class="{ 'disabled-setting': disable }" class="setting-container dropdown-setting no-gutters">
-    <div v-if="enabledRevert || label != null" class="row mb-2 label justify-content-between w-100">
+  <div :class="{ 'disabled-setting': disable }" class="setting-container dropdown-setting">
+    <div v-if="enabledRevert || isLabel" class="row label justify-content-between w-100">
       <div class="d-flex flex-row align-items-center">
-        <p v-if="label != null" class="m-0">{{ label }}</p>
+        <p v-if="isLabel">{{ label }}</p>
         <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
       </div>
       <RevertButton v-if="enabledRevert" @click="handleRevert" />
@@ -84,6 +84,10 @@ export default class DropdownSetting extends Vue {
 
   private get showHint(): boolean {
     return StringUtils.isNotEmpty(this.hint);
+  }
+
+  private get isLabel(): boolean {
+    return StringUtils.isNotEmpty(this.label);
   }
 }
 </script>

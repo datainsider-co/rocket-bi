@@ -91,6 +91,7 @@ export class RouterUtils {
   }
 
   static getToken(route: Route): string {
+    Log.debug('RouteUtils::getToken::', route.query.token, route.params.token);
     return route.query.token as string;
   }
 
@@ -117,6 +118,9 @@ export class RouterUtils {
     return AuthenticationModule.isLoggedIn;
   }
 
+  /**
+   * @deprecated move to use RouterUtils.getToken(route: Route)
+   */
   static isHaveToken(): boolean {
     return !!RouterUtils.dataManager.getToken();
   }
