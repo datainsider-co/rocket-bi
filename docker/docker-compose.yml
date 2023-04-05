@@ -56,7 +56,8 @@ services:
       HTTP_PORT: 8080
     volumes:
       - ./bi-service/logs:/app/logs
-      - bi-service-data:/tmp/csv
+      - biservice-csvdata:/tmp/csv
+      - biservice-mapdata:/app/mapdata
     depends_on:
       - mysql
       - ssdb
@@ -104,13 +105,15 @@ services:
       - 5050:80
     volumes:
       - ./nginx/log/:/var/log/nginx/
-      - bi-service-data:/var/www/html/public/static/tmp/csv
+      - biservice-csvdata:/var/www/html/public/static/tmp/csv
+      - biservice-mapdata:/var/www/html/public/static/mapdata
     depends_on:
       - bi_service
       - web
 
 volumes:
-  bi-service-data:
+  biservice-csvdata:
+  biservice-mapdata:
 
 networks:
   rocket_network:
