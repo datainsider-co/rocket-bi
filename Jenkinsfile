@@ -15,7 +15,10 @@ pipeline {
 
         stage('deploy') {
             when {
-                expression { BRANCH_NAME ==~ /(main|dev)/ }
+		anyOf {
+                    expression { BRANCH_NAME ==~ /(main|dev)/ }
+		    buildingTag()
+		}
             }
 
             steps {
