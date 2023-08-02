@@ -44,30 +44,6 @@ pipeline {
             }
         }
 
-        stage('deploy oss') {
-            when {
-                branch 'oss'
-            }
-
-            steps {
-                sshagent(credentials: ['admin_didev']) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no admin@localhost "
-                          cd /home/admin/data/rocket-bi
-                          git checkout dev && git pull || { exit 1; }
-
-                          cd rocket-bi-server
-                          git pull gitlab oss || { exit 1; }
-                          cd ..
-
-                          git add . && git commit -m '[BOT] Update rocket-bi-server: merge from datainsider oss' && git push
-                          exit 0
-                        "
-                    '''
-                }
-            }
-        }
-
     }
 
     post {

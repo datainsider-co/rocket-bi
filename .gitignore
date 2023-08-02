@@ -1,0 +1,7 @@
+**/target
+**/dist
+**/logs
+**/log
+**/data
+*.idea
+*/Jenkinsfile

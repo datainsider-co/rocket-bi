@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   rocket-bi-web:
-    image: registry.gitlab.com/datainsider/rocketbi_v2/rocket-bi-web:dev
+    image: datainsiderco/rocket-bi-web:main
     container_name: rocket-bi-web
     restart: always
     ports:

@@ -1,11 +1,11 @@
 version: '3'
 services:
   rocket-bi-server:
-    image: registry.gitlab.com/datainsider/rocketbi_v2/rocket-bi-server:dev
+    image: datainsiderco/rocket-bi-server:main
     container_name: rocket-bi-server
     restart: always
     environment:
-      MODE: development
+      MODE: production
     volumes:
       - ./conf:/app/conf
       - ./logs:/app/logs
@@ -18,4 +18,4 @@ volumes:
 networks:
   default:
     external:
-      name: di_network
+      name: rocket_network
