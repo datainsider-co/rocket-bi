@@ -1,0 +1,54 @@
+version: "3"
+
+services:
+  mysql:
+    image: datainsiderco/rocket-mysql
+    container_name: rocket-mysql
+    restart: always
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+
+  ssdb:
+    image: datainsiderco/rocket-ssdb
+    container_name: rocket-ssdb
+    volumes:
+      - ./ssdb/data:/var/lib/ssdb/data
+    restart: always
+
+  rocket-bi-server:
+    image: datainsiderco/rocket-bi-server:main
+    container_name: rocket-bi-server
+    restart: always
+    environment:
+      NAME: rocket-bi-server
+      MODE: production
+    volumes:
+      - ./rocket-bi-server/logs:/app/logs
+      - biservice-mapdata:/app/mapdata
+    depends_on:
+      - mysql
+      - ssdb
+
+  rocket-bi-web:
+    image: datainsiderco/rocket-bi-web:main
+    container_name: rocket-bi-web
+    restart: always
+
+  nginx:
+    image: datainsiderco/rocket-nginx
+    container_name: rocket-nginx
+    restart: always
+    ports:
+      - 5050:80
+    volumes:
+      - ./nginx/log/:/var/log/nginx/
+      - biservice-mapdata:/var/www/html/public/static/mapdata
+    depends_on:
+      - rocket-bi-server
+      - rocket-bi-web
+
+volumes:
+  biservice-mapdata:
+
+networks:
+  rocket_network:
