@@ -1,0 +1,1730 @@
+{
+  "service_type": "AUCTION",
+  "report_type": "BASIC",
+  "data_level": "AUCTION_ADGROUP",
+  "dimensions": [
+    "adgroup_id",
+    "stat_time_day"
+  ],
+  "metric_columns": [
+    {
+      "class_name": "string",
+      "name": "campaign_name",
+      "display_name": "campaign_name",
+      "description": "Campaign name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "campaign_id",
+      "display_name": "campaign_id",
+      "description": "Campaign ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "objective_type",
+      "display_name": "objective_type",
+      "description": "Advertising objective",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "double",
+      "name": "campaign_budget",
+      "display_name": "campaign_budget",
+      "description": "Campaign budget",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "string",
+      "name": "campaign_dedicate_type",
+      "display_name": "campaign_dedicate_type",
+      "description": "Campaign type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "app_promotion_type",
+      "display_name": "app_promotion_type",
+      "description": "App promotion type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "adgroup_name",
+      "display_name": "adgroup_name",
+      "description": "Ad group name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "promotion_type",
+      "display_name": "promotion_type",
+      "description": "Promotion type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "dpa_target_audience_type",
+      "display_name": "dpa_target_audience_type",
+      "description": "Target audience type for DPA",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "smart_target",
+      "display_name": "smart_target",
+      "description": "Optimization goal",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "pricing_category",
+      "display_name": "pricing_category",
+      "description": "Billing Event",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "bid_strategy",
+      "display_name": "bid_strategy",
+      "description": "Bid strategy",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "bid",
+      "display_name": "bid",
+      "description": "Bid",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "aeo_type",
+      "display_name": "aeo_type",
+      "description": "App Event Optimization Type",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "tt_app_id",
+      "display_name": "tt_app_id",
+      "description": "TikTok App ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "tt_app_name",
+      "display_name": "tt_app_name",
+      "description": "TikTok App Name",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "string",
+      "name": "mobile_app_id",
+      "display_name": "mobile_app_id",
+      "description": "Mobile App ID",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "String"
+    },
+    {
+      "class_name": "double",
+      "name": "real_time_app_install",
+      "display_name": "real_time_app_install",
+      "description": "Real-time App Install",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "real_time_app_install_cost",
+      "display_name": "real_time_app_install_cost",
+      "description": "Cost per Real-time App Install",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "app_install",
+      "display_name": "app_install",
+      "description": "App Install",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_app_install",
+      "display_name": "cost_per_app_install",
+      "description": "Cost per App Install",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "registration",
+      "display_name": "registration",
+      "description": "Unique Registration",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_registration",
+      "display_name": "cost_per_registration",
+      "description": "Cost per Unique Registration",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "registration_rate",
+      "display_name": "registration_rate",
+      "description": "Registration Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_registration",
+      "display_name": "total_registration",
+      "description": "Total Registration",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_registration",
+      "display_name": "cost_per_total_registration",
+      "description": "Cost per Registration",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "purchase",
+      "display_name": "purchase",
+      "description": "Unique Purchase",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_purchase",
+      "display_name": "cost_per_purchase",
+      "description": "Cost per Unique Purchase",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "purchase_rate",
+      "display_name": "purchase_rate",
+      "description": "Purchase Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_purchase",
+      "display_name": "total_purchase",
+      "description": "Purchase (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_purchase",
+      "display_name": "cost_per_total_purchase",
+      "description": "Cost per Purchase",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_purchase",
+      "display_name": "value_per_total_purchase",
+      "description": "Value per Purchase",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_purchase_value",
+      "display_name": "total_purchase_value",
+      "description": "Total Purchase Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_active_pay_roas",
+      "display_name": "total_active_pay_roas",
+      "description": "Purchase ROAS",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "app_event_add_to_cart",
+      "display_name": "app_event_add_to_cart",
+      "description": "Unique Add to Cart",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_app_event_add_to_cart",
+      "display_name": "cost_per_app_event_add_to_cart",
+      "description": "Cost per Unique Add to Cart",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "app_event_add_to_cart_rate",
+      "display_name": "app_event_add_to_cart_rate",
+      "description": "Unique Add to Cart Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_app_event_add_to_cart",
+      "display_name": "total_app_event_add_to_cart",
+      "description": "Total Add to Cart",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_app_event_add_to_cart",
+      "display_name": "cost_per_total_app_event_add_to_cart",
+      "description": "Cost per Add to Cart",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_app_event_add_to_cart",
+      "display_name": "value_per_total_app_event_add_to_cart",
+      "description": "Value per Add to Cart",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_app_event_add_to_cart_value",
+      "display_name": "total_app_event_add_to_cart_value",
+      "description": "Total Add to Cart Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "checkout",
+      "display_name": "checkout",
+      "description": "Unique Checkout",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_checkout",
+      "display_name": "cost_per_checkout",
+      "description": "Cost per Unique Checkout",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "checkout_rate",
+      "display_name": "checkout_rate",
+      "description": "Unique Checkout Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_checkout",
+      "display_name": "total_checkout",
+      "description": "Total Checkout",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_checkout",
+      "display_name": "cost_per_total_checkout",
+      "description": "Cost per Checkout",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_checkout",
+      "display_name": "value_per_checkout",
+      "description": "Value per Checkout",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_checkout_value",
+      "display_name": "total_checkout_value",
+      "description": "Total Checkout Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "view_content",
+      "display_name": "view_content",
+      "description": "Unique View Content",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_view_content",
+      "display_name": "cost_per_view_content",
+      "description": "Cost per Unique View Content",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "view_content_rate",
+      "display_name": "view_content_rate",
+      "description": "View Content Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_view_content",
+      "display_name": "total_view_content",
+      "description": "Total View Content",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_view_content",
+      "display_name": "cost_per_total_view_content",
+      "description": "Cost per View Content",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_view_content",
+      "display_name": "value_per_total_view_content",
+      "description": "Value per View Content",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_view_content_value",
+      "display_name": "total_view_content_value",
+      "description": "Total View Content Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "next_day_open",
+      "display_name": "next_day_open",
+      "description": "Unique Day 1 Retention",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_next_day_open",
+      "display_name": "cost_per_next_day_open",
+      "description": "Cost per Unique Day 1 Retention",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "next_day_open_rate",
+      "display_name": "next_day_open_rate",
+      "description": "Day 1 Retention Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_next_day_open",
+      "display_name": "total_next_day_open",
+      "description": "Day 1 Retention (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_next_day_open",
+      "display_name": "cost_per_total_next_day_open",
+      "description": "Cost per Day 1 Retention",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "add_payment_info",
+      "display_name": "add_payment_info",
+      "description": "Unique Add Payment Info",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_add_payment_info",
+      "display_name": "cost_per_add_payment_info",
+      "description": "Cost per Unique Add Payment Info",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "add_payment_info_rate",
+      "display_name": "add_payment_info_rate",
+      "description": "Add Payment Info Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_add_payment_info",
+      "display_name": "total_add_payment_info",
+      "description": "Total Add Payment Info",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_total_add_payment_info",
+      "display_name": "cost_total_add_payment_info",
+      "description": "Cost per Add Payment Info",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "add_to_wishlist",
+      "display_name": "add_to_wishlist",
+      "description": "Unique Add to Wishlist",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_add_to_wishlist",
+      "display_name": "cost_per_add_to_wishlist",
+      "description": "Cost per Unique Add to Wishlist",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "add_to_wishlist_rate",
+      "display_name": "add_to_wishlist_rate",
+      "description": "Add to Wishlist Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_add_to_wishlist",
+      "display_name": "total_add_to_wishlist",
+      "description": "Total Add to Wishlist",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_add_to_wishlist",
+      "display_name": "cost_per_total_add_to_wishlist",
+      "description": "Cost per Add to Wishlist",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_add_to_wishlist",
+      "display_name": "value_per_total_add_to_wishlist",
+      "description": "Value per Add to Wishlist",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_add_to_wishlist_value",
+      "display_name": "total_add_to_wishlist_value",
+      "description": "Total Add to Wishlist Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "launch_app",
+      "display_name": "launch_app",
+      "description": "Unique Launch App",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_launch_app",
+      "display_name": "cost_per_launch_app",
+      "description": "Cost per Unique Launch App",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "launch_app_rate",
+      "display_name": "launch_app_rate",
+      "description": "Launch App Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_launch_app",
+      "display_name": "total_launch_app",
+      "description": "Launch App (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_launch_app",
+      "display_name": "cost_per_total_launch_app",
+      "description": "Cost per Launch App",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "complete_tutorial",
+      "display_name": "complete_tutorial",
+      "description": "Unique Complete Tutorial",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_complete_tutorial",
+      "display_name": "cost_per_complete_tutorial",
+      "description": "Cost per Unique Complete Tutorial",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "complete_tutorial_rate",
+      "display_name": "complete_tutorial_rate",
+      "description": "Complete Tutorial Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_complete_tutorial",
+      "display_name": "total_complete_tutorial",
+      "description": "Complete Tutorial (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_complete_tutorial",
+      "display_name": "cost_per_total_complete_tutorial",
+      "description": "Cost per Complete Tutorial",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_complete_tutorial",
+      "display_name": "value_per_total_complete_tutorial",
+      "description": "Value per Complete Tutorial",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_complete_tutorial_value",
+      "display_name": "total_complete_tutorial_value",
+      "description": "Total Complete Tutorial Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "create_group",
+      "display_name": "create_group",
+      "description": "Unique Create Group",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_create_group",
+      "display_name": "cost_per_create_group",
+      "description": "Cost per Unique Create Group",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "create_group_rate",
+      "display_name": "create_group_rate",
+      "description": "Create Group Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_create_group",
+      "display_name": "total_create_group",
+      "description": "Create Group (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_create_group",
+      "display_name": "cost_per_total_create_group",
+      "description": "Cost per Create Group",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_create_group",
+      "display_name": "value_per_total_create_group",
+      "description": "Value per Create Group",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_create_group_value",
+      "display_name": "total_create_group_value",
+      "description": "Total Create Group Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "join_group",
+      "display_name": "join_group",
+      "description": "Unique Join Group",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_join_group",
+      "display_name": "cost_per_join_group",
+      "description": "Cost per Unique Join Group",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "join_group_rate",
+      "display_name": "join_group_rate",
+      "description": "Join Group Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_join_group",
+      "display_name": "total_join_group",
+      "description": "Join Group (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_join_group",
+      "display_name": "cost_per_total_join_group",
+      "description": "Cost per Join Group",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_join_group",
+      "display_name": "value_per_total_join_group",
+      "description": "Value per Join Group",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_join_group_value",
+      "display_name": "total_join_group_value",
+      "description": "Total Join Group Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "create_gamerole",
+      "display_name": "create_gamerole",
+      "description": "Unique Create Role",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_create_gamerole",
+      "display_name": "cost_per_create_gamerole",
+      "description": "Cost per Unique Create Role",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "create_gamerole_rate",
+      "display_name": "create_gamerole_rate",
+      "description": "Unique Create Role Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_create_gamerole",
+      "display_name": "total_create_gamerole",
+      "description": "Create Role (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_create_gamerole",
+      "display_name": "cost_per_total_create_gamerole",
+      "description": "Cost per Create Role",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_create_gamerole",
+      "display_name": "value_per_total_create_gamerole",
+      "description": "Value per Create Role",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_create_gamerole_value",
+      "display_name": "total_create_gamerole_value",
+      "description": "Total Create Role Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "spend_credits",
+      "display_name": "spend_credits",
+      "description": "Unique Spend Credit",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_spend_credits",
+      "display_name": "cost_per_spend_credits",
+      "description": "Cost per Unique Spend Credit",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "spend_credits_rate",
+      "display_name": "spend_credits_rate",
+      "description": "Spend Credit Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_spend_credits",
+      "display_name": "total_spend_credits",
+      "description": "Spend Credit (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_spend_credits",
+      "display_name": "cost_per_total_spend_credits",
+      "description": "Cost per Spend Credit",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_spend_credits",
+      "display_name": "value_per_total_spend_credits",
+      "description": "Value per Spend Credit",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_spend_credits_value",
+      "display_name": "total_spend_credits_value",
+      "description": "Total Spend Credit Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "achieve_level",
+      "display_name": "achieve_level",
+      "description": "Unique Achieve Level",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_achieve_level",
+      "display_name": "cost_per_achieve_level",
+      "description": "Cost per Unique Achieve Level",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "achieve_level_rate",
+      "display_name": "achieve_level_rate",
+      "description": "Achieve Level Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_achieve_level",
+      "display_name": "total_achieve_level",
+      "description": "Achieve Level (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_achieve_level",
+      "display_name": "cost_per_total_achieve_level",
+      "description": "Cost per Achieve Level",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_achieve_level",
+      "display_name": "value_per_total_achieve_level",
+      "description": "Value per Achieve Level",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_achieve_level_value",
+      "display_name": "total_achieve_level_value",
+      "description": "Total Achieve Level Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "unlock_achievement",
+      "display_name": "unlock_achievement",
+      "description": "Unique Unlock Achievement",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_unlock_achievement",
+      "display_name": "cost_per_unlock_achievement",
+      "description": "Cost per Unique Unlock Achievement",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "unlock_achievement_rate",
+      "display_name": "unlock_achievement_rate",
+      "description": "Unlock Achievement Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_unlock_achievement",
+      "display_name": "total_unlock_achievement",
+      "description": "Unlock Achievement (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_unlock_achievement",
+      "display_name": "cost_per_total_unlock_achievement",
+      "description": "Cost per Unlock Achievement",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_unlock_achievement",
+      "display_name": "value_per_total_unlock_achievement",
+      "description": "Value per Unlock Achievement",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_unlock_achievement_value",
+      "display_name": "total_unlock_achievement_value",
+      "description": "Total Unlock Achievement Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "sales_lead",
+      "display_name": "sales_lead",
+      "description": "Unique Generate Lead",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_sales_lead",
+      "display_name": "cost_per_sales_lead",
+      "description": "Cost per Unique Generate Lead",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "sales_lead_rate",
+      "display_name": "sales_lead_rate",
+      "description": "Generate Lead Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_sales_lead",
+      "display_name": "total_sales_lead",
+      "description": "Generate Lead (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_sales_lead",
+      "display_name": "cost_per_total_sales_lead",
+      "description": "Cost per Generate Lead",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_sales_lead",
+      "display_name": "value_per_total_sales_lead",
+      "description": "Value per Generate Lead",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_sales_lead_value",
+      "display_name": "total_sales_lead_value",
+      "description": "Total Generate Lead Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "in_app_ad_click",
+      "display_name": "in_app_ad_click",
+      "description": "Unique In-App Ad Click",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_in_app_ad_click",
+      "display_name": "cost_per_in_app_ad_click",
+      "description": "Cost per Unique In-App Ad Click",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "in_app_ad_click_rate",
+      "display_name": "in_app_ad_click_rate",
+      "description": "In-App Ad Click Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_in_app_ad_click",
+      "display_name": "total_in_app_ad_click",
+      "description": "In-App Ad Click (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_in_app_ad_click",
+      "display_name": "cost_per_total_in_app_ad_click",
+      "description": "Cost per In-App Ad Click",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_in_app_ad_click",
+      "display_name": "value_per_total_in_app_ad_click",
+      "description": "Value per In-App Ad Click",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_in_app_ad_click_value",
+      "display_name": "total_in_app_ad_click_value",
+      "description": "Total In-App Ad Click Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "in_app_ad_impr",
+      "display_name": "in_app_ad_impr",
+      "description": "Unique In-App Ad Impr",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_in_app_ad_impr",
+      "display_name": "cost_per_in_app_ad_impr",
+      "description": "Cost per Unique In-App Ad Impr",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "in_app_ad_impr_rate",
+      "display_name": "in_app_ad_impr_rate",
+      "description": "In-App Ad Impr Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_in_app_ad_impr",
+      "display_name": "total_in_app_ad_impr",
+      "description": "In-App Ad Impr (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_in_app_ad_impr",
+      "display_name": "cost_per_total_in_app_ad_impr",
+      "description": "Cost per In-App Ad Impr",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_in_app_ad_impr",
+      "display_name": "value_per_total_in_app_ad_impr",
+      "description": "Value per In-App Ad Impr",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_in_app_ad_impr_value",
+      "display_name": "total_in_app_ad_impr_value",
+      "description": "Total In-App Ad Impr Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "loan_apply",
+      "display_name": "loan_apply",
+      "description": "Unique Loan Apply",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_loan_apply",
+      "display_name": "cost_per_loan_apply",
+      "description": "Cost per Unique Loan Apply",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "loan_apply_rate",
+      "display_name": "loan_apply_rate",
+      "description": "Loan Apply Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_loan_apply",
+      "display_name": "total_loan_apply",
+      "description": "Loan Apply (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_loan_apply",
+      "display_name": "cost_per_total_loan_apply",
+      "description": "Cost per Loan Apply",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "loan_credit",
+      "display_name": "loan_credit",
+      "description": "Unique Loan Approval",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_loan_credit",
+      "display_name": "cost_per_loan_credit",
+      "description": "Cost per Unique Loan Approval",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "loan_credit_rate",
+      "display_name": "loan_credit_rate",
+      "description": "Loan Approval Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_loan_credit",
+      "display_name": "total_loan_credit",
+      "description": "Loan Approval (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_loan_credit",
+      "display_name": "cost_per_total_loan_credit",
+      "description": "Cost per Loan Approval",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "loan_disbursement",
+      "display_name": "loan_disbursement",
+      "description": "Unique Loan Disbursement",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_loan_disbursement",
+      "display_name": "cost_per_loan_disbursement",
+      "description": "Cost per Unique Loan Disbursement",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "loan_disbursement_rate",
+      "display_name": "loan_disbursement_rate",
+      "description": "Loan Disbursement Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_loan_disbursement",
+      "display_name": "total_loan_disbursement",
+      "description": "Loan Disbursement (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_loan_disbursement",
+      "display_name": "cost_per_total_loan_disbursement",
+      "description": "Cost per Loan Disbursement",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "login",
+      "display_name": "login",
+      "description": "Unique Login",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_login",
+      "display_name": "cost_per_login",
+      "description": "Cost per Unique Login",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "login_rate",
+      "display_name": "login_rate",
+      "description": "Login Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_login",
+      "display_name": "total_login",
+      "description": "Login (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_login",
+      "display_name": "cost_per_total_login",
+      "description": "Cost per Login",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "ratings",
+      "display_name": "ratings",
+      "description": "Unique Rate",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_ratings",
+      "display_name": "cost_per_ratings",
+      "description": "Cost per Unique Rate",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "ratings_rate",
+      "display_name": "ratings_rate",
+      "description": "Rate Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_ratings",
+      "display_name": "total_ratings",
+      "description": "Rate (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_ratings",
+      "display_name": "cost_per_total_ratings",
+      "description": "Cost per Rate",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_ratings",
+      "display_name": "value_per_total_ratings",
+      "description": "Value per Rate",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_ratings_value",
+      "display_name": "total_ratings_value",
+      "description": "Total Rate Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "search",
+      "display_name": "search",
+      "description": "Unique Search",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_search",
+      "display_name": "cost_per_search",
+      "description": "Cost per Unique Search",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "search_rate",
+      "display_name": "search_rate",
+      "description": "Search Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_search",
+      "display_name": "total_search",
+      "description": "Total Search",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_search",
+      "display_name": "cost_per_total_search",
+      "description": "Cost per Search",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "start_trial",
+      "display_name": "start_trial",
+      "description": "Unique Start Trial",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_start_trial",
+      "display_name": "cost_per_start_trial",
+      "description": "Cost per Unique Start Trial",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "start_trial_rate",
+      "display_name": "start_trial_rate",
+      "description": "Start Trial Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_start_trial",
+      "display_name": "total_start_trial",
+      "description": "Start Trial (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_start_trial",
+      "display_name": "cost_per_total_start_trial",
+      "description": "Cost per Start Trial",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "subscribe",
+      "display_name": "subscribe",
+      "description": "Unique Subscribe",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_subscribe",
+      "display_name": "cost_per_subscribe",
+      "description": "Cost per Unique Subscribe",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "subscribe_rate",
+      "display_name": "subscribe_rate",
+      "description": "Subscribe Rate (%)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_subscribe",
+      "display_name": "total_subscribe",
+      "description": "Subscribe (Total No.)",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "cost_per_total_subscribe",
+      "display_name": "cost_per_total_subscribe",
+      "description": "Cost per Subscribe",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "value_per_total_subscribe",
+      "display_name": "value_per_total_subscribe",
+      "description": "Value per Subscribe",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "total_subscribe_value",
+      "display_name": "total_subscribe_value",
+      "description": "Total Subscribe Value",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    }
+  ]
+}

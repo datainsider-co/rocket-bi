@@ -1,0 +1,110 @@
+[
+  {
+    "class_name": "int64",
+    "name": "primary_category",
+    "display_name": "primary_category",
+    "description": "The ID of the primary category for his product.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "string",
+    "name": "skus",
+    "display_name": "skus",
+    "description": "An array contains at least one SKU.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int64",
+    "name": "item_id",
+    "display_name": "item_id",
+    "description": "The ID of this product",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "datetime",
+    "name": "created_time",
+    "display_name": "created_time",
+    "description": "create time",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "DateTime"
+  },
+  {
+    "class_name": "datetime",
+    "name": "updated_time",
+    "display_name": "updated_time",
+    "description": "update time",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "DateTime"
+  },
+  {
+    "class_name": "string",
+    "name": "images",
+    "display_name": "images",
+    "description": "product images",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "marketImages",
+    "display_name": "marketImages",
+    "description": "product market images",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "status",
+    "display_name": "status",
+    "description": "product status",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "subStatus",
+    "display_name": "subStatus",
+    "description": "product reject status",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "suspendedSkus",
+    "display_name": "suspendedSkus",
+    "description": "An array contains at least one Suspended SKU.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "trialProduct",
+    "display_name": "trialProduct",
+    "description": "Whether product is trial product",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "rejectReason",
+    "display_name": "rejectReason",
+    "description": "rejectReason",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  }
+]

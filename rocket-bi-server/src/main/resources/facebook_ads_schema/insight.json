@@ -1,0 +1,696 @@
+[
+  {
+    "class_name": "string",
+    "name": "account_currency",
+    "display_name": "account_currency",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "account_id",
+    "display_name": "account_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "account_name",
+    "display_name": "account_name",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "action_values",
+    "display_name": "action_values",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "actions",
+    "display_name": "actions",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "string",
+    "name": "ad_id",
+    "display_name": "ad_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "ad_name",
+    "display_name": "ad_name",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "adset_id",
+    "display_name": "adset_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "adset_name",
+    "display_name": "adset_name",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "attribution_setting",
+    "display_name": "attribution_setting",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "buying_type",
+    "display_name": "buying_type",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "campaign_id",
+    "display_name": "campaign_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "campaign_name",
+    "display_name": "campaign_name",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "canvas_avg_view_percent",
+    "display_name": "canvas_avg_view_percent",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "canvas_avg_view_time",
+    "display_name": "canvas_avg_view_time",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "catalog_segment_value",
+    "display_name": "catalog_segment_value",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "clicks",
+    "display_name": "clicks",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "string",
+    "name": "conversion_rate_ranking",
+    "display_name": "conversion_rate_ranking",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "conversion_values",
+    "display_name": "conversion_values",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "conversions",
+    "display_name": "conversions",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "converted_product_quantity",
+    "display_name": "converted_product_quantity",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "converted_product_value",
+    "display_name": "converted_product_value",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cost_per_action_type",
+    "display_name": "cost_per_action_type",
+    "description": "The average cost of a relevant action.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cost_per_conversion",
+    "display_name": "cost_per_conversion",
+    "description": "The average cost of a conversion across all channels (i.e. website, mobile app, offline, and on-facebook). Conversions include contact, customize_product, donate, find_location, schedule, start_trial, submit_application, subscribe, recurring_subscription_payment, cancel_subscription, ad_click, ad_impression.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cost_per_estimated_ad_recallers",
+    "display_name": "cost_per_estimated_ad_recallers",
+    "description": "The average cost for each estimated ad recall lift. This metric is only available for assets in the Brand awareness, Post engagement and Video views Objectives. This metric is estimated and in development.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cost_per_inline_link_click",
+    "display_name": "cost_per_inline_link_click",
+    "description": "The average cost of each inline link click.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cost_per_inline_post_engagement",
+    "display_name": "cost_per_inline_post_engagement",
+    "description": "The average cost of each inline post engagement.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cost_per_outbound_click",
+    "display_name": "cost_per_outbound_click",
+    "description": "The average cost for each outbound click.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cost_per_thruplay",
+    "display_name": "cost_per_thruplay",
+    "description": "The average cost for each ThruPlay. This metric is in development.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cost_per_unique_action_type",
+    "display_name": "cost_per_unique_action_type",
+    "description": "The average cost of each unique action. This metric is estimated.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cost_per_unique_click",
+    "display_name": "cost_per_unique_click",
+    "description": "The average cost for each unique click (all). This metric is estimated.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cost_per_unique_inline_link_click",
+    "display_name": "cost_per_unique_inline_link_click",
+    "description": "The average cost of each unique inline link click. This metric is estimated.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cost_per_unique_outbound_click",
+    "display_name": "cost_per_unique_outbound_click",
+    "description": "The average cost for each unique outbound click. This metric is estimated.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cpc",
+    "display_name": "cpc",
+    "description": "The average cost for each click (all).",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cpm",
+    "display_name": "cpm",
+    "description": "The average cost for 1,000 impressions.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "cpp",
+    "display_name": "cpp",
+    "description": "The average cost to reach 1,000 people. This metric is estimated.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "ctr",
+    "display_name": "ctr",
+    "description": "The percentage of times people saw your ad and performed a click (all).",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "string",
+    "name": "date_start",
+    "display_name": "date_start",
+    "description": "The start date for your data. This is controlled by the date range you've selected for your reporting view.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "date_stop",
+    "display_name": "date_stop",
+    "description": "The end date for your data. This is controlled by the date range you've selected for your reporting view.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "dda_results",
+    "display_name": "dda_results",
+    "description": "Estimated incremental conversions caused by a given ad based on the objective and settings you selected. This is a modeled value.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "engagement_rate_ranking",
+    "display_name": "engagement_rate_ranking",
+    "description": "A ranking of your ad's expected engagement rate. Engagement includes all clicks, likes, comments and shares. Your ad is ranked against ads that competed for the same audience. Possible values include BELOW_AVERAGE_10, BELOW_AVERAGE_20, BELOW_AVERAGE_35, AVERAGE, ABOVE_AVERAGE, or UNKNOWN if there's not enough information about the ad. This metric is an ad relevance diagnostic and does not apply to campaigns or ad sets, only ads.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "estimated_ad_recall_rate",
+    "display_name": "estimated_ad_recall_rate",
+    "description": "The rate at which an estimated number of additional people, when asked, would remember seeing your ads within 2 days. This metric is only available for assets in the Brand awareness, Post engagement and Video views Objectives. This metric is estimated and in development.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "estimated_ad_recallers",
+    "display_name": "estimated_ad_recallers",
+    "description": "An estimate of the number of additional people who may remember seeing your ads, if asked, within 2 days. This metric is only available for assets in the Brand awareness, Post engagement and Video views Objectives. This metric is estimated and in development.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "frequency",
+    "display_name": "frequency",
+    "description": "The average number of times each person saw your ad. This metric is estimated.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "full_view_impressions",
+    "display_name": "full_view_impressions",
+    "description": "The number of Full Views on your Page's posts as a result of your ad.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "full_view_reach",
+    "display_name": "full_view_reach",
+    "description": "The number of people who performed a Full View on your Page's post as a result of your ad.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "impressions",
+    "display_name": "impressions",
+    "description": "The number of times your ads were on screen.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "inline_link_click_ctr",
+    "display_name": "inline_link_click_ctr",
+    "description": "The percentage of time people saw your ads and performed an inline link click.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "inline_link_clicks",
+    "display_name": "inline_link_clicks",
+    "description": "The number of clicks on links to select destinations or experiences, on or off Facebook-owned properties. Inline link clicks use a fixed 1-day-click attribution window.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "inline_post_engagement",
+    "display_name": "inline_post_engagement",
+    "description": "The total number of actions that people take involving your ads. Inline post engagements use a fixed 1-day-click attribution window.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "instant_experience_clicks_to_open",
+    "display_name": "instant_experience_clicks_to_open",
+    "description": "The number of clicks on your ad that open an Instant Experience. This metric is in development.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "instant_experience_clicks_to_start",
+    "display_name": "instant_experience_clicks_to_start",
+    "description": "The number of times an interactive component in an Instant Experience starts. This metric is in development.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "instant_experience_outbound_clicks",
+    "display_name": "instant_experience_outbound_clicks",
+    "description": "The number of clicks on links in an Instant Experience that take people off Facebook-owned properties. This metric is in development.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "mobile_app_purchase_roas",
+    "display_name": "mobile_app_purchase_roas",
+    "description": "The total return on ad spend (ROAS) from mobile app purchases. This is based on the value that you assigned when you set up the app event.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "string",
+    "name": "objective",
+    "display_name": "objective",
+    "description": "The objective reflecting the goal you want to achieve with your advertising. It may be different from the selected objective of the campaign in some cases.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "optimization_goal",
+    "display_name": "optimization_goal",
+    "description": "The optimization goal you selected for your ad or ad set. Your optimization goal reflects what you want to optimize for the ads.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "outbound_clicks",
+    "display_name": "outbound_clicks",
+    "description": "The number of clicks on links that take people off Facebook-owned properties.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "outbound_clicks_ctr",
+    "display_name": "outbound_clicks_ctr",
+    "description": "The percentage of times people saw your ad and performed an outbound click.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "string",
+    "name": "place_page_name",
+    "display_name": "place_page_name",
+    "description": "The name of the place page involved in impression or click. Has to be used together with Business Locations breakdown.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "purchase_roas",
+    "display_name": "purchase_roas",
+    "description": "The total return on ad spend (ROAS) from purchases. This is based on information received from one or more of your connected Facebook Business Tools and attributed to your ads.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "qualifying_question_qualify_answer_rate",
+    "display_name": "qualifying_question_qualify_answer_rate",
+    "description": "qualifying_question_qualify_answer_rate",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "string",
+    "name": "quality_ranking",
+    "display_name": "quality_ranking",
+    "description": "A ranking of your ad's perceived quality. Quality is measured using feedback on your ads and the post-click experience. Your ad is ranked against ads that competed for the same audience. Possible values include BELOW_AVERAGE_10, BELOW_AVERAGE_20, BELOW_AVERAGE_35, AVERAGE, ABOVE_AVERAGE, or UNKNOWN if there's not enough information about the ad. This metric is an ad relevance diagnostic (https://www.facebook.com/help/403110480493160) and does not apply to campaigns or ad sets, only ads.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "reach",
+    "display_name": "reach",
+    "description": "The number of people who saw your ads at least once. Reach is different from impressions, which may include multiple views of your ads by the same people. This metric is estimated.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "social_spend",
+    "display_name": "social_spend",
+    "description": "The total amount you've spent so far for your ads showed with social information. (ex: Jane Doe likes this).",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "spend",
+    "display_name": "spend",
+    "description": "The estimated total amount of money you've spent on your campaign, ad set or ad during its schedule. This metric is estimated.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "video_30_sec_watched_actions",
+    "display_name": "video_30_sec_watched_actions",
+    "description": "The number of times your video played for at least 30 seconds, or for nearly its total length if it's shorter than 30 seconds. For each impression of a video, we'll count video views separately and exclude any time spent replaying the video.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "video_avg_time_watched_actions",
+    "display_name": "video_avg_time_watched_actions",
+    "description": "The average time a video was played, including any time spent replaying the video for a single impression.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "video_p100_watched_actions",
+    "display_name": "video_p100_watched_actions",
+    "description": "The number of times your video was played at 100% of its length, including plays that skipped to this point.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "video_p25_watched_actions",
+    "display_name": "video_p25_watched_actions",
+    "description": "The number of times your video was played at 25% of its length, including plays that skipped to this point.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "video_p50_watched_actions",
+    "display_name": "video_p50_watched_actions",
+    "description": "The number of times your video was played at 50% of its length, including plays that skipped to this point.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "video_p75_watched_actions",
+    "display_name": "video_p75_watched_actions",
+    "description": "The number of times your video was played at 75% of its length, including plays that skipped to this point.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "video_p95_watched_actions",
+    "display_name": "video_p95_watched_actions",
+    "description": "The number of times your video was played at 95% of its length, including plays that skipped to this point.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "video_play_actions",
+    "display_name": "video_play_actions",
+    "description": "The number of times your video starts to play. This is counted for each impression of a video, and excludes replays. This metric is in development.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "string",
+    "name": "video_play_curve_actions",
+    "display_name": "video_play_curve_actions",
+    "description": "A video-play based curve graph that illustrates the percentage of video plays that reached a given second. Entries 0 to 14 represent seconds 0 thru 14. Entries 15 to 17 represent second ranges [15 to 20), [20 to 25), and [25 to 30). Entries 18 to 20 represent second ranges [30 to 40), [40 to 50), and [50 to 60). Entry 21 represents plays over 60 seconds.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "website_ctr",
+    "display_name": "website_ctr",
+    "description": "The percentage of times people saw your ad and performed a link click.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "double",
+    "name": "website_purchase_roas",
+    "display_name": "website_purchase_roas",
+    "description": "The total return on ad spend (ROAS) from website purchases. This is based on the value of all conversions recorded by the Facebook pixel on your website and attributed to your ads.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "string",
+    "name": "action_type",
+    "display_name": "action_type",
+    "description": "The kind of actions taken on your ad, Page, app or event after your ad was served to someone, even if they didn't click on it. Action types include Page likes, app installs, conversions, event responses and more.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  }
+]
+

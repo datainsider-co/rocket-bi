@@ -1,0 +1,210 @@
+[
+  {
+    "class_name": "string",
+    "name": "fee_type",
+    "display_name": "fee_type",
+    "description": "Transaction type ID.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "details",
+    "display_name": "details",
+    "description": "Transaction details",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "seller_sku",
+    "display_name": "seller_sku",
+    "description": "The seller SKU",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "lazada_sku",
+    "display_name": "lazada_sku",
+    "description": "The Lazada SKU",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "amount",
+    "display_name": "amount",
+    "description": "Total transaction value",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "VAT_in_amount",
+    "display_name": "VAT_in_amount",
+    "description": "The VAT in amount",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "WHT_amount",
+    "display_name": "WHT_amount",
+    "description": "The WHT amount",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "WHT_included_in_amount",
+    "display_name": "WHT_included_in_amount",
+    "description": "The WHT included in amount or not",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "statement",
+    "display_name": "statement",
+    "description": "Statement ID",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "paid_status",
+    "display_name": "paid_status",
+    "description": "Yes / No",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "order_no",
+    "display_name": "order_no",
+    "description": "Order ID",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "orderItem_no",
+    "display_name": "orderItem_no",
+    "description": "Order item number",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "orderItem_status",
+    "display_name": "orderItem_status",
+    "description": "The order item status",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "shipping_provider",
+    "display_name": "shipping_provider",
+    "description": "The shipping provider",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "shipping_speed",
+    "display_name": "shipping_speed",
+    "description": "The shipping speed",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "shipment_type",
+    "display_name": "shipment_type",
+    "description": "The shipment type",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "reference",
+    "display_name": "reference",
+    "description": "The Order Item ID (the Sub-order ID of 'Order ID' parameter)",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "comment",
+    "display_name": "comment",
+    "description": "Comments by regional finance team",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "payment_ref_id",
+    "display_name": "payment_ref_id",
+    "description": "Payment reference ID from bank or other payment provider",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "fee_name",
+    "display_name": "fee_name",
+    "description": "feeName",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "transaction_date",
+    "display_name": "transaction_date",
+    "description": "Date of the transaction",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "transaction_type",
+    "display_name": "transaction_type",
+    "description": "Transaction type or fee name",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "transaction_number",
+    "display_name": "transaction_number",
+    "description": "Unique ID of the transaction in the format 'Seller code- xxxxxxx'",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  }
+]
+

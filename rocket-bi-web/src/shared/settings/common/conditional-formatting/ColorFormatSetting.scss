@@ -1,0 +1,45 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 7/6/21, 6:23 PM
+ */
+
+.color-format-setting {
+  > header.color-base-field {
+    display: flex;
+    flex-direction: row;
+
+    > div + div {
+      margin-left: 12px;
+    }
+
+    > div {
+      flex: 1;
+    }
+
+    > div.specific-picker {
+      //background: red;
+      display: flex;
+      align-items: flex-end;
+
+      #color-default-formatting {
+        margin-right: 8px;
+      }
+
+      #specific-color-picker {
+        margin-bottom: 1px;
+      }
+    }
+
+    > div.base-field-error .select-container {
+      border: 1px solid var(--danger);
+    }
+  }
+
+  > header + header {
+    margin-top: 16px;
+  }
+
+  > div {
+    margin-top: 30px;
+  }
+}

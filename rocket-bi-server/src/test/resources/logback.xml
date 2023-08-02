@@ -1,0 +1,29 @@
+<configuration>
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+
+    <!-- ===================================================== -->
+    <!-- Common Config -->
+    <!-- ===================================================== -->
+
+    <!-- JUL/JDK14 to Logback bridge -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <!-- ===================================================== -->
+    <!-- Primary Async Appenders -->
+    <!-- ===================================================== -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <!-- ===================================================== -->
+    <!-- Package Config -->
+    <!-- ===================================================== -->
+
+    <!-- Root Config -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

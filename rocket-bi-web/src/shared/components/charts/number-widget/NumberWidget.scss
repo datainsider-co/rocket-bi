@@ -1,0 +1,39 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 1/19/21, 5:51 PM
+ */
+
+@import '~@/themes/scss/mixin.scss';
+
+.number-widget-container {
+  border-radius: 4px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+
+  .display-value {
+    @include medium-text(20px, 2.57px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+}
+
+.number-tooltip {
+  > .arrow {
+    display: none;
+  }
+
+  > .tooltip-inner {
+    background: unset;
+
+    > div {
+      padding: 4px 8px;
+    }
+  }
+}

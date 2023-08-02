@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  rocket-bi-web:
+    image: registry.gitlab.com/datainsider/rocketbi_v2/rocket-bi-web:dev
+    container_name: rocket-bi-web
+    restart: always
+    ports:
+      - 5050:8080
+    volumes:
+      - ./public/config:/app/config
+
+networks:
+  default:
+    external:
+      name: di_network

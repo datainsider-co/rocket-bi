@@ -1,0 +1,821 @@
+[
+  {
+    "name": "ga:userType"
+  },
+  {
+    "name": "ga:visitorType"
+  },
+  {
+    "name": "ga:sessionCount"
+  },
+  {
+    "name": "ga:visitCount"
+  },
+  {
+    "name": "ga:daysSinceLastSession"
+  },
+  {
+    "name": "ga:userDefinedValue"
+  },
+  {
+    "name": "ga:userBucket"
+  },
+  {
+    "name": "ga:sessionDurationBucket"
+  },
+  {
+    "name": "ga:visitLength"
+  },
+  {
+    "name": "ga:referralPath"
+  },
+  {
+    "name": "ga:fullReferrer"
+  },
+  {
+    "name": "ga:campaign"
+  },
+  {
+    "name": "ga:source"
+  },
+  {
+    "name": "ga:medium"
+  },
+  {
+    "name": "ga:sourceMedium"
+  },
+  {
+    "name": "ga:keyword"
+  },
+  {
+    "name": "ga:adContent"
+  },
+  {
+    "name": "ga:socialNetwork"
+  },
+  {
+    "name": "ga:hasSocialSourceReferral"
+  },
+  {
+    "name": "ga:adGroup"
+  },
+  {
+    "name": "ga:adSlot"
+  },
+  {
+    "name": "ga:adDistributionNetwork"
+  },
+  {
+    "name": "ga:adMatchType"
+  },
+  {
+    "name": "ga:adKeywordMatchType"
+  },
+  {
+    "name": "ga:adMatchedQuery"
+  },
+  {
+    "name": "ga:adPlacementDomain"
+  },
+  {
+    "name": "ga:adPlacementUrl"
+  },
+  {
+    "name": "ga:adFormat"
+  },
+  {
+    "name": "ga:adTargetingType"
+  },
+  {
+    "name": "ga:adTargetingOption"
+  },
+  {
+    "name": "ga:adDisplayUrl"
+  },
+  {
+    "name": "ga:adDestinationUrl"
+  },
+  {
+    "name": "ga:adwordsCustomerID"
+  },
+  {
+    "name": "ga:adwordsCampaignID"
+  },
+  {
+    "name": "ga:adwordsAdGroupID"
+  },
+  {
+    "name": "ga:adwordsCreativeID"
+  },
+  {
+    "name": "ga:adwordsCriteriaID"
+  },
+  {
+    "name": "ga:adQueryWordCount"
+  },
+  {
+    "name": "ga:goalCompletionLocation"
+  },
+  {
+    "name": "ga:goalPreviousStep1"
+  },
+  {
+    "name": "ga:goalPreviousStep2"
+  },
+  {
+    "name": "ga:goalPreviousStep3"
+  },
+  {
+    "name": "ga:browser"
+  },
+  {
+    "name": "ga:browserVersion"
+  },
+  {
+    "name": "ga:operatingSystem"
+  },
+  {
+    "name": "ga:operatingSystemVersion"
+  },
+  {
+    "name": "ga:mobileDeviceBranding"
+  },
+  {
+    "name": "ga:mobileDeviceModel"
+  },
+  {
+    "name": "ga:mobileInputSelector"
+  },
+  {
+    "name": "ga:mobileDeviceInfo"
+  },
+  {
+    "name": "ga:mobileDeviceMarketingName"
+  },
+  {
+    "name": "ga:deviceCategory"
+  },
+  {
+    "name": "ga:continent"
+  },
+  {
+    "name": "ga:subContinent"
+  },
+  {
+    "name": "ga:country"
+  },
+  {
+    "name": "ga:region"
+  },
+  {
+    "name": "ga:metro"
+  },
+  {
+    "name": "ga:city"
+  },
+  {
+    "name": "ga:latitude"
+  },
+  {
+    "name": "ga:longitude"
+  },
+  {
+    "name": "ga:networkDomain"
+  },
+  {
+    "name": "ga:networkLocation"
+  },
+  {
+    "name": "ga:flashVersion"
+  },
+  {
+    "name": "ga:javaEnabled"
+  },
+  {
+    "name": "ga:language"
+  },
+  {
+    "name": "ga:screenColors"
+  },
+  {
+    "name": "ga:sourcePropertyDisplayName"
+  },
+  {
+    "name": "ga:sourcePropertyTrackingId"
+  },
+  {
+    "name": "ga:screenResolution"
+  },
+  {
+    "name": "ga:socialActivityContentUrl"
+  },
+  {
+    "name": "ga:hostname"
+  },
+  {
+    "name": "ga:pagePath"
+  },
+  {
+    "name": "ga:pagePathLevel1"
+  },
+  {
+    "name": "ga:pagePathLevel2"
+  },
+  {
+    "name": "ga:pagePathLevel3"
+  },
+  {
+    "name": "ga:pagePathLevel4"
+  },
+  {
+    "name": "ga:pageTitle"
+  },
+  {
+    "name": "ga:landingPagePath"
+  },
+  {
+    "name": "ga:secondPagePath"
+  },
+  {
+    "name": "ga:exitPagePath"
+  },
+  {
+    "name": "ga:previousPagePath"
+  },
+  {
+    "name": "ga:pageDepth"
+  },
+  {
+    "name": "ga:searchUsed"
+  },
+  {
+    "name": "ga:searchKeyword"
+  },
+  {
+    "name": "ga:searchKeywordRefinement"
+  },
+  {
+    "name": "ga:searchCategory"
+  },
+  {
+    "name": "ga:searchStartPage"
+  },
+  {
+    "name": "ga:searchDestinationPage"
+  },
+  {
+    "name": "ga:searchAfterDestinationPage"
+  },
+  {
+    "name": "ga:appInstallerId"
+  },
+  {
+    "name": "ga:appVersion"
+  },
+  {
+    "name": "ga:appName"
+  },
+  {
+    "name": "ga:appId"
+  },
+  {
+    "name": "ga:screenName"
+  },
+  {
+    "name": "ga:screenDepth"
+  },
+  {
+    "name": "ga:landingScreenName"
+  },
+  {
+    "name": "ga:exitScreenName"
+  },
+  {
+    "name": "ga:eventCategory"
+  },
+  {
+    "name": "ga:eventAction"
+  },
+  {
+    "name": "ga:eventLabel"
+  },
+  {
+    "name": "ga:transactionId"
+  },
+  {
+    "name": "ga:affiliation"
+  },
+  {
+    "name": "ga:sessionsToTransaction"
+  },
+  {
+    "name": "ga:visitsToTransaction"
+  },
+  {
+    "name": "ga:daysToTransaction"
+  },
+  {
+    "name": "ga:productSku"
+  },
+  {
+    "name": "ga:productName"
+  },
+  {
+    "name": "ga:productCategory"
+  },
+  {
+    "name": "ga:currencyCode"
+  },
+  {
+    "name": "ga:socialInteractionNetwork"
+  },
+  {
+    "name": "ga:socialInteractionAction"
+  },
+  {
+    "name": "ga:socialInteractionNetworkAction"
+  },
+  {
+    "name": "ga:socialInteractionTarget"
+  },
+  {
+    "name": "ga:socialEngagementType"
+  },
+  {
+    "name": "ga:userTimingCategory"
+  },
+  {
+    "name": "ga:userTimingLabel"
+  },
+  {
+    "name": "ga:userTimingVariable"
+  },
+  {
+    "name": "ga:exceptionDescription"
+  },
+  {
+    "name": "ga:experimentId"
+  },
+  {
+    "name": "ga:experimentVariant"
+  },
+  {
+    "name": "ga:dimensionXX"
+  },
+  {
+    "name": "ga:customVarNameXX"
+  },
+  {
+    "name": "ga:customVarValueXX"
+  },
+  {
+    "name": "ga:date"
+  },
+  {
+    "name": "ga:year"
+  },
+  {
+    "name": "ga:month"
+  },
+  {
+    "name": "ga:week"
+  },
+  {
+    "name": "ga:day"
+  },
+  {
+    "name": "ga:hour"
+  },
+  {
+    "name": "ga:minute"
+  },
+  {
+    "name": "ga:nthMonth"
+  },
+  {
+    "name": "ga:nthWeek"
+  },
+  {
+    "name": "ga:nthDay"
+  },
+  {
+    "name": "ga:nthMinute"
+  },
+  {
+    "name": "ga:dayOfWeek"
+  },
+  {
+    "name": "ga:dayOfWeekName"
+  },
+  {
+    "name": "ga:dateHour"
+  },
+  {
+    "name": "ga:dateHourMinute"
+  },
+  {
+    "name": "ga:yearMonth"
+  },
+  {
+    "name": "ga:yearWeek"
+  },
+  {
+    "name": "ga:isoWeek"
+  },
+  {
+    "name": "ga:isoYear"
+  },
+  {
+    "name": "ga:isoYearIsoWeek"
+  },
+  {
+    "name": "ga:dcmClickAd"
+  },
+  {
+    "name": "ga:dcmClickAdId"
+  },
+  {
+    "name": "ga:dcmClickAdType"
+  },
+  {
+    "name": "ga:dcmClickAdTypeId"
+  },
+  {
+    "name": "ga:dcmClickAdvertiser"
+  },
+  {
+    "name": "ga:dcmClickAdvertiserId"
+  },
+  {
+    "name": "ga:dcmClickCampaign"
+  },
+  {
+    "name": "ga:dcmClickCampaignId"
+  },
+  {
+    "name": "ga:dcmClickCreativeId"
+  },
+  {
+    "name": "ga:dcmClickCreative"
+  },
+  {
+    "name": "ga:dcmClickRenderingId"
+  },
+  {
+    "name": "ga:dcmClickCreativeType"
+  },
+  {
+    "name": "ga:dcmClickCreativeTypeId"
+  },
+  {
+    "name": "ga:dcmClickCreativeVersion"
+  },
+  {
+    "name": "ga:dcmClickSite"
+  },
+  {
+    "name": "ga:dcmClickSiteId"
+  },
+  {
+    "name": "ga:dcmClickSitePlacement"
+  },
+  {
+    "name": "ga:dcmClickSitePlacementId"
+  },
+  {
+    "name": "ga:dcmClickSpotId"
+  },
+  {
+    "name": "ga:dcmFloodlightActivity"
+  },
+  {
+    "name": "ga:dcmFloodlightActivityAndGroup"
+  },
+  {
+    "name": "ga:dcmFloodlightActivityGroup"
+  },
+  {
+    "name": "ga:dcmFloodlightActivityGroupId"
+  },
+  {
+    "name": "ga:dcmFloodlightActivityId"
+  },
+  {
+    "name": "ga:dcmFloodlightAdvertiserId"
+  },
+  {
+    "name": "ga:dcmFloodlightSpotId"
+  },
+  {
+    "name": "ga:dcmLastEventAd"
+  },
+  {
+    "name": "ga:dcmLastEventAdId"
+  },
+  {
+    "name": "ga:dcmLastEventAdType"
+  },
+  {
+    "name": "ga:dcmLastEventAdTypeId"
+  },
+  {
+    "name": "ga:dcmLastEventAdvertiser"
+  },
+  {
+    "name": "ga:dcmLastEventAdvertiserId"
+  },
+  {
+    "name": "ga:dcmLastEventAttributionType"
+  },
+  {
+    "name": "ga:dcmLastEventCampaign"
+  },
+  {
+    "name": "ga:dcmLastEventCampaignId"
+  },
+  {
+    "name": "ga:dcmLastEventCreativeId"
+  },
+  {
+    "name": "ga:dcmLastEventCreative"
+  },
+  {
+    "name": "ga:dcmLastEventRenderingId"
+  },
+  {
+    "name": "ga:dcmLastEventCreativeType"
+  },
+  {
+    "name": "ga:dcmLastEventCreativeTypeId"
+  },
+  {
+    "name": "ga:dcmLastEventCreativeVersion"
+  },
+  {
+    "name": "ga:dcmLastEventSite"
+  },
+  {
+    "name": "ga:dcmLastEventSiteId"
+  },
+  {
+    "name": "ga:dcmLastEventSitePlacement"
+  },
+  {
+    "name": "ga:dcmLastEventSitePlacementId"
+  },
+  {
+    "name": "ga:dcmLastEventSpotId"
+  },
+  {
+    "name": "ga:landingContentGroupXX"
+  },
+  {
+    "name": "ga:previousContentGroupXX"
+  },
+  {
+    "name": "ga:contentGroupXX"
+  },
+  {
+    "name": "ga:userAgeBracket"
+  },
+  {
+    "name": "ga:visitorAgeBracket"
+  },
+  {
+    "name": "ga:userGender"
+  },
+  {
+    "name": "ga:visitorGender"
+  },
+  {
+    "name": "ga:interestOtherCategory"
+  },
+  {
+    "name": "ga:interestAffinityCategory"
+  },
+  {
+    "name": "ga:interestInMarketCategory"
+  },
+  {
+    "name": "ga:dfpLineItemId"
+  },
+  {
+    "name": "ga:dfpLineItemName"
+  },
+  {
+    "name": "ga:acquisitionCampaign"
+  },
+  {
+    "name": "ga:acquisitionMedium"
+  },
+  {
+    "name": "ga:acquisitionSource"
+  },
+  {
+    "name": "ga:acquisitionSourceMedium"
+  },
+  {
+    "name": "ga:acquisitionTrafficChannel"
+  },
+  {
+    "name": "ga:browserSize"
+  },
+  {
+    "name": "ga:campaignCode"
+  },
+  {
+    "name": "ga:channelGrouping"
+  },
+  {
+    "name": "ga:checkoutOptions"
+  },
+  {
+    "name": "ga:cityId"
+  },
+  {
+    "name": "ga:cohort"
+  },
+  {
+    "name": "ga:cohortNthDay"
+  },
+  {
+    "name": "ga:cohortNthMonth"
+  },
+  {
+    "name": "ga:cohortNthWeek"
+  },
+  {
+    "name": "ga:continentId"
+  },
+  {
+    "name": "ga:countryIsoCode"
+  },
+  {
+    "name": "ga:dataSource"
+  },
+  {
+    "name": "ga:dbmClickAdvertiser"
+  },
+  {
+    "name": "ga:dbmClickAdvertiserId"
+  },
+  {
+    "name": "ga:dbmClickCreativeId"
+  },
+  {
+    "name": "ga:dbmClickExchange"
+  },
+  {
+    "name": "ga:dbmClickExchangeId"
+  },
+  {
+    "name": "ga:dbmClickInsertionOrder"
+  },
+  {
+    "name": "ga:dbmClickInsertionOrderId"
+  },
+  {
+    "name": "ga:dbmClickLineItem"
+  },
+  {
+    "name": "ga:dbmClickLineItemId"
+  },
+  {
+    "name": "ga:dbmClickSite"
+  },
+  {
+    "name": "ga:dbmClickSiteId"
+  },
+  {
+    "name": "ga:dbmLastEventAdvertiser"
+  },
+  {
+    "name": "ga:dbmLastEventAdvertiserId"
+  },
+  {
+    "name": "ga:dbmLastEventCreativeId"
+  },
+  {
+    "name": "ga:dbmLastEventExchange"
+  },
+  {
+    "name": "ga:dbmLastEventExchangeId"
+  },
+  {
+    "name": "ga:dbmLastEventInsertionOrder"
+  },
+  {
+    "name": "ga:dbmLastEventInsertionOrderId"
+  },
+  {
+    "name": "ga:dbmLastEventLineItem"
+  },
+  {
+    "name": "ga:dbmLastEventLineItemId"
+  },
+  {
+    "name": "ga:dbmLastEventSite"
+  },
+  {
+    "name": "ga:dbmLastEventSiteId"
+  },
+  {
+    "name": "ga:dsAdGroup"
+  },
+  {
+    "name": "ga:dsAdGroupId"
+  },
+  {
+    "name": "ga:dsAdvertiser"
+  },
+  {
+    "name": "ga:dsAdvertiserId"
+  },
+  {
+    "name": "ga:dsAgency"
+  },
+  {
+    "name": "ga:dsAgencyId"
+  },
+  {
+    "name": "ga:dsCampaign"
+  },
+  {
+    "name": "ga:dsCampaignId"
+  },
+  {
+    "name": "ga:dsEngineAccount"
+  },
+  {
+    "name": "ga:dsEngineAccountId"
+  },
+  {
+    "name": "ga:dsKeyword"
+  },
+  {
+    "name": "ga:dsKeywordId"
+  },
+  {
+    "name": "ga:experimentCombination"
+  },
+  {
+    "name": "ga:experimentName"
+  },
+  {
+    "name": "ga:internalPromotionCreative"
+  },
+  {
+    "name": "ga:internalPromotionId"
+  },
+  {
+    "name": "ga:internalPromotionName"
+  },
+  {
+    "name": "ga:internalPromotionPosition"
+  },
+  {
+    "name": "ga:isTrueViewVideoAd"
+  },
+  {
+    "name": "ga:metroId"
+  },
+  {
+    "name": "ga:nthHour"
+  },
+  {
+    "name": "ga:orderCouponCode"
+  },
+  {
+    "name": "ga:productBrand"
+  },
+  {
+    "name": "ga:productCategoryHierarchy"
+  },
+  {
+    "name": "ga:productCategoryLevelXX"
+  },
+  {
+    "name": "ga:productCouponCode"
+  },
+  {
+    "name": "ga:productListName"
+  },
+  {
+    "name": "ga:productListPosition"
+  },
+  {
+    "name": "ga:productVariant"
+  },
+  {
+    "name": "ga:regionId"
+  },
+  {
+    "name": "ga:regionIsoCode"
+  },
+  {
+    "name": "ga:shoppingStage"
+  },
+  {
+    "name": "ga:subContinentCode"
+  }
+]

@@ -1,0 +1,65 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 7/2/21, 9:02 PM
+ */
+
+.root-dashboard-popover-theme {
+  .ant-popover {
+    --primary: var(--menu-background-color);
+    --vc-reset: rgba(0, 0, 0, 0.2);
+  }
+
+  .filter-popover-area {
+    --primary: var(--menu-background-color);
+    --secondary: var(--input-background-color);
+    --vc-reset: rgba(0, 0, 0, 0.2);
+    border: none;
+
+    .select-popover {
+      ul li {
+        &:hover {
+          background: var(--active-color);
+        }
+
+        &.active.selected {
+          background: var(--hover-color);
+        }
+      }
+    }
+  }
+
+  .di-context-menu-container,
+  .popover-body {
+    --primary: var(--menu-background-color);
+  }
+
+  .select-popover {
+    ul li {
+      &:hover {
+        background: var(--active-color) !important;
+      }
+
+      &.active.selected {
+        background: var(--hover-color);
+      }
+    }
+  }
+
+  .modal {
+    .modal-footer {
+      border: none !important;
+
+      .select-popover {
+        ul li {
+          &:hover {
+            background: var(--active-color);
+          }
+
+          &.active.selected {
+            background: var(--hover-color);
+          }
+        }
+      }
+    }
+  }
+}

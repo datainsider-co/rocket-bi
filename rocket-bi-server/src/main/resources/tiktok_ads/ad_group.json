@@ -1,0 +1,914 @@
+[
+  {
+    "class_name": "string",
+    "name": "advertiser_id",
+    "display_name": "advertiser_id",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "campaign_id",
+    "display_name": "campaign_id",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "adgroup_id",
+    "display_name": "adgroup_id",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "adgroup_name",
+    "display_name": "adgroup_name",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "split_test_group_id",
+    "display_name": "split_test_group_id",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "split_test_status",
+    "display_name": "split_test_status",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "share_disabled",
+    "display_name": "share_disabled",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "placement_type",
+    "display_name": "placement_type",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "placements",
+    "display_name": "placements",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "inventory_filter_enabled",
+    "display_name": "inventory_filter_enabled",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "bool",
+    "name": "comment_disabled",
+    "display_name": "comment_disabled",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "app_id",
+    "display_name": "app_id",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "promotion_type",
+    "display_name": "promotion_type",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "store_id",
+    "display_name": "store_id",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "store_authorized_bc_id",
+    "display_name": "store_authorized_bc_id",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "identity_id",
+    "display_name": "identity_id",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "identity_type",
+    "display_name": "identity_type",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "identity_authorized_bc_id",
+    "display_name": "identity_authorized_bc_id",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "app_download_url",
+    "display_name": "app_download_url",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "pixel_id",
+    "display_name": "pixel_id",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "optimization_event",
+    "display_name": "optimization_event",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "secondary_optimization_event",
+    "display_name": "secondary_optimization_event",
+    "description": "",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "creative_material_mode",
+    "display_name": "creative_material_mode",
+    "description": "The strategy that your creatives will be delivered. Note: When you choose automated ad, your creative materials will automatically be combined for delivery. Tiktok Ads' smart optimization algorithm is applied and will be used to achieve the best ad performance during delivery. Enum values: CUSTOM(custom), DYNAMIC(automated)",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "audience_ids",
+    "display_name": "audience_ids",
+    "description": "A list of audience IDs",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "excluded_audience_ids",
+    "display_name": "excluded_audience_ids",
+    "description": "A list of excluded audience ID",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "audience_rule",
+    "display_name": "audience_rule",
+    "description": "Rules that specify your audience.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "audience_type",
+    "display_name": "audience_type",
+    "description": "App retargeting audience type. For enum values, see Enumeration - App Retargeting Audience Type.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "location_ids",
+    "display_name": "location_ids",
+    "description": "IDs of the locations that you want to target. Use Get locations to get available locations.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_hfss",
+    "display_name": "is_hfss",
+    "description": "Whether the promoted product is HFSS foods (foods that are high in fat, salt, or sugar).",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "interest_category_ids",
+    "display_name": "interest_category_ids",
+    "description": "Interest classification. If the interest is specified, users that do not meet interest target will be excluded during delivery. Do not specify if you wish to target everyone. Use /tool/interest_category/ endpoint to get the complete list of interest categories.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "interest_keyword_ids",
+    "display_name": "interest_keyword_ids",
+    "description": "IDs of interest keywords that you want to use to target audience. You can get interest keywords IDs by using the /tool/interest_keyword/recommend/ endpoint. For details, see Get interest keywords.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "age_groups",
+    "display_name": "age_groups",
+    "description": "Age groups you want to target. For enum values, see Enumeration - Age Group.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "gender",
+    "display_name": "gender",
+    "description": "Gender that you want to target. Enum values: GENDER_FEMALE,GENDER_MALE,GENDER_UNLIMITED",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "languages",
+    "display_name": "languages",
+    "description": "Codes of the languages that you want to target. For the list of languages codes supported, see Enumeration - Language Code.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "operating_systems",
+    "display_name": "operating_systems",
+    "description": "Device operating systems that you want to target. Only one value is allowed. Enum: ANDROID, IOS",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "network_types",
+    "display_name": "network_types",
+    "description": "Network types that you want to target. Default: unlimited. For enum values, see Enumeration - Connection Type.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "device_price_ranges",
+    "display_name": "device_price_ranges",
+    "description": "\"Targeting device price range. 10000 means 1000+. The numbers must be in multiples of 50.\nImportant: The upper limit you set will be added by 50 and the resulting new number will be used as the actual upper limit for device targeting. The actual upper limit is shown in the ad group settings in TikTok Ads Manager. If you set and get the price range of [0, 250], it actually means [0, 300].\"",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "min_android_version",
+    "display_name": "min_android_version",
+    "description": "Minimum Android version. For enum values, see Enumeration - Minimum Android Version.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "min_ios_version",
+    "display_name": "min_ios_version",
+    "description": "Audience minimum ios version. For enum values, see Enumeration - Minimum iOS Version.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "ios14_targeting",
+    "display_name": "ios14_targeting",
+    "description": "The iOS devices that you want to target.\nNote: When campaign_type of the campaign is set as IOS14_CAMPAIGN, ios14_targeting is required in the request when creating an ad group and must be specified as IOS14_PLUS.\n\nEnum values:\nUNSET: The default value for ad groups that were created before the introduction of this field.\nIOS14_MINUS: Devices with iOS 14.4 or earlier versions, which are not affected by the iOS 14 privacy update. This is the default value for ad groups that are created after the introduction of this field.\nIOS14_PLUS: Devices with iOS 14.5 and above. The iOS 14 privacy update has been enforced in this group of devices. Specify this value if you want to create an iOS 14 campaign. Each iOS 14 campaign can have up to 2 active ad groups.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "device_model_ids",
+    "display_name": "device_model_ids",
+    "description": "List of device model IDs. For more details about device models, see Device Models.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "household_income",
+    "display_name": "household_income",
+    "description": "Household income that you want to target. Enum values: TOP5(Top 5% of ZIP codes), TOP10(Top 10% of ZIP codes), TOP10_25(Top 10% -25% of ZIP codes), TOP25_50(Top 25% - 50% of ZIP codes).Note: household_income is an allowlist-only feature that is only available in US. If you would like to access it, please contact your TikTok representative.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "spending_power",
+    "display_name": "spending_power",
+    "description": "Spending power that you want to target. Enum values: ALL, HIGH. If it is set to HIGH, you can target high spending users who typically spend more on purchases than average users.Note: spending_power is an allowlist-only feature . If you would like to access it, please contact your TikTok representative.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "budget_mode",
+    "display_name": "budget_mode",
+    "description": "Budget mode. If Campaign Budget Optimization is enabled, BUDGET_MODE_INFINITE will be returned. For more information about budget modes, see Budget Settings.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "budget",
+    "display_name": "budget",
+    "description": "Ad budget. Returns 0.0 when Campaign Budget Optimization (budget_optimize_on) is on.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "double",
+    "name": "scheduled_budget",
+    "display_name": "scheduled_budget",
+    "description": "Scheduled ad budget for next day. A value not equal to 0 means the scheduled budget is set and the value represents the budget; a value equals to 0 means the scheduled budget is not set.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "string",
+    "name": "schedule_type",
+    "display_name": "schedule_type",
+    "description": "The schedule type can be either SCHEDULE_START_END or SCHEDULE_FROM_NOW. If you choose SCHEDULE_START_END, you need to specify a start time and an end time. If you choose SCHEDULE_FROM_NOW, you only need to specify a start time.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "datetime",
+    "name": "schedule_start_time",
+    "display_name": "schedule_start_time",
+    "description": "Ad delivery start time (UTC+0). Format should be YYYY-MM-DD HH:MM:SS",
+    "input_as_timestamp": false,
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "DateTime"
+  },
+  {
+    "class_name": "datetime",
+    "name": "schedule_end_time",
+    "display_name": "schedule_end_time",
+    "description": "Ad delivery end time (UTC+0). Format should be YYYY-MM-DD HH:MM:SS",
+    "input_as_timestamp": false,
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "DateTime"
+  },
+  {
+    "class_name": "string",
+    "name": "dayparting",
+    "display_name": "dayparting",
+    "description": "\"\"\"Ad delivery arrangement, in the format of a string that consists of 48 x 7 characters. Each character is mapped to a 30-minute timeframe from Monday to Sunday. Each character can be set to either 0 or 1. 1 represents delivery in the 30-minute timeframe, and 0 stands for non-delivery in the 30-minute timeframe. The first character is mapped to 0:01-0:30 of Monday; The second character is mapped to 0:31-1:00 of Monday, and the last character represents 23:31-0:00 Sunday.Note\nNot specified, all-0, or all-1 are considered as full-time delivery.\"",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "optimization_goal",
+    "display_name": "optimization_goal",
+    "description": "The measurable results that you'd like to drive your ads with. For enum values, see Enumeration - Optimization Goal.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "bid_display_mode",
+    "display_name": "bid_display_mode",
+    "description": "How you calculate and measure Cost per View.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "cpv_video_duration",
+    "display_name": "cpv_video_duration",
+    "description": "Optimized video playback duration\nOptional values include: SIX_SECONDS (video playback 6 seconds) and TWO_SECONDS (video playback 2 seconds)",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "conversion_window",
+    "display_name": "conversion_window",
+    "description": "The time frame when you would like a conversion to happen after a user clicks on or views your ad. Your ad delivery will be optimized using the conversion data during the time frame you select. This setting will not impact your attribution data. For enum values, ee Enumeration - Conversion Window.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "pacing",
+    "display_name": "pacing",
+    "description": "You can choose between PACING_MODE_SMOOTH and PACING_MODE_FAST. For PACING_MODE_SMOOTH, the budget is allocated evenly within the scheduled time. PACING_MODE_FAST would consume budget and produce results as soon as possible. When Campaign Budget Optimization (budget_optimize_on) is on, your setting will be ignored and it will be set as PACING_MODE_SMOOTH. Otherwise, this field is required.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "billing_event",
+    "display_name": "billing_event",
+    "description": "Bid method. See Enumeration - Bid method for optional values.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "skip_learning_phase",
+    "display_name": "skip_learning_phase",
+    "description": "Whether to skip the learning stage.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "bid_type",
+    "display_name": "bid_type",
+    "description": "Bidding strategy that determines how the system manages your cost per result, spends your budget, and how it delivers ads.\nSee Enumeration - Bidding Strategy.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "bid_price",
+    "display_name": "bid_price",
+    "description": "Bid price. The maximum cost per result you are willing to bid (for Bid Cap bidding strategy), or an average cost per result that you want to achieve (for Cost Cap bidding strategy).",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "double",
+    "name": "conversion_bid_price",
+    "display_name": "conversion_bid_price",
+    "description": "Where you can set a target cost per conversion for oCPM(Optimized Cost per Mille).",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "string",
+    "name": "deep_bid_type",
+    "display_name": "deep_bid_type",
+    "description": "Bidding strategy for in-app events. For enum values and their decriptions, see Enumeration - Deep-level Bidding Strategy.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "deep_cpa_bid",
+    "display_name": "deep_cpa_bid",
+    "description": "Specify bid price in this field after you've chosen a bidding strategy for in-app events, for example VO_MIN.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "double",
+    "name": "next_day_retention",
+    "display_name": "next_day_retention",
+    "description": "Day 2 retention ratio. Formula: next_day_retention = conversion_bid_price/deep_cpa_bid. Value range is (0,1]. Only valid when placements is PLACEMENT_PANGLE and secondary_optimization_event is NEXT_DAY_OPEN.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "string",
+    "name": "secondary_status",
+    "display_name": "secondary_status",
+    "description": "Ad group status（secondary status). For enum values, see Enumeration - Ad Group Status - Secondary Status.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "operation_status",
+    "display_name": "operation_status",
+    "description": "Operational status. Enum: DISABLE (ad group is disabled), ENABLE (ad group is enabled), FROZEN (terminated and cannot be used again)",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int64",
+    "name": "frequency",
+    "display_name": "frequency",
+    "description": "\"Frequency, together with frequency_schedule, controls how often people see your ad (only available for REACH ads).\nThe below conditions should be both met:1 <= frequency <= frequency_schedule * 3\n1 <= frequency_schedule <=7\nFor example, frequency = 2 & frequency_schedule = 3 means \"\"show ads no more than twice every 3 day\"\".\"",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "int64",
+    "name": "frequency_schedule",
+    "display_name": "frequency_schedule",
+    "description": "Frequency_schedule, together with frequency, controls how often people see your ad (only available for REACH ads). See frequency fields for more.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "string",
+    "name": "statistic_type",
+    "display_name": "statistic_type",
+    "description": "Conversion bid statistic type, bid for EVERYTIME (Each Purchase)/ NONE (Unique Purchase)",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "carrier_ids",
+    "display_name": "carrier_ids",
+    "description": "Carriers that you want to target. A carrier is valid only when the in_use field for the carrier is true. For detailed information, see get carriers.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "video_download_disabled",
+    "display_name": "video_download_disabled",
+    "description": "Whether users can download your video ads on TikTok.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "blocked_pangle_app_ids",
+    "display_name": "blocked_pangle_app_ids",
+    "description": "Pangle app block list ID.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "actions",
+    "display_name": "actions",
+    "description": "A list of action category objects.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "rf_purchased_type",
+    "display_name": "rf_purchased_type",
+    "description": "Billing method of Reach & Frequency ad groups. For more details, see Enumeration - Reach & Frequency Buy Type. Returned when objective_type of the related campaign is RF_REACH.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int64",
+    "name": "purchased_impression",
+    "display_name": "purchased_impression",
+    "description": "Impressions to be purchased. Returned when objective_type of the related campaign is RF_REACH.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "int64",
+    "name": "purchased_reach",
+    "display_name": "purchased_reach",
+    "description": "Purchased user reach. Returned when objective_type of the related campaign is RF_REACH.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "int64",
+    "name": "rf_estimated_cpr",
+    "display_name": "rf_estimated_cpr",
+    "description": "The estimated cost per mile reach. Returned when objective_type of the related campaign is RF_REACH.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "int64",
+    "name": "rf_estimated_frequency",
+    "display_name": "rf_estimated_frequency",
+    "description": "The estimated show frequency. Returned when objective_type of the related campaign is RF_REACH.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "string",
+    "name": "included_pangle_audience_package_ids",
+    "display_name": "included_pangle_audience_package_ids",
+    "description": "IDs of the Pangle audiences that you want to include. Valid only for Pangle placement. You can get audience IDs (package_id) by using the /pangle_audience_package/get/ endpoint. You need to set bind_type to INCLUDE. Do not specify this field and excluded_pangle_audience_package_ids at the same time.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "excluded_pangle_audience_package_ids",
+    "display_name": "excluded_pangle_audience_package_ids",
+    "description": "IDs of the Pangle audiences that you want to exclude. Valid only for Pangle placement. You can get audience IDs (package_id) by using the /pangle_audience_package/get/ endpoint. You need to set bind_type to EXCLUDE. Do not specify this field and included_pangle_audience_package_ids at the same time.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_new_structure",
+    "display_name": "is_new_structure",
+    "description": "Whether the campaign is a new structure",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "catalog_id",
+    "display_name": "catalog_id",
+    "description": "Catalog ID。\nReturn when the corresponding campaign objective_type is CATALOG_SALES.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "product_set_id",
+    "display_name": "product_set_id",
+    "description": "ProductSet ID of the catalog. 0 means selecting all product sets.\nReturn when the corresponding campaign objective_type is CATALOG_SALES.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "catalog_authorized_bc_id",
+    "display_name": "catalog_authorized_bc_id",
+    "description": "For catalogs in Business Center, this field returns the ID of the Business Center that a catalog belongs to.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "included_custom_actions",
+    "display_name": "included_custom_actions",
+    "description": "Catalog ad redirection contains conditions.\nReturn when the corresponding campaign objective_type is CATALOG_SALES.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "excluded_custom_actions",
+    "display_name": "excluded_custom_actions",
+    "description": "Catalog ad redirection does not contain conditions.\nReturn when the corresponding campaign objective_type is CATALOG_SALES.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "shopping_ads_retargeting_type",
+    "display_name": "shopping_ads_retargeting_type",
+    "description": "The types of ad redirection in the catalog. Returned when the corresponding campaign objective_type is CATALOG_SALES/PRODUCT_SALES.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "brand_safety_type",
+    "display_name": "brand_safety_type",
+    "description": "Brand safety type. Enum values:THIRD_PARTY: Use a third-party brand safety solution. You also need to pass in a value to the brand_safety_partner field.\nLIMITED_INVENTORY: Use TikTok's brand safety solution. Currently, the only supported safety level is Limited Inventory, which is a strict brand safety level. It would exclude all identifiable risky content. To get the countries and regions that your ads can be deployed to based on your brand safety settings, use the /tool/region/ endpoint.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "brand_safety_partner",
+    "display_name": "brand_safety_partner",
+    "description": "Brand safety partner. Available only when brand_safety_type is THIRD_PARTY. Enum values: IAS, OPEN_SLATE. To get the countries and regions that your ads can be deployed to based on your brand safety settings, use the /tool/region/ endpoint. You need to pass in the brand safety type and brand safety partner.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "promotion_website_type",
+    "display_name": "promotion_website_type",
+    "description": "Instant page type in your ad group. Currently, the only supported type is TIKTOK_NATIVE_PAGE, which stands for TikTok instant pages. null means no instant pages are used in the ad group.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "ios14_quota_type",
+    "display_name": "ios14_quota_type",
+    "description": "Whether the campaign will be counted against the iOS 14 dedicated campaign quota. Enum: OCCUPIED, UNOCCUPIED. For non-R&F campaigns, when ios14_targeting is IOS14_PLUS, this field is automatically set to OCCUPIED.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "roas_bid",
+    "display_name": "roas_bid",
+    "description": "ROAS goal for Value Optimization.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "bool",
+    "name": "auto_targeting_enabled",
+    "display_name": "auto_targeting_enabled",
+    "description": "Whether to enable automated targeting.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "targeting_expansion",
+    "display_name": "targeting_expansion",
+    "description": "Settings about targeting expansion",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "adgroup_app_profile_page_state",
+    "display_name": "adgroup_app_profile_page_state",
+    "description": "Indicates whether the adgroup is using app profile page. Enum: INVALID, UNSET, ON, OFF.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "shopping_ads_type",
+    "display_name": "shopping_ads_type",
+    "description": "Shopping ads type. Enum values: UNSET, VIDEO(Video shopping ads),LIVE(Live shopping ads), CATALOG_LISTING_ADS",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "product_source",
+    "display_name": "product_source",
+    "description": "Enum values: UNSET ,CATALOG(Catalog), STORE (TikTok Shop or TikTok Storefront (third-party store)) .",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "feed_type",
+    "display_name": "feed_type",
+    "description": "Feed type option. Enum values: STANDARD_FEED, TOP_FEED.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "delivery_mode",
+    "display_name": "delivery_mode",
+    "description": "The sequencing and schedule strategy for your ad display. Enum: OPTIMIZE(Optimized delivery that delivers ads to achieve the best performance)/STANDARD(Standard delivery that delivers ads in a random order)/SCHEDULE(Scheduled delivery that delivers ads according to the time period that you set)/SEQUENCE(Sequenced delivery that delivers ads in your expected order)",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "schedule_infos",
+    "display_name": "schedule_infos",
+    "description": "Ad delivery information of R&F ad groups.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "contextual_tag_ids",
+    "display_name": "contextual_tag_ids",
+    "description": "Contextual tag IDs. See Contextual targeting to learn more about how to use contextual targeting.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "purchase_intention_keyword_ids",
+    "display_name": "purchase_intention_keyword_ids",
+    "description": "IDs of purchase intention keywords that you want to use to target audiences with an interest in purchases related to a content category.",
+    "is_nullable": false,
+    "is_encrypted": false,
+    "data_type": "String"
+  }
+]
+

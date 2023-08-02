@@ -1,0 +1,27 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 9/6/21, 11:24 AM
+ */
+@import '~@/themes/scss/mixin';
+@import '~bootstrap/scss/bootstrap-grid';
+
+.user-detail-content {
+  flex: 1;
+  background: var(--secondary);
+  display: flex;
+  height: 100%;
+  max-height: 100%;
+  overflow: auto;
+
+  .user-management-detail-panel {
+    display: flex;
+    flex-direction: column;
+
+    > .user-contact {
+      margin: 16px;
+    }
+    > .user-privilege {
+      margin: 0 16px 16px;
+    }
+  }
+}

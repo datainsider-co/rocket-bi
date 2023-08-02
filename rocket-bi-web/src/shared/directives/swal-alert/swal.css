@@ -1,0 +1,152 @@
+/************* CUSTOM STYLE FOR SWAL *************/
+.swal2-height-auto {
+  height: 100vh !important;
+}
+.swal2-popup {
+  border-radius: 4px !important;
+  background-color: #fff !important;
+  border: none !important;
+  box-shadow: unset !important;
+  color: var(--text-color);
+  font-size: 14px !important;
+  width: 398px !important;
+  padding: 1rem !important;
+}
+
+.swal2-popup .swal2-title {
+  font-weight: bold;
+  font-stretch: normal;
+  font-style: normal;
+  line-height: normal;
+  letter-spacing: 0.2px;
+  color: var(--text-color);
+  cursor: default;
+  font-size: 16px;
+  margin: 10px auto 8px;
+  padding: 0;
+}
+
+.swal2-popup .swal2-html-container {
+  font-size: 14px;
+  color: var(--text-color);
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.swal2-popup .swal2-icon {
+  width: 42px;
+  height: 42px;
+  margin: 8px auto 2px;
+  border-width: 3px;
+}
+
+.swal2-popup .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+  width: 3px;
+  height: calc(100% - 14px);
+  top: 7px;
+}
+
+.swal2-popup .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='left'] {
+  left: calc(50% - 1px);
+}
+
+.swal2-popup .swal2-icon.swal2-error [class^='swal2-x-mark-line'][class$='right'] {
+  right: calc(50% - 2px);
+}
+
+.swal2-popup .swal2-icon.swal2-warning {
+  color: #ffab00;
+  border-color: #ffab00;
+}
+
+.swal2-popup .swal2-icon .swal2-icon-content {
+  font-size: 2.3rem;
+  font-weight: 500;
+}
+
+.swal2-popup .swal2-icon.swal2-success [class^='swal2-success-line'] {
+  height: 3px;
+}
+
+.swal2-popup .swal2-icon.swal2-success.swal2-icon-show .swal2-success-line-tip,
+.swal2-popup .swal2-icon.swal2-success.swal2-icon-show .swal2-success-line-long,
+.swal2-popup .swal2-icon.swal2-success.swal2-icon-show .swal2-success-circular-line-right {
+  animation: none;
+}
+
+.swal2-popup .swal2-icon.swal2-success [class^='swal2-success-line'][class$='tip'] {
+  top: 57.5%;
+  left: 16.25%;
+  width: 31.25%;
+}
+
+.swal2-popup .swal2-icon.swal2-success [class^='swal2-success-line'][class$='long'] {
+  top: 47.5%;
+  right: 10%;
+  width: 58.75%;
+}
+
+.swal2-popup .swal2-icon.swal2-success [class^='swal2-success-circular-line'] {
+  width: 75%;
+  height: 150%;
+}
+
+.swal2-popup .swal2-icon.swal2-success [class^='swal2-success-circular-line'][class$='right'],
+.swal2-popup .swal2-icon.swal2-success [class^='swal2-success-circular-line'][class$='left'],
+.swal2-popup .swal2-icon.swal2-success .swal2-success-ring,
+.swal2-popup .swal2-icon.swal2-success .swal2-success-fix {
+  display: none;
+}
+
+.swal2-popup .swal2-actions {
+  margin-top: 1.75rem;
+}
+
+.swal2-popup .swal2-styled {
+  flex: 1;
+  max-width: 192px;
+  width: 192px;
+  height: 42px;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  line-height: 1;
+  font-weight: 400;
+  padding: 0 16px;
+  background-color: transparent;
+  color: var(--text-color) !important;
+}
+
+.swal2-popup .swal2-styled.swal2-confirm {
+  background-color: var(--accent, #597fff) !important;
+  color: #fff !important;
+}
+
+.swal2-popup .swal2-styled.swal2-confirm:focus {
+  box-shadow: unset;
+}
+
+.swal2-popup .swal2-styled.swal2-cancel {
+  border: solid 1px var(--scrollbar-background) !important;
+  background-color: transparent !important;
+}
+
+.swal2-popup .swal2-styled.swal2-cancel:hover {
+  background-color: var(--hover-color) !important;
+  background-image: none !important;
+}
+
+.swal2-popup .swal2-styled.swal2-cancel:focus {
+  box-shadow: unset !important;
+}
+
+.swal2-popup .swal2-styled:disabled {
+  opacity: 0.2;
+}
+
+.swal2-popup .swal2-actions {
+  flex-direction: row-reverse;
+}
+
+.pe-none {
+  pointer-events: none;
+}

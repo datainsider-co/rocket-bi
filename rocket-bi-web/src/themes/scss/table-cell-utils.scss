@@ -1,0 +1,156 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 8/23/21, 6:00 PM
+ */
+
+@import './button';
+@import '~@/themes/scss/mixin';
+@import '~@/themes/scss/di-variables';
+
+// name cell
+td > .directory-name-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  color: var(--text-color);
+
+  > img {
+    width: 24px;
+    height: 24px;
+    margin-right: 16px;
+  }
+
+  > span {
+    font-size: 14px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.4;
+    letter-spacing: 0.6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  > i {
+    margin-left: 12px;
+    font-size: 16px;
+    color: var(--icon-color);
+  }
+}
+
+// avatar
+
+td > .directory-owner-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+
+  > img.owner-avt {
+    width: 24px;
+    height: 24px;
+    border-radius: 24px;
+    margin-right: 8px;
+  }
+
+  > span.owner-name {
+    font-size: 14px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.4;
+    letter-spacing: 0.23px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &.text-bold > span.owner-name {
+    font-weight: 500;
+    color: var(--text-color);
+  }
+}
+
+// icon-action
+td > .icon-action-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  color: var(--icon-color);
+
+  > i {
+    cursor: pointer;
+    font-size: 16px;
+    @extend .btn-icon-border;
+    padding: 4px;
+
+    & + i {
+      margin-left: 20px;
+      @include media-breakpoint-only(xs) {
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+td > .title-cell {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+
+  > img {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+  }
+}
+
+.custom-status-cell {
+  display: flex;
+  align-items: center;
+
+  > img {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+  }
+}
+
+td > .radio-cell,
+th > .radio-cell {
+  width: 30px;
+  height: 30px;
+
+  input[type='checkbox'] {
+    cursor: pointer;
+    transform: scale(1.263) translate(50%, 50%);
+  }
+}
+
+td > .action-container {
+  .btn-outline-secondary {
+    @include regular-text-14();
+    cursor: pointer;
+    border-width: 1px !important;
+    border-color: var(--scrollbar-background) !important;
+  }
+}
+
+td .suspended-status {
+  color: var(--suspend-status-color, #ea6b6b) !important;
+}
+
+td .active-status {
+  color: var(--active-status-color, #07bc40) !important;
+}
+
+td .btn-border-accent {
+  color: var(--accent) !important;
+  border: 1px solid var(--accent) !important;
+  font-weight: 400 !important;
+  &:hover {
+    color: var(--accent) !important;
+    background: #e3edff !important;
+  }
+}

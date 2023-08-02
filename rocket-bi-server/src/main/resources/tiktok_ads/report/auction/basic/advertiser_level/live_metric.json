@@ -1,0 +1,47 @@
+{
+  "service_type": "AUCTION",
+  "report_type": "BASIC",
+  "data_level": "AUCTION_ADVERTISER",
+  "dimensions": [
+    "advertiser_id",
+    "stat_time_day"
+  ],
+  "metric_columns": [
+    {
+      "class_name": "double",
+      "name": "live_views",
+      "display_name": "live_views",
+      "description": "LIVE Views",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "live_unique_views",
+      "display_name": "live_unique_views",
+      "description": "LIVE Unique Views",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "live_effective_views",
+      "display_name": "live_effective_views",
+      "description": "Effective LIVE Views",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    },
+    {
+      "class_name": "double",
+      "name": "live_product_clicks",
+      "display_name": "live_product_clicks",
+      "description": "LIVE Product Clicks",
+      "is_nullable": true,
+      "is_encrypted": false,
+      "data_type": "Double"
+    }
+  ]
+}

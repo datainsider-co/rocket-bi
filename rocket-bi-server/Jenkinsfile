@@ -1,0 +1,87 @@
+pipeline {
+    agent any
+
+    options {
+        gitLabConnection('gitlab_connection')
+        gitlabBuilds(builds: ['build', 'deploy'])
+    }
+
+    triggers {
+        gitlab(triggerOnPush: true, triggerOnMergeRequest: true, branchFilterType: 'All')
+    }
+
+    tools {
+        jdk 'jdk8'
+        maven "M3"
+    }
+
+    environment {
+        DOCKER_REGISTRY_HOST = 'https://registry.gitlab.com'
+        DOCKER_REGISTRY_CREDENTIAL = 'acc_nkt165'
+        IMAGE_NAME = 'registry.gitlab.com/datainsider/rocketbi_v2/rocket-bi-server'
+    }
+
+    stages {
+        stage('build') {
+            steps {
+                gitlabCommitStatus('build') {
+                    sh './build.sh'
+                }
+            }
+        }
+
+        stage('deploy') {
+            steps {
+                gitlabCommitStatus('deploy') {
+                    script {
+                        echo "building docker image from branch ${BRANCH_NAME}..."
+                        docker.withRegistry(DOCKER_REGISTRY_HOST, DOCKER_REGISTRY_CREDENTIAL) {
+                            def image = docker.build("$IMAGE_NAME:$BRANCH_NAME")
+                            image.push()
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('deploy oss') {
+            when {
+                branch 'oss'
+            }
+
+            steps {
+                sshagent(credentials: ['admin_didev']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no admin@localhost "
+                          cd /home/admin/data/rocket-bi
+                          git checkout dev && git pull || { exit 1; }
+
+                          cd rocket-bi-server
+                          git pull gitlab oss || { exit 1; }
+                          cd ..
+
+                          git add . && git commit -m '[BOT] Update rocket-bi-server: merge from datainsider oss' && git push
+                          exit 0
+                        "
+                    '''
+                }
+            }
+        }
+
+    }
+
+    post {
+        success {
+            slackSend(
+                    color: 'good',
+                    message: "The pipeline ${currentBuild.fullDisplayName} completed successfully."
+            )
+        }
+        failure {
+            slackSend(
+                    color: 'danger',
+                    message: "The pipeline ${currentBuild.fullDisplayName} failed. Build URL: ${BUILD_URL}"
+            )
+        }
+    }
+}

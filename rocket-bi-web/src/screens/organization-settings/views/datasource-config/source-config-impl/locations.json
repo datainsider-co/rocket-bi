@@ -1,0 +1,114 @@
+[
+  {
+    "label": "asia-east1 (Taiwan)",
+    "type": "asia-east1"
+  },
+  {
+    "label": "asia-east2 (Hong Kong)",
+    "type": "asia-east2"
+  },
+  {
+    "label": "asia-northeast1 (Tokyo)",
+    "type": "asia-northeast1"
+  },
+  {
+    "label": "asia-northeast2 (Osaka)",
+    "type": "asia-northeast2"
+  },
+  {
+    "label": "asia-northeast3 (Seoul)",
+    "type": "asia-northeast3"
+  },
+  {
+    "label": "asia-south1 (Mumbai)",
+    "type": "asia-south1"
+  },
+  {
+    "label": "asia-south2 (Delhi)",
+    "type": "asia-south2"
+  },
+  {
+    "label": "asia-southeast1 (Singapore)",
+    "type": "asia-southeast1"
+  },
+  {
+    "label": "asia-southeast2 (Jakarta)",
+    "type": "asia-southeast2"
+  },
+  {
+    "label": "australia-southeast1 (Sydney)",
+    "type": "australia-southeast1"
+  },
+  {
+    "label": "australia-southeast2 (Melbourne)",
+    "type": "australia-southeast2"
+  },
+  {
+    "label": "europe-central2 (Warsaw)",
+    "type": "europe-central2"
+  },
+  {
+    "label": "europe-north1 (Finland)",
+    "type": "europe-north1"
+  },
+  {
+    "label": "europe-west1 (Belgium)",
+    "type": "europe-west1"
+  },
+  {
+    "label": "europe-west2 (London)",
+    "type": "europe-west2"
+  },
+  {
+    "label": "europe-west3 (Frankfurt)",
+    "type": "europe-west3"
+  },
+  {
+    "label": "europe-west4 (Netherlands)",
+    "type": "europe-west4"
+  },
+  {
+    "label": "europe-west6 (Zürich)",
+    "type": "europe-west6"
+  },
+  {
+    "label": "northamerica-northeast1 (Montréal)",
+    "type": "northamerica-northeast1"
+  },
+  {
+    "label": "northamerica-northeast2 (Toronto)",
+    "type": "northamerica-northeast2"
+  },
+  {
+    "label": "southamerica-east1 (São Paulo)",
+    "type": "southamerica-east1"
+  },
+  {
+    "label": "us-central1 (Iowa)",
+    "type": "us-central1"
+  },
+  {
+    "label": "us-east1 (South Carolina)",
+    "type": "us-east1"
+  },
+  {
+    "label": "us-east4 (Northern Virginia)",
+    "type": "us-east4"
+  },
+  {
+    "label": "us-west1 (Oregon)",
+    "type": "us-west1"
+  },
+  {
+    "label": "us-west2 (Los Angeles)",
+    "type": "us-west2"
+  },
+  {
+    "label": "us-west3 (Salt Lake City)",
+    "type": "us-west3"
+  },
+  {
+    "label": "us-west4 (Las Vegas)",
+    "type": "us-west4"
+  }
+]

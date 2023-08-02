@@ -1,0 +1,61 @@
+@import '~@/themes/scss/mixin.scss';
+@import '~@/themes/scss/di-variables.scss';
+@import '~@/themes/scss/_button.scss';
+@import '~ant-design-vue/lib/tabs/style/index.css';
+@import '~@/themes/scss/utilities.scss';
+
+.ant-tabs {
+  height: 100%;
+  color: var(--text-color);
+  border-radius: 8px;
+
+  ::v-deep {
+    .ant-tabs-content {
+      height: calc(100% - 65px);
+    }
+  }
+}
+
+::v-deep {
+  .ant-tabs-bar {
+    border: 0;
+    margin-bottom: 24px;
+    text-align: left;
+
+    div[role='tab'] {
+      @include regular-text();
+      @extend .unselectable;
+      opacity: 0.6;
+      padding: 8px;
+      margin-top: -8px;
+
+      &[aria-disabled='false'] {
+        @extend .btn-ghost;
+      }
+
+      &[aria-disabled='true'] {
+        opacity: 0.3;
+      }
+    }
+
+    div[aria-selected='true'] {
+      @include bold-text();
+      opacity: 1;
+    }
+
+    .ant-tabs-ink-bar {
+      background-color: var(--blue-grey);
+      height: 1px;
+    }
+
+    .ant-tabs-tab-btn-disabled.ant-tabs-tab-arrow-show {
+      opacity: 0.5;
+    }
+
+    .anticon {
+      color: var(--text-color);
+      width: 16px;
+      height: 16px;
+    }
+  }
+}

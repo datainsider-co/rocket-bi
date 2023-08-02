@@ -1,0 +1,507 @@
+[
+  {
+    "class_name": "string",
+    "name": "id",
+    "display_name": "id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "account_id",
+    "display_name": "account_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int32",
+    "name": "account_status",
+    "display_name": "account_status",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  },
+  {
+    "class_name": "float",
+    "name": "age",
+    "display_name": "age",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Float"
+  },
+  {
+    "class_name": "string",
+    "name": "agency_client_declaration",
+    "display_name": "agency_client_declaration",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "amount_spent",
+    "display_name": "amount_spent",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "string",
+    "name": "attribution_spec",
+    "display_name": "attribution_spec",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "balance",
+    "display_name": "balance",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Double"
+  },
+  {
+    "class_name": "string",
+    "name": "business",
+    "display_name": "business",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "business_city",
+    "display_name": "business_city",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "business_country_code",
+    "display_name": "business_country_code",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "business_name",
+    "display_name": "business_name",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "business_state",
+    "display_name": "business_state",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "business_street",
+    "display_name": "business_street",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "business_street2",
+    "display_name": "business_street2",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "business_zip",
+    "display_name": "business_zip",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "can_create_brand_lift_study",
+    "display_name": "can_create_brand_lift_study",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "string",
+    "name": "capabilities",
+    "display_name": "capabilities",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "datetime",
+    "name": "created_time",
+    "display_name": "created_time",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Datetime"
+  },
+  {
+    "class_name": "string",
+    "name": "currency",
+    "display_name": "currency",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int32",
+    "name": "disable_reason",
+    "display_name": "disable_reason",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  },
+  {
+    "class_name": "string",
+    "name": "end_advertiser",
+    "display_name": "end_advertiser",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "end_advertiser_name",
+    "display_name": "end_advertiser_name",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "extended_credit_invoice_group",
+    "display_name": "extended_credit_invoice_group",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "failed_delivery_checks",
+    "display_name": "failed_delivery_checks",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int32",
+    "name": "fb_entity",
+    "display_name": "fb_entity",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  },
+  {
+    "class_name": "string",
+    "name": "funding_source",
+    "display_name": "funding_source",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "has_advertiser_opted_in_odax",
+    "display_name": "has_advertiser_opted_in_odax",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "bool",
+    "name": "has_migrated_permissions",
+    "display_name": "has_migrated_permissions",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "string",
+    "name": "io_number",
+    "display_name": "io_number",
+    "description": "The Insertion Order (IO) number.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_attribution_spec_system_default",
+    "display_name": "is_attribution_spec_system_default",
+    "description": "If the attribution specification of ad account is generated from system default values",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_direct_deals_enabled",
+    "display_name": "is_direct_deals_enabled",
+    "description": "Whether the account is enabled to run Direct Deals",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_in_3ds_authorization_enabled_market",
+    "display_name": "is_in_3ds_authorization_enabled_market",
+    "description": "If the account is in a market requiring to go through payment process going through 3DS authorization",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_notifications_enabled",
+    "display_name": "is_notifications_enabled",
+    "description": "Get the notifications status of the user for this ad account. This will return true or false depending if notifications are enabled or not",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "int32",
+    "name": "is_personal",
+    "display_name": "is_personal",
+    "description": "Indicates if this ad account is being used for private, non-business purposes. This affects how value-added tax (VAT) is assessed. Note: This is not related to whether an ad account is attached to a business.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "int32"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_prepay_account",
+    "display_name": "is_prepay_account",
+    "description": "If this ad account is a prepay. Other option would be a postpay account.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "bool",
+    "name": "is_tax_id_required",
+    "display_name": "is_tax_id_required",
+    "description": "If tax id for this ad account is required or not.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "string",
+    "name": "line_numbers",
+    "display_name": "line_numbers",
+    "description": "The line numbers",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "media_agency",
+    "display_name": "media_agency",
+    "description": "The agency, this could be your own business. Must be a Facebook Page Alias, Facebook Page ID or an Facebook App ID. In absence of one, you can use NONE or UNFOUND.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "min_campaign_group_spend_cap",
+    "display_name": "min_campaign_group_spend_cap",
+    "description": "The minimum required spend cap of Ad Campaign.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int32",
+    "name": "min_daily_budget",
+    "display_name": "min_daily_budget",
+    "description": "The minimum daily budget for this Ad Account",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  },
+  {
+    "class_name": "string",
+    "name": "name",
+    "display_name": "name",
+    "description": "Name of the account. If not set, the name of the first admin visible to the user will be returned.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "offsite_pixels_tos_accepted",
+    "display_name": "offsite_pixels_tos_accepted",
+    "description": "Indicates whether the offsite pixel Terms Of Service contract was signed. This feature can be accessible before v2.9",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "string",
+    "name": "owner",
+    "display_name": "owner",
+    "description": "The ID of the account owner",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "partner",
+    "display_name": "partner",
+    "description": "This could be Facebook Marketing Partner, if there is one. Must be a Facebook Page Alias, Facebook Page ID or an Facebook App ID. In absence of one, you can use NONE or UNFOUND.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "rf_spec",
+    "display_name": "rf_spec",
+    "description": "Reach and Frequency limits configuration. See Reach and Frequency",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "spend_cap",
+    "display_name": "spend_cap",
+    "description": "The maximum amount that can be spent by this Ad Account. When the amount is reached, related Ad Campaigns are paused. A value of 0 means no spending-cap. Setting a new spend cap only applies to spend AFTER the time at which you set it. Value specified in basic unit of the currency, for example 'cents' for USD.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "tax_id",
+    "display_name": "tax_id",
+    "description": "Tax ID",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int32",
+    "name": "tax_id_status",
+    "display_name": "tax_id_status",
+    "description": "VAT status code for the account.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  },
+  {
+    "class_name": "string",
+    "name": "tax_id_type",
+    "display_name": "tax_id_type",
+    "description": "Type of Tax ID",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int32",
+    "name": "timezone_id",
+    "display_name": "timezone_id",
+    "description": "The timezone ID of this ad account",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  },
+  {
+    "class_name": "string",
+    "name": "timezone_name",
+    "display_name": "timezone_name",
+    "description": "Name for the time zone",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "float",
+    "name": "timezone_offset_hours_utc",
+    "display_name": "timezone_offset_hours_utc",
+    "description": "Time zone difference from UTC (Coordinated Universal Time).",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Float"
+  },
+  {
+    "class_name": "string",
+    "name": "tos_accepted",
+    "display_name": "tos_accepted",
+    "description": "Checks if this specific ad account has signed the Terms of Service contracts. Returns 1, if terms were accepted.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "user_tasks",
+    "display_name": "user_tasks",
+    "description": "user_tasks",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "user_tos_accepted",
+    "display_name": "user_tos_accepted",
+    "description": "Checks if a user has signed the Terms of Service contracts related to the Business that contains a specific ad account. Must include user's access token to get information. This verification is not valid for system users.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  }
+]
+

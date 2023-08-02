@@ -1,0 +1,16 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Table_collapse" clip-path="url(#clip0_1277_11308)">
+<rect id="Rectangle" width="15" height="6" fill="#5577FF"/>
+<rect id="Rectangle Copy 457" x="16" width="15" height="6" fill="#5577FF"/>
+<rect id="Rectangle Copy 458" x="32" width="16" height="6" fill="#5577FF"/>
+<path id="Combined Shape" fill-rule="evenodd" clip-rule="evenodd" d="M15 7H0V20H15V7ZM31 7H16V13H31V7ZM32 7H48V13H32V7ZM31 21H16V27H31V21ZM32 21H48V27H32V21ZM15 35H0V41H15V35ZM16 35H31V41H16V35ZM48 35H32V41H48V35Z" fill="#7F98FE"/>
+<path id="Combined Shape_2" fill-rule="evenodd" clip-rule="evenodd" d="M31 14H16V20H31V14ZM48 14H32V20H48V14ZM0 21H15V34H0V21ZM31 28H16V34H31V28ZM32 28H48V34H32V28ZM15 42H0V48H15V42ZM16 42H31V48H16V42ZM48 42H32V48H48V42Z" fill="#B7C5FF"/>
+<path id="Union" fill-rule="evenodd" clip-rule="evenodd" d="M8 10H7V13H4V14H7V17H8V14H11V13H8V10Z" fill="white"/>
+<rect id="Rectangle 41" x="4" y="27" width="7" height="1" fill="white"/>
+</g>
+<defs>
+<clipPath id="clip0_1277_11308">
+<rect width="48" height="48" fill="white"/>
+</clipPath>
+</defs>
+</svg>

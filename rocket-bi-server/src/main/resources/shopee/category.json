@@ -1,0 +1,48 @@
+[
+  {
+    "class_name": "int32",
+    "name": "category_id",
+    "display_name": "category_id",
+    "description": "ID for category.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  },
+  {
+    "class_name": "int32",
+    "name": "parent_category_id",
+    "display_name": "parent_category_id",
+    "description": "ID for parent category.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  },
+  {
+    "class_name": "string",
+    "name": "original_category_name",
+    "display_name": "original_category_name",
+    "description": "Default name for category.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "display_category_name",
+    "display_name": "display_category_name",
+    "description": "Display name dependent on display name.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "has_children",
+    "display_name": "has_children",
+    "description": "Whether this category has active children category.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  }
+]
+

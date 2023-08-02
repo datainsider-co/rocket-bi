@@ -1,0 +1,197 @@
+.pad-x-32 {
+  padding: 0 32px;
+}
+
+.pad-x-5 {
+  padding: 0 5px;
+}
+
+.pad-x-24 {
+  padding: 0 24px;
+}
+
+.pad-15 {
+  padding: 15px;
+}
+
+.pad-r-16 {
+  padding-right: 16px !important;
+}
+
+.mar-b-16 {
+  margin-bottom: 16px;
+}
+
+.mar-b-12 {
+  margin-bottom: 12px;
+}
+
+.mar-r-12 {
+  margin-right: 12px;
+}
+
+.mar-t-12 {
+  margin-top: 12px;
+}
+
+.mar-b-32 {
+  margin-bottom: 32px;
+}
+
+.mar-b-48 {
+  margin-bottom: 48px;
+}
+
+.mar-t-32 {
+  margin-top: 32px;
+}
+
+.mar-t-24 {
+  margin-top: 24px;
+}
+
+.mar-t-15 {
+  margin-top: 15px;
+}
+
+.pad-x-12 {
+  padding: 0 12px;
+}
+
+.pl-24 {
+  padding-left: 24px !important;
+}
+
+.pr-24 {
+  padding-right: 24px !important;
+}
+
+.pad-x-15 {
+  padding: 0 15px;
+}
+
+.pad-y-15 {
+  padding: 15px 0;
+}
+
+.mar-y-15 {
+  padding: 15px 0;
+}
+
+img[class~='ic-16'] {
+  @include ic-16;
+}
+
+img[class~='ic-32'] {
+  @include ic-32;
+}
+
+img[class~='ic-40'] {
+  @include ic-40;
+}
+
+.text-14px {
+  font-size: 14px !important;
+}
+
+.text-12px {
+  font-size: 12px !important;
+}
+
+.w-60 {
+  width: 60% !important;
+}
+
+.w-70 {
+  width: 70% !important;
+}
+
+.h-42px {
+  height: 42px !important;
+}
+
+.h-44px {
+  height: 44px !important;
+}
+
+.opacity-0dot5 {
+  opacity: 0.5;
+}
+
+.regular-icon-16 {
+  @include regular-text;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  padding: 4px;
+}
+
+.regular-text-24 {
+  @include regular-text;
+  font-size: 24px;
+  letter-spacing: 0.2px;
+  opacity: 1;
+  white-space: nowrap;
+  margin-left: 16px;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+
+.regular-text-14-white {
+  @include regular-text();
+  font-size: 14px;
+  line-height: unset;
+  opacity: 1 !important;
+  text-align: left;
+  white-space: nowrap;
+  width: 100%;
+}
+//Wrap p with div and set width to it for using
+.single-line {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.horizontal-scroll {
+  overflow-x: scroll;
+}
+
+.vertical-scroll {
+  overflow-y: scroll;
+}
+
+.unselectable,
+img {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+}
+
+.non-interactive {
+  pointer-events: none;
+}
+
+svg[icon-size='24'] {
+  width: 24px;
+  height: 24px;
+}
+svg[icon-size='16'] {
+  width: 16px;
+  height: 16px;
+}
+
+svg[icon-size='60'] {
+  width: 60px;
+  height: 60px;
+}
+
+.icon-title {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}

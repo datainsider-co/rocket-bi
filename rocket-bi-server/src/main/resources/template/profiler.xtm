@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="{{=refreshTimeInSec}}">
+    <title>REALTIME PROFILER</title>
+
+    <!-- Breakpoint Viewport -->
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+
+    <!-- CSS Files -->
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        table td,
+        table th {
+            border: 1px solid black;
+        }
+
+        table thead tr:first-child th {
+            border-top: 0;
+            border-right: 0;
+            border-left: 0;
+        }
+
+        .btn {
+            height: 40px;
+            line-height: 40px;
+            padding: 0 10px;
+            font-size: 14px;
+            margin: 0;
+            border: none;
+        }
+
+        .btn:focus {
+            outline: none;
+        }
+
+        .inner {
+            display: flex;
+        }
+
+        .inner > button {
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .inner > button:focus {
+            outline: none;
+        }
+
+        .btn-group {
+            display: block;
+        }
+
+        .btn.active {
+            background: #30333a;
+            color: #fff;
+        }
+
+        #container > div {
+            width: 100% !important;
+            min-width: 100%;
+            text-align: center !important;
+        }
+    </style>
+</head>
+
+<body>
+    <table style="width:100%">
+        <thead>
+            <tr>
+                <th colspan="9" style="padding: 30px 0 10px;">
+                    <div style="display: block;float:left">Request Profiling: {{=instanceName}}</div>
+                    <div style="display: block;float:right">
+                        <div aria-label="Basic example" class="btn-group" role="group" style="box-shadow: unset;">
+                            <button class="btn active">Enable</button>
+                            <button class="btn">Disable</button>
+                        </div>
+                    </div>
+                </th>
+            </tr>
+            <tr style="background-color: paleturquoise">
+                <th>No</th>
+                <th>Name</th>
+                <th>TotalReq</th>
+                <th>PendingReq</th>
+                <th>LastTmReq
+                    <br>(milisecs)</th>
+                <th>HighestTmReq
+                    <br>(milisecs)</th>
+                <th>TotalTmReq
+                    <br>(milisecs)</th>
+                <th>Request Rate
+                    <br>(req/second)</th>
+                <th>Time Rate
+                    <br>(milisecs/req)</th>
+            </tr>
+        </thead>
+        <tbody style="text-align: right">
+
+            {{#MeasureValues}}
+            <tr>
+                <td style="text-align: center">{{=id}}</td>
+                <td style="text-align: left">
+                    <div class="inner">
+                        <button onclick="viewChart('{{=id}}')">{{=reqName}}</button>
+                    </div>
+                </td>
+                <td>{{=totalReq}}</td>
+                <td>{{=pendingReq}}</td>
+                <td>{{=lastTmReq}}</td>
+                <td>{{=highestTmReq}}</td>
+                <td>{{=totalTmReq}}</td>
+                <td>{{=reqRate}}</td>
+                <td>{{=tmRate}}</td>
+            </tr>
+            <tr id="chart_{{=id}}" style="display: none;">
+                <td colspan="9">
+                    <div id="container_{{=id}}" style="width:100%; height:300px;"></div>
+                </td>
+            </tr>
+            <!--  -->
+            {{/MeasureValues}}
+
+        </tbody>
+    </table>
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!--  -->
+    <script>
+        // TOGGLE BUTTON
+        $('.btn-group button').on('click', function(e) {
+            e.preventDefault();
+
+            if (!$(this).hasClass('active')) {
+                $(this).addClass('active');
+                $(this).siblings().removeClass('active');
+            }
+        })
+
+        //
+
+        function viewChart(id) {
+
+            var x = document.getElementById("chart_" + id);
+            if (x.style.display === "none") {
+                x.style.display = "contents";
+            } else {
+                x.style.display = "none";
+            }
+        }
+
+        //
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            {{#MeasureValues}}
+
+            Highcharts.chart('container_{{=id}}', {
+                chart: {
+                    zoomType: 'x'
+                },
+                title: {
+                    text: ''
+                },
+                subtitle: {
+                    text: document.ontouchstart === undefined ?
+                        'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    dateTimeLabelFormats: {
+                        month: '%e. %b',
+                        year: '%b'
+                    },
+                    title: {
+                        text: 'Date'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Execution time (ms)'
+                    }
+                },
+                legend: {
+                    enabled: false
+                },
+                plotOptions: {
+                    area: {
+                        fillColor: {
+                            linearGradient: {
+                                x1: 0,
+                                y1: 0,
+                                x2: 0,
+                                y2: 1
+                            },
+                            stops: [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, Highcharts.color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                            ]
+                        },
+                        marker: {
+                            radius: 2,
+                            enable: true
+                        },
+                        lineWidth: 1,
+                        states: {
+                            hover: {
+                                lineWidth: 1
+                            }
+                        },
+                        threshold: null
+                    }
+                },
+
+                series: [{
+                    name: '{{=reqName}}',
+                    type: 'area',
+                    data: {{=historyRecords}}
+                }]
+            });
+
+            {{/MeasureValues}}
+
+            });
+    </script>
+
+</body>
+
+</html>

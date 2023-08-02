@@ -1,0 +1,73 @@
+/*!
+ * @author: tvc12 - Thien Vi
+ * @created: 6/8/21, 1:29 PM
+ */
+
+@import '~@/themes/scss/mixin.scss';
+
+.chart-holder-component {
+  border-radius: 4px;
+}
+
+.chart-container {
+  height: 100%;
+  padding: 16px;
+  width: 100%;
+  z-index: 1;
+}
+.tree-filter-container {
+  height: 100%;
+  width: 100%;
+  padding: 16px 8px;
+  z-index: 1;
+}
+
+.table-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+.tab-filter-container,
+.dropdown-container {
+  height: 100%;
+  width: 100%;
+  padding: 8px;
+  z-index: 1;
+}
+
+.edit-icon-container {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+}
+
+.semi-bold-14 {
+  @include semi-bold-text;
+  font-size: 14px;
+  overflow: hidden;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+::v-deep .tooltip-inner {
+  max-width: 500px !important;
+}
+
+.widget-action {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 2;
+}
+
+.table-loading {
+  height: calc(100% - 48px);
+}
+
+::v-deep ol,
+ul,
+dl {
+  margin-bottom: 0 !important;
+  margin-top: 0 !important;
+}

@@ -1,0 +1,507 @@
+[
+  {
+    "class_name": "string",
+    "name": "order_sn",
+    "display_name": "order_sn",
+    "description": "Return by default. Shopee's unique identifier for an order.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "region",
+    "display_name": "region",
+    "description": "Return by default. The two-digit code representing the region where the order was made.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "currency",
+    "display_name": "currency",
+    "description": "Return by default. The three-digit code representing the currency unit for which the order was paid.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "cod",
+    "display_name": "cod",
+    "description": "Return by default. This value indicates whether the order was a COD (cash on delivery) order.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "double",
+    "name": "total_amount",
+    "display_name": "total_amount",
+    "description": "The total amount paid by the buyer for the order. This amount includes the total sale price of items, shipping cost beared by buyer; and offset by Shopee promotions if applicable. This value will only return after the buyer has completed payment for the order.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "string",
+    "name": "order_status",
+    "display_name": "order_status",
+    "description": "Return by default. Enumerated type that defines the current status of the order.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "shipping_carrier",
+    "display_name": "shipping_carrier",
+    "description": "The logistics service provider that the buyer selected for the order to deliver items.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "payment_method",
+    "display_name": "payment_method",
+    "description": "The payment method that the buyer selected to pay for the order.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "estimated_shipping_fee",
+    "display_name": "estimated_shipping_fee",
+    "description": "The estimated shipping fee is an estimation calculated by Shopee based on specific logistics courier's standard.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "string",
+    "name": "message_to_seller",
+    "display_name": "message_to_seller",
+    "description": "Return by default. Message to seller.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int64",
+    "name": "create_time",
+    "display_name": "create_time",
+    "description": "Return by default. Timestamp that indicates the date and time that the order was created.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "int64",
+    "name": "update_time",
+    "display_name": "update_time",
+    "description": "Return by default. Timestamp that indicates the last time that there was a change in value of order, such as order status changed from 'Paid' to 'Completed'.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "int32",
+    "name": "days_to_ship",
+    "display_name": "days_to_ship",
+    "description": "Return by default. Shipping preparation time set by the seller when listing item on Shopee.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  },
+  {
+    "class_name": "int64",
+    "name": "ship_by_date",
+    "display_name": "ship_by_date",
+    "description": "Return by default. The deadline to ship out the parcel.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "int32",
+    "name": "buyer_user_id",
+    "display_name": "buyer_user_id",
+    "description": "The user id of buyer of this order",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  },
+  {
+    "class_name": "string",
+    "name": "buyer_username",
+    "display_name": "buyer_username",
+    "description": "The name of buyer",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "recipient_address.name",
+    "display_name": "recipient_address.name",
+    "description": "Recipient's name for the address.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "recipient_address.phone",
+    "display_name": "recipient_address.phone",
+    "description": "Recipient's phone number input when order was placed.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "recipient_address.town",
+    "display_name": "recipient_address.town",
+    "description": "The town of the recipient's address. Whether there is a town will depend on the region and/or country.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "recipient_address.district",
+    "display_name": "recipient_address.district",
+    "description": "The district of the recipient's address. Whether there is a district will depend on the region and/or country.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "recipient_address.city",
+    "display_name": "recipient_address.city",
+    "description": "The city of the recipient's address. Whether there is a city will depend on the region and/or country.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "recipient_address.state",
+    "display_name": "recipient_address.state",
+    "description": "The state/province of the recipient's address. Whether there is a state/province will depend on the region and/or country.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "recipient_address.region",
+    "display_name": "recipient_address.region",
+    "description": "The two-digit code representing the region of the Recipient.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "recipient_address.zipcode",
+    "display_name": "recipient_address.zipcode",
+    "description": "Recipient's postal code.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "recipient_address.full_address",
+    "display_name": "recipient_address.full_address",
+    "description": "The full address of the recipient, including country, state, even street, and etc.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "actual_shipping_fee",
+    "display_name": "actual_shipping_fee",
+    "description": "The actual shipping fee of the order if available from external logistics partners.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "bool",
+    "name": "goods_to_declare",
+    "display_name": "goods_to_declare",
+    "description": "Only work for cross-border order.This value indicates whether the order contains goods that are required to declare at customs. 'T' means true and it will mark as 'T' on the shipping label; 'F' means false and it will mark as 'P' on the shipping label. This value is accurate ONLY AFTER the order trackingNo is generated, please capture this value AFTER your retrieve the trackingNo.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "note",
+    "display_name": "note",
+    "description": "The note seller made for own reference.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int64",
+    "name": "note_update_time",
+    "display_name": "note_update_time",
+    "description": "Update time for the note.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "string",
+    "name": "item_list",
+    "display_name": "item_list",
+    "description": "This object contains the detailed breakdown for the result of this API call.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int64",
+    "name": "pay_time",
+    "display_name": "pay_time",
+    "description": "The time when the order status is updated from UNPAID to PAID. This value is NULL when order is not paid yet.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "string",
+    "name": "dropshipper",
+    "display_name": "dropshipper",
+    "description": "For Indonesia orders only. The name of the dropshipper.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "dropshipper_phone",
+    "display_name": "dropshipper_phone",
+    "description": "The phone number of dropshipper, could be empty.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "split_up",
+    "display_name": "split_up",
+    "description": "To indicate whether this order is split to fullfil order(forder) level.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "buyer_cancel_reason",
+    "display_name": "buyer_cancel_reason",
+    "description": "Cancel reason from buyer, could be empty.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "cancel_by",
+    "display_name": "cancel_by",
+    "description": "Could be one of buyer, seller, system or Ops.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "cancel_reason",
+    "display_name": "cancel_reason",
+    "description": "Use this field to get reason for buyer, seller, and system cancellation.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "actual_shipping_fee_confirmed",
+    "display_name": "actual_shipping_fee_confirmed",
+    "description": "Use this filed to judge whether the actual_shipping_fee is confirmed.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "UInt8"
+  },
+  {
+    "class_name": "string",
+    "name": "buyer_cpf_id",
+    "display_name": "buyer_cpf_id",
+    "description": "Buyer's CPF number for taxation and invoice purposes. Only for Brazil order.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "fulfillment_flag",
+    "display_name": "fulfillment_flag",
+    "description": "Use this field to indicate the order is fulfilled by shopee or seller. Applicable values: fulfilled_by_shopee, fulfilled_by_cb_seller, fulfilled_by_local_seller.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int64",
+    "name": "pickup_done_time",
+    "display_name": "pickup_done_time",
+    "description": "The timestamp when pickup is done.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "string",
+    "name": "package_list",
+    "display_name": "package_list",
+    "description": "The list of package under an order",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "invoice_data.number",
+    "display_name": "invoice_data.number",
+    "description": "The number of the invoice. The number should be 9 digits. pt: número da NF-e.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "invoice_data.series_number",
+    "display_name": "invoice_data.series_number",
+    "description": "The series number of the invoice. The series number should be 3 digits. pt: série da NF-e.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "invoice_data.access_key",
+    "display_name": "invoice_data.access_key",
+    "description": "The access key of the invoice. The access key should be 44 digits. pt: chave de acesso da NF-e.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int64",
+    "name": "invoice_data.issue_date",
+    "display_name": "invoice_data.issue_date",
+    "description": "The issue date of the invoice. The issue date should be later than the order pay date. pt: data de emissão da NF-e.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "double",
+    "name": "invoice_data.total_value",
+    "display_name": "invoice_data.total_value",
+    "description": "The total value of the invoice. pt: valor total da NF-e (R$).",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "double",
+    "name": "invoice_data.products_total_value",
+    "display_name": "invoice_data.products_total_value",
+    "description": "The products total value of the invoice. pt: valor total dos produtos (R$) da NF-e.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "string",
+    "name": "invoice_data.tax_code",
+    "display_name": "invoice_data.tax_code",
+    "description": "The tax code for the invoice. The tax code should be 4 digits. pt: Código Fiscal de Operações e Prestações (CFOP) predominante na NF-e.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "checkout_shipping_carrier",
+    "display_name": "checkout_shipping_carrier",
+    "description": "For non masking order, the logistics service provider that the buyer selected for the order to deliver items. For masking order, the logistics service type that the buyer selected for the order to deliver items.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "double",
+    "name": "reverse_shipping_fee",
+    "display_name": "reverse_shipping_fee",
+    "description": "Shopee charges the reverse shipping fee for the returned order.The value of this field will be non-negative.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Float64"
+  },
+  {
+    "class_name": "int32",
+    "name": "order_chargeable_weight_gram",
+    "display_name": "order_chargeable_weight_gram",
+    "description": "For CB shop, display weight used to calculate actual_shipping_fee for this order.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  },
+  {
+    "class_name": "int64",
+    "name": "edt_from",
+    "display_name": "edt_from",
+    "description": "Earliest estimated delivery date of orders (only available for BR region)",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "int64",
+    "name": "edt_to",
+    "display_name": "edt_to",
+    "description": "Latest estimated delivery date of orders (only available for BR region)",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int64"
+  },
+  {
+    "class_name": "string",
+    "name": "prescription_images",
+    "display_name": "prescription_images",
+    "description": "Return list of all prescription pictures of this order, only for ID whitelist user.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "int32",
+    "name": "prescription_check_status",
+    "display_name": "prescription_check_status",
+    "description": "Return prescription check status of this order enum OrderPrescriptionCheckStatus: NONE = 0; PASSED = 1; FAILED = 2; only for ID whitelist user.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Int32"
+  }
+]
+

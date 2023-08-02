@@ -1,0 +1,515 @@
+[
+  {
+    "class_name": "string",
+    "name": "id",
+    "display_name": "id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "account_id",
+    "display_name": "account_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "actor_id",
+    "display_name": "actor_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "adlabels",
+    "display_name": "adlabels",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "applink_treatment",
+    "display_name": "applink_treatment",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "asset_feed_spec",
+    "display_name": "asset_feed_spec",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "authorization_category",
+    "display_name": "authorization_category",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "body",
+    "display_name": "body",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "branded_content_sponsor_page_id",
+    "display_name": "branded_content_sponsor_page_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "bundle_folder_id",
+    "display_name": "bundle_folder_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "call_to_action_type",
+    "display_name": "call_to_action_type",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "categorization_criteria",
+    "display_name": "categorization_criteria",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "category_media_source",
+    "display_name": "category_media_source",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "collaborative_ads_lsb_image_bank_id",
+    "display_name": "collaborative_ads_lsb_image_bank_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "degrees_of_freedom_spec",
+    "display_name": "degrees_of_freedom_spec",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "destination_set_id",
+    "display_name": "destination_set_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "dynamic_ad_voice",
+    "display_name": "dynamic_ad_voice",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "effective_authorization_category",
+    "display_name": "effective_authorization_category",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "effective_instagram_media_id",
+    "display_name": "effective_instagram_media_id",
+    "description": "",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "effective_instagram_story_id",
+    "display_name": "effective_instagram_story_id",
+    "description": "Used for Instagram Ads. The ID of an Instagram post to display as an Instagram ad.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "effective_object_story_id",
+    "display_name": "effective_object_story_id",
+    "description": "The ID of a page post to use in an ad, regardless of whether it's an organic or unpublished page post",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "enable_direct_install",
+    "display_name": "enable_direct_install",
+    "description": "Whether Direct Install should be enabled on supported devices",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "bool",
+    "name": "enable_launch_instant_app",
+    "display_name": "enable_launch_instant_app",
+    "description": "Whether Instant App should be enabled on supported devices",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "string",
+    "name": "image_crops",
+    "display_name": "image_crops",
+    "description": "A JSON object defining crop dimensions for the image specified. See image crop reference for more details",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "image_hash",
+    "display_name": "image_hash",
+    "description": "Image hash for ad creative. If provided, do not add image_url. See image library for more details.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "image_url",
+    "display_name": "image_url",
+    "description": "A URL for the image for this creative. We save the image at this URL to the ad account's image library. If provided, do not include image_hash.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "instagram_actor_id",
+    "display_name": "instagram_actor_id",
+    "description": "Used for Instagram Ads. Provide Instagram account ID used for running these ads.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "instagram_permalink_url",
+    "display_name": "instagram_permalink_url",
+    "description": "URL for a post on Instagram you want to run as an ad. Also known as Instagram media.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "instagram_story_id",
+    "display_name": "instagram_story_id",
+    "description": "Used for Instagram Stories as Ads. Specifies the Instagram story you want to run as an ad. This field will be deprecated in the future. Use SOURCE_INSTAGRAM_STORY_ID",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "instagram_user_id",
+    "display_name": "instagram_user_id",
+    "description": "Instagram actor ID",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "interactive_components_spec",
+    "display_name": "interactive_components_spec",
+    "description": "Specification for all the interactive components that would show up on the ad",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "link_destination_display_url",
+    "display_name": "link_destination_display_url",
+    "description": "Overwrites the display URL for link ads when object_url is set to a click tag",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "link_og_id",
+    "display_name": "link_og_id",
+    "description": "The Open Graph (OG) ID for the link in this creative if the landing page has OG tags",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "link_url",
+    "display_name": "link_url",
+    "description": "Identify a specific landing tab on your Facebook page by the Page tab's URL. See connection objects for retrieving Page tab URLs. You can add app_data parameters to the URL to pass data to a Page's tab.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "messenger_sponsored_message",
+    "display_name": "messenger_sponsored_message",
+    "description": "Used for Messenger sponsored message. JSON string with message for this ad creative. See Messenger Platform, Send API Reference.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "name",
+    "display_name": "name",
+    "description": "Name of this ad creative as seen in the ad account's library. This field has a limit of 100 characters.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "object_id",
+    "display_name": "object_id",
+    "description": "ID for Facebook object being promoted with ads or relevant to the ad or ad type. For example a page ID if you are running ads to generate Page Likes. See promoted_object.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "object_store_url",
+    "display_name": "object_store_url",
+    "description": "iTunes or Google Play of the destination of an app ad",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "object_story_id",
+    "display_name": "object_story_id",
+    "description": "ID of a Facebook Page post to use in an ad. You can get this ID by querying the posts of the page. If this post includes an image, it should not exceed 8 MB. Facebook will upload the image from the post to your ad account's image library. If you create an unpublished page post via object_story_spec at the same time as creating the ad, this ID will be null. However, the effective_object_story_id will be the ID of the page post regardless of whether it's an organic or unpublished page post.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "object_story_spec",
+    "display_name": "object_story_spec",
+    "description": "Use if you want to create a new unpublished page post and turn the post into an ad. The Page ID and the content to create a new unpublished page post. Specify link_data, photo_data, video_data, text_data or template_data with the content.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "object_type",
+    "display_name": "object_type",
+    "description": "The type of Facebook object you want to advertise.{APPLICATION, DOMAIN, EVENT, OFFER, PAGE, PHOTO, SHARE, STATUS, STORE_ITEM, VIDEO, INVALID, PRIVACY_CHECK_FAIL, POST_DELETED}",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "object_url",
+    "display_name": "object_url",
+    "description": "URL that opens if someone clicks your link on a link ad. This URL is not connected to a Facebook page.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "place_page_set_id",
+    "display_name": "place_page_set_id",
+    "description": "The ID of the page set for this creative. See theLocal Awareness guide",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "platform_customizations",
+    "display_name": "platform_customizations",
+    "description": "Use this field to specify the exact media to use on different Facebook placements. You can currently use this setting for images and videos. Facebook replaces the media originally defined in ad creative with this media when the ad displays in a specific placements. For example, if you define a media here for instagram, Facebook uses that media instead of the media defined in the ad creative when the ad appears on Instagram.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "playable_asset_id",
+    "display_name": "playable_asset_id",
+    "description": "The ID of the playable asset in this creative",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "portrait_customizations",
+    "display_name": "portrait_customizations",
+    "description": "This field describes the rendering customizations selected for portrait mode ads like IG Stories, FB Stories, IGTV, etc",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "product_set_id",
+    "display_name": "product_set_id",
+    "description": "Used for Dynamic Ad. An ID for a product set, which groups related products or other items being advertised.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "recommender_settings",
+    "display_name": "recommender_settings",
+    "description": "Used for Dynamic Ads. Settings to display Dynamic ads based on product recommendations.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "status",
+    "display_name": "status",
+    "description": "The status of the creative. WITH_ISSUES and IN_PROCESS are available for 4.0 or higher",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "template_url",
+    "display_name": "template_url",
+    "description": "Used for Dynamic Ads when you want to use third-party click tracking. See Dynamic Ads, Click Tracking and Templates.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "template_url_spec",
+    "display_name": "template_url_spec",
+    "description": "Used for Dynamic Ads when you want to use third-party click tracking. See Dynamic Ads, Click Tracking and Templates.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "thumbnail_id",
+    "display_name": "thumbnail_id",
+    "description": "thumbnail_id",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "thumbnail_url",
+    "display_name": "thumbnail_url",
+    "description": "URL for a thumbnail image for this ad creative. You can provide dimensions for this with thumbnail_width and thumbnail_height. See example.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "title",
+    "display_name": "title",
+    "description": "Title for link ad, which does not belong to a page.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "string",
+    "name": "url_tags",
+    "display_name": "url_tags",
+    "description": "A set of query string parameters which will replace or be appended to urls clicked from page post ads, message of the post, and canvas app install creatives only",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  },
+  {
+    "class_name": "bool",
+    "name": "use_page_actor_override",
+    "display_name": "use_page_actor_override",
+    "description": "Used for App Ads. If true, we display the Facebook page associated with the app ads.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "Bool"
+  },
+  {
+    "class_name": "string",
+    "name": "video_id",
+    "display_name": "video_id",
+    "description": "Facebook object ID for video in this ad creative.",
+    "is_nullable": true,
+    "is_encrypted": false,
+    "data_type": "String"
+  }
+]

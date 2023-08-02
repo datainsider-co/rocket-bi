@@ -1,0 +1,11 @@
+{
+  "presets": [
+    [
+      "@vue/app",
+      {
+        "polyfills": ["es.promise", "es.symbol"]
+      }
+    ]
+  ],
+  "plugins": [["import", { "libraryName": "ant-design-vue", "style": "css" }]]
+}
