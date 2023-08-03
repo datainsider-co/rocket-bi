@@ -9,7 +9,7 @@ const productionConfig = {
   VUE_APP_DATA_COOK_API_URL: '/api',
   VUE_APP_LAKE_API_URL: '/api',
   VUE_APP_CDP_API_URL: '/api',
-  VUE_APP_BILLING_API_URL: 'https://license.rocket.bi/api',
+  VUE_APP_BILLING_API_URL: 'https://rocketbi.cf/api',
   VUE_APP_WORKER_API_URL: '/api',
   VUE_APP_SCHEDULER_API_URL: '/api',
   VUE_APP_RELAY_API_URL: '/api',
