@@ -67,7 +67,11 @@ username: hello@gmail.com
 password: 123456
 ```
 
+- Setup your data connection. RocketBI support multiple connectors such as Clickhouse, BigQuery, Vertica, MySql...
 - Begin by creating a dashboard and using drag-n-drop tool to explore your data.
+
+![rocket-bi-connection](https://github.com/datainsider-co/rocket-bi/assets/19279051/2542d944-5edc-45bb-896b-1a5d3dd09e77)
+
 
 ### Build from source:
 
