@@ -6,20 +6,19 @@
 import {
   Condition,
   Function,
-  GaugeChartOption,
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
-  VizSettingType,
+  ChartOptionClassName,
   WidgetId
 } from '@core/common/domain/model';
 import { QuerySetting } from '../QuerySetting';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class GaugeQuerySetting extends QuerySetting<GaugeChartOption> {
-  readonly className = QuerySettingType.Gauge;
+export class GaugeQuerySetting extends QuerySetting {
+  readonly className = QuerySettingClassName.Gauge;
 
   constructor(
     public value: TableColumn,
@@ -49,14 +48,14 @@ export class GaugeQuerySetting extends QuerySetting<GaugeChartOption> {
     return [this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     if (this.legend) {
       return [this.value, this.legend];
     }
     return [this.value];
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
     if (this.legend) {
       this.legend = ConfigDataUtils.replaceDynamicFunction(this.legend, functions);
@@ -65,7 +64,7 @@ export class GaugeQuerySetting extends QuerySetting<GaugeChartOption> {
 
   getDefaultSize(): [number, number] {
     const vizSettingClassName = this.getChartOption()?.className;
-    if (vizSettingClassName === VizSettingType.BulletSetting) {
+    if (vizSettingClassName === ChartOptionClassName.BulletSetting) {
       return [16, 8];
     }
     return super.getDefaultSize();

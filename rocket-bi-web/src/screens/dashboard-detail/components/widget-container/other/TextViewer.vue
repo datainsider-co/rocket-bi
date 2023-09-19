@@ -1,6 +1,6 @@
 <template>
   <div :style="{ width: width }" class="text-widget-container overflow-hidden">
-    <div :style="widget.getContainerStyle()" class="text-widget-container--background"></div>
+    <!--    <div :style="widget.getContainerStyle()" class="text-widget-container&#45;&#45;background"></div>-->
     <StatusWidget class="text-widget-container--status-widget" :status="status" :error="errorMessage" hide-retry>
       <div
         ref="htmlRender"
@@ -118,16 +118,12 @@ export default TextViewer;
   position: relative;
   background: transparent;
 
-  &--background {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-  }
   &--status-widget {
     display: flex;
     align-items: flex-start;
     z-index: 0;
     background: transparent;
+    overflow: hidden;
   }
 
   .html-render {
@@ -136,8 +132,13 @@ export default TextViewer;
 
   .text-render {
     overflow: hidden;
-    padding: 16px;
+    //padding: 16px;
     background: transparent;
+  }
+
+  textarea:focus-visible {
+    outline: none;
+    text-shadow: none;
   }
 }
 </style>

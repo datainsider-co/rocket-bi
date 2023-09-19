@@ -5,14 +5,13 @@
 
 //@import '~@/themes/scss/di-variables.scss';
 //@import '~@/themes/scss/mixin.scss';
-@import '~@chart/custom-table/DefaultTableStyle';
+@import '~@chart/custom-table/DefaultTableStyle.scss';
 
 .scroll-area {
   height: 100% !important;
 }
 
 .table-chart-container {
-  padding: 16px;
   height: 100%;
   width: 100%;
   display: flex;

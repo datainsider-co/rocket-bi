@@ -4,13 +4,13 @@
  */
 
 import { getFiltersAndSorts, QuerySetting } from '@core/common/domain/model/query/QuerySetting';
-import { Condition, Function, InlineSqlView, OrderBy, QuerySettingType, SqlQuery, TableColumn, WidgetId } from '@core/common/domain/model';
+import { Condition, Function, InlineSqlView, OrderBy, QuerySettingClassName, SqlQuery, TableColumn, WidgetId } from '@core/common/domain/model';
 import { Paginatable } from '@core/common/domain/model/query/features/Paginatable';
 import { IdGenerator } from '@/utils/IdGenerator';
 import { RandomUtils } from '@/utils';
 
 export class RawQuerySetting extends QuerySetting implements Paginatable {
-  readonly className = QuerySettingType.RawQuery;
+  readonly className = QuerySettingClassName.RawQuery;
 
   constructor(
     public sql: string,
@@ -27,7 +27,7 @@ export class RawQuerySetting extends QuerySetting implements Paginatable {
     return [];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [];
   }
 
@@ -52,10 +52,10 @@ export class RawQuerySetting extends QuerySetting implements Paginatable {
   }
 
   static isRawQuerySetting(querySetting: QuerySetting): querySetting is RawQuerySetting {
-    return querySetting.className === QuerySettingType.RawQuery;
+    return querySetting.className === QuerySettingClassName.RawQuery;
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     //Nothing to do
   }
 }

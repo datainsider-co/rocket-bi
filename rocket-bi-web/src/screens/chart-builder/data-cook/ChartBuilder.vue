@@ -2,7 +2,7 @@
   <div class="h-100 w-100 d-inline-block">
     <div class="data-builder">
       <div class="d-flex flex-row data-builder-body">
-        <DatabaseListing :isDragging.sync="isDragging" class="col-3 database-panel" :showSelectDatabase="true" :mode="DatabaseEditionMode.None">
+        <DatabaseListing :isDragging.sync="isDragging" class="col-3 database-panel" :showSelectDatabase="true" :mode="DatabaseListingMode.None">
           <template #database-selector>
             <label class="database-listing-title text-left unselectable d-flex align-items-center">
               Table & Field
@@ -21,7 +21,6 @@
               class="col-12 config-panel"
               @onQuerySettingChanged="onQuerySettingChanged"
             />
-            <!--            <FilterPanel :isDragging="isDragging" class="col-12 filter-panel"></FilterPanel>-->
           </div>
         </div>
         <VizPanel ref="vizPanel" class="col-5 visualization-panel" :show-setting="false"></VizPanel>

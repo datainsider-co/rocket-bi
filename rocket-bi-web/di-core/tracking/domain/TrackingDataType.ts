@@ -51,7 +51,6 @@ export interface WidgetTrackingData {
   widgetType?: string;
   widgetId?: number;
   widgetName?: string;
-  chartFamilyType?: string;
   chartType?: string;
   dashboardId?: number;
   dashboardName?: string;

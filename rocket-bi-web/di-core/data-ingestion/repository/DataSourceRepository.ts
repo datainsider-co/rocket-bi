@@ -3,8 +3,18 @@ import { InjectValue } from 'typescript-ioc';
 import { DIKeys } from '@core/common/modules';
 import { BaseClient } from '@core/common/services/HttpClient';
 import { DataSource } from '@core/data-ingestion/domain/response/DataSource';
-import { DIException, ListingRequest, SourceId, TableSchema } from '@core/common/domain';
-import { TokenResponse, Job, ListingResponse, PreviewResponse, S3Job, S3SourceInfo, TokenRequest, TiktokAccessTokenResponse } from '@core/data-ingestion';
+import { DIException, ListingRequest, SourceId } from '@core/common/domain';
+import {
+  DataSourceType,
+  Job,
+  ListingResponse,
+  PreviewResponse,
+  S3Job,
+  S3SourceInfo,
+  TiktokAccessTokenResponse,
+  TokenRequest,
+  TokenResponse
+} from '@core/data-ingestion';
 import { BaseResponse } from '@core/data-ingestion/domain/response/BaseResponse';
 import { Log } from '@core/utils';
 import { GoogleToken } from '@core/data-ingestion/domain/response/GoogleToken';
@@ -53,7 +63,9 @@ export abstract class DataSourceRepository {
 
   abstract listTiktokReport(): Promise<string[]>;
 
-  abstract getGoogleToken(request: TokenRequest): Promise<TokenResponse>;
+  abstract refreshGoogleToken(request: TokenRequest): Promise<TokenResponse>;
+
+  abstract get(id: number): Promise<DataSourceInfo>;
 }
 
 export class DataSourceRepositoryImpl extends DataSourceRepository {
@@ -175,7 +187,7 @@ export class DataSourceRepositoryImpl extends DataSourceRepository {
     return this.httpClient.get(`source/fb_ads/${token}/exchange_token`).then(res => TokenResponse.fromObject(res));
   }
 
-  getGoogleToken(request: TokenRequest): Promise<TokenResponse> {
+  refreshGoogleToken(request: TokenRequest): Promise<TokenResponse> {
     return this.httpClient.post<TokenResponse>(`source/google/access_token/refresh`, request).then(res => TokenResponse.fromObject(res));
   }
 
@@ -189,6 +201,10 @@ export class DataSourceRepositoryImpl extends DataSourceRepository {
 
   multiDelete(ids: SourceId[]): Promise<boolean> {
     return this.httpClient.delete(`/source/multi_delete`, { ids: ids }, void 0, headerScheduler);
+  }
+
+  get(id: number): Promise<DataSourceInfo> {
+    return this.httpClient.get<DataSource>(`/source/${id}`, void 0, headerScheduler).then(res => DataSourceInfo.fromDataSource(res));
   }
 }
 
@@ -272,11 +288,15 @@ export class DataSourceRepositoryMock extends DataSourceRepository {
     throw new DIException('Not supported');
   }
 
-  getGoogleToken(request: TokenRequest): Promise<TokenResponse> {
+  refreshGoogleToken(request: TokenRequest): Promise<TokenResponse> {
     throw new DIException('Not supported');
   }
 
   multiDelete(ids: SourceId[]): Promise<boolean> {
     return Promise.resolve(false);
+  }
+
+  get(id: number): Promise<DataSourceInfo> {
+    return Promise.resolve(DataSourceInfo.default(DataSourceType.GA));
   }
 }

@@ -77,7 +77,7 @@ import DiButton from '@/shared/components/common/DiButton.vue';
 import DiShadowButton from '@/shared/components/common/DiShadowButton.vue';
 import DiIconTextButton from '@/shared/components/common/DiIconTextButton.vue';
 import DefaultValueSetting from '@/shared/settings/tab-filter-setting/DefaultValueSetting.vue';
-import { FontFamilyOptions, FontSizeOptions } from '@/shared/settings/common/options';
+import { FontFamilyOptions, SecondaryFontSizeOptions } from '@/shared/settings/common/options';
 
 @Component({ components: { DefaultValueSetting, DiIconTextButton, DiShadowButton, DiButton, PanelHeader } })
 export default class TreeFilterControlTab extends Vue {

@@ -167,10 +167,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { AxisSetting, ChartOption, QuerySettingType, SettingKey } from '@core/common/domain';
+import { AxisSetting, ChartOption, QuerySettingClassName, SettingKey } from '@core/common/domain';
 import { QuerySetting } from '@core/common/domain/model/query/QuerySetting.ts';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { DashOptions } from '@/shared/settings/common/options/DashOptions';
 import { ListUtils } from '@/utils';
 import { enableCss } from '@/shared/settings/common/install';
@@ -186,12 +186,12 @@ export default class BellXAxisTab extends Vue {
   private readonly query!: QuerySetting;
   private readonly defaultSetting = {
     visible: true,
-    categoryFont: 'Roboto',
-    categoryColor: ChartOption.getThemeTextColor(),
+    categoryFont: ChartOption.getSecondaryFontFamily(),
+    categoryColor: ChartOption.getPrimaryTextColor(),
     categoryFontSize: '11px',
     titleEnabled: true,
-    titleFont: 'Roboto',
-    titleColor: ChartOption.getThemeTextColor(),
+    titleFont: ChartOption.getSecondaryFontFamily(),
+    titleColor: ChartOption.getPrimaryTextColor(),
     titleFontSize: '11px',
     title: 'Bell curve',
     gridLineColor: ChartOption.getGridLineColor(),
@@ -265,7 +265,7 @@ export default class BellXAxisTab extends Vue {
   }
 
   private get fontSizeOptions() {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get title(): string {
@@ -317,8 +317,8 @@ export default class BellXAxisTab extends Vue {
     return false;
   }
   private get enableSettingGridLine(): boolean {
-    const isScatter: boolean = this.query.className == QuerySettingType.Scatter;
-    const isBubble: boolean = this.query.className == QuerySettingType.Bubble;
+    const isScatter: boolean = this.query.className == QuerySettingClassName.Scatter;
+    const isBubble: boolean = this.query.className == QuerySettingClassName.Bubble;
     return isScatter || isBubble;
   }
 

@@ -37,7 +37,7 @@ export default class QueryBuilder extends Vue {
   private isDragging = false;
   private controller: FormulaController | null = null;
   private defaultQuery = '';
-  private readonly DatabaseEditionMode = DatabaseListingMode;
+  private readonly DatabaseListingMode = DatabaseListingMode;
 
   private readonly editorController = new EditorController();
 

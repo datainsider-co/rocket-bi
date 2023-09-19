@@ -8,4 +8,8 @@ export interface StyleSetting {
   textShadow?: boolean;
   outline?: string;
   textOutline?: number;
+  fontWeight?: string;
+  lineHeight?: string;
+  fontStyle?: string;
+  textDecoration?: string;
 }

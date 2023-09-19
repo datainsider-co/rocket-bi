@@ -3,8 +3,8 @@ import { FunctionInfo } from '@/screens/chart-builder/config-builder/database-li
 import { Column, DatabaseInfo, TableSchema } from '@core/common/domain';
 import { FormulaController } from '@/shared/fomula/FormulaController';
 import { MySQLFormulaController } from '@/shared/fomula/mysql/MySQLFormulaController';
-import { MySQLCalculatedFieldController } from '@/shared/fomula/mysql/MySQLCalculatedFieldController';
-import { MySQLMeasureFieldController } from '@/shared/fomula/mysql/MySQLMeasureFieldController';
+import { CalculatedFieldController } from '@/shared/fomula/CalculatedFieldController';
+import { MeasureController } from '@/shared/fomula/MeasureController';
 
 export class MySQLFormulaHandler extends FormulaCreatorHandler {
   createController(allFunctions: FunctionInfo[], databaseSchemas: DatabaseInfo[]): FormulaController {
@@ -12,11 +12,11 @@ export class MySQLFormulaHandler extends FormulaCreatorHandler {
   }
 
   createCalculatedFieldController(allFunctions: FunctionInfo[], columns: Column[]): FormulaController {
-    return new MySQLCalculatedFieldController(allFunctions, columns);
+    return new CalculatedFieldController(allFunctions, columns);
   }
 
   createMeasureFieldController(allFunctions: FunctionInfo[], tblSchema: TableSchema): FormulaController {
-    return new MySQLMeasureFieldController(allFunctions, tblSchema);
+    return new MeasureController(allFunctions, tblSchema);
   }
 
   getSyntaxFile(): string {

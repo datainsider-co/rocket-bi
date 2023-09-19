@@ -182,7 +182,7 @@ import { PlotOptions } from '@core/common/domain/model/chart-option/extra-settin
 import { ChartType, SelectOption } from '@/shared';
 import { DisplayUnitOptions } from '@/shared/settings/common/options/DisplayUnitOptions';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { LabelFormatOptions } from '@/shared/settings/common/options/LabelFormatOptions';
 import { DataLabelFormatterMode } from '@chart/PieChart';
 import { get, isNumber, toNumber } from 'lodash';
@@ -209,8 +209,8 @@ export default class DataLabelTab extends Vue {
   private readonly defaultSetting = {
     enabled: false,
     labelFormat: DataLabelFormatterMode.NameAndValue,
-    fontFamily: 'Roboto',
-    color: ChartOption.getThemeTextColor(),
+    fontFamily: ChartOption.getSecondaryFontFamily(),
+    color: ChartOption.getPrimaryTextColor(),
     fontSize: '12px',
     displayUnit: MetricNumberMode.Default,
     distance: 30,
@@ -225,6 +225,7 @@ export default class DataLabelTab extends Vue {
   private get seriesKey(): string {
     switch (this.widgetType) {
       case ChartType.Pie:
+      case ChartType.Donut:
         return 'pie';
       case ChartType.Gauges:
         return 'solidgauge';
@@ -250,6 +251,7 @@ export default class DataLabelTab extends Vue {
       case ChartType.Funnel:
       case ChartType.Pyramid:
       case ChartType.Pie:
+      case ChartType.Donut:
         return true;
       default:
         return false;
@@ -257,7 +259,7 @@ export default class DataLabelTab extends Vue {
   }
 
   private get haveDistanceSetting() {
-    return this.widgetType === ChartType.Pie;
+    return this.widgetType === ChartType.Pie || this.widgetType === ChartType.Donut;
   }
 
   private get havePositionSetting() {
@@ -315,7 +317,7 @@ export default class DataLabelTab extends Vue {
   }
 
   private get fontSizeOptions(): SelectOption[] {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get positionOptions(): SelectOption[] {
@@ -475,5 +477,3 @@ export default class DataLabelTab extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

@@ -3,17 +3,17 @@
  * @created: 5/29/21, 4:36 PM
  */
 
-import { ChartOption, ConditionType, FilterRequest, FunctionControl, In, VizSettingType, WidgetId } from '@core/common/domain';
+import { ChartOption, ConditionType, FilterRequest, FunctionController, In, ChartOptionClassName, WidgetId } from '@core/common/domain';
 import { Log } from '@core/utils';
 import { QuerySetting } from '../QuerySetting';
 import {
   Condition,
-  Filterable,
+  FilterableSetting,
   Function,
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
+  QuerySettingClassName,
   TabFilterOption,
   TableColumn
 } from '@core/common/domain/model';
@@ -22,8 +22,8 @@ import { toNumber } from 'lodash';
 import { ListUtils } from '@/utils';
 import { Direction, TabFilterDisplay } from '@/shared';
 
-export class TabFilterQuerySetting<T extends ChartOption = ChartOption> extends QuerySetting<TabFilterOption> implements Filterable, FunctionControl {
-  readonly className = QuerySettingType.TabControl;
+export class TabFilterQuerySetting extends QuerySetting implements FilterableSetting, FunctionController {
+  readonly className = QuerySettingClassName.TabFilterQuerySetting;
   filterRequest?: FilterRequest;
 
   constructor(
@@ -56,11 +56,11 @@ export class TabFilterQuerySetting<T extends ChartOption = ChartOption> extends 
     return this.values.map(value => value.function);
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return this.values;
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.values[0];
   }
 
@@ -84,15 +84,15 @@ export class TabFilterQuerySetting<T extends ChartOption = ChartOption> extends 
     }
   }
 
-  setValueBySetting(setting: ChartOption) {
-    const isTabFilterSetting = setting.className == VizSettingType.TabFilterSetting;
+  assignChartOptionValue(setting: ChartOption) {
+    const isTabFilterSetting = setting.className == ChartOptionClassName.TabFilterSetting;
     if (isTabFilterSetting) {
       const defaultValues = (setting as TabFilterOption)?.options?.default?.setting?.value ?? [];
       this.setDefaultValue(defaultValues);
     }
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.values = ConfigDataUtils.replaceDynamicFunctions(this.values, functions);
   }
 
@@ -100,11 +100,11 @@ export class TabFilterQuerySetting<T extends ChartOption = ChartOption> extends 
     return this.values.length === 1;
   }
 
-  enableFunctionControl(): boolean {
+  isEnableFunctionControl(): boolean {
     return this.values.length > 1;
   }
 
-  getDefaultFunctions(): TableColumn[] {
+  getDefaultTableColumns(): TableColumn[] {
     const defaultValues = this.getChartOption()?.options.default?.setting?.value as Array<string>;
     if (ListUtils.isNotEmpty(defaultValues)) {
       return defaultValues.map(value => {
@@ -123,12 +123,12 @@ export class TabFilterQuerySetting<T extends ChartOption = ChartOption> extends 
   getDefaultSize(): [number, number] {
     const displayAs: TabFilterDisplay | undefined = this.getChartOption()?.options.displayAs;
     switch (displayAs) {
-      case TabFilterDisplay.normal:
-      case TabFilterDisplay.singleChoice:
-      case TabFilterDisplay.multiChoice:
+      case TabFilterDisplay.Normal:
+      case TabFilterDisplay.SingleChoice:
+      case TabFilterDisplay.MultiChoice:
         return this.getDefaultSizeTabWidget();
-      case TabFilterDisplay.dropDown:
-      case TabFilterDisplay.flat:
+      case TabFilterDisplay.DropDown:
+      case TabFilterDisplay.Flat:
         return [12, 2];
       default:
         return super.getDefaultSize();
@@ -136,10 +136,10 @@ export class TabFilterQuerySetting<T extends ChartOption = ChartOption> extends 
   }
 
   isEnableFilter(): boolean {
-    return this.values.length === 1;
+    return false;
   }
 
-  hasDefaultValue(): boolean {
+  hasDefaultCondition(): boolean {
     return this.getChartOption()?.options?.default?.setting?.conditions != undefined;
   }
 

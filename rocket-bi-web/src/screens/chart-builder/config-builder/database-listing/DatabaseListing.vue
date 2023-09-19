@@ -13,8 +13,8 @@
           <div v-if="showSelectTabControl" class="d-flex flex-row h-100 w-100 align-items-center">
             <div
               class="cursor-pointer source-item"
-              :class="{ 'di-active': displayListing === DisplayListings.Database }"
-              @click="setDisplayListing(DisplayListings.Database)"
+              :class="{ 'di-active': currentListingType === ListingType.Database }"
+              @click="setListingType(ListingType.Database)"
             >
               <i class="di-icon-database icon-title" />
               <label class="cursor-pointer">
@@ -23,8 +23,8 @@
             </div>
             <div
               class="cursor-pointer source-item"
-              :class="{ 'di-active': displayListing === DisplayListings.TabControl }"
-              @click="setDisplayListing(DisplayListings.TabControl)"
+              :class="{ 'di-active': currentListingType === ListingType.TabControl }"
+              @click="setListingType(ListingType.TabControl)"
             >
               <i class="di-icon-filter-control icon-title" />
               <label class="cursor-pointer">
@@ -50,14 +50,15 @@
         :blur="handleUnFocus"
         :toggleSearch="toggleSearch"
       >
-        <div class="database-selector" v-if="displayListing === DisplayListings.Database">
+        <div class="database-selector" v-if="currentListingType === ListingType.Database">
           <slot name="database-selector" v-if="!enableSearch && showSelectDatabase">
             <DiDropdown
               canHideOtherPopup
               class="selector mr-2"
               :id="genDropdownId('databases')"
-              v-model="databaseSelected"
+              :value="selectedDbName"
               :data="databaseInfos"
+              @change="dbName => handleSelectDbName(dbName)"
               labelProps="displayName"
               placeholder="Select database"
               valueProps="name"
@@ -78,17 +79,28 @@
             <img src="@/assets/icon/ic_search.svg" alt="" />
           </div>
         </div>
+        <div class="tab-control-selector" v-if="currentListingType === ListingType.TabControl">
+          <DiSearchInput
+            autofocus
+            class="w-100"
+            placeholder="Search tab controls..."
+            :border="true"
+            :value="keyword"
+            @change="value => (keyword = value)"
+            @blur="handleUnFocus"
+          />
+        </div>
       </slot>
       <StatusWidget :status="status" :error="error" :hide-retry="hideRetry" class="overflow-hidden pt-2">
         <vuescroll v-if="!isLoading && !isError && !isEmptyTableSchema" :ops="options" class="schema-listing" ref="treeNodeScroller">
           <div class="nav-scroll">
             <ul class="nav">
               <SlVueTree
-                v-if="displayListing === DisplayListings.Database"
+                v-if="currentListingType === ListingType.Database"
                 :value="tableSchemas"
                 draggable="false"
                 @onDragEndItem="handleDragEnd"
-                @onDragstartitem="handleDragStart"
+                @onDragStartItem="handleDragStart"
                 @onRightClick="handleRightClickNode"
                 @nodeclick="handleNodeClick"
                 @clickField="handleClickField"
@@ -100,13 +112,13 @@
                     <template v-if="!node.isLeaf && !hideTableAction">
                       <div
                         class="icon-create-field btn-icon btn-icon-border"
-                        v-if="mode === DatabaseEditionMode.Query"
+                        v-if="mode === DatabaseListingMode.Query"
                         @click.prevent.stop="handleClickTable(node)"
                       >
                         <i class="di-icon-double-arrow"></i>
                       </div>
                       <div
-                        v-else-if="mode === DatabaseEditionMode.Editing"
+                        v-else-if="mode === DatabaseListingMode.Editing"
                         class="icon-create-field btn-icon btn-icon-border"
                         @click="showMoreOption(node, ...arguments)"
                       >
@@ -117,11 +129,11 @@
                 </template>
               </SlVueTree>
               <SlVueTree
-                v-else-if="displayListing === DisplayListings.TabControl"
-                :value="tabControls"
+                v-else-if="currentListingType === ListingType.TabControl"
+                :value="chartControls"
                 :draggable="true"
                 @onDragEndItem="handleDragEnd"
-                @onDragstartitem="handleDragStart"
+                @onDragStartItem="handleDragStart"
                 @onRightClick="handleRightClickNode"
                 @nodeclick="handleNodeClick"
                 @clickField="handleClickField"
@@ -133,7 +145,7 @@
         <div v-if="isLoaded && !isError && isEmptyTableSchema" class="h-100 w-100 d-flex flex-column align-items-center justify-content-center">
           <template v-if="isActiveSearch">
             <img src="@/assets/icon/directory-empty.svg" alt="empty" />
-            <template v-if="displayListing === DisplayListings.Database">
+            <template v-if="currentListingType === ListingType.Database">
               <div class="justify-content-center pt-3">No found tables & columns</div>
             </template>
             <template v-else>
@@ -141,7 +153,7 @@
             </template>
           </template>
           <template v-else>
-            <EmptyDirectory v-if="displayListing === DisplayListings.Database" title="Database empty" :is-hide-create-hint="true" />
+            <EmptyDirectory v-if="currentListingType === ListingType.Database" title="Database empty" :is-hide-create-hint="true" />
             <EmptyDirectory v-else title="Chart control empty" :is-hide-create-hint="true" />
           </template>
         </div>

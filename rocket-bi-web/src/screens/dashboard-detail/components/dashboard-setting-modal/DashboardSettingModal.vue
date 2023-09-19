@@ -104,7 +104,7 @@
 
         display: flex;
         justify-content: space-between;
-        overflow: hidden;
+        overflow: Header hidden;
 
         padding: 2px;
 

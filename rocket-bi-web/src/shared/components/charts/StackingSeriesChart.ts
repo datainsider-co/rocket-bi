@@ -49,7 +49,7 @@ export default class StackingSeriesChart extends BaseHighChartWidget<SeriesOneRe
           labels: {
             useHTML: true,
             formatter: function() {
-              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         },
@@ -57,7 +57,7 @@ export default class StackingSeriesChart extends BaseHighChartWidget<SeriesOneRe
           labels: {
             useHTML: true,
             formatter: function() {
-              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         }
@@ -203,7 +203,7 @@ export default class StackingSeriesChart extends BaseHighChartWidget<SeriesOneRe
           labels: {
             useHTML: true,
             formatter: function() {
-              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         }
@@ -298,11 +298,11 @@ export default class StackingSeriesChart extends BaseHighChartWidget<SeriesOneRe
     //@ts-ignore
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
     //@ts-ignore
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     let result = '';
     if (contextObject.points) {
       contextObject.points.forEach(point => {
-        const formattedData = this.numberFormatter.format(point.y);
+        const formattedData = this.numberFormatter.format(point.y as number);
         result = result + `<span style="color:${point.color}">●</span> ${point.series.name}: <b>${formattedData}</b><br/>`;
       });
     }
@@ -392,9 +392,9 @@ export default class StackingSeriesChart extends BaseHighChartWidget<SeriesOneRe
       }
     });
   }
-  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const yAxisSetting = this.setting.options.yAxis;
-    const value = this.numberFormatter.format(axis.value);
+    const value = this.numberFormatter.format(axis.value as number);
     if (yAxisSetting && yAxisSetting[0]) {
       return this.customAxisLabel(value, yAxisSetting[0].prefix, yAxisSetting[0].postfix);
     } else {
@@ -410,11 +410,11 @@ export default class StackingSeriesChart extends BaseHighChartWidget<SeriesOneRe
       `;
   }
 
-  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const xAxisSetting = this.setting.options.xAxis;
     const value = axis.value;
     if (xAxisSetting && xAxisSetting[0]) {
-      return this.customAxisLabel(value, xAxisSetting[0].prefix, xAxisSetting[0].postfix);
+      return this.customAxisLabel(value as string, xAxisSetting[0].prefix, xAxisSetting[0].postfix);
     } else {
       return `<div>${value}</div>`;
     }

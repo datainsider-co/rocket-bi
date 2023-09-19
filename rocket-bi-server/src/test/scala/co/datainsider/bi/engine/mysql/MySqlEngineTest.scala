@@ -3,6 +3,7 @@ package co.datainsider.bi.engine.mysql
 import co.datainsider.bi.engine.clickhouse.DataTable
 import co.datainsider.bi.repository.FileStorage.FileType
 import co.datainsider.caas.user_profile.domain.Implicits.FutureEnhanceLike
+import co.datainsider.jobworker.repository.writer.DataWriter
 import co.datainsider.jobworker.util.JsonUtils
 import co.datainsider.schema.domain.TableSchema
 import co.datainsider.schema.domain.column._
@@ -18,7 +19,7 @@ class MySqlEngineTest extends BaseMySqlTest {
   val csvPath = s"${baseDir}/mysql_sales.csv"
   val excelPath = s"${baseDir}/mysql_sales.xlsx"
 
-  val testWriteTableSchema: TableSchema = TableSchema(
+  val schema: TableSchema = TableSchema(
     name = "writeable_table",
     dbName = dbName,
     organizationId = 0,
@@ -42,7 +43,7 @@ class MySqlEngineTest extends BaseMySqlTest {
     if (!file.exists()) {
       file.mkdirs()
     }
-    await(ddlExecutor.createTable(testWriteTableSchema))
+    await(ddlExecutor.createTable(schema))
   }
 
   test("test export csv") {
@@ -127,10 +128,11 @@ class MySqlEngineTest extends BaseMySqlTest {
       Array(7, null, null, dateTime.getTime, dateTime2.getTime, null, null, null, null)
     )
 
-    await(engine.write(source, testWriteTableSchema, records))
+    val writer: DataWriter = engine.createWriter(source)
+    assert(writer.insertBatch(records, schema) > 0)
     val query =
       s"""SELECT *
-         |FROM ${testWriteTableSchema.dbName}.${testWriteTableSchema.name}
+         |FROM ${schema.dbName}.${schema.name}
          |ORDER BY `'id'` """.stripMargin
     val actualRows: Seq[Seq[Any]] = client.executeQuery(query)(rs => {
       val records = ArrayBuffer[Seq[Any]]()

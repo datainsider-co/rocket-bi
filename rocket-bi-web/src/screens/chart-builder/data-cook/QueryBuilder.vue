@@ -4,7 +4,7 @@
       <div class="d-flex flex-row data-builder-body">
         <DatabaseListing
           :isDragging.sync="isDragging"
-          :mode="DatabaseEditionMode.Query"
+          :mode="DatabaseListingMode.Query"
           :showSelectDatabase="true"
           class="col-2 database-panel"
           @clickField="handleClickField"

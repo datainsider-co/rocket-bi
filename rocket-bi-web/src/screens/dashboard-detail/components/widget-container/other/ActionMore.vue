@@ -21,7 +21,7 @@
             :key="genBtnId(`action-${item.text}`, index)"
             :is-disable="item.disabled"
             :title="item.text"
-            @click="onClickItem(item)"
+            @click="event => onClickItem(event, item)"
           >
             <img v-if="hasIcon(item.icon)" :src="require(`@/assets/icon/${item.icon}`)" alt="" />
           </DiButton>
@@ -78,10 +78,10 @@ export default class ActionMore extends Vue {
     ];
   }
 
-  private onClickItem(item: ContextMenuItem) {
+  private onClickItem(event: MouseEvent, item: ContextMenuItem) {
     this.isShowMenu = false;
     // fix: menu splash
-    TimeoutUtils.waitAndExec(null, () => item.click(), 100);
+    TimeoutUtils.waitAndExec(null, () => item.click?.call(item, event), 100);
   }
 
   private hasIcon(icon?: string): boolean {

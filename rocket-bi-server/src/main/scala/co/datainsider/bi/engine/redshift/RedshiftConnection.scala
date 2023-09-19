@@ -1,6 +1,6 @@
 package co.datainsider.bi.engine.redshift
 
-import co.datainsider.bi.domain.Connection
+import co.datainsider.bi.domain.{Connection, SshConfig, TunnelConnection}
 
 case class RedshiftConnection(
     orgId: Long = -1,
@@ -9,12 +9,13 @@ case class RedshiftConnection(
     username: String,
     password: String,
     database: String,
+    tunnelConfig: Option[SshConfig] = None,
     properties: Map[String, String] = Map("ssl" -> "false", "TimeZone" -> "GMT"),
     createdBy: String = null,
     updatedBy: String = null,
     createdAt: Long = System.currentTimeMillis(),
     updatedAt: Long = System.currentTimeMillis()
-) extends Connection {
+) extends TunnelConnection {
 
   def jdbcUrl: String = {
     s"jdbc:redshift://$host:$port/$database"
@@ -34,5 +35,13 @@ case class RedshiftConnection(
       createdAt = createdAt,
       updatedAt = updatedAt
     )
+  }
+
+  override def getRemoteHost(): String = host
+
+  override def getRemotePorts(): Seq[Int] = Seq(port)
+
+  override def copyHostPorts(host: String, ports: Seq[Int]): Connection = {
+    this.copy(host = host, port = ports.head)
   }
 }

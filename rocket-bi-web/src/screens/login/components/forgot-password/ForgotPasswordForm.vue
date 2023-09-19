@@ -11,7 +11,7 @@
       <div class="login-screen-left-panel-body-form-body">
         <div>{{ messageForgotPassword }}</div>
         <DiInputComponent class="mt-2" autofocus autocomplete="off" :id="genInputId('email')" v-model="email" placeholder="Email" @enter="handleForgotPassword">
-          <template v-if="!isEmailEmpty" #suffix>
+          <template v-if="!isEmailEmpty" #suffix-icon>
             <div>
               <i class="di-icon-close btn-icon-border" @click="handleResetEmail"></i>
             </div>

@@ -3,7 +3,7 @@ import {
   BellCurveChartOption2,
   BubbleChartOption,
   BulletChartOption,
-  ChartFamilyType,
+  ChartOptionClassName,
   CircularChartOption,
   DateSelectFilterOption,
   DonutChartOption,
@@ -14,7 +14,6 @@ import {
   FlattenTableChartOption,
   FunnelChartOption,
   GaugeChartOption,
-  GroupMeasurementOption,
   HeatMapChartOption,
   HistogramChartOption,
   InputControlOption,
@@ -33,12 +32,16 @@ import {
   SlicerFilterOption,
   SpiderWebChartOption,
   StackedChartOption,
+  StyleSetting,
   TabFilterOption,
   TableChartOption,
+  TextSetting,
   TreeFilterOption,
   TreeMapChartOption,
+  ValueControlInfo,
+  ValueController,
+  ValueControlType,
   VariablepieChartOption,
-  VizSettingType,
   WindRoseChartOption,
   WordCloudChartOption
 } from '@core/common/domain/model';
@@ -51,7 +54,7 @@ import { _ThemeStore } from '@/store/modules/ThemeStore';
 
 export type SettingKey = string;
 
-export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> {
+export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> implements ValueController {
   static readonly CHART_TYPE_CONVERT: Map<string, string> = new Map<string, string>([
     [ChartType.Bubble, 'bubble'],
     [ChartType.Pareto, ChartType.Column],
@@ -146,6 +149,17 @@ export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> {
         }
       }
     },
+    title: {
+      style: {
+        color: ChartOption.getPrimaryTextColor(),
+        fontFamily: ChartOption.getPrimaryFontFamily(),
+        fontWeight: ChartOption.getPrimaryFontWeight(),
+        fontStyle: ChartOption.getPrimaryFontStyle()
+      }
+    },
+    subtitle: {
+      style: ChartOption.getSecondaryStyle()
+    },
     credits: {
       enabled: false
     },
@@ -202,92 +216,89 @@ export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> {
     '#7798BF',
     '#aaeeee'
   ];
-  abstract readonly className: VizSettingType;
-  abstract readonly chartFamilyType: ChartFamilyType;
+  abstract readonly className: ChartOptionClassName;
 
   protected constructor(public readonly options: T) {}
 
   static fromObject(obj: ChartOption): ChartOption {
     switch (obj.className) {
-      case VizSettingType.BellCurveSetting:
+      case ChartOptionClassName.BellCurveSetting:
         return BellCurveChartOption.fromObject(obj as BellCurveChartOption);
-      case VizSettingType.SeriesSetting:
+      case ChartOptionClassName.SeriesSetting:
         return SeriesChartOption.fromObject(obj as SeriesChartOption);
-      case VizSettingType.PieSetting:
+      case ChartOptionClassName.PieSetting:
         return PieChartOption.fromObject(obj as PieChartOption);
-      case VizSettingType.FunnelSetting:
+      case ChartOptionClassName.FunnelSetting:
         return FunnelChartOption.fromObject(obj as FunnelChartOption);
-      case VizSettingType.PyramidSetting:
+      case ChartOptionClassName.PyramidSetting:
         return PyramidChartOption.fromObject(obj as PyramidChartOption);
-      case VizSettingType.ScatterSetting:
+      case ChartOptionClassName.ScatterSetting:
         return ScatterChartOption.fromObject(obj as ScatterChartOption);
-      case VizSettingType.BubbleSetting:
+      case ChartOptionClassName.BubbleSetting:
         return BubbleChartOption.fromObject(obj as BubbleChartOption);
-      case VizSettingType.ParetoSetting:
+      case ChartOptionClassName.ParetoSetting:
         return ParetoChartOption.fromObject(obj as ParetoChartOption);
-      case VizSettingType.HeatMapSetting:
+      case ChartOptionClassName.HeatMapSetting:
         return HeatMapChartOption.fromObject(obj as HeatMapChartOption);
-      case VizSettingType.GaugeSetting:
+      case ChartOptionClassName.GaugeSetting:
         return GaugeChartOption.fromObject(obj as GaugeChartOption);
-      case VizSettingType.NumberSetting:
+      case ChartOptionClassName.NumberSetting:
         return NumberChartOption.fromObject(obj as NumberChartOption);
-      case VizSettingType.DrilldownSetting:
+      case ChartOptionClassName.DrilldownSetting:
         return DrilldownChartOption.fromObject(obj as DrilldownChartOption);
-      case VizSettingType.DrilldownPieSetting:
+      case ChartOptionClassName.DrilldownPieSetting:
         return DrilldownPieChartOption.fromObject(obj as DrilldownPieChartOption);
-      case VizSettingType.TableSetting:
+      case ChartOptionClassName.TableSetting:
         return TableChartOption.fromObject(obj);
-      case VizSettingType.WordCloudSetting:
+      case ChartOptionClassName.WordCloudSetting:
         return WordCloudChartOption.fromObject(obj as WordCloudChartOption);
-      case VizSettingType.TreeMapSetting:
+      case ChartOptionClassName.TreeMapSetting:
         return TreeMapChartOption.fromObject(obj as TreeMapChartOption);
-      case VizSettingType.StackedSeriesSetting:
+      case ChartOptionClassName.StackedSeriesSetting:
         return StackedChartOption.fromObject(obj as StackedChartOption);
-      case VizSettingType.CircularBarSetting:
+      case ChartOptionClassName.CircularBarSetting:
         return CircularChartOption.fromObject(obj as CircularChartOption);
-      case VizSettingType.HistogramSetting:
+      case ChartOptionClassName.HistogramSetting:
         return HistogramChartOption.fromObject(obj as HistogramChartOption);
-      case VizSettingType.DropdownSetting:
+      case ChartOptionClassName.DropdownSetting:
         return DropdownChartOption.fromObject(obj as DropdownChartOption);
-      case VizSettingType.MapSetting:
+      case ChartOptionClassName.MapSetting:
         return MapChartChartOption.fromObject(obj as MapChartChartOption);
-      case VizSettingType.TabFilterSetting:
+      case ChartOptionClassName.TabFilterSetting:
         return TabFilterOption.fromObject(obj as TabFilterOption);
-      case VizSettingType.PivotTableSetting:
+      case ChartOptionClassName.PivotTableSetting:
         return PivotTableChartOption.fromObject(obj);
-      case VizSettingType.ParliamentSetting:
+      case ChartOptionClassName.ParliamentSetting:
         return ParliamentChartOption.fromObject(obj);
-      case VizSettingType.SpiderWebSetting:
+      case ChartOptionClassName.SpiderWebSetting:
         return SpiderWebChartOption.fromObject(obj as SpiderWebChartOption);
-      case VizSettingType.BellCurve2Setting:
+      case ChartOptionClassName.BellCurve2Setting:
         return BellCurveChartOption2.fromObject(obj as BellCurveChartOption2);
-      case VizSettingType.SankeySetting:
+      case ChartOptionClassName.SankeySetting:
         return SankeyChartOption.fromObject(obj as SankeyChartOption);
-      case VizSettingType.SlicerFilterSetting:
+      case ChartOptionClassName.SlicerFilterSetting:
         return SlicerFilterOption.fromObject(obj);
-      case VizSettingType.DateSelectFilterSetting:
+      case ChartOptionClassName.DateSelectFilterSetting:
         return DateSelectFilterOption.fromObject(obj);
-      case VizSettingType.FlattenTableSetting:
+      case ChartOptionClassName.FlattenTableSetting:
         return FlattenTableChartOption.fromObject(obj);
-      case VizSettingType.FlattenPivotTableSetting:
+      case ChartOptionClassName.FlattenPivotTableSetting:
         return FlattenPivotTableChartOption.fromObject(obj);
-      case VizSettingType.InputFilterSetting:
+      case ChartOptionClassName.InputFilterSetting:
         return InputFilterOption.fromObject(obj as InputFilterOption);
-      case VizSettingType.BulletSetting:
+      case ChartOptionClassName.BulletSetting:
         return BulletChartOption.fromObject(obj);
-      case VizSettingType.WindRoseSetting:
+      case ChartOptionClassName.WindRoseSetting:
         return WindRoseChartOption.fromObject(obj as WindRoseChartOption);
-      case VizSettingType.LineStockSetting:
+      case ChartOptionClassName.LineStockSetting:
         return LineStockChartOption.fromObject(obj as LineStockChartOption);
-      case VizSettingType.TabMeasurementSetting:
-        return GroupMeasurementOption.fromObject(obj as GroupMeasurementOption);
-      case VizSettingType.InputControlSetting:
+      case ChartOptionClassName.InputControlSetting:
         return InputControlOption.fromObject(obj as InputControlOption);
-      case VizSettingType.TreeFilterSetting:
+      case ChartOptionClassName.TreeFilterSetting:
         return TreeFilterOption.fromObject(obj as TreeFilterOption);
-      case VizSettingType.VariablepieSetting:
+      case ChartOptionClassName.VariablePieSetting:
         return VariablepieChartOption.fromObject(obj as VariablepieChartOption);
-      case VizSettingType.DonutSetting:
+      case ChartOptionClassName.DonutSetting:
         return DonutChartOption.fromObject(obj as DonutChartOption);
       default:
         throw new DIException(`ChartSetting:: ${obj.className} unsupported`);
@@ -295,7 +306,7 @@ export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> {
   }
 
   getBackgroundColor(): string {
-    return this.options?.background ?? '#00000019';
+    return this.options?.background ?? '#FAFAFB';
   }
 
   getSubtitle(): string {
@@ -489,11 +500,6 @@ export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> {
         return WindRoseChartOption.getDefaultChartOption();
       case ChartType.LineStock:
         return LineStockChartOption.getDefaultChartOption(chartType);
-      case ChartType.TabMeasurement:
-      case ChartType.MultiChoiceMeasurement:
-      case ChartType.SingleChoiceMeasurement:
-      case ChartType.DropDownMeasurement:
-        return GroupMeasurementOption.getDefaultChartOption(chartType);
       case ChartType.InputControl:
         return InputControlOption.getDefaultChartOption();
       case ChartType.MultiTreeFilter:
@@ -540,11 +546,46 @@ export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> {
     }
   }
 
-  static getThemeTextColor(): string {
+  static getDefaultTitle(custom: { title?: string; align?: AlignSetting; fontSize?: string } = {}): TextSetting {
+    return {
+      align: custom.align ?? 'center',
+      enabled: true,
+      text: custom.title ?? 'Untitled chart',
+      style: {
+        color: ChartOption.getPrimaryTextColor(),
+        fontFamily: ChartOption.getPrimaryFontFamily(),
+        fontSize: custom.fontSize ?? '20px',
+        fontWeight: ChartOption.getPrimaryFontWeight(),
+        fontStyle: ChartOption.getPrimaryFontStyle()
+      }
+    } as TextSetting;
+  }
+
+  static getDefaultSubtitle(custom: { content?: string; align?: AlignSetting; fontSize?: string } = {}): TextSetting {
+    return {
+      align: custom.align ?? 'center',
+      enabled: true,
+      text: custom.content ?? '',
+      style: ChartOption.getSecondaryStyle({ fontSize: custom.fontSize, isEnableDecoration: true })
+    } as TextSetting;
+  }
+
+  static getSecondaryStyle(custom: { fontSize?: string; isEnableDecoration?: boolean } = {}): StyleSetting {
+    return {
+      color: ChartOption.getSecondaryTextColor(),
+      fontFamily: ChartOption.getSecondaryFontFamily(),
+      fontSize: custom.fontSize ?? '11px',
+      fontWeight: ChartOption.getSecondaryFontWeight(),
+      fontStyle: ChartOption.getSecondaryFontStyle(),
+      textDecoration: custom.isEnableDecoration ? ChartOption.getSecondaryFontUnderlined() : void 0
+    };
+  }
+
+  static getPrimaryTextColor(): string {
     return 'var(--text-color)';
   }
 
-  static getThemeSecondaryTextColor(): string {
+  static getSecondaryTextColor(): string {
     return 'var(--secondary-text-color)';
   }
 
@@ -574,5 +615,72 @@ export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> {
 
   static getTooltipBackgroundColor(): string {
     return 'var(--tooltip-background-color)';
+  }
+
+  static getPrimaryFontFamily(): string {
+    return `var(--widget-primary-font-family, Roboto)`;
+  }
+
+  static getPrimaryFontWeight(): string {
+    return `var(--widget-primary-font-weight, 500)`;
+  }
+
+  static getPrimaryFontStyle(): string {
+    return `var(--widget-primary-font-style, normal)`;
+  }
+
+  static getPrimaryFontUnderlined(): string {
+    return `var(--widget-primary-font-underlined, underline)`;
+  }
+
+  static getPrimaryFontAlign(): string {
+    return `var(--widget-primary-font-align, center)`;
+  }
+
+  static getSecondaryFontFamily(): string {
+    return `var(--widget-secondary-font-family, Roboto)`;
+  }
+
+  static getSecondaryFontWeight(): string {
+    return `var(--widget-secondary-font-weight, 400)`;
+  }
+
+  static getSecondaryFontStyle(): string {
+    return `var(--widget-secondary-font-style, normal)`;
+  }
+
+  static getSecondaryFontUnderlined(): string {
+    return `var(--widget-secondary-font-underlined, underline)`;
+  }
+
+  static getSecondaryFontAlign(): string {
+    return `var(--widget-secondary-font-align, center)`;
+  }
+
+  isEnableControl(): boolean {
+    return true;
+  }
+
+  getSupportedControls(): ValueControlInfo[] {
+    return [new ValueControlInfo(ValueControlType.SelectedValue, 'Selected Value')];
+  }
+
+  getDefaultValueAsMap(): Map<ValueControlType, string[]> | undefined {
+    return undefined;
+  }
+
+  /**
+   * Control logic keep value of this object and merge otherOption if can.
+   * @return {ChartOption} is a new instance of this object and otherOption is merged into it.
+   * default implementation is keep title of other object & return clone of this object.
+   * Implement this method if you want to keep other value for specific chart type.
+   */
+  mergeWith(otherOption: ChartOption): ChartOption {
+    this.setTitle(otherOption.getTitle() || this.getTitle());
+    return this;
+  }
+
+  getOverridePadding(): string | undefined {
+    return void 0;
   }
 }

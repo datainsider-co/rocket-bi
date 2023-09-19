@@ -6,7 +6,7 @@
 import { ConditionType, Field, FilterMode, ScalarFunction } from '@core/common/domain/model';
 import { ValueCondition } from '@core/common/domain/model/condition/ValueCondition';
 import { ConditionUtils, getScalarFunction } from '@core/utils/index';
-import { ConditionData, ConditionFamilyTypes, DateHistogramConditionTypes, InputType } from '@/shared';
+import { ConditionData, DateHistogramConditionTypes, InputType } from '@/shared';
 import { FieldRelatedCondition } from '@core/common/domain/model/condition/FieldRelatedCondition';
 import { RandomUtils, SchemaUtils } from '@/utils';
 import { DIException } from '@core/common/domain';
@@ -29,11 +29,6 @@ export class BetweenAndIncluding extends FieldRelatedCondition implements ValueC
     return new BetweenAndIncluding(field, min, max, getScalarFunction(obj.scalarFunction));
   }
 
-  assignValue(min: string, max: string) {
-    this.min = min;
-    this.max = max;
-  }
-
   getValues(): string[] {
     return [this.min, this.max];
   }
@@ -44,10 +39,6 @@ export class BetweenAndIncluding extends FieldRelatedCondition implements ValueC
     }
     this.min = values[0];
     this.max = values[1];
-  }
-
-  getConditionTypes(): string[] {
-    return [ConditionFamilyTypes.dateHistogram, DateHistogramConditionTypes.betweenAndIncluding];
   }
 
   toConditionData(groupId: number): ConditionData {
@@ -64,8 +55,8 @@ export class BetweenAndIncluding extends FieldRelatedCondition implements ValueC
       firstValue: this.min,
       secondValue: this.max,
       allValues: this.getValues(),
-      currentInputType: InputType.dateRange,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.DateRange,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: DateHistogramConditionTypes.betweenAndIncluding
     };
   }

@@ -148,16 +148,6 @@ export class AuthenticationStore extends VuexModule {
     this.errorMessage = message;
   }
 
-  @Action
-  checkSession(): Promise<boolean> {
-    try {
-      const sessionId = DataManager.getSession();
-      return Promise.resolve(!!sessionId);
-    } catch (ex) {
-      return Promise.resolve(false);
-    }
-  }
-
   @Action({ rawError: true })
   async register(payload: { email: string; password: string }) {
     let registerResponse: RegisterResponse | undefined = void 0;
@@ -361,12 +351,17 @@ export class AuthenticationStore extends VuexModule {
 
   @Action
   async init(): Promise<void> {
-    const session = DataManager.getSession();
-    if (session) {
-      this.setAuthStatus(AuthenticationStatus.Authenticated);
-      const userProfile: UserProfile = UserProfile.fromObject(DataManager.getUserProfile()) || (await this.userProfileService.getMyProfile());
-      AuthenticationModule.setUserProfile(userProfile);
-    } else {
+    try {
+      const session = DataManager.getSession();
+      if (session) {
+        this.setAuthStatus(AuthenticationStatus.Authenticated);
+        const userProfile: UserProfile = UserProfile.fromObject(DataManager.getUserProfile()) || (await this.userProfileService.getMyProfile());
+        AuthenticationModule.setUserProfile(userProfile);
+      } else {
+        this.setAuthStatus(AuthenticationStatus.UnAuthenticated);
+      }
+    } catch (ex) {
+      Log.error('AuthenticationStore::init::failure', ex);
       this.setAuthStatus(AuthenticationStatus.UnAuthenticated);
     }
   }

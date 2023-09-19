@@ -8,28 +8,27 @@ import datainsider.client.exception.InternalError
   * @author andy
   * @since 7/8/20
   */
-
 object Column {
   def getCustomClassName(column: Column): String = {
     column match {
-      case column: BoolColumn => "bool"
-      case column: Int8Column => "int8"
-      case column: Int16Column => "int16"
-      case column: Int32Column => "int32"
-      case column: Int64Column => "int64"
-      case column: UInt8Column => "uint8"
-      case column: UInt16Column => "uint16"
-      case column: UInt32Column => "uint32"
-      case column: UInt64Column => "uint64"
-      case column: FloatColumn => "float"
-      case column: DoubleColumn => "double"
-      case column: StringColumn => "string"
-      case column: DateColumn => "date"
-      case column: DateTimeColumn => "datetime"
+      case column: BoolColumn       => "bool"
+      case column: Int8Column       => "int8"
+      case column: Int16Column      => "int16"
+      case column: Int32Column      => "int32"
+      case column: Int64Column      => "int64"
+      case column: UInt8Column      => "uint8"
+      case column: UInt16Column     => "uint16"
+      case column: UInt32Column     => "uint32"
+      case column: UInt64Column     => "uint64"
+      case column: FloatColumn      => "float"
+      case column: DoubleColumn     => "double"
+      case column: StringColumn     => "string"
+      case column: DateColumn       => "date"
+      case column: DateTimeColumn   => "datetime"
       case column: DateTime64Column => "datetime64"
-      case column: ArrayColumn => "array"
-      case column: NestedColumn => "nested"
-      case _ => "string"
+      case column: ArrayColumn      => "array"
+      case column: NestedColumn     => "nested"
+      case _                        => "string"
     }
   }
 
@@ -83,23 +82,23 @@ object Column {
 )
 @JsonSubTypes(
   Array(
-    new Type(value = classOf[BoolColumn], name = "bool"),
-    new Type(value = classOf[Int8Column], name = "int8"),
-    new Type(value = classOf[Int16Column], name = "int16"),
-    new Type(value = classOf[Int32Column], name = "int32"),
-    new Type(value = classOf[Int64Column], name = "int64"),
-    new Type(value = classOf[UInt8Column], name = "uint8"),
-    new Type(value = classOf[UInt16Column], name = "uint16"),
-    new Type(value = classOf[UInt32Column], name = "uint32"),
-    new Type(value = classOf[UInt64Column], name = "uint64"),
-    new Type(value = classOf[FloatColumn], name = "float"),
-    new Type(value = classOf[DoubleColumn], name = "double"),
-    new Type(value = classOf[StringColumn], name = "string"),
-    new Type(value = classOf[DateColumn], name = "date"),
-    new Type(value = classOf[DateTimeColumn], name = "datetime"),
-    new Type(value = classOf[DateTime64Column], name = "datetime64"),
-    new Type(value = classOf[ArrayColumn], name = "array"),
-    new Type(value = classOf[NestedColumn], name = "nested")
+    new Type(value = classOf[BoolColumn], name = ColType.Bool),
+    new Type(value = classOf[Int8Column], name = ColType.Int8),
+    new Type(value = classOf[Int16Column], name = ColType.Int16),
+    new Type(value = classOf[Int32Column], name = ColType.Int32),
+    new Type(value = classOf[Int64Column], name = ColType.Int64),
+    new Type(value = classOf[UInt8Column], name = ColType.UInt8),
+    new Type(value = classOf[UInt16Column], name = ColType.UInt16),
+    new Type(value = classOf[UInt32Column], name = ColType.UInt32),
+    new Type(value = classOf[UInt64Column], name = ColType.UInt64),
+    new Type(value = classOf[FloatColumn], name = ColType.Float),
+    new Type(value = classOf[DoubleColumn], name = ColType.Double),
+    new Type(value = classOf[StringColumn], name = ColType.String),
+    new Type(value = classOf[DateColumn], name = ColType.Date),
+    new Type(value = classOf[DateTimeColumn], name = ColType.DateTime),
+    new Type(value = classOf[DateTime64Column], name = ColType.DateTime64),
+    new Type(value = classOf[ArrayColumn], name = ColType.Array),
+    new Type(value = classOf[NestedColumn], name = ColType.Nested)
   )
 )
 abstract class Column {

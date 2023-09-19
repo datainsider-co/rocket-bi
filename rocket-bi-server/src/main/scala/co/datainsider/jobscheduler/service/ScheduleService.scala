@@ -202,6 +202,8 @@ class SimpleScheduleService @Inject() (
               job.copy(currentSyncStatus = JobStatus.Init, nextRunTime = atTime)
             case job: PalexyJob =>
               job.copy(currentSyncStatus = JobStatus.Init, nextRunTime = atTime)
+            case job: GoogleSearchConsoleJob =>
+              job.copy(currentSyncStatus = JobStatus.Init, nextRunTime = atTime)
             case _ => throw BadRequestError("job type not supported")
           }
           jobRepository.update(job.orgId, newJob)
@@ -324,7 +326,6 @@ class SimpleScheduleService @Inject() (
       histories <- historyRepository.getQueuedHistories(jobs.map(_.jobId))
       connections <- connectionService.mgetTunnelConnection(jobs.map(_.orgId))
     } yield {
-
       jobs.map(job =>
         SyncInfo(
           job = job,

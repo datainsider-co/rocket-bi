@@ -564,8 +564,10 @@ case class TabControlChartSetting(
   override def toTableColumns: Array[TableColumn] = Array(getLabelColumn, getValueColumn)
 
   override def toQuery: Query = {
+    val func1 = getLabelColumn.function.asInstanceOf[FieldRelatedFunction].customCopy(Some("val1"))
+    val func2 = getLabelColumn.function.asInstanceOf[FieldRelatedFunction].customCopy(Some("val2"))
     val builder = new ObjectQueryBuilder
-    builder.addFunctions(Array(getLabelColumn.function, getValueColumn.function))
+    builder.addFunctions(Array(func1, func2))
     builder.addCondition(Or(filters))
     builder.addOrders(sorts)
     builder.addViews(sqlViews)

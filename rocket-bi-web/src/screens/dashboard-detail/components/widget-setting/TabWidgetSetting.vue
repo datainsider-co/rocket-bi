@@ -60,7 +60,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, PropSync } from 'vue-property-decorator';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
 import { TabWidget, TabWidgetOptions } from '@core/common/domain';
 import { set } from 'lodash';
@@ -70,7 +70,7 @@ export default class TabWidgetSetting extends Vue {
   @PropSync('widget')
   tab!: TabWidget;
 
-  readonly fontSizeOptions = FontSizeOptions;
+  readonly fontSizeOptions = SecondaryFontSizeOptions;
   readonly fontOptions = FontFamilyOptions;
 
   readonly positionOptions = [

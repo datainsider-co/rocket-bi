@@ -66,7 +66,7 @@ import { TextParamToChartHandler } from '@/screens/data-management/components/pa
 import { NumberParamToChartHandler } from '@/screens/data-management/components/parameter-to-chart-builder/NumberParamToChartHandler';
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
-import { DataSourceType } from '@core/clickhouse-config';
+import { ConnectorType } from '@core/connector-config';
 import { FormulaControllerResolver } from '@/shared/fomula/builder/FormulaControllerResolver';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 
@@ -179,7 +179,7 @@ export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPa
 
   private initFormulaController() {
     Log.debug('initFormulaController::', ConnectionModule.source, DatabaseSchemaModule.databaseInfos.length);
-    const sourceType: DataSourceType = ConnectionModule.source?.className ?? DataSourceType.Clickhouse;
+    const sourceType: ConnectorType = ConnectionModule.source?.className ?? ConnectorType.Clickhouse;
     const syntax = Di.get(FormulaControllerResolver).getSyntax(sourceType);
     FormulaSuggestionModule.initSuggestFunction({
       fileNames: [syntax]
@@ -417,7 +417,7 @@ export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPa
       }
       case QueryEditorMode.EditTable: {
         await this.initTableSchemaBreadcrumbs();
-        await this.queryComponent?.handleQuery();
+        await this.queryComponent?.handleExecuteQuery();
         break;
       }
       case QueryEditorMode.Query:
@@ -428,8 +428,8 @@ export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPa
   private async initAnalysis(adhocId: DashboardId) {
     try {
       this.loading = true;
-      await DashboardModule.handleLoadDashboard(adhocId);
-      await DashboardModule.loadDirectoryFromDashboardId(adhocId);
+      await DashboardModule.init(adhocId);
+      await DashboardModule.loadDirectory(adhocId);
       await this.loadPermission(adhocId);
       await this.initBreadcrumbs(adhocId, DashboardModule.currentDashboard?.name ?? '');
       this.loading = false;
@@ -541,9 +541,12 @@ export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPa
     this.$nextTick(async () => {
       this.queryComponent?.setParameters(ListUtils.getHead(WidgetModule.allQueryWidgets)?.setting?.getChartOption()?.options?.queryParameter);
       await DashboardControllerModule.init();
-      const query = (ListUtils.getHead(WidgetModule.allQueryWidgets)?.setting as RawQuerySetting)?.sql ?? '';
-      this.tempQuery = query;
-      this.updateDefaultQuery(query);
+      const firstWidget = ListUtils.getHead(WidgetModule.allQueryWidgets);
+      if (firstWidget) {
+        const query = firstWidget.setting.getChartOption()?.options?.rawQuery || (firstWidget.setting as RawQuerySetting)?.sql || '';
+        this.tempQuery = query;
+        this.updateDefaultQuery(query);
+      }
       this.queryComponent?.setWidgets(WidgetModule.allQueryWidgets);
       this.queryComponent?.selectChart(0);
       this.autoSave();

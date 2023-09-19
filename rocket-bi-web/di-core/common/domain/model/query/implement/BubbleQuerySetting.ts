@@ -10,7 +10,7 @@ import {
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   WidgetId
 } from '@core/common/domain/model';
@@ -18,9 +18,9 @@ import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
 import { Paginatable } from '@core/common/domain/model/query/features/Paginatable';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class BubbleQuerySetting extends QuerySetting<BubbleChartOption> implements Paginatable {
+export class BubbleQuerySetting extends QuerySetting implements Paginatable {
   private static readonly DEFAULT_NUM_DATA_POINT = 1000;
-  readonly className = QuerySettingType.Bubble;
+  readonly className = QuerySettingClassName.Bubble;
 
   constructor(
     public xAxis: TableColumn,
@@ -55,7 +55,7 @@ export class BubbleQuerySetting extends QuerySetting<BubbleChartOption> implemen
     }
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     if (this.legend) {
       return [this.xAxis, this.yAxis, this.value, this.legend];
     } else {
@@ -63,7 +63,7 @@ export class BubbleQuerySetting extends QuerySetting<BubbleChartOption> implemen
     }
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.xAxis = ConfigDataUtils.replaceDynamicFunction(this.xAxis, functions);
     this.yAxis = ConfigDataUtils.replaceDynamicFunction(this.yAxis, functions);
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);

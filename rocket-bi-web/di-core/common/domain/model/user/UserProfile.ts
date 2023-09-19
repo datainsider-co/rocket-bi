@@ -6,7 +6,7 @@
 import { Gender, UserGenders } from '@core/common/domain/model';
 import { TrackingProfile } from '@core/tracking/domain/TrackingProfile';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
-import { DateTimeFormatter } from '@/utils';
+import { DateTimeUtils } from '@/utils';
 import { StringUtils } from '@/utils/StringUtils';
 import { isObject } from 'lodash';
 
@@ -58,7 +58,7 @@ export class UserProfile {
   }
 
   get displayDateOfBirth(): string {
-    return this.dob ? DateTimeFormatter.formatAsDDMMYYYY(this.dob) : '';
+    return this.dob ? DateTimeUtils.formatAsDDMMYYYY(this.dob) : '';
   }
 
   displayExtraFieldName(fieldName: string): string {

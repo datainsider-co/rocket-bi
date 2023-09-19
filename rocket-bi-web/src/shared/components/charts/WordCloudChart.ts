@@ -149,7 +149,7 @@ export default class WordCloudChart extends BaseHighChartWidget<WordCloudRespons
     //@ts-ignore
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
     //@ts-ignore
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="font-family: ${fontFamily}; color: ${textColor}; text-align: left">
                 ${fieldProperty}: <b>${formattedData}</b><br/>
             </div>`;

@@ -15,7 +15,7 @@ export class DefaultTabFilter implements WidgetRenderer<TabFilter> {
     const title = this.renderTitle(widget, h);
     const tab = this.renderTabSelection(widget, h);
     const search = this.renderSearch(widget, h);
-    const isDropdown = widget.displayAs === TabFilterDisplay.dropDown;
+    const isDropdown = widget.displayAs === TabFilterDisplay.DropDown;
     const scrollClass = widget.direction === Direction.column ? 'scroll-column' : 'scroll-row';
     if (isDropdown) {
       return (

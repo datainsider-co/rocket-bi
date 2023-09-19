@@ -28,14 +28,6 @@
     padding-right: 0;
     border-radius: 4px;
   }
-
-  ::v-deep {
-    .select-area-popover {
-      .select-popover ul {
-        max-height: 400px;
-      }
-    }
-  }
 }
 
 ::v-deep {

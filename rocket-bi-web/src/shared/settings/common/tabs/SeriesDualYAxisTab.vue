@@ -190,19 +190,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import {
-  AxisSetting,
-  ChartOption,
-  HeatMapQuerySetting,
-  PlotOptions,
-  QuerySetting,
-  QuerySettingType,
-  SeriesQuerySetting,
-  SettingKey
-} from '@core/common/domain';
+import { AxisSetting, ChartOption, PlotOptions, QuerySetting, QuerySettingClassName, SettingKey } from '@core/common/domain';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { DashOptions } from '@/shared/settings/common/options/DashOptions';
 import { enableCss } from '@/shared/settings/common/install';
 import { ChartType, SelectOption } from '@/shared';
@@ -217,21 +208,22 @@ export default class SeriesDualYAxisTab extends Vue {
   private readonly plotOptions!: PlotOptions;
   @Prop({ required: false, type: Object })
   private readonly query!: QuerySetting;
-  @Prop({ required: false, type: Array })
-  private readonly seriesOptions?: SelectOption[];
+
+  @Prop({ required: false, type: Array, default: () => [] })
+  private readonly seriesOptions!: SelectOption[];
+
   @Prop({ required: false, type: String })
   private readonly chartType?: ChartType;
 
   private readonly defaultSetting = {
     visible: true,
-    categoryFont: 'Roboto',
-    categoryColor: ChartOption.getThemeTextColor(),
+    categoryFont: ChartOption.getSecondaryFontFamily(),
+    categoryColor: ChartOption.getPrimaryTextColor(),
     categoryFontSize: '11px',
     titleEnabled: true,
-    titleFont: 'Roboto',
-    titleColor: ChartOption.getThemeTextColor(),
+    titleFont: ChartOption.getSecondaryFontFamily(),
+    titleColor: ChartOption.getPrimaryTextColor(),
     titleFontSize: '11px',
-    title: this.defaultText,
     gridLineColor: ChartOption.getGridLineColor(),
     gridLineDashStyle: 'Solid',
     gridLineWidth: '0.5',
@@ -240,21 +232,29 @@ export default class SeriesDualYAxisTab extends Vue {
     min: '0',
     max: '10000',
     prefixText: '',
-    postfixText: ''
+    postfixText: '',
+    prefixMaxLength: 10,
+    suffixMaxLength: 10
   };
   private selectedLegend = '';
 
   @Watch('seriesOptions', { immediate: true })
-  onResponseChanged() {
-    this.selectedLegend = get(this.seriesOptions, '[1].id', '');
+  onResponseChanged(seriesOptions: SelectOption[]) {
+    if (!this.selectedLegend || !this.existsOptions(seriesOptions, this.selectedLegend)) {
+      this.selectedLegend = get(seriesOptions, '[1].id', '');
+    }
   }
 
-  private get defaultText() {
+  protected existsOptions(seriesOptions: SelectOption[], selectedLegend: string): boolean {
+    return seriesOptions?.some(series => series.id === selectedLegend) ?? false;
+  }
+
+  protected getDefaultTitle(): string {
     switch (this.query.className) {
-      case QuerySettingType.Series:
-        return (this.query as SeriesQuerySetting).yAxis[1].name;
-      case QuerySettingType.HeatMap:
-        return (this.query as HeatMapQuerySetting).yAxis.name;
+      case QuerySettingClassName.Series:
+        return get(this.query, 'yAxis[1].name', 'Untitled');
+      case QuerySettingClassName.HeatMap:
+        return get(this.query, 'yAxis.name', 'Untitled');
       default:
         return '';
     }
@@ -310,11 +310,11 @@ export default class SeriesDualYAxisTab extends Vue {
   }
 
   private get fontSizeOptions() {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get title(): string {
-    return get(this.setting, '[1].title.text', this.defaultSetting.title);
+    return get(this.setting, '[1].title.text', this.getDefaultTitle());
   }
 
   private get dualTitle(): string {

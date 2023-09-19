@@ -78,7 +78,7 @@ class GaReader(analyticsReporting: AnalyticsReporting, job: GaJob, batchSize: In
           break
         } catch {
           case ex: GoogleJsonResponseException if (isRetryRequest(ex)) => {
-            val sleepTime: Long = Math.pow(2L,  retryTime).toLong + ThreadLocalRandom.current().nextLong(0, 1000)
+            val sleepTime: Long = Math.pow(2,  retryTime).toInt * 1000 + ThreadLocalRandom.current().nextLong(0, 1000)
             logger.info(s"Request failed, cause ${ex.getMessage}, sleep in ${sleepTime}ms...")
             Thread.sleep(sleepTime)
           }

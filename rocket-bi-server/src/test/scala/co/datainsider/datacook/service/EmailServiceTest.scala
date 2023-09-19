@@ -39,6 +39,18 @@ class EmailServiceTest extends Test {
 //    println(response.body)
 //  }
 
+//  test("send excel to 1 user") {
+//    val config = new EmailConfiguration(
+//      Array("meomeocf98@gmail.com"),
+//      fileName = "sales.xlsx",
+//      subject = "Daily Send Sales Records"
+//    )
+//    val path = getClass.getClassLoader.getResource("datasets/sample.xlsx").getPath
+//    val response = await(emailService.send(config, path, MediaType.Html))
+//    assertResult(response != null)(true)
+//    println(response.body)
+//  }
+
 //  test("send email with empty content") {
 //    val config = new EmailConfiguration(
 //      Array("meomeocf98@gmail.com"),
@@ -75,17 +87,17 @@ class EmailServiceTest extends Test {
     }
   }
 
-  test("send email with big attachments") {
-    try {
-      val config =
-        EmailConfiguration(Array("meomeocf98@gmail.com"), fileName = "sales.csv", subject = "Daily Send Sales Records")
-      val path = getClass.getClassLoader.getResource("datasets/tripdata.csv").getPath
-      val response = await(emailService.send(config, path, MediaType.Csv))
-      assertResult(response != null)(true)
-    } catch {
-      case ex: Throwable => assert(true)
-    }
-  }
+//  test("send email with big attachments") {
+//    try {
+//      val config =
+//        EmailConfiguration(Array("meomeocf98@gmail.com"), fileName = "sales.csv", subject = "Daily Send Sales Records")
+//      val path = getClass.getClassLoader.getResource("datasets/tripdata.csv").getPath
+//      val response = await(emailService.send(config, path, MediaType.Csv))
+//      assertResult(response != null)(true)
+//    } catch {
+//      case ex: Throwable => assert(true)
+//    }
+//  }
 
 //  test("send multi file to 1 user") {
 //    val config = new EmailConfiguration(

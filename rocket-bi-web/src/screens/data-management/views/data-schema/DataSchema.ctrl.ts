@@ -3,9 +3,22 @@ import { Component, Mixins, Ref, Watch } from 'vue-property-decorator';
 import DatabaseTreeView from '@/screens/data-management/components/database-tree-view/DatabaseTreeView.vue';
 import DatabaseTreeViewCtrl from '@/screens/data-management/components/database-tree-view/DatabaseTreeView';
 import ChartHolder from '@/screens/dashboard-detail/components/widget-container/charts/ChartHolder.vue';
-import { ChartInfo, Column, DatabaseInfo, DIException, TableSchema, TableStatus, TableType } from '@core/common/domain';
+import {
+  ChartInfo,
+  Column,
+  DatabaseInfo,
+  DIException,
+  QuerySetting,
+  TableChartOption,
+  TableQueryChartSetting,
+  TableSchema,
+  TableStatus,
+  TableType,
+  WidgetCommonData,
+  WidgetSetting
+} from '@core/common/domain';
 import { Log } from '@core/utils';
-import { DataManagementModule } from '@/screens/data-management/store/DataManagementStore';
+import { DataManagementModule, DataManagementStore } from '@/screens/data-management/store/DataManagementStore';
 import AbstractSchemaComponent, { FindSchemaResponse } from '../AbstractSchemaComponent';
 import { ChartUtils, ListUtils } from '@/utils';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
@@ -142,6 +155,13 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
 
   private clearSearch() {
     this.columnKeyword = '';
+  }
+
+  protected get previewWidgetSetting(): WidgetSetting {
+    const setting = WidgetSetting.default();
+    setting.padding = 0;
+    setting.border.radius.setAllRadius(4);
+    return setting;
   }
 
   private showNotFoundError(databaseName: string, tblName: string): void {
@@ -303,13 +323,23 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
       this.error = '';
       this.loadingTableData = true;
       await DataManagementModule.handleLoadTableData(table);
-      this.tableData = DataManagementModule.tableChartInfo;
+      this.tableData = this.toPreviewChartInfo();
       this.loadingTableData = false;
     } catch (ex) {
       this.loadingTableData = false;
       this.tableData = null;
       this.error = ex.message;
     }
+  }
+
+  protected toPreviewChartInfo(): ChartInfo {
+    const query: TableQueryChartSetting = TableQueryChartSetting.default();
+    const chartOption: TableChartOption | undefined = query.getChartOption<TableChartOption>();
+    if (chartOption) {
+      // chartOption.
+    }
+    const commonSetting: WidgetCommonData = { id: DataManagementStore.DEFAULT_TABLE_ID, name: '', description: '' };
+    return new ChartInfo(commonSetting, query);
   }
 
   private changeViewMode(modeId: number) {

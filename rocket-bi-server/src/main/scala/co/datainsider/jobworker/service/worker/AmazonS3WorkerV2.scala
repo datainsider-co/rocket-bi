@@ -111,7 +111,7 @@ class AmazonS3WorkerV2(
           schemaService.createOrMergeTableSchema(finalSchema).sync()
 
           val records: Seq[Record] = s3CsvReader.next(finalSchema)
-          writers.foreach(writer => writer.write(records, finalSchema))
+          writers.foreach(writer => writer.insertBatch(records, finalSchema))
           totalRowInserted += records.length
 
           curBatchNumber += 1

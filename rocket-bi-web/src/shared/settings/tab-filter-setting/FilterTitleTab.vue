@@ -45,7 +45,7 @@ import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { SelectOption } from '@/shared';
 import { ChartOption, ChartOptionData, SettingKey } from '@core/common/domain';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 
 @Component({ components: { PanelHeader } })
 export default class FilterTitleTab extends Vue {
@@ -58,8 +58,8 @@ export default class FilterTitleTab extends Vue {
     title: {
       text: 'Untitled chart',
       enabled: true,
-      fontFamily: 'Roboto',
-      color: ChartOption.getThemeTextColor(),
+      fontFamily: ChartOption.getSecondaryFontFamily(),
+      color: ChartOption.getPrimaryTextColor(),
       fontSize: '20px'
     },
     subtitle: {
@@ -92,7 +92,7 @@ export default class FilterTitleTab extends Vue {
   }
 
   private get fontSizeOptions(): SelectOption[] {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get subtitle(): string {

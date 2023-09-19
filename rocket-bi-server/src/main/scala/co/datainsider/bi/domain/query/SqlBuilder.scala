@@ -117,7 +117,7 @@ class SqlBuilder(sqlParser: SqlParser) {
       case Or(conditions) =>
         val conditionStrings = conditions.map(sqlParser.toQueryString).filter(_.nonEmpty)
         if (conditionStrings.nonEmpty) whereFields += conditionStrings.mkString("(", " or ", ")")
-      case DynamicCondition(_, baseCondition, finalCondition) =>
+      case DynamicCondition(_, _, finalCondition, _) =>
         val conditionStr = finalCondition.map(sqlParser.toQueryString).filter(_.nonEmpty)
         if (conditionStr.isDefined) {
           whereFields += conditionStr.get

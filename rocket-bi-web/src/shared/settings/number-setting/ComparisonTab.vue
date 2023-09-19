@@ -54,81 +54,81 @@
           :hint="`${configSetting['comparison.range'].hint}`"
           @onDateChanged="onComparisonDateRangeChanged"
         />
-        <DropdownSetting
-          id="display-type"
-          :disable="!dataRangeEnabled || !comparisonEnabled"
-          :options="displayStyleOptions"
-          :value="selectedComparisonStyle"
-          boundary="viewport"
-          :label="`${configSetting['comparison.compareStyle'].label}`"
-          :hint="`${configSetting['comparison.compareStyle'].hint}`"
-          @onSelected="onComparisonStyleChanged"
-        />
-        <div class="row-config-container">
-          <ColorSetting
-            id="up-trend-color"
-            :disable="!dataRangeEnabled || !comparisonEnabled"
-            default-color="#4dcf36"
-            :value="upTrendIconColor"
-            :label="`${configSetting['comparison.uptrendIconColor'].label}`"
-            :hint="`${configSetting['comparison.uptrendIconColor'].hint}`"
-            size="small"
-            style="margin-right: 12px"
-            @onChanged="handleUpIconColorChanged"
-          />
-          <DropdownSetting
-            id="up-trend-icon"
-            :disable="!dataRangeEnabled || !comparisonEnabled"
-            :options="compareTrendIconOptions"
-            :value="upTrendIcon"
-            :label="`${configSetting['comparison.upTrendIcon'].label}`"
-            :hint="`${configSetting['comparison.upTrendIcon'].hint}`"
-            boundary="viewport"
-            size="small"
-            @onChanged="handleUptrendIconChanged"
-          >
-            <template #selected-icon="{label}">
-              <i :class="label"></i>
-            </template>
-            <template #option-item="{item}">
-              <i :class="item.id"></i>
-            </template>
-          </DropdownSetting>
-        </div>
-        <div class="row-config-container">
-          <ColorSetting
-            id="down-trend-color"
-            :disable="!dataRangeEnabled || !comparisonEnabled"
-            default-color="#ea6b6b"
-            :value="downTrendIconColor"
-            :label="`${configSetting['comparison.downtrendIconColor'].label}`"
-            :hint="`${configSetting['comparison.downtrendIconColor'].hint}`"
-            size="small"
-            style="margin-right: 12px"
-            @onChanged="handleDowntrendIconColorChanged"
-          />
-          <DropdownSetting
-            id="down-trend-icon"
-            :disable="!dataRangeEnabled || !comparisonEnabled"
-            :options="compareTrendIconOptions"
-            :value="downTrendIcon"
-            :label="`${configSetting['comparison.downTrendIcon'].label}`"
-            :hint="`${configSetting['comparison.downTrendIcon'].hint}`"
-            size="small"
-            boundary="viewport"
-            @onChanged="handleDowntrendIconChanged"
-          >
-            <template #selected-icon="{label}">
-              <i :class="label"></i>
-            </template>
-            <template #option-item="{item}">
-              <i :class="item.id"></i>
-            </template>
-          </DropdownSetting>
-        </div>
-      </template>
-      <!--      Trendline-->
-      <template>
+        <!--        <DropdownSetting-->
+        <!--          id="display-type"-->
+        <!--          :disable="!dataRangeEnabled || !comparisonEnabled"-->
+        <!--          :options="displayStyleOptions"-->
+        <!--          :value="selectedComparisonStyle"-->
+        <!--          boundary="viewport"-->
+        <!--          :label="`${configSetting['comparison.compareStyle'].label}`"-->
+        <!--          :hint="`${configSetting['comparison.compareStyle'].hint}`"-->
+        <!--          @onSelected="onComparisonStyleChanged"-->
+        <!--        />-->
+        <!--        <div class="row-config-container">-->
+        <!--          <ColorSetting-->
+        <!--            id="up-trend-color"-->
+        <!--            :disable="!dataRangeEnabled || !comparisonEnabled"-->
+        <!--            default-color="#4dcf36"-->
+        <!--            :value="upTrendIconColor"-->
+        <!--            :label="`${configSetting['comparison.uptrendIconColor'].label}`"-->
+        <!--            :hint="`${configSetting['comparison.uptrendIconColor'].hint}`"-->
+        <!--            size="small"-->
+        <!--            style="margin-right: 12px"-->
+        <!--            @onChanged="handleUpIconColorChanged"-->
+        <!--          />-->
+        <!--          <DropdownSetting-->
+        <!--            id="up-trend-icon"-->
+        <!--            :disable="!dataRangeEnabled || !comparisonEnabled"-->
+        <!--            :options="compareTrendIconOptions"-->
+        <!--            :value="upTrendIcon"-->
+        <!--            :label="`${configSetting['comparison.upTrendIcon'].label}`"-->
+        <!--            :hint="`${configSetting['comparison.upTrendIcon'].hint}`"-->
+        <!--            boundary="viewport"-->
+        <!--            size="small"-->
+        <!--            @onChanged="handleUptrendIconChanged"-->
+        <!--          >-->
+        <!--            <template #selected-icon="{label}">-->
+        <!--              <i :class="label"></i>-->
+        <!--            </template>-->
+        <!--            <template #option-item="{item}">-->
+        <!--              <i :class="item.id"></i>-->
+        <!--            </template>-->
+        <!--          </DropdownSetting>-->
+        <!--        </div>-->
+        <!--        <div class="row-config-container">-->
+        <!--          <ColorSetting-->
+        <!--            id="down-trend-color"-->
+        <!--            :disable="!dataRangeEnabled || !comparisonEnabled"-->
+        <!--            default-color="#ea6b6b"-->
+        <!--            :value="downTrendIconColor"-->
+        <!--            :label="`${configSetting['comparison.downtrendIconColor'].label}`"-->
+        <!--            :hint="`${configSetting['comparison.downtrendIconColor'].hint}`"-->
+        <!--            size="small"-->
+        <!--            style="margin-right: 12px"-->
+        <!--            @onChanged="handleDowntrendIconColorChanged"-->
+        <!--          />-->
+        <!--          <DropdownSetting-->
+        <!--            id="down-trend-icon"-->
+        <!--            :disable="!dataRangeEnabled || !comparisonEnabled"-->
+        <!--            :options="compareTrendIconOptions"-->
+        <!--            :value="downTrendIcon"-->
+        <!--            :label="`${configSetting['comparison.downTrendIcon'].label}`"-->
+        <!--            :hint="`${configSetting['comparison.downTrendIcon'].hint}`"-->
+        <!--            size="small"-->
+        <!--            boundary="viewport"-->
+        <!--            @onChanged="handleDowntrendIconChanged"-->
+        <!--          >-->
+        <!--            <template #selected-icon="{label}">-->
+        <!--              <i :class="label"></i>-->
+        <!--            </template>-->
+        <!--            <template #option-item="{item}">-->
+        <!--              <i :class="item.id"></i>-->
+        <!--            </template>-->
+        <!--          </DropdownSetting>-->
+        <!--        </div>-->
+        <!--      </template>-->
+        <!--      &lt;!&ndash;      Trendline&ndash;&gt;-->
+        <!--      <template>-->
         <ToggleSetting
           id="trend-line-enabled"
           :disable="!dataRangeEnabled"
@@ -138,16 +138,30 @@
           :hint="`${configSetting['trendLine.enabled'].hint}`"
           @onChanged="onTrendLineEnabledChanged"
         />
-        <DropdownSetting
-          id="line-type"
-          :disable="!dataRangeEnabled || !trendLineEnabled"
-          :options="trendLineTypeOptions"
-          :value="selectedTrendLineType"
-          boundary="viewport"
-          :label="`${configSetting['trendLine.displayAs'].label}`"
-          :hint="`${configSetting['trendLine.displayAs'].hint}`"
-          @onSelected="onTrendLineTypeChanged"
-        />
+        <div class="row-config-container">
+          <DropdownSetting
+            id="line-type"
+            :disable="!dataRangeEnabled || !trendLineEnabled"
+            :options="trendLineTypeOptions"
+            :value="selectedTrendLineType"
+            boundary="viewport"
+            :label="`${configSetting['trendLine.displayAs'].label}`"
+            :hint="`${configSetting['trendLine.displayAs'].hint}`"
+            @onSelected="onTrendLineTypeChanged"
+            size="half"
+            style="margin-right: 8px"
+          />
+          <ColorSetting
+            :disable="!dataRangeEnabled || !trendLineEnabled"
+            id="trend-line-color"
+            size="half"
+            :value="trendLineColor"
+            :default-color="defaultTrendLineColor"
+            :label="`${configSetting['trendLine.color'].label}`"
+            :hint="`${configSetting['trendLine.color'].hint}`"
+            @onChanged="onTrendLineColorChanged"
+          />
+        </div>
         <DropdownSetting
           id="trend-by"
           :disable="!dataRangeEnabled || !trendLineEnabled"
@@ -169,7 +183,7 @@
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
-import { ComparisonOptionData, Dashboard, DataRange, Field, MainDateMode, SettingKey, TrendIcon } from '@core/common/domain';
+import { ComparisonOptionData, Dashboard, DataRange, Field, KPITheme, MainDateMode, NumberChartOption, SettingKey, TrendIcon } from '@core/common/domain';
 import { DropdownData } from '@/shared/components/common/di-dropdown';
 import { FormattingOptions } from '@/shared/settings/common/conditional-formatting/FormattingOptions';
 import { SlTreeNodeModel } from '@/shared/components/builder/treemenu/SlVueTree';
@@ -188,8 +202,13 @@ import { ComparisonUtils } from '@core/utils/ComparisonUtils';
 })
 export default class ComparisonTab extends Vue {
   private readonly configSetting = window.chartSetting['comparison.tab'];
+  private readonly themeSettings = require('./themeSettings.json');
+
   @Prop({ required: false, type: Object })
   private readonly chartOption!: ComparisonOptionData;
+
+  @Prop({ required: false, type: String })
+  private readonly theme?: string;
 
   @Prop({ type: Array, default: [] })
   private dateOptions!: DropdownData[];
@@ -224,14 +243,14 @@ export default class ComparisonTab extends Vue {
         id: ChartType.Line,
         displayName: 'Line'
       },
-      {
-        id: ChartType.Column,
-        displayName: 'Column'
-      },
-      {
-        id: ChartType.Bar,
-        displayName: 'Bar'
-      },
+      // {
+      //   id: ChartType.Column,
+      //   displayName: 'Column'
+      // },
+      // {
+      //   id: ChartType.Bar,
+      //   displayName: 'Bar'
+      // },
       {
         id: ChartType.Area,
         displayName: 'Area'
@@ -329,6 +348,14 @@ export default class ComparisonTab extends Vue {
 
   private get selectedTrendLineType(): ChartType.Line | ChartType.Area | ChartType.Bar | ChartType.Column {
     return this.chartOption.trendLine?.displayAs || ChartType.Line;
+  }
+
+  private get trendLineColor(): string {
+    return this.chartOption.trendLine?.color ?? '';
+  }
+
+  private get defaultTrendLineColor(): string {
+    return this.getThemeSetting(this.theme).trendLine.color;
   }
 
   private get selectedTrendLineBy(): string {
@@ -450,8 +477,14 @@ export default class ComparisonTab extends Vue {
     settingAsMap.set('trendLine.enabled', enabled);
     settingAsMap.set('trendLine.displayAs', this.selectedTrendLineType);
     settingAsMap.set('comparison.trendBy', this.selectedTrendLineBy);
+    settingAsMap.set('trendLine.color', this.getThemeSetting(this.theme).trendLine.color);
+    settingAsMap.set('trendLine.colorByPercentage', this.getThemeSetting(this.theme).trendLine.colorByPercentage);
     Log.debug('onTrendLineEnabledChanged::', settingAsMap);
     this.emitMultiSettingChanged(settingAsMap, true);
+  }
+
+  private getThemeSetting(theme?: string): any {
+    return this.themeSettings[theme ?? KPITheme.Style1];
   }
 
   private emitSettingKeyChanged(key: string, value: any, reRender?: boolean) {
@@ -518,6 +551,10 @@ export default class ComparisonTab extends Vue {
 
   private onTrendLineByChanged(item: DropdownData): void {
     this.emitSettingKeyChanged('trendLine.trendBy', item.id, true);
+  }
+
+  private onTrendLineColorChanged(color: string) {
+    this.emitSettingKeyChanged('trendLine.color', color, false);
   }
 }
 </script>

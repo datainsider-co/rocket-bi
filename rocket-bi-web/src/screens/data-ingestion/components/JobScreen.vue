@@ -105,6 +105,8 @@ import {
   GA4Job,
   GA4Metric,
   GoogleAnalyticJob,
+  GoogleSearchConsoleJob,
+  GoogleSearchConsoleType,
   JdbcJob,
   JobService,
   JobStatus,
@@ -115,8 +117,8 @@ import {
   SyncMode
 } from '@core/data-ingestion';
 import { DIException, JobId, SortDirection } from '@core/common/domain';
-import { DateTimeFormatter, GoogleUtils, ListUtils } from '@/utils';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
+import { DateTimeUtils, GoogleUtils, ListUtils } from '@/utils';
+import { AtomicAction } from '@core/common/misc';
 import DataIngestionTable from '@/screens/data-ingestion/components/DataIngestionTable.vue';
 import JobConfigModal from '@/screens/data-ingestion/components/JobConfigModal.vue';
 import JobCreationModal from '@/screens/data-ingestion/components/JobCreationModal.vue';
@@ -264,7 +266,7 @@ export default class JobScreen extends Vue {
           const time = job.lastSuccessfulSync;
           const imgSrc = StatusCell.jobStatusImg(job.lastSyncStatus);
           const elements = job.wasRun
-            ? [HtmlElementRenderUtils.renderImg(imgSrc), HtmlElementRenderUtils.renderText(DateTimeFormatter.formatAsMMMDDYYYHHmmss(time), 'span')]
+            ? [HtmlElementRenderUtils.renderImg(imgSrc), HtmlElementRenderUtils.renderText(DateTimeUtils.formatAsMMMDDYYYHHmmss(time), 'span')]
             : '--';
           const div = document.createElement('div');
           div.append(...elements);
@@ -278,7 +280,7 @@ export default class JobScreen extends Vue {
         label: 'Next Sync',
         customRenderBodyCell: new CustomCell(rowData => {
           const job = Job.fromObject(rowData);
-          const data = job.hasNextRunTime ? DateTimeFormatter.formatAsMMMDDYYYHHmmss(job.nextRunTime) : '--';
+          const data = job.hasNextRunTime ? DateTimeUtils.formatAsMMMDDYYYHHmmss(job.nextRunTime) : '--';
           return HtmlElementRenderUtils.renderText(data, 'div', '');
         }),
         width: this.cellWidth
@@ -385,7 +387,8 @@ export default class JobScreen extends Vue {
   }
 
   //create job with multi creation modal
-  private async createJob(job: Job, isSingleTable: boolean) {
+  @AtomicAction()
+  protected async createJob(job: Job, isSingleTable: boolean) {
     try {
       this.showUpdating();
       if (Job.isS3Job(job)) {
@@ -420,7 +423,7 @@ export default class JobScreen extends Vue {
     }
   }
 
-  private async createMultiJob(job: Job) {
+  protected async createMultiJob(job: Job) {
     switch (job.jobType) {
       case JobType.GoogleAnalytics: {
         const listGAJob = this.getListGAJob(job as GoogleAnalyticJob);
@@ -430,6 +433,15 @@ export default class JobScreen extends Vue {
       case JobType.GA4: {
         const listGAJob = await this.getListGA4Job(job as GA4Job);
         await this.jobService.multiCreateV2(listGAJob);
+        break;
+      }
+      case JobType.GoogleSearchConsole: {
+        const newJob = job as GoogleSearchConsoleJob;
+        const searchAnalyticJob = cloneDeep(newJob);
+        const searchAppearanceJob = cloneDeep(newJob);
+        searchAppearanceJob.tableType = GoogleSearchConsoleType.SearchAppearance;
+        searchAnalyticJob.tableType = GoogleSearchConsoleType.SearchAnalytics;
+        await JobModule.multiCreateV2({ jobs: [searchAnalyticJob.createSingleJob(), searchAppearanceJob.createSingleJob()] });
         break;
       }
       default: {
@@ -508,6 +520,7 @@ export default class JobScreen extends Vue {
       case JobType.GoogleAnalytics:
       case JobType.GA4:
       case JobType.Palexy:
+      case JobType.GoogleSearchConsole:
         this.jobCreationModal.show(jobInfo.job);
         break;
       case JobType.Facebook:

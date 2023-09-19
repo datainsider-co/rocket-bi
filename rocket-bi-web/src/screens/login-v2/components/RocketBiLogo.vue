@@ -8,7 +8,7 @@ export default class RocketBiLogo extends Vue {}
 <template>
   <div class="logo">
     <img src="@/assets/icon/login/v2/logo.svg" />
-    <h3 class="logo--name unselectable">Rocket.Bi</h3>
+    <h3 class="logo--name unselectable">RocketBI</h3>
   </div>
 </template>
 

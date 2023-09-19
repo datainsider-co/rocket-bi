@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { SeriesOptionData, ChartOptionClassName } from '@core/common/domain/model';
 
 export class TreeMapChartOption extends ChartOption<SeriesOptionData> {
   static readonly DEFAULT_SETTING = {
@@ -46,8 +46,8 @@ export class TreeMapChartOption extends ChartOption<SeriesOptionData> {
       }
     }
   };
-  chartFamilyType = ChartFamilyType.TreeMap;
-  className = VizSettingType.TreeMapSetting;
+
+  className = ChartOptionClassName.TreeMapSetting;
 
   constructor(options: {} = {}) {
     super(options);
@@ -62,37 +62,16 @@ export class TreeMapChartOption extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(): TreeMapChartOption {
-    const textColor: string = this.getThemeTextColor();
+    const textColor: string = this.getPrimaryTextColor();
     const options: SeriesOptionData = {
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       affectedByFilter: true,
       themeColor: { enabled: true },
       background: this.getThemeBackgroundColor(),
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       },
       plotOptions: {
         treemap: {

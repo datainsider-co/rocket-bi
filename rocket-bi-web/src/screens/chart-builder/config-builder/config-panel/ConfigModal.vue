@@ -79,7 +79,7 @@ import { FunctionFamilyTypes, SortTypes } from '@/shared';
 import DiCustomModal from '@/shared/components/DiCustomModal.vue';
 import DiInputComponent from '@/shared/components/DiInputComponent.vue';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
-import { TabControlData } from '@core/common/domain';
+import { ChartControlData } from '@core/common/domain';
 
 @Component({
   components: {
@@ -125,7 +125,7 @@ export default class ConfigModal extends Vue {
   private readonly modal!: DiCustomModal;
 
   private get isChartControl(): boolean {
-    const dynamicFunction: TabControlData | undefined = ConfigDataUtils.getTabControlData(this.node);
+    const dynamicFunction: ChartControlData | undefined = ConfigDataUtils.getTabControlData(this.node);
     return !!dynamicFunction;
   }
 

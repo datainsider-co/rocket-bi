@@ -12,7 +12,7 @@ import TableHeader from '@chart/table/TableHeader.vue';
 export class DefaultTableRenderer implements WidgetRenderer<DefaultTable> {
   render(widget: DefaultTable, h: any): any {
     return (
-      <div key={widget.tableChartTempId} class={widget.tableChartContainerClass} ref="divTableChart" style={widget.tableStyle}>
+      <div key={widget.tableChartTempId} class="table-chart-container" ref="divTableChart" oncontextmenu={widget.handleOnRightClick} style={widget.tableStyle}>
         <TableHeader {...{ props: widget.headerProps }} />
         <div class="table-chart-table-content" ref="tableContent">
           <div id={widget.nprocessParentId}>

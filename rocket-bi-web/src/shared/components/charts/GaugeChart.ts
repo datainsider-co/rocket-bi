@@ -39,7 +39,7 @@ export default class GaugeChart extends BaseHighChartWidget<SeriesOneResponse, G
         labels: {
           useHTML: true,
           formatter: function() {
-            return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+            return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
           }
         }
       },
@@ -237,13 +237,13 @@ export default class GaugeChart extends BaseHighChartWidget<SeriesOneResponse, G
   }
 
   private tooltipFormatter(contextObject: TooltipFormatterContextObject) {
-    const formattedData = this.numberFormatter.format(contextObject.y);
+    const formattedData = this.numberFormatter.format(contextObject.y as number);
     const tooltipLabel = contextObject.series.name;
     const pointColor = contextObject.color;
     //@ts-ignore
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
     //@ts-ignore
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="color: ${textColor}; font-family: ${fontFamily}">
 <!--                <span style="color:${pointColor}">●</span>-->
                 ${tooltipLabel}: <b>${formattedData}</b><br/>
@@ -278,9 +278,9 @@ export default class GaugeChart extends BaseHighChartWidget<SeriesOneResponse, G
     return new NumberFormatter(ranges, precision, decimalPoint, thousandSep);
   }
 
-  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const yAxisSetting = this.setting.options.yAxis;
-    const value = this.numberFormatter.format(axis.value);
+    const value = this.numberFormatter.format(axis.value as number);
     if (yAxisSetting) {
       return this.customAxisLabel(value, yAxisSetting.prefix, yAxisSetting.postfix);
     } else {

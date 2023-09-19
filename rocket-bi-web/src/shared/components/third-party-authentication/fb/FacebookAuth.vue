@@ -1,6 +1,6 @@
 <template>
   <div class="fb-auth px-3">
-    <h3>DataInsider.co requires authorization to connect to your Facebook Account</h3>
+    <h3>RocketBI requires authorization to connect to your Facebook Account</h3>
     <DiButton class="access-fb-btn" :is-loading="loading" primary title="AUTHORIZE" @click="authentication">
       <img v-show="!loading" alt="Facebook" height="16" width="16" src="https://static.xx.fbcdn.net/rsrc.php/v3/yq/r/_9VQFvOk7ZC.png" />
     </DiButton>

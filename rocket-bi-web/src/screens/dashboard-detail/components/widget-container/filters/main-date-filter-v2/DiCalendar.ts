@@ -271,16 +271,6 @@ export default class DiCalendar extends Vue {
       this.updateDateRange(range);
     }
   }
-
-  private ddlCompareToChanged(mode: CompareMode) {
-    if (this.currentCalendarData.chosenDateRange) {
-      const compareRange = DateUtils.getCompareDateRange(mode, this.currentCalendarData.chosenDateRange);
-      if (compareRange) {
-        this.currentCalendarData.updateCompareRange(compareRange);
-      }
-    }
-  }
-
   private handleResetMainDateFilter() {
     if (this.handleResetMainDate) {
       this.handleResetMainDate();

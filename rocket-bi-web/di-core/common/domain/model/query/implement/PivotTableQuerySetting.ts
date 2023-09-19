@@ -11,7 +11,7 @@ import {
   getFiltersAndSorts,
   OrderBy,
   PivotTableChartOption,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   ChartOption,
   InlineSqlView,
@@ -24,8 +24,8 @@ import { clone, cloneDeep } from 'lodash';
 import { ListUtils } from '@/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class PivotTableQuerySetting extends QuerySetting<PivotTableChartOption> implements Sortable, Paginatable {
-  readonly className = QuerySettingType.PivotTable;
+export class PivotTableQuerySetting extends QuerySetting implements Sortable, Paginatable {
+  readonly className = QuerySettingClassName.PivotTable;
 
   constructor(
     public columns: TableColumn[],
@@ -53,7 +53,7 @@ export class PivotTableQuerySetting extends QuerySetting<PivotTableChartOption> 
   }
 
   static isPivotChartSetting(setting: any): setting is PivotTableQuerySetting {
-    return setting.className == QuerySettingType.PivotTable;
+    return setting.className == QuerySettingClassName.PivotTable;
   }
 
   getAllFunction(): Function[] {
@@ -63,7 +63,7 @@ export class PivotTableQuerySetting extends QuerySetting<PivotTableChartOption> 
     return [...columnFunctions, ...rowFunctions, ...valueFunctions];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [...this.columns, ...this.rows, ...this.values];
   }
 
@@ -78,7 +78,7 @@ export class PivotTableQuerySetting extends QuerySetting<PivotTableChartOption> 
   }
 
   isPivotTableQuerySetting(obj: any): obj is PivotTableQuerySetting {
-    return obj.className === QuerySettingType.PivotTable;
+    return obj.className === QuerySettingClassName.PivotTable;
   }
 
   getFrom(): number {
@@ -110,13 +110,13 @@ export class PivotTableQuerySetting extends QuerySetting<PivotTableChartOption> 
     this.formatters = formatters;
   }
 
-  protected setValueBySetting(setting: ChartOption) {
+  protected assignChartOptionValue(setting: ChartOption) {
     if (FormatterSetting.isFormatterSetting(setting)) {
       this.formatters = setting.getFormatters();
     }
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.columns = ConfigDataUtils.replaceDynamicFunctions(this.columns, functions);
     this.rows = ConfigDataUtils.replaceDynamicFunctions(this.rows, functions);
     this.values = ConfigDataUtils.replaceDynamicFunctions(this.values, functions);

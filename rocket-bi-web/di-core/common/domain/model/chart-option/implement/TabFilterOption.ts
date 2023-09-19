@@ -4,9 +4,11 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, StyleSetting, TextSetting, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionClassName, ChartOptionData, StyleSetting, ValueControlInfo, ValueControlType } from '@core/common/domain/model';
 import { ChartType, DefaultDynamicFunctionValue, DefaultFilterValue, Direction, TabFilterDisplay } from '@/shared';
 import { Log } from '@core/utils';
+import { isArray, isString } from 'lodash';
+import { StringUtils } from '@/utils';
 
 export interface DefaultSettings {
   enabled: boolean;
@@ -33,8 +35,7 @@ export interface TabOptionData extends ChartOptionData {
 }
 
 export class TabFilterOption extends ChartOption<TabOptionData> {
-  chartFamilyType = ChartFamilyType.TabFilter;
-  className = VizSettingType.TabFilterSetting;
+  className = ChartOptionClassName.TabFilterSetting;
 
   constructor(options: TabOptionData = {}) {
     super(options);
@@ -53,28 +54,10 @@ export class TabFilterOption extends ChartOption<TabOptionData> {
   }
 
   private static getDefaultWidgetOptions(chartType: ChartType): TabOptionData {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     return {
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitle chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '14px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle({ fontSize: '14px' }),
+      subtitle: ChartOption.getDefaultSubtitle(),
       displayAs: this.toDisplay(chartType),
       affectedByFilter: false,
       textColor: textColor,
@@ -91,7 +74,7 @@ export class TabFilterOption extends ChartOption<TabOptionData> {
   }
 
   private static getDefaultInnerFilterOptions(chartType: ChartType): TabOptionData {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     return {
       title: {
         align: 'center',
@@ -99,7 +82,9 @@ export class TabFilterOption extends ChartOption<TabOptionData> {
         text: '',
         style: {
           color: textColor,
-          fontFamily: 'Roboto',
+          fontFamily: ChartOption.getPrimaryFontFamily(),
+          fontWeight: ChartOption.getPrimaryFontWeight(),
+          fontStyle: ChartOption.getPrimaryFontStyle(),
           fontSize: '20px'
         }
       },
@@ -109,7 +94,7 @@ export class TabFilterOption extends ChartOption<TabOptionData> {
         text: '',
         style: {
           color: textColor,
-          fontFamily: 'Roboto',
+          fontFamily: ChartOption.getSecondaryFontFamily(),
           fontSize: '11px'
         }
       },
@@ -138,15 +123,15 @@ export class TabFilterOption extends ChartOption<TabOptionData> {
     switch (chartType) {
       case ChartType.SingleChoice:
       case ChartType.SingleChoiceFilter:
-        return TabFilterDisplay.singleChoice;
+        return TabFilterDisplay.SingleChoice;
       case ChartType.MultiChoice:
       case ChartType.MultiChoiceFilter:
-        return TabFilterDisplay.multiChoice;
+        return TabFilterDisplay.MultiChoice;
       case ChartType.DropDown:
       case ChartType.DropDownFilter:
-        return TabFilterDisplay.dropDown;
+        return TabFilterDisplay.DropDown;
       default:
-        return TabFilterDisplay.normal;
+        return TabFilterDisplay.Normal;
     }
   }
 
@@ -160,5 +145,28 @@ export class TabFilterOption extends ChartOption<TabOptionData> {
       default:
         return false;
     }
+  }
+
+  isEnableControl(): boolean {
+    return true;
+  }
+
+  getSupportedControls(): ValueControlInfo[] {
+    return [new ValueControlInfo(ValueControlType.SelectedValue, 'Selected value')];
+  }
+
+  getDefaultValueAsMap(): Map<ValueControlType, string[]> | undefined {
+    const defaultValue: any = this.options.default?.setting?.value;
+    if (defaultValue && isArray(defaultValue)) {
+      return new Map<ValueControlType, string[]>([[ValueControlType.SelectedValue, defaultValue]]);
+    }
+    if (defaultValue) {
+      return new Map<ValueControlType, string[]>([[ValueControlType.SelectedValue, [defaultValue]]]);
+    }
+    return void 0;
+  }
+
+  getOverridePadding(): string | undefined {
+    return '6px';
   }
 }

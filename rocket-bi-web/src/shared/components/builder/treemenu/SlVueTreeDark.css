@@ -116,6 +116,11 @@
   margin-bottom: 2px;
 }
 
+.sl-vue-tree-title img.chart-control-icon {
+  width: 16px;
+  margin-right: 10px;
+}
+
 .sl-vue-tree-sidebar {
   margin-left: auto;
 }

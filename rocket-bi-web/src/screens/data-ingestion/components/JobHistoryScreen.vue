@@ -77,11 +77,13 @@ import {
   JobService,
   GA4Job,
   GA4Metric,
-  Ga4Dimension
+  Ga4Dimension,
+  GoogleSearchConsoleJob,
+  GoogleSearchConsoleType
 } from '@core/data-ingestion';
 import { JobHistoryModule } from '@/screens/data-ingestion/store/JobHistoryStore';
 import { DIException, SortDirection } from '@core/common/domain';
-import { DateTimeFormatter, GoogleUtils, ListUtils } from '@/utils';
+import { DateTimeUtils, GoogleUtils, ListUtils } from '@/utils';
 import { StringUtils } from '@/utils/StringUtils';
 import { JobFormRender } from '@/screens/data-ingestion/form-builder/JobFormRender';
 import JobCreationModal from '@/screens/data-ingestion/components/JobCreationModal.vue';
@@ -92,6 +94,7 @@ import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { GoogleAnalyticTables } from '@/screens/data-ingestion/components/google-analytics/GoogleAnalyticTables';
 import { Inject } from 'typescript-ioc';
 import { GoogleAnalytic4Tables } from '@/screens/data-ingestion/components/google-analytics-4/GoogleAnalytic4Tables';
+import { AtomicAction } from '@core/common/misc';
 
 @Component({
   components: {
@@ -138,8 +141,8 @@ export default class JobHistoryScreen extends Vue {
     return JobHistoryModule.jobHistoryList.map(jobHistory => {
       return {
         ...jobHistory,
-        totalSyncTime: DateTimeFormatter.formatAsHms(jobHistory.totalSyncedTime),
-        lastSyncTime: DateTimeFormatter.formatAsMMMDDYYYHHmmss(jobHistory.lastSyncTime),
+        totalSyncTime: DateTimeUtils.formatAsHms(jobHistory.totalSyncedTime),
+        lastSyncTime: DateTimeUtils.formatAsMMMDDYYYHHmmss(jobHistory.lastSyncTime),
         totalInsertedRows: jobHistory.totalRowsInserted,
         message: StringUtils.isEmpty(jobHistory.message) ? '--' : jobHistory.message,
         depth: 0,
@@ -206,6 +209,7 @@ export default class JobHistoryScreen extends Vue {
     );
   }
 
+  @AtomicAction()
   private async createJob(job: Job, isSingleTable: boolean) {
     if (Job.isS3Job(job)) {
       this.openS3PreviewModal(job as S3Job);
@@ -225,6 +229,7 @@ export default class JobHistoryScreen extends Vue {
     }
   }
 
+  @AtomicAction()
   private async createMultiJob(job: Job) {
     switch (job.jobType) {
       case JobType.GoogleAnalytics: {
@@ -235,6 +240,15 @@ export default class JobHistoryScreen extends Vue {
       case JobType.GA4: {
         const listGAJob = this.getListGA4Job(job as GA4Job);
         await this.jobService.multiCreateV2(listGAJob);
+        break;
+      }
+      case JobType.GoogleSearchConsole: {
+        const newJob = job as GoogleSearchConsoleJob;
+        const searchAnalyticJob = cloneDeep(newJob);
+        const searchAppearanceJob = cloneDeep(newJob);
+        searchAppearanceJob.tableType = GoogleSearchConsoleType.SearchAppearance;
+        searchAnalyticJob.tableType = GoogleSearchConsoleType.SearchAnalytics;
+        await JobModule.multiCreateV2({ jobs: [searchAnalyticJob.createSingleJob(), searchAppearanceJob.createSingleJob()] });
         break;
       }
       default: {
@@ -430,7 +444,8 @@ export default class JobHistoryScreen extends Vue {
     }
   }
 
-  private async submitJob(job: Job) {
+  @AtomicAction()
+  async submitJob(job: Job): Promise<void> {
     const clonedJob = cloneDeep(job);
     clonedJob.scheduleTime = TimeScheduler.toSchedulerV2(job.scheduleTime!);
     await JobModule.create(clonedJob);

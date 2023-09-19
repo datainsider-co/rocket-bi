@@ -23,8 +23,8 @@
               <DiButton :id="genBtnId('save-setting')" primary title="Save" @click="handleSaveSetting" />
             </div>
           </div>
-          <vuescroll :ops="scrollOptions" class="chart-setting-area" style="padding: 15px 0;">
-            <StatusWidget :renderWhen="renderWhen" :status="status" class="chart-setting-status">
+          <vuescroll :ops="scrollOptions" class="chart-setting-area">
+            <StatusWidget :status="status" class="chart-setting-status">
               <!-- Nếu không có setting phù hợp thì render default -->
               <template v-if="toComponent">
                 <component :is="toComponent" :chartInfo="currentChartInfo" class="setting-component" @onChartInfoChanged="onChartInfoChanged" />
@@ -58,7 +58,7 @@ import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { Config } from 'vuescroll';
 import { ChartType, DefaultScrollConfig, Status, VerticalScrollConfigs } from '@/shared';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
-import { ChartInfo, VizSettingType } from '@core/common/domain';
+import { ChartInfo, ChartOptionClassName } from '@core/common/domain';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { ChartDataModule } from '@/screens/dashboard-detail/stores';
@@ -97,8 +97,6 @@ const InputFilterSetting = () => import('@/shared/settings/input-filter-setting/
 const BulletGraphSetting = () => import('@/shared/settings/bullet-setting/BulletGraphSetting.vue');
 const WindRoseSetting = () => import('@/shared/settings/wind-rose-setting/WindRoseSetting.vue');
 const SeriesStockSetting = () => import('@/shared/settings/series-stock-setting/SeriesStockSetting.vue');
-const DynamicFunctionSetting = () => import('@/shared/settings/tab-filter-setting/DynamicFunctionSetting.vue');
-
 const VariablepieSetting = () => import('@/shared/settings/variablepie-setting/VariablepieSetting.vue');
 
 @Component({
@@ -112,44 +110,41 @@ const VariablepieSetting = () => import('@/shared/settings/variablepie-setting/V
   }
 })
 export default class VizSettingModal extends Vue {
-  static readonly RENDER_WHEN = [Status.Error];
   static readonly components = new Map<string, Function>([
-    [VizSettingType.BellCurve2Setting, BellCurveSetting],
-    [VizSettingType.BubbleSetting, BubbleSetting],
-    [VizSettingType.FunnelSetting, FunnelSetting],
-    [VizSettingType.GaugeSetting, GaugeSetting],
-    [VizSettingType.HeatMapSetting, HeatMapSetting],
-    [VizSettingType.HistogramSetting, HistogramSetting],
-    [VizSettingType.MapSetting, MapSetting],
-    [VizSettingType.NumberSetting, NumberSetting],
-    [VizSettingType.ParetoSetting, ParetoSetting],
-    [VizSettingType.ParliamentSetting, ParliamentSetting],
-    [VizSettingType.PieSetting, PieSetting],
-    [VizSettingType.PivotTableSetting, PivotSetting],
-    [VizSettingType.PyramidSetting, PyramidSetting],
-    [VizSettingType.ScatterSetting, ScatterSetting],
-    [VizSettingType.SeriesSetting, SeriesSetting],
-    [VizSettingType.SpiderWebSetting, SpiderSetting],
-    [VizSettingType.StackedSeriesSetting, StackSeriesSetting],
-    [VizSettingType.CircularBarSetting, CircularBarSetting],
-    [VizSettingType.TabFilterSetting, TabFilterSetting],
-    [VizSettingType.TableSetting, TableSetting],
-    [VizSettingType.FlattenTableSetting, FlattenTableSetting],
-    [VizSettingType.TreeMapSetting, TreeMapSetting],
-    [VizSettingType.WordCloudSetting, WordCloudSetting],
-    [VizSettingType.SankeySetting, SankeySetting],
-    [VizSettingType.SlicerFilterSetting, SlicerSetting],
-    [VizSettingType.DateSelectFilterSetting, DateSelectSetting],
-    [VizSettingType.InputFilterSetting, InputFilterSetting],
-    [VizSettingType.BulletSetting, BulletGraphSetting],
-    [VizSettingType.WindRoseSetting, WindRoseSetting],
-    [VizSettingType.LineStockSetting, SeriesStockSetting],
-    [VizSettingType.TabMeasurementSetting, DynamicFunctionSetting],
-    [VizSettingType.TreeFilterSetting, TreeFilterSetting],
-    [VizSettingType.DonutSetting, DonutSetting],
-    [VizSettingType.VariablepieSetting, VariablepieSetting]
+    [ChartOptionClassName.BellCurve2Setting, BellCurveSetting],
+    [ChartOptionClassName.BubbleSetting, BubbleSetting],
+    [ChartOptionClassName.FunnelSetting, FunnelSetting],
+    [ChartOptionClassName.GaugeSetting, GaugeSetting],
+    [ChartOptionClassName.HeatMapSetting, HeatMapSetting],
+    [ChartOptionClassName.HistogramSetting, HistogramSetting],
+    [ChartOptionClassName.MapSetting, MapSetting],
+    [ChartOptionClassName.NumberSetting, NumberSetting],
+    [ChartOptionClassName.ParetoSetting, ParetoSetting],
+    [ChartOptionClassName.ParliamentSetting, ParliamentSetting],
+    [ChartOptionClassName.PieSetting, PieSetting],
+    [ChartOptionClassName.PivotTableSetting, PivotSetting],
+    [ChartOptionClassName.PyramidSetting, PyramidSetting],
+    [ChartOptionClassName.ScatterSetting, ScatterSetting],
+    [ChartOptionClassName.SeriesSetting, SeriesSetting],
+    [ChartOptionClassName.SpiderWebSetting, SpiderSetting],
+    [ChartOptionClassName.StackedSeriesSetting, StackSeriesSetting],
+    [ChartOptionClassName.CircularBarSetting, CircularBarSetting],
+    [ChartOptionClassName.TabFilterSetting, TabFilterSetting],
+    [ChartOptionClassName.TableSetting, TableSetting],
+    [ChartOptionClassName.FlattenTableSetting, FlattenTableSetting],
+    [ChartOptionClassName.TreeMapSetting, TreeMapSetting],
+    [ChartOptionClassName.WordCloudSetting, WordCloudSetting],
+    [ChartOptionClassName.SankeySetting, SankeySetting],
+    [ChartOptionClassName.SlicerFilterSetting, SlicerSetting],
+    [ChartOptionClassName.DateSelectFilterSetting, DateSelectSetting],
+    [ChartOptionClassName.InputFilterSetting, InputFilterSetting],
+    [ChartOptionClassName.BulletSetting, BulletGraphSetting],
+    [ChartOptionClassName.WindRoseSetting, WindRoseSetting],
+    [ChartOptionClassName.LineStockSetting, SeriesStockSetting],
+    [ChartOptionClassName.TreeFilterSetting, TreeFilterSetting],
+    [ChartOptionClassName.DonutSetting, DonutSetting],
+    [ChartOptionClassName.VariablePieSetting, VariablepieSetting]
   ]);
-  readonly renderWhen = VizSettingModal.RENDER_WHEN;
   private readonly scrollOptions = VerticalScrollConfigs;
   private readonly SETTING_CHART_ID = -2;
   private isShowSetting = false;
@@ -308,9 +303,10 @@ export default class VizSettingModal extends Vue {
   }
 
   > .visualize-preview-area {
-    .status-loading {
-      background: transparent;
-    }
+    // fixme: check css
+    //.status-loading {
+    //  background: transparent;
+    //}
 
     .chart-error {
       background: var(--hover-color);
@@ -342,9 +338,10 @@ export default class VizSettingModal extends Vue {
           }
         }
 
-        > .status-loading {
-          background: transparent;
-        }
+        // fixme: check css
+        //> .status-loading {
+        //  background: transparent;
+        //}
       }
     }
   }

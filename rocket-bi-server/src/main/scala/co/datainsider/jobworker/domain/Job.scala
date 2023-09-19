@@ -1,6 +1,6 @@
 package co.datainsider.jobworker.domain
 
-import co.datainsider.jobworker.domain.job.{AmazonS3Job, BigQueryStorageJob, CoinMarketCapJob, FacebookAdsJob, Ga4Job, GaJob, GenericJdbcJob, GoogleAdsJob, GoogleSheetJob, LazadaJob, MongoJob, PalexyJob, ShopeeJob, ShopifyJob, SolanaJob, TikTokAdsJob}
+import co.datainsider.jobworker.domain.job.{AmazonS3Job, BigQueryStorageJob, CoinMarketCapJob, FacebookAdsJob, Ga4Job, GaJob, GenericJdbcJob, GoogleAdsJob, GoogleSearchConsoleJob, GoogleSheetJob, LazadaJob, MongoJob, PalexyJob, ShopeeJob, ShopifyJob, SolanaJob, TikTokAdsJob}
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
@@ -33,7 +33,8 @@ import SyncMode.SyncMode
     new Type(value = classOf[TikTokAdsJob], name = "tik_tok_ads_job"),
     new Type(value = classOf[ShopeeJob], name = "shopee_job"),
     new Type(value = classOf[LazadaJob], name = "lazada_job"),
-    new Type(value = classOf[PalexyJob], name = "palexy_job")
+    new Type(value = classOf[PalexyJob], name = "palexy_job"),
+    new Type(value = classOf[GoogleSearchConsoleJob], name = "google_search_console_job")
   )
 )
 trait Job {

@@ -69,8 +69,8 @@ import { Modals } from '@/utils/Modals';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { CreateStreamingJobRequest, KafkaStreamingJob, ListingResponse, SortRequest, StreamingJobService } from '@core/data-ingestion';
 import { DIException, ListingRequest, SortDirection } from '@core/common/domain';
-import { ChartUtils, DateTimeFormatter, ListUtils } from '@/utils';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
+import { ChartUtils, DateTimeUtils, ListUtils } from '@/utils';
+import { AtomicAction } from '@core/common/misc';
 import DataIngestionTable from '@/screens/data-ingestion/components/DataIngestionTable.vue';
 import ContextMenu from '@/shared/components/ContextMenu.vue';
 import { ForceMode } from '@core/lake-house/domain/lake-job/ForceMode';
@@ -167,7 +167,7 @@ export default class Streaming extends Vue {
         hiddenInMobile: true,
         customRenderBodyCell: new CustomCell(rowData => {
           const response = StreamingJobResponse.fromObject((rowData as any) as StreamingJobResponse);
-          const data = DateTimeFormatter.formatAsMMMDDYYYHHmmss(response.job.updatedAt);
+          const data = DateTimeUtils.formatAsMMMDDYYYHHmmss(response.job.updatedAt);
           return HtmlElementRenderUtils.renderText(data, 'div', '');
         }),
         width: this.cellWidth
@@ -179,7 +179,7 @@ export default class Streaming extends Vue {
         hiddenInMobile: true,
         customRenderBodyCell: new CustomCell(rowData => {
           const response = StreamingJobResponse.fromObject((rowData as any) as StreamingJobResponse);
-          const data = DateTimeFormatter.formatAsMMMDDYYYHHmmss(response.job.createdAt);
+          const data = DateTimeUtils.formatAsMMMDDYYYHHmmss(response.job.createdAt);
           return HtmlElementRenderUtils.renderText(data, 'div', '');
         }),
         width: this.cellWidth

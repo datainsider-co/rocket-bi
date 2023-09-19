@@ -33,7 +33,7 @@ import EtlModal from '../../../etl-modal/EtlModal.vue';
 import { ExpressionFieldConfiguration, FieldConfiguration, ManageFieldOperator, NormalFieldConfiguration } from '@core/data-cook';
 import { TableSchema } from '@core/common/domain';
 import { FormulaSuggestionModule } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
-import { ClickhouseCalculatedFieldController } from '@/shared/fomula/ClickhouseCalculatedFieldController';
+import { CalculatedFieldController } from '@/shared/fomula/CalculatedFieldController';
 import FormulaCompletionInput from '@/shared/components/formula-completion-input/FormulaCompletionInput.vue';
 import { ExpressionParser, RawExpressionData } from '@core/schema/service/ExpressionParser';
 import { Track } from '@/shared/anotation';
@@ -55,7 +55,7 @@ export default class ManageExpressionField extends Vue {
   private target: ExpressionFieldConfiguration | null = null;
   private displayName = '';
   private formula = '';
-  private formulaController: ClickhouseCalculatedFieldController | null = null;
+  private formulaController: CalculatedFieldController | null = null;
   private tableSchema: TableSchema | null = null;
   private displayNameError = '';
   private formulaError = '';
@@ -168,7 +168,7 @@ export default class ManageExpressionField extends Vue {
       ignoreFunctions: ['Keyword']
     });
     FormulaSuggestionModule.setTableSchema(tableSchema);
-    this.formulaController = new ClickhouseCalculatedFieldController(FormulaSuggestionModule.allFunctions, FormulaSuggestionModule.columns);
+    this.formulaController = new CalculatedFieldController(FormulaSuggestionModule.allFunctions, FormulaSuggestionModule.columns);
   }
 
   private handleSelectKeyword(keyword: string): void {

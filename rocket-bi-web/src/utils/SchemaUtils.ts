@@ -1,6 +1,5 @@
 import {
   CalculationField,
-  ChartControlField,
   Column,
   Condition,
   DatabaseInfo,
@@ -11,8 +10,6 @@ import {
   QuerySetting,
   Select,
   ShortDatabaseInfo,
-  TabControl,
-  TabControlData,
   TableColumn,
   TableSchema
 } from '@core/common/domain/model';
@@ -35,22 +32,6 @@ export abstract class SchemaUtils {
         isExpanded: isExpanded,
         isLeaf: false,
         children: this.getTableAsNodes(table)
-      };
-    });
-  }
-
-  static buildTabControlNodes(controls: TabControl[], isExpanded = true): SlTreeNodeModel<TabControlData>[] {
-    return controls.map(control => {
-      const tabControlData: TabControlData = control.toTabControlData();
-      return {
-        title: tabControlData.displayName,
-        tag: tabControlData,
-        data: tabControlData,
-        icon: 'DynamicFunctionIcon',
-        field: new ChartControlField(tabControlData),
-        isExpanded: isExpanded,
-        isLeaf: true,
-        children: []
       };
     });
   }
@@ -110,15 +91,6 @@ export abstract class SchemaUtils {
 
   static isNested(tableName: string): boolean {
     return tableName.includes('.');
-  }
-
-  static isDiff(firstField: Field, secondField: Field) {
-    return (
-      firstField.dbName !== secondField.dbName ||
-      firstField.tblName !== secondField.tblName ||
-      firstField.fieldName !== secondField.fieldName ||
-      firstField.fieldType !== secondField.fieldType
-    );
   }
 
   static sortDatabaseInfos(databases: DatabaseInfo[]): DatabaseInfo[] {

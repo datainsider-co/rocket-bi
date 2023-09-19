@@ -1,13 +1,14 @@
 import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
 import { SelectOption } from '@/shared';
 import { BaseChartWidget, PropsBaseChart } from '@chart/BaseChart';
-import { DropdownChartOption, DropdownQuerySetting } from '@core/common/domain/model';
+import { DropdownChartOption, DropdownQuerySetting, FilterableSetting, QuerySetting, ValueControlType, WidgetId } from '@core/common/domain/model';
 import { TableResponse } from '@core/common/domain/response/query/TableResponse';
 import { WidgetRenderer } from './widget-renderer';
 import { BaseWidget } from '@/screens/dashboard-detail/components/widget-container/BaseWidget';
 import { DefaultDropDownFilter } from '@chart/widget-renderer/DefaultDropDownFilter';
 import { PopupUtils } from '@/utils/PopupUtils';
-import { ExportType } from '@core/common/domain';
+import { ExportType, FilterRequest } from '@core/common/domain';
+import { QuerySettingModule } from '@/screens/dashboard-detail/stores';
 
 @Component({
   props: PropsBaseChart
@@ -67,25 +68,42 @@ export default class DropdownFilter extends BaseChartWidget<TableResponse, Dropd
     return 'displayName';
   }
 
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onAddFilter?: (values: SelectOption) => void;
-
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onRemoveFilter?: () => void;
-
   // Inject from FilterContainer.vue
   @Inject({ default: undefined })
   private readonly defaultValue?: any;
 
-  handleFilterChanged(data: SelectOption) {
+  async handleFilterChanged(data: SelectOption) {
     this.currentValue = data.data;
-    const selectAll = +this.currentValue == DropdownFilter.ALL_ID;
-    if (selectAll && this.onRemoveFilter) {
-      this.onRemoveFilter();
-    } else if (this.onAddFilter) {
-      this.onAddFilter(data);
+    const filterRequest: FilterRequest | undefined = this.toFilterRequest(data);
+    const filterValueMap: Map<ValueControlType, string[]> | undefined = this.getFilterValueMap(data);
+    await this.applyFilterRequest({
+      filterRequest: filterRequest,
+      filterValueMap: filterValueMap
+    });
+  }
+
+  private getFilterValueMap(selectOption: SelectOption): Map<ValueControlType, string[]> | undefined {
+    const isSelectAll = +this.currentValue == DropdownFilter.ALL_ID;
+    if (isSelectAll) {
+      return void 0;
+    } else {
+      const valueMap = new Map<ValueControlType, string[]>();
+      valueMap.set(ValueControlType.SelectedValue, [selectOption.data]);
+      return valueMap;
+    }
+  }
+
+  private toFilterRequest(selectOption: SelectOption): FilterRequest | undefined {
+    const isSelectAll = +this.currentValue == DropdownFilter.ALL_ID;
+    if (isSelectAll) {
+      return void 0;
+    }
+    if (this.setting && FilterableSetting.isFilterable(this.setting!) && this.setting.isEnableFilter()) {
+      const widgetId: WidgetId = this.id! as WidgetId;
+      const querySetting: QuerySetting = QuerySettingModule.buildQuerySetting(widgetId);
+      return FilterRequest.fromValue(widgetId, querySetting, selectOption.data);
+    } else {
+      return void 0;
     }
   }
 
@@ -107,7 +125,7 @@ export default class DropdownFilter extends BaseChartWidget<TableResponse, Dropd
   }
 
   get filterClass(): string {
-    return this.showEditComponent ? 'disable' : '';
+    return '';
   }
 
   async export(type: ExportType): Promise<void> {

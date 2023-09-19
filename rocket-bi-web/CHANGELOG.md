@@ -1,5 +1,61 @@
 # CHANGELOG
 
+### v23.09.18 2023-09-18
+
+#### New Features
+
+- [DataCook] Support send excel file to email
+- [Ingestion] Support ingest data from google search console
+
+### Bug Fixes
+
+- [Query Editor] Execute query error limit 1000 when query has limit
+- [Query Editor] Cannot suggest table name, column name in create measure field & calculate field
+- [Query Editor] Cannot visualize when switch to another chart type
+- [Query Editor] Insert query params error
+- [Query Editor] Suggest syntax mysql incorrect
+- [Query Editor] Suggest syntax postgres incorrect
+- [Input Filter] Duplicate event emit value in input filter
+- [Dashboard] Area config in correct when change chart type
+
+### v23.09.11 2023-09-11
+
+#### New Features
+
+- [Dashboard] Support setting border, background, width, height for dashboard
+- [Widget] Support setting text style of primary text, secondary text, border, padding and background
+- [Ingestion] Support ingest data from google search console
+- [Payment] Support redeem code
+
+#### Enhancements
+
+- [KPI] Support theme for KPI
+- [Heatmap] Update new style for heatmap
+- [Chart Builder] Move setting chart to right side
+- [Chart Builder] Render default size of chart/filters in builder
+- [Chart Builder] Update chart icon
+
+### v23.08 2023-08-11
+
+#### Breaking Changes
+
+- Add ingestion features
+- Add data cook features
+- Remove implicit apply filter & implicit main date filter
+
+#### New Features
+
+- [Connection] Support MySql Connection
+- [Connection] Support Postgres Connection
+- [Connection] Support Redshift Connection
+- [Connection] Support Vertica Connection
+- [Connection] Support BigQuery Connection
+- [Connection] Support Connection to database using SSH Tunnel
+- [Chart] Support Donut Chart
+- [Chart] Support Variable Pie Chart
+- [Widget] New design for text widget
+- [Filter] Support drag & drop filter, chart as chart control
+
 ### v3.0.1 2023-10-14
 
 #### Breaking Changes

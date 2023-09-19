@@ -7,7 +7,7 @@ import { IdGenerator } from '@/utils/IdGenerator';
 import { DropdownData } from '@/shared/components/common/di-dropdown';
 import { Log } from '@core/utils';
 import { Status } from '@/shared';
-import { DateTimeFormatter, ListUtils } from '@/utils';
+import { DateTimeUtils, ListUtils } from '@/utils';
 import { GoogleUtils } from '@/utils/GoogleUtils';
 import { PopupUtils } from '@/utils/PopupUtils';
 import DatePickerInput from '@/screens/data-ingestion/form-builder/render-impl/DatePickerInput.vue';
@@ -54,8 +54,6 @@ export class GoogleAnalyticsJobFormRender implements JobFormRender {
 
   private gaCubes: Record<string, Record<string, number>> = require(`@/screens/data-ingestion/constants/ga-cubes.json`);
 
-  private googleConfig = require('@/screens/data-ingestion/constants/google-config.json');
-
   @Inject
   private schemaService!: SchemaService;
 
@@ -83,8 +81,8 @@ export class GoogleAnalyticsJobFormRender implements JobFormRender {
 
   createJob(): Job {
     Log.debug('createJob::', this.gaJob);
-    this.gaJob.dateRanges[0].startDate = DateTimeFormatter.formatDateWithTime(this.gaJob.dateRanges[0].startDate, '');
-    if (this.gaEndDateMode === GaDateMode.Date) this.gaJob.dateRanges[0].endDate = DateTimeFormatter.formatDateWithTime(this.gaJob.dateRanges[0].endDate, '');
+    this.gaJob.dateRanges[0].startDate = DateTimeUtils.formatDate(this.gaJob.dateRanges[0].startDate);
+    if (this.gaEndDateMode === GaDateMode.Date) this.gaJob.dateRanges[0].endDate = DateTimeUtils.formatDate(this.gaJob.dateRanges[0].endDate);
     return this.gaJob;
   }
 
@@ -146,7 +144,7 @@ export class GoogleAnalyticsJobFormRender implements JobFormRender {
       this.showPropertyLoading();
       this.showViewLoading();
       await this.loadRefreshToken();
-      await GoogleUtils.loadGoogleAnalyticClient(this.googleConfig.apiKey, '');
+      await GoogleUtils.loadGoogleAnalyticClient(window.appConfig.GOOGLE_API_KEY, '');
       const propertyResponse = await GoogleUtils.getGoogleAnalyticProperty('~all');
       Log.debug('response::', propertyResponse);
       await this.processProperty(propertyResponse);

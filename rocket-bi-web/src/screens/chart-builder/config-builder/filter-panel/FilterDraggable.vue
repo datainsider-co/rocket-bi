@@ -4,12 +4,10 @@
       :key="draggableConfig.key"
       :is-optional="draggableConfig.isOptional"
       :isDragging="hasDragging"
-      :placeholder="draggableConfig.placeholder"
+      :disabled="disabled"
       :show-title="showTitle"
-      :showPlaceHolder="canShowPlaceHolder"
       :title="draggableConfig.title"
-      @onDrop="handleDropOrGroup"
-      @onClickTooltip="handleClickTooltip(dbFieldContext, ...arguments)"
+      @onDrop="dropToOrGroup"
     >
       <template #drop-area>
         <draggable
@@ -18,12 +16,12 @@
           :group="orGroupConfig"
           :value="[]"
           draggable=".filter-content-area .items"
-          @add="handleAddNewGroupFromFilterSection"
+          @add="handleClickNewGroup"
           @input="handleAddNewGroupFromOtherSection"
         >
           <div class="filter-content-area">
             <div v-for="(andGroup, groupIndex) in conditions" :key="groupIndex" class="filter-group">
-              <div :class="{ 'over-and': hasDragging }" class="items">
+              <div :class="{ 'over-and': hasDragging && !disabled }" class="items">
                 <draggable
                   :animation="100"
                   :componentData="{ group: andGroup, groupIndex: groupIndex }"
@@ -43,21 +41,21 @@
                     :isItemDragging="isItemDragging"
                     @onInsert="handleInsertCondition(andGroup, true, ...arguments)"
                     @onReplace="handleReplaceCondition(andGroup, ...arguments)"
-                    @onInsertDynamic="handleInsertDynamicCondition(andGroup, ...arguments)"
                   >
                     <template #default="{ opacity }">
                       <FilterItem
+                        ref="filterItems"
+                        :filterId="getFilterConfigId(node.groupId, node.id)"
                         :andGroup="andGroup"
                         :conditionTreeNode="node"
-                        :filterId="genFilterId(node.groupId, node.id)"
                         :group-index="groupIndex"
                         :node-index="nodeIndex"
                         :opacity="opacity"
                         :is-read-only="isReadOnly"
                         :showChartControlConfig="showChartControlConfig"
-                        @onClickFilter="showFilter"
-                        @onDeleteFilter="handleDeleteFilter"
-                        @onFilterChanged="handleOnFilterChanged"
+                        @onClickFilter="setupFilterValue"
+                        @delete="handleDeleteFilter"
+                        @onChangedFilter="updateConditionNode"
                         @onOpenMenu="handleOpenMenu"
                       >
                       </FilterItem>
@@ -73,18 +71,19 @@
               </div>
               <div class="gap-or">Or</div>
             </div>
-            <div v-if="hasDragging" class="gap-or"></div>
+            <div v-if="hasDragging && !disabled" class="gap-or"></div>
           </div>
           <template #footer>
             <div v-if="canShowPlaceHolder" class="tutorial-drop">
               <div v-once class="unselectable">
                 <img alt="drag" v-if="!isReadOnly" src="@/assets/icon/ic-drag.svg" />
                 {{ draggableConfig.placeholder }} or
-                <a href="#" style="cursor: pointer;" @click.stop="handleClickTooltip(dbFieldContext, $event)">click here</a>
+                <a href="#" style="cursor: pointer;" @click="handleClickTooltip" :id="clickHereId">click here</a>
               </div>
             </div>
           </template>
         </draggable>
+        <SelectFieldContext ref="selectFieldContext" @select-column="handleSelectColumn"></SelectFieldContext>
       </template>
     </DropArea>
     <vue-context ref="menu">
@@ -93,33 +92,8 @@
           <a href="#" @click="handleConfigFilter(child.data)">Config</a>
         </li>
         <li>
-          <a href="#" @click.prevent="handleDeleteFilter([child.data.i, child.data.j])">Remove</a>
+          <a href="#" @click.prevent="handleDeleteFilter(child.data.i, child.data.j)">Remove</a>
         </li>
-      </template>
-    </vue-context>
-    <vue-context ref="dbFieldContext">
-      <template>
-        <StatusWidget :error="errorMessage" :status="contextStatus">
-          <div class="context field-context">
-            <template v-if="fieldOptions.length === 0">
-              <div class="d-flex align-items-center justify-content-center" style="height:  316px;width:250px">
-                <EmptyDirectory :is-hide-create-hint="true" title="Database empty" />
-              </div>
-            </template>
-            <template v-for="(table, tableIndex) in fieldOptions" v-else>
-              <li :key="`table_${tableIndex}`" class="p-2">
-                <b href="#">{{ table.displayName }}</b>
-              </li>
-              <template v-for="(field, i) in table.options">
-                <div :key="`table_${tableIndex}_${i}`" class="active p-2" @click="handleSelectColumn(field)">
-                  <li>
-                    <a href="#" style="cursor: pointer">{{ field.displayName }}</a>
-                  </li>
-                </div>
-              </template>
-            </template>
-          </div>
-        </StatusWidget>
       </template>
     </vue-context>
   </div>

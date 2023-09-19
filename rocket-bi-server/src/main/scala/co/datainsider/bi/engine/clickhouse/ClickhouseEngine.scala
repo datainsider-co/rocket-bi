@@ -2,9 +2,10 @@ package co.datainsider.bi.engine.clickhouse
 
 import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.bi.client.{HikariClient, JdbcClient, NativeJdbcClientWithProperties}
-import co.datainsider.bi.domain.ClickhouseConnection
+import co.datainsider.bi.domain.{ClickhouseConnection, Connection}
 import co.datainsider.bi.domain.query.Limit
-import co.datainsider.bi.engine.{ClientManager, Engine, ExpressionUtils, SqlParser}
+import co.datainsider.bi.engine.{ClientManager, DataStream, Engine, ExpressionUtils, SqlParser}
+import co.datainsider.bi.repository.FileStorage
 import co.datainsider.bi.repository.FileStorage.FileType
 import co.datainsider.bi.repository.FileStorage.FileType.FileType
 import co.datainsider.bi.util.profiler.Profiler
@@ -237,53 +238,54 @@ final class ClickhouseEngine(
       getClient(source)
         .executeQuery(sql)(converter = rs => {
           val (colNames, colTypes) = getColMetaData(rs)
-          val workbook: SXSSFWorkbook = new SXSSFWorkbook()
-          val sheet: SXSSFSheet = workbook.createSheet()
-          val header: SXSSFRow = sheet.createRow(0)
-          val creationHelper: CreationHelper = workbook.getCreationHelper
-          val dateTimeStyle: CellStyle = workbook.createCellStyle
-          dateTimeStyle.setDataFormat(creationHelper.createDataFormat().getFormat("m/d/yy h:mm"))
+          Using(new SXSSFWorkbook()) {
+            workbook => {
+              val sheet: SXSSFSheet = workbook.createSheet()
+              val header: SXSSFRow = sheet.createRow(0)
+              val creationHelper: CreationHelper = workbook.getCreationHelper
+              val dateTimeStyle: CellStyle = workbook.createCellStyle
+              dateTimeStyle.setDataFormat(creationHelper.createDataFormat().getFormat("m/d/yy h:mm"))
 
-          for (i <- colNames.indices) {
-            val headerCell = header.createCell(i)
-            headerCell.setCellValue(colNames(i))
-          }
+              for (i <- colNames.indices) {
+                val headerCell = header.createCell(i)
+                headerCell.setCellValue(colNames(i))
+              }
 
-          var rowCount = 1
+              var rowCount = 1
 
-          while (rs.next()) {
-            try {
-              val row: SXSSFRow = sheet.createRow(rowCount)
-              rowCount += 1
-
-              for (i <- colTypes.indices) {
+              while (rs.next()) {
                 try {
-                  val cell: SXSSFCell = row.createCell(i)
-                  colTypes(i) match {
-                    case t if isArray(t)  => cell.setCellValue(rs.getString(colNames(i)))
-                    case t if isNumber(t) => cell.setCellValue(rs.getDouble(colNames(i)))
-                    case t if isDateTime(t) =>
-                      cell.setCellValue(rs.getTimestamp(colNames(i)))
-                      cell.setCellStyle(dateTimeStyle)
-                    case _ => cell.setCellValue(rs.getString(colNames(i)))
+                  val row: SXSSFRow = sheet.createRow(rowCount)
+                  rowCount += 1
+
+                  for (i <- colTypes.indices) {
+                    try {
+                      val cell: SXSSFCell = row.createCell(i)
+                      colTypes(i) match {
+                        case t if isArray(t)  => cell.setCellValue(rs.getString(colNames(i)))
+                        case t if isNumber(t) => cell.setCellValue(rs.getDouble(colNames(i)))
+                        case t if isDateTime(t) =>
+                          cell.setCellValue(rs.getTimestamp(colNames(i)))
+                          cell.setCellStyle(dateTimeStyle)
+                        case _ => cell.setCellValue(rs.getString(colNames(i)))
+                      }
+                    } catch {
+                      case e: Throwable => logger.error(s"create cell error: ${e.getMessage}", e)
+                    }
                   }
+
                 } catch {
-                  case e: Throwable => logger.error(s"create cell error: ${e.getMessage}", e)
+                  case e: Throwable => logger.error(s"create row error: ${e.getMessage}", e)
                 }
               }
 
-            } catch {
-              case e: Throwable => logger.error(s"create row error: ${e.getMessage}", e)
+              Using(new FileOutputStream(destPath))(out => workbook.write(out))
+              workbook.dispose()
+              logger.info(s"export query $sql as excel file to $destPath, total rows: $rowCount.")
+
+              destPath
             }
           }
-
-          val outputStream = new FileOutputStream(destPath)
-          workbook.write(outputStream)
-          workbook.dispose()
-
-          logger.info(s"export query $sql as excel file to $destPath, total rows: $rowCount.")
-
-          destPath
         })
     }
 
@@ -460,7 +462,7 @@ final class ClickhouseEngine(
       emailService: EmailService
   ): Executor[SendGroupEmailOperator] = {
     val baseDir: String = ZConfig.getString("data_cook.mail_dir")
-    SendGroupEmailOperatorExecutor(source, emailService, baseDir)
+    SendGroupEmailOperatorExecutor(this, source, emailService, baseDir)
   }
 
   private def createSendEmailExecutor(

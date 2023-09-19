@@ -5,7 +5,7 @@ import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
 import { IdGenerator } from '@/utils/IdGenerator';
 import { Log } from '@core/utils';
 import { Status } from '@/shared';
-import { DateTimeFormatter, ListUtils } from '@/utils';
+import { DateTimeUtils, ListUtils } from '@/utils';
 import { GoogleUtils } from '@/utils/GoogleUtils';
 import { PopupUtils } from '@/utils/PopupUtils';
 import DatePickerInput from '@/screens/data-ingestion/form-builder/render-impl/DatePickerInput.vue';
@@ -55,8 +55,6 @@ export class GA4JobFormRender implements JobFormRender {
 
   private source: GA4SourceInfo | null = null;
 
-  private googleConfig = require('@/screens/data-ingestion/constants/google-config.json');
-
   @Inject
   private schemaService!: SchemaService;
 
@@ -84,8 +82,8 @@ export class GA4JobFormRender implements JobFormRender {
 
   createJob(): Job {
     Log.debug('createJob::', this.gaJob);
-    this.gaJob.dateRanges[0].startDate = DateTimeFormatter.formatDateWithTime(this.gaJob.dateRanges[0].startDate, '');
-    if (this.gaEndDateMode === GaDateMode.Date) this.gaJob.dateRanges[0].endDate = DateTimeFormatter.formatDateWithTime(this.gaJob.dateRanges[0].endDate, '');
+    this.gaJob.dateRanges[0].startDate = DateTimeUtils.formatDate(this.gaJob.dateRanges[0].startDate);
+    if (this.gaEndDateMode === GaDateMode.Date) this.gaJob.dateRanges[0].endDate = DateTimeUtils.formatDate(this.gaJob.dateRanges[0].endDate);
     return this.gaJob;
   }
 

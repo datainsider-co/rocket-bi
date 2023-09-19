@@ -28,7 +28,7 @@ import { InputDateType } from '@/shared/settings/common/InputDateSetting.vue';
   components: { DiCalendar }
 })
 export default class DateRangeDropdown extends Vue {
-  private readonly DateRangeOptions = DateTimeConstants.ListDateRangeModeOptions;
+  private readonly DateRangeOptions = DateTimeConstants.DATE_RANGE_MODE_OPTION_LIST;
 
   @Prop({ required: true, type: String })
   private readonly id!: string;
@@ -57,7 +57,7 @@ export default class DateRangeDropdown extends Vue {
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 4px;
+  padding: 4px var(--widget-padding);
 
   > svg {
     order: 1;

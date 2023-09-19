@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, SeriesOptionData, ChartOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionData, SeriesOptionData, ChartOptionClassName } from '@core/common/domain/model';
 
 export class MapChartChartOption extends ChartOption<SeriesOptionData> {
   static readonly DEFAULT_SETTING = {
@@ -65,8 +65,8 @@ export class MapChartChartOption extends ChartOption<SeriesOptionData> {
       }
     }
   };
-  readonly chartFamilyType = ChartFamilyType.Map;
-  readonly className = VizSettingType.MapSetting;
+
+  readonly className = ChartOptionClassName.MapSetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);
@@ -77,7 +77,7 @@ export class MapChartChartOption extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(): MapChartChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const options: SeriesOptionData = {
       chart: {
         // resetZoomButton: {
@@ -111,32 +111,11 @@ export class MapChartChartOption extends ChartOption<SeriesOptionData> {
           }
         }
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       },
       plotOptions: {
         map: {
@@ -145,9 +124,7 @@ export class MapChartChartOption extends ChartOption<SeriesOptionData> {
           dataLabels: {
             enabled: false,
             style: {
-              color: textColor,
-              fontSize: '11px',
-              fontFamily: 'Roboto',
+              ...ChartOption.getSecondaryStyle(),
               textOutline: 0
             }
           }

@@ -24,7 +24,7 @@ import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 export class IconFieldValueFormatter implements BodyStyleFormatter<AbstractTableQuerySetting, AbstractTableResponse, TableChartOption> {
   static createIconStyle(
     bodyData:
-      | BodyData<AbstractTableQuerySetting<TableChartOption>, AbstractTableResponse, TableChartOption>
+      | BodyData<AbstractTableQuerySetting, AbstractTableResponse, TableChartOption>
       | BodyData<PivotTableQuerySetting, AbstractTableResponse, PivotTableChartOption>
   ): CustomStyleData {
     const { bodyCellData, vizSetting, tableResponse } = bodyData;

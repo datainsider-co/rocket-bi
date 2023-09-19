@@ -5,6 +5,56 @@
 
 @import '~@/themes/scss/mixin.scss';
 
+.data-builder-container {
+  display: flex;
+  align-items: flex-start;
+  height: 100%;
+  width: 100%;
+  .data-builder-bar {
+    width: 134px;
+    background: var(--secondary);
+
+    &--menu {
+      margin-top: 60px;
+      &--item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        height: 40px;
+        cursor: pointer;
+        i {
+          font-size: 13px;
+          margin-right: 10px;
+        }
+        &:before {
+          content: '';
+          position: absolute;
+          width: 6px;
+          left: 0;
+          top: 0;
+          height: 100%;
+        }
+      }
+      &--item.active,
+      &--item:hover {
+        background: #e5f4ff;
+        color: var(--accent);
+      }
+      &--item.active:before {
+        background: var(--accent);
+      }
+      &--item + .data-builder-bar--menu--item {
+        margin-top: 18px;
+      }
+    }
+  }
+}
+
 .data-builder ::v-deep {
   @import '~@/themes/scss/di-variables.scss';
   @import '~bootstrap/scss/variables';
@@ -21,13 +71,11 @@
 .data-builder {
   background-color: var(--data-builder-bg, var(--primary));
   height: 100%;
-  max-width: 3840px;
-
-  min-height: 640px;
-  min-width: 854px;
-
-  padding: 16px;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 16px;
+  padding: 18px 13px 20px 11px;
 
   > .data-builder-header {
     height: 28px;
@@ -60,21 +108,14 @@
   }
 
   > .data-builder-body {
-    height: calc(100% - 48px);
-    width: calc(100% - 32px);
+    flex: 1;
+    //?????
+    height: 1px;
+    //width: calc(100% - 32px);
 
-    > div + div {
-      margin-left: 16px;
-    }
-
-    .database-panel {
-      @include col(22%);
-
-      @include builder-panel();
-      background-color: var(--builder-panel-bg, var(--secondary));
-
-      width: 223px;
-    }
+    //> div + div {
+    //  margin-left: 16px;
+    //}
 
     .config-filter-area {
       height: 100%;
@@ -83,22 +124,55 @@
       .config-panel {
         height: 100%;
         @include builder-panel();
+        border-radius: 0 4px 4px 0 !important;
         background-color: var(--builder-panel-bg, var(--secondary));
       }
     }
 
     .visualization-panel {
-      @include col(45%);
+      flex: 1;
       @include builder-panel();
-      background-color: var(--builder-panel-bg, var(--secondary));
+      background-color: var(--secondary-2, #fafafb);
     }
 
-    .config-chart-panel {
-      @include col(33%);
+    .builder-config-container {
+      position: relative;
+      display: flex;
+      margin-right: 8px;
+
+      .setting-panel {
+        width: 631px;
+        padding: 16px;
+        border-radius: 4px;
+        background-color: var(--builder-panel-bg, var(--secondary));
+      }
+
+      .builder-config {
+        display: flex;
+        gap: 8px;
+
+        .database-panel {
+          @include builder-panel();
+          background-color: var(--builder-panel-bg, var(--secondary));
+          width: 238px;
+          height: 100%;
+          border-radius: 4px 0 0px 4px;
+          ::v-deep {
+            .source-item:first-child {
+              border-top-left-radius: 4px;
+            }
+          }
+        }
+
+        .config-chart-panel {
+          width: 385px;
+          height: 100%;
+        }
+      }
     }
   }
 
   .data-builder-header + .data-builder-body {
-    margin-top: 16px;
+    //margin-top: 16px;
   }
 }

@@ -14,10 +14,11 @@ import { DeleteFieldData } from '@/screens/chart-builder/config-builder/database
 import { cloneDeep } from 'lodash';
 import { StringUtils } from '@/utils/StringUtils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
-import { AtomicAction, Track } from '@/shared/anotation';
+import { AtomicAction } from '@core/common/misc';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import DiRenameModal from '@/shared/components/DiRenameModal.vue';
 import { DataManagementModule } from '@/screens/data-management/store/DataManagementStore';
+import { Track } from '@/shared/anotation';
 
 interface TreeViewInfo {
   [key: string]: TreeViewDatabase;

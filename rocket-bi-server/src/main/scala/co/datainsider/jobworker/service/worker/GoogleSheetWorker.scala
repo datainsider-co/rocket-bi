@@ -103,7 +103,7 @@ class GoogleSheetWorker(
 
         writers.foreach(writer => {
           if (records.nonEmpty) try {
-            writer.write(records, destTableSchema)
+            writer.insertBatch(records, destTableSchema)
           } catch {
             case e: Throwable => error(s"${writer.getClass} write ${records.length} records failed, reason: $e")
           }

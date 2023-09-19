@@ -5,9 +5,9 @@ import {
   FlattenTableChartOption,
   PivotTableChartOption,
   QuerySetting,
-  QuerySettingType,
+  QuerySettingClassName,
   TableChartOption,
-  VizSettingType,
+  ChartOptionClassName,
   WidgetId
 } from '@core/common/domain/model';
 import { VisualizationResponse } from '@core/common/domain/response';
@@ -33,42 +33,41 @@ const PivotTable = () => import('@chart/table/pivot-table/PivotTable');
 })
 export default class ChartComponent extends Vue implements WidgetResizeHandler {
   static readonly components = new Map<string, string>([
-    [VizSettingType.SeriesSetting, 'SeriesChart'],
-    [VizSettingType.PieSetting, 'PieChart'],
-    [VizSettingType.FunnelSetting, 'FunnelChart'],
-    [VizSettingType.PyramidSetting, 'PyramidChart'],
-    [VizSettingType.ScatterSetting, 'ScatterChart'],
-    [VizSettingType.BubbleSetting, 'BubbleChart'],
-    [VizSettingType.HeatMapSetting, 'HeatMapChart'],
-    [VizSettingType.ParetoSetting, 'ParetoChart'],
-    [VizSettingType.BellCurveSetting, 'BellCurveChart'],
-    [VizSettingType.DrilldownSetting, 'DrilldownChart'],
-    [VizSettingType.DrilldownPieSetting, 'DrilldownPieChart'],
-    [VizSettingType.GaugeSetting, 'GaugeChart'],
-    [VizSettingType.TreeMapSetting, 'TreeMapChart'],
-    [VizSettingType.NumberSetting, 'KPIWidget'],
-    [VizSettingType.WordCloudSetting, 'WordCloudChart'],
-    [VizSettingType.HistogramSetting, 'HistogramChart'],
-    [VizSettingType.DropdownSetting, 'DropdownFilter'],
-    [VizSettingType.StackedSeriesSetting, 'StackingSeriesChart'],
-    [VizSettingType.CircularBarSetting, 'StackingSeriesChart'],
-    [VizSettingType.TabFilterSetting, 'TabFilter'],
-    [VizSettingType.MapSetting, 'MapChart'],
-    [VizSettingType.ParliamentSetting, 'ParliamentChart'],
-    [VizSettingType.SpiderWebSetting, 'SpiderWebChart'],
-    [VizSettingType.BellCurve2Setting, 'BellCurve2Chart'],
-    [VizSettingType.SankeySetting, 'SankeyChart'],
-    [VizSettingType.SlicerFilterSetting, 'SlicerFilter'],
+    [ChartOptionClassName.SeriesSetting, 'SeriesChart'],
+    [ChartOptionClassName.PieSetting, 'PieChart'],
+    [ChartOptionClassName.FunnelSetting, 'FunnelChart'],
+    [ChartOptionClassName.PyramidSetting, 'PyramidChart'],
+    [ChartOptionClassName.ScatterSetting, 'ScatterChart'],
+    [ChartOptionClassName.BubbleSetting, 'BubbleChart'],
+    [ChartOptionClassName.HeatMapSetting, 'HeatMapChart'],
+    [ChartOptionClassName.ParetoSetting, 'ParetoChart'],
+    [ChartOptionClassName.BellCurveSetting, 'BellCurveChart'],
+    [ChartOptionClassName.DrilldownSetting, 'DrilldownChart'],
+    [ChartOptionClassName.DrilldownPieSetting, 'DrilldownPieChart'],
+    [ChartOptionClassName.GaugeSetting, 'GaugeChart'],
+    [ChartOptionClassName.TreeMapSetting, 'TreeMapChart'],
+    [ChartOptionClassName.NumberSetting, 'KPIWidget'],
+    [ChartOptionClassName.WordCloudSetting, 'WordCloudChart'],
+    [ChartOptionClassName.HistogramSetting, 'HistogramChart'],
+    [ChartOptionClassName.DropdownSetting, 'DropdownFilter'],
+    [ChartOptionClassName.StackedSeriesSetting, 'StackingSeriesChart'],
+    [ChartOptionClassName.CircularBarSetting, 'StackingSeriesChart'],
+    [ChartOptionClassName.TabFilterSetting, 'TabFilter'],
+    [ChartOptionClassName.MapSetting, 'MapChart'],
+    [ChartOptionClassName.ParliamentSetting, 'ParliamentChart'],
+    [ChartOptionClassName.SpiderWebSetting, 'SpiderWebChart'],
+    [ChartOptionClassName.BellCurve2Setting, 'BellCurve2Chart'],
+    [ChartOptionClassName.SankeySetting, 'SankeyChart'],
+    [ChartOptionClassName.SlicerFilterSetting, 'SlicerFilter'],
     // [VizSettingType.DateSelectFilterSetting, 'DateFilter'],
-    [VizSettingType.DateSelectFilterSetting, 'DateFilter2'],
-    [VizSettingType.InputFilterSetting, 'InputFilter'],
-    [VizSettingType.BulletSetting, 'BulletGraph'],
-    [VizSettingType.WindRoseSetting, 'StackingSeriesChart'],
-    [VizSettingType.LineStockSetting, 'LineStockChart'],
-    [VizSettingType.TabMeasurementSetting, 'MeasureControl'],
-    [VizSettingType.TreeFilterSetting, 'TreeFilter'],
-    [VizSettingType.VariablepieSetting, 'VariablepieChart'],
-    [VizSettingType.DonutSetting, 'DonutChart']
+    [ChartOptionClassName.DateSelectFilterSetting, 'DateFilter2'],
+    [ChartOptionClassName.InputFilterSetting, 'InputFilter'],
+    [ChartOptionClassName.BulletSetting, 'BulletGraph'],
+    [ChartOptionClassName.WindRoseSetting, 'StackingSeriesChart'],
+    [ChartOptionClassName.LineStockSetting, 'LineStockChart'],
+    [ChartOptionClassName.TreeFilterSetting, 'TreeFilter'],
+    [ChartOptionClassName.VariablePieSetting, 'VariablepieChart'],
+    [ChartOptionClassName.DonutSetting, 'DonutChart']
   ]);
 
   @Prop({ required: true, type: Object })
@@ -103,10 +102,10 @@ export default class ChartComponent extends Vue implements WidgetResizeHandler {
     return void 0;
   }
 
-  private get componentClass(): string {
+  protected get componentClass(): string {
     switch (this.setting?.className) {
-      case VizSettingType.TabFilterSetting:
-      case VizSettingType.SlicerFilterSetting:
+      case ChartOptionClassName.TabFilterSetting:
+      case ChartOptionClassName.SlicerFilterSetting:
         return 'filter-widget-container';
       default:
         return 'chart-widget-container';
@@ -125,12 +124,12 @@ export default class ChartComponent extends Vue implements WidgetResizeHandler {
 
   private get toTableComponent(): any {
     switch (this.metaData.setting.className) {
-      case QuerySettingType.Table:
-      case QuerySettingType.GroupedTable:
-      case QuerySettingType.FlattenPivot:
-      case QuerySettingType.RawQuery:
+      case QuerySettingClassName.Table:
+      case QuerySettingClassName.GroupedTable:
+      case QuerySettingClassName.FlattenPivot:
+      case QuerySettingClassName.RawQuery:
         return DefaultTable;
-      case QuerySettingType.PivotTable:
+      case QuerySettingClassName.PivotTable:
         return PivotTable;
       default:
         throw new DIException('Unsupported render this table');
@@ -157,7 +156,13 @@ export default class ChartComponent extends Vue implements WidgetResizeHandler {
 
   handleResize(id: WidgetId): void {
     if (this.metaData.id === id) {
-      if (this.chart && this.chart.resize) TimeoutUtils.waitAndExec(null, () => this.chart.resize(), 250);
+      this.resize();
+    }
+  }
+
+  resize() {
+    if (this.chart && this.chart.resize) {
+      TimeoutUtils.waitAndExec(null, () => this.chart.resize(), 180);
     }
   }
 
@@ -165,10 +170,6 @@ export default class ChartComponent extends Vue implements WidgetResizeHandler {
     if (this.metaData.id === id) {
       this.chart.export(type);
     }
-  }
-
-  updateChart(chartInfo: ChartInfo) {
-    this.chart.updateChart(chartInfo);
   }
 
   private getCurrentQuerySetting(): QuerySetting {

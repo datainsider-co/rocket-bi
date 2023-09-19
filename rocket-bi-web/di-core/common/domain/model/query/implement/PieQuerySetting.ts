@@ -8,13 +8,11 @@ import {
   CrossFilterable,
   Equal,
   FieldRelatedFunction,
-  Filterable,
   Function,
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  PieChartOption,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   WidgetId,
   Zoomable
@@ -26,8 +24,8 @@ import { ZoomData } from '@/shared';
 import { ConditionUtils } from '@core/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class PieQuerySetting extends QuerySetting<PieChartOption> implements CrossFilterable, Zoomable, Drilldownable {
-  readonly className = QuerySettingType.Pie;
+export class PieQuerySetting extends QuerySetting implements CrossFilterable, Zoomable, Drilldownable {
+  readonly className = QuerySettingClassName.Pie;
 
   constructor(
     public legend: TableColumn,
@@ -35,7 +33,6 @@ export class PieQuerySetting extends QuerySetting<PieChartOption> implements Cro
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-
     sqlViews: InlineSqlView[] = [],
     parameters: Record<string, string> = {}
   ) {
@@ -59,11 +56,11 @@ export class PieQuerySetting extends QuerySetting<PieChartOption> implements Cro
     return [this.legend.function, this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.legend, this.value];
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.legend;
   }
 
@@ -96,10 +93,11 @@ export class PieQuerySetting extends QuerySetting<PieChartOption> implements Cro
     }
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.legend = ConfigDataUtils.replaceDynamicFunction(this.legend, functions);
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
+
   getDefaultSize(): [number, number] {
     return [10, 10];
   }

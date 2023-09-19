@@ -78,7 +78,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { ChartOption, PivotTableChartOption, SettingKey } from '@core/common/domain';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 
 @Component({ components: { PanelHeader } })
 export default class TotalTab extends Vue {
@@ -87,13 +87,13 @@ export default class TotalTab extends Vue {
   @Prop({ required: false, type: Object })
   private readonly setting!: PivotTableChartOption;
   private fontOptions = FontFamilyOptions;
-  private readonly fontSizeOptions = FontSizeOptions;
+  private readonly fontSizeOptions = SecondaryFontSizeOptions;
   private readonly defaultStyle = {
     enabled: true,
-    color: ChartOption.getThemeTextColor(),
+    color: ChartOption.getPrimaryTextColor(),
     backgroundColor: ChartOption.getTableTotalColor(),
     label: 'Total',
-    fontFamily: 'Roboto',
+    fontFamily: ChartOption.getSecondaryFontFamily(),
     fontSize: '12px',
     align: 'right'
   };

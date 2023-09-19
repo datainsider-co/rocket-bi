@@ -3,7 +3,7 @@ import store from '@/store';
 import { Stores } from '@/shared';
 import { Column, TableSchema } from '@core/common/domain/model';
 import { ListUtils } from '@/utils';
-import { DataSourceType } from '@core/clickhouse-config';
+import { ConnectorType } from '@core/connector-config';
 
 /* eslint @typescript-eslint/camelcase: 0 */
 

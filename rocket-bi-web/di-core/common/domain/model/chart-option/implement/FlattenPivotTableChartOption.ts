@@ -3,7 +3,7 @@
  * @created: 5/26/21, 4:21 PM
  */
 
-import { ChartFamilyType, FormatterSetting, PivotTableOptionData, TableColumn, VizSettingType } from '@core/common/domain/model';
+import { FormatterSetting, PivotTableOptionData, TableColumn, ChartOptionClassName } from '@core/common/domain/model';
 import { Scrollable } from '@core/common/domain/model/query/features/Scrollable';
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
 import { get } from 'lodash';
@@ -12,8 +12,7 @@ import { ColorConfig } from '@core/common/domain/model/chart-option/extra-settin
 import { ConditionalFormattingUtils } from '@core/utils/ConditionalFormattingUtils';
 
 export class FlattenPivotTableChartOption extends ChartOption<PivotTableOptionData> implements Scrollable, FormatterSetting {
-  readonly chartFamilyType = ChartFamilyType.FlattenPivot;
-  readonly className = VizSettingType.FlattenPivotTableSetting;
+  readonly className = ChartOptionClassName.FlattenPivotTableSetting;
 
   constructor(options: PivotTableOptionData = {}) {
     super(options);
@@ -24,33 +23,15 @@ export class FlattenPivotTableChartOption extends ChartOption<PivotTableOptionDa
   }
 
   static isPivotTableSetting(obj: any): obj is FlattenPivotTableChartOption {
-    return obj.className === VizSettingType.FlattenPivotTableSetting;
+    return obj.className === ChartOptionClassName.FlattenPivotTableSetting;
   }
 
   static getDefaultChartOption(): FlattenPivotTableChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const gridColor = this.getTableGridLineColor();
     const options: PivotTableOptionData = {
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Pivot Table',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle({ title: 'Pivot Table' }),
+      subtitle: ChartOption.getDefaultSubtitle(),
       grid: {
         horizontal: {
           color: gridColor,
@@ -70,7 +51,7 @@ export class FlattenPivotTableChartOption extends ChartOption<PivotTableOptionDa
       },
       affectedByFilter: true,
       tooltip: {
-        fontFamily: 'Roboto',
+        fontFamily: ChartOption.getSecondaryFontFamily(),
         backgroundColor: 'var(--tooltip-background-color)',
         valueColor: textColor
       },
@@ -83,7 +64,7 @@ export class FlattenPivotTableChartOption extends ChartOption<PivotTableOptionDa
         enableUrlIcon: false,
         style: {
           color: textColor,
-          fontFamily: 'Roboto',
+          fontFamily: ChartOption.getSecondaryFontFamily(),
           fontSize: '12px',
           isWordWrap: false
         }
@@ -97,7 +78,9 @@ export class FlattenPivotTableChartOption extends ChartOption<PivotTableOptionDa
         style: {
           color: textColor,
           isWordWrap: false,
-          fontFamily: 'Roboto',
+          fontFamily: ChartOption.getPrimaryFontFamily(),
+          fontWeight: ChartOption.getPrimaryFontWeight(),
+          fontStyle: ChartOption.getPrimaryFontStyle(),
           fontSize: '12px'
         }
       },
@@ -111,7 +94,7 @@ export class FlattenPivotTableChartOption extends ChartOption<PivotTableOptionDa
           isWordWrap: false,
           backgroundColor: this.getTableTotalColor(),
           style: {
-            fontFamily: 'Roboto',
+            fontFamily: ChartOption.getSecondaryFontFamily(),
             fontSize: '12px',
             color: textColor,
             isWordWrap: false

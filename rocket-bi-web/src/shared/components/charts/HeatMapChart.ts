@@ -142,7 +142,7 @@ export default class HeatMapChart extends BaseHighChartWidget<SeriesTwoResponse,
         labels: {
           useHTML: true,
           formatter: function() {
-            return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+            return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
           }
         }
       };
@@ -154,7 +154,7 @@ export default class HeatMapChart extends BaseHighChartWidget<SeriesTwoResponse,
         labels: {
           useHTML: true,
           formatter: function() {
-            return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+            return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
           }
         }
       };
@@ -172,7 +172,7 @@ export default class HeatMapChart extends BaseHighChartWidget<SeriesTwoResponse,
     //@ts-ignore
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
     //@ts-ignore
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     Log.debug('HeatMap::tooltip::', contextObject);
     const xAxisLabel = contextObject.series.xAxis.categories[contextObject.point.x];
     const yAxisLabel = contextObject.series.yAxis.categories[toNumber(contextObject.point.y)];
@@ -196,7 +196,7 @@ export default class HeatMapChart extends BaseHighChartWidget<SeriesTwoResponse,
     return new NumberFormatter(ranges, precision, decimalPoint, thousandSep);
   }
 
-  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const yAxisSetting = this.setting.options.yAxis;
     const value = axis.value;
     if (yAxisSetting && yAxisSetting[0]) {
@@ -214,11 +214,11 @@ export default class HeatMapChart extends BaseHighChartWidget<SeriesTwoResponse,
       `;
   }
 
-  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const xAxisSetting = this.setting.options.xAxis;
     const value = axis.value;
     if (xAxisSetting && xAxisSetting[0]) {
-      return this.customAxisLabel(value, xAxisSetting[0].prefix, xAxisSetting[0].postfix);
+      return this.customAxisLabel(value as string, xAxisSetting[0].prefix, xAxisSetting[0].postfix);
     } else {
       return `<div>${value}</div>`;
     }

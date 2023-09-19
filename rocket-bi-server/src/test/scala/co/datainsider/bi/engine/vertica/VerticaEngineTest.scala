@@ -26,7 +26,6 @@ class VerticaEngineTest extends BaseVerticaTest {
   val csvPath = s"${baseDir}/sales.csv"
   val excelPath = s"${baseDir}/sales.xlsx"
 
-
   val testWriteTableSchema: TableSchema = TableSchema(
     name = "writeable_table",
     dbName = dbName,
@@ -41,7 +40,7 @@ class VerticaEngineTest extends BaseVerticaTest {
       Int32Column("gender", "Gender", isNullable = true),
       FloatColumn("score", "Average score", isNullable = true),
       StringColumn("email", "Email", isNullable = true),
-      StringColumn("address.country", "Country", isNullable = true),
+      StringColumn("address.country", "Country", isNullable = true)
     )
   )
 
@@ -153,24 +152,47 @@ class VerticaEngineTest extends BaseVerticaTest {
     val actualRows: Seq[Seq[Any]] = client.executeQuery(query)(rs => {
       val records = ArrayBuffer[Seq[Any]]()
       while (rs.next()) {
-          val record = ArrayBuffer[Any]()
-          for (i <- 1 to rs.getMetaData.getColumnCount) {
-            record += rs.getObject(i)
-          }
-          records += record
+        val record = ArrayBuffer[Any]()
+        for (i <- 1 to rs.getMetaData.getColumnCount) {
+          record += rs.getObject(i)
+        }
+        records += record
       }
       records
     })
     assert(actualRows.size == 7)
-    assert(actualRows(0).toSeq == Seq(1, "Atlantic", 10, date, Timestamp.valueOf("2021-01-01 00:00:00.0"), 1, 7.1, "kiki\"@gmail.com", null))
+    assert(
+      actualRows(0).toSeq == Seq(
+        1,
+        "Atlantic",
+        10,
+        date,
+        Timestamp.valueOf("2021-01-01 00:00:00.0"),
+        1,
+        7.1,
+        "kiki\"@gmail.com",
+        null
+      )
+    )
     assert(actualRows(1).toSeq == Seq(2, "Pa\"cific", 3, date, dateTime, 0, null, "mimi@gmail.com", "Vietnam"))
     assert(actualRows(2) == Seq(3, "1", 7, null, null, 0, 7.3, "momo@gmail.com", "Vietnam"))
-    assert(actualRows(3) == Seq(4, "Himawari", null, null, Timestamp.valueOf("2021-01-01 00:00:00"), 0, 7.3, "momo@gmail.com", null))
+    assert(
+      actualRows(3) == Seq(
+        4,
+        "Himawari",
+        null,
+        null,
+        Timestamp.valueOf("2021-01-01 00:00:00"),
+        0,
+        7.3,
+        "momo@gmail.com",
+        null
+      )
+    )
     assert(actualRows(4) == Seq(5, null, null, null, null, null, null, null, ""))
     assert(actualRows(5) == Seq(6, null, null, date, Timestamp.valueOf("2021-01-01 00:00:00.0"), null, null, null, "1"))
     assert(actualRows(6) == Seq(7, null, null, date, dateTime2, null, null, null, null))
   }
-
 
   test("connect using ssh") {
     val keypair = injector.instance[SshKeyPair]
@@ -181,7 +203,8 @@ class VerticaEngineTest extends BaseVerticaTest {
     println(s"open tunnel from localhost -> ${tunnelConfig.host}:${tunnelConfig.port}")
     Using(SshSessionManager.createSession(keypair, tunnelConfig))(session => {
       val newPorts = session.forwardLocalPorts(originConnection.getRemoteHost(), originConnection.getRemotePorts())
-      println(s"tunnel from ${originConnection.getRemoteHost()}:${originConnection.getRemotePorts()} -> ${session.getLocalHost()}:${newPorts}")
+      println(s"tunnel from ${originConnection.getRemoteHost()}:${originConnection.getRemotePorts()} -> ${session
+        .getLocalHost()}:${newPorts}")
       val tunnelConnection = source.copyHostPorts(session.getLocalHost(), newPorts)
       val client = NativeJDbcClient(tunnelConnection.jdbcUrl, tunnelConnection.username, tunnelConnection.password)
       client.executeQuery("SELECT 1")(rs => {

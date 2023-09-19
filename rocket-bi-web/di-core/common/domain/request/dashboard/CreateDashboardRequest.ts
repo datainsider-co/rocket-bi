@@ -9,6 +9,9 @@ import { Position } from '@core/common/domain/model/dashboard/Position';
 export class CreateDashboardRequest {
   readonly name: string;
   readonly parentDirectoryId: DirectoryId;
+  /**
+   * @deprecated field is disabled
+   */
   readonly mainDateFilter?: MainDateFilter;
   readonly widgets?: Widget[];
   readonly widgetPositions?: DIMap<Position>;
@@ -16,7 +19,7 @@ export class CreateDashboardRequest {
   readonly setting?: DashboardSetting;
   readonly boostInfo?: BoostInfo;
 
-  constructor(
+  protected constructor(
     directoryType: DirectoryType,
     name: string,
     parentDirectoryId: DirectoryId,
@@ -36,29 +39,40 @@ export class CreateDashboardRequest {
     this.boostInfo = boostInfo;
   }
 
+  /**
+   * create dashboard request with default main date filter
+   */
   static createDashboardRequest(payload: {
     name: string;
     parentDirectoryId: DirectoryId;
-    mainDateFilter?: MainDateFilter;
     widgets?: Widget[];
     widgetPositions?: DIMap<Position>;
     setting?: DashboardSetting;
     boostInfo?: BoostInfo;
-  }) {
+  }): CreateDashboardRequest {
     return new CreateDashboardRequest(
       DirectoryType.Dashboard,
       payload.name,
       payload.parentDirectoryId,
-      payload.mainDateFilter,
+      void 0,
       payload.widgets,
       payload.widgetPositions,
-      payload.setting,
+      payload.setting || DashboardSetting.default(),
       payload.boostInfo
     );
   }
 
-  static createQueryRequest(payload: { name: string; parentDirectoryId: DirectoryId; widgets: Widget[] }) {
-    return new CreateDashboardRequest(DirectoryType.Query, payload.name, payload.parentDirectoryId, void 0, payload.widgets, void 0, void 0, void 0);
+  static createQueryRequest(payload: { name: string; parentDirectoryId: DirectoryId; widgets: Widget[] }): CreateDashboardRequest {
+    return new CreateDashboardRequest(
+      DirectoryType.Query,
+      payload.name,
+      payload.parentDirectoryId,
+      void 0,
+      payload.widgets,
+      void 0,
+      DashboardSetting.default(),
+      void 0
+    );
   }
 
   static fromDashboard(type: DirectoryType, parentId: number, dashboard: Dashboard) {

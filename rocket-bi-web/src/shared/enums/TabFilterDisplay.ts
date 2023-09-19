@@ -1,7 +1,7 @@
 export enum TabFilterDisplay {
-  normal = 'normal',
-  singleChoice = 'single_choice',
-  multiChoice = 'multi_choice',
-  dropDown = 'drop_down',
-  flat = 'flat'
+  Normal = 'normal',
+  SingleChoice = 'single_choice',
+  MultiChoice = 'multi_choice',
+  DropDown = 'drop_down',
+  Flat = 'flat'
 }

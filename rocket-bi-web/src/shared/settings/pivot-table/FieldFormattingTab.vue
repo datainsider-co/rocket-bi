@@ -121,7 +121,7 @@ export default class FieldFormattingTab extends Vue {
     background: '#fff',
     align: 'left',
     style: {
-      color: ChartOption.getThemeTextColor()
+      color: ChartOption.getPrimaryTextColor()
     },
     applyHeader: false,
     applyTotals: false,

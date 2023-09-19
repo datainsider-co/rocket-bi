@@ -2,13 +2,13 @@ package co.datainsider.caas.user_profile.controller.http
 
 import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.caas.user_profile.controller.http.filter.parser.UserContext.UserContextSyntax
+import co.datainsider.caas.user_profile.controller.http.filter.{MustLoggedInFilter, PermissionFilter}
+import co.datainsider.caas.user_profile.controller.http.request._
+import co.datainsider.caas.user_profile.service.OrganizationService
+import co.datainsider.license.domain.LicensePermission
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import com.twitter.inject.Logging
-import co.datainsider.caas.user_profile.controller.http.filter.{MustLoggedInFilter, PermissionFilter}
-import co.datainsider.license.domain.LicensePermission
-import co.datainsider.caas.user_profile.controller.http.request._
-import co.datainsider.caas.user_profile.service.OrganizationService
 import datainsider.client.exception.OrganizationNotFoundError
 
 import javax.inject.Inject
@@ -61,6 +61,13 @@ class OrganizationController @Inject() (organizationService: OrganizationService
     Profiler(s"/organizations/my-domain") {
       val orgDomain: String = request.getRequestDomain()
       organizationService.getByDomain(orgDomain)
+    }
+  }
+
+  get("/organizations") { request: Request =>
+    Profiler(s"/organizations") {
+      val licenseKey: String = request.getParam("license_key")
+      organizationService.getByLicenseKey(licenseKey)
     }
   }
 

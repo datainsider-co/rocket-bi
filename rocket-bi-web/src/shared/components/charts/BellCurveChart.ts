@@ -29,7 +29,7 @@ export default class BellCurveChart extends BaseHighChartWidget<SeriesTwoRespons
       opposite: true,
       labels: {
         formatter: function() {
-          return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+          return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
         }
       }
     };
@@ -37,7 +37,7 @@ export default class BellCurveChart extends BaseHighChartWidget<SeriesTwoRespons
       title: { text: '' },
       labels: {
         formatter: function() {
-          return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+          return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
         }
       }
     };
@@ -69,8 +69,8 @@ export default class BellCurveChart extends BaseHighChartWidget<SeriesTwoRespons
   tooltipPointFormat(contextObject: TooltipFormatterContextObject) {
     const field = contextObject.series.name;
     const pointColor = contextObject.color;
-    const formattedXAxis = this.numberFormatter.format(contextObject.x);
-    const formattedYAxis = this.numberFormatter.format(contextObject.y);
+    const formattedXAxis = this.numberFormatter.format(contextObject.x as number);
+    const formattedYAxis = this.numberFormatter.format(contextObject.y as number);
     return `<div style=" text-align: left">
                 <span style="color:${pointColor}">●</span>  <span>${field}</span><br/>
                 x: <b>${formattedXAxis}</b><br/>
@@ -82,7 +82,7 @@ export default class BellCurveChart extends BaseHighChartWidget<SeriesTwoRespons
     const bellCurveName = contextObject.series.name;
     const textColor = this.setting.options.textColor;
     const pointColor = contextObject.color;
-    const formattedData = this.numberFormatter.format(contextObject.x);
+    const formattedData = this.numberFormatter.format(contextObject.x as number);
     const bellCurveValue = contextObject.y;
     return `<div style="color: ${textColor}; text-align: left">
                 <span style="color:${pointColor}">●</span>
@@ -199,8 +199,8 @@ export default class BellCurveChart extends BaseHighChartWidget<SeriesTwoRespons
     });
   }
 
-  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
-    const value = this.numberFormatter.format(axis.value);
+  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
+    const value = this.numberFormatter.format(axis.value as number);
     return `
         <div> ${value}</div>
     `;

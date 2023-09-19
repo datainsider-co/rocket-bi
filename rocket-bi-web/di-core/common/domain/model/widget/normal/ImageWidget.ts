@@ -3,12 +3,7 @@
  * @created: 5/30/21, 10:04 PM
  */
 
-/*
- * @author: tvc12 - Thien Vi
- * @created: 12/17/20, 11:50 AM
- */
-
-import { Position, WidgetCommonData, WidgetExtraData, WidgetId, Widgets } from '@core/common/domain/model';
+import { Position, WidgetCommonData, Widgets } from '@core/common/domain/model';
 import { RandomUtils, StringUtils } from '@/utils';
 import { Widget } from '../Widget';
 
@@ -26,10 +21,6 @@ export class ImageWidget extends Widget {
 
   get isEmpty() {
     return StringUtils.isEmpty(this.url);
-  }
-
-  get isCreate() {
-    return this.id === -1;
   }
 
   static fromUrl(url: string): ImageWidget {

@@ -65,7 +65,7 @@ class VersioningWorkerImpl @Inject() (
         val message = JsonParser.toJson(finalStatus)
         sendNotification(title, message)
       },
-      0,
+      1,
       1,
       TimeUnit.HOURS
     )

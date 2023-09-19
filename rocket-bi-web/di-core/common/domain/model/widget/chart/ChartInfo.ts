@@ -4,14 +4,15 @@
  */
 
 import {
+  ChartControl,
+  ChartControlData,
   ChartOption,
   ChartOptionData,
-  DynamicValues,
-  Filterable,
-  FunctionControl,
+  FilterableSetting,
+  FunctionController,
   Position,
-  TabControl,
-  TabControlData,
+  TableColumn,
+  ValueController,
   WidgetCommonData,
   WidgetExtraData,
   WidgetId,
@@ -20,17 +21,26 @@ import {
 import { QueryRelatedWidget } from './QueryRelatedWidget';
 import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
 import { cloneDeep } from 'lodash';
-import { FilterUtils, RandomUtils } from '@/utils';
-import { Log } from '@core/utils';
+import { RandomUtils } from '@/utils';
+import { ChartType } from '@/shared';
 
 export enum ChartInfoType {
-  normal = 'normal',
-  filter = 'filter',
-  dynamicFunction = 'DynamicFunction',
-  dynamicValues = 'dynamicValues'
+  /**
+   * It's a chart, visualization data from query.
+   * Can be a chart control, user can interact with it to control other chart.
+   */
+  Normal = 'Normal',
+  /**
+   * It's a filter, user can interact with it to filter data in other chart.
+   */
+  Filter = 'Filter',
+  /**
+   * It's a chart control, use for change function of other chart.
+   */
+  FunctionController = 'FunctionController'
 }
 
-export class ChartInfo implements QueryRelatedWidget, TabControl {
+export class ChartInfo implements QueryRelatedWidget, ChartControl {
   readonly className = Widgets.Chart;
   setting: QuerySetting;
 
@@ -89,53 +99,89 @@ export class ChartInfo implements QueryRelatedWidget, TabControl {
     return new ChartInfo({ id: -1, name: '', description: '', extraData: extraData }, querySetting);
   }
 
-  get containChartFilter(): boolean {
+  get hasInnerFilter(): boolean {
     return !!this.chartFilter;
   }
 
-  isControl(): boolean {
-    if (FunctionControl.isFunctionControl(this.setting)) {
-      Log.debug('isControl', this.id, this.setting.enableFunctionControl());
-      return this.setting.enableFunctionControl();
-    }
-    if (DynamicValues.isValuesControl(this.setting)) {
-      return this.setting.enableDynamicValues();
-    }
-    return false;
+  getControlId(): WidgetId {
+    return this.id;
   }
 
-  toTabControlData(): TabControlData {
-    const name = this.setting.getChartOption()?.getTitle() ?? this.name ?? '';
-    const allTableColumns = this.setting.getAllTableColumn().map(tblColumn => tblColumn.copyWith({ dynamicFunctionId: this.id }));
-    const defaultTableColumns = FunctionControl.isFunctionControl(this.setting)
-      ? this.setting.getDefaultFunctions().map(tblColumn => tblColumn.copyWith({ dynamicFunctionId: this.id }))
-      : [];
-    const values = DynamicValues.isValuesControl(this.setting) ? this.setting.getDefaultValues() : [];
-    return {
-      id: this.id,
-      displayName: name,
-      tableColumns: allTableColumns,
-      defaultTableColumns: defaultTableColumns,
-      values: values,
-      chartType: this.extraData?.currentChartType ?? ''
-    };
+  getChartControlData(): ChartControlData {
+    const name: string = this.setting.getChartOption()?.getTitle() ?? this.name;
+    const chartInfoType: ChartInfoType = this.getChartInfoType();
+    switch (chartInfoType) {
+      case ChartInfoType.FunctionController: {
+        const tableColumns: TableColumn[] = this.setting.getAllTableColumns().map(column => column.copyWith({ dynamicFunctionId: this.id }));
+        const defaultTableColumns = FunctionController.isFunctionController(this.setting)
+          ? this.setting.getDefaultTableColumns().map(tblColumn => tblColumn.copyWith({ dynamicFunctionId: this.id }))
+          : [];
+        return {
+          id: this.id,
+          displayName: name,
+          tableColumns: tableColumns,
+          defaultTableColumns: defaultTableColumns,
+          chartType: this.extraData?.currentChartType as ChartType,
+          chartInfoType: chartInfoType
+        };
+      }
+      default: {
+        return {
+          id: this.id,
+          displayName: name,
+          tableColumns: [],
+          defaultTableColumns: [],
+          chartType: this.extraData?.currentChartType as ChartType,
+          chartInfoType: chartInfoType
+        };
+      }
+    }
   }
 
   getChartInfoType(): ChartInfoType {
-    if (FunctionControl.isFunctionControl(this.setting) && this.setting.enableFunctionControl()) {
-      return ChartInfoType.dynamicFunction;
+    if (FunctionController.isFunctionController(this.setting) && this.setting.isEnableFunctionControl()) {
+      return ChartInfoType.FunctionController;
     }
-    if (DynamicValues.isValuesControl(this.setting) && this.setting.enableDynamicValues()) {
-      return ChartInfoType.dynamicValues;
+    if (FilterableSetting.isFilterable(this.setting) && this.setting.isEnableFilter()) {
+      return ChartInfoType.Filter;
     }
-    if (Filterable.isFilterable(this.setting) && this.setting.isEnableFilter()) {
-      return ChartInfoType.filter;
-    }
-    return ChartInfoType.normal;
+    return ChartInfoType.Normal;
   }
 
   getDefaultPosition(): Position {
     const [width, height] = this.setting.getDefaultSize();
     return new Position(-1, -1, width, height, 1);
+  }
+
+  getValueController(): ValueController | undefined {
+    const chartOption: ChartOption<any> | undefined = this.setting.getChartOption();
+    if (chartOption && ValueController.isValueController(chartOption)) {
+      return chartOption;
+    } else {
+      return void 0;
+    }
+  }
+
+  isEnableControl(): boolean {
+    switch (this.getChartInfoType()) {
+      case ChartInfoType.FunctionController:
+        return true;
+      default: {
+        const controller: ValueController | undefined = this.getValueController();
+        return !!controller && controller.isEnableControl();
+      }
+    }
+  }
+
+  getBackgroundColorOpacity(): number {
+    return 100;
+  }
+
+  getBackgroundColor(): string | undefined {
+    return this.setting.getChartOption()?.getBackgroundColor();
+  }
+
+  getOverridePadding(): string | undefined {
+    return this.setting.getChartOption()?.getOverridePadding();
   }
 }

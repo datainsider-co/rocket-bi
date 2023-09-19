@@ -54,12 +54,6 @@
   flex-grow: 1;
   flex-shrink: 1;
 
-  ::v-deep {
-    .status-loading {
-      background-color: var(--primary) !important;
-    }
-  }
-
   .database-selector {
     display: flex;
     flex-direction: row;

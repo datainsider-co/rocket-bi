@@ -19,7 +19,6 @@ export interface MainDateCompareRequest {
   field: Field;
   currentRange: DateRange | null;
   mainDateMode: MainDateMode | null;
-  compareRange: DateRange | null;
 }
 
 @Module({ dynamic: true, namespaced: true, store: store, name: Stores.ChartDataStore })

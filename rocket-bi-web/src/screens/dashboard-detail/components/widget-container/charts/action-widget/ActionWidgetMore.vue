@@ -3,7 +3,7 @@
     <div>
       <template>
         <template v-if="isEditMode">
-          <div :id="id" ref="btnMenuRef" v-b-tooltip.d500.top="'More'" class="d-table btn-icon-40 btn-ghost" tabindex="-1" title="More" @click="toggleMenu">
+          <div :id="id" ref="btnMenuRef" title="More" class="d-table btn-icon-40 btn-ghost" tabindex="-1" @click="toggleMenu">
             <div class="d-table-cell align-middle text-center">
               <i class="di-icon-setting"></i>
             </div>
@@ -16,7 +16,7 @@
                   :key="genBtnId(`action-${item.text}`, index)"
                   :is-disable="item.disabled"
                   :title="item.text"
-                  @click="onClickItem(item)"
+                  @click="event => onClickItem(event, item)"
                 >
                   <img v-if="hasIcon(item.icon)" :src="require(`@/assets/icon/${item.icon}`)" alt="" />
                 </DiButton>
@@ -26,16 +26,7 @@
         </template>
         <template v-else>
           <div class="d-flex flex-row">
-            <div
-              v-if="canZoom()"
-              :id="zoomId"
-              ref="btnZoomRef"
-              v-b-tooltip.d500.top="'Zoom'"
-              class="d-table btn-icon-40 btn-ghost"
-              tabindex="-1"
-              title="Zoom"
-              @click="toggleZoom"
-            >
+            <div v-if="canZoom()" :id="zoomId" ref="btnZoomRef" class="d-table btn-icon-40 btn-ghost" tabindex="-1" title="Zoom" @click="toggleZoom">
               <div class="d-table-cell align-middle text-center">
                 <i class="di-icon-zoom"></i>
               </div>
@@ -44,7 +35,7 @@
               v-if="enableDrilldownIcon()"
               :id="drilldownId"
               ref="btnDrilldownRef"
-              v-b-tooltip.d500.top="'Drilldown'"
+              title="Drilldown"
               class="d-table btn-icon-40 btn-ghost"
               tabindex="-1"
               @click.stop="toggleDrilldown"
@@ -80,8 +71,7 @@ import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
 import DrilldownSetting from '@/screens/dashboard-detail/components/widget-container/charts/action-widget/drilldown/DrilldownSetting.vue';
 import VueContext from 'vue-context';
 import { MouseEventData } from '@chart/BaseChart';
-import { Log } from '@core/utils';
-import { TimeoutUtils } from '@/utils';
+import { TimeoutUtils, PopupUtils } from '@/utils';
 
 export enum MoreActionStatus {
   Zoom = 'zoom',
@@ -165,19 +155,19 @@ export default class ActionWidgetMore extends Vue {
         text: DashboardOptions.ADD_FILTER_WIDGET,
         click: this.handleAddInnerFilter,
         disabled: !DashboardModeModule.canEdit,
-        hidden: this.metaData.containChartFilter
+        hidden: this.metaData.hasInnerFilter
       },
       {
         text: DashboardOptions.UPDATE_FILTER_WIDGET,
         click: this.handleUpdateInnerFilter,
         disabled: !DashboardModeModule.canEdit,
-        hidden: !this.metaData.containChartFilter
+        hidden: !this.metaData.hasInnerFilter
       },
       {
         text: DashboardOptions.DELETE_FILTER_WIDGET,
         click: this.handleDeleteInnerFilter,
         disabled: !DashboardModeModule.canEdit,
-        hidden: !this.metaData.containChartFilter
+        hidden: !this.metaData.hasInnerFilter
       },
       {
         text: DashboardOptions.DUPLICATE_CHART,
@@ -202,7 +192,7 @@ export default class ActionWidgetMore extends Vue {
   }
 
   handleClickDataPoint(id: WidgetId, mouseEventData: MouseEventData<string>): void {
-    const canHandle = this.metaData.id == id && !this.isEditMode;
+    const canHandle = this.metaData.id == id;
     if (canHandle) {
       this.hideDrilldown();
       this.$root.$emit(DashboardEvents.ShowContextMenuOnPointData, this.metaData, mouseEventData);
@@ -212,12 +202,10 @@ export default class ActionWidgetMore extends Vue {
   }
 
   mounted() {
-    Log.debug('ActionWidgetMore::mounted', this.metaData.id);
     this.registerEvents();
   }
 
   beforeDestroy() {
-    Log.debug('ActionWidgetMore::beforeDestroy', this.metaData.id);
     this.unregisterEvents();
   }
 
@@ -246,6 +234,7 @@ export default class ActionWidgetMore extends Vue {
   private toggleDrilldown(): void {
     this.hideMenuPopover();
     this.hideZoomPopover();
+    PopupUtils.hideAllPopup();
     this.$root.$emit(DashboardEvents.HideDrillDown);
 
     this.btnDrilldownRef?.focus();
@@ -279,11 +268,11 @@ export default class ActionWidgetMore extends Vue {
 
   private canZoom(): boolean {
     const querySetting: QuerySetting = this.metaData.setting;
-    Log.debug('querySetting::', this.metaData);
+    // Log.debug('querySetting::', this.metaData);
     const options = querySetting.getChartOption()?.options ?? {};
     const isEnableZoom: boolean = options.isEnableZoom ?? false;
     const enableIconZoom = options.enableIconZoom ?? false;
-    Log.debug('canZoom::', enableIconZoom, isEnableZoom, ZoomModule.canZoom(this.metaData.id));
+    // Log.debug('canZoom::', enableIconZoom, isEnableZoom, ZoomModule.canZoom(this.metaData.id));
     return enableIconZoom && isEnableZoom && ZoomModule.canZoom(this.metaData.id);
   }
 
@@ -336,10 +325,10 @@ export default class ActionWidgetMore extends Vue {
     this.$root.$off(DashboardEvents.ClickDataPoint, this.handleClickDataPoint);
   }
 
-  private onClickItem(item: ContextMenuItem) {
+  private onClickItem(event: MouseEvent, item: ContextMenuItem) {
     this.isShowMenu = false;
     // fix: menu splash
-    TimeoutUtils.waitAndExec(null, () => item.click(), 100);
+    TimeoutUtils.waitAndExec(null, () => item.click?.call(item, event), 100);
   }
 }
 </script>

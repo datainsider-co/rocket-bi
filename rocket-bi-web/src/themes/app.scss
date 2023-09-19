@@ -46,6 +46,7 @@
 @import '~@/themes/animation/header-fade.scss';
 @import '~@/themes/scss/utilities.scss';
 @import '~@/themes/scss/browsers-behavior.scss';
+@import '~@/themes/scss/scrollbar.scss';
 @import '~@/themes/scss/button';
 @import '~@/themes/scss/custom-boostrap-class.scss';
 @import '~@/themes/scss/di-loading.scss';
@@ -61,6 +62,7 @@
 // import custom theme here
 @import '~@/themes/app-theme.scss';
 @import '~@/themes/dashboard-theme.scss';
+@import '~@/themes/scss/custom-highcharts.scss';
 
 html {
   -webkit-text-size-adjust: 100%;
@@ -226,11 +228,8 @@ tr:last-of-type td::after {
   @include regular-text();
   font-size: 14px;
   color: var(--danger);
-}
 
-.status-loading {
-  color: #e6e6e6;
-  background-color: var(--dashboard-panel-background-color, var(--hover-color));
+  overflow: hidden;
 }
 
 //.__panel {
@@ -243,21 +242,6 @@ tr:last-of-type td::after {
 
 .primary-chart-background-color {
   background-color: var(--primary) !important;
-}
-
-.highcharts-container {
-  .highcharts-title,
-  .highcharts-subtitle {
-    text-transform: unset !important;
-  }
-}
-
-.title-chart {
-  @include regular-text;
-  font-size: 20px;
-  font-weight: 300;
-  letter-spacing: 0.86px;
-  text-transform: unset;
 }
 
 .filter-chart {

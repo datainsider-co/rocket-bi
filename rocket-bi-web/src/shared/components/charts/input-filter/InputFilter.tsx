@@ -8,11 +8,13 @@ import {
   FilterRequest,
   InputControlQuerySetting,
   InputFilterOption,
+  QueryRequest,
   TableResponse,
+  ValueControlType,
   WidgetId
 } from '@core/common/domain';
 import { WidgetRenderer } from '@chart/widget-renderer';
-import { ConditionData, ConditionFamilyTypes, InputType, NumberConditionTypes, StringConditionTypes, TableSettingColor } from '@/shared';
+import { ConditionData, ConditionTypes, InputType, NumberConditionTypes, StringConditionTypes, TableSettingColor } from '@/shared';
 import { ConditionBuilder } from '@core/common/services';
 import { Di } from '@core/common/modules';
 import { ConditionUtils, Log } from '@core/utils';
@@ -22,11 +24,6 @@ import { StringUtils } from '@/utils/StringUtils';
 import { DefaultInputFilter } from '@chart/input-filter/DefaultInputFilter';
 import { PopupUtils } from '@/utils/PopupUtils';
 import './input-filter.scss';
-
-enum InputMode {
-  DynamicValue = 'DynamicValue',
-  Filter = 'Filter'
-}
 
 @Component({ components: {} })
 export default class InputFilter extends BaseWidget {
@@ -61,20 +58,6 @@ export default class InputFilter extends BaseWidget {
 
   @Prop({ type: Object, required: true })
   chartInfo!: ChartInfo;
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private addFilter?: (request: FilterRequest) => void;
-
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onRemoveFilter?: () => void;
-
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onChangeDynamicValues?: (values: string[]) => void;
-
-  @Inject({ default: undefined })
-  private getCurrentValues?: (id: WidgetId) => string[];
 
   currentValue: any = this.getInputValue();
 
@@ -98,10 +81,8 @@ export default class InputFilter extends BaseWidget {
   }
 
   get containerClass(): any {
-    const padding = this.id === -2 ? 'p-2' : '';
-    const disable = this.showEditComponent ? 'disable' : '';
     const color = !this.backgroundColor ? `${TableSettingColor.secondaryBackgroundColor}` : '';
-    return `input-filter-container input-filter ${color} ${padding} ${disable}`;
+    return `input-filter-container input-filter ${color}`;
   }
 
   get containerStyle() {
@@ -133,49 +114,33 @@ export default class InputFilter extends BaseWidget {
   }
 
   get filterClass(): string {
-    return this.showEditComponent ? `disable ml-1 mt-3` : `ml-1 mt-3`;
+    return `ml-1 mt-3`;
   }
 
   handleFilterChange(value: string | Date | number) {
-    const valueAsString = String(value);
+    const valueAsString = String(value ?? '');
     this.saveCurrentValue(valueAsString);
-    const mode = this.getInputMode(this.query);
-    switch (mode) {
-      case InputMode.DynamicValue:
-        this.handleDynamicValueChanged(valueAsString);
-        break;
-      case InputMode.Filter:
-        this.handleFilterValueChanged(valueAsString);
-        break;
-    }
+    this.applyFilter(valueAsString);
   }
 
-  private handleFilterValueChanged(value: string) {
-    const isEmpty = StringUtils.isEmpty(value);
-    if (isEmpty) {
-      //In dashboard
-      if (this.onRemoveFilter && !this.isPreview) {
-        this.onRemoveFilter();
-      } else if (this.isPreview) {
-        this.saveTempSelectedValue(void 0);
-      }
-    } else {
-      const filterRequest: FilterRequest | undefined = this.buildFilterRequest(value);
-      //In dashboard
-      if (this.addFilter && filterRequest && !this.isPreview) {
-        this.addFilter(filterRequest);
-      } else if (filterRequest && this.isPreview) {
-        this.saveTempSelectedValue(filterRequest.condition);
-      }
-    }
-  }
-
-  private handleDynamicValueChanged(value: string) {
-    const values = StringUtils.isEmpty(value) ? [] : [value];
+  protected applyFilter(value: string): void {
+    const filterRequest: FilterRequest | undefined = StringUtils.isEmpty(value) ? void 0 : this.buildFilterRequest(value);
     if (this.isPreview) {
-      this.saveTempSelectedValue(void 0);
+      this.saveTempSelectedValue(filterRequest?.condition);
     } else {
-      this.onChangeDynamicValues ? this.onChangeDynamicValues(values) : void 0;
+      const filterValueMap: Map<ValueControlType, string[]> | undefined = this.getFilterValueMap(value);
+      this.applyFilterRequest({
+        filterRequest: filterRequest,
+        filterValueMap: filterValueMap
+      });
+    }
+  }
+
+  private getFilterValueMap(value: string): Map<ValueControlType, string[]> | undefined {
+    if (StringUtils.isEmpty(value)) {
+      return undefined;
+    } else {
+      return new Map([[ValueControlType.SelectedValue, [value]]]);
     }
   }
 
@@ -186,28 +151,30 @@ export default class InputFilter extends BaseWidget {
     });
   }
 
-  private buildFilterRequest(value: string | Date) {
-    const familyType = ConditionUtils.getFamilyTypeFromFieldType(this.query.getFilter().function.field.fieldType);
-    if (familyType) {
-      const subType = this.getSubType(familyType);
-      const conditionData: ConditionData = {
-        currentOptionSelected: '',
-        field: this.query.getFilter().function.field,
-        familyType: familyType,
-        subType: subType,
-        isNested: false,
-        id: +this.id,
-        groupId: -1,
-        firstValue: `${value}`.toLowerCase(),
-        secondValue: void 0,
-        allValues: [],
-        currentInputType: InputType.date,
-        filterModeSelected: FilterMode.selection
-      };
-      const conditionBuilder: ConditionBuilder = Di.get(ConditionBuilder);
-      const condition: Condition | undefined = conditionBuilder.buildCondition(conditionData);
-      Log.debug('DateFilter:: buildFilterRequest:', '\n Filter data::', value, ' \n Condition built', condition);
-      return condition ? new FilterRequest(+this.id, condition) : void 0;
+  private buildFilterRequest(value: string | Date): FilterRequest | undefined {
+    if (this.query.values.length === 1) {
+      const familyType = ConditionUtils.getFamilyTypeFromFieldType(this.query.getFilterColumn().function.field.fieldType);
+      if (familyType) {
+        const subType = this.getSubType(familyType);
+        const conditionData: ConditionData = {
+          currentOptionSelected: '',
+          field: this.query.getFilterColumn().function.field,
+          familyType: familyType,
+          subType: subType,
+          isNested: false,
+          id: +this.id,
+          groupId: -1,
+          firstValue: `${value}`.toLowerCase(),
+          secondValue: void 0,
+          allValues: [],
+          currentInputType: InputType.Date,
+          filterModeSelected: FilterMode.Selection
+        };
+        const conditionBuilder: ConditionBuilder = Di.get(ConditionBuilder);
+        const condition: Condition | undefined = conditionBuilder.buildCondition(conditionData);
+        Log.debug('DateFilter:: buildFilterRequest:', '\n Filter data::', value, ' \n Condition built', condition);
+        return condition ? new FilterRequest(+this.id, condition) : void 0;
+      }
     }
     return void 0;
   }
@@ -216,7 +183,7 @@ export default class InputFilter extends BaseWidget {
     this.currentValue = value;
   }
 
-  getInputValue() {
+  getInputValue(): string {
     const currentValues: string[] = this.getCurrentValues ? this.getCurrentValues(this.chartInfo.id) : [];
     const isUsingDefault = !!this.setting.options.default?.setting?.value;
     ///sử dụng data của store
@@ -247,16 +214,13 @@ export default class InputFilter extends BaseWidget {
     }
   }
 
-  private getSubType(familyType: ConditionFamilyTypes) {
+  private getSubType(familyType: ConditionTypes) {
     switch (familyType) {
-      case ConditionFamilyTypes.dateHistogram:
-      case ConditionFamilyTypes.number:
+      case ConditionTypes.DateHistogram:
+      case ConditionTypes.Number:
         return NumberConditionTypes.equal;
-      case ConditionFamilyTypes.string:
+      case ConditionTypes.String:
         return StringConditionTypes.likeCaseInsensitive;
-      case ConditionFamilyTypes.geospatial:
-      case ConditionFamilyTypes.custom:
-        return StringConditionTypes.equal;
     }
   }
 
@@ -282,12 +246,5 @@ export default class InputFilter extends BaseWidget {
 
   async export(type: ExportType) {
     PopupUtils.showError('Unsupported Download CSV');
-  }
-
-  private getInputMode(query: InputControlQuerySetting) {
-    if (query.enableDynamicValues()) {
-      return InputMode.DynamicValue;
-    }
-    return InputMode.Filter;
   }
 }

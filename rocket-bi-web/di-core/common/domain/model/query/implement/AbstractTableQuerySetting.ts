@@ -4,14 +4,14 @@
  */
 
 import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
-import { Condition, FormatterSetting, OrderBy, QuerySettingType, TableColumn, TableChartOption, ChartOption, InlineSqlView } from '@core/common/domain/model';
+import { Condition, FormatterSetting, OrderBy, QuerySettingClassName, TableColumn, ChartOption, InlineSqlView } from '@core/common/domain/model';
 import { SortDirection } from '@core/common/domain/request';
 import { Log } from '@core/utils';
 import { Sortable } from '@core/common/domain/model/query/features/Sortable';
 import { Paginatable } from '@core/common/domain/model/query/features/Paginatable';
 import { DisplayTableType } from '@core/common/domain/model/chart-option/implement/TableChartOption';
 
-export abstract class AbstractTableQuerySetting<T extends TableChartOption = TableChartOption> extends QuerySetting<T> implements Sortable, Paginatable {
+export abstract class AbstractTableQuerySetting extends QuerySetting implements Sortable, Paginatable {
   formatters: TableColumn[];
 
   protected constructor(
@@ -28,22 +28,22 @@ export abstract class AbstractTableQuerySetting<T extends TableChartOption = Tab
     this.formatters = formatters;
   }
 
-  static isTableChartSetting(querySetting: any): querySetting is AbstractTableQuerySetting<any> {
+  static isTableChartSetting(querySetting: any): querySetting is AbstractTableQuerySetting {
     return (
-      (querySetting.className == QuerySettingType.Table ||
-        querySetting.className == QuerySettingType.GroupedTable ||
-        querySetting.className == QuerySettingType.RawQuery) &&
+      (querySetting.className == QuerySettingClassName.Table ||
+        querySetting.className == QuerySettingClassName.GroupedTable ||
+        querySetting.className == QuerySettingClassName.RawQuery) &&
       !!querySetting.changeDisplayType
     );
   }
 
-  changeDisplayType(displayType: DisplayTableType): AbstractTableQuerySetting<T> {
+  changeDisplayType(displayType: DisplayTableType): AbstractTableQuerySetting {
     switch (displayType) {
       case DisplayTableType.Collapse:
-        this.className = QuerySettingType.GroupedTable;
+        this.className = QuerySettingClassName.GroupedTable;
         break;
       case DisplayTableType.Normal:
-        this.className = QuerySettingType.Table;
+        this.className = QuerySettingClassName.Table;
         break;
     }
     return this;
@@ -68,7 +68,7 @@ export abstract class AbstractTableQuerySetting<T extends TableChartOption = Tab
     return 20;
   }
 
-  protected setValueBySetting(setting: ChartOption) {
+  protected assignChartOptionValue(setting: ChartOption) {
     if (FormatterSetting.isFormatterSetting(setting)) {
       this.formatters = setting.getFormatters();
     }

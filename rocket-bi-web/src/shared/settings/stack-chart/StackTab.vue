@@ -76,5 +76,3 @@ export default class StackTab extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

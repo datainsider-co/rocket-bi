@@ -361,45 +361,45 @@ object RedshiftParser extends SqlParser {
 
   def toQueryString(scalarFn: ScalarFunction, field: String): String = {
     scalarFn match {
-      case ToYear(_)     => s"DATE_PART('year', $field)"
-      case ToQuarter(_)  => s"DATE_PART('quarter', $field)"
-      case ToMonth(_)    => s"DATE_PART('month', $field)"
-      case ToWeek(_)     => s"DATE_PART('week', $field)"
-      case ToDate(_)     => s"CAST($field AS DATE)"
-      case ToDateTime(_) => s"CAST($field AS TIMESTAMP)"
+      case ToYear(_, _)     => s"DATE_PART('year', $field)"
+      case ToQuarter(_, _)  => s"DATE_PART('quarter', $field)"
+      case ToMonth(_, _)    => s"DATE_PART('month', $field)"
+      case ToWeek(_, _)     => s"DATE_PART('week', $field)"
+      case ToDate(_, _)     => s"CAST($field AS DATE)"
+      case ToDateTime(_, _) => s"CAST($field AS TIMESTAMP)"
 
-      case SecondsToDateTime(_) => s"TIMESTAMP 'EPOCH' + $field * INTERVAL '1 SECOND'"
-      case MillisToDateTime(_)  => s"TIMESTAMP 'EPOCH' + $field / 1000 * INTERVAL '1 SECOND'"
-      case NanosToDateTime(_)   => s"TIMESTAMP 'EPOCH' + $field / 1000000 * INTERVAL '1 SECOND'"
-      case DatetimeToSeconds(_) => s"EXTRACT(EPOCH FROM $field)"
-      case DatetimeToMillis(_)  => s"EXTRACT(EPOCH FROM $field) * 1000"
-      case DatetimeToNanos(_)   => s"EXTRACT(EPOCH FROM $field) * 1000000"
+      case SecondsToDateTime(_, _) => s"TIMESTAMP 'EPOCH' + $field * INTERVAL '1 SECOND'"
+      case MillisToDateTime(_, _)  => s"TIMESTAMP 'EPOCH' + $field / 1000 * INTERVAL '1 SECOND'"
+      case NanosToDateTime(_, _)   => s"TIMESTAMP 'EPOCH' + $field / 1000000 * INTERVAL '1 SECOND'"
+      case DatetimeToSeconds(_, _) => s"EXTRACT(EPOCH FROM $field)"
+      case DatetimeToMillis(_, _)  => s"EXTRACT(EPOCH FROM $field) * 1000"
+      case DatetimeToNanos(_, _)   => s"EXTRACT(EPOCH FROM $field) * 1000000"
 
-      case ToDayOfYear(_)  => s"DATE_PART('doy', $field)"
-      case ToDayOfMonth(_) => s"DATE_PART('day', $field)"
-      case ToDayOfWeek(_)  => s"DATE_PART('dow', $field)"
-      case ToHour(_)       => s"DATE_PART('hour', $field)"
-      case ToMinute(_)     => s"DATE_PART('minute', $field)"
-      case ToSecond(_)     => s"DATE_PART('second', $field)"
+      case ToDayOfYear(_, _)  => s"DATE_PART('doy', $field)"
+      case ToDayOfMonth(_, _) => s"DATE_PART('day', $field)"
+      case ToDayOfWeek(_, _)  => s"DATE_PART('dow', $field)"
+      case ToHour(_, _)       => s"DATE_PART('hour', $field)"
+      case ToMinute(_, _)     => s"DATE_PART('minute', $field)"
+      case ToSecond(_, _)     => s"DATE_PART('second', $field)"
 
-      case ToYearNum(_)    => s"DATE_PART('year', $field)"
-      case ToQuarterNum(_) => s"TRUNC(DATE_PART('day', $field - TIMESTAMP '1970-01-01') / 90)"
-      case ToMonthNum(_)   => s"TRUNC(DATE_PART('day', $field - TIMESTAMP '1970-01-01') / 30)"
-      case ToWeekNum(_)    => s"TRUNC(DATE_PART('day', $field - TIMESTAMP '1970-01-01') / 7)"
-      case ToDayNum(_)     => s"DATE_PART('day', $field - TIMESTAMP '1970-01-01')"
-      case ToHourNum(_)    => s"EXTRACT(EPOCH FROM $field) / 3600"
-      case ToMinuteNum(_)  => s"EXTRACT(EPOCH FROM $field) / 60"
-      case ToSecondNum(_)  => s"EXTRACT(EPOCH FROM $field)"
+      case ToYearNum(_, _)    => s"DATE_PART('year', $field)"
+      case ToQuarterNum(_, _) => s"TRUNC(DATE_PART('day', $field - TIMESTAMP '1970-01-01') / 90)"
+      case ToMonthNum(_, _)   => s"TRUNC(DATE_PART('day', $field - TIMESTAMP '1970-01-01') / 30)"
+      case ToWeekNum(_, _)    => s"TRUNC(DATE_PART('day', $field - TIMESTAMP '1970-01-01') / 7)"
+      case ToDayNum(_, _)     => s"DATE_PART('day', $field - TIMESTAMP '1970-01-01')"
+      case ToHourNum(_, _)    => s"EXTRACT(EPOCH FROM $field) / 3600"
+      case ToMinuteNum(_, _)  => s"EXTRACT(EPOCH FROM $field) / 60"
+      case ToSecondNum(_, _)  => s"EXTRACT(EPOCH FROM $field)"
 
-      case DateDiff(unit, date, _)   => ???
-      case GetArrayElement(_, index) => ???
-      case Decrypt(_)                => ???
+      case DateDiff(unit, date, _, _)   => ???
+      case GetArrayElement(_, index, _) => ???
+      case Decrypt(_, _)                => ???
 
-      case PastNYear(unit, _)    => s"$field - INTERVAL '$unit years'"
-      case PastNQuarter(unit, _) => s"$field - INTERVAL '${unit * 3} months'"
-      case PastNMonth(unit, _)   => s"$field - INTERVAL '$unit months'"
-      case PastNWeek(unit, _)    => s"$field - INTERVAL '$unit weeks'"
-      case PastNDay(unit, _)     => s"$field - INTERVAL '$unit days'"
+      case PastNYear(unit, _, _)    => s"$field - INTERVAL '$unit years'"
+      case PastNQuarter(unit, _, _) => s"$field - INTERVAL '${unit * 3} months'"
+      case PastNMonth(unit, _, _)   => s"$field - INTERVAL '$unit months'"
+      case PastNWeek(unit, _, _)    => s"$field - INTERVAL '$unit weeks'"
+      case PastNDay(unit, _, _)     => s"$field - INTERVAL '$unit days'"
 
       case Cast(asType, _) => s"CAST($field AS $asType)"
     }

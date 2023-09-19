@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { SeriesOptionData, ChartOptionClassName } from '@core/common/domain/model';
 
 export enum ParliamentDisplayType {
   Parliament = 'parliament',
@@ -38,8 +38,8 @@ export class ParliamentChartOption extends ChartOption<ParliamentOptionData> {
     }
   };
   private static readonly DEFAULT_MAX_DATA_POINT = 1500;
-  readonly chartFamilyType = ChartFamilyType.Parliament;
-  readonly className = VizSettingType.ParliamentSetting;
+
+  readonly className = ChartOptionClassName.ParliamentSetting;
 
   constructor(options: ParliamentOptionData = {}) {
     super(options);
@@ -50,7 +50,7 @@ export class ParliamentChartOption extends ChartOption<ParliamentOptionData> {
   }
 
   static getDefaultChartOption(): ParliamentChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const options: ParliamentOptionData = {
       legend: {
         enabled: true,
@@ -67,32 +67,11 @@ export class ParliamentChartOption extends ChartOption<ParliamentOptionData> {
           }
         }
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       },
       affectedByFilter: true,
       themeColor: { enabled: true },

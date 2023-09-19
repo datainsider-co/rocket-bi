@@ -24,6 +24,10 @@ case class JobWorkerProgress(
   def addMessage(message: String): Unit = {
     messages += message
   }
+
+  def addSyncedRows(rows: Long): Long = {
+    totalSyncedRows.addAndGet(rows)
+  }
 }
 
 object JobWorkerProgress {

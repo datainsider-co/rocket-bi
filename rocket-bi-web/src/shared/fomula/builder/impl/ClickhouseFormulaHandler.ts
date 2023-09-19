@@ -3,8 +3,8 @@ import { FunctionInfo } from '@/screens/chart-builder/config-builder/database-li
 import { Column, DatabaseInfo, TableSchema } from '@core/common/domain';
 import { FormulaController } from '@/shared/fomula/FormulaController';
 import { QueryFormulaController } from '@/shared/fomula/QueryFormulaController';
-import { ClickhouseCalculatedFieldController } from '@/shared/fomula/ClickhouseCalculatedFieldController';
-import { ClickhouseMeasureController } from '@/shared/fomula/ClickhouseMeasureController';
+import { CalculatedFieldController } from '@/shared/fomula/CalculatedFieldController';
+import { MeasureController } from '@/shared/fomula/MeasureController';
 
 export class ClickhouseFormulaHandler extends FormulaCreatorHandler {
   createController(allFunctions: FunctionInfo[], databaseSchemas: DatabaseInfo[]): FormulaController {
@@ -12,11 +12,11 @@ export class ClickhouseFormulaHandler extends FormulaCreatorHandler {
   }
 
   createCalculatedFieldController(allFunctions: FunctionInfo[], columns: Column[]): FormulaController {
-    return new ClickhouseCalculatedFieldController(allFunctions, columns);
+    return new CalculatedFieldController(allFunctions, columns);
   }
 
   createMeasureFieldController(allFunctions: FunctionInfo[], tblSchema: TableSchema): FormulaController {
-    return new ClickhouseMeasureController(allFunctions, tblSchema);
+    return new MeasureController(allFunctions, tblSchema);
   }
 
   getSyntaxFile(): string {

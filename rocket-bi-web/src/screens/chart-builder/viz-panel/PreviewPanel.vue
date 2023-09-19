@@ -9,7 +9,14 @@
       </template>
       <template v-else>
         <div class="h-100 w-100 position-relative dashboard-background-color" widget-preview-area>
-          <ChartHolder ref="chartHolder" :isEnableFullSize="false" :isPreview="true" :metaData="currentChartInfo" class="preview-chart-container"></ChartHolder>
+          <ChartHolder
+            :style="chartHolderStyle"
+            ref="chartHolder"
+            :isPreview="true"
+            :metaData="currentChartInfo"
+            :widget-setting="widgetSetting"
+            class="preview-chart-container"
+          ></ChartHolder>
           <MatchingLocationButton
             v-if="enableMatchingButton"
             class="location-panel"
@@ -23,10 +30,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import { Component, Inject, Prop, Ref, Vue } from 'vue-property-decorator';
 
 import { Status, VisualizationItemData } from '@/shared';
-import { ChartInfo } from '@core/common/domain/model';
+import { ChartInfo, QuerySettingClassName, WidgetSetting } from '@core/common/domain/model';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import HintPanel from '@/screens/chart-builder/viz-panel/HintPanel.vue';
 import EmptyWidget from '@/screens/dashboard-detail/components/widget-container/charts/error-display/EmptyWidget.vue';
@@ -35,37 +42,58 @@ import { MapResponse } from '@core/common/domain/response';
 import { ListUtils } from '@/utils';
 import MatchingLocationButton from '@/screens/chart-builder/viz-panel/MatchingLocationButton.vue';
 import ErrorWidget from '@/shared/components/ErrorWidget.vue';
-import { ChartDataModule } from '@/screens/dashboard-detail/stores';
+import { ChartDataModule, DashboardModule } from '@/screens/dashboard-detail/stores';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
+import Dashboard from '@/screens/dashboard-detail/components/dashboard/Dashboard';
 
 @Component({
   components: { ErrorWidget, ChartHolder, EmptyWidget, HintPanel, StatusWidget, MatchingLocationButton }
 })
 export default class PreviewPanel extends Vue {
+  private readonly CELL_WIDTH = 27.5;
+
   @Prop({ type: Boolean, default: false })
-  private readonly isEditMode!: boolean;
+  protected readonly isEditMode!: boolean;
 
-  private currentChartInfo: ChartInfo | null = null;
+  protected currentChartInfo: ChartInfo | null = null;
   @Ref()
-  private readonly chartHolder!: ChartHolder;
+  readonly chartHolder!: ChartHolder;
 
-  private get itemSelected(): VisualizationItemData {
+  @Inject('getCellWidth')
+  protected readonly getCellWidth!: () => number | undefined;
+
+  protected get itemSelected(): VisualizationItemData {
     return _ConfigBuilderStore.itemSelected;
   }
 
-  private get isShowHint(): boolean {
+  protected get isShowHint(): boolean {
     return !this.currentChartInfo;
   }
 
-  private get errorMessage(): string {
+  protected get errorMessage(): string {
     return ChartDataModule.mapErrorMessage[this.currentChartInfo?.id!] || '';
   }
 
-  private get hasError(): boolean {
+  protected get hasError(): boolean {
     return ChartDataModule.statuses[this.currentChartInfo?.id!] === Status.Error;
   }
 
-  private get enableMatchingButton(): boolean {
+  protected get widgetSetting(): WidgetSetting {
+    return DashboardModule.setting.widgetSetting;
+  }
+
+  get chartHolderStyle() {
+    return {
+      height: `${(this.currentChartInfo?.getDefaultPosition().height ?? 1) * Dashboard.getCellHeight() - 16}px !important`,
+      width: `${this.CELL_WIDTH * this.defaultChartWidth - 16}px !important`
+    };
+  }
+
+  protected get defaultChartWidth() {
+    return this.currentChartInfo?.getDefaultPosition().width ?? 1;
+  }
+
+  protected get enableMatchingButton(): boolean {
     if (this.currentChartInfo?.id && MapResponse.isMapResponse(ChartDataModule.chartDataResponses[this.currentChartInfo.id])) {
       const currentMapResponse: MapResponse = ChartDataModule.chartDataResponses[this.currentChartInfo.id] as MapResponse;
       return !this.isEditMode && ListUtils.isNotEmpty(currentMapResponse?.unknownData);
@@ -73,32 +101,36 @@ export default class PreviewPanel extends Vue {
     return false;
   }
 
-  renderChart(chartInfo: ChartInfo | null) {
+  public renderChart(chartInfo: ChartInfo | null): void {
     this.prepareChart(chartInfo);
     if (chartInfo) {
       this.$nextTick(() => this.chartHolder?.renderChart(chartInfo));
     }
   }
 
-  updateChart(chartInfo: ChartInfo | null) {
+  public updateChart(chartInfo: ChartInfo | null): void {
     this.currentChartInfo = chartInfo;
     if (chartInfo) {
       this.$nextTick(() => this.chartHolder?.updateChart(chartInfo));
     }
   }
 
-  private handleRerender(): void {
+  public resizeChart(): void {
+    this.$nextTick(() => this.chartHolder?.resizeChart());
+  }
+
+  protected handleRerender(): void {
     this.renderChart(this.currentChartInfo!);
   }
 
-  private prepareChart(chartInfo: ChartInfo | null) {
+  protected prepareChart(chartInfo: ChartInfo | null) {
     this.currentChartInfo = chartInfo;
     // fix: bug chart can't reload
     if (chartInfo) {
       ChartDataModule.setStatusLoading(chartInfo.id);
     }
   }
-  private onMatchingButtonClicked() {
+  protected onMatchingButtonClicked() {
     this.$emit('clickMatchingButton');
   }
 }
@@ -108,7 +140,10 @@ export default class PreviewPanel extends Vue {
   border-radius: 4px;
 
   .dashboard-background-color {
-    background: var(--dashboard-gradient-background-color, #fff);
+    //background: var(--dashboard-gradient-background-color, #fff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 

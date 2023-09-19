@@ -1,5 +1,5 @@
 import BoostContextMenu from '@/screens/dashboard-detail/components/dashboard-control-bar/BoostContextMenu.vue';
-import WidgetContainer from '@/screens/dashboard-detail/components/widget-container';
+import WidgetHolder from '@/screens/dashboard-detail/components/widget-container/WidgetHolder.vue';
 import DrilldownSetting from '@/screens/dashboard-detail/components/widget-container/charts/action-widget/drilldown/DrilldownSetting.vue';
 import TabViewer from '@/screens/dashboard-detail/components/widget-container/other/TabViewer.vue';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
@@ -8,23 +8,23 @@ import { DashboardMode, isEdit, isView } from '@/shared';
 import { CalendarPickerOptions } from '@/shared/components/CalendarContextMenu.vue';
 import { CustomGridStackOptions } from '@/shared/components/gridstack/CustomGridstack';
 import DiGridstack from '@/shared/components/gridstack/DiGridstack.vue';
-import { ChartUtils, DomUtils } from '@/utils';
+import { ChartUtils } from '@/utils';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { MouseEventData } from '@chart/BaseChart';
-import { ChartInfo, DIException, DIMap, Position, TabWidget, Widget, WidgetId, Widgets } from '@core/common/domain';
+import { ChartInfo, DIException, DIMap, Position, TabWidget, Widget, WidgetId, WidgetSetting } from '@core/common/domain';
 import { cloneDeep } from 'lodash';
 import VueContext from 'vue-context';
 import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
 import WidgetContextMenu from '../WidgetContextMenu.vue';
-import { FilterPanel } from '@core/common/domain/model/widget/normal/FilterPanel';
+import { GroupFilter } from '@core/common/domain/model/widget/normal/GroupFilter';
 import FilterPanelViewer from '@/screens/dashboard-detail/components/widget-container/other/FilterPanelViewer.vue';
 import { Log } from '@core/utils';
 
 @Component({
-  components: { WidgetContainer, DrilldownSetting, VueContext, WidgetContextMenu, BoostContextMenu, TabViewer, FilterPanelViewer }
+  components: { WidgetHolder, DrilldownSetting, VueContext, WidgetContextMenu, BoostContextMenu, TabViewer, FilterPanelViewer }
 })
 export default class Dashboard extends Vue {
-  private enableEdit = false;
+  private allowEdit = false;
   private canSave = true;
 
   @Ref()
@@ -41,7 +41,7 @@ export default class Dashboard extends Vue {
     return WidgetModule.positionsInDashboard;
   }
 
-  private get widgetAsMap(): DIMap<Widget> {
+  get widgetAsMap(): DIMap<Widget> {
     return DashboardModule.widgetAsMap;
   }
 
@@ -49,21 +49,25 @@ export default class Dashboard extends Vue {
     return DashboardModule.setting.enableOverlap;
   }
 
-  public getCellHeight() {
+  protected get widgetSetting(): WidgetSetting {
+    return DashboardModule.setting.widgetSetting;
+  }
+
+  static getCellHeight(): number {
     return 32;
   }
 
-  public getCellWidth() {
+  public getCellWidth(): number | undefined {
     return this.gridstack?.instance?.cellWidth();
   }
 
-  private get defaultOptions(): CustomGridStackOptions {
+  get gridstackOptions(): CustomGridStackOptions {
     return {
       animate: true,
       column: 48,
-      margin: '0.5rem',
-      marginUnit: 'rem',
-      cellHeight: '32px',
+      margin: '10px',
+      marginUnit: 'px',
+      cellHeight: Dashboard.getCellHeight() + 'px',
       oneColumnModeDomSort: false,
       disableOneColumnMode: true,
       enableOverlap: this.enableOverlap,
@@ -86,18 +90,17 @@ export default class Dashboard extends Vue {
     return isEdit(this.mode);
   }
 
-  private get dashboardStyle(): any {
+  get dashboardStyle(): any {
     return {
       '--next-max-z-index': WidgetModule.currentMaxZIndex + 1
     };
   }
 
   created() {
-    this.enableEdit = DashboardModeModule.isEditMode;
+    this.allowEdit = DashboardModeModule.isEditMode;
   }
 
   mounted() {
-    this.$nextTick(() => DomUtils.bind('gridstack', this.gridstack));
     this.registerEvents();
   }
 
@@ -109,7 +112,7 @@ export default class Dashboard extends Vue {
   async onModeChanged(newMode: DashboardMode, oldMode: DashboardMode): Promise<void> {
     const isDifferentMode = newMode != oldMode;
     if (isDifferentMode) {
-      this.enableEdit = isEdit(newMode);
+      this.allowEdit = isEdit(newMode);
       if (this.canSave) {
         const isEditToView = isEdit(oldMode) && isView(newMode);
         if (isEditToView) {
@@ -130,11 +133,7 @@ export default class Dashboard extends Vue {
     }
   }
 
-  private getWidget(id: number): Widget {
-    return this.widgetAsMap[id];
-  }
-
-  public handleChangePosition(payload: { id: number; position: Position }) {
+  public onPositionChanged(payload: { id: number; position: Position }): void {
     if (this.isEditMode) {
       const { position, id } = payload;
       this.canSave = true;
@@ -143,11 +142,11 @@ export default class Dashboard extends Vue {
         newPosition: position
       });
 
-      this.emitResizeEvent(id);
+      this.resizeWidget(id);
     }
   }
 
-  public emitResizeEvent(id: number) {
+  public resizeWidget(id: number) {
     this.$nextTick(() => {
       this.$root.$emit(DashboardEvents.ResizeWidget, id);
     });
@@ -166,7 +165,7 @@ export default class Dashboard extends Vue {
   private handleClickItem(id: WidgetId, position: Position): void {
     if (this.isEditMode && ChartUtils.isDesktop() && this.enableOverlap) {
       const newPosition = this.calculateZIndex(position);
-      this.handleChangePosition({ id: id, position: newPosition });
+      this.onPositionChanged({ id: id, position: newPosition });
     }
   }
 
@@ -175,7 +174,6 @@ export default class Dashboard extends Vue {
     this.$root.$on(DashboardEvents.ShowContextMenuOnWidget, this.showContextMenuOnWidget);
     this.$root.$on(DashboardEvents.ShowDrillDown, this.showDrilldown);
     this.$root.$on(DashboardEvents.ShowCalendar, this.showCalendar);
-    this.$root.$on(DashboardEvents.HideCalendar, this.hideCalendar);
   }
 
   private unregisterEvents() {
@@ -183,10 +181,10 @@ export default class Dashboard extends Vue {
     this.$root.$on(DashboardEvents.ShowContextMenuOnWidget, this.showContextMenuOnWidget);
     this.$root.$off(DashboardEvents.ShowDrillDown, this.showDrilldown);
     this.$root.$off(DashboardEvents.ShowCalendar, this.showCalendar);
-    this.$root.$off(DashboardEvents.HideCalendar, this.hideCalendar);
   }
 
   private showContextMenuOnPointData(metaData: ChartInfo, mouseEventData: MouseEventData<string>) {
+    Log.debug('Dashboard::showContextMenuOnPointData::', mouseEventData);
     PopupUtils.hideAllPopup();
     this.widgetContextMenu?.show(metaData, mouseEventData);
   }
@@ -206,15 +204,11 @@ export default class Dashboard extends Vue {
     this.widgetContextMenu?.showCalendar(event, onDateSelected, options);
   }
 
-  public hideCalendar() {
-    this.widgetContextMenu?.hideCalendar();
-  }
-
-  private isTabWidget(widget: Widget): boolean {
+  protected isTabWidget(widget: Widget): boolean {
     return TabWidget.isTabWidget(widget);
   }
-  private isFilterPanel(widget: Widget): boolean {
-    return FilterPanel.isFilterPanel(widget);
+  protected isFilterPanel(widget: Widget): boolean {
+    return GroupFilter.isGroupFilter(widget);
   }
 
   removeWidgets(ids: WidgetId[]) {

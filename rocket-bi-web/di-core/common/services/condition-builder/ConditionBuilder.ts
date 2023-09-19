@@ -1,34 +1,24 @@
 import { ConditionData } from '@/shared';
 import { Condition } from '@core/common/domain/model';
-import { get } from 'lodash';
 
 export abstract class ConditionBuilder {
   abstract buildCondition(condition: ConditionData): Condition | undefined;
 
-  static getSecondValue(condition: ConditionData) {
-    if (condition.tabControl) {
-      return get(condition.tabControl, 'values[1]', '');
-    }
+  static getSecondValue(condition: ConditionData): string {
     if (condition.secondValue !== undefined) {
       return condition.secondValue;
     }
     return '';
   }
 
-  static getFirstValue(condition: ConditionData) {
-    if (condition.tabControl) {
-      return get(condition.tabControl, 'values[0]', '');
-    }
+  static getFirstValue(condition: ConditionData): string {
     if (condition.firstValue !== undefined) {
       return condition.firstValue;
     }
     return '';
   }
 
-  static getAllValues(condition: ConditionData) {
-    if (condition.tabControl) {
-      return get(condition.tabControl, 'values', []);
-    }
+  static getAllValues(condition: ConditionData): string[] {
     if (condition.allValues !== undefined) {
       return condition.allValues;
     }

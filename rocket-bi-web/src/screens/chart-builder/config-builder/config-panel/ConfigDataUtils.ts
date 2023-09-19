@@ -7,7 +7,7 @@ import { ConditionTreeNode, DraggableConfig, FunctionData, FunctionTreeNode } fr
 import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
 import { cloneDeep, isNumber } from 'lodash';
 import { ChartUtils } from '@/utils';
-import { ChartControlField, Field, TabControl, TabControlData, TableColumn, WidgetId } from '@core/common/domain/model';
+import { ChartControlField, Field, ChartControl, ChartControlData, TableColumn, WidgetId } from '@core/common/domain/model';
 import { DragCustomEvent } from '@/screens/chart-builder/config-builder/config-panel/DragConfig';
 import { FunctionNodeBuilder } from '@/screens/chart-builder/config-builder/function-builder/FunctionNodeBuilder';
 import { Log } from '@core/utils';
@@ -42,10 +42,10 @@ export class ConfigDataUtils {
     };
   }
 
-  static getTabControlData(node: FunctionTreeNode): TabControlData | undefined {
-    if (TabControl.isTabControlData(node.tag)) {
+  static getTabControlData(node: FunctionTreeNode): ChartControlData | undefined {
+    if (ChartControl.isChartControlData(node.tag)) {
       return node.tag;
-    } else if (TabControl.isTabControlData(node.data)) {
+    } else if (ChartControl.isChartControlData(node.data)) {
       return node.data;
     } else if (ChartControlField.isChartControlField(node.field)) {
       return node.field.controlData;

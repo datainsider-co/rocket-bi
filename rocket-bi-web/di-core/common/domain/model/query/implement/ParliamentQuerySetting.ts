@@ -13,17 +13,16 @@ import {
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   WidgetId
 } from '@core/common/domain/model';
 import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
-import { ParliamentChartOption } from '@core/common/domain/model/chart-option/implement/ParliamentChartOption';
 import { ConditionUtils } from '@core/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class ParliamentQuerySetting extends QuerySetting<ParliamentChartOption> implements Drilldownable, CrossFilterable {
-  readonly className = QuerySettingType.Parliament;
+export class ParliamentQuerySetting extends QuerySetting implements Drilldownable, CrossFilterable {
+  readonly className = QuerySettingClassName.Parliament;
 
   constructor(
     public legend: TableColumn,
@@ -50,7 +49,7 @@ export class ParliamentQuerySetting extends QuerySetting<ParliamentChartOption> 
     return [this.legend.function, this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.legend, this.value];
   }
 
@@ -69,12 +68,12 @@ export class ParliamentQuerySetting extends QuerySetting<ParliamentChartOption> 
     return this.legend;
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.legend = ConfigDataUtils.replaceDynamicFunction(this.legend, functions);
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.legend;
   }
 

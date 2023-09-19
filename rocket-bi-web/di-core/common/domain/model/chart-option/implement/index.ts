@@ -35,7 +35,6 @@ export * from './InputFilterOption';
 export * from './BulletChartOption';
 export * from './WindRoseChartOption';
 export * from './LineStockChartOption';
-export * from './GroupMeasurementOption';
 export * from './InputControlOption';
 export * from './TreeFilterOption';
 export * from './DonutChartOption';

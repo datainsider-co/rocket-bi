@@ -12,6 +12,7 @@
         :class="`color-component ${size}`"
         :defaultColor="defaultColor"
         :value="currentValue"
+        :isSolid="isSolid"
         @change="handlePickColor"
       />
       <RevertButton v-if="enabledRevert" style="text-align: right" @click="handleRevert" />
@@ -51,6 +52,9 @@ export default class ColorSetting extends Vue {
   private readonly size!: SettingSize;
   @Prop({ type: String, default: '' })
   private readonly hint!: string;
+
+  @Prop({ required: false, default: true, type: Boolean })
+  private readonly isSolid!: boolean;
 
   private currentValue = this.value;
 

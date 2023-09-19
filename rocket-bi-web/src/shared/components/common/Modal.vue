@@ -33,7 +33,8 @@ import 'bootstrap/dist/js/bootstrap.bundle.js';
 export default {
   name: 'Modal',
   model: {
-    prop: 'open'
+    prop: 'open',
+    modalEl: null
   },
   props: {
     title: {
@@ -88,6 +89,10 @@ export default {
       type: String,
       default: ''
     },
+    showAtBody: {
+      type: Boolean,
+      default: false
+    },
     width: {
       type: Number
     },
@@ -141,10 +146,17 @@ export default {
       e.stopImmediatePropagation();
     });
     this.applyOptions();
+    if (!this.modalEl) {
+      this.modalEl = this.showAtBody ? $(this.$el).appendTo('body') : $(this.$el);
+    }
     $(this.$el).on('mousewheel', this.handleMouseWheel);
   },
   destroyed: function() {
     $(this.$el).off('mousewheel', this.handleMouseWheel);
+    if (this.modalEl) {
+      this.modalEl.remove();
+      this.modalEl = null;
+    }
     this.hide();
   },
   methods: {
@@ -155,6 +167,7 @@ export default {
         focus: this.focus,
         show: this.opened
       });
+
       if (this.opened) {
         $(this.$el).modal('show');
       } else {

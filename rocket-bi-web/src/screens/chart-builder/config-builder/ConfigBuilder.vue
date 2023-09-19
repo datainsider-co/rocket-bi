@@ -16,6 +16,7 @@
             :key="buildKey(config.key)"
             :config="config"
             :hasDragging="hasDragging"
+            :disabled="disabledDropConfig"
             :isShowSorting="false"
             @onConfigChange="handleConfigChange"
             @onItemDragging="handleItemDragging"
@@ -25,6 +26,7 @@
           v-if="isShowSorting"
           :config="sortingConfig"
           :hasDragging="hasDragging"
+          :disabled="disabledDropConfig"
           @onConfigChange="handleConfigChange"
           @onItemDragging="handleItemDragging"
         />
@@ -33,6 +35,7 @@
           :draggableConfig="filterConfig"
           :hasDragging="hasDragging"
           :showChartControlConfig="showChartControlConfig"
+          :disabled="disabledDropFilter"
           @onConfigChange="handleConfigChange"
           @onItemDragging="handleItemDragging"
         />

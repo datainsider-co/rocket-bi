@@ -10,6 +10,7 @@ import { RegisterResponse } from '@core/common/domain/response';
 import { SearchUserRequest } from '@core/admin/domain/request/SearchUserRequest';
 import { UserSearchResponse } from '@core/common/domain/response/user/UserSearchResponse';
 import { EditUserPropertyRequest } from '@core/admin/domain/request/EditUserPropertyRequest';
+import { UserGroup } from '@core/common/domain/model/user/UserGroup';
 
 export abstract class UserAdminRepository {
   abstract create(newUser: CreateUserRequest): Promise<RegisterResponse>;
@@ -32,12 +33,15 @@ export abstract class UserAdminRepository {
 
   abstract updateUserProperties(request: EditUserPropertyRequest): Promise<UserProfile>;
 
+  abstract updateRole(username: string, role: UserGroup): Promise<boolean>;
+
   abstract resetPassword(username: string): Promise<boolean>;
 }
 
 export class UserAdminRepositoryImpl extends UserAdminRepository {
   @InjectValue(DIKeys.CaasClient)
   private httpClient!: BaseClient;
+
   create(request: CreateUserRequest): Promise<RegisterResponse> {
     return this.httpClient.post(`/admin/users/create`, request, undefined).then(obj => RegisterResponse.fromObject(obj));
   }
@@ -113,6 +117,14 @@ export class UserAdminRepositoryImpl extends UserAdminRepository {
   }
 
   resetPassword(username: string): Promise<boolean> {
-    return this.httpClient.put<{ isSuccess: boolean }>(`/admin/users/${username}/reset_password`).then(res => res.isSuccess);
+    return this.httpClient
+      .put<{
+        isSuccess: boolean;
+      }>(`/admin/users/${username}/reset_password`)
+      .then(res => res.isSuccess);
+  }
+
+  updateRole(userName: string, role: UserGroup): Promise<boolean> {
+    return this.httpClient.post(`/admin/permissions/${userName}/group`, { userGroup: role }).then((res: any) => res.isSuccess);
   }
 }

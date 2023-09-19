@@ -7,7 +7,12 @@
     <ColorTab :setting="setting.options.themeColor" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <DataLabelTab :setting="setting.options.plotOptions" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <ShapeTab :setting="setting.options.plotOptions" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
-    <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab
+      :color="setting.options.background"
+      :default-color="defaultBackgroundColor"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <TooltipTab :setting="setting.options.tooltip" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <VisualHeader :widget-type="currentWidget" :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
@@ -24,7 +29,7 @@ import ColorTab from '@/shared/settings/common/tabs/ColorTab.vue';
 import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
 import XAxisTab from '@/shared/settings/common/tabs/XAxisTab.vue';
 import YAxisTab from '@/shared/settings/common/tabs/YAxisTab.vue';
-import { ChartInfo, ParetoQuerySetting, ParetoChartOption, SettingKey } from '@core/common/domain';
+import { ChartInfo, ParetoQuerySetting, ParetoChartOption, SettingKey, ChartOption } from '@core/common/domain';
 import TooltipTab from '@/shared/settings/common/tabs/TooltipTab.vue';
 import { ChartType } from '@/shared';
 import { Log } from '@core/utils';
@@ -71,6 +76,10 @@ export default class ParetoSetting extends Vue {
     this.setting.setOptions(settings);
     this.query.setChartOption(this.setting);
     this.$emit('onChartInfoChanged', this.chartInfo);
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

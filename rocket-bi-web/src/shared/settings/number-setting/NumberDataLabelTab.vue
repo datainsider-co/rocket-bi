@@ -127,7 +127,7 @@ import { MetricNumberMode } from '@/utils';
 import { SelectOption } from '@/shared';
 import { DisplayUnitOptions } from '@/shared/settings/common/options/DisplayUnitOptions';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { LargeFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { PrimaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 
 @Component({ components: { PanelHeader } })
@@ -137,16 +137,16 @@ export default class NumberDataLabelTab extends Vue {
   private readonly setting!: NumberOptionData;
 
   private readonly defaultSetting = {
-    fontFamily: 'Roboto',
-    color: ChartOption.getThemeTextColor(),
+    fontFamily: ChartOption.getSecondaryFontFamily(),
+    color: ChartOption.getPrimaryTextColor(),
     fontSize: '48px',
     displayUnit: MetricNumberMode.Default,
-    prefixFontFamily: 'Roboto',
-    prefixColor: ChartOption.getThemeTextColor(),
+    prefixFontFamily: ChartOption.getSecondaryFontFamily(),
+    prefixColor: ChartOption.getPrimaryTextColor(),
     prefixFontSize: '48px',
     prefixText: '',
-    postfixFontFamily: 'Roboto',
-    postfixColor: ChartOption.getThemeTextColor(),
+    postfixFontFamily: ChartOption.getSecondaryFontFamily(),
+    postfixColor: ChartOption.getPrimaryTextColor(),
     postfixFontSize: '48px',
     postfixText: '',
     maxLength: 24
@@ -169,7 +169,7 @@ export default class NumberDataLabelTab extends Vue {
   }
 
   private get fontSizeOptions(): SelectOption[] {
-    return LargeFontSizeOptions;
+    return PrimaryFontSizeOptions;
   }
 
   private get prefixFont(): string {

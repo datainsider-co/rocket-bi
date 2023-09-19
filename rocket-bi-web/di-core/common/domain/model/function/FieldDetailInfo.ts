@@ -21,4 +21,8 @@ export class FieldDetailInfo {
     const sqlView = obj.sqlView ? InlineSqlView.fromObject(obj.sqlView) : void 0;
     return new FieldDetailInfo(obj.field, obj.name, obj.displayName, obj.isNested, obj.isHidden, sqlView);
   }
+
+  static default() {
+    return new FieldDetailInfo(Field.default(), '', '', false);
+  }
 }

@@ -1,4 +1,4 @@
-import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
+import { Component, Prop, Watch } from 'vue-property-decorator';
 import { BaseWidget } from '@/screens/dashboard-detail/components/widget-container/BaseWidget';
 import {
   And,
@@ -6,10 +6,13 @@ import {
   Condition,
   DIException,
   ExportType,
+  FilterableSetting,
+  FilterRequest,
   InputControlQuerySetting,
   SlicerConfig,
   SlicerFilterOption,
-  TableResponse
+  TableResponse,
+  ValueControlType
 } from '@core/common/domain';
 import { WidgetRenderer } from '@chart/widget-renderer';
 import { DefaultSlicerFilter } from '@chart/slicer-filter/DefaultSlicerFilter';
@@ -18,7 +21,7 @@ import NumberSlicer, { SlicerDisplay } from '@chart/slicer-filter/NumberSlicer.v
 import { get, isArray, toNumber } from 'lodash';
 import { ConditionUtils } from '@core/utils';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
-import { ChartUtils, DateTimeFormatter, ListUtils } from '@/utils';
+import { ChartUtils, DateTimeUtils, ListUtils } from '@/utils';
 import { PopupUtils } from '@/utils/PopupUtils';
 
 // import '@/shared/components/charts/InputFilter/input-filter.scss';
@@ -31,7 +34,7 @@ enum SlicerMode {
 export default class SlicerFilter extends BaseWidget {
   protected renderer: WidgetRenderer<BaseWidget> = new DefaultSlicerFilter();
 
-  @Prop({ default: -1 })
+  @Prop({ default: -1, type: [String, Number] })
   id!: string | number;
 
   @Prop({ type: String, default: '' })
@@ -60,13 +63,6 @@ export default class SlicerFilter extends BaseWidget {
 
   @Prop({ type: Object, required: true })
   chartInfo!: ChartInfo;
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onAddCondition?: (condition: Condition) => void;
-
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onChangeDynamicValues?: (values: string[]) => void;
 
   resize(): void {
     //Todo: Add resize method
@@ -90,9 +86,7 @@ export default class SlicerFilter extends BaseWidget {
   }
 
   get containerClass(): any {
-    const padding = this.id === -2 ? 'p-2' : '';
-    const disable = this.showEditComponent ? 'disable' : '';
-    return `tab-filter-container flex-column w-100 ${padding} ${disable}`;
+    return `tab-filter-container flex-column w-100`;
   }
 
   get containerStyle() {
@@ -121,10 +115,6 @@ export default class SlicerFilter extends BaseWidget {
       ...this.setting.options.title?.style
       // justifyContent: this.setting.options.title?.align
     };
-  }
-
-  get filterClass(): string {
-    return this.showEditComponent ? `disable ml-1 mt-3` : `ml-1 mt-3`;
   }
 
   get useFormat(): boolean {
@@ -238,43 +228,67 @@ export default class SlicerFilter extends BaseWidget {
     }
   }
 
-  private handleFilterChanged(range: SlicerRange) {
-    const condition: Condition = this.buildCondition(range);
-    if (this.onAddCondition && !this.isPreview) {
-      this.onAddCondition(condition);
-    } else if (this.isPreview) {
+  private handleNormalFilter(range: SlicerRange) {
+    if (this.isPreview) {
+      const condition: Condition = this.buildCondition(range);
       this.saveTempSelectedValue({
         value: range,
         conditions: condition
       });
+    } else {
+      const valueMap = new Map<ValueControlType, string[]>([
+        [ValueControlType.MinValue, [`${range.from.value}`]],
+        [ValueControlType.MaxValue, [`${range.to.value}`]]
+      ]);
+      const filterRequest: FilterRequest | undefined = this.toFilterRequest(range);
+      this.applyFilterRequest({
+        filterValueMap: valueMap,
+        filterRequest: filterRequest
+      });
     }
   }
 
-  private handleDynamicValuesChanged(range: SlicerRange) {
-    const values: string[] = [];
-    if (range.to.value !== this.max || range.from.value !== this.min) {
-      const fromValueAsString = this.slicerDisplay === SlicerDisplay.date ? DateTimeFormatter.formatDateWithTime(range.from.value, '') : `${range.from.value}`;
-      const toValueAsString = this.slicerDisplay === SlicerDisplay.date ? DateTimeFormatter.formatDateWithTime(range.to.value, '') : `${range.to.value}`;
-      values.push(fromValueAsString, toValueAsString);
+  private toFilterRequest(range: SlicerRange): FilterRequest | undefined {
+    if (FilterableSetting.isFilterable(this.setting) && this.setting.isEnableFilter()) {
+      const condition: Condition = this.buildCondition(range);
+      return new FilterRequest(+this.id, condition);
     }
+  }
+
+  private applyDynamicValues(range: SlicerRange): void {
+    const values: string[] = this.getValueFromRange(range);
     if (this.isPreview) {
       this.saveTempSelectedValue({
         value: values,
         conditions: void 0
       });
     } else {
-      this.onChangeDynamicValues ? this.onChangeDynamicValues(values) : void 0;
+      const valueMap = new Map<ValueControlType, string[]>([
+        [ValueControlType.MinValue, [values[0]]],
+        [ValueControlType.MaxValue, [values[1]]]
+      ]);
+      this.applyDirectCrossFilter(valueMap);
     }
   }
 
+  private getValueFromRange(range: SlicerRange): string[] {
+    const values: string[] = [];
+    if (range.to.value !== this.max || range.from.value !== this.min) {
+      const fromValueAsString = this.slicerDisplay === SlicerDisplay.date ? DateTimeUtils.formatDate(range.from.value) : `${range.from.value}`;
+      const toValueAsString = this.slicerDisplay === SlicerDisplay.date ? DateTimeUtils.formatDate(range.to.value) : `${range.to.value}`;
+      values.push(fromValueAsString, toValueAsString);
+    }
+    return values;
+  }
+
   handleSlicerChanged(range: SlicerRange): void {
-    const mode = this.getSlicerMode(this.query);
+    const mode: SlicerMode = this.getSlicerMode(this.query);
     switch (mode) {
       case SlicerMode.DynamicValues:
-        this.handleDynamicValuesChanged(range);
+        this.applyDynamicValues(range);
         break;
       case SlicerMode.Filter:
-        this.handleFilterChanged(range);
+        this.handleNormalFilter(range);
         break;
     }
   }
@@ -283,9 +297,9 @@ export default class SlicerFilter extends BaseWidget {
     _ConfigBuilderStore.setTempFilterValue(value);
   }
 
-  private buildCondition(range: SlicerRange) {
+  private buildCondition(range: SlicerRange): And {
     const { from, to } = range;
-    const filterColumn = this.query.getFilter();
+    const filterColumn = this.query.getFilterColumn();
     const fromCondition: Condition = ConditionUtils.buildFromCondition(filterColumn, from);
     const toCondition: Condition = ConditionUtils.buildToCondition(filterColumn, to);
     return new And([fromCondition, toCondition]);
@@ -323,8 +337,8 @@ export default class SlicerFilter extends BaseWidget {
     }
   }
 
-  private getSlicerMode(query: InputControlQuerySetting) {
-    if (query.enableDynamicValues()) {
+  private getSlicerMode(query: InputControlQuerySetting): SlicerMode {
+    if (query.values.length === 0) {
       return SlicerMode.DynamicValues;
     }
     return SlicerMode.Filter;

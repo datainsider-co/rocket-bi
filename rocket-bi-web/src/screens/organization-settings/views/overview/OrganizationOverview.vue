@@ -83,7 +83,7 @@ export default class OrganizationOverview extends Vue {
   private logoModal!: OrganizationLogoModal;
 
   private get companyName(): string {
-    return this.organization.name || 'DATA INSIDER';
+    return this.organization.name || 'RocketBI';
   }
 
   private get companyLogoUrl(): string {

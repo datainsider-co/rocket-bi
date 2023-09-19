@@ -44,29 +44,10 @@
         <div class="description">
           View the result here. You can edit the values of these properties to change the text color, background, and font size according to your preferences.
         </div>
-        <div ref="dashboard" class="dashboard">
-          <!--          <div class="widget-container">-->
-          <!--            <div-->
-          <!--              ref="htmlRender"-->
-          <!--              :style="{ ...textWidget.renderStyle, width: reviewWidth }"-->
-          <!--              class="html-render"-->
-          <!--              v-if="textWidget.isHtmlRender"-->
-          <!--              v-html="textWidget.content"-->
-          <!--              key="html-rendering"-->
-          <!--            />-->
-          <!--            <BFormTextarea-->
-          <!--              ref="textRender"-->
-          <!--              class="text-render"-->
-          <!--              v-else-->
-          <!--              max-rows="1000"-->
-          <!--              rows="1"-->
-          <!--              key="normal-rendering"-->
-          <!--              :style="{ ...textWidget.renderStyle, width: reviewWidth }"-->
-          <!--              :value="textWidget.content"-->
-          <!--            >-->
-          <!--            </BFormTextarea>-->
-          <!--          </div>-->
-          <TextViewer :style="{ height: reviewHeight }" ref="textViewer" :widget="textWidget" :width="reviewWidth"></TextViewer>
+        <div ref="dashboard" class="preview-text--dashboard">
+          <WidgetContainer class="preview-text--dashboard--container" :widget="textWidget" :default-setting="defaultSetting">
+            <TextViewer :style="{ height: reviewHeight }" ref="textViewer" :widget="textWidget" :width="reviewWidth"></TextViewer>
+          </WidgetContainer>
         </div>
       </div>
     </div>
@@ -101,10 +82,10 @@
               />
             </div>
             <div class="config-item">
-              <TextStyleSetting title="" :setting-value="textWidget.textStyle" @change="handleTextStyleChange"></TextStyleSetting>
+              <FontStyleSetting title="" :isBold.sync="textWidget.isBold" :isUnderline.sync="textWidget.isUnderline" :isItalic.sync="textWidget.isItalic" />
             </div>
             <div class="config-item">
-              <AlignSettingV2 title="" :setting-value="textWidget.textAlign" @change="handleTextAlignChange"></AlignSettingV2>
+              <AlignSettingV2 title="" :setting-value="textAlign" @change="handleTextAlignChange"></AlignSettingV2>
             </div>
             <div class="config-item">
               <div class="input-group">
@@ -112,14 +93,14 @@
                   :allowWatchValueChange="true"
                   class=""
                   :id="genBtnId('preview-text-color-picker')"
-                  default-color="#fff"
+                  :default-color="emptyTextWidget.fontColor"
                   :value="textWidget.fontColor"
                   @change="value => textWidget.setFontColor(value)"
                 />
               </div>
             </div>
             <div class="config-item">
-              <PercentageInput ref="percentageInput" :value="opacity.toString()" @input="handleOpacityChange"> </PercentageInput>
+              <PercentageInput ref="percentageInput" tooltip="Text opacity" :value="opacity.toString()" @input="handleOpacityChange"> </PercentageInput>
             </div>
           </div>
         </div>
@@ -147,14 +128,20 @@
                 :allowWatchValueChange="true"
                 class=""
                 :id="genBtnId('preview-background-color-picker')"
-                default-color="#fff"
+                :default-color="emptyTextWidget.background"
                 :value="textWidget.background"
                 @change="value => textWidget.setBackground(value)"
               />
             </div>
           </div>
           <div class="config-item">
-            <PercentageInput ref="backgroundOpacityInput" :value="backgroundOpacity.toString()" @input="handleBackgroundOpacityChange"> </PercentageInput>
+            <PercentageInput
+              tooltip="Background opacity"
+              ref="backgroundOpacityInput"
+              :value="backgroundOpacity.toString()"
+              @input="handleBackgroundOpacityChange"
+            >
+            </PercentageInput>
           </div>
         </div>
       </div>
@@ -163,167 +150,81 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Ref, Prop } from 'vue-property-decorator';
-import { TextWidget } from '@core/common/domain/model';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import { TextWidget, TextAlign, WidgetSetting } from '@core/common/domain/model';
 import { SelectOption } from '@/shared';
-import { clone, isNumber } from 'lodash';
+import { clone } from 'lodash';
 import { Log } from '@core/utils';
 import ColorSetting from '@/shared/settings/common/ColorSetting.vue';
-import TextStyleSetting from '@/screens/dashboard-detail/components/text-style-setting/TextStyleSetting.vue';
-import { TextStyle } from '@/screens/dashboard-detail/components/text-style-setting/TextStyle';
+import FontStyleSetting from '@/screens/dashboard-detail/components/font-style-setting/FontStyleSetting.vue';
 import AlignSettingV2 from '@/screens/dashboard-detail/components/align-setting/AlignSettingV2.vue';
-import { TextAlign } from './align-setting/TextAlign';
-import ColorPicker from '@/shared/components/ColorPicker.vue';
 import ColorPickerV2 from '@/shared/components/ColorPickerV2.vue';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import { BFormTextarea } from 'bootstrap-vue';
 import PercentageInput from '@/shared/components/PercentageInput.vue';
 import TextViewer from '@/screens/dashboard-detail/components/widget-container/other/TextViewer.vue';
-
+import WidgetContainer from '@/screens/dashboard-detail/components/widget-container/WidgetContainer.vue';
+import { DashboardModule } from '@/screens/dashboard-detail/stores';
+import { FontFamilyOptions, PrimaryFontSizeOptions } from '@/shared/settings/common/options';
 @Component({
   components: {
     DiButton,
     AlignSettingV2,
-    TextStyleSetting,
+    FontStyleSetting,
     ColorSetting,
     ColorPickerV2,
     PercentageInput,
-    TextViewer
+    TextViewer,
+    WidgetContainer
   }
 })
 class PreviewText extends Vue {
   textWidget = TextWidget.empty();
 
-  @Prop({ required: true, type: String })
-  private reviewWidth!: string;
+  protected get emptyTextWidget() {
+    return TextWidget.empty();
+  }
 
   @Prop({ required: true, type: String })
-  private reviewHeight!: string;
+  protected reviewWidth!: string;
+
+  @Prop({ required: true, type: String })
+  protected reviewHeight!: string;
 
   @Ref()
-  text!: BFormTextarea;
+  protected readonly text!: BFormTextarea;
 
   @Ref()
-  textViewer!: TextViewer;
+  protected readonly textViewer!: TextViewer;
 
   @Ref()
-  dashboard!: HTMLDivElement;
+  protected readonly dashboard!: HTMLDivElement;
 
   @Ref()
   percentageInput!: PercentageInput;
   @Ref()
   backgroundOpacityInput!: PercentageInput;
 
-  readonly options: SelectOption[] = [
-    {
-      id: '10px',
-      displayName: '10px'
-    },
-    {
-      id: '11px',
-      displayName: '11px'
-    },
-    {
-      id: '12px',
-      displayName: '12px'
-    },
-    {
-      id: '13px',
-      displayName: '13px'
-    },
-    {
-      id: '14px',
-      displayName: '14px'
-    },
-    {
-      id: '16px',
-      displayName: '16px'
-    },
-    {
-      id: '18px',
-      displayName: '18px'
-    },
-    {
-      id: '20px',
-      displayName: '20px'
-    },
-    {
-      id: '24px',
-      displayName: '24px'
-    },
-    {
-      id: '28px',
-      displayName: '28px'
-    },
-    {
-      id: '36px',
-      displayName: '36px'
-    },
-    {
-      id: '48px',
-      displayName: '48px'
-    }
-  ];
-  readonly fontFamilyOptions: SelectOption[] = [
-    {
-      id: 'Arial',
-      displayName: 'Arial'
-    },
-    {
-      id: 'Verdana',
-      displayName: 'Verdana'
-    },
-    {
-      id: 'Tahoma',
-      displayName: 'Tahoma'
-    },
-    {
-      id: 'Trebuchet MS',
-      displayName: 'Trebuchet MS'
-    },
-    {
-      id: 'Times New Roman',
-      displayName: 'Times New Roman'
-    },
-    {
-      id: 'Georgia',
-      displayName: 'Georgia'
-    },
-    {
-      id: 'Garamond',
-      displayName: 'Garamond'
-    },
-    {
-      id: 'Courier New',
-      displayName: 'Courier New'
-    },
-    {
-      id: 'Brush Script MT',
-      displayName: 'Brush Script MT'
-    },
-    {
-      id: 'Roboto',
-      displayName: 'Roboto'
-    }
-  ];
+  protected get defaultSetting(): WidgetSetting {
+    return DashboardModule.setting.widgetSetting;
+  }
 
-  private get editorPlaceholder() {
+  readonly options: SelectOption[] = PrimaryFontSizeOptions;
+  readonly fontFamilyOptions: SelectOption[] = FontFamilyOptions;
+
+  protected get editorPlaceholder() {
     return this.textWidget.isHtmlRender ? 'Input code...' : 'Input text...';
   }
 
-  private get textStyle() {
-    return this.textWidget.textStyle ?? TextStyle.Normal;
-  }
-
-  private get textAlign() {
+  protected get textAlign() {
     return this.textWidget.textAlign ?? TextAlign.Left;
   }
 
-  private get opacity() {
+  protected get opacity() {
     return this.textWidget.opacity ?? 100;
   }
 
-  private get backgroundOpacity() {
+  protected get backgroundOpacity() {
     return this.textWidget.backgroundOpacity ?? 100;
   }
 
@@ -388,7 +289,7 @@ class PreviewText extends Vue {
     textContainer.scrollTo(0, newScrollTop);
   }
 
-  private handleOpacityChange(opacity: number) {
+  protected handleOpacityChange(opacity: number) {
     if (isNaN(opacity)) {
       this.textWidget.setOpacity(100);
     } else {
@@ -397,7 +298,7 @@ class PreviewText extends Vue {
     Log.debug('PreviewText::handleOpacityChange::opacity::', opacity);
   }
 
-  private handleBackgroundOpacityChange(opacity: number) {
+  protected handleBackgroundOpacityChange(opacity: number) {
     if (isNaN(opacity)) {
       this.textWidget.setBackgroundOpacity(100);
     } else {
@@ -406,21 +307,13 @@ class PreviewText extends Vue {
     Log.debug('PreviewText::handleBackgroundOpacityChange::opacity::', opacity);
   }
 
-  private handleEditorModeChange(isHtml: boolean) {
+  protected handleEditorModeChange(isHtml: boolean) {
     this.textWidget.isHtmlRender = isHtml;
     this.destroySyncScroll();
     this.initSyncScroll();
   }
 
-  private handleTextStyleChange(style: TextStyle) {
-    if (this.textWidget.textStyle === style) {
-      this.textWidget.setTextStyle(TextStyle.Normal);
-    } else {
-      this.textWidget.setTextStyle(style);
-    }
-  }
-
-  private handleTextAlignChange(align: TextAlign) {
+  protected handleTextAlignChange(align: TextAlign) {
     this.textWidget.setTextAlign(align);
   }
 }
@@ -593,17 +486,20 @@ export default PreviewText;
       display: flex;
       flex-direction: column;
 
-      .dashboard {
+      .preview-text--dashboard {
         height: 270px;
         padding: 16px;
         background: var(--primary);
         overflow: auto;
 
-        .text-widget-container {
-          display: flex;
-          align-items: center;
-          box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.1);
-          border-radius: 4px;
+        .preview-text--dashboard--container {
+          height: fit-content;
+          min-height: 100px;
+
+          .text-widget-container {
+            display: flex;
+            align-items: center;
+          }
         }
       }
     }

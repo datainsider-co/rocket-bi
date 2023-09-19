@@ -4,12 +4,11 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, TabOptionData, VizSettingType } from '@core/common/domain/model';
+import { TabOptionData, ChartOptionClassName } from '@core/common/domain/model';
 import { ChartType, TabFilterDisplay } from '@/shared';
 
 export class TreeFilterOption extends ChartOption<TabOptionData> {
-  chartFamilyType = ChartFamilyType.TreeFilter;
-  className = VizSettingType.TreeFilterSetting;
+  className = ChartOptionClassName.TreeFilterSetting;
 
   constructor(options: TabOptionData = {}) {
     super(options);
@@ -24,29 +23,11 @@ export class TreeFilterOption extends ChartOption<TabOptionData> {
   }
 
   private static getDefaultWidgetOptions(type: ChartType): TabOptionData {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     return {
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Tree Filter',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '14px'
-        }
-      },
+      title: ChartOption.getDefaultTitle({ title: 'Tree Filter', fontSize: '14px', align: 'center' }),
+      subtitle: ChartOption.getDefaultSubtitle(),
       displayAs: this.toDisplay(type),
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
       search: {
         enabled: false
       },
@@ -63,11 +44,7 @@ export class TreeFilterOption extends ChartOption<TabOptionData> {
       },
       choice: {
         borderColor: textColor,
-        style: {
-          color: textColor,
-          fontSize: '12px',
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       },
       switchColor: textColor
     };
@@ -76,11 +53,11 @@ export class TreeFilterOption extends ChartOption<TabOptionData> {
   private static toDisplay(chartType: ChartType): TabFilterDisplay {
     switch (chartType) {
       case ChartType.SingleTreeFilter:
-        return TabFilterDisplay.singleChoice;
+        return TabFilterDisplay.SingleChoice;
       case ChartType.MultiTreeFilter:
-        return TabFilterDisplay.multiChoice;
+        return TabFilterDisplay.MultiChoice;
       default:
-        return TabFilterDisplay.multiChoice;
+        return TabFilterDisplay.MultiChoice;
     }
   }
 }

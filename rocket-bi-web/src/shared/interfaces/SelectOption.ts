@@ -6,13 +6,12 @@ export interface SelectOption {
 }
 
 export enum InputType {
-  date = 'date_time',
-  dateRange = 'date_range',
-  text = 'text',
-  color = 'color',
-  multiSelect = 'multi_select',
-  none = 'none',
-  numberRange = 'number_range'
+  Date = 'date_time',
+  DateRange = 'date_range',
+  Text = 'text',
+  MultiSelect = 'multi_select',
+  None = 'none',
+  NumberRange = 'number_range'
 }
 
 export interface FilterSelectOption extends SelectOption {

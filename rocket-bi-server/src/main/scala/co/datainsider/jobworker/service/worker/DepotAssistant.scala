@@ -39,7 +39,7 @@ case class SingleDepotAssistant(
   private val _writer: DataWriter = engine.createWriter(connection)
 
   def put(records: Seq[Record]): Unit = {
-    _writer.write(records, tableSchema)
+    _writer.insertBatch(records, tableSchema)
   }
 
   def writer: DataWriter = _writer
@@ -66,7 +66,7 @@ case class MultiDepotAssistant(
   }
 
   def put(records: Seq[Record]): Unit = {
-    writers.foreach(_.write(records, tableSchema))
+    writers.foreach(_.insertBatch(records, tableSchema))
   }
 
   private def init(): Unit = {

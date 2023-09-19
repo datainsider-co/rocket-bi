@@ -1,5 +1,5 @@
 <template>
-  <div class="w-100 h-100">
+  <div class="di-chart-component">
     <template v-if="isTableChart">
       <component
         :is="toTableComponent"
@@ -13,7 +13,7 @@
       />
     </template>
     <template v-else-if="toComponent">
-      <div :key="genBtnId('chart', metaData.id)" class="h-100 w-100 onRow overflow-hidden">
+      <div :key="genBtnId('chart', metaData.id)" class="h-100 w-100 on-row overflow-hidden">
         <div :class="componentClass">
           <component
             :is="toComponent"
@@ -46,23 +46,26 @@
 <script lang="ts" src="./ChartComponent.ts"></script>
 
 <style lang="scss">
-@import '~@/themes/scss/mixin.scss';
-
-.onRow {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.chart-widget-container {
-  box-sizing: border-box;
-  height: 100%;
+.di-chart-component {
   width: 100%;
-}
-
-.filter-widget-container {
   height: 100%;
-  width: 100%;
-  display: flex;
-  justify-content: center;
+
+  .chart-widget-container {
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+  }
+
+  .on-row {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .filter-widget-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
 }
 </style>

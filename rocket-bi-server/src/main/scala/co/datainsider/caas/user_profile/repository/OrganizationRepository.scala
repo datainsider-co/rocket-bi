@@ -11,7 +11,7 @@ import co.datainsider.caas.user_profile.domain.Implicits.OptionString
 import co.datainsider.caas.user_profile.domain.org.Organization
 
 import java.sql.ResultSet
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 trait OrganizationRepository {
 
@@ -30,6 +30,14 @@ trait OrganizationRepository {
   def getByDomain(domain: String): Option[Organization]
 
   def update(organization: Organization): Boolean
+
+  def list(
+      owner: Option[String] = None,
+      name: Option[String] = None,
+      domain: Option[String] = None,
+      licenseKey: Option[String] = None,
+      limit: Int = 10
+  ): Seq[Organization]
 
 }
 
@@ -157,5 +165,45 @@ case class MySqlOrganizationRepository(client: JdbcClient) extends OrganizationR
       organization.licenceKey.orNull,
       organization.organizationId
     ) >= 0
+  }
+
+  override def list(
+      owner: Option[String],
+      name: Option[String],
+      domain: Option[String],
+      licenseKey: Option[String],
+      limit: Int
+  ): Seq[Organization] = {
+    var whereClause = ""
+    val args = ArrayBuffer.empty[Any]
+
+    if (owner.isDefined) {
+      whereClause += s" and owner = ?"
+      args += owner.get
+    }
+
+    if (name.isDefined) {
+      whereClause += s" and name = ?"
+      args += name.get
+    }
+
+    if (domain.isDefined) {
+      whereClause += s" and domain = ?"
+      args += domain.get
+    }
+
+    if (licenseKey.isDefined) {
+      whereClause += s" and licence_key = ?"
+      args += licenseKey.get
+    }
+
+    val selectQuery =
+      s"""
+         |select * from caas.organization
+         |where 1=1 $whereClause
+         |limit $limit
+         |""".stripMargin
+
+    client.executeQuery(selectQuery, args: _*)(readOrganizations)
   }
 }

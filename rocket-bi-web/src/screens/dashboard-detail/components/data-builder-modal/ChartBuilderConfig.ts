@@ -36,23 +36,6 @@ export const RLSFilterBuilderConfig: ChartBuilderConfig = {
   }
 };
 
-export const ControlBuilderConfig: ChartBuilderConfig = {
-  databaseConfig: {
-    showSelectDatabase: true,
-    useTabControl: false
-  },
-  builderConfig: {
-    vizItems: DataBuilderConstantsV35.MULTIPLE_MEASURES,
-    showFilterConfig: false,
-    showGeneralConfig: true,
-    showSortConfig: false,
-    showVizListing: true
-  },
-  previewConfig: {
-    showSetting: true
-  }
-};
-
 export const AdhocBuilderConfig: ChartBuilderConfig = {
   databaseConfig: {
     showSelectDatabase: false,

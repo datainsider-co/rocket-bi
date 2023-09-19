@@ -4,7 +4,6 @@ import co.datainsider.bi.controller.http._
 import co.datainsider.bi.controller.http.filter._
 import co.datainsider.bi.module.{BIServiceModule, TestContainerModule, TestModule}
 import co.datainsider.bi.repository.SchemaManager
-import co.datainsider.bi.service.BoostScheduleService
 import co.datainsider.bi.util.ZConfig
 import co.datainsider.caas.admin.controller.http.{
   AdminUserController,
@@ -157,9 +156,6 @@ class Server extends HttpServer {
       case false => throw DbExecuteError("invalid database schema")
     }
     Await.result(preparedSchema)
-
-    val boostScheduleService = injector.instance[BoostScheduleService]
-    boostScheduleService.start()
   }
 
   private def warmupSchemaService(): Unit = {

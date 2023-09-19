@@ -9,7 +9,7 @@ import co.datainsider.jobworker.domain.Ids.SyncId
 import co.datainsider.jobworker.domain.JobStatus.JobStatus
 import co.datainsider.jobworker.domain.job.CoinMarketCapJob
 import co.datainsider.jobworker.domain.{CoinMarketCapProgress, DataDestination, JobProgress, JobStatus}
-import co.datainsider.jobworker.hubspot.util.JsonUtil.JsonNodeLike
+import co.datainsider.jobworker.service.hubspot.util.JsonUtil.JsonNodeLike
 import co.datainsider.jobworker.repository.writer.DataWriter
 import co.datainsider.jobworker.repository.{CoinMarketCapClientImpl, CoinMarketCapListResponse}
 import co.datainsider.jobworker.service.worker.CoinMarketCapWorker.COLUMN_NAME_TO_PATH_MAP
@@ -107,7 +107,7 @@ class CoinMarketCapWorker(
       val records: Seq[Record] =
         CoinMarketCapWorker.toRecords(tableSchema.columns, response.data, COLUMN_NAME_TO_PATH_MAP)
       if (records.nonEmpty) {
-        writers.foreach(_.write(records, tableSchema))
+        writers.foreach(_.insertBatch(records, tableSchema))
         rowInserted = rowInserted + records.length
         from += records.length
         reportStatus()

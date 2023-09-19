@@ -26,20 +26,19 @@ import { Component, Ref, Vue } from 'vue-property-decorator';
 import Modal from '@/shared/components/common/Modal.vue';
 import PlanTypeItem from '@/screens/organization-settings/components/PlanTypeItem.vue';
 import { PlanType } from '@core/organization/domain/Plan/PlanType';
-import { PlanDetail } from '@core/organization';
 
 @Component({
   components: { Modal, PlanTypeItem }
 })
 export default class ModifyPlan extends Vue {
-  private planDetail: PlanDetail | null = null;
+  private selectedPlanType: PlanType | null = null;
   private planTypes: PlanType[] = [PlanType.Startup, PlanType.Business, PlanType.Cooperate, PlanType.OnPremise];
 
   @Ref()
   private modal?: typeof Modal;
 
-  show(planDetail: PlanDetail) {
-    this.planDetail = planDetail;
+  show(currentPlanType?: PlanType) {
+    this.selectedPlanType = currentPlanType ?? null;
     // @ts-ignore
     this.modal?.show();
   }
@@ -50,7 +49,7 @@ export default class ModifyPlan extends Vue {
   }
 
   private isActivePlan(planType: PlanType) {
-    return this.planDetail?.planType === planType;
+    return this.selectedPlanType === planType;
   }
 
   private contactUs(planType: PlanType) {

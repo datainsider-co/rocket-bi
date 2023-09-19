@@ -135,17 +135,17 @@ import { FormulaSuggestionModule, FunctionInfo } from '@/screens/chart-builder/c
 import FormulaCompletionInput from '@/shared/components/formula-completion-input/FormulaCompletionInput.vue';
 import { Log } from '@core/utils';
 import { FormulaController } from '@/shared/fomula/FormulaController';
-import { ClickhouseCalculatedFieldController } from '@/shared/fomula/ClickhouseCalculatedFieldController';
+import { CalculatedFieldController } from '@/shared/fomula/CalculatedFieldController';
 import { CalculatedFieldModalMode, CreateFieldData, EditFieldData } from '@/screens/chart-builder/config-builder/database-listing/CalculatedFieldData';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
+import { AtomicAction } from '@core/common/misc';
 import Modal from '@/shared/components/builder/Modal.vue';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { StringUtils } from '@/utils';
-import { ClickhouseMeasureController } from '@/shared/fomula/ClickhouseMeasureController';
+import { MeasureController } from '@/shared/fomula/MeasureController';
 import { DataManager } from '@core/common/services';
 import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
-import { DataSourceType } from '@core/clickhouse-config';
+import { ConnectorType } from '@core/connector-config';
 import { Di } from '@core/common/modules';
 import { FormulaControllerResolver } from '@/shared/fomula/builder/FormulaControllerResolver';
 
@@ -273,7 +273,7 @@ export default class CalculatedFieldModal extends Vue {
   }
 
   private initSuggestion(tableSchema: TableSchema, isCalculatedField: boolean) {
-    const sourceType: DataSourceType = ConnectionModule.source?.className ?? DataSourceType.Clickhouse;
+    const sourceType: ConnectorType = ConnectionModule.source?.className ?? ConnectorType.Clickhouse;
     const syntax = Di.get(FormulaControllerResolver).getSyntax(sourceType);
     const ignoredFunctions: string[] = this.isCalculatedField ? ['Keyword'] : [];
     FormulaSuggestionModule.initSuggestFunction({
@@ -318,7 +318,7 @@ export default class CalculatedFieldModal extends Vue {
     database_name: (_: CalculatedFieldModal) => _.tableSchema.name,
     expression: (_: CalculatedFieldModal) => ExpressionParser.parse(new RawExpressionData(_.formula, _.tableSchema))
   })
-  @AtomicAction({ timeUnlockAfterComplete: 500 })
+  @AtomicAction()
   private async createCalculatedField(): Promise<void> {
     Log.debug('createCalculatedField::');
     if (!this.isLoading && this.isValidField()) {
@@ -347,7 +347,7 @@ export default class CalculatedFieldModal extends Vue {
     column_display_name: (_: CalculatedFieldModal) => _.displayName,
     expression: (_: CalculatedFieldModal) => ExpressionParser.parse(new RawExpressionData(_.formula, _.tableSchema))
   })
-  @AtomicAction({ timeUnlockAfterComplete: 500 })
+  @AtomicAction()
   private async editCalculatedField(): Promise<void> {
     if (!this.isLoading && this.isValidField() && this.editingColumn) {
       try {
@@ -406,7 +406,7 @@ export default class CalculatedFieldModal extends Vue {
     }
   }
 
-  @AtomicAction({ timeUnlockAfterComplete: 500 })
+  @AtomicAction()
   private async createMeasurementField(): Promise<void> {
     Log.debug('createMeasurementField::');
     if (!this.isLoading && this.isValidField()) {
@@ -429,7 +429,7 @@ export default class CalculatedFieldModal extends Vue {
     }
   }
 
-  @AtomicAction({ timeUnlockAfterComplete: 500 })
+  @AtomicAction()
   private async editMeasurementField(): Promise<void> {
     if (!this.isLoading && this.isValidField() && this.editingColumn) {
       try {

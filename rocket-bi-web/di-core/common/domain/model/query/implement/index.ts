@@ -29,9 +29,8 @@ export * from './TableQuerySetting';
 export * from './TreeMapQuerySetting';
 export * from './WordCloudQuerySetting';
 export * from './StockQuerySetting';
-export * from './GroupMeasurementQuerySetting';
 export * from './InputControlQuerySetting';
 export * from './TreeFilterQuerySetting';
 export * from './TablFilterQuerySetting';
 export * from './GenericChartQuerySetting';
-export * from './generic_query'
+export * from './generic_query';

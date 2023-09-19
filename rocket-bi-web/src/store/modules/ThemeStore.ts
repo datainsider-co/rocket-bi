@@ -8,20 +8,41 @@ import { Log } from '@core/utils/Log';
 
 export type DiTheme = 'light' | 'dark' | 'custom';
 
+export interface ThemeInfo {
+  name: string;
+  style: any;
+  colors: string[];
+  baseTheme: DiTheme;
+  /**
+   * contains default settings of dashboard
+   */
+  defaultSettings: any;
+}
+
 @Module({ store: store, name: Stores.ThemeStore, dynamic: true, namespaced: true })
 class ThemeStore extends VuexModule {
-  private static readonly DASHBOARD_THEME_AS_MAP = require('@/screens/dashboard-detail/theme/DashboardTheme.json');
+  protected static readonly DASHBOARD_THEME_AS_MAP: {
+    [key in DashboardThemeType]: ThemeInfo;
+  } = require('@/screens/dashboard-detail/theme/DashboardTheme.json');
   private allowApplyMainTheme = true;
 
   currentThemeName: DiTheme = 'light';
   mainThemeName: DiTheme = 'light';
-  dashboardStyle: any = ThemeStore.DASHBOARD_THEME_AS_MAP[DashboardThemeType.LightDefault].style;
   paletteColors: string[] = ThemeStore.DASHBOARD_THEME_AS_MAP[DashboardThemeType.LightDefault].colors;
   static readonly ATTRIBUTE_THEME_NAME = 'dashboard-theme';
   dashboardTheme = '';
 
+  protected minColor = ColorUtils.getColorFromCssVariable('var(--min-background-color)');
+  protected maxColor = ColorUtils.getColorFromCssVariable('var(--max-background-color)');
+
   get baseDashboardTheme(): string {
-    return ColorUtils.combine(this.dashboardStyle['--min-background-color'], [this.dashboardStyle['--max-background-color']]);
+    return ColorUtils.combine(this.minColor, [this.maxColor]);
+  }
+
+  get getTheme(): (themeName: string) => ThemeInfo {
+    return (themeName: string) => {
+      return ThemeStore.DASHBOARD_THEME_AS_MAP[themeName as DashboardThemeType] ?? ThemeStore.DASHBOARD_THEME_AS_MAP[DashboardThemeType.Default];
+    };
   }
 
   get isDarkTheme(): boolean {
@@ -30,14 +51,16 @@ class ThemeStore extends VuexModule {
 
   @Mutation
   setDashboardTheme(themeName: DashboardThemeType) {
-    const dashboardTheme: any = ThemeStore.DASHBOARD_THEME_AS_MAP[themeName] ?? ThemeStore.DASHBOARD_THEME_AS_MAP[DashboardThemeType.Default];
-    this.dashboardTheme = themeName;
-    this.dashboardStyle = dashboardTheme.style;
-    this.paletteColors = dashboardTheme.colors;
-    document.body.setAttribute(ThemeStore.ATTRIBUTE_THEME_NAME, dashboardTheme.name);
-    const isNeedUpdateBaseTheme = dashboardTheme['base-theme'] !== _ThemeStore.currentThemeName;
-    if (isNeedUpdateBaseTheme) {
-      _ThemeStore.setTheme(dashboardTheme['base-theme']);
+    if (this.dashboardTheme !== themeName) {
+      const theme: ThemeInfo = ThemeStore.DASHBOARD_THEME_AS_MAP[themeName] ?? ThemeStore.DASHBOARD_THEME_AS_MAP[DashboardThemeType.Default];
+      this.dashboardTheme = themeName;
+      this.paletteColors = theme.colors;
+      document.body.setAttribute(ThemeStore.ATTRIBUTE_THEME_NAME, theme.name);
+      this.minColor = ColorUtils.getColorFromCssVariable('var(--min-background-color)');
+      this.maxColor = ColorUtils.getColorFromCssVariable('var(--max-background-color)');
+      if (theme.baseTheme !== this.currentThemeName) {
+        this.currentThemeName = theme.baseTheme;
+      }
     }
   }
 
@@ -67,7 +90,6 @@ class ThemeStore extends VuexModule {
 
   @Mutation
   revertToMainTheme() {
-    Log.debug('_ThemeStore.mainThemeName::', _ThemeStore.mainThemeName);
     _ThemeStore.setAllowApplyMainTheme(true);
     _ThemeStore.setTheme(_ThemeStore.mainThemeName);
   }

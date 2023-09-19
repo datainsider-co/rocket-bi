@@ -6,7 +6,7 @@
 import { ConditionType, Field, FilterMode, ScalarFunction } from '@core/common/domain/model';
 import { ValueCondition } from '@core/common/domain/model/condition/ValueCondition';
 import { ConditionUtils, getScalarFunction } from '@core/utils';
-import { ConditionData, ConditionFamilyTypes, InputType, NumberConditionTypes } from '@/shared';
+import { ConditionData, InputType, NumberConditionTypes } from '@/shared';
 import { FieldRelatedCondition } from '@core/common/domain/model/condition/FieldRelatedCondition';
 import { ListUtils, RandomUtils, SchemaUtils } from '@/utils';
 import { DIException } from '@core/common/domain';
@@ -26,10 +26,6 @@ export class LessThanOrEqual extends FieldRelatedCondition implements ValueCondi
     return new LessThanOrEqual(field, value, getScalarFunction(obj.scalarFunction));
   }
 
-  assignValue(value: string) {
-    this.value = value;
-  }
-
   getValues(): string[] {
     return [this.value];
   }
@@ -39,10 +35,6 @@ export class LessThanOrEqual extends FieldRelatedCondition implements ValueCondi
       throw new DIException('Value is require!');
     }
     this.value = values[0];
-  }
-
-  getConditionTypes(): string[] {
-    return [ConditionFamilyTypes.number, NumberConditionTypes.lessThanOrEqual];
   }
 
   toConditionData(groupId: number): ConditionData {
@@ -59,8 +51,8 @@ export class LessThanOrEqual extends FieldRelatedCondition implements ValueCondi
       firstValue: this.value,
       secondValue: void 0,
       allValues: this.getValues(),
-      currentInputType: InputType.text,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.Text,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: NumberConditionTypes.lessThanOrEqual
     };
   }

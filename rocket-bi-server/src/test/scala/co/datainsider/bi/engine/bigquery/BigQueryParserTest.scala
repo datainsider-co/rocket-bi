@@ -392,4 +392,73 @@ class BigQueryParserTest extends Test {
 
   }
 
+  test("test parse date range conditions") {
+    val conditions = Seq(
+      LastNMinute(TableField(dbName, tblName, "Order_Date", "Date"), 1),
+      LastNHour(TableField(dbName, tblName, "Order_Date", "Date"), 1),
+      LastNDay(TableField(dbName, tblName, "Order_Date", "Date"), 1),
+      LastNWeek(TableField(dbName, tblName, "Order_Date", "Date"), 1),
+      LastNMonth(TableField(dbName, tblName, "Order_Date", "Date"), 1),
+      LastNQuarter(TableField(dbName, tblName, "Order_Date", "Date"), 1),
+      LastNYear(TableField(dbName, tblName, "Order_Date", "Date"), 1),
+      CurrentDay(TableField(dbName, tblName, "Order_Date", "Date")),
+      CurrentWeek(TableField(dbName, tblName, "Order_Date", "Date")),
+      CurrentMonth(TableField(dbName, tblName, "Order_Date", "Date")),
+      CurrentQuarter(TableField(dbName, tblName, "Order_Date", "Date")),
+      CurrentYear(TableField(dbName, tblName, "Order_Date", "Date"))
+    )
+
+    conditions.foreach(condition => {
+      val selectWithCondition = ObjectQuery(
+        functions = Seq(Select(field = TableField(dbName, tblName, "Order_Date", "Date"))),
+        conditions = Seq(condition),
+        limit = Some(Limit(0, 10))
+      )
+
+      val sql = parser.parse(selectWithCondition)
+
+      val dataTable: DataTable = engine.execute(bqSource, sql).syncGet()
+      assert(dataTable.headers.nonEmpty)
+    })
+  }
+
+  test("test parse comparison conditions") {
+    val profitField = TableField(dbName, tblName, "Total_Profit", "Double")
+    val regionField = TableField(dbName, tblName, "Region", "String")
+
+    val conditions = Seq(
+      Empty(regionField),
+      NotEmpty(regionField),
+      Null(profitField),
+      NotNull(profitField),
+      Equal(profitField, "100"),
+      NotEqual(profitField, "100"),
+      GreaterThan(profitField, "100"),
+      GreaterThanOrEqual(profitField, "100"),
+      LessThan(profitField, "100"),
+      LessThanOrEqual(profitField, "100"),
+      MatchRegex(regionField, "Asia"),
+      Like(regionField, "Asia"),
+      NotLike(regionField, "Asia"),
+      LikeCaseInsensitive(regionField, "Asia"),
+      NotLikeCaseInsensitive(regionField, "Asia"),
+      Between(profitField, "100", "200"),
+      BetweenAndIncluding(profitField, "100", "200"),
+      In(regionField, Set("Asia", "Europe")),
+      NotIn(regionField, Set("Asia", "Europe"))
+    )
+
+    conditions.foreach(condition => {
+      val selectWithCondition = ObjectQuery(
+        functions = Seq(Select(field = regionField), Select(field = profitField)),
+        conditions = Seq(condition),
+        limit = Some(Limit(0, 10))
+      )
+
+      val sql = parser.parse(selectWithCondition)
+      val dataTable: DataTable = engine.execute(bqSource, sql).syncGet()
+      assert(dataTable.headers.nonEmpty)
+    })
+  }
+
 }

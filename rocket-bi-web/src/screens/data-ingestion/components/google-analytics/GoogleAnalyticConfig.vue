@@ -5,7 +5,7 @@
       <label>Google Analytics account</label>
       <div class="input">
         <DiInputComponent :id="genInputId('ga-count-name')" placeholder="Account name" autocomplete="off" :disabled="true" v-model="accountName" type="text">
-          <template #suffix>
+          <template #suffix-icon>
             <div v-if="isPropertyLoading">
               <i style="font-size: 16px" class="fa fa-spinner fa-spin"></i>
             </div>
@@ -117,7 +117,6 @@ interface PropertyItem {
   components: { DiInputComponent, DiToggle, DiCalendar }
 })
 export default class GoogleAnalyticConfig extends Vue {
-  private googleConfig = require('@/screens/data-ingestion/constants/google-config.json');
   private suggestedProperties: PropertyItem[] = [];
   private suggestedViews: DropdownData[] = [];
   private propertyStatus: Status = Status.Loaded;
@@ -202,8 +201,8 @@ export default class GoogleAnalyticConfig extends Vue {
       const sourceResponse: DataSourceResponse | undefined = DataSourceModule.dataSources.find(source => source.dataSource.id === this.syncedJob.sourceId);
       if (sourceResponse) {
         const gaSource = sourceResponse.dataSource as GASourceInfo;
-        const tokenResponse: TokenResponse = await this.sourcesService.getGoogleToken(new TokenRequest(gaSource.accessToken, gaSource.refreshToken));
-        await GoogleUtils.loadGoogleAnalyticClient(this.googleConfig.apiKey, tokenResponse.accessToken);
+        const tokenResponse: TokenResponse = await this.sourcesService.refreshGoogleToken(new TokenRequest(gaSource.accessToken, gaSource.refreshToken));
+        await GoogleUtils.loadGoogleAnalyticClient(window.appConfig.GOOGLE_API_KEY, tokenResponse.accessToken);
         const propertyResponse = await GoogleUtils.getGoogleAnalyticProperty('~all');
         Log.debug('response::', propertyResponse);
         await this.processProperty(propertyResponse);

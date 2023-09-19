@@ -39,50 +39,50 @@ object ClickhouseParser extends SqlParser {
       case notIn: NotIn => toNotInConditionStr(notIn)
 
       case EqualField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} = ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} = ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
       case NotEqualField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} != ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} != ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
       case GreaterThanField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} > ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} > ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
       case LessThanField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} < ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} < ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
       case GreaterOrEqualField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} >= ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} >= ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
       case LessOrEqualField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} <= ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} <= ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
 
-      case Null(field, scalarFn)     => s"${applyScalarFn(field.fullFieldName, scalarFn)} is null"
-      case NotNull(field, scalarFn)  => s"${applyScalarFn(field.fullFieldName, scalarFn)} is not null"
-      case Empty(field, scalarFn)    => s"${applyScalarFn(field.fullFieldName, scalarFn)} = ''"
-      case NotEmpty(field, scalarFn) => s"${applyScalarFn(field.fullFieldName, scalarFn)} != ''"
+      case Null(field, scalarFn)     => s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} is null"
+      case NotNull(field, scalarFn)  => s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} is not null"
+      case Empty(field, scalarFn)    => s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} = ''"
+      case NotEmpty(field, scalarFn) => s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} != ''"
 
       case Equal(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} = ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} = ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case NotEqual(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} != ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} != ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case GreaterThan(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} > ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} > ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case GreaterThanOrEqual(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} >= ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} >= ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case LessThan(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} < ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} < ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case LessThanOrEqual(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} <= ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} <= ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case MatchRegex(field, value, scalarFn) =>
-        s"match(${applyScalarFn(field.fullFieldName, scalarFn)}, ${toCorrespondingValue(field.fieldType, value, scalarFn)})"
+        s"match(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)}, ${toCorrespondingValue(field.fieldType, value, scalarFn)})"
       case Like(field, value, scalarFn) =>
-        s"like(${applyScalarFn(field.fullFieldName, scalarFn)}, ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"like(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)}, ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
       case NotLike(field, value, scalarFn) =>
-        s"notLike(${applyScalarFn(field.fullFieldName, scalarFn)}, ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"notLike(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)}, ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
       case LikeCaseInsensitive(field, value, scalarFn) =>
-        s"like(lower(${applyScalarFn(field.fullFieldName, scalarFn)}), ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"like(lower(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)}), ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
       case NotLikeCaseInsensitive(field, value, scalarFn) =>
-        s"notLike(lower(${applyScalarFn(field.fullFieldName, scalarFn)}), ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"notLike(lower(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)}), ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
       case Between(field, min, max, scalarFn) =>
-        s"(${applyScalarFn(field.fullFieldName, scalarFn)} > ${toCorrespondingValue(field.fieldType, min)}) " +
-          s"and (${applyScalarFn(field.fullFieldName, scalarFn)} < ${toCorrespondingValue(field.fieldType, max)})"
+        s"(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} > ${toCorrespondingValue(field.fieldType, min)}) " +
+          s"and (${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} < ${toCorrespondingValue(field.fieldType, max)})"
       case BetweenAndIncluding(field, min, max, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} between ${toCorrespondingValue(field.fieldType, min)} " +
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} between ${toCorrespondingValue(field.fieldType, min)} " +
           s"and ${toCorrespondingValue(field.fieldType, max)}"
 
       case LastNMinute(field, nMinute, scalarFn, intervalFn) =>
@@ -216,7 +216,7 @@ object ClickhouseParser extends SqlParser {
   }
 
   private def toInConditionStr(in: In): String = {
-    val fieldStr: String = applyScalarFn(in.field.fullFieldName, in.scalarFunction)
+    val fieldStr: String = applyScalarFn(in.field.fullFieldNameWithEscape, in.scalarFunction)
     val valuesStr: String = in.possibleValues.filterNot(v => v.isNull).map(escapeString).mkString(",")
 
     if (in.isIncludeNull) {
@@ -227,7 +227,7 @@ object ClickhouseParser extends SqlParser {
   }
 
   private def toNotInConditionStr(notIn: NotIn): String = {
-    val fieldStr: String = applyScalarFn(notIn.field.fullFieldName, notIn.scalarFunction)
+    val fieldStr: String = applyScalarFn(notIn.field.fullFieldNameWithEscape, notIn.scalarFunction)
     val valuesStr: String = notIn.possibleValues.filterNot(v => v.isNull).map(escapeString).mkString(",")
 
     if (notIn.isIncludeNull) {
@@ -263,7 +263,7 @@ object ClickhouseParser extends SqlParser {
     * parse function object to clickhouse query syntax in select clause
     */
   def toQueryString(function: FieldRelatedFunction): String = {
-    val fieldName = s"${function.field.fullFieldName}"
+    val fieldName = function.field.fullFieldNameWithEscape
     function match {
       case f: Select           => applyScalarFn(fieldName, f.scalarFunction)
       case f: SelectDistinct   => applyScalarFn(fieldName, f.scalarFunction)
@@ -350,44 +350,44 @@ object ClickhouseParser extends SqlParser {
 
   def toQueryString(scalarFn: ScalarFunction, field: String): String = {
     scalarFn match {
-      case ToYear(_)     => s"toYear($field)"
-      case ToQuarter(_)  => s"toQuarter($field)"
-      case ToMonth(_)    => s"toMonth($field)"
-      case ToWeek(_)     => s"toWeek($field)"
-      case ToDate(_)     => s"toDate($field)"
-      case ToDateTime(_) => s"toDateTime($field)"
+      case ToYear(_, _)     => s"toYear($field)"
+      case ToQuarter(_, _)  => s"toQuarter($field)"
+      case ToMonth(_, _)    => s"toMonth($field)"
+      case ToWeek(_, _)     => s"toWeek($field)"
+      case ToDate(_, _)     => s"toDate($field)"
+      case ToDateTime(_, _) => s"toDateTime($field)"
 
-      case SecondsToDateTime(_) => s"toDateTime($field)"
-      case MillisToDateTime(_)  => s"toDateTime($field / 1000)"
-      case NanosToDateTime(_)   => s"toDateTime($field / 1000000)"
-      case DatetimeToSeconds(_) => s"toUInt64($field)"
-      case DatetimeToMillis(_)  => s"toUInt64($field) * 1000"
-      case DatetimeToNanos(_)   => s"toUInt64($field) * 1000000"
+      case SecondsToDateTime(_, _) => s"toDateTime($field)"
+      case MillisToDateTime(_, _)  => s"toDateTime($field / 1000)"
+      case NanosToDateTime(_, _)   => s"toDateTime($field / 1000000)"
+      case DatetimeToSeconds(_, _) => s"toUInt64($field)"
+      case DatetimeToMillis(_, _)  => s"toUInt64($field) * 1000"
+      case DatetimeToNanos(_, _)   => s"toUInt64($field) * 1000000"
 
-      case ToDayOfYear(_)  => s"toDayOfYear($field)"
-      case ToDayOfMonth(_) => s"toDayOfMonth($field)"
-      case ToDayOfWeek(_)  => s"toDayOfWeek($field)"
-      case ToHour(_)       => s"toHour($field)"
-      case ToMinute(_)     => s"toMinute($field)"
-      case ToSecond(_)     => s"toSecond($field)"
-      case ToYearNum(_)    => s"toRelativeYearNum($field)"
-      case ToQuarterNum(_) => s"toRelativeQuarterNum($field)"
-      case ToMonthNum(_)   => s"toRelativeMonthNum($field)"
-      case ToWeekNum(_)    => s"toRelativeWeekNum($field)"
-      case ToDayNum(_)     => s"toRelativeDayNum($field)"
-      case ToHourNum(_)    => s"toRelativeHourNum($field)"
-      case ToMinuteNum(_)  => s"toRelativeMinuteNum($field)"
-      case ToSecondNum(_)  => s"toRelativeSecondNum($field)"
+      case ToDayOfYear(_, _)  => s"toDayOfYear($field)"
+      case ToDayOfMonth(_, _) => s"toDayOfMonth($field)"
+      case ToDayOfWeek(_, _)  => s"toDayOfWeek($field)"
+      case ToHour(_, _)       => s"toHour($field)"
+      case ToMinute(_, _)     => s"toMinute($field)"
+      case ToSecond(_, _)     => s"toSecond($field)"
+      case ToYearNum(_, _)    => s"toRelativeYearNum($field)"
+      case ToQuarterNum(_, _) => s"toRelativeQuarterNum($field)"
+      case ToMonthNum(_, _)   => s"toRelativeMonthNum($field)"
+      case ToWeekNum(_, _)    => s"toRelativeWeekNum($field)"
+      case ToDayNum(_, _)     => s"toRelativeDayNum($field)"
+      case ToHourNum(_, _)    => s"toRelativeHourNum($field)"
+      case ToMinuteNum(_, _)  => s"toRelativeMinuteNum($field)"
+      case ToSecondNum(_, _)  => s"toRelativeSecondNum($field)"
 
-      case DateDiff(unit, date, _)   => s"dateDiff('$unit', $date, $field)"
-      case GetArrayElement(_, index) => s"arrayElement($field,${index.getOrElse(1)})"
-      case Decrypt(_)                => s"decrypt($field)"
+      case DateDiff(unit, date, _, _)   => s"dateDiff('$unit', $date, $field)"
+      case GetArrayElement(_, index, _) => s"arrayElement($field,${index.getOrElse(1)})"
+      case Decrypt(_, _)                => s"decrypt($field)"
 
-      case PastNYear(unit, _)    => s"$field - toIntervalYear($unit)"
-      case PastNQuarter(unit, _) => s"$field - toIntervalQuarter($unit)"
-      case PastNMonth(unit, _)   => s"$field - toIntervalMonth($unit)"
-      case PastNWeek(unit, _)    => s"$field - toIntervalWeek($unit)"
-      case PastNDay(unit, _)     => s"$field - toIntervalDay($unit)"
+      case PastNYear(unit, _, _)    => s"$field - toIntervalYear($unit)"
+      case PastNQuarter(unit, _, _) => s"$field - toIntervalQuarter($unit)"
+      case PastNMonth(unit, _, _)   => s"$field - toIntervalMonth($unit)"
+      case PastNWeek(unit, _, _)    => s"$field - toIntervalWeek($unit)"
+      case PastNDay(unit, _, _)     => s"$field - toIntervalDay($unit)"
 
       case Cast(asType, _) => s"cast($field as ${asType})"
     }
@@ -396,7 +396,7 @@ object ClickhouseParser extends SqlParser {
   def applyScalarFunctionToField(scalarFn: ScalarFunction, field: Field): String = {
     scalarFn.innerFn match {
       case Some(innerFn) => toQueryString(scalarFn, applyScalarFunctionToField(innerFn, field))
-      case _             => toQueryString(scalarFn, field.fullFieldName)
+      case _             => toQueryString(scalarFn, field.fullFieldNameWithEscape)
     }
   }
 
@@ -647,7 +647,7 @@ object ClickhouseParser extends SqlParser {
       scalarFunction: Option[ScalarFunction],
       intervalFunction: Option[ScalarFunction]
   ): String = {
-    val date: String = applyScalarFn(dateField.fullFieldName, scalarFunction)
+    val date: String = applyScalarFn(dateField.fullFieldNameWithEscape, scalarFunction)
     val startDate: String = applyScalarFn(startDateExpr, intervalFunction)
     val endDate: String = applyScalarFn(endDateExpr, intervalFunction)
 

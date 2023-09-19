@@ -204,7 +204,10 @@ export class TableBodyRenderEngine {
   }
 
   private bindEventToCell(cellElement: HTMLTableDataCellElement, cellData: BodyCellData) {
-    cellElement.addEventListener('contextmenu', event => this.handleShowContextMenu(event, cellData));
+    cellElement.addEventListener('contextmenu', event => {
+      event.stopPropagation();
+      this.handleShowContextMenu(event, cellData);
+    });
     if (isFunction(cellData.onClick)) {
       cellElement.addEventListener('click', cellData.onClick);
     }

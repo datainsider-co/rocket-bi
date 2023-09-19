@@ -58,7 +58,7 @@ class SolanaWorker(
   }
 
   private def write(writers: Seq[DataWriter], records: Seq[Record], tableSchema: TableSchema): Unit = {
-    writers.foreach(_.write(records, tableSchema))
+    writers.foreach(_.insertBatch(records, tableSchema))
   }
 
   def sync(job: SolanaJob, syncId: SyncId, onProgress: JobProgress => Future[Unit]): JobProgress = {

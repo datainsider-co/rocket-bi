@@ -7,10 +7,16 @@ ENV MODE development
 ENV HTTP_PORT 8080
 ENV THRIFT_PORT 8084
 
+RUN curl -O https://repo.yandex.ru/clickhouse/tgz/stable/clickhouse-common-static-21.12.3.32.tgz
+RUN curl -O https://repo.yandex.ru/clickhouse/tgz/stable/clickhouse-client-21.12.3.32.tgz
+RUN tar -xzvf clickhouse-common-static-21.12.3.32.tgz
+RUN clickhouse-common-static-21.12.3.32/install/doinst.sh
+RUN tar -xzvf clickhouse-client-21.12.3.32.tgz
+RUN clickhouse-client-21.12.3.32/install/doinst.sh
+
 #install zip
 RUN apt-get update -qq
 RUN apt-get install -y zip
-RUN apt-get install -y clickhouse-client
 
 # install python3 for data-cook
 RUN apt-get install -y python3 python3-pip

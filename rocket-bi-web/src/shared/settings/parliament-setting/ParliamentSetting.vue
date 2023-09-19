@@ -11,7 +11,12 @@
     <!--      @onChanged="handleSettingChanged"-->
     <!--      @onMultipleChanged="handleMultipleSettingChanged"-->
     <!--    />-->
-    <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab
+      :color="setting.options.background"
+      :default-color="defaultBackgroundColor"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <TooltipTab :setting="setting.options.tooltip" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <VisualHeader :widget-type="currentWidget" :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
@@ -25,7 +30,7 @@ import BackgroundTab from '@/shared/settings/common/tabs/BackgroundTab.vue';
 import DataLabelTab from '@/shared/settings/series-chart/DataLabelTab.vue';
 import ColorTab from '@/shared/settings/common/tabs/ColorTab.vue';
 import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
-import { ChartInfo, ParliamentQuerySetting, ParliamentChartOption, SettingKey } from '@core/common/domain';
+import { ChartInfo, ParliamentQuerySetting, ParliamentChartOption, SettingKey, ChartOption } from '@core/common/domain';
 import TooltipTab from '@/shared/settings/common/tabs/TooltipTab.vue';
 import { ChartType } from '@/shared';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
@@ -76,6 +81,10 @@ export default class ParliamentSetting extends Vue {
   }
   private handleSettingChangeAndQuery(key: string, value: boolean | string | number) {
     this.handleSettingChanged(key, value, true);
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

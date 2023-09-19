@@ -42,7 +42,6 @@ export class StringConditionBuilder implements ConditionBuilder {
     const allValues = ConditionBuilder.getAllValues(condition);
     const field = condition.field;
 
-    Log.debug('StringConditionBuilder:: buildCondition', condition, firstValue, secondValue, allValues, field);
     const builder = this.builderAsMap.get(condition.subType || '');
     if (builder) {
       return builder(field, firstValue, secondValue, allValues.filter(isNotEmpty));

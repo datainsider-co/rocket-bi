@@ -43,6 +43,7 @@ export interface PlotSeries {
   dataLabels?: DataLabels;
   stacking?: string;
   borderWidth?: number;
+  borderRadius?: number;
   borderColor?: string;
   color?: string;
   groupPadding?: number;

@@ -1,10 +1,13 @@
 package co.datainsider.datacook.domain.operator
 
+import co.datainsider.bi.repository.FileStorage.FileType.FileType
+import co.datainsider.bi.repository.FileStorage.{FileType, FileTypeRef}
 import co.datainsider.datacook.domain.Ids.OperatorId
 import co.datainsider.datacook.domain.persist.ActionConfiguration
 import co.datainsider.datacook.pipeline.operator.Operator
 import co.datainsider.datacook.util.StringUtils
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
 import com.twitter.finatra.validation.constraints.NotEmpty
 import datainsider.client.exception.BadRequestError
 
@@ -27,7 +30,9 @@ case class SendToGroupEmailOperator(
     fileNames: Seq[String],
     content: Option[String] = None,
     displayName: Option[String] = None,
-    isZip: Boolean = false
+    isZip: Boolean = false,
+    @JsonScalaEnumeration(classOf[FileTypeRef])
+    fileType: FileType = FileType.Csv
 ) extends OldOperator {
   @JsonIgnore
   override def id: OperatorId = {
@@ -73,7 +78,8 @@ case class SendToGroupEmailOperator(
       fileNames = fileNames,
       content = content,
       displayName = displayName,
-      isZip = isZip
+      isZip = isZip,
+      fileType = fileType
     )
   }
 

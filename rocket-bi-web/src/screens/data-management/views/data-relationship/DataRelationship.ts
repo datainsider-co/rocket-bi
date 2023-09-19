@@ -55,7 +55,7 @@ export default class DataRelationship extends Mixins(AbstractSchemaComponent, Sp
   }
 
   async beforeRouteLeave(to: Route, from: Route, next: NavigationGuardNext<any>) {
-    if (await _ConfigBuilderStore.confirmBack()) {
+    if (await _ConfigBuilderStore.requireConfirmBack()) {
       await next();
     } else {
       next(false);

@@ -29,7 +29,7 @@ export class DefaultTableBodyStyleRender implements TableBodyStyleRender {
   constructor(tableResponse: AbstractTableResponse, query: AbstractTableQuerySetting) {
     this.tableResponse = tableResponse;
     this.querySetting = query;
-    this.vizSetting = query.getChartOption()!;
+    this.vizSetting = query.getChartOption<TableChartOption>()!;
   }
 
   private static calculateBackgroundColor(bodyCellData: CustomBodyCellData, minMaxData: MinMaxData, colorConfig: ColorConfig): string {

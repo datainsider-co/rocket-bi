@@ -53,9 +53,9 @@ export default class TooltipTab extends Vue {
   private readonly setting!: PivotTableChartOption;
 
   private defaultStyle = {
-    valueColor: ChartOption.getThemeTextColor(),
-    labelColor: ChartOption.getThemeTextColor(),
-    fontFamily: 'Roboto',
+    valueColor: ChartOption.getPrimaryTextColor(),
+    labelColor: ChartOption.getPrimaryTextColor(),
+    fontFamily: ChartOption.getSecondaryFontFamily(),
     backgroundColor: 'var(--tooltip-background-color)'
   };
 

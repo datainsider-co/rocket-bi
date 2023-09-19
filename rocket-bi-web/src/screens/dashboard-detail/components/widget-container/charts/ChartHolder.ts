@@ -5,23 +5,18 @@
 
 import { Component, Inject, Prop, Provide, Ref, Vue, Watch } from 'vue-property-decorator';
 
-import { BuilderMode, ContextMenuItem, DashboardMode, DashboardOptions, SelectOption, Status } from '@/shared';
+import { BuilderMode, DashboardMode, Status } from '@/shared';
 import {
-  AbstractTableQuerySetting,
   ChartInfo,
   ChartOption,
-  Condition,
-  DropdownQuerySetting,
-  Filterable,
-  PivotTableQuerySetting,
+  FilterableSetting,
   QueryRelatedWidget,
-  QuerySettingType,
   TableColumn,
   ValueCondition,
-  VizSettingType,
+  ValueControlType,
   Widget,
   WidgetId,
-  Widgets
+  WidgetSetting
 } from '@core/common/domain/model';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { DataManager, QueryService } from '@core/common/services';
@@ -29,7 +24,7 @@ import { FilterRequest, QueryRequest } from '@core/common/domain/request';
 import { TableResponse, VisualizationResponse } from '@core/common/domain/response';
 import { ZoomModule } from '@/store/modules/ZoomStore';
 import EmptyWidget from '@/screens/dashboard-detail/components/widget-container/charts/error-display/EmptyWidget.vue';
-import { ListUtils } from '@/utils';
+import { ListUtils, TimeoutUtils } from '@/utils';
 import { FilterModule } from '@/screens/dashboard-detail/stores/widget/FilterStore';
 import ActionWidgetFilter from '@/screens/dashboard-detail/components/widget-container/charts/action-widget/ActionWidgetFilter.vue';
 import ActionWidgetMore from '@/screens/dashboard-detail/components/widget-container/charts/action-widget/ActionWidgetMore.vue';
@@ -51,6 +46,7 @@ import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Track } from '@/shared/anotation';
 import Swal from 'sweetalert2';
 import { CopiedData, CopiedDataType } from '@/screens/dashboard-detail/intefaces/CopiedData';
+import WidgetContainer from '@/screens/dashboard-detail/components/widget-container/WidgetContainer.vue';
 
 @Component({
   components: {
@@ -61,65 +57,63 @@ import { CopiedData, CopiedDataType } from '@/screens/dashboard-detail/intefaces
     ActionWidgetMore,
     CaptureException,
     ChartError: ErrorWidget,
-    InnerFilter: ChartFilter
+    InnerFilter: ChartFilter,
+    WidgetContainer
   }
 })
 export default class ChartHolder extends Vue {
-  static readonly RENDER_WHEN = [Status.Error, Status.Updating];
-  readonly renderWhen = ChartHolder.RENDER_WHEN;
-  $alert!: typeof Swal;
-  isHovered: boolean;
+  protected readonly Status = Status;
+  protected $alert!: typeof Swal;
+  // fixme: workaround: fixed metaData change but currentChartInfo not change.
+  protected currentChartInfo: ChartInfo;
+
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly showEditComponent!: boolean;
+  protected readonly showEditComponent!: boolean;
+
   @Prop({ required: true })
-  private readonly metaData!: ChartInfo;
-  // Provide from DiGridstackItem
-  @Inject({ default: undefined })
-  private readonly remove?: (fn: Function) => void;
+  protected readonly metaData!: ChartInfo;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly isFullSizeMode!: boolean;
-
-  // TODO: force hide full size in builder
-  @Prop({ required: false, type: Boolean, default: false })
-  private readonly isEnableFullSize!: boolean;
+  protected readonly isPreview!: boolean;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private isPreview!: boolean;
+  protected readonly disableSort!: boolean;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly disableSort!: boolean;
-
-  @Prop({ required: false, type: Boolean, default: false })
-  private readonly disableEmptyChart!: boolean;
+  protected readonly disableEmptyChart!: boolean;
 
   @Prop({ required: false, type: String, default: '' })
-  emptyMessage!: string;
+  protected readonly emptyMessage!: string;
 
   @Prop({ required: false, type: Boolean, default: false })
-  readonly disablePagination!: boolean;
+  protected readonly disablePagination!: boolean;
 
   @Prop({ required: false, type: Function })
-  private readonly retry!: Function | null;
-
-  @Ref()
-  private readonly chartComponent!: ChartComponent;
+  protected readonly retry!: Function | null;
 
   // resolve problem: auto load chart when init chart holder
   // fixme: remove when chart refactor chart
   @Prop({ type: Boolean, default: false })
-  private autoRenderChart!: boolean;
+  protected readonly autoRenderChart!: boolean;
 
-  private currentChartInfo: ChartInfo;
+  @Prop({ type: Boolean, default: false })
+  protected readonly isHideShadow!: boolean;
+
+  @Prop({ required: false, type: Object, default: () => WidgetSetting.default() })
+  protected readonly widgetSetting!: WidgetSetting;
+
+  @Ref()
+  protected readonly chartComponent!: ChartComponent;
+
+  // Provide from DiGridstackItem
+  @Inject({ default: undefined })
+  protected readonly remove?: (fn: Function) => void;
 
   @ServiceInjector
-  private readonly queryService!: QueryService;
-
-  // fixme: workaround: fixed metaData change but currentChartInfo not change.
+  protected readonly queryService!: QueryService;
 
   constructor() {
     super();
-    this.isHovered = false;
     this.currentChartInfo = this.metaData;
   }
 
@@ -151,103 +145,12 @@ export default class ChartHolder extends Vue {
     }
   }
 
-  get canShowFullScreen(): boolean {
-    return DashboardModeModule.isViewMode && this.isEnableFullSize;
-  }
-
-  get viewMode(): string {
-    return this.isFullSizeMode ? 'full-screen' : 'widget';
-  }
-
   get enableMoreAction(): boolean {
     return !this.isPreview;
   }
 
-  private get menuOptions(): ContextMenuItem[] {
-    return [
-      {
-        text: DashboardOptions.EDIT_TITLE,
-        click: this.handleEditTitle,
-        disabled: !DashboardModeModule.canEdit
-      },
-      {
-        text: DashboardOptions.CONFIG_CHART,
-        click: this.handleEditChart,
-        disabled: !DashboardModeModule.canEdit
-      },
-      {
-        text: DashboardOptions.ADD_FILTER_WIDGET,
-        click: this.handleAddInnerFilter,
-        disabled: !DashboardModeModule.canEdit
-      },
-      {
-        text: DashboardOptions.DUPLICATE_CHART,
-        click: this.duplicateChart,
-        disabled: !DashboardModeModule.canDuplicate
-      },
-      {
-        text: DashboardOptions.DELETE,
-        click: this.deleteChart,
-        disabled: !DashboardModeModule.canDelete
-      }
-    ];
-  }
-
-  private get dashboardMode(): DashboardMode {
+  protected get dashboardMode(): DashboardMode {
     return DashboardModeModule.mode;
-  }
-
-  private get isTableChart(): boolean {
-    return this.currentChartInfo.setting instanceof AbstractTableQuerySetting;
-  }
-
-  private get isPivotTableChart(): boolean {
-    return PivotTableQuerySetting.isPivotChartSetting(this.currentChartInfo.setting);
-  }
-
-  private get isTreeFilter(): boolean {
-    return this.currentChartInfo.setting.getChartOption()?.className === VizSettingType.TreeFilterSetting;
-  }
-  private get isTabFilter(): boolean {
-    switch (this.currentChartInfo.setting.className) {
-      case QuerySettingType.InputControl:
-      case QuerySettingType.TabControl:
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  private get isDropdownFilter(): boolean {
-    return this.currentChartInfo.setting instanceof DropdownQuerySetting;
-  }
-
-  private get chartWidgetClass() {
-    if (this.hasData) {
-      return {
-        'table-container': this.isTableChart || this.isPivotTableChart,
-        'dropdown-container': this.isDropdownFilter,
-        'tab-filter-container': this.isTabFilter && !this.isTreeFilter,
-        'tree-filter-container': this.isTreeFilter,
-        'chart-container': !(this.isTableChart || this.isPivotTableChart) && !this.isDropdownFilter && !this.isTabFilter,
-        'p-0 preview-container': this.isPreview
-        // 'non-interactive': this.showEditComponent
-      };
-    } else {
-      return {
-        'w-100 h-100': true
-        // 'non-interactive': this.showEditComponent
-      };
-    }
-  }
-
-  private get backgroundColor(): string {
-    let backgroundColor = this.currentChartInfo.backgroundColor;
-    const vizSetting = this.currentChartInfo.setting?.getChartOption();
-    if (vizSetting) {
-      backgroundColor = vizSetting.getBackgroundColor();
-    }
-    return backgroundColor ?? '#00000019';
   }
 
   // fixme: will remove when refactor dashboard flow
@@ -265,23 +168,19 @@ export default class ChartHolder extends Vue {
     }
   }
 
-  async renderChart(chartInfo: ChartInfo) {
+  async renderChart(chartInfo: ChartInfo): Promise<void> {
     try {
-      this.setChartInfo(chartInfo);
-      const disableQuery = !chartInfo.setting.canQuery();
-      if (disableQuery) {
-        //Nothing to do
-        const emptyResponse = TableResponse.empty();
-        ChartDataModule.setVisualizationResponse({ id: chartInfo.id, data: emptyResponse });
-        ChartDataModule.setStatusLoaded(chartInfo.id);
-      } else {
+      this.updateChart(chartInfo);
+      const canQuery = chartInfo.setting.canQuery();
+      if (canQuery) {
         ChartDataModule.setStatusLoading(chartInfo.id);
-        Log.debug('ChartHolder::renderChart::chartInfo', chartInfo, chartInfo.id);
         const queryRequest: QueryRequest = this.toQueryRequest(chartInfo);
-        Log.debug('ChartHolder::renderChart::queryRequest', queryRequest);
         const response = await this.queryService.query(queryRequest);
-        //Todo: Update Setting by response here
         this._renderChart(response, chartInfo);
+      } else {
+        // Nothing to do
+        ChartDataModule.setVisualizationResponse({ id: chartInfo.id, data: TableResponse.empty() });
+        ChartDataModule.setStatusLoaded(chartInfo.id);
       }
 
       await this.renderChartFilter(chartInfo);
@@ -290,130 +189,7 @@ export default class ChartHolder extends Vue {
     }
   }
 
-  updateChart(chartInfo: ChartInfo) {
-    this.setChartInfo(chartInfo);
-    this.chartComponent.updateChart(chartInfo);
-  }
-
-  isAffectByFilter(): boolean {
-    return FilterModule.isAffectedByFilter(this.currentChartInfo.id);
-  }
-
-  getFilterRequests(): FilterRequest[] {
-    return [
-      FilterModule.crossFilterRequest,
-      ...FilterModule.filterRequests.values(),
-      ...Array.from(FilterModule.mainFilterWidgets.values()).map(widget => widget.toFilterRequest())
-    ].filter((filter): filter is FilterRequest => {
-      return filter instanceof FilterRequest && filter.filterId !== this.currentChartInfo.id;
-    });
-  }
-
-  hasFilter(): boolean {
-    if (this.isPreview) {
-      return false;
-    }
-    return this.getFilterRequests().length > 0;
-  }
-
-  @Provide()
-  zoom(nextLvl: string) {
-    ZoomModule.zoomChart({ chart: this.currentChartInfo, nextLvl: nextLvl });
-    return DashboardControllerModule.renderChart({ id: this.currentChartInfo.id, forceFetch: false });
-  }
-
-  @Provide()
-  async onAddFilter(selectOption: SelectOption): Promise<void> {
-    if (Filterable.isFilterable(this.currentChartInfo.setting) && this.currentChartInfo.setting.isEnableFilter()) {
-      const widgetId: WidgetId = this.currentChartInfo.id;
-      const querySetting: QuerySetting = QuerySettingModule.buildQuerySetting(widgetId);
-      const filterRequest: FilterRequest | undefined = FilterRequest.fromValue(widgetId, querySetting, selectOption.data);
-      if (filterRequest) {
-        await FilterModule.addFilterRequest(filterRequest);
-        // this.$emit('')
-      }
-    }
-  }
-
-  @Provide()
-  async onAddMultiFilter(filters: SelectOption[]): Promise<void> {
-    const isEmptyFilters = ListUtils.isEmpty(filters);
-    if (isEmptyFilters) {
-      return this.handleRemoveFilter(this.currentChartInfo);
-    } else {
-      if (Filterable.isFilterable(this.currentChartInfo.setting) && this.currentChartInfo.setting.isEnableFilter()) {
-        const widgetId: WidgetId = this.currentChartInfo.id;
-        const querySetting: QuerySetting = QuerySettingModule.buildQuerySetting(widgetId);
-        const values: any[] = filters.map(filter => filter.id);
-        const filterRequest: FilterRequest | undefined = FilterRequest.fromValues(widgetId, querySetting, values);
-        if (filterRequest) {
-          return FilterModule.addFilterRequest(filterRequest);
-        }
-      }
-    }
-  }
-
-  @Provide()
-  async onAddCondition(condition: Condition) {
-    if (Filterable.isFilterable(this.currentChartInfo.setting) && this.currentChartInfo.setting.isEnableFilter()) {
-      return FilterModule.addFilterRequest(new FilterRequest(this.currentChartInfo.id, condition));
-    }
-  }
-
-  @Provide()
-  onRemoveFilter(): Promise<void> {
-    const isFilter: boolean = Filterable.isFilterable(this.currentChartInfo.setting) && this.currentChartInfo.setting.isEnableFilter();
-    if (isFilter) {
-      return this.handleRemoveFilter(this.currentChartInfo);
-    }
-    return Promise.resolve();
-  }
-
-  @Provide()
-  addFilter(request: FilterRequest) {
-    const isFilter: boolean = Filterable.isFilterable(this.currentChartInfo.setting) && this.currentChartInfo.setting.isEnableFilter();
-    if (isFilter) {
-      return FilterModule.addFilterRequest(request);
-    }
-    return Promise.resolve();
-  }
-
-  @Provide()
-  async onChangeFilterApply(on: boolean): Promise<void> {
-    const isActivatedCrossFilter = FilterModule.currentCrossFilterData?.activeId === this.currentChartInfo.id;
-    if (isActivatedCrossFilter) {
-      await FilterModule.handleRemoveCrossFilter();
-    }
-    if (on) {
-      FilterModule.applyFilterToWidget(this.currentChartInfo.id);
-      return DashboardControllerModule.renderChart({ id: this.currentChartInfo.id, forceFetch: true });
-    } else {
-      FilterModule.ignoreWidgetFromFilters(this.currentChartInfo.id);
-      return DashboardControllerModule.renderChart({ id: this.currentChartInfo.id, forceFetch: true });
-    }
-  }
-
-  @Provide()
-  async onChangeDynamicFunction(tableColumns: TableColumn[]): Promise<void> {
-    return DashboardControllerModule.replaceDynamicFunction({ widget: this.metaData, selected: tableColumns, apply: true });
-  }
-
-  @Provide()
-  async onChangeDynamicValues(values: string[]): Promise<void> {
-    await DashboardControllerModule.replaceDynamicValues({ widget: this.metaData, values: values, apply: true });
-  }
-
-  @Provide()
-  getCurrentValues(id: WidgetId): string[] {
-    if (FilterModule.filterRequests.has(id)) {
-      const filterRequest: FilterRequest = FilterModule.filterRequests.get(id)!;
-      return ValueCondition.isValueCondition(filterRequest!.condition) ? filterRequest!.condition.getValues() : [];
-    } else {
-      return DashboardControllerModule.dynamicFilter.get(id) ?? [];
-    }
-  }
-
-  private setChartInfo(chartInfo: ChartInfo) {
+  updateChart(chartInfo: ChartInfo): void {
     this.currentChartInfo = chartInfo;
     /// FIXME: hardcode for fix problem load more in table
     /// will remove when refactor dashboard, chart.
@@ -428,7 +204,142 @@ export default class ChartHolder extends Vue {
     GeolocationModule.loadMapDataFromWidget(chartInfo);
   }
 
-  private _renderChart(response: VisualizationResponse, chart: ChartInfo) {
+  @Provide()
+  async saveChart(chartInfo: ChartInfo) {
+    await WidgetModule.handleUpdateWidget(chartInfo);
+    this.updateChart(chartInfo);
+  }
+
+  resizeChart() {
+    this.chartComponent.resize();
+  }
+
+  isAffectByFilter(): boolean {
+    return FilterModule.canApplyFilter(this.currentChartInfo.id);
+  }
+
+  getFilterRequests(): FilterRequest[] {
+    return Array.from(FilterModule.mainFilterRequestMap.values()).filter((filter): filter is FilterRequest => {
+      return filter && filter.filterId !== this.currentChartInfo.id;
+    });
+  }
+
+  hasFilter(): boolean {
+    if (this.isPreview) {
+      return false;
+    }
+    return this.getFilterRequests().length > 0;
+  }
+
+  @Provide()
+  async zoom(nextLvl: string): Promise<void> {
+    ZoomModule.zoomChart({ chart: this.currentChartInfo, nextLvl: nextLvl });
+    return DashboardControllerModule.renderChart({ id: this.currentChartInfo.id, forceFetch: false });
+  }
+
+  /**
+   * method apply filter, if filterRequest is undefined will remove filter otherwise apply filter
+   * if valueMap is undefined will remove cross filter otherwise apply cross filter
+   */
+  @Provide()
+  async applyFilterRequest(data: { filterRequest?: FilterRequest; filterValueMap?: Map<ValueControlType, string[]> }): Promise<void> {
+    const { filterRequest, filterValueMap } = data;
+    const affectedByFilterIds: WidgetId[] = filterRequest ? this.addFilter(filterRequest) : this.removeFilter(this.currentChartInfo.id);
+    const affectedByCrossFilterIds: WidgetId[] = await this.addFilterValue(this.currentChartInfo.id, filterValueMap);
+    const affectedIds: WidgetId[] = ListUtils.distinct([...affectedByFilterIds, ...affectedByCrossFilterIds]);
+    await this.requestRender(affectedIds);
+    // remove ignore apply filter for current chart avoid reload current chart
+    if (ListUtils.isNotEmpty(affectedByFilterIds)) {
+      FilterModule.removeIgnoreApplyFilterById(this.currentChartInfo.id);
+    }
+  }
+
+  /**
+   * remove filter from store, return list widget id affected by filter
+   */
+  protected removeFilter(requestId: WidgetId): WidgetId[] {
+    const isFilter: boolean = FilterableSetting.isFilterable(this.currentChartInfo.setting) && this.currentChartInfo.setting.isEnableFilter();
+    if (isFilter) {
+      const { groupId } = WidgetModule.findTabContainWidget(requestId);
+      if (groupId > -1) {
+        FilterModule.removeFilterFromGroup({ panelId: groupId, requestId: requestId });
+        return [];
+      }
+      if (FilterModule.mainFilterRequestMap.has(requestId)) {
+        FilterModule.removeFilterRequest(requestId);
+        return WidgetModule.allQueryWidgets.filter(widget => FilterModule.canApplyFilter(widget.id)).map(widget => widget.id);
+      }
+    }
+    return [];
+  }
+
+  protected addFilter(request: FilterRequest): WidgetId[] {
+    const isFilter: boolean = FilterableSetting.isFilterable(this.currentChartInfo.setting) && this.currentChartInfo.setting.isEnableFilter();
+    if (isFilter) {
+      const { groupId } = WidgetModule.findTabContainWidget(request.filterId);
+      if (groupId > -1) {
+        FilterModule.pushFilterToGroup({ filterPanelId: groupId, request: request });
+        return [];
+      } else {
+        FilterModule.addFilterRequest(request);
+        return WidgetModule.allQueryWidgets.filter(widget => FilterModule.canApplyFilter(widget.id)).map(widget => widget.id);
+      }
+    }
+    return [];
+  }
+
+  protected async addFilterValue(requestId: WidgetId, valueMap?: Map<ValueControlType, string[]>): Promise<WidgetId[]> {
+    const { groupId } = WidgetModule.findTabContainWidget(requestId);
+    if (groupId > -1) {
+      FilterModule.pushFilterValueToGroup({ groupId: groupId, widgetId: requestId, valueMap: valueMap });
+      return [];
+    } else {
+      return await DashboardControllerModule.applyDynamicValues({
+        id: requestId,
+        valueMap: valueMap,
+        ignoreReRender: true
+      });
+    }
+  }
+
+  @Provide()
+  async onChangeFilterApply(on: boolean): Promise<void> {
+    if (on) {
+      FilterModule.applyFilterToWidget(this.currentChartInfo.id);
+      return DashboardControllerModule.renderChart({ id: this.currentChartInfo.id, forceFetch: true });
+    } else {
+      FilterModule.ignoreApplyFilterToWidget(this.currentChartInfo.id);
+      return DashboardControllerModule.renderChart({ id: this.currentChartInfo.id, forceFetch: true });
+    }
+  }
+
+  @Provide()
+  async onChangeDynamicFunction(tableColumns: TableColumn[]): Promise<void> {
+    return DashboardControllerModule.replaceDynamicFunction({
+      id: this.metaData.id,
+      selectedFunctions: tableColumns,
+      forceRender: true
+    });
+  }
+
+  @Provide()
+  getCurrentValues(id: WidgetId): string[] {
+    if (FilterModule.mainFilterRequestMap.has(id)) {
+      const filterRequest: FilterRequest = FilterModule.mainFilterRequestMap.get(id)!;
+      return ValueCondition.isValueCondition(filterRequest!.condition) ? filterRequest!.condition.getValues() : [];
+    } else {
+      return QuerySettingModule.getDynamicValueAsList(id);
+    }
+  }
+
+  @Provide()
+  protected async applyDirectCrossFilter(valueMap: Map<ValueControlType, string[]> | undefined): Promise<void> {
+    Log.debug('changeValues::id', this.metaData.id);
+    Log.debug('changeValues::valueMap', valueMap);
+    await DashboardControllerModule.applyDynamicValues({ id: this.metaData.id, valueMap: valueMap });
+  }
+
+  protected _renderChart(response: VisualizationResponse, chart: ChartInfo) {
     ChartDataModule.setVisualizationResponse({
       id: chart.id,
       data: response
@@ -436,7 +347,7 @@ export default class ChartHolder extends Vue {
     ChartDataModule.setStatusLoaded(chart.id);
   }
 
-  private renderError(ex: any) {
+  protected renderError(ex: any) {
     const exception = DIException.fromObject(ex);
     Log.error('renderError::', ex);
     ChartDataModule.setStatusError({
@@ -445,25 +356,11 @@ export default class ChartHolder extends Vue {
     });
   }
 
-  private toQueryRequest(chartInfo: ChartInfo): QueryRequest {
+  protected toQueryRequest(chartInfo: ChartInfo): QueryRequest {
     const querySetting: QuerySetting = chartInfo.setting;
     const queryRequest = QueryRequest.fromQuerySetting(querySetting);
     queryRequest.dashboardId = DashboardModule.id;
     return queryRequest;
-  }
-
-  private handleHover(isHovered: boolean) {
-    this.isHovered = isHovered;
-  }
-
-  private clickSeeMore(event: Event) {
-    const menuOptions: ContextMenuItem[] = [];
-    if (this.currentChartInfo && this.currentChartInfo.className === Widgets.Chart && this.currentChartInfo.extraData) {
-      menuOptions.push(...this.menuOptions);
-    } else {
-      menuOptions.push(...this.menuOptions.filter(item => item.text != DashboardOptions.CONFIG_CHART));
-    }
-    this.$root.$emit(DashboardEvents.ShowContextMenu, event, menuOptions);
   }
 
   @Track(TrackEvents.ConfigChart, {
@@ -472,14 +369,13 @@ export default class ChartHolder extends Vue {
     chart_title: (_: ChartHolder) => _.currentChartInfo.name
   })
   @Provide()
-  private handleEditChart() {
+  protected handleEditChart() {
     PopupUtils.hideAllPopup();
     const dashboard = DashboardModule.currentDashboard;
     if (dashboard) {
       DataManager.saveCurrentDashboardId(dashboard.id.toString());
       DataManager.saveCurrentDashboard(dashboard);
       DataManager.saveCurrentWidget(this.currentChartInfo);
-      DataManager.saveChartBuilderMode(BuilderMode.Update);
       // RouteUtils.navigateToDataBuilder(this.$route, FilterModule.routerFilters);
       this.$root.$emit(DashboardEvents.UpdateChart, this.currentChartInfo);
     }
@@ -487,13 +383,12 @@ export default class ChartHolder extends Vue {
 
   @Track(TrackEvents.ChartAddInnerFilter)
   @Provide()
-  private handleAddInnerFilter() {
+  protected handleAddInnerFilter() {
     PopupUtils.hideAllPopup();
     const dashboard = DashboardModule.currentDashboard;
     if (dashboard) {
       DataManager.saveCurrentDashboardId(dashboard.id.toString());
       DataManager.saveCurrentDashboard(dashboard);
-      DataManager.saveChartBuilderMode(BuilderMode.Create);
       // RouteUtils.navigateToDataBuilder(this.$route, FilterModule.routerFilters);
       this.$root.$emit(DashboardEvents.AddInnerFilter, this.currentChartInfo);
     }
@@ -501,14 +396,13 @@ export default class ChartHolder extends Vue {
 
   @Track(TrackEvents.ChartUpdateInnerFilter)
   @Provide()
-  private handleUpdateInnerFilter() {
+  protected handleUpdateInnerFilter() {
     PopupUtils.hideAllPopup();
     const dashboard = DashboardModule.currentDashboard;
     if (dashboard) {
       DataManager.saveCurrentDashboardId(dashboard.id.toString());
       DataManager.saveCurrentDashboard(dashboard);
       DataManager.saveCurrentWidget(this.currentChartInfo.chartFilter!);
-      DataManager.saveChartBuilderMode(BuilderMode.Update);
       // RouteUtils.navigateToDataBuilder(this.$route, FilterModule.routerFilters);
       this.$root.$emit(DashboardEvents.UpdateInnerFilter, this.currentChartInfo);
     }
@@ -516,7 +410,7 @@ export default class ChartHolder extends Vue {
 
   @Track(TrackEvents.ChartDeleteInnerFilter)
   @Provide()
-  private async handleDeleteInnerFilter() {
+  protected async handleDeleteInnerFilter() {
     PopupUtils.hideAllPopup();
     this.currentChartInfo.chartFilter = undefined;
     await WidgetModule.handleUpdateWidget(this.currentChartInfo);
@@ -529,19 +423,20 @@ export default class ChartHolder extends Vue {
     chart_title: (_: ChartHolder) => _.currentChartInfo.name ?? 'Untitled chart'
   })
   @Provide()
-  private handleEditTitle() {
+  protected handleEditTitle() {
     PopupUtils.hideAllPopup();
     this.$root.$emit(DashboardEvents.ShowEditChartTitleModal, this.currentChartInfo);
   }
 
   @Track(TrackEvents.DuplicateChart, { chart_id: (_: ChartHolder) => _.currentChartInfo.id })
   @Provide()
-  private async duplicateChart(): Promise<void> {
+  protected async duplicateChart(): Promise<void> {
     PopupUtils.hideAllPopup();
 
     const newWidget: Widget = await WidgetModule.handleDuplicateWidget(this.currentChartInfo);
     if (QueryRelatedWidget.isQueryRelatedWidget(newWidget)) {
-      ZoomModule.registerZoomData(cloneDeep(newWidget));
+      const clonedChart = cloneDeep(newWidget);
+      ZoomModule.registerZoomData({ id: clonedChart.id, setting: clonedChart.setting });
       FilterModule.setAffectFilterWidget(newWidget);
       QuerySettingModule.setQuerySetting({ id: newWidget.id, query: newWidget.setting });
       await DashboardControllerModule.renderChart({ id: newWidget.id, forceFetch: true });
@@ -550,7 +445,7 @@ export default class ChartHolder extends Vue {
 
   @Track(TrackEvents.CopyChart, { chart_id: (_: ChartHolder) => _.currentChartInfo.id })
   @Provide()
-  private async copyChart(): Promise<void> {
+  protected async copyChart(): Promise<void> {
     try {
       PopupUtils.hideAllPopup();
       const copiedData = CopiedData.create(CopiedDataType.Chart, {
@@ -567,7 +462,7 @@ export default class ChartHolder extends Vue {
 
   @Track(TrackEvents.DeleteChart, { chart_id: (_: ChartHolder) => _.currentChartInfo.id })
   @Provide()
-  private async deleteChart() {
+  protected async deleteChart() {
     const { isConfirmed } = await this.$alert.fire({
       icon: 'warning',
       title: 'Remove widget',
@@ -577,50 +472,46 @@ export default class ChartHolder extends Vue {
       cancelButtonText: 'No'
     });
     if (this.remove && isConfirmed) {
-      this.remove(() => {
+      this.remove(async () => {
         PopupUtils.hideAllPopup();
         WidgetModule.handleDeleteWidget(this.currentChartInfo).catch(ex => {
           PopupUtils.showError('Can not remove widget, refresh page and try again');
         });
-        this.onRemoveFilter();
+        const affectedIds: WidgetId[] = this.removeFilter(this.currentChartInfo.id);
+        this.requestRender(affectedIds);
       });
     }
   }
 
-  private retryLoadData() {
+  protected async requestRender(affectedIds: WidgetId[]): Promise<void> {
+    // avoid stuck ui
+    await TimeoutUtils.sleep(100);
+    await DashboardControllerModule.renderCharts({
+      idList: affectedIds,
+      useBoost: DashboardModule.isUseBoost
+    });
+  }
+
+  protected retryLoadData() {
     if (isFunction(this.retry)) {
       this.retry();
     } else {
-      ZoomModule.registerZoomData(this.currentChartInfo);
+      ZoomModule.registerZoomData({ id: this.currentChartInfo.id, setting: this.currentChartInfo.setting });
       FilterModule.setAffectFilterWidget(this.currentChartInfo);
       DashboardControllerModule.renderChart({ id: this.currentChartInfo.id, forceFetch: true });
     }
   }
 
-  private handleRemoveFilter(chartInfo: ChartInfo) {
-    return FilterModule.handleRemoveFilter(chartInfo.id);
-  }
-
-  private showFullSize() {
-    this.$root.$emit(DashboardEvents.ShowWidgetFullSize, this.currentChartInfo);
-  }
-
-  private hideFullSize() {
-    this.$root.$emit(DashboardEvents.HideWidgetFullSize);
-  }
-
-  private handleChartRenderError(ex: any) {
+  protected handleChartRenderError(ex: any) {
     const exception = DIException.fromObject(ex);
     ChartDataModule.setStatusError({ id: this.currentChartInfo.id, message: exception.message });
   }
 
-  private async renderChartFilter(parentChartInfo: ChartInfo) {
-    Log.debug('renderChartFilter::', parentChartInfo.containChartFilter);
-    if (parentChartInfo.containChartFilter) {
+  protected async renderChartFilter(parentChartInfo: ChartInfo): Promise<void> {
+    if (parentChartInfo.hasInnerFilter) {
       const chartFilter: ChartInfo = parentChartInfo.chartFilter!;
       const queryRequest: QueryRequest = this.toQueryRequest(chartFilter);
       const response: VisualizationResponse = await this.queryService.query(queryRequest);
-      Log.debug('renderChartFilter::response', response);
       ChartDataModule.setVisualizationResponse({
         id: chartFilter.id,
         data: response
@@ -628,11 +519,11 @@ export default class ChartHolder extends Vue {
     }
   }
 
-  private async handleChartFilterSelect(filter: FilterRequest) {
+  protected async handleChartFilterSelect(filter: FilterRequest) {
     return FilterModule.handleSetInnerFilter(filter);
   }
 
-  private async handleDeleteChartFilter() {
+  protected async handleDeleteChartFilter() {
     return FilterModule.handleRemoveInnerFilter(this.currentChartInfo.id);
   }
 

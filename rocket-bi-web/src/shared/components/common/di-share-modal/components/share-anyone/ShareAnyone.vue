@@ -59,7 +59,7 @@
                 placeholder="Your password"
                 @input="changePassword"
               >
-                <template #suffix>
+                <template #suffix-icon>
                   <template v-if="isCreateNewPassword">
                     <i v-if="isShowPassword" class="fas fa-eye" @click="toggleShowPassword"></i>
                     <i v-else class="fas fa-eye-slash" @click="toggleShowPassword"></i>

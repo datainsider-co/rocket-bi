@@ -33,6 +33,7 @@ import { GA4Source } from '@core/data-ingestion/domain/response/GA4Source';
 import { GASource } from '@core/data-ingestion/domain/response/GASource';
 import { GASourceInfo } from '@core/data-ingestion/domain/data-source/GASourceInfo';
 import { PalexySourceInfo } from '@core/data-ingestion/domain/data-source/PalexySourceInfo';
+import { GoogleSearchConsoleSourceInfo } from '@core/data-ingestion/domain/data-source/GoogleSearchConsoleSourceInfo';
 
 export abstract class DataSourceInfo {
   static readonly DEFAULT_ID = -1;
@@ -80,12 +81,15 @@ export abstract class DataSourceInfo {
         return TiktokSourceInfo.fromObject(obj);
       case DataSourceType.Palexy:
         return PalexySourceInfo.fromObject(obj);
+      case DataSourceType.GoogleSearchConsole:
+        return GoogleSearchConsoleSourceInfo.fromObject(obj);
       default:
         return UnsupportedSourceInfo.fromObject(obj);
     }
   }
 
   static fromDataSource(obj: DataSource): DataSourceInfo {
+    // Log.debug("DataSourceInfo::fromDataSource::obj::", obj)
     switch (obj.className) {
       case DataSources.JdbcSource:
         return this.fromJdbcSource(obj as JdbcSource);
@@ -111,6 +115,11 @@ export abstract class DataSourceInfo {
         return TiktokSourceInfo.fromObject(obj);
       case DataSources.Palexy:
         return PalexySourceInfo.fromObject(obj);
+      case DataSources.GoogleSearchConsole: {
+        const source = GoogleSearchConsoleSourceInfo.fromObject(obj);
+        Log.debug('DataSourceInfo::fromDataSource::obj::', source);
+        return source;
+      }
       default:
         return UnsupportedSourceInfo.fromObject(obj);
     }
@@ -186,6 +195,8 @@ export abstract class DataSourceInfo {
         return 'ic_tiktok_ads_small.svg';
       case DataSourceType.Palexy:
         return 'ic_palexy_small.svg';
+      case DataSourceType.GoogleSearchConsole:
+        return 'ic_google_search_console_small.svg';
       default:
         return 'ic_default.svg';
     }

@@ -21,7 +21,7 @@ export class DefaultTableFooterStyleRender implements TableFooterStyleRender {
   constructor(tableResponse: AbstractTableResponse, query: AbstractTableQuerySetting, baseThemeColor: string) {
     this.tableResponse = tableResponse;
     this.querySetting = query;
-    this.vizSetting = query.getChartOption()!;
+    this.vizSetting = query.getChartOption<TableChartOption>()!;
     this.baseThemeColor = baseThemeColor;
     this.styleFormatters = DefaultTableFooterStyleRender.getStyleFormatters();
   }

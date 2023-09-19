@@ -60,4 +60,16 @@ export class EventBus {
   static pasteData(data: CopiedData) {
     this.getInstance().$emit(BusEvents.PasteData, data);
   }
+
+  static onDashboardResize(fn: (isMobile: boolean) => void): void {
+    this.getInstance().$on(BusEvents.DashboardResize, fn);
+  }
+
+  static offDashboardResize(fn: (isMobile: boolean) => void): void {
+    this.getInstance().$off(BusEvents.DashboardResize, fn);
+  }
+
+  static resizeDashboard(isMobile: boolean): void {
+    this.getInstance().$emit(BusEvents.DashboardResize, isMobile);
+  }
 }

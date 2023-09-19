@@ -1,4 +1,4 @@
-import ClickhouseConfig from '@/screens/organization-settings/views/clickhouse-config/ClickhouseConfig.vue';
+import ClickhouseConfig from '@/screens/organization-settings/views/connector-config/ConnectorConfig.vue';
 import { ConnectionModule, ConnectionStore } from '@/screens/organization-settings/stores/ConnectionStore';
 
 export default class EnvUtils {

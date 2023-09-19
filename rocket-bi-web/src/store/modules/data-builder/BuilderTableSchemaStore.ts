@@ -3,12 +3,12 @@
  * @created: 12/4/20, 6:05 PM
  */
 
-import { DatabaseInfo, DynamicFunctionWidget, TabControl, TableSchema, TableType, TabControlData } from '@core/common/domain/model';
+import { ChartControlData, ChartControlField, ChartControl, ChartInfoType, DatabaseInfo, TableSchema } from '@core/common/domain/model';
 import { SlTreeNodeModel } from '@/shared/components/builder/treemenu/SlVueTree';
 import { Action, getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import store from '@/store';
 import { Stores } from '@/shared/enums/Stores';
-import { ListUtils, SchemaUtils } from '@/utils';
+import { ChartUtils, ListUtils, SchemaUtils } from '@/utils';
 import { StringUtils } from '@/utils/StringUtils';
 import { Log } from '@core/utils';
 import { cloneDeep } from 'lodash';
@@ -17,10 +17,9 @@ import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchem
 @Module({ store: store, name: Stores.BuilderTableSchemaStore, dynamic: true, namespaced: true })
 class BuilderTableSchemaStore extends VuexModule {
   tableSchemas: SlTreeNodeModel<TableSchema>[] = [];
-  dbNameSelected = '';
+  selectedDbName = '';
   databaseSchema: DatabaseInfo | null = null;
-  tabControlAsTreeNodes: SlTreeNodeModel<TabControlData>[] = [];
-  tabControls: TabControl[] = [];
+  chartControls: ChartControl[] = [];
 
   get searchTablesAndColumns(): (keyword: string) => SlTreeNodeModel<TableSchema>[] {
     const numberOfTables = 20;
@@ -52,19 +51,18 @@ class BuilderTableSchemaStore extends VuexModule {
     };
   }
 
-  get searchTabControls(): (keyword: string) => SlTreeNodeModel<TabControlData>[] {
+  get filterChartControls(): (keyword: string) => SlTreeNodeModel<ChartControlData>[] {
     return (keyword: string) => {
-      return this.tabControlAsTreeNodes.filter(control => StringUtils.isIncludes(keyword, control.title));
+      return this.chartControlAsTreeNodes.filter(control => StringUtils.isIncludes(keyword, control.title));
     };
   }
 
   @Mutation
   reset() {
-    this.dbNameSelected = '';
+    this.selectedDbName = '';
     this.tableSchemas = [];
-    this.tabControlAsTreeNodes = [];
     this.databaseSchema = null;
-    this.tabControls = [];
+    this.chartControls = [];
   }
 
   @Mutation
@@ -102,20 +100,32 @@ class BuilderTableSchemaStore extends VuexModule {
     return databaseSchema;
   }
 
-  @Action
-  loadTabControls(tabs: TabControl[]): void {
-    this.setTabControls(tabs);
+  @Mutation
+  setChartControls(chartControls: ChartControl[]): void {
+    this.chartControls = chartControls;
   }
 
-  @Mutation
-  setTabControls(tabs: TabControl[]): void {
-    this.tabControls = tabs;
-    this.tabControlAsTreeNodes = SchemaUtils.buildTabControlNodes(tabs).sort((node, otherNode) => StringUtils.compare(node.title, otherNode.title));
+  get chartControlAsTreeNodes(): SlTreeNodeModel<ChartControlData>[] {
+    return this.chartControls
+      .map(control => {
+        const controlData: ChartControlData = control.getChartControlData();
+        const chartInfoType = controlData.chartInfoType || ChartInfoType.Normal;
+        const iconSrc = ChartUtils.getControlIconSrc(chartInfoType, controlData.chartType);
+        return {
+          title: controlData.displayName,
+          iconSrc: iconSrc,
+          field: new ChartControlField(controlData),
+          isExpanded: true,
+          isLeaf: true,
+          children: []
+        };
+      })
+      .sort((node, otherNode) => StringUtils.compare(node.title, otherNode.title));
   }
 
   @Mutation
   setDbNameSelected(dbName: string) {
-    this.dbNameSelected = dbName;
+    this.selectedDbName = dbName;
   }
 
   @Mutation

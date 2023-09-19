@@ -4,26 +4,26 @@
  */
 
 import { DrillThroughHandler } from '@/screens/dashboard-detail/components/drill-through/drill-throguh-handler/DrillThroughHandler';
-import { ChartInfo, DynamicFilter, FilterMode, HistogramQuerySetting } from '@core/common/domain';
+import { ChartInfo, InternalFilter, FilterMode, HistogramQuerySetting } from '@core/common/domain';
 import { ListUtils, SchemaUtils } from '@/utils';
-import { InputType, NumberConditionTypes } from '@/shared';
+import { DateHistogramConditionTypes, InputType, NumberConditionTypes, StringConditionTypes } from '@/shared';
 
 export class HistogramDrillThroughHandler extends DrillThroughHandler {
   constructor() {
     super();
   }
 
-  createFilter(metaData: ChartInfo, value: string): DynamicFilter[] {
+  createFilter(metaData: ChartInfo, value: string): InternalFilter[] {
     const { setting } = metaData;
     if (HistogramQuerySetting.isHistogramQuerySetting(setting)) {
       const column = setting.value;
       const field = column.function.field;
       const [minValue, maxValue] = JSON.parse(value);
-      const minFilter = DynamicFilter.from(field, column.name, SchemaUtils.isNested(field.fieldName));
+      const minFilter = InternalFilter.from(field, column.name, SchemaUtils.isNested(field.fieldName));
       minFilter.sqlView = ListUtils.getHead(setting.sqlViews);
       this.configFilter(minFilter, minValue, NumberConditionTypes.greaterThanOrEqual);
 
-      const maxFilter = DynamicFilter.from(field, column.name, SchemaUtils.isNested(field.fieldName));
+      const maxFilter = InternalFilter.from(field, column.name, SchemaUtils.isNested(field.fieldName));
       maxFilter.sqlView = ListUtils.getHead(setting.sqlViews);
       this.configFilter(maxFilter, maxValue, NumberConditionTypes.lessThanOrEqual);
 
@@ -33,9 +33,9 @@ export class HistogramDrillThroughHandler extends DrillThroughHandler {
     }
   }
 
-  private configFilter(filter: DynamicFilter, value: number, optionType: string) {
-    filter.filterModeSelected = FilterMode.range;
-    filter.currentInputType = InputType.text;
+  private configFilter(filter: InternalFilter, value: number, optionType: StringConditionTypes | DateHistogramConditionTypes | NumberConditionTypes) {
+    filter.filterModeSelected = FilterMode.Range;
+    filter.currentInputType = InputType.Text;
     filter.currentOptionSelected = optionType;
     filter.currentValues = [value?.toString()];
   }

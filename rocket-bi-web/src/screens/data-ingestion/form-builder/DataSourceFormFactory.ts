@@ -28,6 +28,8 @@ import { GASourceInfo } from '@core/data-ingestion/domain/data-source/GASourceIn
 import { TiktokSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/TiktokSourceFormRender';
 import { PalexySourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/PalexySourceFormRender';
 import { PalexySourceInfo } from '@core/data-ingestion/domain/data-source/PalexySourceInfo';
+import { GoogleSearchConsoleSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/GoogleSearchConsoleSourceFormRender';
+import { GoogleSearchConsoleSourceInfo } from '@core/data-ingestion/domain/data-source/GoogleSearchConsoleSourceInfo';
 
 export class DataSourceFormFactory {
   createRender(dataSource: DataSourceInfo, onSubmit?: () => void): DataSourceFormRender {
@@ -71,6 +73,8 @@ export class DataSourceFormFactory {
         return new TiktokSourceFormRender(dataSource as TiktokSourceInfo, onSubmit);
       case DataSourceType.Palexy:
         return new PalexySourceFormRender(dataSource as PalexySourceInfo, onSubmit);
+      case DataSourceType.GoogleSearchConsole:
+        return new GoogleSearchConsoleSourceFormRender(dataSource as GoogleSearchConsoleSourceInfo, onSubmit);
       default:
         throw new UnsupportedException(`Unsupported data source type ${dataSource.sourceType}`);
     }

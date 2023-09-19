@@ -157,4 +157,18 @@ export abstract class GoogleUtils {
       })
     });
   }
+
+  static loadGoogleSearchConsoleClient(apiKey: string, accessToken: string) {
+    gapi.client.setToken({ access_token: accessToken });
+    // gapi.client.setApiKey(apiKey);
+    return gapi.client.load('https://content.googleapis.com/discovery/v1/apis/searchconsole/v1/rest', 'v1beta');
+  }
+
+  static listSiteUrls(): { siteUrl: string }[] {
+    //@ts-ignore
+    return gapi.client.webmasters.sites.list({}).then((response: any) => {
+      Log.debug('GoogleUtils::listSiteUrls::response::', response);
+      return response.result.siteEntry;
+    });
+  }
 }

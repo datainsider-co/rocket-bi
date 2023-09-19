@@ -4,7 +4,6 @@
  */
 
 import {
-  BetweenAndIncluding,
   CompareMode,
   CompareRequest,
   Comparison,
@@ -33,7 +32,7 @@ import { ChartType, DateRange } from '@/shared';
 import { DateHistogramFunctionBuilder } from '@core/common/services';
 import { Log } from '@core/utils/Log';
 import { DateUtils } from '@/utils';
-import { CompareMode as ComparisonMode } from '@/shared/enums/CompareMode.ts';
+import { CompareMode as CompareModeEnum } from '@/shared/enums/CompareMode';
 import { DateRelatedCondition } from '@core/common/domain/model/condition/DateRelatedCondition';
 
 export class ComparisonUtils {
@@ -46,23 +45,26 @@ export class ComparisonUtils {
     }
   }
 
-  static getCompareRequest(compareOption: ComparisonOptionData, compareMode: CompareMode): CompareRequest | undefined {
+  static toCompareRequest(compareOption: ComparisonOptionData, compareMode: CompareMode): CompareRequest | undefined {
     Log.debug('getCompareRequest::', ComparisonUtils.isComparisonOn(compareOption), compareOption);
     if (ComparisonUtils.isComparisonOn(compareOption)) {
-      const dataRange: DataRange = compareOption.dataRange!;
-      const firstCondition: FieldRelatedCondition | undefined = ConditionUtils.buildMainDateCondition(
-        dataRange.dateField!,
-        dataRange.dateRange!,
-        dataRange.mode!
+      const firstRange: DataRange = compareOption.dataRange!;
+      const firstCondition: FieldRelatedCondition | undefined = ConditionUtils.buildDateFilterCondition(
+        firstRange.dateField!,
+        firstRange.dateRange!,
+        firstRange.mode!
       );
-      const secondCondition: Condition | undefined = ComparisonUtils.buildSecondCondition(dataRange, compareOption.comparison!);
+      const secondCondition: Condition | undefined = ComparisonUtils.buildSecondCondition(firstRange, compareOption.comparison!);
       return new CompareRequest(firstCondition, secondCondition, compareMode);
-      return void 0;
     } else {
       return void 0;
     }
   }
 
+  /**
+   * @deprecated use method DateUtils.getDateRange instead of this method.
+   * Because method return all time when mode is all time. But method DateUtils.getDateRange return null
+   */
   static getDateRange(mode: MainDateMode): DateRange | null {
     if (mode === MainDateMode.allTime) {
       return DateUtils.getAllTime();
@@ -71,64 +73,53 @@ export class ComparisonUtils {
     }
   }
 
-  private static buildSecondCondition(dataRange: DataRange, comparison: Comparison): Condition | undefined {
-    const field: Field = dataRange.dateField!;
-    const firstCondition: FieldRelatedCondition | undefined = ConditionUtils.buildMainDateCondition(field, dataRange.dateRange!, dataRange.mode!);
-    const compareMode: ComparisonMode = comparison.mode as any;
-    if (dataRange.mode === MainDateMode.custom || dataRange.mode === MainDateMode.allTime) {
-      const dateRange = ComparisonUtils.getDateRange(dataRange.mode!) || dataRange.dateRange || DateUtils.getAllTime();
-      const compareRange = DateUtils.getCompareDateRange(compareMode, dateRange) ?? DateUtils.getAllTime();
-      return ConditionUtils.buildDateCondition(dataRange.dateField!, compareRange);
-    } else {
-      switch (compareMode) {
-        case ComparisonMode.previousPeriod: {
-          const dateCondition: DateRelatedCondition = firstCondition as any;
-          if (dateCondition) {
-            dateCondition.intervalFunction = ComparisonUtils.getIntervalPreviousPeriodFunction(dataRange.mode!);
-            return dateCondition;
-          } else {
-            return void 0;
-          }
-        }
-        case ComparisonMode.custom: {
-          const dateRange = ConditionUtils.formatDateRange(comparison.dateRange);
-          return new BetweenAndIncluding(field, dateRange.start, dateRange.end);
-        }
-        case ComparisonMode.samePeriodLastMonth: {
-          const dateCondition: DateRelatedCondition = firstCondition as any;
-          if (dateCondition) {
-            dateCondition.intervalFunction = new PastNMonth(1);
-            return firstCondition;
-          } else {
-            return void 0;
-          }
-        }
-        case ComparisonMode.samePeriodLastQuarter: {
-          const dateCondition: DateRelatedCondition = firstCondition as any;
-          if (dateCondition) {
-            dateCondition.intervalFunction = new PastNQuarter(1);
-            return firstCondition;
-          } else {
-            return void 0;
-          }
-        }
-        case ComparisonMode.samePeriodLastYear: {
-          const dateCondition: DateRelatedCondition = firstCondition as any;
-          if (dateCondition) {
-            dateCondition.intervalFunction = new PastNYear(1);
-            return firstCondition;
-          } else {
-            return void 0;
-          }
-        }
-        default:
+  private static buildSecondCondition(firstRange: DataRange, comparison: Comparison): Condition | undefined {
+    const field: Field = Field.fromObject(firstRange.dateField!);
+    const compareMode: CompareModeEnum = comparison.mode as any;
+    switch (firstRange.mode) {
+      case MainDateMode.custom: {
+        const firstDateRange: DateRange = firstRange.dateRange ?? DateUtils.getAllTime();
+        const secondDateRange: DateRange = DateUtils.getCompareDateRange(compareMode, firstDateRange) ?? comparison.dateRange ?? DateUtils.getAllTime();
+        return ConditionUtils.buildBetweenConditionByDateRange(field, secondDateRange);
+      }
+      case MainDateMode.allTime: {
+        const secondDateRange: DateRange = DateUtils.getCompareDateRange(compareMode, DateUtils.getAllTime()) ?? comparison.dateRange ?? DateUtils.getAllTime();
+        return ConditionUtils.buildBetweenConditionByDateRange(field, secondDateRange);
+      }
+      default: {
+        const intervalCompareFn: ScalarFunction | undefined = ComparisonUtils.getIntervalPeriodFn(firstRange.mode!, compareMode);
+        const firstCondition: FieldRelatedCondition | undefined = ConditionUtils.buildDateFilterCondition(field, firstRange.dateRange!, firstRange.mode!);
+        if (firstCondition) {
+          ((firstCondition as any) as DateRelatedCondition).intervalFunction = intervalCompareFn;
+          return firstCondition;
+        } else {
           return void 0;
+        }
       }
     }
   }
 
-  private static getIntervalPreviousPeriodFunction(mode: MainDateMode): ScalarFunction | undefined {
-    switch (mode) {
+  static getIntervalPeriodFn(dateMode: MainDateMode, comparisonMode: CompareModeEnum): ScalarFunction | undefined {
+    switch (comparisonMode) {
+      case CompareModeEnum.previousPeriod: {
+        return ComparisonUtils.getIntervalPreviousPeriodFn(dateMode);
+      }
+      case CompareModeEnum.samePeriodLastMonth: {
+        return new PastNMonth(1);
+      }
+      case CompareModeEnum.samePeriodLastQuarter: {
+        return new PastNQuarter(1);
+      }
+      case CompareModeEnum.samePeriodLastYear: {
+        return new PastNYear(1);
+      }
+      default:
+        return void 0;
+    }
+  }
+
+  private static getIntervalPreviousPeriodFn(dateMode: MainDateMode): ScalarFunction | undefined {
+    switch (dateMode) {
       case MainDateMode.thisDay:
       case MainDateMode.lastDay:
       case MainDateMode.last7Days:
@@ -195,7 +186,7 @@ export class ComparisonUtils {
     seriesChartOption.setOption('chart.margin', [0, 0, 0, 0]);
     seriesChartOption.setOption('yAxis[0].visible', false);
     seriesChartOption.setOption('xAxis[0].visible', false);
-    seriesChartOption.setOption('background', '#00000000');
+    seriesChartOption.setOption('background', 'var(--chart-background-color)');
     seriesChartOption.setOption('themeColor.enabled', false);
     seriesChartOption.setOption('themeColor.colors', [isDecreaseComparison ? '#ea6b6b' : '#4dcf36']);
     seriesChartOption.setOption('plotOptions.area.fillColor', isDecreaseComparison ? '#ffeded' : '#eaffe7');

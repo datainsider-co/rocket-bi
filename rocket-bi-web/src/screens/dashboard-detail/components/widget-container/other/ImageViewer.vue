@@ -1,8 +1,8 @@
 <template>
-  <div class="h-100 w-100" style="background-color: var(--chart-background-color);">
+  <div class="image-viewer">
     <EmptyWidget v-if="widget.isEmpty" />
     <ErrorWidget v-else-if="isLoadImageError" hide-retry error="Something went wrong"></ErrorWidget>
-    <div v-show="!isLoadImageError && !widget.isEmpty" class="image-view rounded">
+    <div v-show="!isLoadImageError && !widget.isEmpty" class="image-viewer--preview" v-loading="isLoading">
       <img :src="getImage" @error="handleOnError" @load="handleOnLoad" />
     </div>
   </div>
@@ -22,9 +22,10 @@ import EmptyWidget from '@/screens/dashboard-detail/components/widget-container/
 })
 export default class ImageViewer extends Vue {
   isLoadImageError = false;
+  isLoading = true;
 
   @Prop({ required: true })
-  widget!: ImageWidget;
+  protected readonly widget!: ImageWidget;
 
   get getImage(): string {
     return this.widget.url;
@@ -32,24 +33,34 @@ export default class ImageViewer extends Vue {
 
   private handleOnLoad() {
     this.isLoadImageError = false;
+    this.isLoading = false;
   }
 
   private handleOnError() {
     this.isLoadImageError = true;
+    this.isLoading = false;
   }
 }
 </script>
 
-<style lang="scss" scoped>
-.image-view {
+<style lang="scss">
+.image-viewer {
   width: 100%;
   height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 
-  img {
+  &--preview {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    background-size: cover;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background-size: cover;
+    }
   }
 }
 </style>

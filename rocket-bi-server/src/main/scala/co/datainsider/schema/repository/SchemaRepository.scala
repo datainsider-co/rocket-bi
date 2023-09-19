@@ -149,7 +149,7 @@ case class SchemaRepositoryImpl @Inject() (
 ) extends SchemaRepository
     with Logging {
 
-  private def resolveDDLExecutor(organizationId: Long): Future[DDLExecutor] = {
+  def resolveDDLExecutor(organizationId: Long): Future[DDLExecutor] = {
     connectionService.getTunnelConnection(organizationId).map { source =>
       engineFactoryResolver.resolve(source.getClass).asInstanceOf[Engine[Connection]].getDDLExecutor(source)
     }
@@ -309,7 +309,7 @@ case class SchemaRepositoryImpl @Inject() (
       isDDLExists <- ddlExecutor.existTableSchema(dbName, tblName)
       tableType <- getTable(organizationId, dbName, tblName).transform {
         case Return(schema) => Future.value(Option(schema.getTableType))
-        case Throw(e)  => Future.None
+        case Throw(e)       => Future.None
       }
       isDDLDeleted <- isDDLExists match {
         case true  => ddlExecutor.dropTable(dbName, tblName, tableType.getOrElse(TableType.Default))

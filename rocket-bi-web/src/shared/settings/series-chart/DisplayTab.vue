@@ -85,6 +85,7 @@ import { ListUtils } from '@/utils';
 import { ChartType, SelectOption } from '@/shared';
 import { get } from 'lodash';
 import { AxisSetting, SettingKey } from '@core/common/domain';
+import { Log } from '@core/utils';
 
 @Component({ components: { PanelHeader } })
 export default class DisplayTab extends Vue {
@@ -96,16 +97,23 @@ export default class DisplayTab extends Vue {
   @Prop({ required: false, type: Array })
   private readonly axisSetting!: AxisSetting[];
 
-  @Prop({ required: false, type: Array })
-  private readonly seriesOptions?: SelectOption[];
+  @Prop({ required: false, type: Array, default: () => [] })
+  private readonly seriesOptions!: SelectOption[];
+
   @Prop({ required: false, type: String })
   private readonly widgetType!: ChartType;
 
   private selectedLegend = '';
 
   @Watch('seriesOptions', { immediate: true })
-  onResponseChanged() {
-    this.selectedLegend = get(this.seriesOptions, '[0].id', '');
+  onResponseChanged(seriesOptions: SelectOption[]) {
+    if (!this.selectedLegend || !this.existsOptions(seriesOptions, this.selectedLegend)) {
+      this.selectedLegend = get(seriesOptions, '[0].id', '');
+    }
+  }
+
+  protected existsOptions(seriesOptions: SelectOption[], selectedLegend: string): boolean {
+    return seriesOptions.some(series => series.id === selectedLegend);
   }
 
   private readonly defaultSetting = {
@@ -256,5 +264,3 @@ export default class DisplayTab extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

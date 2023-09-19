@@ -5,7 +5,7 @@
 
 import { ConditionType, Field, FilterMode, ScalarFunction } from '@core/common/domain/model';
 import { ValueCondition } from '@core/common/domain/model/condition/ValueCondition';
-import { ConditionData, ConditionFamilyTypes, DateHistogramConditionTypes, InputType } from '@/shared';
+import { ConditionData, DateHistogramConditionTypes, InputType } from '@/shared';
 import { FieldRelatedCondition } from '@core/common/domain/model/condition/FieldRelatedCondition';
 import { RandomUtils, SchemaUtils } from '@/utils';
 import { DIException } from '@core/common/domain';
@@ -28,15 +28,6 @@ export class Between extends FieldRelatedCondition implements ValueCondition {
     const min = obj.min;
     const max = obj.max;
     return new Between(field, min, max, getScalarFunction(obj.scalarFunction));
-  }
-
-  assignValue(min: string, max: string) {
-    this.min = min;
-    this.max = max;
-  }
-
-  getConditionTypes(): string[] {
-    return [ConditionFamilyTypes.dateHistogram, DateHistogramConditionTypes.between];
   }
 
   getValues(): string[] {
@@ -65,8 +56,8 @@ export class Between extends FieldRelatedCondition implements ValueCondition {
       firstValue: this.min,
       secondValue: this.max,
       allValues: this.getValues(),
-      currentInputType: InputType.dateRange,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.DateRange,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: DateHistogramConditionTypes.between
     };
   }

@@ -1,5 +1,5 @@
 <template>
-  <ContextMenu :id="id" ref="vueContext" tag="div" minWidth="314px" :ignoreOutsideClass="listIgnoreClassForContextMenu" :close-on-click="true" :z-index="1">
+  <ContextMenu :id="id" ref="vueContext" tag="div" minWidth="314px" :ignoreOutsideClass="listIgnoreClassForContextMenu" :close-on-click="true">
     <div class="move-file-container">
       <MoveFile
         ref="moveFile"

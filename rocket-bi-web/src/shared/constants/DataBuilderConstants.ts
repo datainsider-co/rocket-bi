@@ -1,7 +1,7 @@
 import {
   AggregationFunctionTypes,
   ChartType,
-  ConditionFamilyTypes,
+  ConditionTypes,
   ConditionNode,
   DateFunctionTypes,
   DateHistogramConditionTypes,
@@ -258,7 +258,7 @@ export abstract class DataBuilderConstants {
 
   static readonly FILTER_NODES: ConditionNode[] = [
     {
-      label: ConditionFamilyTypes.dateHistogram,
+      label: ConditionTypes.DateHistogram,
       conditions: [
         {
           type: 'group',
@@ -356,7 +356,7 @@ export abstract class DataBuilderConstants {
       ]
     },
     {
-      label: ConditionFamilyTypes.number,
+      label: ConditionTypes.Number,
       conditions: [
         {
           label: NumberConditionTypes.equal
@@ -387,7 +387,7 @@ export abstract class DataBuilderConstants {
       ]
     },
     {
-      label: ConditionFamilyTypes.string,
+      label: ConditionTypes.String,
       conditions: [
         {
           type: 'group',
@@ -440,6 +440,10 @@ export abstract class DataBuilderConstantsV35 {
     return [...DataBuilderConstantsV35.ALL_CHARTS, ...DataBuilderConstantsV35.ALL_FILTERS].filter(item => !item.isHidden);
   }
 
+  static get ALL_ICON_MAP(): Map<string, string> {
+    return new Map<string, string>([...DataBuilderConstantsV35.ALL_CHARTS, ...DataBuilderConstantsV35.ALL_FILTERS].map(chart => [chart.type, chart.src]));
+  }
+
   static get ALL_ITEMS_AS_MAP(): Map<string, VisualizationItemData> {
     return new Map<string, VisualizationItemData>(DataBuilderConstantsV35.ALL_ITEMS.map(vizItem => [vizItem.type, vizItem]));
   }
@@ -477,17 +481,6 @@ export abstract class DataBuilderConstantsV35 {
     }
   ];
 
-  static readonly TAB_MEASUREMENT_CONFIGS: DraggableConfig[] = [
-    {
-      key: ConfigType.values,
-      title: 'Values',
-      placeholder: 'Drag and drop your fields',
-      preferFunctionTypes: [FunctionFamilyTypes.aggregation],
-      defaultNumberFunctionInfo: AGGREGATION_FUNCTION_FOR_NUMBER,
-      defaultDateFunctionInfo: AGGREGATION_FUNCTION_FOR_DATE,
-      defaultTextFunctionInfo: AGGREGATION_FUNCTION_FOR_TEXT
-    }
-  ];
   static readonly DROP_DOWN_CONFIGS: DraggableConfig[] = [
     {
       key: ConfigType.values,
@@ -744,7 +737,7 @@ export abstract class DataBuilderConstantsV35 {
       title: 'X-Axis',
       placeholder: 'Drag and drop your fields',
       maxItem: 1,
-      preferFunctionTypes: [FunctionFamilyTypes.none, FunctionFamilyTypes.groupBy, FunctionFamilyTypes.dateHistogram, FunctionFamilyTypes.aggregation],
+      preferFunctionTypes: [FunctionFamilyTypes.none, FunctionFamilyTypes.aggregation],
       defaultTextFunctionInfo: NONE_FUNCTION_FOR_TEXT,
       defaultNumberFunctionInfo: NONE_FUNCTION_FOR_NUMBER,
       defaultDateFunctionInfo: NONE_FUNCTION_FOR_DATE
@@ -754,7 +747,7 @@ export abstract class DataBuilderConstantsV35 {
       title: 'Y-Axis',
       placeholder: 'Drag and drop your fields',
       maxItem: 1,
-      preferFunctionTypes: [FunctionFamilyTypes.none, FunctionFamilyTypes.groupBy, FunctionFamilyTypes.dateHistogram, FunctionFamilyTypes.aggregation],
+      preferFunctionTypes: [FunctionFamilyTypes.none, FunctionFamilyTypes.aggregation],
       defaultTextFunctionInfo: NONE_FUNCTION_FOR_TEXT,
       defaultNumberFunctionInfo: NONE_FUNCTION_FOR_NUMBER,
       defaultDateFunctionInfo: NONE_FUNCTION_FOR_DATE
@@ -1007,7 +1000,7 @@ export abstract class DataBuilderConstantsV35 {
       title: 'Value',
       placeholder: 'Drag and drop your fields',
       maxItem: 1,
-      preferFunctionTypes: [FunctionFamilyTypes.none, FunctionFamilyTypes.groupBy, FunctionFamilyTypes.dateHistogram],
+      preferFunctionTypes: [FunctionFamilyTypes.none, FunctionFamilyTypes.groupBy],
       defaultTextFunctionInfo: NONE_FUNCTION_FOR_TEXT,
       defaultNumberFunctionInfo: NONE_FUNCTION_FOR_NUMBER,
       defaultDateFunctionInfo: NONE_FUNCTION_FOR_DATE
@@ -1348,15 +1341,15 @@ export abstract class DataBuilderConstantsV35 {
       extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
     },
     {
-      title: 'Variwide',
-      src: 'ic_pie.svg',
+      title: 'Variable Pie',
+      src: 'ic_variable_pie.svg',
       type: ChartType.Variablepie,
       configPanels: DataBuilderConstantsV35.VARIWIDE_CONFIGS,
       extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
     },
     {
       title: 'Donut',
-      src: 'ic_pie.svg',
+      src: 'ic_donut.svg',
       type: ChartType.Donut,
       configPanels: DataBuilderConstantsV35.PIE_CONFIGS,
       extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
@@ -1541,7 +1534,7 @@ export abstract class DataBuilderConstantsV35 {
     },
     {
       title: 'Line Stock',
-      src: 'ic_line_chart.svg',
+      src: 'ic_linestock.svg',
       type: ChartType.LineStock,
       configPanels: DataBuilderConstantsV35.LINE_STOCK_CONFIGS,
       extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
@@ -1677,45 +1670,6 @@ export abstract class DataBuilderConstantsV35 {
     //   configPanels: DataBuilderConstantsV35.VALUE_FILTER_CONFIGS,
     //   extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
     // }
-  ];
-
-  static readonly MULTIPLE_MEASURES: VisualizationItemData[] = [
-    {
-      title: 'Tab Control',
-      src: 'ic_tab_filter.svg',
-      type: ChartType.TabMeasurement,
-      configPanels: DataBuilderConstantsV35.TAB_MEASUREMENT_CONFIGS,
-      extraPanels: []
-    },
-    {
-      title: 'Single Choice Control',
-      src: 'ic_single_choice.svg',
-      type: ChartType.SingleChoiceMeasurement,
-      configPanels: DataBuilderConstantsV35.TAB_MEASUREMENT_CONFIGS,
-      extraPanels: []
-    },
-    {
-      title: 'Multi Choice Control',
-      src: 'ic_multi_choice.svg',
-      type: ChartType.MultiChoiceMeasurement,
-      configPanels: DataBuilderConstantsV35.TAB_MEASUREMENT_CONFIGS,
-      extraPanels: []
-    },
-    {
-      title: 'Dropdown Control',
-      src: 'ic_dropdown.svg',
-      type: ChartType.DropDownMeasurement,
-      configPanels: DataBuilderConstantsV35.TAB_MEASUREMENT_CONFIGS,
-      extraPanels: []
-    },
-    {
-      title: 'Input Control',
-      src: 'ic_input_filter.svg',
-      type: ChartType.InputControl,
-      configPanels: [],
-      extraPanels: [],
-      useChartBuilder: false
-    }
   ];
 }
 

@@ -166,6 +166,7 @@ export default class GroupListCheckbox extends Vue {
         background-image: unset !important;
         color: var(--white);
         text-align: center;
+        line-height: 1;
       }
 
       .custom-control-input:checked ~ .custom-control-label::before {

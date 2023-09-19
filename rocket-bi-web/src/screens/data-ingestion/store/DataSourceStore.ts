@@ -7,11 +7,11 @@ import { Log } from '@core/utils';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { DIException, ListingRequest, SourceId } from '@core/common/domain';
 import { DataSourceService } from '@core/common/services/DataSourceService';
-import { DataSourceType, ListingResponse, SortRequest } from '@core/data-ingestion';
+import { DataSourceType, ListingResponse, SortRequest, TokenRequest, TokenResponse } from '@core/data-ingestion';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 import { UserAvatarCell } from '@/shared/components/common/di-table/custom-cell';
 import { DataSourceResponse } from '@core/data-ingestion/domain/response/DataSourceResponse';
-import { DateTimeFormatter } from '@/utils';
+import { DateTimeUtils } from '@/utils';
 import { JdbcUrlSourceInfo } from '@core/data-ingestion/domain/data-source/JdbcUrlSourceInfo';
 import { CheckBoxHeaderController, CheckBoxHeaderData } from '@/shared/components/common/di-table/custom-cell/CheckBoxHeaderData';
 
@@ -32,7 +32,7 @@ class DataSourceStore extends VuexModule {
     return this.dataSourceService
       .list(new ListingRequest(keyword, from, size, sorts))
       .then(response => {
-        // Log.debug('LoadDataSource::', response);
+        Log.debug('LoadDataSource::', response);
         this.setDataSources(response);
         return response.data;
       })
@@ -143,6 +143,16 @@ class DataSourceStore extends VuexModule {
   @Action
   getRefreshToken(authorizationCode: string): Promise<string> {
     return this.dataSourceService.getRefreshToken(authorizationCode);
+  }
+
+  @Action
+  refreshGoogleToken(request: TokenRequest): Promise<TokenResponse> {
+    return this.dataSourceService.refreshGoogleToken(request);
+  }
+
+  @Action
+  getSource(id: number): Promise<DataSourceInfo> {
+    return this.dataSourceService.get(id);
   }
 }
 

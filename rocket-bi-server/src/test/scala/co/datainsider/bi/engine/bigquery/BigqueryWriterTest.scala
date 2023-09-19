@@ -73,7 +73,7 @@ class BigqueryWriterTest extends Test with BeforeAndAfterAll {
       Array(7, null, null, dateTime.getTime, dateTime.getTime, null, null, null)
     )
 
-    bigqueryWriter.write(records, tableSchema)
+    bigqueryWriter.insertBatch(records, tableSchema)
     bigqueryWriter.close()
 
     val tableResult: TableResult =

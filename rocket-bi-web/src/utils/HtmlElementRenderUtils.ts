@@ -2,6 +2,7 @@ import { RandomUtils } from '@/utils/RandomUtils';
 import { StringUtils } from '@/utils/StringUtils';
 import { IconUtils } from '@/utils/IconUtils';
 import { Log } from '@core/utils';
+import { isObject } from 'lodash';
 
 type IconType = 'di-icon-edit' | 'di-icon-delete';
 
@@ -219,16 +220,17 @@ export class HtmlElementRenderUtils {
     return HtmlElementRenderUtils.backgrounds[charIndex % maxIndex];
   }
 
-  static getViewport(elementID: string) {
-    const elementRect = document.getElementById(elementID)?.getBoundingClientRect();
+  static getViewport(targetEl: string | Element) {
+    const el = isObject(targetEl) ? targetEl : document.getElementById(targetEl);
+    const elementRect = el?.getBoundingClientRect();
     return {
       height: elementRect?.height,
       width: elementRect?.width
     };
   }
 
-  static getPosition(elementID: string) {
-    const element = document.getElementById(elementID);
+  static getPosition(targetEl: string | Element): { top: number; left: number } {
+    const element = isObject(targetEl) ? targetEl : document.getElementById(targetEl);
     const bodyRect = document.body.getBoundingClientRect();
     const elemRect = element?.getBoundingClientRect();
     const offsetTop = (elemRect?.top ?? 0) - bodyRect.top;
@@ -239,14 +241,14 @@ export class HtmlElementRenderUtils {
   /**
    * fix overlap when open vue-context.
    * widget will render below or above targetId
-   * @param targetId is id of button
+   * @param targetEl is id of button or html element
    * @param event is native event
    * @param paddingX belong side target button
    * @param paddingY belong side target button
    */
-  static fixMenuOverlap(event: Event, targetId: string, paddingX = 0, paddingY = 8): Event {
-    const position = HtmlElementRenderUtils.getPosition(targetId);
-    const targetViewPort = HtmlElementRenderUtils.getViewport(targetId);
+  static fixMenuOverlap(event: Event, targetEl: string | Element, paddingX = 0, paddingY = 8): Event {
+    const position = HtmlElementRenderUtils.getPosition(targetEl);
+    const targetViewPort = HtmlElementRenderUtils.getViewport(targetEl);
     return {
       ...event,
       pageX: (position?.left ?? 0) + paddingX,
@@ -254,9 +256,9 @@ export class HtmlElementRenderUtils {
     } as Event;
   }
 
-  static fixMenuOverlapForContextMenu(event: Event, targetId: string, paddingX = 0, paddingY = 8): Event {
-    const position = HtmlElementRenderUtils.getPosition(targetId);
-    const targetViewPort = HtmlElementRenderUtils.getViewport(targetId);
+  static fixMenuOverlapForContextMenu(event: Event, targetEl: string | Element, paddingX = 0, paddingY = 8): Event {
+    const position = HtmlElementRenderUtils.getPosition(targetEl);
+    const targetViewPort = HtmlElementRenderUtils.getViewport(targetEl);
     return {
       ...event,
       clientX: (position?.left ?? 0) + paddingX,

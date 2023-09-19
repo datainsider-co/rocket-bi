@@ -149,7 +149,8 @@ class DataCookControllerTest extends FeatureTest {
 
   test("end preview etl job") {
     val request = EndPreviewEtlJobRequest(123)
-    val response: Response = server.httpPost("/data_cook/456/end_preview", postBody = JsonParser.toJson(request), andExpect = Status.Ok)
+    val response: Response =
+      server.httpPost("/data_cook/456/end_preview", postBody = JsonParser.toJson(request), andExpect = Status.Ok)
 
 //    val responseAsMap = JsonParser.fromJson[Map[String, Boolean]](response.contentString)
 //    assertResult(true)(responseAsMap("data"))
@@ -187,7 +188,7 @@ class DataCookControllerTest extends FeatureTest {
     val queryResponse = JsonParser.fromJson[EtlQueryResponse](response.contentString)
     assertResult(4)(queryResponse.id)
     assertResult(queryResponse.query.trim)(
-      """select tbl_d796e7.id as `Name as number 16`, cast(tbl_d796e7.name as Nullable(Int16)) as `Name as number 16`, lower(name) as `Name To Lower case`
+      """select tbl_d796e7.`id` as `Name as number 16`, cast(tbl_d796e7.`name` as Nullable(Int16)) as `Name as number 16`, lower(name) as `Name To Lower case`
         |from test.animal tbl_d796e7""".stripMargin
     )
   }

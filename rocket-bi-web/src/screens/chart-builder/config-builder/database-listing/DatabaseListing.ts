@@ -15,7 +15,7 @@ import { LabelNode, Status, VerticalScrollConfigs } from '@/shared';
 import CalculatedFieldModal from '@/screens/chart-builder/config-builder/database-listing/CalculatedFieldModal.vue';
 import VueContext from 'vue-context';
 import DataListing from '@/screens/dashboard-detail/components/widget-container/charts/action-widget/DataListing.vue';
-import { Column, ExpressionField, Field, FieldType, TabControlData } from '@core/common/domain/model';
+import { Column, ExpressionField, Field, FieldType, ChartControlData } from '@core/common/domain/model';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { DIException } from '@core/common/domain/exception';
 import { Log } from '@core/utils';
@@ -54,7 +54,7 @@ export enum DatabaseListingMode {
   None = 'none'
 }
 
-export enum DisplayListing {
+export enum ListingType {
   Database = 'database',
   TabControl = 'TabControl'
 }
@@ -73,13 +73,8 @@ export enum DisplayListing {
 })
 export default class DatabaseListing extends Vue {
   $alert!: typeof Swal;
-  private readonly DatabaseEditionMode = DatabaseListingMode;
-  private readonly DisplayListings = DisplayListing;
-
-  /**
-   * cached value for change tab
-   */
-  private cachingObject: any = {};
+  private readonly DatabaseListingMode = DatabaseListingMode;
+  private readonly ListingType = ListingType;
 
   @Prop({ default: DatabaseListingAs.Normal })
   databaseListingAs!: DatabaseListingAs;
@@ -93,7 +88,7 @@ export default class DatabaseListing extends Vue {
   private options = VerticalScrollConfigs;
   private enableSearch = false;
   private keyword = '';
-  private displayListing = DisplayListing.Database;
+  private currentListingType = ListingType.Database;
   @Ref()
   private readonly tableMenu?: VueContext;
 
@@ -149,14 +144,10 @@ export default class DatabaseListing extends Vue {
   }
 
   get isEmptyTableSchema() {
-    return this.displayListing === DisplayListing.Database ? this.tableSchemas.length <= 0 : this.tabControls.length <= 0;
+    return this.currentListingType === ListingType.Database ? this.tableSchemas.length <= 0 : this.chartControls.length <= 0;
   }
 
   private get isActiveSearch() {
-    return StringUtils.isNotEmpty(this.keyword);
-  }
-
-  get isShowClearSearchButton(): boolean {
     return StringUtils.isNotEmpty(this.keyword);
   }
 
@@ -172,16 +163,12 @@ export default class DatabaseListing extends Vue {
     }
   }
 
-  private get tabControls(): SlTreeNodeModel<TabControlData>[] {
-    if (this.enableSearch && StringUtils.isNotEmpty(this.keyword)) {
-      return _BuilderTableSchemaStore.searchTabControls(this.keyword);
+  private get chartControls(): SlTreeNodeModel<ChartControlData>[] {
+    if (StringUtils.isNotEmpty(this.keyword)) {
+      return _BuilderTableSchemaStore.filterChartControls(this.keyword);
     } else {
-      return _BuilderTableSchemaStore.tabControlAsTreeNodes;
+      return _BuilderTableSchemaStore.chartControlAsTreeNodes;
     }
-  }
-
-  private get haveDatabase() {
-    return ListUtils.isNotEmpty(DatabaseSchemaModule.databaseInfos);
   }
 
   private finalTableActions(tableSchema: TableSchema): LabelNode[] {
@@ -238,27 +225,24 @@ export default class DatabaseListing extends Vue {
     ];
   }
 
-  private get databaseSelected(): string {
-    return _BuilderTableSchemaStore.dbNameSelected ?? '';
+  get selectedDbName(): string {
+    return _BuilderTableSchemaStore.selectedDbName ?? '';
   }
 
-  private set databaseSelected(dbName: string) {
-    this.handleSetDatabaseSelected(dbName);
-  }
-
-  private async handleSetDatabaseSelected(dbName: string) {
+  private async handleSelectDbName(dbName: string): Promise<void> {
     try {
       this.setStatus(Status.Loading);
-      if (StringUtils.isNotEmpty(dbName) && dbName != this.databaseSelected) {
-        this.displayListing = this.DisplayListings.Database;
+      if (StringUtils.isNotEmpty(dbName) && dbName != this.selectedDbName) {
+        this.setListingType(ListingType.Database);
         await DatabaseSchemaModule.reload(dbName);
         await _BuilderTableSchemaStore.selectDatabase(dbName);
         _BuilderTableSchemaStore.expandFirstTable();
       }
       this.setStatus(Status.Loaded);
     } catch (ex) {
-      Log.error('BuilderTableSchema::handleSetDatabaseSelected', ex);
-      this.setStatus(Status.Error, `Loading the ${dbName} database has failed`);
+      Log.error('BuilderTableSchema::handleSelectDbName', ex);
+      const errorMsg = `Loading the ${dbName} database has failed`;
+      this.setStatus(Status.Error, errorMsg);
     }
   }
 
@@ -272,13 +256,15 @@ export default class DatabaseListing extends Vue {
     }
   }
 
-  private handleDragStart() {
+  private handleDragStart(node: SlTreeNodeModel<any>) {
     PopupUtils.hideAllPopup();
     this.setIsDragging(true);
+    this.$emit('dragStart', node);
   }
 
-  private handleDragEnd() {
+  private handleDragEnd(node: SlTreeNodeModel<any>) {
     this.setIsDragging(false);
+    this.$emit('dragEnd', node);
   }
 
   @Emit('update:isDragging')
@@ -345,11 +331,6 @@ export default class DatabaseListing extends Vue {
 
   private toggleSearch() {
     this.enableSearch = !this.enableSearch;
-  }
-
-  private handleClearSearchInput() {
-    this.keyword = '';
-    this.searchInput?.focus();
   }
 
   private handleRightClickNode(node: SlTreeNode<TableSchema>, event: MouseEvent) {
@@ -531,45 +512,27 @@ export default class DatabaseListing extends Vue {
     _BuilderTableSchemaStore.expandTables([tableSchema.name]);
   }
 
-  private setDisplayListing(display: DisplayListing) {
-    if (this.displayListing !== display) {
-      this.displayListing = display;
+  private setListingType(newMode: ListingType) {
+    if (this.currentListingType !== newMode) {
+      this.currentListingType = newMode;
+      this.handleOnListingMode(newMode);
+      this.keyword = '';
     }
   }
 
-  @Watch('displayListing')
-  onDisplayListingChanged() {
-    switch (this.displayListing) {
-      case DisplayListing.Database: {
-        this.setStatus(Status.Loading);
-        const previousStatus = this.cachingObject.status || Status.Loaded;
-        const previousError = this.cachingObject.error;
-        this.setStatus(previousStatus, previousError);
+  handleOnListingMode(newMode: ListingType) {
+    switch (newMode) {
+      case ListingType.Database: {
+        this.handleSelectDbName(this.selectedDbName);
         break;
       }
-      case DisplayListing.TabControl: {
-        this.selectTabController();
+      case ListingType.TabControl: {
+        this.setStatus(Status.Loaded);
         break;
       }
+      default: {
+        Log.error('onDisplayListingChanged::unknown display listing', this.currentListingType);
+      }
     }
-  }
-
-  private selectTabController() {
-    try {
-      Object.assign(this.cachingObject, 'status', this.status);
-      Object.assign(this.cachingObject, 'error', this.error);
-      // this.setStatus(Status.Loading);
-      // const tabControls = WidgetModule.allTabControls;
-      // _BuilderTableSchemaStore.loadTabControls(tabControls);
-      // this.setStatus(Status.Loaded);
-    } catch (ex) {
-      const exception = DIException.fromObject(ex);
-      Log.error('selectTabController::exception', exception);
-      this.setStatus(Status.Error, 'Can not load chart controls');
-    }
-  }
-
-  private get searchPlaceHolder(): string {
-    return this.displayListing === DisplayListing.Database ? 'Search tables & columns' : 'Search tab controls';
   }
 }

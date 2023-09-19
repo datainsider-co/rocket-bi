@@ -112,7 +112,7 @@ class MongoWorker(
         val records = reader.getNextRecords(tableSchema.columns)
         writers.foreach(writer => {
           if (records.nonEmpty) try {
-            writer.write(records, tableSchema)
+            writer.insertBatch(records, tableSchema)
             lastSyncedValue = records.last(incrementalColumnIndex).toString
           } catch {
             case e: Throwable => error(s"${writer.getClass} write ${records.length} records failed, reason: $e")

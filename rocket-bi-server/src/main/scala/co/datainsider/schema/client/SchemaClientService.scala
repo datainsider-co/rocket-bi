@@ -63,6 +63,7 @@ case class SchemaClientServiceImpl @Inject() (schemaService: SchemaService) exte
 
   override def createOrMergeTableSchema(schema: TableSchema): Future[TableSchema] = {
     for {
+      _ <- schemaService.ensureDatabaseCreated(schema.organizationId, schema.dbName, None, useDdlQuery = true)
       tableSchema <- schemaService.createOrMergeTableSchema(schema)
       schemaOk <- ensureSchema(tableSchema.organizationId, tableSchema.dbName, tableSchema.name)
     } yield {

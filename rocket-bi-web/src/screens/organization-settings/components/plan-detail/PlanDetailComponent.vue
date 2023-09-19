@@ -11,33 +11,33 @@
       </div>
       <div class="plan-detail-desc">
         <span>{{ startDate }}</span>
-        <span v-if="planDetail.endDate"> - {{ endDate }} </span>
+        <span v-if="endDate"> - {{ endDate }} </span>
       </div>
       <div class="plan-detail-body">
         <div class="plan-detail-body-content">
-          <div class="plan-detail-body-content-item">
+          <div class="plan-detail-body-content-item" v-if="hasLastPayment">
             <label>Last invoice total</label>
-            <div>${{ planDetail.lastPaymentAmount }}/mo</div>
+            <div>${{ lastPaymentAmount }}/mo</div>
           </div>
           <div class="plan-detail-body-content-item">
             <label>Monthly editor seats</label>
-            <div>{{ planDetail.editorSeats }}</div>
+            <div>{{ editorSeats }}</div>
           </div>
           <div style="min-width: 200px;max-width: 460px" class="plan-detail-body-content-item">
             <label>Billing email</label>
-            <div class="text-truncate">{{ planDetail.invoiceEmail }}</div>
+            <div class="text-truncate">{{ invoiceEmail || '--' }}</div>
           </div>
           <div class="plan-detail-body-content-item">
             <label>Payment method</label>
-            <div>{{ planDetail.lastPaymentMethod }}</div>
+            <div>{{ lastPaymentMethod }}</div>
           </div>
           <div class="plan-detail-body-content-item">
             <label>Payment status</label>
-            <div>{{ planDetail.lastPaymentStatus }}</div>
+            <div>{{ lastPaymentStatus }}</div>
           </div>
         </div>
       </div>
-      <img class="plan-detail-icon" :src="require(`@/assets/icon/${planDetail.icon}`)" alt="" />
+      <img class="plan-detail-icon" :src="require(`@/assets/icon/${icon}`)" alt="" />
     </div>
     <div class="org-settings-content-header">
       <div class="org-settings-content-header-title">
@@ -55,12 +55,22 @@
         </div>
       </div>
       <div class="org-overview-item">
+        <div class="org-overview-item-label">Redeem Code</div>
+        <div class="org-overview-item-content">
+          Redeem a code to upgrade your plan
+        </div>
+        <div class="org-overview-item-action">
+          <DiButton @click.prevent="onClickRedeemCode" title="Redeem Code" border></DiButton>
+        </div>
+      </div>
+
+      <div class="org-overview-item">
         <div class="org-overview-item-label">Cancel Plan</div>
         <div class="org-overview-item-content">
           Submit a request to cancel your plan and switch to Professional
         </div>
         <div class="org-overview-item-action">
-          <DiButton :disabled="!planDetail.isSucceeded" @click.prevent="cancel" title="Cancel" primary></DiButton>
+          <DiButton :disabled="!isSucceeded" @click.prevent="cancel" title="Cancel" border></DiButton>
         </div>
       </div>
     </div>
@@ -68,37 +78,96 @@
 </template>
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { PlanDetail } from '@core/organization';
-import { DateTimeFormatter } from '@/utils';
-import { PlanDisplayNames, PlanType } from '@core/organization/domain/Plan/PlanType';
+import { DateTimeUtils } from '@/utils';
+import { PlanDisplayNames, PlanType, PlanTypeBgColors, PlanTypeIcon } from '@core/organization/domain/Plan/PlanType';
+import { PaymentInfo, PaymentMethod, PaypalPaymentInfo, ProductSubscription, ProductSubscriptionInfo, UnknownPaymentInfo } from '@core/billing';
 
 @Component({})
 export default class PlanDetailComponent extends Vue {
-  @Prop({ required: true, type: PlanDetail })
-  private planDetail?: PlanDetail;
+  @Prop({ type: Object, required: true })
+  protected readonly subscriptionInfo!: ProductSubscriptionInfo;
 
-  private get startDate() {
-    return DateTimeFormatter.formatDateDisplay(new Date(this.planDetail?.startDate ?? 0));
+  protected get isSucceeded() {
+    return this.subscriptionInfo.isPaymentSucceeded();
   }
 
-  private get displayName(): string {
-    return PlanDisplayNames[this.planDetail?.planType ?? PlanType.NoPlan];
+  protected get paymentInfo(): PaymentInfo {
+    return this.subscriptionInfo.payment ?? UnknownPaymentInfo.default();
   }
 
-  private get endDate() {
-    return DateTimeFormatter.formatDateDisplay(new Date(this.planDetail?.endDate ?? 0));
+  protected get startDate(): string {
+    return DateTimeUtils.formatDateDisplay(new Date(this.subscriptionInfo.startTime));
   }
 
-  private cancel() {
+  protected get endDate(): string {
+    return DateTimeUtils.formatDateDisplay(new Date(this.subscriptionInfo.endTime));
+  }
+
+  protected get planType(): PlanType {
+    return this.subscriptionInfo.product.name;
+  }
+
+  protected get displayName(): string {
+    return PlanDisplayNames[this.planType];
+  }
+
+  protected get lastPaymentAmount(): number {
+    return this.subscriptionInfo.product.price;
+  }
+
+  protected get hasLastPayment(): boolean {
+    return this.paymentInfo.className !== PaymentMethod.RedeemCode;
+  }
+
+  protected get editorSeats(): number {
+    return this.subscriptionInfo.product.editorSeats;
+  }
+
+  protected get invoiceEmail(): string {
+    if (PaypalPaymentInfo.isPaypalPaymentInfo(this.paymentInfo)) {
+      return this.paymentInfo.billingEmail;
+    } else {
+      return '';
+    }
+  }
+
+  protected get lastPaymentMethod(): string {
+    switch (this.paymentInfo.className) {
+      case PaymentMethod.RedeemCode:
+        return 'Redeem';
+      case PaymentMethod.Paypal:
+        return 'Paypal';
+      default:
+        return '';
+    }
+  }
+
+  protected get lastPaymentStatus(): string {
+    return this.paymentInfo.status;
+  }
+
+  protected cancel() {
     this.$emit('cancelPlan');
   }
 
-  private modify() {
+  protected modify() {
     this.$emit('modifyPlan');
   }
 
-  private get computedStyles() {
-    return `--plan-bg-from: ${this.planDetail?.bgColors[0]}; --plan-bg-to: ${this.planDetail?.bgColors[1]}`;
+  protected onClickRedeemCode() {
+    this.$emit('clickRedeemCode');
+  }
+
+  get icon() {
+    return PlanTypeIcon[this.planType];
+  }
+
+  get bgColors() {
+    return PlanTypeBgColors[this.planType];
+  }
+
+  protected get computedStyles() {
+    return `--plan-bg-from: ${this.bgColors[0]}; --plan-bg-to: ${this.bgColors[1]}`;
   }
 }
 </script>

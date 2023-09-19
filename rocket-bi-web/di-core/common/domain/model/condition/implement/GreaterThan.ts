@@ -9,7 +9,7 @@ import { ConditionUtils, getScalarFunction } from '@core/utils';
 import { FieldRelatedCondition } from '@core/common/domain/model/condition/FieldRelatedCondition';
 import {
   ConditionData,
-  ConditionFamilyTypes,
+  ConditionTypes,
   DateConditionTypes,
   DateHistogramConditionTypes,
   InputType,
@@ -59,8 +59,8 @@ export class GreaterThan extends FieldRelatedCondition implements ValueCondition
       firstValue: this.value,
       secondValue: void 0,
       allValues: this.getValues(),
-      currentInputType: InputType.text,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.Text,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: NumberConditionTypes.greaterThan
     };
   }

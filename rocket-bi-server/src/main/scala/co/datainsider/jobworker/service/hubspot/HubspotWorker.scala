@@ -1,46 +1,70 @@
 package co.datainsider.jobworker.service.hubspot
 
+import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.bi.domain.Connection
 import co.datainsider.bi.engine.Engine
 import co.datainsider.jobworker.domain.Ids.SyncId
-import co.datainsider.jobworker.domain._
+import co.datainsider.jobworker.domain.JobStatus.JobStatus
 import co.datainsider.jobworker.domain.source.HubspotSource
-import co.datainsider.jobworker.service.worker.JobWorker
+import co.datainsider.jobworker.domain.{HubspotJob, HubspotProgress, JobProgress, JobStatus}
+import co.datainsider.jobworker.service.hubspot.client.HubspotReader
+import co.datainsider.jobworker.service.worker.{DepotAssistant, JobWorker, SingleDepotAssistant}
 import co.datainsider.schema.client.SchemaClientService
+import co.datainsider.schema.domain.TableSchema
+import com.twitter.inject.Logging
 import com.twitter.util.Future
 
+import scala.util.control.NonFatal
+
 /**
-  * Created by phg on 7/10/21.
+  * Created by phg on 7/5/21.
   */
 case class HubspotWorker(
     source: HubspotSource,
     schemaService: SchemaClientService,
     engine: Engine[Connection],
     connection: Connection
-) extends JobWorker[HubspotJob] {
-
-  private val contactWorker = ContactWorker(source, schemaService, engine, connection)
-  private val dealWorker = DealWorker(source, schemaService, engine, connection)
-  private val engagementWorker = EngagementWorker(source, schemaService, engine, connection)
-  private val companyWorker = CompanyWorker(source, schemaService, engine, connection)
+) extends JobWorker[HubspotJob]
+    with Logging {
 
   override def run(job: HubspotJob, syncId: SyncId, onProgress: JobProgress => Future[Unit]): JobProgress = {
-    job.subType match {
-      case HubspotSubJobType.Contact    => contactWorker.run(job, syncId, onProgress)
-      case HubspotSubJobType.Deal       => dealWorker.run(job, syncId, onProgress)
-      case HubspotSubJobType.Engagement => engagementWorker.run(job, syncId, onProgress)
-      case HubspotSubJobType.Company    => companyWorker.run(job, syncId, onProgress)
-      case _ =>
-        HubspotProgress(
-          orgId = job.orgId,
-          syncId = syncId,
-          jobId = job.jobId,
-          updatedTime = System.currentTimeMillis(),
-          jobStatus = JobStatus.Terminated,
-          totalSyncRecord = 0,
-          totalExecutionTime = 0,
-          message = Some("unknown subtype")
-        )
+    val reader = new HubspotReader(source.apiKey, job)
+    var totalRecords = 0L
+    val begin = System.currentTimeMillis()
+    def process(status: JobStatus, msg: Option[String] = None): HubspotProgress = {
+      HubspotProgress(
+        orgId = job.orgId,
+        syncId = syncId,
+        jobId = job.jobId,
+        updatedTime = System.currentTimeMillis(),
+        jobStatus = status,
+        totalSyncRecord = totalRecords,
+        totalExecutionTime = System.currentTimeMillis() - begin,
+        message = msg
+      )
+    }
+
+    try {
+      val schema: TableSchema = reader.getSchema
+      val depotAssistant: DepotAssistant = SingleDepotAssistant(schemaService, schema, engine, connection)
+
+      do {
+        try {
+          val records: Seq[Record] = reader.next(schema.columns)
+          depotAssistant.put(records)
+          totalRecords += records.length
+          onProgress(process(JobStatus.Syncing, Some(s"received ${records.length} records")))
+        } catch {
+          case e: Throwable => error(e)
+        }
+      } while (reader.hasNext())
+
+      process(JobStatus.Synced)
+    } catch {
+      case NonFatal(throwable) =>
+        error(throwable)
+        process(JobStatus.Error, Some(throwable.getLocalizedMessage))
     }
   }
+
 }

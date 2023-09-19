@@ -18,6 +18,7 @@ import { FunctionConvertorData } from '@/screens/chart-builder/config-builder/fu
 import { FunctionConvertResolver } from '@/screens/chart-builder/config-builder/function-convertor/FunctionConvertResolver';
 import { ChartOptionResolver } from '@/screens/chart-builder/config-builder/chart-option-resolver/ChartOptionResolver';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
+import { QuerySettingModule } from '@/screens/dashboard-detail/stores';
 
 /* eslint @typescript-eslint/no-use-before-define: 0 */
 
@@ -56,8 +57,11 @@ class ConfigBuilderStore extends VuexModule {
   configsAsMap: Map<ConfigType, FunctionData[]> = new Map<ConfigType, FunctionData[]>();
   filterAsMap: Map<Id, ConditionData[]> = new Map<Id, ConditionData[]>();
   itemSelected: VisualizationItemData = DataBuilderConstantsV35.ALL_CHARTS[0];
+  /**
+   * @type{ChartOption} is object of chart option
+   */
   chartOption: Record<string, any> = {};
-  lastedState: ConfigBuilderState | null = null;
+  latestState: ConfigBuilderState | null = null;
   // sử dụng để lưu tạm giá trị của filter khi select
   tempFilterValue: DefaultFilterValue | null = null;
   private allowBack = false;
@@ -71,12 +75,14 @@ class ConfigBuilderStore extends VuexModule {
 
   get getQuerySetting(): () => QuerySetting {
     return () => {
-      const setting = this.querySettingResolver.toQuerySetting(this.chartType, this.configsAsMap, this.filterAsMap);
+      const setting: QuerySetting = this.querySettingResolver.toQuerySetting(this.chartType, this.configsAsMap, this.filterAsMap);
+      // apply old chart option
       const chartOption = cloneDeep(this.chartOption) as any;
       setting.setChartOption(chartOption);
-      const listSqlViews = ConfigBuilderStore.getSqlViews(this.configsAsMap, this.filterAsMap);
+      // apply dynamic filter
+      setting.applyDynamicFilters(QuerySettingModule.allDynamicValuesMap);
       // Server support only one sql view in this time.
-      setting.sqlViews = listSqlViews;
+      setting.sqlViews = ConfigBuilderStore.getSqlViews(this.configsAsMap, this.filterAsMap);
       return setting;
     };
   }
@@ -105,7 +111,7 @@ class ConfigBuilderStore extends VuexModule {
       .filter((query): query is InlineSqlView => !!query);
   }
 
-  get canBuildQuerySetting(): () => boolean {
+  get hasQuerySetting(): () => boolean {
     return () => {
       return this.querySettingResolver.canBuildQuerySetting(this.chartType, this.configsAsMap, this.filterAsMap);
     };
@@ -120,11 +126,17 @@ class ConfigBuilderStore extends VuexModule {
   }
 
   @Mutation
-  initDefaultState() {
+  initDefaultState(): void {
     this.allowBack = false;
     this.configsAsMap.clear();
     this.filterAsMap.clear();
-    this.lastedState = null;
+    this.latestState = null;
+  }
+
+  @Mutation
+  reset(): void {
+    _ConfigBuilderStore.initDefaultState();
+    this.chartOption = {};
   }
 
   @Mutation
@@ -133,23 +145,23 @@ class ConfigBuilderStore extends VuexModule {
   }
 
   @Action
-  async initState(chart: Widget): Promise<void> {
+  async init(chart: Widget): Promise<void> {
     this.initDefaultState();
     if (ChartInfo.isChartInfo(chart) && chart.extraData) {
-      this.setCurrentChartSelected(chart.extraData.currentChartType ?? '');
+      this.setSelectedChartType(chart.extraData.currentChartType ?? '');
       this.setConfigs(chart.extraData);
-      this.setFilters(chart.extraData);
-      this.saveChartOption(chart.setting.options);
-      this.saveLastedState();
+      this.setFilter(chart.extraData);
+      this.setChartOption(chart.setting.options);
+      this.saveLatestState();
     } else {
-      Log.debug(`${chart.className} Unsorted visualization`);
-      throw new DIException(`${chart.className} Unsorted visualization`);
+      Log.debug(`${chart.className} unsupported visualization`);
+      throw new DIException(`${chart.className} unsupported visualization`);
     }
   }
 
   @Mutation
-  saveChartOption(chartOption: Record<string, any>) {
-    this.chartOption = chartOption;
+  setChartOption(chartOption: Record<string, any>): void {
+    this.chartOption = chartOption ?? {};
   }
 
   // Config
@@ -167,7 +179,7 @@ class ConfigBuilderStore extends VuexModule {
     } else {
       this.configsAsMap.set(configType, [data]);
     }
-    _ConfigBuilderStore.saveLastedState();
+    _ConfigBuilderStore.saveLatestState();
   }
 
   @Mutation
@@ -187,7 +199,7 @@ class ConfigBuilderStore extends VuexModule {
         oldFunction: oldFunction
       });
     }
-    _ConfigBuilderStore.saveLastedState();
+    _ConfigBuilderStore.saveLatestState();
   }
 
   @Mutation
@@ -203,7 +215,7 @@ class ConfigBuilderStore extends VuexModule {
         removedConfig: removedConfig
       });
     }
-    _ConfigBuilderStore.saveLastedState();
+    _ConfigBuilderStore.saveLatestState();
   }
 
   @Mutation
@@ -221,24 +233,24 @@ class ConfigBuilderStore extends VuexModule {
         removedConfig: removedConfig
       });
     }
-    _ConfigBuilderStore.saveLastedState();
+    _ConfigBuilderStore.saveLatestState();
   }
 
   @Mutation
-  changeIndex(payload: ChangeIndexConfig) {
+  changeIndex(payload: ChangeIndexConfig): void {
     const { configs, configType } = payload;
     this.configsAsMap.set(configType, configs);
-    _ConfigBuilderStore.saveLastedState();
+    _ConfigBuilderStore.saveLatestState();
   }
 
   @Mutation
-  setConfigs(extraData: WidgetExtraData) {
+  private setConfigs(extraData: WidgetExtraData): void {
     this.configsAsMap = FunctionDataUtils.toConfigAsMap(extraData?.configs ?? ({} as any));
   }
 
   // Filter
   @Mutation
-  addFilter(payload: AddFilterRequest) {
+  addFilter(payload: AddFilterRequest): void {
     const { data, index } = payload;
     const groupId: Id = data.groupId;
     const group = this.filterAsMap.get(groupId);
@@ -254,8 +266,8 @@ class ConfigBuilderStore extends VuexModule {
   }
 
   @Mutation
-  updateFilter(data: ConditionData) {
-    const group = this.filterAsMap.get(data.groupId);
+  updateFilter(data: ConditionData): void {
+    const group: ConditionData[] | undefined = this.filterAsMap.get(data.groupId);
     if (group) {
       const currentData: ConditionData | undefined = group.find(item => item.id === data.id);
       if (currentData) {
@@ -269,7 +281,7 @@ class ConfigBuilderStore extends VuexModule {
   }
 
   @Mutation
-  removeFilter(payload: { id: Id; groupId: Id }) {
+  removeFilter(payload: { id: Id; groupId: Id }): void {
     const { id, groupId } = payload;
     const group = this.filterAsMap.get(groupId);
     if (group) {
@@ -283,13 +295,13 @@ class ConfigBuilderStore extends VuexModule {
   }
 
   @Mutation
-  setItemSelected(newItemSelected: VisualizationItemData) {
+  setItemSelected(newItemSelected: VisualizationItemData): void {
     _ConfigBuilderStore.changeConfig(newItemSelected);
     this.itemSelected = newItemSelected;
   }
 
   @Action
-  async confirmBack(): Promise<boolean> {
+  async requireConfirmBack(): Promise<boolean> {
     return new Promise(resolve => {
       if (this.allowBack) {
         return resolve(true);
@@ -303,8 +315,8 @@ class ConfigBuilderStore extends VuexModule {
   }
 
   @Mutation
-  private saveLastedState() {
-    this.lastedState = {
+  private saveLatestState(): void {
+    this.latestState = {
       itemSelected: this.itemSelected,
       configsAsMap: cloneDeep(this.configsAsMap),
       chartOption: cloneDeep(this.chartOption)
@@ -312,34 +324,49 @@ class ConfigBuilderStore extends VuexModule {
   }
 
   @Mutation
-  setCurrentChartSelected(currentChartType: string) {
-    const itemSelected = [
-      ...DataBuilderConstantsV35.ALL_CHARTS,
-      ...DataBuilderConstantsV35.ALL_FILTERS,
-      ...DataBuilderConstantsV35.ALL_INNER_FILTERS,
-      ...DataBuilderConstantsV35.MULTIPLE_MEASURES
-    ].find(chart => chart.type == currentChartType);
+  setSelectedChartType(currentChartType: string) {
+    const itemSelected = [...DataBuilderConstantsV35.ALL_CHARTS, ...DataBuilderConstantsV35.ALL_FILTERS, ...DataBuilderConstantsV35.ALL_INNER_FILTERS].find(
+      chart => chart.type == currentChartType
+    );
     if (itemSelected) {
       this.itemSelected = itemSelected;
     }
   }
 
   @Mutation
-  changeConfig(newItemSelected: VisualizationItemData) {
-    if (this.lastedState && this.lastedState.itemSelected.type === newItemSelected.type) {
-      this.configsAsMap = this.lastedState.configsAsMap;
-      this.chartOption = this.lastedState.chartOption;
-    } else if (this.lastedState && this.lastedState.itemSelected.type !== newItemSelected.type) {
-      this.configsAsMap = ChartConfigUtils.cloneToNewConfig(newItemSelected, this.lastedState.configsAsMap);
-      this.chartOption = ChartOption.getDefaultChartOption(newItemSelected.type as ChartType);
+  changeConfig(newSelectedItem: VisualizationItemData): void {
+    if (this.latestState && this.latestState.itemSelected.type === newSelectedItem.type) {
+      this.configsAsMap = this.latestState.configsAsMap;
+      this.chartOption = this.latestState.chartOption;
+    } else if (this.latestState && this.latestState.itemSelected.type !== newSelectedItem.type) {
+      this.configsAsMap = ChartConfigUtils.convertToNewConfig(newSelectedItem, this.latestState.configsAsMap);
+      const newChartOption = ChartOption.getDefaultChartOption(newSelectedItem.type as ChartType);
+      const oldChartOption = cloneDeep(this.chartOption);
+      this.chartOption = ConfigBuilderStore.mergeChartOption(newChartOption, oldChartOption);
     } else {
       this.configsAsMap = new Map<ConfigType, FunctionData[]>();
-      this.chartOption = ChartOption.getDefaultChartOption(newItemSelected.type as ChartType);
+      const newChartOption = ChartOption.getDefaultChartOption(newSelectedItem.type as ChartType);
+      const oldChartOption = cloneDeep(this.chartOption);
+      this.chartOption = ConfigBuilderStore.mergeChartOption(newChartOption, oldChartOption);
+    }
+  }
+
+  /**
+   * Logic merge chart option keep title and subtitle
+   */
+  static mergeChartOption(newOption: Record<string, any>, oldOption: Record<string, any>): Record<string, any> {
+    try {
+      const newChartOption: ChartOption = ChartOption.fromObject(newOption as any);
+      const oldChartOption: ChartOption = ChartOption.fromObject(oldOption as any);
+      return newChartOption.mergeWith(oldChartOption);
+    } catch (ex) {
+      Log.debug('mergeChartOption::', ex);
+      return newOption;
     }
   }
 
   @Mutation
-  setFilters(extraData: WidgetExtraData) {
+  setFilter(extraData: WidgetExtraData) {
     this.filterAsMap = ConditionDataUtils.toFilters(extraData.filters ?? {});
     Log.debug('ConfigBuilderStore::', this.filterAsMap);
   }

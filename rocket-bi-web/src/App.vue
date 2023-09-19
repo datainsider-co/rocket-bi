@@ -18,11 +18,12 @@ import { Log } from '@core/utils/Log';
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { OrganizationStoreModule } from '@/store/modules/OrganizationStore';
 import { Inject } from 'typescript-ioc';
-import { ClickhouseConfigService } from '@core/clickhouse-config';
+import { ConnectorService } from '@core/connector-config';
 import { RouterUtils } from '@/utils';
 import { Routers } from '@/shared';
 import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
 import { PlanAndBillingModule } from '@/screens/organization-settings/stores/PlanAndBillingStore';
+import { LogDebug } from '@core/common/misc';
 
 @Component({
   components: { ConfirmationModal }
@@ -33,7 +34,7 @@ export default class App extends Vue {
   confirmationModal!: ConfirmationModal;
 
   @Inject
-  clickhouseService!: ClickhouseConfigService;
+  clickhouseService!: ConnectorService;
 
   get themeName(): string {
     return _ThemeStore.currentThemeName;

@@ -168,10 +168,10 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
-import { AxisSetting, ChartOption, HeatMapQuerySetting, QuerySettingType, ScatterQuerySetting, SeriesQuerySetting, SettingKey } from '@core/common/domain';
+import { AxisSetting, ChartOption, HeatMapQuerySetting, QuerySettingClassName, ScatterQuerySetting, SeriesQuerySetting, SettingKey } from '@core/common/domain';
 import { QuerySetting } from '@core/common/domain/model/query/QuerySetting.ts';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { DashOptions } from '@/shared/settings/common/options/DashOptions';
 import { enableCss } from '@/shared/settings/common/install';
 import { ChartType } from '@/shared';
@@ -189,12 +189,12 @@ export default class XAxisTab extends Vue {
 
   private readonly defaultSetting = {
     visible: true,
-    categoryFont: 'Roboto',
-    categoryColor: ChartOption.getThemeTextColor(),
+    categoryFont: ChartOption.getSecondaryFontFamily(),
+    categoryColor: ChartOption.getPrimaryTextColor(),
     categoryFontSize: '11px',
     titleEnabled: true,
-    titleFont: 'Roboto',
-    titleColor: ChartOption.getThemeTextColor(),
+    titleFont: ChartOption.getSecondaryFontFamily(),
+    titleColor: ChartOption.getPrimaryTextColor(),
     titleFontSize: '11px',
     title: this.defaultText,
     gridLineColor: ChartOption.getGridLineColor(),
@@ -223,11 +223,11 @@ export default class XAxisTab extends Vue {
 
   private get defaultText() {
     switch (this.query.className) {
-      case QuerySettingType.Series:
+      case QuerySettingClassName.Series:
         return (this.query as SeriesQuerySetting).xAxis.name;
-      case QuerySettingType.Scatter:
+      case QuerySettingClassName.Scatter:
         return (this.query as ScatterQuerySetting).xAxis.name;
-      case QuerySettingType.HeatMap:
+      case QuerySettingClassName.HeatMap:
         return (this.query as HeatMapQuerySetting).xAxis.name;
       default:
         return '';
@@ -295,7 +295,7 @@ export default class XAxisTab extends Vue {
   }
 
   private get fontSizeOptions() {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get title(): string {
@@ -338,8 +338,8 @@ export default class XAxisTab extends Vue {
   }
 
   private get enableSettingGridLine(): boolean {
-    const isScatter: boolean = this.query.className == QuerySettingType.Scatter;
-    const isBubble: boolean = this.query.className == QuerySettingType.Bubble;
+    const isScatter: boolean = this.query.className == QuerySettingClassName.Scatter;
+    const isBubble: boolean = this.query.className == QuerySettingClassName.Bubble;
     const isCircularBar: boolean = this.chartType == ChartType.CircularBar;
     return isScatter || isBubble || isCircularBar;
   }

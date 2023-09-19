@@ -4,23 +4,13 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import {
-  AxisSetting,
-  ChartFamilyType,
-  ChartOptionData,
-  LabelsSetting,
-  LegendSetting,
-  MapNavigation,
-  TextSetting,
-  VizSettingType
-} from '@core/common/domain/model';
+import { AxisSetting, ChartOptionData, LabelsSetting, LegendSetting, MapNavigation, ChartOptionClassName } from '@core/common/domain/model';
 import { StringUtils } from '@/utils/StringUtils';
 import { cloneDeep, merge } from 'lodash';
 import { ObjectUtils } from '@core/utils/ObjectUtils';
 import { PlotOptions } from '@core/common/domain/model/chart-option/extra-setting/chart-style/PlotOptions';
 import { ChartTooltipSetting } from '@core/common/domain/model/chart-option/extra-setting/chart-style/ChartTooltipSetting';
 import { ChartType } from '@/shared';
-import { _ThemeStore } from '@/store/modules/ThemeStore';
 
 const deleteProperty = Reflect.deleteProperty;
 
@@ -103,8 +93,7 @@ export class SeriesChartOption extends ChartOption<SeriesOptionData> {
     }
   };
 
-  chartFamilyType = ChartFamilyType.Series;
-  className = VizSettingType.SeriesSetting;
+  className = ChartOptionClassName.SeriesSetting;
 
   /**
    * @key: label (Online, Offline)
@@ -130,7 +119,7 @@ export class SeriesChartOption extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(chartType: ChartType): SeriesChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const gridLineColor: string = this.getGridLineColor();
     const enableMarker = chartType === ChartType.Lollipop;
     const options: SeriesOptionData = {
@@ -152,26 +141,8 @@ export class SeriesChartOption extends ChartOption<SeriesOptionData> {
           }
         }
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       affectedByFilter: true,
       themeColor: { enabled: true },
       background: this.getThemeBackgroundColor(),
@@ -188,9 +159,8 @@ export class SeriesChartOption extends ChartOption<SeriesOptionData> {
           dataLabels: {
             enabled: false,
             style: {
+              ...ChartOption.getSecondaryStyle(),
               color: textColor,
-              fontSize: '11px',
-              fontFamily: 'Roboto',
               textOutline: 0
             }
           }
@@ -255,7 +225,7 @@ export class SeriesChartOption extends ChartOption<SeriesOptionData> {
         backgroundColor: this.getTooltipBackgroundColor(),
         style: {
           color: textColor,
-          fontFamily: 'Roboto'
+          fontFamily: ChartOption.getSecondaryFontFamily()
         }
       }
     };
@@ -311,6 +281,7 @@ export class SeriesChartOption extends ChartOption<SeriesOptionData> {
     }
     return seriesTypeByLabelMap;
   }
+
   private static getTextColor(): string {
     return '#FFFFFF';
   }

@@ -9,7 +9,12 @@
       @onChanged="handleSettingChanged"
       @onMultipleChanged="handleMultipleSettingChanged"
     />
-    <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab
+      :color="setting.options.background"
+      :default-color="defaultBackgroundColor"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <TooltipTab :setting="setting.options.tooltip" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <VisualHeader :widget-type="currentWidget" :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
@@ -22,7 +27,7 @@ import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
 import BackgroundTab from '@/shared/settings/common/tabs/BackgroundTab.vue';
 import TitleTab from '@/shared/settings/common/tabs/TitleTab.vue';
 import ColorTab from '@/shared/settings/common/tabs/ColorTab.vue';
-import { ChartInfo, FunnelQuerySetting, FunnelChartOption, PyramidQuerySetting, PyramidChartOption, SettingKey } from '@core/common/domain';
+import { ChartInfo, FunnelQuerySetting, FunnelChartOption, PyramidQuerySetting, PyramidChartOption, SettingKey, ChartOption } from '@core/common/domain';
 import DataLabelTab from '@/shared/settings/series-chart/DataLabelTab.vue';
 import { ChartType } from '@/shared';
 import TooltipTab from '@/shared/settings/common/tabs/TooltipTab.vue';
@@ -58,6 +63,10 @@ export default class FunnelSetting extends Vue {
   }
   private get currentWidget(): ChartType {
     return _ConfigBuilderStore.chartType;
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

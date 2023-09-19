@@ -39,7 +39,24 @@ const productionConfig = {
   REGISTER_URL: 'https://rocket.bi/register',
   //Forgot password config
   TOTAL_PIN_CODE: 6,
-  TIMEOUT_SHOW_RESEND_SECOND: 180
+  TIMEOUT_SHOW_RESEND_SECOND: 10,
+
+  //Third party ingestion config
+  GOOGLE_CLIENT_ID: '',
+  GOOGLE_API_KEY: '',
+  GOOGLE_ROOT_ORIGIN: 'http://localhost:5050',
+  GOOGLE_SHEET_URL: 'http://localhost:5050/third-party-auth/google-sheet',
+  GA_URL: 'http://localhost:5050/third-party-auth/google-analytic',
+  GA4_URL: 'http://localhost:5050/third-party-auth/ga4',
+  GOOGLE_SEARCH_CONSOLE_URL: 'http://localhost:5050/third-party-auth/google-search-console',
+  FACEBOOK_ADS_URL: 'http://localhost:5050/third-party-auth/facebook',
+  TIKTOK_ADS_URL: 'http://localhost:5050/third-party-auth/tik-tok',
+  GOOGLE_ADS_URL: 'http://localhost:5050/third-party-auth/google-advertise',
+  GOOGLE_SHEET_SCOPES: 'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets.readonly',
+  GA_SCOPES: 'profile https://www.googleapis.com/auth/analytics.readonly',
+  GA4_SCOPES: 'profile https://www.googleapis.com/auth/analytics.readonly',
+  GOOGLE_SEARCH_CONSOLE_SCOPES: 'https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/webmasters',
+  GOOGLE_ADS_SCOPES: 'https://www.googleapis.com/auth/adwords'
 };
 
 window.appConfig = productionConfig;

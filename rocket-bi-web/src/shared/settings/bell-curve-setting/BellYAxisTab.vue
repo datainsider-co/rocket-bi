@@ -103,14 +103,15 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { AxisSetting, ChartOption, HeatMapQuerySetting, QuerySetting, QuerySettingType, SeriesQuerySetting, SettingKey } from '@core/common/domain';
+import { AxisSetting, ChartOption, HeatMapQuerySetting, QuerySetting, QuerySettingClassName, SeriesQuerySetting, SettingKey } from '@core/common/domain';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { DashOptions } from '@/shared/settings/common/options/DashOptions';
 import { ListUtils } from '@/utils';
 import { enableCss } from '@/shared/settings/common/install';
 import { Log } from '@core/utils';
+import { get } from 'lodash';
 
 @Component({ components: { PanelHeader } })
 export default class BellYAxisTab extends Vue {
@@ -121,14 +122,13 @@ export default class BellYAxisTab extends Vue {
 
   private readonly defaultSetting = {
     visible: true,
-    categoryFont: 'Roboto',
-    categoryColor: ChartOption.getThemeTextColor(),
+    categoryFont: ChartOption.getSecondaryFontFamily(),
+    categoryColor: ChartOption.getPrimaryTextColor(),
     categoryFontSize: '11px',
     titleEnabled: true,
-    titleFont: 'Roboto',
-    titleColor: ChartOption.getThemeTextColor(),
+    titleFont: ChartOption.getSecondaryFontFamily(),
+    titleColor: ChartOption.getPrimaryTextColor(),
     titleFontSize: '11px',
-    title: this.defaultText,
     gridLineColor: ChartOption.getGridLineColor(),
     gridLineDashStyle: 'Solid',
     gridLineWidth: '0.5',
@@ -138,12 +138,12 @@ export default class BellYAxisTab extends Vue {
     postfixText: ''
   };
 
-  private get defaultText() {
+  protected getDefaultTitle(): string {
     switch (this.query.className) {
-      case QuerySettingType.Series:
-        return (this.query as SeriesQuerySetting).yAxis[1].name;
-      case QuerySettingType.HeatMap:
-        return (this.query as HeatMapQuerySetting).yAxis.name;
+      case QuerySettingClassName.Series:
+        return get(this.query, 'yAxis[1].name', 'Untitled');
+      case QuerySettingClassName.HeatMap:
+        return get(this.query, 'yAxis.name', 'Untitled');
       default:
         return '';
     }
@@ -210,14 +210,14 @@ export default class BellYAxisTab extends Vue {
   }
 
   private get fontSizeOptions() {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get title(): string {
     if (this.setting && this.setting[1]) {
-      return this.setting[1].title?.text ?? this.defaultSetting.title;
+      return this.setting[1].title?.text ?? this.getDefaultTitle();
     }
-    return this.defaultSetting.title;
+    return this.getDefaultTitle();
   }
 
   private get gridLineColor(): string {
@@ -347,7 +347,7 @@ export default class BellYAxisTab extends Vue {
     settingAsMap.set('yAxis[1].labels.style.fontSize', this.defaultSetting.categoryFontSize);
     settingAsMap.set('yAxis[1].labels.style.color', this.defaultSetting.categoryColor);
     settingAsMap.set('yAxis[1].title.enabled', this.defaultSetting.titleEnabled);
-    settingAsMap.set('yAxis[1].title.text', this.defaultSetting.title);
+    settingAsMap.set('yAxis[1].title.text', this.getDefaultTitle());
     settingAsMap.set('yAxis[1].title.style.fontFamily', this.defaultSetting.titleFont);
     settingAsMap.set('yAxis[1].title.style.fontSize', this.defaultSetting.titleFontSize);
     settingAsMap.set('yAxis[1].title.style.color', this.defaultSetting.titleColor);

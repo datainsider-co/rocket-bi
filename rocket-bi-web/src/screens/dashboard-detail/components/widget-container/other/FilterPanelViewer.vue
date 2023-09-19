@@ -48,7 +48,7 @@
                     @change="handleChangePosition"
                   >
                     <div :style="{ cursor: getCurrentCursor }" class="grid-item-container">
-                      <WidgetContainer :isShowEdit="isShowEdit" :widget="getWidget(id)" :id="`${id}-chart-holder`" />
+                      <WidgetHolder :isShowEdit="isShowEdit" :widget-setting="widgetSetting" :widget="getWidget(id)" :id="`${id}-chart-holder`" />
                     </div>
                   </DiGridstackItem>
                 </template>
@@ -59,7 +59,13 @@
       </b-tabs>
     </b-card>
     <b-card-footer class="group-filter-footer" :style="footerStyle">
-      <DiButton :is-disable="widget.allWidgets.length === 0 && !isPreview" :title="widget.extraData.footer.apply.title" primary @click="handleApply" />
+      <DiButton
+        :is-disable="widget.allWidgets.length === 0 && !isPreview"
+        :title="widget.extraData.footer.apply.title"
+        primary
+        @click="handleApply"
+        :isLoading="isLoading"
+      />
     </b-card-footer>
     <DiRenameModal ref="renameModal" />
   </div>
@@ -67,9 +73,9 @@
 
 <script lang="ts">
 import SortModal from '@/screens/dashboard-detail/components/SortModal.vue';
-import WidgetContainer from '@/screens/dashboard-detail/components/widget-container';
+import WidgetHolder from '@/screens/dashboard-detail/components/widget-container/WidgetHolder.vue';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
-import { DashboardModule, FilterModule, WidgetModule } from '@/screens/dashboard-detail/stores';
+import { DashboardControllerModule, DashboardModule, FilterModule, GroupFilterInfo, WidgetModule } from '@/screens/dashboard-detail/stores';
 import { ContextMenuItem } from '@/shared';
 import DiRenameModal from '@/shared/components/DiRenameModal.vue';
 import { CustomGridStackOptions } from '@/shared/components/gridstack/CustomGridstack';
@@ -78,44 +84,44 @@ import DiGridstackItem from '@/shared/components/gridstack/DiGridstackItem.vue';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 import { GenIdMethods } from '@/utils/IdGenerator';
 import { PopupUtils } from '@/utils/PopupUtils';
-import { DIMap, Position, Tab, Widget, WidgetId } from '@core/common/domain';
+import { DIMap, Position, Tab, Widget, WidgetId, WidgetSetting } from '@core/common/domain';
 import { isNumber } from 'lodash';
 import { Component, Inject, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import Swal from 'sweetalert2';
-import { ListUtils } from '@/utils';
-import { FilterPanel } from '@core/common/domain/model/widget/normal/FilterPanel';
+import { ListUtils, TimeoutUtils } from '@/utils';
+import { GroupFilter } from '@core/common/domain/model/widget/normal/GroupFilter';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import { Log } from '@core/utils';
 
-@Component({ components: { DiButton, WidgetContainer, DiGridstack, DiGridstackItem, DiRenameModal, SortModal } })
+@Component({ components: { DiButton, WidgetHolder, DiGridstack, DiGridstackItem, DiRenameModal, SortModal } })
 export default class FilterPanelViewer extends Vue {
   private static readonly TAB_INDEX = 0;
+  protected isLoading = false;
   $alert!: typeof Swal;
-  @Prop()
-  widget!: FilterPanel;
+  @Prop({ required: true, type: Object })
+  readonly widget!: GroupFilter;
 
-  @Prop()
-  isShowEdit?: boolean;
+  @Prop({ required: false, type: Boolean, default: false })
+  readonly isShowEdit?: boolean;
 
   @Prop({ type: Boolean, default: false })
-  isPreview?: boolean;
+  readonly isPreview?: boolean;
 
   @Prop({ type: Boolean, default: true })
-  isShowComponent!: boolean;
+  readonly isShowComponent!: boolean;
+
+  @Prop({ required: false, type: Object, default: () => WidgetSetting.default() })
+  readonly widgetSetting!: WidgetSetting;
 
   @Ref()
-  renameModal!: DiRenameModal;
+  readonly renameModal!: DiRenameModal;
 
   @Ref()
-  gridstacks!: DiGridstack[];
+  readonly gridstacks!: DiGridstack[];
 
   // Provide from DiGridstackItem
   @Inject({ default: undefined })
   private readonly remove?: (fn: Function) => void;
-
-  //Provide from Dashboard Detail
-  @Inject({ default: undefined })
-  private readonly applyFilterPanel?: (panelId: WidgetId) => void;
 
   mounted() {
     this.registerEvents();
@@ -258,8 +264,8 @@ export default class FilterPanelViewer extends Vue {
       this.remove(async () => {
         try {
           await WidgetModule.handleDeleteWidget(this.widget);
-          await FilterModule.handleApplyFilterPanel(this.widget.id);
-          FilterModule.removeFilterPanel(this.widget.id);
+          await this.handleApply();
+          FilterModule.removeGroupFilter(this.widget.id);
         } catch (ex) {
           Log.error('handleDeleteWidget', ex);
           PopupUtils.showError('Can not remove widget, refresh page and try again');
@@ -361,8 +367,50 @@ export default class FilterPanelViewer extends Vue {
     return WidgetModule.handleUpdateWidget(this.widget);
   }
 
-  private handleApply() {
-    this.applyFilterPanel && !this.isPreview ? this.applyFilterPanel(this.widget.id) : void 0;
+  private async handleApply(): Promise<void> {
+    if (!this.isPreview) {
+      try {
+        this.isLoading = true;
+        const groupId = this.widget.id;
+        if (FilterModule.groupFilterMap.has(groupId)) {
+          const groupFilter: GroupFilterInfo = FilterModule.groupFilterMap.get(groupId)!;
+          const affectedByFilterIds = this.applyFilter(groupFilter);
+          const affectedByCrossFilterIds = await this.applyCrossFilter(groupFilter);
+          const affectedIds = ListUtils.distinct([...affectedByFilterIds, ...affectedByCrossFilterIds]);
+          // avoid stuck ui
+          await TimeoutUtils.sleep(100);
+          await DashboardControllerModule.renderCharts({
+            idList: affectedIds,
+            useBoost: DashboardModule.isUseBoost
+          });
+        }
+      } catch (ex) {
+        Log.error('handleApply', ex);
+      } finally {
+        this.isLoading = false;
+      }
+    }
+  }
+
+  // todo: force apply filter is empty
+  private applyFilter(groupFilter: GroupFilterInfo): WidgetId[] {
+    // FilterModule.removeFilterRequests(groupFilter.getRemovedFilterIds());
+    // FilterModule.addFilterRequests(groupFilter.getRequests());
+    // return WidgetModule.allQueryWidgets.filter(widget => FilterModule.canApplyFilter(widget.id)).map(widget => widget.id);
+    return [];
+  }
+
+  private async applyCrossFilter(groupFilter: GroupFilterInfo): Promise<WidgetId[]> {
+    const affectedIds: WidgetId[] = [];
+    for (const [filterId, filterValue] of groupFilter.crossFilterValueMap) {
+      const widgetIds: WidgetId[] = await DashboardControllerModule.applyDynamicValues({
+        id: filterId,
+        valueMap: filterValue,
+        ignoreReRender: true
+      });
+      affectedIds.push(...widgetIds);
+    }
+    return ListUtils.distinct(affectedIds);
   }
 }
 </script>
@@ -410,8 +458,8 @@ $border-radius: 4px;
       .grid-item-container {
         height: 100%;
         width: 100%;
-        border-radius: 4px;
-        border: 1px solid var(--tab-border-color, #f0f0f0) !important;
+        //border-radius: 4px;
+        //border: 1px solid var(--tab-border-color, #f0f0f0) !important;
 
         .tab-filter-container {
           border-radius: 4px;
@@ -484,6 +532,7 @@ $border-radius: 4px;
             position: absolute;
             right: 0;
             width: unset;
+
             i {
               font-size: 14px;
             }

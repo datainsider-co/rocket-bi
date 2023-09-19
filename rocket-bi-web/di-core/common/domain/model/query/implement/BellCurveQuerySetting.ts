@@ -5,13 +5,12 @@
 
 import {
   BellCurveChartOption2,
-  BellCurveChartOption,
   Condition,
   Function,
   getFiltersAndSorts,
   OrderBy,
   Paginatable,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   Zoomable,
   InlineSqlView,
@@ -24,8 +23,8 @@ import { DefaultSize, ZoomData } from '@/shared';
 import { Log } from '@core/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class BellCurveQuerySetting extends QuerySetting<BellCurveChartOption> implements Zoomable {
-  readonly className = QuerySettingType.Scatter;
+export class BellCurveQuerySetting extends QuerySetting implements Zoomable {
+  readonly className = QuerySettingClassName.Scatter;
 
   constructor(
     public xAxis: TableColumn,
@@ -78,7 +77,7 @@ export class BellCurveQuerySetting extends QuerySetting<BellCurveChartOption> im
     }
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     if (this.legend) {
       return [this.xAxis, this.yAxis, this.legend];
     } else {
@@ -86,7 +85,7 @@ export class BellCurveQuerySetting extends QuerySetting<BellCurveChartOption> im
     }
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.xAxis = ConfigDataUtils.replaceDynamicFunction(this.xAxis, functions);
     this.yAxis = ConfigDataUtils.replaceDynamicFunction(this.yAxis, functions);
     if (this.legend) {
@@ -109,9 +108,9 @@ export class BellCurveQuerySetting extends QuerySetting<BellCurveChartOption> im
   }
 }
 
-export class BellCurve2QuerySetting extends QuerySetting<BellCurveChartOption2> implements Zoomable, Paginatable {
+export class BellCurve2QuerySetting extends QuerySetting implements Zoomable, Paginatable {
   private static readonly DEFAULT_NUM_DATA_POINT = 1000;
-  readonly className = QuerySettingType.BellCurve;
+  readonly className = QuerySettingClassName.BellCurve;
 
   constructor(
     public value: TableColumn,
@@ -156,11 +155,11 @@ export class BellCurve2QuerySetting extends QuerySetting<BellCurveChartOption2> 
     return [this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.value];
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
 
@@ -193,6 +192,6 @@ export class BellCurve2QuerySetting extends QuerySetting<BellCurveChartOption2> 
   }
 
   static isBellCurve2QuerySetting(obj: any): obj is BellCurve2QuerySetting {
-    return obj.className === QuerySettingType.BellCurve;
+    return obj.className === QuerySettingClassName.BellCurve;
   }
 }

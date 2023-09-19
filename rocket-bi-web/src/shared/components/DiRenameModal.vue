@@ -19,7 +19,7 @@
             <span v-else-if="!$v.name.required">Field is required.</span>
             <span v-else>Field can't contain any of the following characters: /\"?*&#62;&#60;:|</span>
           </div>
-          <div class="error" v-if="errorMsg">
+          <div class="error" :title="errorMsg" v-if="errorMsg">
             {{ errorMsg }}
           </div>
         </template>
@@ -108,7 +108,6 @@ export default class DiRenameModal extends Vue {
     try {
       event.preventDefault();
       if (this.validName() && this.name && this.onClickOk) {
-        // this.$emit('rename', this.name, this.data);
         this.onClickOk(this.name);
       }
     } catch (e) {

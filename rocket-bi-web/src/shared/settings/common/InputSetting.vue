@@ -14,11 +14,11 @@
         :maxLength="maxLength"
         :placeholder="placeholder"
         :type="currentType"
-        :value="textInput"
+        :value="curInputValue"
         autocomplete="off"
         @input="onTextInputChanged"
-        @blur.native="handleUnFocusInput"
-        @keydown.enter="handleSave"
+        @blur.native="applyValue"
+        @keydown.enter="applyValue"
       />
     </b-input-group>
     <BPopover
@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { SettingSize } from '@/shared/settings/common/SettingSize';
 import { BFormInput } from 'bootstrap-vue';
 import { StringUtils } from '@/utils/StringUtils';
@@ -62,57 +62,57 @@ export enum InputType {
 @Component
 export default class InputSetting extends Vue {
   @Prop({ required: true, type: String })
-  private readonly id!: string;
+  protected readonly id!: string;
   @Prop({ required: false, type: String })
-  private readonly label!: string;
+  protected readonly label!: string;
   @Prop({ required: true })
-  private readonly value!: string;
+  protected readonly value!: string;
 
   @Prop({ default: SettingSize.full })
-  private readonly size!: SettingSize;
+  protected readonly size!: SettingSize;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly disable!: boolean;
+  protected readonly disable!: boolean;
 
   @Prop({ required: false, type: String, default: '' })
-  private readonly placeholder!: string;
+  protected readonly placeholder!: string;
 
   @Prop({ required: false, default: InputType.Text })
-  private readonly type!: InputType;
+  protected readonly type!: InputType;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly autoFocus!: boolean;
+  protected readonly autoFocus!: boolean;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly applyFormatNumber!: boolean;
+  protected readonly applyFormatNumber!: boolean;
 
   @Prop({ required: false, type: Number })
-  private readonly min?: number;
+  protected readonly min?: number;
 
   @Prop({ required: false, type: Number })
-  private readonly max?: number;
+  protected readonly max?: number;
 
   @Prop({ required: false, type: Number })
-  private readonly maxLength?: number;
+  protected readonly maxLength?: number;
 
   @Prop({ required: false, type: Array, default: () => [] })
-  private readonly suggestions!: string[];
+  protected readonly suggestions!: string[];
   @Prop({ type: String, default: '' })
-  private readonly hint!: string;
+  protected readonly hint!: string;
 
   @Ref()
-  private readonly input?: BFormInput;
+  protected readonly input?: BFormInput;
 
-  private textInput = '';
+  protected curInputValue = '';
 
-  private isShowSuggestList = false;
+  protected isShowSuggestList = false;
 
-  private get useFormatter(): boolean {
+  protected get useFormatter(): boolean {
     return this.type === InputType.Number && this.applyFormatNumber;
   }
 
   // if use format for number, input must be a text
-  private get currentType(): string {
+  protected get currentType(): string {
     if (this.useFormatter) {
       return InputType.Text;
     } else {
@@ -120,59 +120,56 @@ export default class InputSetting extends Vue {
     }
   }
 
-  private get isNotEmptyData(): boolean {
+  protected get isNotEmptyData(): boolean {
     return ListUtils.isNotEmpty(this.filteredData);
   }
 
-  private get filteredData(): string[] {
-    return this.suggestions.filter(label => label.toLowerCase().includes(this.textInput.toLowerCase()));
+  protected get filteredData(): string[] {
+    return this.suggestions.filter(label => label.toLowerCase().includes(this.curInputValue.toLowerCase()));
   }
 
   mounted() {
-    this.textInput = this.formatValue(this.value || '');
+    this.curInputValue = this.formatValue(this.value || '');
   }
 
-  setTextInput(value: string) {
-    this.textInput = this.formatValue(value);
+  setTextInput(value: string): void {
+    this.curInputValue = this.formatValue(value);
   }
 
-  displaySuggest(show: boolean) {
-    this.isShowSuggestList = show;
+  showSuggestion(isShow: boolean): void {
+    this.isShowSuggestList = isShow;
   }
 
   @Watch('value')
-  private onValueChanged(newValue: string): void {
-    if (this.textInput !== this.parseNumber(newValue)?.toString()) {
-      this.textInput = this.formatValue(newValue);
+  protected onValueChanged(newValue: string): void {
+    if (this.curInputValue !== this.parseNumber(newValue)?.toString()) {
+      this.curInputValue = this.formatValue(newValue);
     }
   }
 
-  private handleSave() {
-    // this.input?.blur();
-    const showSuggest = false;
-    this.displaySuggest(showSuggest);
-    return this.emitValueChanged(this.textInput);
+  protected applyValue(): void {
+    this.showSuggestion(false);
+    this.emitChangedValue(this.curInputValue);
   }
 
-  private formatValue(value: string): string {
+  protected formatValue(value: string): string {
     if (this.useFormatter && this.canFormat(value)) {
-      const valueAsNumber = this.parseNumber(value) ?? this.textInput;
+      const valueAsNumber = this.parseNumber(value) ?? this.curInputValue;
       return StringUtils.formatDisplayNumber(valueAsNumber, '', 'en-US', { maximumFractionDigits: 10 });
     } else {
       return value;
     }
   }
 
-  private onTextInputChanged(value: string) {
+  protected onTextInputChanged(value: string) {
     Log.debug('onTextInputChanged:', this.disable, value);
     const newValue = this.formatValue(value);
-    this.textInput = newValue;
-    const showSuggest = true;
-    this.displaySuggest(showSuggest);
+    this.curInputValue = newValue;
+    this.showSuggestion(true);
     this.updateCursor(value, newValue);
   }
 
-  private updateCursor(currentValue: string, newValue: string) {
+  protected updateCursor(currentValue: string, newValue: string) {
     if (this.useFormatter && this.input) {
       const offsetStart = currentValue.length - this.input.selectionStart;
       const positionStart = Math.max(newValue.length - offsetStart, 0);
@@ -181,12 +178,12 @@ export default class InputSetting extends Vue {
     }
   }
 
-  private setCursor(start: number, end: number) {
+  protected setCursor(start: number, end: number) {
     const setSelectionRange = () => {
       if (this.input) {
         const inputEl = this.input.$el as HTMLInputElement;
         // // force update value
-        inputEl.value = this.textInput;
+        inputEl.value = this.curInputValue;
         inputEl.setSelectionRange(start, end);
       }
     };
@@ -194,7 +191,7 @@ export default class InputSetting extends Vue {
     setTimeout(setSelectionRange, 1); // Android Fix
   }
 
-  private canFormat(value: string): boolean {
+  protected canFormat(value: string): boolean {
     if (StringUtils.isNotEmpty(value)) {
       return this.isMultiDot(value) || (!value.endsWith('.') && value !== '-');
     } else {
@@ -203,11 +200,11 @@ export default class InputSetting extends Vue {
   }
 
   // multi dot is case 0.11.. and 0..
-  private isMultiDot(value: string) {
+  protected isMultiDot(value: string) {
     return /(\d+\.\d+.+$)|(\.{2,})/.test(value);
   }
 
-  private parseNumber(value: string): number | undefined {
+  protected parseNumber(value: string): number | undefined {
     // remove character is not a number
     let numberAsText = value.replace(/[^(\-\d.)]+/g, '');
     // remove double (dot, minus)
@@ -218,15 +215,15 @@ export default class InputSetting extends Vue {
     }
   }
 
-  private handleUnFocusInput() {
-    const showSuggest = false;
-    this.displaySuggest(showSuggest);
-    return this.emitValueChanged(this.textInput);
+  protected emitChangedValue(value: string): void {
+    const finalValue = this.toFinalValue(value);
+    if (this.value !== finalValue) {
+      this.$emit('onChanged', finalValue);
+    }
   }
 
-  @Emit('onChanged')
-  private emitValueChanged(value: string) {
-    if (this.canValidateValue(value)) {
+  protected toFinalValue(value: string): number | string {
+    if (this.isNeededValid(value)) {
       const valueAsNumber = this.parseNumber(value);
       return this.getValidValue(valueAsNumber) ?? '';
     } else {
@@ -234,11 +231,11 @@ export default class InputSetting extends Vue {
     }
   }
 
-  private canValidateValue(value: string) {
+  protected isNeededValid(value: string) {
     return StringUtils.isNotEmpty(value) && (this.type === InputType.Number || this.useFormatter);
   }
 
-  private getValidValue(valueAsNumber?: number | null): number | undefined {
+  protected getValidValue(valueAsNumber?: number | null): number | undefined {
     if (isNumber(valueAsNumber)) {
       let currentValue = valueAsNumber;
       if (isNumber(this.min)) {
@@ -252,19 +249,19 @@ export default class InputSetting extends Vue {
     }
   }
 
-  private suggestionInputSize() {
+  protected suggestionInputSize() {
     return this.$el?.clientWidth ?? 500;
   }
 
-  private handleSelectSuggest(text: string) {
+  protected handleSelectSuggest(text: string) {
     this.onTextInputChanged(text);
-    this.handleSave();
+    this.applyValue();
   }
-  private get showHint(): boolean {
+  protected get showHint(): boolean {
     return StringUtils.isNotEmpty(this.hint);
   }
 
-  private get isLabel(): boolean {
+  protected get isLabel(): boolean {
     return StringUtils.isNotEmpty(this.label);
   }
 }

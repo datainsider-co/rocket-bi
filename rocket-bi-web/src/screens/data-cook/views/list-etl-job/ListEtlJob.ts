@@ -19,7 +19,7 @@ import { ForceMode } from '@core/lake-house/domain/lake-job/ForceMode';
 import ForceRunSettingModal from '@/shared/components/ForceRunSettingModal.vue';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 import ContextMenu from '@/shared/components/ContextMenu.vue';
-import { DateTimeFormatter } from '@/utils';
+import { DateTimeUtils } from '@/utils';
 import { LayoutContent, LayoutHeader, LayoutNoData } from '@/shared/components/layout-wrapper';
 import DiTable2 from '@/shared/components/common/di-table/DiTable2.vue';
 import { RouterUtils } from '@/utils/RouterUtils';
@@ -159,7 +159,7 @@ export default class ListEtlJob extends Vue {
           const time = job.lastExecuteTime;
           const imgSrc = job.lastRunStatusIcon;
           const elements = job.wasRun
-            ? [HtmlElementRenderUtils.renderImg(imgSrc), HtmlElementRenderUtils.renderText(DateTimeFormatter.formatAsMMMDDYYYHHmmss(time), 'span')]
+            ? [HtmlElementRenderUtils.renderImg(imgSrc), HtmlElementRenderUtils.renderText(DateTimeUtils.formatAsMMMDDYYYHHmmss(time), 'span')]
             : '--';
           const div = document.createElement('div');
           div.append(...elements);
@@ -173,7 +173,7 @@ export default class ListEtlJob extends Vue {
         disableSort: true,
         customRenderBodyCell: new CustomCell(rowData => {
           const job = EtlJobInfo.fromObject(rowData);
-          const data = this.type !== LIST_ETL_JOB_TYPE.ArchivedEtl && job.hasNextRunTime ? DateTimeFormatter.formatAsMMMDDYYYHHmmss(job.nextExecuteTime) : '--';
+          const data = this.type !== LIST_ETL_JOB_TYPE.ArchivedEtl && job.hasNextRunTime ? DateTimeUtils.formatAsMMMDDYYYHHmmss(job.nextExecuteTime) : '--';
           return HtmlElementRenderUtils.renderText(data, 'div', '');
         })
       },

@@ -32,7 +32,7 @@ abstract class AxiosHttpClient extends BaseClient {
 
   protected abstract parseResponse(response: string): Promise<any>;
 
-  protected abstract transformDataRequest(data: any): Promise<any>;
+  protected abstract transformRequestData(data: any): Promise<any>;
   protected handleError(path: string, ex: any): any {
     if (ex.toJSON) {
       Log.debug('request error', 'path::', path, ex.toJSON());
@@ -49,7 +49,7 @@ abstract class AxiosHttpClient extends BaseClient {
   }
 
   async delete<T>(path: string, body?: any, params?: any, headers?: any): Promise<T> {
-    const requestData = body ? await this.transformDataRequest(body) : void 0;
+    const requestData = body ? await this.transformRequestData(body) : void 0;
     return this.client
       .delete<string>(path, {
         data: requestData,
@@ -62,7 +62,7 @@ abstract class AxiosHttpClient extends BaseClient {
   }
 
   async get<T>(path: string, params?: any, headers?: any, data?: any): Promise<T> {
-    const requestData = data ? await this.transformDataRequest(data) : void 0;
+    const requestData = data ? await this.transformRequestData(data) : void 0;
 
     return this.client
       .get<string>(path, {
@@ -86,7 +86,7 @@ abstract class AxiosHttpClient extends BaseClient {
       responseType?: 'arraybuffer' | 'blob' | 'document' | 'json' | 'text' | 'stream';
     }
   ): Promise<T> {
-    const requestData = body ? await this.transformDataRequest(body) : void 0;
+    const requestData = body ? await this.transformRequestData(body) : void 0;
     Log.debug(`request path:: ${path}`);
 
     return this.client
@@ -101,7 +101,7 @@ abstract class AxiosHttpClient extends BaseClient {
   }
 
   async put<T>(path: string, body?: any, params?: any, headers?: any): Promise<T> {
-    const requestData = body ? await this.transformDataRequest(body) : void 0;
+    const requestData = body ? await this.transformRequestData(body) : void 0;
 
     return this.client
       .put<string>(path, requestData, {
@@ -132,7 +132,7 @@ class HttpClient extends AxiosHttpClient {
    *
    * if data is object, return JSON.stringify(data)
    */
-  protected async transformDataRequest(data: any): Promise<any> {
+  protected async transformRequestData(data: any): Promise<any> {
     if (data instanceof FormData) {
       return data;
     } else if (typeof data === 'string') {
@@ -152,7 +152,7 @@ class HttpClientWithoutWorker extends AxiosHttpClient {
     return JsonUtils.fromObject(response);
   }
 
-  protected async transformDataRequest(data: any): Promise<any> {
+  protected async transformRequestData(data: any): Promise<any> {
     if (data instanceof FormData) {
       return data;
     } else if (typeof data === 'string') {

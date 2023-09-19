@@ -3,22 +3,40 @@
  * @created: 12/31/20, 10:44 AM
  */
 
-import { Component, Inject, Prop, PropSync, Ref, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, PropSync, Ref, Vue, Watch } from 'vue-property-decorator';
 import moment from 'moment';
-import { DataBuilderConstantsV35, DateRange, DateTimeConstants, FilterSelectOption, InputType, SelectOption } from '@/shared';
+import {
+  CheckboxGroupOption,
+  DateHistogramConditionTypes,
+  DateRange,
+  DateTimeConstants,
+  FilterSelectOption,
+  InputType,
+  NumberConditionTypes,
+  SelectOption,
+  StringConditionTypes
+} from '@/shared';
 import DiCalendar from '@filter/main-date-filter-v2/DiCalendar.vue';
-import { MainDateMode, TabControlData, WidgetId } from '@core/common/domain/model';
+import { ChartControlData, ChartControl, MainDateMode, ValueControlInfo, WidgetId } from '@core/common/domain/model';
 import { CalendarData } from '@/shared/models';
-import { DateTimeFormatter, DateUtils, ListUtils } from '@/utils';
+import { ChartUtils, DateTimeUtils, DateUtils, ListUtils, RandomUtils } from '@/utils';
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
 import SingleChoiceItem from '@/shared/components/filters/SingleChoiceItem.vue';
 import { Log } from '@core/utils';
+import DiInputComponent from '@/shared/components/DiInputComponent.vue';
+import MultiSelection from '@/shared/components/MultiSelection.vue';
+import { cloneDeep } from 'lodash';
 
 @Component({
-  components: { DiCalendar, DiDatePicker, SingleChoiceItem }
+  components: { DiInputComponent, DiCalendar, DiDatePicker, SingleChoiceItem, MultiSelection }
 })
 export default class SelectionInput extends Vue {
-  private readonly MainDateModeOptions = DateTimeConstants.ListDateRangeModeOptions;
+  protected readonly selectionPanelInputId = `selection-input-panel-${RandomUtils.nextString()}`;
+  protected readonly selectionInputId = `chart-control-value-section-${RandomUtils.nextString()}`;
+  private readonly MainDateModeOptions = DateTimeConstants.DATE_RANGE_MODE_OPTION_LIST;
+  private readonly InputTypes = InputType;
+
+  private cacheObject: any = {};
 
   private readonly ValueTypeOptions: SelectOption[] = [
     {
@@ -30,109 +48,98 @@ export default class SelectionInput extends Vue {
       id: `Dashboard Control`
     }
   ];
+  protected currentSelected: FilterSelectOption | null = null;
 
   @Prop({ type: Array, default: () => [] })
-  options!: FilterSelectOption[];
+  readonly options!: FilterSelectOption[];
 
   @PropSync('optionSelected', { type: String, default: '' })
-  optionSelectedProp!: string;
+  optionSelectedProp!: DateHistogramConditionTypes | StringConditionTypes | NumberConditionTypes;
 
-  @PropSync('values', { type: Array, default: '' })
-  valuesProp!: string[];
-
-  @Prop({ type: Array, default: () => [] })
-  controlOptions!: TabControlData[];
-
-  @PropSync('control')
-  syncControl?: TabControlData;
+  @PropSync('values', { type: Array, default: () => [] })
+  protected valuesProp!: string[];
 
   @Prop({ required: false, default: false })
   private readonly enableControlConfig!: boolean;
 
+  @Prop({ required: false, type: Number })
+  private readonly selectedControlId?: WidgetId;
+
+  @Prop({ required: false, type: Boolean, default: false })
+  private readonly isManualInput!: boolean;
+
+  @Prop({ required: false, type: Array, default: () => [] })
+  private readonly chartControls!: ChartControl[];
+
   @Ref()
   private controlButton!: any;
 
-  private get valueProp(): string {
+  private get singleValue(): string {
     return this.valuesProp[0];
   }
 
-  private set valueProp(newValue: string) {
+  private set singleValue(newValue: string) {
     this.valuesProp.splice(0, 1, newValue);
   }
 
-  private get selectedDate(): Date | null {
-    if (this.valueProp) {
-      return moment(this.valueProp).toDate();
+  protected get selectedDate(): Date | null {
+    if (this.singleValue) {
+      return moment(this.singleValue).toDate();
     } else {
       return null;
     }
   }
 
-  private set selectedDate(newDate: Date | null) {
+  protected set selectedDate(newDate: Date | null) {
     if (newDate) {
-      this.valueProp = DateTimeFormatter.formatDate(newDate);
+      this.singleValue = DateTimeUtils.formatDate(newDate);
     } else {
-      this.valueProp = '';
+      this.singleValue = '';
     }
   }
 
-  private currentSelected: FilterSelectOption | null = null;
+  private get selectedWidgetControl(): ChartControl | null {
+    if (this.selectedControlId) {
+      return this.chartControls.find(control => control.getControlId() === this.selectedControlId) ?? null;
+    } else {
+      return null;
+    }
+  }
+
+  protected get supportedControlValues(): ValueControlInfo[] {
+    return this.selectedWidgetControl?.getValueController()?.getSupportedControls() ?? [];
+  }
+
+  protected selectChartControl(controlId?: WidgetId) {
+    this.$emit('update:selectedControlId', controlId);
+  }
+
+  protected getChartControlIconSrc(chartData: ChartControlData): string {
+    return ChartUtils.getControlIconSrc(chartData.chartInfoType, chartData.chartType);
+  }
+
+  protected get chartControlDataList(): ChartControlData[] {
+    return this.chartControls.map(control => control.getChartControlData());
+  }
 
   @Watch('optionSelectedProp', { immediate: true })
   onOptionSelectedChanged() {
     this.currentSelected = this.options.find(option => option.id === this.optionSelectedProp) ?? null;
-    switch (this.currentSelected?.inputType) {
-      case InputType.multiSelect:
-      case InputType.none:
-        this.handleValueTypeChanged(true);
-    }
   }
 
-  private get selectClass(): string {
-    if (this.isDate || this.isText) {
-      const col = this.enableControlConfig ? 'col-6' : 'col-8';
-      return `pl-0 ${col}`;
-    } else if (this.isDateRange) {
-      const col = this.enableControlConfig ? 'col-6' : 'col-8';
-      return `pl-0 ${col}`;
-    } else {
-      return 'px-0 col-12';
-    }
+  private get inputType(): InputType {
+    return this.currentSelected?.inputType ?? InputType.None;
   }
 
-  private get isDynamicValue(): boolean {
-    return this.syncControl !== null && this.syncControl !== undefined;
+  protected applyFilter(): void {
+    this.$emit('applyFilter');
   }
 
-  private get isText(): boolean {
-    return this.currentSelected?.inputType == InputType.text;
-  }
-
-  private get isDate(): boolean {
-    return this.currentSelected?.inputType == InputType.date;
-  }
-
-  private get isDateRange(): boolean {
-    return this.currentSelected?.inputType == InputType.dateRange;
-  }
-
-  private get isNumberRange(): boolean {
-    return this.currentSelected?.inputType == InputType.numberRange;
-  }
-
-  //TODO inject from DynamicFilterPanel.ts
-  @Inject()
-  private handleApplyFilter!: () => void;
-
-  private applyFilter(): void {
-    this.handleApplyFilter();
-  }
-
-  private parentElement(): Element {
+  protected parentElement(): Element {
     return this.$el;
   }
 
-  private get defaultDateRange(): DateRange | undefined {
+  protected get defaultDateRange(): DateRange | undefined {
     Log.debug('SelectionInput::defaultDateRange', this.valuesProp);
     if (ListUtils.isNotEmpty(this.valuesProp)) {
       Log.debug('SelectionInput::defaultDateRange::if', this.valuesProp);
@@ -145,7 +152,7 @@ export default class SelectionInput extends Vue {
     }
   }
 
-  private get mainDateFilterMode(): MainDateMode {
+  protected get mainDateFilterMode(): MainDateMode {
     if (this.defaultDateRange) {
       return MainDateMode.custom;
     } else {
@@ -153,45 +160,40 @@ export default class SelectionInput extends Vue {
     }
   }
 
-  private getDateRangeByMode(mode: MainDateMode): DateRange | null {
+  protected getDateRangeByMode(mode: MainDateMode): DateRange | null {
     return DateUtils.getDateRange(mode);
   }
 
-  private handleCalendarSelected(calendarData: CalendarData) {
+  protected handleCalendarSelected(calendarData: CalendarData) {
     switch (calendarData.filterMode) {
       case MainDateMode.allTime:
         this.valuesProp = [];
         break;
       default:
         if (calendarData.chosenDateRange) {
-          this.valuesProp = [DateTimeFormatter.formatDate(calendarData.chosenDateRange.start), DateTimeFormatter.formatDate(calendarData.chosenDateRange.end)];
+          this.valuesProp = [DateTimeUtils.formatDate(calendarData.chosenDateRange.start), DateTimeUtils.formatDate(calendarData.chosenDateRange.end, true)];
         } else {
           this.valuesProp = [];
         }
     }
   }
 
-  private isManualInput = false;
+  protected changeManualInput(event: MouseEvent, isManualInput: boolean): void {
+    event.stopPropagation();
+    this.$emit('update:isManualInput', isManualInput);
 
-  mounted() {
-    this.isManualInput = this.syncControl === undefined || this.syncControl === null || this.syncControl === void 0;
-  }
-
-  private handleValueTypeChanged(isManualInput: boolean, option?: SelectOption, event?: Event | undefined) {
-    event?.stopPropagation();
-    this.isManualInput = isManualInput;
-    this.syncControl = void 0;
-  }
-
-  private get controlId(): WidgetId | undefined {
-    return this.syncControl?.id;
-  }
-
-  private set controlId(controlId: WidgetId | undefined) {
-    this.syncControl = this.controlOptions.find(control => control.id === controlId);
-  }
-
-  private getControlIcon(control: any) {
-    return DataBuilderConstantsV35.ALL_FILTERS.find(filter => filter.type === control.chartType)?.src ?? '';
+    const { selectedValues, controlId } = this.cacheObject;
+    this.cacheObject = {
+      selectedValues: [...this.valuesProp],
+      controlId: this.selectedControlId
+    };
+    // from chart control to manual
+    if (isManualInput) {
+      this.selectChartControl(void 0);
+      this.valuesProp = cloneDeep(selectedValues);
+    } else {
+      this.selectChartControl(controlId);
+      this.valuesProp = cloneDeep(selectedValues ?? []);
+    }
   }
 }

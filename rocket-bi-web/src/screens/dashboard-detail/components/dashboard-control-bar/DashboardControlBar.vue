@@ -1,92 +1,85 @@
 <template>
-  <div class="dashboard-control-bar">
+  <div
+    :class="{
+      'dashboard-control-bar': true,
+      'dashboard-control-bar--mobile': isMobile
+    }"
+  >
     <div v-if="dashboardId">
       <MainDateFilter
+        v-if="hasMainDate"
         class="btn-ghost"
-        v-if="isShowMainDateFilter"
         :class="getHiddenClass"
         :defaultDateRange="defaultDateRange"
-        :canEditMainDateFilter="isEditDashboardMode"
+        :canEditMainDateFilter="isEditMode"
         :mainDateFilterMode="mainDateFilterMode"
       />
       <SetupMainDateFilter
-        v-else-if="isEditDashboardMode"
+        v-else-if="isEditMode && !isEmbeddedView"
         :class="getHiddenClass"
-        :isResetMainDateFilter="isResetMainDateFilter"
+        :isResetMainDateFilter="isResetMainDateFlow"
         @handle-setup-main-date-filter="handleSetupMainDateFilter"
         @handle-clear-reset-main-date="handleClearResetMainDate"
       />
     </div>
-    <div v-if="dashboardId && !isMobile()" class="d-flex">
-      <DiIconTextButton v-if="showResetFilters" :id="genBtnId('reset-filter')" title="Reset Filters" @click="resetFilter">
+    <div v-if="dashboardId && !isMobile" class="d-flex">
+      <DiButton v-if="showResetFilters" :id="genBtnId('reset-filter')" title="Reset Filters" @click="resetFilter">
         <i class="di-icon-reset icon-title"></i>
-      </DiIconTextButton>
-      <SelectFieldButton id="add-filter" :dashboardId="dashboardId" :is-show-reset-filter-button="showResetFilters" title="Add Filter">
-        <template #icon>
-          <i class="di-icon-filter icon-title"></i>
-        </template>
-      </SelectFieldButton>
+      </DiButton>
+      <!--      <SelectFieldButton id="add-filter" :dashboardId="dashboardId" :is-show-reset-filter-button="showResetFilters" title="Add Filter">-->
+      <!--        <template #icon>-->
+      <!--          <i class="di-icon-filter icon-title"></i>-->
+      <!--        </template>-->
+      <!--      </SelectFieldButton>-->
     </div>
-    <transition mode="out-in" name="fade">
+    <transition mode="out-in" name="fade" v-if="!isEmbeddedView">
       <!--      View Mode-->
       <div v-if="isViewMode" key="view" class="view-action-bar">
-        <template v-if="!isMobile()">
-          <PermissionWidget :actionTypes="actionTypes" :allowed-actions="['*']">
-            <DiIconTextButton :id="genBtnId('performance-boost')" :disabled="!boostEnable" title="Boost:" @click.prevent="showBoostMenu">
-              <i class="di-icon-boost di-popup icon-title"></i>
-              <template #suffix-content>
-                <span v-if="boostEnable" id="boost-label" :class="{ 'di-disable': !boostEnable }">On</span>
-                <span v-else id="boost-label" :class="{ 'di-disable': !boostEnable }">Off</span>
-              </template>
-            </DiIconTextButton>
-          </PermissionWidget>
-        </template>
-
-        <DiIconTextButton ref="optionButton" :id="optionButtonId" tabindex="-1" title="Options" @click="openOptionMenu">
+        <DiButton ref="optionButton" :id="optionButtonId" tabindex="-1" title="Options" @click="openOptionMenu">
           <i class="di-icon-option icon-title"></i>
-        </DiIconTextButton>
-        <PermissionWidget v-if="!isMobile()" :actionTypes="actionTypes" :allowed-actions="['*', 'edit']">
-          <DiIconTextButton :id="genBtnId('edit-mode')" title="Edit" @click="switchMode('to_edit')">
+        </DiButton>
+        <PermissionWidget v-if="!isMobile" :actionTypes="actionTypes" :allowed-actions="['*', 'edit']">
+          <DiButton :id="genBtnId('edit-mode')" title="Edit" @click="toEditMode">
             <i class="di-icon-edit icon-title"></i>
-          </DiIconTextButton>
+          </DiButton>
         </PermissionWidget>
       </div>
       <!--      FullScreen-->
       <div v-else-if="isFullScreen || isTVMode" class="view-action-bar">
-        <DiIconTextButton ref="optionButton" :id="optionButtonId" tabindex="-1" title="Options" @click="openOptionMenu">
+        <DiButton ref="optionButton" :id="optionButtonId" tabindex="-1" title="Options" @click="openOptionMenu">
           <i class="di-icon-option icon-title"></i>
-        </DiIconTextButton>
-        <div :id="genBtnId('exit-fullscreen')" key="full-screen" class="ic-exit-fullscreen btn-icon-border" @click="switchMode('to_view')">
+        </DiButton>
+        <div :id="genBtnId('exit-fullscreen')" key="full-screen" class="ic-exit-fullscreen btn-icon-border mar-r-4" @click="toViewMode">
           <i class="di-icon-exit-full-screen"></i>
         </div>
       </div>
       <!--      Edit Mode-->
-      <div v-else-if="isEditDashboardMode" key="edit" class="edit-action-bar">
+      <div v-else-if="isEditMode" key="edit" class="edit-action-bar">
         <PermissionWidget :actionTypes="actionTypes" :allowed-actions="['*', 'create']">
-          <DiIconTextButton :id="genBtnId('adding-chart')" class="di-popup" title="Adding" @click.prevent="clickAdding">
+          <DiButton :id="genBtnId('adding-chart')" class="di-popup" title="Adding" @click.prevent="clickAdding">
             <i class="di-icon-add di-popup icon-title"></i>
-          </DiIconTextButton>
+          </DiButton>
         </PermissionWidget>
-        <PermissionWidget :actionTypes="actionTypes" :allowed-actions="['*', 'create']">
-          <DiIconTextButton :id="genBtnId('performance-boost')" title="Boost:" @click.prevent="clickBoost">
-            <i class="di-icon-boost di-popup icon-title"></i>
-            <template #suffix-content>
-              <span v-if="boostEnable" id="boost-label">On</span>
-              <span v-else id="boost-label">Off</span>
-            </template>
-          </DiIconTextButton>
-        </PermissionWidget>
-        <DiIconTextButton ref="optionButton" :id="optionButtonId" tabindex="-1" title="Options" @click="openOptionMenu">
+        <!--        <PermissionWidget :actionTypes="actionTypes" :allowed-actions="['*', 'create']">-->
+        <!--          <DiIconTextButton :id="genBtnId('performance-boost')" title="Boost:" @click.prevent="clickBoost">-->
+        <!--            <i class="di-icon-boost di-popup icon-title"></i>-->
+        <!--            <template #suffix-content>-->
+        <!--              <span v-if="boostEnable" id="boost-label">On</span>-->
+        <!--              <span v-else id="boost-label">Off</span>-->
+        <!--            </template>-->
+        <!--          </DiIconTextButton>-->
+        <!--        </PermissionWidget>-->
+        <DiButton ref="optionButton" :id="optionButtonId" tabindex="-1" title="Options" @click="openOptionMenu">
           <i class="di-icon-option icon-title"></i>
-        </DiIconTextButton>
-        <DiIconTextButton :id="genBtnId('save')" title="Save" @click="switchMode('to_view')">
+        </DiButton>
+        <DiButton :id="genBtnId('save')" title="Save" @click="toViewMode">
           <i class="di-icon-save icon-title"></i>
-        </DiIconTextButton>
+        </DiButton>
       </div>
       <!--      RLS View Mode-->
       <div class="d-flex align-items-center" v-else-if="isRLSViewAsMode">
         <div v-if="viewAsUser" :title="viewAsUser.email">
-          <DiIconTextButton class="rls-view-as" border :id="genBtnId('rls-setting-view-as')" @click="showRLSViewAsModal">
+          <DiButton class="rls-view-as" border :id="genBtnId('rls-setting-view-as')" @click="showRLSViewAsModal">
             <div class="d-flex align-items-center">
               <i class="di-icon-view-as icon-title mr-2"></i>
               <div class="d-flex align-items-center">
@@ -94,87 +87,85 @@
                 <div class="font-weight-semi-bold ml-2">{{ userDisplayName(viewAsUser) }}</div>
               </div>
             </div>
-          </DiIconTextButton>
+          </DiButton>
         </div>
 
-        <DiIconTextButton :id="genBtnId('rls-exit-view-as')" class="ml-1" title="Exit View As" @click="exitRLSViewAs">
+        <DiButton :id="genBtnId('rls-exit-view-as')" class="ml-1" title="Exit View As" @click="exitRLSViewAs">
           <i class="di-icon-exit-view-as icon-title"></i>
-        </DiIconTextButton>
+        </DiButton>
       </div>
     </transition>
-    <template>
-      <input
-        :id="genInputId('image-picker')"
-        ref="imagePicker"
-        accept="image/*"
-        class="form-control-file"
-        style="display: none !important;"
-        type="file"
-        @change="handleFileSelected"
-      />
-      <DashboardSettingModal ref="dashboardSettingModal" />
-    </template>
-    <PerformanceBoostModal ref="performanceBoostModal" />
-    <RelationshipModal ref="relationshipModal"></RelationshipModal>
+    <input
+      :id="genInputId('image-picker')"
+      ref="imagePicker"
+      accept="image/*"
+      class="form-control-file"
+      style="display: none !important;"
+      type="file"
+      @change="handleFileSelected"
+    />
 
     <!--Option Menu-->
     <BPopover
       ref="menuOption"
-      :show.sync="isShowOptionMenu"
+      id="dashboard-options-menu"
       custom-class="custom-option-menu-popover"
-      :id="optionMenuId"
-      :target="optionButtonId"
-      :placement="optionMenuPlacement"
       boundary="viewport"
-      triggers="blur click"
+      placement="bottom"
+      triggers="click"
+      :show.sync="isShowOptionMenu"
+      :target="optionButtonId"
     >
-      <div v-click-outside="hideOptionMenu">
+      <div v-click-outside="hideMenuOptions">
         <div>
-          <DiIconTextButton :id="genBtnId('data-relationship')" title="Relationship" @click="openRelationshipModal">
+          <DiButton align="left" :id="genBtnId('data-relationship')" title="Relationship" @click="openRelationshipModal">
             <DashboardRelationshipIcon />
-          </DiIconTextButton>
+          </DiButton>
         </div>
         <!--Edit Mode Options-->
-        <div v-if="isEditDashboardMode">
+        <div v-if="isEditMode">
           <!--Setting-->
-          <DiIconTextButton :id="genBtnId('setting-dashboard')" title="Settings" @click="showDashboardSetting">
+          <DiButton align="left" :id="genBtnId('setting-dashboard')" title="Settings" @click="showDashboardSetting">
             <i class="di-icon-setting icon-title"></i>
-          </DiIconTextButton>
+          </DiButton>
         </div>
         <!--View Mode Options-->
         <div v-else-if="isViewMode">
           <!--FullScreen Option-->
-          <DiIconTextButton :id="genBtnId('fullscreen')" title="Full screen" @click="switchMode('to_full_screen')">
+          <DiButton align="left" :id="genBtnId('fullscreen')" title="Full screen" @click="toFullScreenMode">
             <i class="di-icon-full-screen icon-title"></i>
-          </DiIconTextButton>
+          </DiButton>
 
           <!--TVMode Option-->
-          <DiIconTextButton :id="genBtnId('tv-mode')" :title="'TV mode'" @click="switchMode('to_tv_mode')">
+          <DiButton align="left" :id="genBtnId('tv-mode')" :title="'TV mode'" @click="toTvMode">
             <i class="di-icon-tv-mode icon-title"></i>
-          </DiIconTextButton>
+          </DiButton>
 
           <!--Share Option-->
-          <PermissionWidget v-if="!isMobile()" :actionTypes="actionTypes" :allowed-actions="['*']">
-            <DiIconTextButton :id="genBtnId('share')" title="Share" @click="clickShare">
+          <PermissionWidget v-if="!isMobile" :actionTypes="actionTypes" :allowed-actions="['*']">
+            <DiButton align="left" :id="genBtnId('share')" title="Share" @click="clickShare">
               <i class="di-icon-share icon-title"></i>
-            </DiIconTextButton>
+            </DiButton>
           </PermissionWidget>
 
           <!--Switch to ViewAs-->
-          <DiIconTextButton :id="genBtnId('rls-view-as')" title="View As" @click="clickViewAs">
+          <DiButton align="left" :id="genBtnId('rls-view-as')" title="View As" @click="clickViewAs">
             <i class="di-icon-view-as icon-title"></i>
-          </DiIconTextButton>
+          </DiButton>
         </div>
         <div v-else-if="isFullScreen || isFullScreen">
           <!--Share Option-->
-          <PermissionWidget v-if="!isMobile()" :actionTypes="actionTypes" :allowed-actions="['*']">
-            <DiIconTextButton :id="genBtnId('share')" title="Share" @click="clickShare">
+          <PermissionWidget v-if="!isMobile" :actionTypes="actionTypes" :allowed-actions="['*']">
+            <DiButton align="left" :id="genBtnId('share')" title="Share" @click="clickShare">
               <i class="di-icon-share icon-title"></i>
-            </DiIconTextButton>
+            </DiButton>
           </PermissionWidget>
         </div>
       </div>
     </BPopover>
+    <DashboardSettingModal ref="dashboardSettingModal" />
+    <PerformanceBoostModal ref="performanceBoostModal" />
+    <RelationshipModal ref="relationshipModal"></RelationshipModal>
     <RLSViewAsModal ref="rlsViewAsModal"></RLSViewAsModal>
   </div>
 </template>

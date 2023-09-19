@@ -1,7 +1,7 @@
 import {
   AggregationFunctionTypes,
   ConditionData,
-  ConditionFamilyTypes,
+  ConditionTypes,
   ConditionTreeNode,
   DataBuilderConstants,
   DateFunctionTypes,
@@ -10,21 +10,19 @@ import {
   FunctionData,
   FunctionFamilyTypes,
   FunctionTreeNode,
-  GeospatialConditionTypes,
-  GeospatialFunctionTypes,
   InputType,
   NumberConditionTypes,
-  SettingItemType,
   SortTypes,
-  StringConditionTypes
+  StringConditionTypes,
+  DataBuilderConstantsV35,
+  ChartType
 } from '@/shared';
 import { SlTreeNodeModel } from '@/shared/components/builder/treemenu/SlVueTree';
 import { ListUtils } from '@/utils/ListUtils';
-import { SchemaUtils } from '@/utils/SchemaUtils';
 import {
-  Column,
+  ChartControlData,
+  ChartInfoType,
   ColumnType,
-  DatabaseInfo,
   Field,
   FieldRelatedFunction,
   FilterMode,
@@ -38,7 +36,6 @@ import {
   TableSchema,
   TableType
 } from '@core/common/domain/model';
-import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
 import { FilterRequest, SortDirection } from '@core/common/domain/request';
 import { AbstractTableResponse, MinMaxData } from '@core/common/domain/response/query/AbstractTableResponse';
 import { CsvWriterFactory } from '@core/common/misc/csv/CsvWriterFactory';
@@ -124,14 +121,12 @@ export abstract class ChartUtils {
   static getFilterType(familyType: string): string {
     // TODO: be-careful if nodeName change, function will return wrong value
     switch (familyType) {
-      case ConditionFamilyTypes.dateHistogram:
+      case ConditionTypes.DateHistogram:
         return DateHistogramConditionTypes.earlierThan;
-      case ConditionFamilyTypes.number:
+      case ConditionTypes.Number:
         return NumberConditionTypes.equal;
-      case ConditionFamilyTypes.string:
+      case ConditionTypes.String:
         return StringConditionTypes.equal;
-      case ConditionFamilyTypes.geospatial:
-        return GeospatialConditionTypes.countryOf;
       default:
         return '';
     }
@@ -149,15 +144,15 @@ export abstract class ChartUtils {
       case ColumnType.uint64:
       case ColumnType.float:
       case ColumnType.double:
-        return ConditionFamilyTypes.number;
+        return ConditionTypes.Number;
       case ColumnType.string:
-        return ConditionFamilyTypes.string;
+        return ConditionTypes.String;
       case ColumnType.date:
       case ColumnType.datetime:
       case ColumnType.datetime64:
-        return ConditionFamilyTypes.dateHistogram;
+        return ConditionTypes.DateHistogram;
       default:
-        return ConditionFamilyTypes.dateHistogram;
+        return ConditionTypes.DateHistogram;
     }
   }
 
@@ -257,8 +252,8 @@ export abstract class ChartUtils {
     switch (functionFamily) {
       case FunctionFamilyTypes.dateHistogram:
         return DateFunctionTypes.year;
-      case FunctionFamilyTypes.geospatial:
-        return GeospatialFunctionTypes.cityOf;
+      // case FunctionFamilyTypes.geospatial:
+      //   return GeospatialFunctionTypes.cityOf;
       case FunctionFamilyTypes.aggregation:
         return AggregationFunctionTypes.countAll;
       default:
@@ -293,44 +288,37 @@ export abstract class ChartUtils {
     }
   }
 
-  static isNoneComponent(type: string): boolean {
-    return type == SettingItemType.none;
-  }
-
-  static isGroupSettingComponent(type: string): boolean {
-    return type == SettingItemType.group;
-  }
-
-  static isDifferentFieldType(firstField: Field | undefined, secondField: Field | undefined) {
-    Log.debug('isDifferentFieldType::', firstField?.getDataType(), secondField?.getDataType());
-    if (firstField && secondField) {
-      if (firstField.getDataType() === DataType.Expression || secondField.getDataType() === DataType.Expression) {
+  /**
+   * check two field different field type.
+   */
+  static isDiffFieldType(first?: Field, second?: Field): boolean {
+    Log.debug('isDifferentFieldType::', first?.getDataType(), second?.getDataType());
+    if (first && second) {
+      if (first.getDataType() === DataType.Expression || second.getDataType() === DataType.Expression) {
         return true;
-      } else if (ChartUtils.isNumberType(firstField.fieldType) && ChartUtils.isNumberType(secondField.fieldType)) {
+      } else if (ChartUtils.isNumberType(first.fieldType) && ChartUtils.isNumberType(second.fieldType)) {
         return false;
-      } else if (ChartUtils.isDateType(firstField.fieldType) && ChartUtils.isDateType(secondField.fieldType)) {
+      } else if (ChartUtils.isDateType(first.fieldType) && ChartUtils.isDateType(second.fieldType)) {
         return false;
-      } else if (ChartUtils.isTextType(firstField.fieldType) && ChartUtils.isTextType(secondField.fieldType)) {
+      } else if (ChartUtils.isTextType(first.fieldType) && ChartUtils.isTextType(second.fieldType)) {
         return false;
       }
     }
     return true;
   }
 
-  static getProfileFieldsFromDBSchemaTblName(dbSchema: DatabaseInfo, tblName: string): FieldDetailInfo[] {
-    const selectedTable = dbSchema.tables.find(table => table.name === tblName);
-    if (selectedTable) {
-      return selectedTable.columns.map((column: Column) => {
-        return new FieldDetailInfo(
-          Field.new(selectedTable.dbName, selectedTable.name, column.name, column.className),
-          column.name,
-          column.displayName,
-          SchemaUtils.isNested(selectedTable.name),
-          false
-        );
-      });
+  /**
+   * check two field is different value.
+   */
+  static isDiffFieldValue(first?: Field, second?: Field): boolean {
+    if (first && second) {
+      return first.className !== second.className || !first.equals(second);
     }
-    return [];
+    if (!first && !second) {
+      return false;
+    }
+    // otherwise, one of them is null
+    return true;
   }
 
   static getFilterFamily(node: ConditionTreeNode): string {
@@ -357,37 +345,40 @@ export abstract class ChartUtils {
       columnName: node.title,
       isNested: node.isNested || node?.path?.length > 2 || false,
       allValues: node.allValues,
-      filterModeSelected: node.filterModeSelected ?? FilterMode.range,
+      filterModeSelected: node.filterModeSelected ?? FilterMode.Range,
       currentOptionSelected: node.currentOptionSelected ?? FilterConstants.DEFAULT_SELECTED,
       currentInputType: node.currentInputType ?? FilterConstants.DEFAULT_STRING_SELECTED,
-      tabControl: node.tabControl ?? void 0
+      controlId: node.controlId
     };
   }
 
-  static resetNodeData(newNode: ConditionTreeNode) {
-    newNode.allValues = [];
-    newNode.secondValue = '';
-    newNode.firstValue = '';
-    if (newNode.field) {
-      newNode.filterFamily = ChartUtils.getFilterFamily(newNode);
-      if (ChartUtils.isDateType(newNode.field.fieldType)) {
-        newNode.filterType = newNode.currentOptionSelected = newNode.filterType = FilterConstants.DEFAULT_DATE_SELECTED;
-        newNode.filterModeSelected = FilterMode.range;
-        newNode.currentInputType = InputType.dateRange;
-      } else if (ChartUtils.isTextType(newNode.field.fieldType)) {
-        newNode.filterType = newNode.currentOptionSelected = newNode.filterType = FilterConstants.DEFAULT_STRING_SELECTED;
-        newNode.filterModeSelected = FilterMode.selection;
-        newNode.currentInputType = InputType.multiSelect;
-      } else if (ChartUtils.isNumberType(newNode.field.fieldType)) {
-        newNode.filterType = newNode.currentOptionSelected = newNode.filterType = FilterConstants.DEFAULT_NUMBER_SELECTED;
-        newNode.filterModeSelected = FilterMode.range;
-        newNode.currentInputType = InputType.text;
+  /**
+   * set default value for condition node
+   */
+  static setDefaultValue(node: ConditionTreeNode): void {
+    node.allValues = [];
+    node.secondValue = '';
+    node.firstValue = '';
+    if (node.field) {
+      node.filterFamily = ChartUtils.getFilterFamily(node);
+      if (ChartUtils.isDateType(node.field.fieldType)) {
+        node.filterType = node.currentOptionSelected = node.filterType = FilterConstants.DEFAULT_DATE_SELECTED;
+        node.filterModeSelected = FilterMode.Range;
+        node.currentInputType = InputType.DateRange;
+      } else if (ChartUtils.isTextType(node.field.fieldType)) {
+        node.filterType = node.currentOptionSelected = node.filterType = FilterConstants.DEFAULT_STRING_SELECTED;
+        node.filterModeSelected = FilterMode.Selection;
+        node.currentInputType = InputType.MultiSelect;
+      } else if (ChartUtils.isNumberType(node.field.fieldType)) {
+        node.filterType = node.currentOptionSelected = node.filterType = FilterConstants.DEFAULT_NUMBER_SELECTED;
+        node.filterModeSelected = FilterMode.Range;
+        node.currentInputType = InputType.Text;
       }
     }
   }
 
   static isMobile() {
-    return document.body.clientWidth < 800;
+    return document.body.clientWidth < 768;
   }
 
   static isDesktop() {
@@ -397,10 +388,6 @@ export abstract class ChartUtils {
   static isAggregationFunction(fieldRelatedFunction: FieldRelatedFunction) {
     const [family, type] = fieldRelatedFunction.getFunctionTypes();
     return family == FunctionFamilyTypes.aggregation;
-  }
-
-  static findTableColumnIsNumber(columns: TableColumn[]): TableColumn[] {
-    return columns.filter(column => ChartUtils.isNumberType(column.function.field.fieldType) || ChartUtils.isAggregationFunction(column.function));
   }
 
   private static getFieldNested(node: ConditionTreeNode | FunctionTreeNode, path: number[]): Field | undefined {
@@ -503,6 +490,17 @@ export abstract class ChartUtils {
         return true;
       default:
         return false;
+    }
+  }
+
+  static getControlIconSrc(chartInfoType: ChartInfoType | undefined, chartType: ChartType): string {
+    switch (chartInfoType) {
+      case ChartInfoType.FunctionController:
+        return require('@/assets/icon/charts/chart_control.svg');
+      default: {
+        const iconName = DataBuilderConstantsV35.ALL_ICON_MAP.get(chartType) ?? 'chart_control.svg';
+        return require(`@/assets/icon/charts/${iconName}`);
+      }
     }
   }
 }

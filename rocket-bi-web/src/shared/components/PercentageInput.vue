@@ -1,6 +1,6 @@
 <template>
-  <div class="percentage-input">
-    <input class="percentage-input--input" ref="percentageInput" type="text" :value="currentValue" />
+  <div class="percentage-input" :title="tooltip">
+    <input class="percentage-input--input" ref="percentageInput" type="text" :value="currentValue" @keydown.enter="event => $emit('enter', event)" />
     <div class="percentage-input--actions">
       <button class="percentage-input--actions--up-button" @click="handleCountUp">
         <img src="@/assets/icon/input-number-up.svg" alt="" />
@@ -19,8 +19,11 @@ import { Log } from '@core/utils';
 
 @Component
 export default class PercentageInput extends Vue {
-  @Prop({ required: true, type: String })
-  private value!: string;
+  @Prop({ required: false, type: String, default: '' })
+  protected readonly tooltip!: string;
+
+  @Model('input', { required: true, type: [String, Number], default: '100' })
+  protected readonly value!: string;
 
   private currentValue = this.value;
   public setCurrentValue(number: number) {
@@ -44,11 +47,13 @@ export default class PercentageInput extends Vue {
   private handleCountUp() {
     const value = this.getValue(`${parseInt(this.percentageInput.value) + 1}`);
     this.percentageInput.value = value + '%';
+    this.emitValue(value);
   }
 
   private handleCountDown() {
     const value = this.getValue(`${parseInt(this.percentageInput.value) - 1}`);
     this.percentageInput.value = value + '%';
+    this.emitValue(value);
   }
 
   private handleInput(e: any) {
@@ -106,27 +111,34 @@ export default class PercentageInput extends Vue {
 
 <style lang="scss">
 .percentage-input {
-  height: 38px;
-  width: 161px;
+  height: 40px;
   position: relative;
+  //margin: 1px;
+  //box-shadow: 0 0 0 1px #d6d6d6;
+  border-radius: 4px;
+  outline: 1px solid #d6d6d6;
+  margin-left: 1px;
+  margin-right: 1px;
 
-  &:hover .percentage-input--input {
-    outline: 2px solid #0066ff !important;
+  &:hover,
+  &:focus,
+  &:active,
+  &:focus-within {
+    outline: 1px solid var(--accent);
   }
 
   &--input {
-    border-radius: 4px;
     border: 0;
-    outline: 1px solid #c4cdd5;
     background: #fff;
     height: 100%;
     width: 100%;
     padding: 0 12px;
+    border-radius: 4px;
 
-    &:focus,
-    &:hover {
-      outline: 2px solid #0066ff !important;
-    }
+    //&:focus,
+    //&:hover {
+    //  box-shadow: 0 0 0 1px var(--accent);
+    //}
   }
   &--actions {
     display: flex;

@@ -1,14 +1,14 @@
-import { DataSourceType } from '@core/clickhouse-config';
+import { ConnectorType } from '@core/connector-config';
 import { FormulaCreatorHandler } from '@/shared/fomula/builder/FormulaCreatorHandler';
 import { FormulaControllerResolver } from '@/shared/fomula/builder/FormulaControllerResolver';
 import { ClassNotFound } from '@core/common/domain';
 import { Log } from '@core/utils';
 
 export class FormulaControllerResolverBuilder {
-  private mapCreator: Map<DataSourceType, FormulaCreatorHandler> = new Map();
+  private mapCreator: Map<ConnectorType, FormulaCreatorHandler> = new Map();
   private defaultCreatorHandler: FormulaCreatorHandler | null = null;
 
-  add(type: DataSourceType, handler: FormulaCreatorHandler): FormulaControllerResolverBuilder {
+  add(type: ConnectorType, handler: FormulaCreatorHandler): FormulaControllerResolverBuilder {
     this.mapCreator.set(type, handler);
     return this;
   }

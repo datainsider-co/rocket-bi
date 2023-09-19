@@ -24,7 +24,7 @@ import { TableFieldFormatterUtils } from '@chart/table/default-table/style/Table
 export class BackgroundColorRuleFormatter implements BodyStyleFormatter<AbstractTableQuerySetting, AbstractTableResponse, TableChartOption> {
   static createBackgroundColorStyle(
     bodyData:
-      | BodyData<AbstractTableQuerySetting<TableChartOption>, AbstractTableResponse, TableChartOption>
+      | BodyData<AbstractTableQuerySetting, AbstractTableResponse, TableChartOption>
       | BodyData<PivotTableQuerySetting, AbstractTableResponse, PivotTableChartOption>
   ): CustomStyleData {
     const { bodyCellData, vizSetting, tableResponse } = bodyData;

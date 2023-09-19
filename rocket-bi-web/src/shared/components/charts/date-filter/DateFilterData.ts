@@ -1,7 +1,9 @@
 import { MainDateMode } from '@core/common/domain';
-import { DateTimeFormatter, DateUtils } from '@/utils';
 
 export interface DateFilterData {
+  /**
+   * [startDate, endDate] with format 'YYYY-MM-DD 00:00:00' - 'YYYY-MM-DD 23:59:59'
+   */
   dates: string[];
   mode: MainDateMode;
 }

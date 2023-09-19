@@ -10,7 +10,7 @@ import com.twitter.util.Future
 @deprecated("use FileClickhouseWriter instead")
 class ClickhouseWriter(client: JdbcClient) extends DataWriter {
 
-  override def write(records: Seq[Record], destSchema: TableSchema): Int =
+  override def insertBatch(records: Seq[Record], destSchema: TableSchema): Int =
     Profiler(s"[DataWriter] ${this.getClass.getSimpleName}::write") {
       val dbName: String = destSchema.dbName
       val tblName: String = destSchema.name

@@ -88,25 +88,30 @@ import { email, minLength, required, sameAs } from 'vuelidate/lib/validators';
 import { Routers, Status } from '@/shared';
 import { DIException } from '@core/common/domain/exception';
 import { UserManagementModule } from '@/screens/user-management/store/UserManagementStore';
-import { PopupUtils } from '@/utils/PopupUtils';
 import { Log } from '@core/utils';
 import DiLoading from '@/shared/components/DiLoading.vue';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
-import { RegisterResponse, UserProfile } from '@core/common/domain';
+import { RegisterResponse } from '@core/common/domain';
 import { UserDetailModule } from '@/screens/user-management/store/UserDetailStore';
-import { Di } from '@core/common/modules';
-import { DataManager } from '@core/common/services';
+import { UserGroup } from '@core/common/domain/model/user/UserGroup';
 
 export class NewUserData {
-  constructor(public firstName: string, public lastName: string, public email: string, public password: string, public confirmPassword: string) {}
+  constructor(
+    public firstName: string,
+    public lastName: string,
+    public email: string,
+    public password: string,
+    public confirmPassword: string,
+    public userGroup: UserGroup
+  ) {}
 
   static empty(): NewUserData {
-    return new NewUserData('', '', '', '', '');
+    return new NewUserData('', '', '', '', '', UserGroup.Viewer);
   }
 
   toCreateUserRequest(): CreateUserRequest {
-    return new CreateUserRequest(this.email, this.password, `${this.firstName} ${this.lastName}`, this.firstName, this.lastName);
+    return new CreateUserRequest(this.email, this.password, `${this.firstName} ${this.lastName}`, this.firstName, this.lastName, this.userGroup);
   }
 }
 

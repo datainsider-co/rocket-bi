@@ -363,7 +363,8 @@ export default class ManageEtlOperator extends Vue {
       ListUtils.unique([...sourceOperator.fileNames, ...destOperator.fileNames]),
       sourceOperator.content || destOperator.content,
       sourceOperator.displayName || destOperator.displayName,
-      sourceOperator.isZip || destOperator.isZip
+      sourceOperator.isZip || destOperator.isZip,
+      sourceOperator.fileType || destOperator.fileType
     );
   }
 

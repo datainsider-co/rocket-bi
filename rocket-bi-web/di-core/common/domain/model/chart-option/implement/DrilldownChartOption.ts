@@ -5,8 +5,7 @@
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
 import Highcharts from 'highcharts/highmaps';
-import { _ThemeStore } from '@/store/modules/ThemeStore';
-import { ChartFamilyType, ChartOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionData, ChartOptionClassName } from '@core/common/domain/model';
 
 /**
  * @deprecated from v1.0.
@@ -39,8 +38,8 @@ export class DrilldownChartOption extends ChartOption {
       }
     }
   };
-  chartFamilyType = ChartFamilyType.Drilldown;
-  className = VizSettingType.DrilldownSetting;
+
+  className = ChartOptionClassName.DrilldownSetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);

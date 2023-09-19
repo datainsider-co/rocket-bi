@@ -1,22 +1,21 @@
 package co.datainsider.bi.module
 
 import co.datainsider.bi.client.{HikariClient, JdbcClient}
-import co.datainsider.bi.domain.query.{QueryParser, QueryParserFactory, QueryParserImpl}
 import co.datainsider.bi.domain.response.ChartResponse
 import co.datainsider.bi.domain.{BigQueryConnection, ClickhouseConnection}
-import co.datainsider.bi.engine.{ClientManager, Engine}
 import co.datainsider.bi.engine.bigquery.BigQueryEngine
 import co.datainsider.bi.engine.clickhouse.ClickhouseEngine
 import co.datainsider.bi.engine.factory.{EngineResolver, EngineResolverImpl}
 import co.datainsider.bi.engine.mysql.{MySqlEngine, MysqlConnection}
 import co.datainsider.bi.engine.posgresql.{PostgreSqlConnection, PostgreSqlEngine}
+import co.datainsider.bi.engine.redshift.{RedshiftConnection, RedshiftEngine}
 import co.datainsider.bi.engine.vertica.{VerticaConnection, VerticaEngine}
+import co.datainsider.bi.engine.{ClientManager, Engine}
 import co.datainsider.bi.repository._
 import co.datainsider.bi.service._
 import co.datainsider.bi.util.{Using, ZConfig}
 import co.datainsider.caas.user_profile.domain.Implicits.FutureEnhanceLike
 import co.datainsider.share.service.{PermissionAssigner, PermissionAssignerImpl}
-import com.google.inject.assistedinject.FactoryModuleBuilder
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Provides, Singleton}
 import com.twitter.inject.TwitterModule
@@ -48,12 +47,6 @@ object BIServiceModule extends TwitterModule {
     bind[AdminService].to[AdminServiceImpl].asEagerSingleton()
     bind[PermissionAssigner].to[PermissionAssignerImpl].asEagerSingleton()
     bind[ConnectionService].to[ConnectionServiceImpl].asEagerSingleton()
-    // install query parser factory
-    install(
-      new FactoryModuleBuilder()
-        .implement(classOf[QueryParser], classOf[QueryParserImpl])
-        .build(classOf[QueryParserFactory])
-    )
   }
 
   @Provides
@@ -118,12 +111,24 @@ object BIServiceModule extends TwitterModule {
 
   @Provides
   @Singleton
+  def providesRedshiftEngine(clientManager: ClientManager): Engine[RedshiftConnection] = {
+    new RedshiftEngine(
+      clientManager = clientManager,
+      poolSize = ZConfig.getInt("redshift_engine.client_pool_size", 10),
+      timeoutMs = ZConfig.getInt("redshift_engine.conn_timeout_ms", 30000),
+      maxQueryRows = ZConfig.getInt("redshift_engine.max_query_rows", 10000)
+    )
+  }
+
+  @Provides
+  @Singleton
   def providesEngineResolver(
       clickhouseEngine: Engine[ClickhouseConnection],
       bigqueryEngine: Engine[BigQueryConnection],
       mysqlEngine: Engine[MysqlConnection],
       verticaEngine: Engine[VerticaConnection],
-      postgreSqlEngine: Engine[PostgreSqlConnection]
+      postgreSqlEngine: Engine[PostgreSqlConnection],
+      redshiftEngine: Engine[RedshiftConnection]
   ): EngineResolver = {
     val resolver: EngineResolver = new EngineResolverImpl()
     resolver
@@ -132,6 +137,7 @@ object BIServiceModule extends TwitterModule {
       .register(mysqlEngine)
       .register(verticaEngine)
       .register(postgreSqlEngine)
+      .register(redshiftEngine)
     return resolver
   }
 

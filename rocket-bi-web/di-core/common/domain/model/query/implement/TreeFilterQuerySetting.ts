@@ -3,14 +3,14 @@
  * @created: 5/29/21, 4:36 PM
  */
 
-import { Filterable, FilterRequest, QuerySettingType, TreeFilterOption, VizSettingType } from '@core/common/domain';
+import { FilterableSetting, FilterRequest, ChartOptionClassName } from '@core/common/domain';
 import { QuerySetting } from '../QuerySetting';
 import { Condition, getFiltersAndSorts, InlineSqlView, OrderBy, TableColumn, TransformQuery } from '@core/common/domain/model';
 import { ListUtils } from '@/utils';
 import { cloneDeep } from 'lodash';
 import { TabFilterQuerySetting } from './TablFilterQuerySetting';
 
-export class TreeFilterQuerySetting extends TabFilterQuerySetting<TreeFilterOption> implements TransformQuery, Filterable {
+export class TreeFilterQuerySetting extends TabFilterQuerySetting implements TransformQuery, FilterableSetting {
   filterRequest?: FilterRequest;
 
   constructor(
@@ -25,7 +25,7 @@ export class TreeFilterQuerySetting extends TabFilterQuerySetting<TreeFilterOpti
     super(values, filters, sorts, options, filterRequest, sqlViews, parameters);
   }
 
-  transform(): QuerySetting<TreeFilterOption> {
+  transform(): QuerySetting {
     const query = cloneDeep(this);
     // use only one row when columns existed
     if (ListUtils.isNotEmpty(query.values)) {
@@ -42,15 +42,16 @@ export class TreeFilterQuerySetting extends TabFilterQuerySetting<TreeFilterOpti
     return new TreeFilterQuerySetting(values, filters, sorts, obj.options, filterRequest, sqlViews, obj.parameters);
   }
 
-  enableFunctionControl(): boolean {
+  isEnableFunctionControl(): boolean {
     return false;
   }
 
   canQuery(): boolean {
     return true;
   }
+
   isEnableFilter(): boolean {
-    return true;
+    return false;
   }
 
   getDefaultSize(): [number, number] {
@@ -58,7 +59,7 @@ export class TreeFilterQuerySetting extends TabFilterQuerySetting<TreeFilterOpti
   }
 
   static isTreeFilterQuerySetting(query: QuerySetting | TreeFilterQuerySetting): query is TreeFilterQuerySetting {
-    return query.getChartOption()?.className === VizSettingType.TreeFilterSetting;
+    return query.getChartOption()?.className === ChartOptionClassName.TreeFilterSetting;
   }
 
   getExpandedKeys(): string[] {

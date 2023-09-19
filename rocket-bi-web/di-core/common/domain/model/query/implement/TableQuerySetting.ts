@@ -1,10 +1,5 @@
 /*
  * @author: tvc12 - Thien Vi
- * @created: 5/29/21, 4:36 PM
- */
-
-/*
- * @author: tvc12 - Thien Vi
  * @created: 12/10/20, 10:25 AM
  */
 
@@ -12,21 +7,19 @@ import {
   Condition,
   Function,
   getFiltersAndSorts,
-  OrderBy,
-  QuerySettingType,
-  TableColumn,
-  TableChartOption,
   InlineSqlView,
+  OrderBy,
+  QuerySettingClassName,
+  TableChartOption,
+  TableColumn,
   WidgetId
 } from '@core/common/domain/model';
 import { AbstractTableQuerySetting } from './AbstractTableQuerySetting';
 import { Log } from '@core/utils';
-import { ListUtils } from '@/utils';
-import { clone } from 'lodash';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class TableQueryChartSetting extends AbstractTableQuerySetting<TableChartOption> {
-  readonly className = QuerySettingType.Table;
+export class TableQueryChartSetting extends AbstractTableQuerySetting {
+  readonly className = QuerySettingClassName.Table;
 
   constructor(
     columns: TableColumn[],
@@ -34,7 +27,6 @@ export class TableQueryChartSetting extends AbstractTableQuerySetting<TableChart
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
     readonly formatters: TableColumn[] = [],
-
     sqlViews: InlineSqlView[] = [],
     parameters: Record<string, string> = {}
   ) {
@@ -50,14 +42,19 @@ export class TableQueryChartSetting extends AbstractTableQuerySetting<TableChart
     return new TableQueryChartSetting(columns, filters, sorts, obj.options, formatters, sqlViews, obj.parameters);
   }
 
+  static default(): TableQueryChartSetting {
+    return new TableQueryChartSetting([], [], [], TableChartOption.getDefaultChartOption(), [], [], {});
+  }
+
   getAllFunction(): Function[] {
     return this.columns.map(col => col.function);
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return this.columns;
   }
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.columns = ConfigDataUtils.replaceDynamicFunctions(this.columns, functions);
     Log.debug('TableQueryChartSetting::setDynamicFunctions::', this.columns);
   }

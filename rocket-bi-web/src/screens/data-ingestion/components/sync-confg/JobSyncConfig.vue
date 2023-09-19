@@ -51,7 +51,7 @@
       :single-table="singleTable"
     />
     <PalexySyncModeConfig
-      v-if="isPalexyJob"
+      v-if="isPalexyJob || isGoogleSearchConsoleJob"
       ref="palexySyncModeConfig"
       class="mb-3"
       :is-validate="isValidate"
@@ -180,6 +180,10 @@ export default class JobSyncConfig extends Vue {
 
   private get isPalexyJob(): boolean {
     return this.syncJob.className === JobName.PalexyJob;
+  }
+
+  private get isGoogleSearchConsoleJob(): boolean {
+    return this.syncJob.className === JobName.GoogleSearchConsoleJob;
   }
 
   public validSyncMode() {

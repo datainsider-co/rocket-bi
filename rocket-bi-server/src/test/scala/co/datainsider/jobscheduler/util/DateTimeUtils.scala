@@ -100,7 +100,7 @@ class DateTimeUtils extends Test {
     assert(dateRanges(2).to.toString == "2011-10-20")
   }
 
-  test("split date ranges (2021-07-01, 2021-07-11), window days = 1") {
+  test("split date ranges (2011-10-10, 2011-10-12), window days = 1") {
     val startDate = Date.valueOf("2011-10-10")
     val endDate = Date.valueOf("2011-10-12")
     val dateRanges = DateTimeUtils.splitDateRanges(startDate, endDate, 1)
@@ -111,7 +111,7 @@ class DateTimeUtils extends Test {
     assert(dateRanges(1).to.toString == "2011-10-12")
   }
 
-  test("split date ranges (2021-07-01, 2021-07-11), window days = 1") {
+  test("split date ranges (2011-10-10, 2011-09-12), window days = 1") {
     val startDate = Date.valueOf("2011-10-10")
     val endDate = Date.valueOf("2011-09-12")
     val dateRanges = DateTimeUtils.splitDateRanges(startDate, endDate, 1)
@@ -124,4 +124,26 @@ class DateTimeUtils extends Test {
     val dateRanges = DateTimeUtils.splitDateRanges(startDate, endDate, 1)
     assert(dateRanges.isEmpty)
   }
+
+  test("get next day") {
+    val startDate = Date.valueOf("2011-10-10")
+    val nextDay: Date = DateTimeUtils.getNextDay(startDate)
+    assert(nextDay.toString == "2011-10-11")
+  }
+
+  test("is after 2011-10-10") {
+    val startDate = Date.valueOf("2011-10-10")
+    val endDate = Date.valueOf("2011-10-10")
+    assert(startDate.after(endDate) == false)
+    assert(startDate.before(endDate) == false)
+    assert(startDate.equals(endDate) == true)
+  }
+
+    test("is after 2011-10-11") {
+        val startDate = Date.valueOf("2011-10-11")
+        val endDate = Date.valueOf("2011-10-10")
+        assert(startDate.after(endDate) == true)
+        assert(startDate.before(endDate) == false)
+        assert(startDate.equals(endDate) == false)
+    }
 }

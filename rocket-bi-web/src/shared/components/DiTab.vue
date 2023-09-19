@@ -1,8 +1,16 @@
 <template>
-  <ATabs :default-active-key="defaultKey">
-    <template v-for="[key, tab] in keyTabAsMap">
-      <ATabPane :key="key" :disabled="isDisable(tab[tabKey])" :tab="tab[keyForDisplay]">
-        <slot v-bind:tab="tab"></slot>
+  <ATabs class="di-tab" :default-active-key="defaultKey" @change="handleChange" size="small">
+    <template v-for="tab in tabs">
+      <ATabPane :key="tab.key" :disabled="tab.disabled">
+        <template #tab>
+          <span class="di-tab--content">
+            <i v-if="tab.iconClass" :class="tab.iconClass" />
+            {{ tab.label }}
+          </span>
+        </template>
+        <slot :name="tab.key" :tab="tab">
+          <slot name="default">{{ tab.label }}</slot>
+        </slot>
       </ATabPane>
     </template>
   </ATabs>
@@ -10,49 +18,81 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
+export interface DiTabData {
+  key: string;
+  label: string;
+  disabled?: boolean;
+  click?: () => void;
+  // use icon from di-icon
+  iconClass?: string;
+}
 
 @Component
 export default class DiTab extends Vue {
   @Prop({ required: true, type: Array })
-  private readonly tabs!: any[];
-
-  @Prop({ required: true, type: String })
-  private readonly keyForDisplay!: string;
-
-  @Prop({ required: false, type: String })
-  private readonly tabKey?: string;
+  protected readonly tabs!: DiTabData[];
 
   @Prop({ type: Number, default: 0 })
   private readonly defaultActiveIndex!: number;
 
-  @Prop({ required: false, type: String, default: '' })
-  private readonly prefixKey!: string;
-
-  @Prop({ required: false, type: Array, default: () => [] })
-  private readonly disableKeys!: string[];
-
-  private get defaultKey(): string {
-    const tab: any = this.tabs[this.defaultActiveIndex];
-    return this.getKey(tab, this.defaultActiveIndex);
+  protected get defaultKey(): string {
+    const tab: DiTabData = this.tabs[this.defaultActiveIndex];
+    return tab.key;
   }
 
-  private getKey(tab: any, tabIndex: number): string {
-    const customKey: string = tab[`${this.tabKey}`] ?? tabIndex.toString();
-    return `tab-${customKey}`;
-  }
-
-  private isDisable(currentKey: string): boolean {
-    return this.disableKeys.some(key => key === currentKey);
-  }
-
-  private get keyTabAsMap(): Map<string, any> {
-    // TODO: remove duplicated tab (same key)
-    const idTabs: [string, any][] = this.tabs.map((tab, index) => [this.getKey(tab, index), tab]);
-    return new Map<string, any>(idTabs);
+  protected handleChange(key: string): void {
+    const tab: DiTabData = this.tabs.find((t: DiTabData) => t.key === key) as DiTabData;
+    if (tab && tab.click) {
+      tab.click();
+    }
+    this.$emit('change', tab);
   }
 }
 </script>
 
-<style lang="scss" scoped>
-@import '~@/themes/scss/_tab.scss';
+<style lang="scss">
+.di-tab {
+  .ant-tabs-nav .ant-tabs-tab {
+    padding: 12px 0;
+
+    &:hover,
+    &:active {
+      color: var(--accent);
+    }
+  }
+
+  .ant-tabs-bar {
+    width: fit-content;
+  }
+
+  &--content {
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      margin-right: 12px;
+      width: 14px;
+      height: 14px;
+      font-size: 14px;
+      font-style: normal;
+    }
+  }
+
+  .ant-tabs-tab-active {
+    color: var(--accent);
+
+    .di-tab--content {
+      font-weight: 700;
+
+      i {
+        font-weight: 700;
+      }
+    }
+  }
+}
 </style>

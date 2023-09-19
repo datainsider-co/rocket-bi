@@ -3,15 +3,10 @@
  * @created: 5/29/21, 4:23 PM
  */
 
-/*
- * @author: tvc12 - Thien Vi
- * @created: 5/29/21, 4:18 PM
- */
-
 import { ConditionType, Field, FilterMode, ScalarFunction } from '@core/common/domain/model';
 import { ValueCondition } from '@core/common/domain/model/condition/ValueCondition';
 import { ConditionUtils, getScalarFunction } from '@core/utils';
-import { ConditionData, ConditionFamilyTypes, DateHistogramConditionTypes, InputType } from '@/shared';
+import { ConditionData, DateHistogramConditionTypes, InputType } from '@/shared';
 import { FieldRelatedCondition } from '@core/common/domain/model/condition/FieldRelatedCondition';
 import { DateRelatedCondition } from '@core/common/domain/model/condition/DateRelatedCondition';
 import { RandomUtils, SchemaUtils } from '@/utils';
@@ -30,20 +25,8 @@ export class CurrentQuarter extends FieldRelatedCondition implements ValueCondit
     return new CurrentQuarter(field, getScalarFunction(obj.scalarFunction), getScalarFunction(obj.intervalFunction));
   }
 
-  assignValue() {
-    // do nothing
-  }
-
-  getConditionTypes(): string[] {
-    return [ConditionFamilyTypes.dateHistogram, DateHistogramConditionTypes.currentQuarter];
-  }
-
   getValues(): string[] {
     return [];
-  }
-
-  isDateCondition(): boolean {
-    return true;
   }
 
   setValues(values: string[]) {
@@ -64,8 +47,8 @@ export class CurrentQuarter extends FieldRelatedCondition implements ValueCondit
       firstValue: void 0,
       secondValue: void 0,
       allValues: this.getValues(),
-      currentInputType: InputType.none,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.None,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: DateHistogramConditionTypes.currentQuarter
     };
   }

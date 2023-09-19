@@ -37,7 +37,7 @@
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import DiInputComponent2 from '@/screens/login-v2/components/DiInputComponent2.vue';
 import { minLength, required, sameAs } from 'vuelidate/lib/validators';
-import { AtomicAction } from '@/shared/anotation';
+import { AtomicAction } from '@core/common/misc';
 import { UserResetPasswordRequest } from '@core/common/domain/request/authentication/UserResetPasswordRequest';
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { PopupUtils } from '@/utils';

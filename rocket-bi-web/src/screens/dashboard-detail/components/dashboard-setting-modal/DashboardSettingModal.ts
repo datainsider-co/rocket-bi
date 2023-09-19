@@ -13,6 +13,7 @@ import { DashboardThemeType } from '@core/common/domain/model/dashboard/setting/
 import { LabelNode } from '@/shared';
 import { _ThemeStore } from '@/store/modules/ThemeStore';
 import { TimeoutUtils } from '@/utils';
+import { ObjectUtils } from '@core/utils';
 
 @Component({
   components: {
@@ -90,6 +91,7 @@ export default class DashboardSettingModal extends Vue {
 
   getCurrentDashboardSetting(): DashboardSetting {
     return new DashboardSetting({
+      ...this.settingModalData?.setting,
       enableOverlap: this.overlapSettingItem.value,
       themeName: this.currentTheme
     });
@@ -133,8 +135,11 @@ export default class DashboardSettingModal extends Vue {
     this.$nextTick(() => this.modal?.show());
   }
 
-  private selectTheme(themeType: DashboardThemeType): void {
+  protected selectTheme(themeType: DashboardThemeType): void {
     this.currentTheme = themeType;
-    // _ThemeStore.setDashboardTheme(themeType);
+    const theme = _ThemeStore.getTheme(themeType);
+    Object.entries(theme.defaultSettings).forEach(([key, value]) => {
+      ObjectUtils.set(this.settingModalData?.setting, key, value);
+    });
   }
 }

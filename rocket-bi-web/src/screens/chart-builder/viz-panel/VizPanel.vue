@@ -2,11 +2,11 @@
   <div class="d-inline-block visualization-area">
     <div class="d-flex flex-row header align-items-center justify-content-between">
       <div class="title unselectable">Visualization</div>
-      <div class="d-flex flex-row" v-if="showSetting">
-        <DiIconTextButton :id="genBtnId('setting')" class="ml-1" title="Settings" @click="handleOpenSetting">
-          <i class="di-icon-settings-wrench"></i>
-        </DiIconTextButton>
-      </div>
+      <!--      <div class="d-flex flex-row" v-if="showSetting">-->
+      <!--        <DiIconTextButton :id="genBtnId('setting')" class="ml-1" title="Settings" @click="handleOpenSetting">-->
+      <!--          <i class="di-icon-settings-wrench"></i>-->
+      <!--        </DiIconTextButton>-->
+      <!--      </div>-->
     </div>
     <div class="d-flex flex-column body">
       <PreviewPanel ref="previewPanel" class="visualization" @clickMatchingButton="onMatchingButtonClicked" />
@@ -42,14 +42,20 @@ export default class VizPanel extends Vue {
 
   private currentChartId: WidgetId | null = null;
 
-  private get enableSetting(): boolean {
-    return !!this.currentChartId;
-  }
-
-  renderChart(chartInfo: ChartInfo | null) {
+  public renderChart(chartInfo: ChartInfo | null): void {
     Log.debug('VizPanel::renderChart::chartInfo', chartInfo);
     this.currentChartId = chartInfo?.id || null;
     this.previewPanel.renderChart(chartInfo);
+  }
+
+  public updateChart(chartInfo: ChartInfo | null): void {
+    Log.debug('VizPanel::renderChart::chartInfo', chartInfo);
+    this.currentChartId = chartInfo?.id || null;
+    this.previewPanel.updateChart(chartInfo);
+  }
+
+  public resize(): void {
+    this.previewPanel?.resizeChart();
   }
 
   @Emit('clickSettingButton')

@@ -10,6 +10,7 @@ import { JobStatus, ListingResponse, SortRequest } from '@core/data-ingestion';
 import { ForceMode } from '@core/lake-house/domain/lake-job/ForceMode';
 import { RefreshOption } from '@/screens/data-ingestion/interfaces/RefreshOption';
 import { cloneDeep } from 'lodash';
+import { AtomicAction } from '@core/common/misc';
 
 @Module({ dynamic: true, namespaced: true, store: store, name: Stores.JobStore })
 class JobStore extends VuexModule {
@@ -61,13 +62,24 @@ class JobStore extends VuexModule {
   }
 
   @Action
+  @AtomicAction()
   create(job: Job): Promise<JobInfo> {
     return this.jobService.create(cloneDeep(job));
   }
+
+  /**
+   * @deprecated use multiCreateV2 instead
+   */
   @Action
   createMulti(payload: { job: Job; tables: string[] }): Promise<boolean> {
     const { job, tables } = payload;
     return this.jobService.multiCreate(job, tables);
+  }
+
+  @Action
+  multiCreateV2(payload: { jobs: Job[] }): Promise<boolean> {
+    const { jobs } = payload;
+    return this.jobService.multiCreateV2(jobs);
   }
 
   @Action

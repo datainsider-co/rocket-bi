@@ -33,7 +33,7 @@ export default class BellCurve2Chart extends BaseHighChartWidget<SeriesOneRespon
       labels: {
         useHTML: true,
         formatter: function() {
-          return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+          return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
         }
       }
     };
@@ -43,7 +43,7 @@ export default class BellCurve2Chart extends BaseHighChartWidget<SeriesOneRespon
       labels: {
         useHTML: true,
         formatter: function() {
-          return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+          return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
         }
       }
     };
@@ -52,7 +52,7 @@ export default class BellCurve2Chart extends BaseHighChartWidget<SeriesOneRespon
       labels: {
         useHTML: true,
         formatter: function() {
-          return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+          return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
         }
       }
     };
@@ -61,7 +61,7 @@ export default class BellCurve2Chart extends BaseHighChartWidget<SeriesOneRespon
       labels: {
         useHTML: true,
         formatter: function() {
-          return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+          return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
         }
       }
     };
@@ -109,12 +109,12 @@ export default class BellCurve2Chart extends BaseHighChartWidget<SeriesOneRespon
   tooltipPointFormat(contextObject: TooltipFormatterContextObject) {
     const field = contextObject.series.name;
     const pointColor = contextObject.color;
-    const formattedXAxis = this.numberFormatter.format(contextObject.x);
-    const formattedYAxis = this.numberFormatter.format(contextObject.y);
+    const formattedXAxis = this.numberFormatter.format(contextObject.x as number);
+    const formattedYAxis = this.numberFormatter.format(contextObject.y as number);
     //@ts-ignore
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
     //@ts-ignore
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="color: ${textColor}; font-family: ${fontFamily}; text-align: left">
                 <span style="color:${pointColor}">●</span>  <span>${field}</span><br/>
                 x: <b>${formattedXAxis}</b><br/>
@@ -126,10 +126,10 @@ export default class BellCurve2Chart extends BaseHighChartWidget<SeriesOneRespon
     //@ts-ignore
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
     //@ts-ignore
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     const bellCurveName = contextObject.series.name;
     const pointColor = contextObject.color;
-    const formattedData = this.numberFormatter.format(contextObject.x);
+    const formattedData = this.numberFormatter.format(contextObject.x as number);
     const bellCurveValue = contextObject.y;
     return `<div style="color: ${textColor}; font-family: ${fontFamily}; text-align: left">
                 <span style="color:${pointColor}">●</span>
@@ -264,9 +264,9 @@ export default class BellCurve2Chart extends BaseHighChartWidget<SeriesOneRespon
     });
   }
 
-  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const yAxisSetting = this.setting.options.yAxis;
-    const value = this.numberFormatter.format(axis.value);
+    const value = this.numberFormatter.format(axis.value as number);
     if (yAxisSetting && yAxisSetting[1]) {
       return this.customAxisLabel(value, yAxisSetting[1].prefix, yAxisSetting[1].postfix);
     } else {
@@ -282,9 +282,9 @@ export default class BellCurve2Chart extends BaseHighChartWidget<SeriesOneRespon
       `;
   }
 
-  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const xAxisSetting = this.setting.options.xAxis;
-    const value = this.numberFormatter.format(axis.value);
+    const value = this.numberFormatter.format(axis.value as number);
     if (xAxisSetting && xAxisSetting[1]) {
       return this.customAxisLabel(value, xAxisSetting[1].prefix, xAxisSetting[1].postfix);
     } else {

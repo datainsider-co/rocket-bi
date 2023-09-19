@@ -26,8 +26,4 @@ export class EqualField extends Condition {
     const rightField = Field.fromObject(obj.rightField);
     return new EqualField(leftField, rightField);
   }
-
-  assignValue(rightField: Field) {
-    this.rightField = rightField;
-  }
 }

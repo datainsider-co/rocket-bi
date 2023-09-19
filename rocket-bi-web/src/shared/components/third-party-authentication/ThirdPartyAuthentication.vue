@@ -21,6 +21,7 @@ export default class ThirdPartyAuthentication extends Vue {
     [ThirdPartyType.GA4, GoogleAuth2],
     [ThirdPartyType.GoogleAds, GoogleAuth2],
     [ThirdPartyType.GoogleAnalytic, GoogleAuth2],
+    [ThirdPartyType.GoogleSearchConsole, GoogleAuth2],
     [ThirdPartyType.Facebook, FacebookAuth],
     [ThirdPartyType.TikTok, TiktokAuth]
   ]);

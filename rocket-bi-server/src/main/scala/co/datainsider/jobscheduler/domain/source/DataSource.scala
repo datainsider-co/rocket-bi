@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonSubTypes, JsonTypeInfo}
     new Type(value = classOf[ShopeeSource], name = "shopee_source"),
     new Type(value = classOf[LazadaSource], name = "lazada_source"),
     new Type(value = classOf[PalexySource], name = "palexy_source"),
+    new Type(value = classOf[GoogleSearchConsoleSource], name = "google_search_console_source"),
   )
 )
 trait DataSource {

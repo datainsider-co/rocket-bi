@@ -78,8 +78,8 @@
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 import { FunctionTreeNode, Status } from '@/shared';
-import { ChartControlField, DatabaseInfo, Field, FieldDetailInfo } from '@core/common/domain';
-import { ListUtils, SchemaUtils, TimeoutUtils } from '@/utils';
+import { ChartControlField, DatabaseInfo, Field, FieldDetailInfo, ChartControl } from '@core/common/domain';
+import { HtmlElementRenderUtils, ListUtils, SchemaUtils, TimeoutUtils } from '@/utils';
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
 import { Log } from '@core/utils';
 import { cloneDeep } from 'lodash';
@@ -190,7 +190,7 @@ export default class SelectFieldContext extends Vue {
     }
   }
 
-  showSuggestTableAndFields(event: MouseEvent): void {
+  showTableAndFields(event: Event): void {
     TimeoutUtils.waitAndExec(
       null,
       () => {
@@ -198,7 +198,7 @@ export default class SelectFieldContext extends Vue {
       },
       100
     );
-    const dbName = _BuilderTableSchemaStore.dbNameSelected;
+    const dbName = _BuilderTableSchemaStore.selectedDbName;
     this.initTablesOptions(dbName);
   }
 
@@ -216,9 +216,9 @@ export default class SelectFieldContext extends Vue {
   private async initChartControls() {
     try {
       this.status = Status.Loading;
-      const tabControls = WidgetModule.allTabControls;
-      await _BuilderTableSchemaStore.loadTabControls(tabControls);
-      this.chartControlList = _BuilderTableSchemaStore.tabControlAsTreeNodes.map(control => {
+      // const chartControllers: ChartController[] = WidgetModule.chartControllers;
+      // _BuilderTableSchemaStore.setChartControls(chartControllers);
+      this.chartControlList = _BuilderTableSchemaStore.chartControlAsTreeNodes.map(control => {
         const controlData = ConfigDataUtils.getTabControlData(control as any);
         return new FieldDetailInfo(new ChartControlField(controlData!), control.title, control.title, false, false);
       });

@@ -313,7 +313,7 @@ export default class HeaderBar extends Vue {
     return this.userProfile?.avatar || this.getDefaultAvt();
   }
 
-  handleSignOut() {
+  handleSignOut(): void {
     this.hideAllPopover();
     DatabaseSchemaModule.reset();
     DataManagementModule.reset();

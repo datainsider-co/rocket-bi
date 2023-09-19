@@ -9,7 +9,7 @@ import VCalendar from 'v-calendar';
 import vuescroll from 'vuescroll';
 import vSelect from 'vue-select';
 import VueDraggableResizable from 'vue-draggable-resizable';
-import { Button, Popover, Table, Tabs, TimePicker, Modal, InputNumber } from 'ant-design-vue';
+import { Button, Popover, Table, Tabs, TimePicker, Modal, InputNumber, Tooltip } from 'ant-design-vue';
 import Directives from '@/shared/directives';
 
 // DATA INSIDER
@@ -40,7 +40,7 @@ import DiUploadDocumentPlugin from '@/screens/data-ingestion/components/di-uploa
 import DiUploadGoogleSheetPlupin from '@/screens/data-ingestion/components/di-upload-google-sheet';
 import DiIcons from '@/shared/components/Icon/install';
 import { OrganizationModule } from '@core/organization';
-import { ClickhouseConfigModule } from '@core/clickhouse-config/module/ClickhouseConfigModule';
+import { ConnectorModule } from '@core/connector-config/module/ConnectorModule';
 import { RelationshipModule } from '@core/data-relationship';
 import { HttpModule } from '@core/common/modules/HttpModule';
 import { HttpTestModule } from '@core/common/modules/TestHttpModule';
@@ -65,7 +65,7 @@ switch (process.env.NODE_ENV) {
       new SchemaModule(),
       new OrganizationModule(),
       new RelationshipModule(),
-      new ClickhouseConfigModule(),
+      new ConnectorModule(),
       new BillingModule(),
       new DataIngestionModule(),
       new DataCookModule()
@@ -81,7 +81,7 @@ switch (process.env.NODE_ENV) {
       new ShareModule(),
       new SchemaModule(),
       new OrganizationModule(),
-      new ClickhouseConfigModule(),
+      new ConnectorModule(),
       new RelationshipModule(),
       new BillingModule(),
       new DataIngestionModule(),
@@ -102,7 +102,7 @@ switch (process.env.NODE_ENV) {
       new ShareModule(),
       new SchemaModule(),
       new OrganizationModule(),
-      new ClickhouseConfigModule(),
+      new ConnectorModule(),
       new RelationshipModule(),
       new BillingModule(),
       new DataIngestionModule(),
@@ -171,6 +171,7 @@ Vue.use(Popover);
 Vue.use(TimePicker);
 Vue.use(Button);
 Vue.use(InputNumber);
+Vue.use(Tooltip);
 Vue.use(CommonComponentPlugin);
 Vue.use(DiIcons);
 Vue.use(Directives);
@@ -193,5 +194,5 @@ new Vue({
   router,
   store,
   render: h => h(App),
-  name: 'Data Insider'
+  name: 'RocketBI'
 }).$mount('#app');

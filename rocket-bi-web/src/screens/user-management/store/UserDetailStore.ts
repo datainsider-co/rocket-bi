@@ -16,6 +16,7 @@ import { Di } from '@core/common/modules';
 import { DataManager } from '@core/common/services';
 import { EditUserPropertyRequest } from '@core/admin/domain/request/EditUserPropertyRequest';
 import { cloneDeep } from 'lodash';
+import { UserGroup } from '@core/common/domain/model/user/UserGroup';
 
 @Module({ namespaced: true, store: store, dynamic: true, name: Stores.UserProfileDetailStore })
 class UserDetailStore extends VuexModule {
@@ -159,6 +160,23 @@ class UserDetailStore extends VuexModule {
       this.setUserProfile({ userProfile: resp });
       return resp;
     });
+  }
+
+  @Action
+  updateRole(payload: { role: UserGroup; username: string }): Promise<boolean> {
+    const { role, username } = payload;
+
+    return this.userManagementService.updateRole(username, role).then(resp => {
+      this.setRole(role);
+      return resp;
+    });
+  }
+
+  @Mutation
+  private setRole(role: UserGroup) {
+    if (this.userFullDetailInfo) {
+      this.userFullDetailInfo.userGroup = role;
+    }
   }
 
   @Mutation

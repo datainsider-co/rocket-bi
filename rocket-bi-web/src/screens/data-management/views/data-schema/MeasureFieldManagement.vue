@@ -67,7 +67,7 @@ import { DataSchemaModel } from '@/screens/data-management/views/data-schema/mod
 import DiMultiChoice from '@/shared/components/common/DiMultiChoice.vue';
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
 import InputSetting from '@/shared/settings/common/InputSetting.vue';
-import { DateTimeFormatter } from '@/utils';
+import { DateTimeUtils } from '@/utils';
 import { StringUtils } from '@/utils/StringUtils';
 import { BoolColumn, ColumnType, DatabaseInfo, DIException, TableSchema } from '@core/common/domain';
 import { Column } from '@core/common/domain/model/column/Column.ts';
@@ -184,7 +184,7 @@ export default class MeasureFieldManagement extends Vue {
       case ColumnType.datetime:
       case ColumnType.datetime64:
         // @ts-ignore
-        return column.defaultValue ? DateTimeFormatter.formatAsDDMMYYYY(column.defaultValue) : '--';
+        return column.defaultValue ? DateTimeUtils.formatAsDDMMYYYY(column.defaultValue) : '--';
       case ColumnType.array:
       case ColumnType.nested:
         // @ts-ignore

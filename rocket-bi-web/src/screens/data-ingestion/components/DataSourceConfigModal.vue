@@ -87,7 +87,7 @@ import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
 import TestConnection, { ConnectionStatus } from '@/screens/data-ingestion/components/TestConnection.vue';
 import { DIException } from '@core/common/domain';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
+import { AtomicAction } from '@core/common/misc';
 import { DataSourceType, MySqlSourceInfo, SourceWithExtraField } from '@core/data-ingestion';
 import TSLForm from '@/screens/data-cook/components/save-to-database/TSLForm.vue';
 import { Track } from '@/shared/anotation';
@@ -137,12 +137,18 @@ export default class DataSourceConfigModal extends Vue {
   }
 
   private get isShowReAuthenButton() {
-    switch (this.dataSourceRender.createDataSourceInfo().sourceType) {
-      case DataSourceType.GA4:
-      case DataSourceType.GA:
-        return true;
-      default:
-        return false;
+    if (this.dataSourceRender.createDataSourceInfo().id < 0) {
+      return false;
+    } else {
+      switch (this.dataSourceRender.createDataSourceInfo().sourceType) {
+        case DataSourceType.GA4:
+        case DataSourceType.GA:
+        case DataSourceType.GoogleAds:
+        case DataSourceType.GoogleSearchConsole:
+          return true;
+        default:
+          return false;
+      }
     }
   }
 

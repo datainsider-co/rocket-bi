@@ -5,32 +5,21 @@
 
 import {
   Condition,
-  CrossFilterable,
-  Equal,
-  FieldRelatedFunction,
-  Filterable,
   Function,
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
-  SeriesChartOption,
+  QuerySettingClassName,
   TableColumn,
   VariablepieQuerySetting,
-  VizSettingType,
-  WidgetId,
-  Zoomable
+  ChartOptionClassName,
+  WidgetId
 } from '@core/common/domain/model';
-import { clone, isEqual } from 'lodash';
 import { QuerySetting } from '../QuerySetting';
-import { ZoomData } from '@/shared';
-import { Drilldownable, DrilldownData } from '@core/common/domain/model/query/features/Drilldownable';
-import { ConditionUtils, Log } from '@core/utils';
-import { ListUtils } from '@/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
 export class GenericChartQuerySetting extends QuerySetting {
-  readonly className = QuerySettingType.GenericChart;
+  readonly className = QuerySettingClassName.GenericChart;
 
   constructor(
     public columns: TableColumn[],
@@ -45,7 +34,7 @@ export class GenericChartQuerySetting extends QuerySetting {
 
   static fromObject(obj: GenericChartQuerySetting): GenericChartQuerySetting {
     switch (obj.options.className) {
-      case VizSettingType.VariablepieSetting:
+      case ChartOptionClassName.VariablePieSetting:
         return VariablepieQuerySetting.fromObject(obj);
       default:
         return this.defaultFromObject(obj);
@@ -63,11 +52,11 @@ export class GenericChartQuerySetting extends QuerySetting {
     return this.columns.map(column => column.function);
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return this.columns;
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.columns = ConfigDataUtils.replaceDynamicFunctions(this.columns, functions);
   }
 }

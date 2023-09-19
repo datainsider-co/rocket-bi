@@ -9,6 +9,7 @@ import { RegisterResponse } from '@core/common/domain/response';
 import { SearchUserRequest } from '@core/admin/domain/request/SearchUserRequest';
 import { UserSearchResponse } from '@core/common/domain/response/user/UserSearchResponse';
 import { EditUserPropertyRequest } from '@core/admin/domain/request/EditUserPropertyRequest';
+import { UserGroup } from '@core/common/domain/model/user/UserGroup';
 
 export abstract class UserAdminService {
   abstract create(newUser: CreateUserRequest): Promise<RegisterResponse>;
@@ -30,6 +31,8 @@ export abstract class UserAdminService {
   abstract getSuggestedUsers(request: SearchUserRequest): Promise<UsersResponse>;
 
   abstract updateUserProperties(request: EditUserPropertyRequest): Promise<UserProfile>;
+
+  abstract updateRole(username: string, role: UserGroup): Promise<boolean>;
 
   abstract resetPassword(username: string): Promise<boolean>;
 }
@@ -80,5 +83,9 @@ export class UserAdminServiceImpl implements UserAdminService {
 
   resetPassword(username: string): Promise<boolean> {
     return this.userRepository.resetPassword(username);
+  }
+
+  updateRole(username: string, role: UserGroup): Promise<boolean> {
+    return this.userRepository.updateRole(username, role);
   }
 }

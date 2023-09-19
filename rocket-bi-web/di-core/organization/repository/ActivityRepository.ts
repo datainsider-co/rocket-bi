@@ -1,10 +1,9 @@
-import { GetUserActivityRequest, PlanInfo } from '../domain';
+import { GetUserActivityRequest } from '../domain';
 import { InjectValue } from 'typescript-ioc';
 import { DIKeys } from '@core/common/modules';
 import { BaseClient } from '@core/common/services/HttpClient';
 import { Log } from '@core/utils';
 import { DIException, PageResult } from '@core/common/domain';
-import { ActionType, ResourceType } from '@/utils/PermissionUtils';
 import { UserActivity } from '@core/organization/domain/user-activity/UserActivity';
 
 export abstract class ActivityRepository {

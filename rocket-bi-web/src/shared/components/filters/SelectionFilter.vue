@@ -4,39 +4,44 @@
       :optionSelected.sync="optionSelected"
       :options="selectOptions"
       :values.sync="inputValues"
-      :controlOptions="controlOptions"
-      :control.sync="syncControl"
+      :isManualInput="isManualInput"
       :enableControlConfig="enableControlConfig && !hideControlConfig"
-    ></SelectionInput>
-    <!--    <CollapseTransition>-->
-    <div v-show="isMultiSelection" class="string-listing-container">
-      <DILoadMore
-        ref="loadMore"
-        :canLoadMore="canLoadMore"
-        :initStatus="initStatus"
-        :error-msg="errorMsg"
-        :isLoadMore.sync="isLoadMore"
-        :isVirtualScroll="true"
-        :scrollClass="'multi-selection-area'"
-        @retry="handleLoadChartData"
-        @onLoadMore="handleLoadMoreChartResponse"
-      >
-        <MultiSelection
-          class="string-filter-area-multi-selection"
-          :id="genMultiSelectionId('selection-filter')"
-          :model="valuesSelected"
-          :options="groupOptions"
-          @onScroll="handleScroll"
-          @selectedColumnsChanged="handleSelectedColumnsChanged"
-        />
-      </DILoadMore>
-    </div>
-    <!--    </CollapseTransition>-->
+      :selected-control-id="selectedControlId"
+      :chartControls="chartControls"
+      @update:selectedControlId="id => $emit('update:selectedControlId', id)"
+      @applyFilter="() => $emit('applyFilter')"
+      @update:isManualInput="handleChangeIsManualInput"
+    >
+      <template #footer="{isManualInput}">
+        <div class="string-listing-container" v-show="isSelectionMode && isManualInput">
+          <DILoadMore
+            ref="loadMore"
+            :canLoadMore="canLoadMore"
+            :initStatus="initStatus"
+            :error-msg="errorMsg"
+            :isLoadMore.sync="isLoadMore"
+            :isVirtualScroll="true"
+            :scrollClass="'multi-selection-area'"
+            @retry="handleLoadChartData"
+            @onLoadMore="handleLoadMoreChartResponse"
+          >
+            <MultiSelection
+              class="string-filter-area-multi-selection"
+              :id="genMultiSelectionId('selection-filter')"
+              :model="valuesSelected"
+              :options="groupOptions"
+              @onScroll="handleScroll"
+              @selectedColumnsChanged="handleSelectedColumnsChanged"
+            />
+          </DILoadMore>
+        </div>
+      </template>
+    </SelectionInput>
   </div>
 </template>
 <script lang="ts">
-import { Component, Prop, PropSync, Ref, Vue, Watch } from 'vue-property-decorator';
-import { CheckboxGroupOption, DateHistogramConditionTypes, FilterConstants, FilterSelectOption, InputType, Status, StringConditionTypes } from '@/shared';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
+import { CheckboxGroupOption, FilterConstants, FilterSelectOption, InputType, Status, StringConditionTypes } from '@/shared';
 import MultiSelection from '@/shared/components/MultiSelection.vue';
 import { FilterProp } from '@/shared/components/filters/FilterProp';
 import { ListUtils } from '@/utils';
@@ -51,48 +56,48 @@ import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
 import { AbstractTableResponse } from '@core/common/domain/response/query/AbstractTableResponse';
 import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
 import { StringUtils } from '@/utils/StringUtils';
-import { isString } from 'lodash';
-import { DIException, TabControlData } from '@core/common/domain';
+import { isString, isNumber } from 'lodash';
+import { ChartControl, DIException, WidgetId } from '@core/common/domain';
 import { Log } from '@core/utils';
 import { DashboardModule } from '@/screens/dashboard-detail/stores';
-import { ValueType } from '@/shared/components/filters/selection-input/ValueType';
 
 @Component({
   components: { SelectionInput, StatusWidget, MultiSelection, CollapseTransition, DILoadMore }
 })
 export default class SelectionFilter extends Vue implements FilterProp {
-  @Prop({ type: Array, default: () => [] })
-  defaultValues!: string[];
-
-  @Prop({ type: String, default: '' })
-  defaultOptionSelected!: string;
-
-  @Prop({ required: true })
-  profileField!: FieldDetailInfo;
-
+  private isManualInput = false;
   private initStatus = Status.Loading;
   private valuesSelected: string[] = [];
-  private optionSelected: string = FilterConstants.DEFAULT_STRING_SELECTED;
+  private optionSelected: StringConditionTypes = FilterConstants.DEFAULT_STRING_SELECTED;
   private canLoadMore = true;
   private isLoadMore = false;
   private records: any[][] = [];
   private inputValues: string[] = [];
   private errorMsg = '';
 
+  @Prop({ type: Array, default: () => [] })
+  readonly defaultValues!: string[];
+
+  @Prop({ type: String, default: '' })
+  readonly defaultOptionSelected!: string;
+
+  @Prop({ required: true })
+  readonly profileField!: FieldDetailInfo;
+
   @Prop({ required: true, type: Array })
-  private selectOptions!: FilterSelectOption[];
+  readonly selectOptions!: FilterSelectOption[];
 
   @Prop({ required: false, default: false })
-  private readonly enableControlConfig!: boolean;
+  readonly enableControlConfig!: boolean;
 
-  @Prop({ type: Array, default: () => [] })
-  controlOptions!: TabControlData[];
+  @Prop({ required: false, type: Number })
+  private readonly selectedControlId?: WidgetId;
 
-  @PropSync('control')
-  syncControl?: TabControlData;
+  @Prop({ required: false, type: Array, default: () => [] })
+  private readonly chartControls!: ChartControl[];
 
   @Ref()
-  private loadMore!: DILoadMore;
+  private readonly loadMore!: DILoadMore;
 
   private get from(): number {
     return this.records.length;
@@ -109,14 +114,12 @@ export default class SelectionFilter extends Vue implements FilterProp {
     });
   }
 
-  private get isMultiSelection() {
-    return this.currentSelectOption.inputType == InputType.multiSelect;
+  protected get isSelectionMode() {
+    return this.currentSelectOption.inputType == InputType.MultiSelect;
   }
 
   private get hideControlConfig(): boolean {
     switch (this.optionSelected) {
-      case StringConditionTypes.in:
-      case StringConditionTypes.notIn:
       case StringConditionTypes.notNull:
       case StringConditionTypes.isnull:
       case StringConditionTypes.notEmpty:
@@ -133,26 +136,24 @@ export default class SelectionFilter extends Vue implements FilterProp {
 
   @Watch('optionSelected')
   handleOnOptionSelected() {
-    this.updatePositionPopover();
+    this.relocation();
   }
 
   created() {
-    if (this.isMultiSelection) {
+    this.optionSelected = (this.defaultOptionSelected as any) ?? FilterConstants.DEFAULT_STRING_SELECTED;
+    this.isManualInput = !isNumber(this.selectedControlId);
+    if (this.isSelectionMode && this.isManualInput) {
       this.handleLoadChartData();
     }
   }
 
-  mounted() {
-    this.optionSelected = this.defaultOptionSelected ?? FilterConstants.DEFAULT_STRING_SELECTED;
-  }
-
-  getCurrentOptionSelected(): string {
+  getSelectedCondition(): StringConditionTypes {
     return this.optionSelected;
   }
 
   getCurrentValues(): string[] {
-    if (this.isMultiSelection) {
-      return this.valuesSelected;
+    if (this.isManualInput) {
+      return this.isSelectionMode ? this.valuesSelected : this.inputValues;
     } else {
       return this.inputValues;
     }
@@ -168,10 +169,15 @@ export default class SelectionFilter extends Vue implements FilterProp {
   }
 
   @Watch('defaultValues', { immediate: true })
-  private handleOnDefaultValues() {
-    if (ListUtils.isNotEmpty(this.defaultValues)) {
-      this.valuesSelected = this.defaultValues;
-      this.inputValues = this.defaultValues;
+  private handleOnChangedDefaultValues(newValues: string[]) {
+    if (ListUtils.isNotEmpty(newValues)) {
+      if (this.isManualInput && this.isSelectionMode) {
+        this.valuesSelected = [...newValues];
+        this.inputValues = [];
+      } else {
+        this.inputValues = [...newValues];
+        this.valuesSelected = [];
+      }
     } else {
       this.valuesSelected = [];
     }
@@ -188,12 +194,12 @@ export default class SelectionFilter extends Vue implements FilterProp {
       this.records = [];
       const chartQueryResponse: AbstractTableResponse = await this.loadChartQueryResponse(this.from, FilterConstants.DEFAULT_LOAD_ITEM_SIZE);
       this.records = chartQueryResponse.records ?? [];
-      this.updatePositionPopover();
+      this.relocation();
       this.initStatus = Status.Loaded;
     } catch (ex) {
       Log.error('handleLoadChartData::error cause', ex);
       this.records = [];
-      this.updatePositionPopover();
+      this.relocation();
       this.initStatus = Status.Error;
       this.errorMsg = DIException.fromObject(ex).getPrettyMessage();
     }
@@ -234,8 +240,17 @@ export default class SelectionFilter extends Vue implements FilterProp {
     this.loadMore.handleScroll({ process: process });
   }
 
-  private updatePositionPopover() {
-    this.$root.$emit('filter-content-changed');
+  protected relocation(): void {
+    this.$emit('relocation');
+  }
+
+  private handleChangeIsManualInput(isManualInput: boolean) {
+    this.isManualInput = isManualInput;
+    if (this.isManualInput && this.initStatus !== Status.Loaded) {
+      this.handleLoadChartData();
+    } else {
+      this.relocation();
+    }
   }
 }
 </script>
@@ -247,11 +262,10 @@ export default class SelectionFilter extends Vue implements FilterProp {
   display: flex;
   flex-direction: column;
 
-  > .string-listing-container {
+  .string-listing-container {
     flex: 1;
     height: 100%;
     display: flex;
-    margin-top: 15px;
 
     > .multi-selection-area {
       flex: 1;

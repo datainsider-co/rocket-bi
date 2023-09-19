@@ -9,11 +9,10 @@ import {
   Equal,
   FieldRelatedFunction,
   Function,
-  FunnelChartOption,
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   WidgetId,
   Zoomable
@@ -25,8 +24,8 @@ import { ZoomData } from '@/shared';
 import { ConditionUtils } from '@core/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class FunnelQuerySetting extends QuerySetting<FunnelChartOption> implements Zoomable, Drilldownable, CrossFilterable {
-  readonly className = QuerySettingType.Funnel;
+export class FunnelQuerySetting extends QuerySetting implements Zoomable, Drilldownable, CrossFilterable {
+  readonly className = QuerySettingClassName.Funnel;
 
   constructor(
     public legend: TableColumn,
@@ -57,7 +56,7 @@ export class FunnelQuerySetting extends QuerySetting<FunnelChartOption> implemen
     return [this.legend.function, this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.legend, this.value];
   }
 
@@ -90,12 +89,12 @@ export class FunnelQuerySetting extends QuerySetting<FunnelChartOption> implemen
     }
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.legend = ConfigDataUtils.replaceDynamicFunction(this.legend, functions);
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.legend;
   }
 

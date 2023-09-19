@@ -49,7 +49,7 @@
           placeholder="Verification code"
           @enter="resetPassword(resetPasswordRequest)"
         >
-          <template v-if="!isVerifyCodeEmpty" #suffix>
+          <template v-if="!isVerifyCodeEmpty" #suffix-icon>
             <div>
               <i class="di-icon-close btn-icon-border" @click="setVerifyCode('')"></i>
             </div>

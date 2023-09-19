@@ -1,4 +1,4 @@
-import { Field, Id, TabControlData } from '@core/common/domain/model';
+import { Field, Id, ChartControlData } from '@core/common/domain/model';
 
 export interface FunctionData {
   id: Id;
@@ -13,5 +13,5 @@ export interface FunctionData {
   sorting: string;
   numElemsShown?: number | null;
   isShowNElements?: boolean;
-  dynamicFunction?: TabControlData;
+  dynamicFunction?: ChartControlData;
 }

@@ -1,6 +1,6 @@
 import { SlTreeNode } from '@/shared/components/builder/treemenu/SlVueTree';
-import { Field, FilterMode, TabControlData, TableSchema } from '@core/common/domain/model';
-import { InputType } from '@/shared';
+import { ChartControlField, Field, FilterMode, TableSchema, WidgetId } from '@core/common/domain/model';
+import { DateHistogramConditionTypes, InputType, NumberConditionTypes, StringConditionTypes } from '@/shared';
 
 export interface ConditionNode {
   label: string;
@@ -39,6 +39,6 @@ export interface ConditionTreeNode extends SlTreeNode<ConditionNode | ValueCondi
 
   currentInputType: InputType;
   filterModeSelected: FilterMode;
-  currentOptionSelected: string;
-  tabControl?: TabControlData;
+  currentOptionSelected: StringConditionTypes | DateHistogramConditionTypes | NumberConditionTypes;
+  controlId?: WidgetId;
 }

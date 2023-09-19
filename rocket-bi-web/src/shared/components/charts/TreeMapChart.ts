@@ -162,7 +162,7 @@ export default class TreeMapChart extends BaseHighChartWidget<TreeMapResponse, T
 
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
     //@ts-ignore
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="color: ${textColor};font-family: ${fontFamily}; text-align: left;">
                 ${fieldProperty}: <b>${formattedData}</b><br/>
             </div>`;

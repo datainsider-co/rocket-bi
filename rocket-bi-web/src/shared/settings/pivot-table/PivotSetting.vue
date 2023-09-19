@@ -18,7 +18,12 @@
       @onClearSetting="handleClearSetting"
       @onMultipleChanged="handleMultipleSettingChanged"
     />
-    <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab
+      :color="setting.options.background"
+      :default-color="defaultBackgroundColor"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <TooltipTab :setting="setting" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <VisualHeader :setting="setting.options" :widget-type="currentWidget" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
@@ -35,7 +40,7 @@ import TitleTab from '@/shared/settings/common/tabs/TitleTab.vue';
 import BackgroundTab from '@/shared/settings/common/tabs/BackgroundTab.vue';
 import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
 import FieldFormattingTab from '@/shared/settings/pivot-table/FieldFormattingTab.vue';
-import { ChartInfo, PivotTableChartOption, PivotTableQuerySetting, SettingKey, TableColumn } from '@core/common/domain';
+import { ChartInfo, ChartOption, PivotTableChartOption, PivotTableQuerySetting, SettingKey, TableColumn } from '@core/common/domain';
 import TooltipTab from '@/shared/settings/pivot-table/TooltipTab.vue';
 import CollapseTab from '@/shared/settings/pivot-table/CollapseTab.vue';
 import ConditionalFormattingTab from '@/shared/settings/table/ConditionalFormattingTab.vue';
@@ -126,6 +131,10 @@ export default class PivotSetting extends Vue {
 
   private get hasFormattingTab(): boolean {
     return ListUtils.isNotEmpty(this.query.values);
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

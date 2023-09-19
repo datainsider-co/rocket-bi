@@ -4,7 +4,7 @@
  */
 
 import { MouseEventData } from '@chart/BaseChart';
-import { ChartInfo, DynamicFilter, QuerySettingType } from '@core/common/domain';
+import { ChartInfo, InternalFilter, QuerySettingClassName } from '@core/common/domain';
 import { DrillThroughHandler } from '@/screens/dashboard-detail/components/drill-through/drill-throguh-handler/DrillThroughHandler';
 import { DefaultDrillThroughHandler } from '@/screens/dashboard-detail/components/drill-through/drill-throguh-handler/DefaultDrillThroughHandler';
 import { Log } from '@core/utils';
@@ -13,19 +13,19 @@ import { HeatmapDrillThroughHandler } from '@/screens/dashboard-detail/component
 import { HistogramDrillThroughHandler } from '@/screens/dashboard-detail/components/drill-through/drill-throguh-handler/HistogramDrillThroughHandler';
 
 export class DrillThroughResolver {
-  private readonly handlerAsMap: Map<QuerySettingType, DrillThroughHandler>;
+  private readonly handlerAsMap: Map<QuerySettingClassName, DrillThroughHandler>;
   private readonly defaultHandler: DrillThroughHandler;
 
   constructor() {
-    this.handlerAsMap = new Map<QuerySettingType, DrillThroughHandler>([
-      [QuerySettingType.Bubble, new BubbleDrillThroughHandler()],
-      [QuerySettingType.HeatMap, new HeatmapDrillThroughHandler()],
-      [QuerySettingType.Histogram, new HistogramDrillThroughHandler()]
+    this.handlerAsMap = new Map<QuerySettingClassName, DrillThroughHandler>([
+      [QuerySettingClassName.Bubble, new BubbleDrillThroughHandler()],
+      [QuerySettingClassName.HeatMap, new HeatmapDrillThroughHandler()],
+      [QuerySettingClassName.Histogram, new HistogramDrillThroughHandler()]
     ]);
     this.defaultHandler = new DefaultDrillThroughHandler();
   }
 
-  createFilter(metaData: ChartInfo, value: string): DynamicFilter[] {
+  createFilter(metaData: ChartInfo, value: string): InternalFilter[] {
     try {
       const handler = this.handlerAsMap.get(metaData.setting.className) ?? this.defaultHandler;
       return handler.createFilter(metaData, value);

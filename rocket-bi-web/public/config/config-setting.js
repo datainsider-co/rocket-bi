@@ -418,6 +418,10 @@ const setting = {
     'trendLine.trendBy': {
       label: 'Trend by',
       hint: ''
+    },
+    'trendLine.color': {
+      label: 'Color',
+      hint: ''
     }
   },
   'display.tab': {

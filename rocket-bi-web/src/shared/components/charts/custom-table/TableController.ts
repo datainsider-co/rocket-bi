@@ -113,7 +113,7 @@ export class TableController {
       const rawData = RowDataUtils.getData(rowData, header) ?? '--';
       const canApplyFormat = !header.isGroupBy;
       if (canApplyFormat) {
-        if (header.isTextLeft) {
+        if (header.isTextLeft || header.disabledFormatBodyCell) {
           return rawData;
         } else {
           const fieldFormatter = TableFieldFormatterUtils.getFieldFormatterContainsHeaderKey(header, extraData.fieldFormatting ?? {});
@@ -136,7 +136,7 @@ export class TableController {
   private getFooterFormatter(extraData: TableExtraData) {
     return (header: IndexedHeaderData) => {
       const isFirstColumn = header.columnIndex == 0;
-      if (isFirstColumn) {
+      if (isFirstColumn || header.disabledFormatFooterCell) {
         return extraData.total?.label?.text ?? 'Total';
       } else {
         const fieldFormatter = TableFieldFormatterUtils.getFieldFormatterContainsHeaderKey(header, extraData.fieldFormatting ?? {});

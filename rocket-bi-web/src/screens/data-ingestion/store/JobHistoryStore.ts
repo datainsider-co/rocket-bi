@@ -59,7 +59,8 @@ class JobHistoryStore extends VuexModule {
       {
         key: 'totalInsertedRows',
         label: 'Total Inserted Rows',
-        width: this.cellWidth
+        width: this.cellWidth,
+        disabledFormatBodyCell: true
       }
     ];
   }

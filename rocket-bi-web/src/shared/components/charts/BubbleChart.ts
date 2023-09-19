@@ -35,7 +35,7 @@ export default class HighchartsBubbleChart extends BaseHighChartWidget<SeriesTwo
           labels: {
             useHTML: true,
             formatter: function() {
-              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         }
@@ -47,7 +47,7 @@ export default class HighchartsBubbleChart extends BaseHighChartWidget<SeriesTwo
           labels: {
             useHTML: true,
             formatter: function() {
-              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         }
@@ -186,14 +186,14 @@ export default class HighchartsBubbleChart extends BaseHighChartWidget<SeriesTwo
 
   private tooltipFormatter(point: TooltipFormatterContextObject) {
     // Log.debug('Bubble::tooltip::', point);
-    const formattedDataXAxis = this.numberFormatter.formatWithType(point.x, this.query.xAxis.function.field.fieldType);
-    const formattedDataYAxis = this.numberFormatter.formatWithType(point.y, this.query.yAxis.function.field.fieldType);
+    const formattedDataXAxis = this.numberFormatter.formatWithType(point.x as number, this.query.xAxis.function.field.fieldType);
+    const formattedDataYAxis = this.numberFormatter.formatWithType(point.y as number, this.query.yAxis.function.field.fieldType);
     const formattedSize = this.numberFormatter.format(point.point.options.z ?? 0);
     const xAxisLabel = this.query.xAxis.name;
     const yAxisLabel = this.query.yAxis.name;
     const valueLabel = this.query.value.name;
     const textColor = this.setting.options.tooltip?.style?.color ?? '#fff';
-    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     const color = point.color;
     const legend = point.series.name;
     return `<div style="color: ${textColor}; font-family: ${fontFamily}; text-align: left;">
@@ -203,9 +203,9 @@ export default class HighchartsBubbleChart extends BaseHighChartWidget<SeriesTwo
               <span>${valueLabel}: <b>${formattedSize}</b></span>
             </div>`;
   }
-  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const yAxisSetting = this.setting.options.yAxis;
-    const value = this.numberFormatter.format(axis.value);
+    const value = this.numberFormatter.format(axis.value as number);
     if (yAxisSetting && yAxisSetting[0]) {
       return this.customAxisLabel(value, yAxisSetting[0].prefix, yAxisSetting[0].postfix);
     } else {
@@ -221,9 +221,9 @@ export default class HighchartsBubbleChart extends BaseHighChartWidget<SeriesTwo
       `;
   }
 
-  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const xAxisSetting = this.setting.options.xAxis;
-    const value = this.numberFormatter.format(axis.value);
+    const value = this.numberFormatter.format(axis.value as number);
     if (xAxisSetting && xAxisSetting[0]) {
       return this.customAxisLabel(value, xAxisSetting[0].prefix, xAxisSetting[0].postfix);
     } else {

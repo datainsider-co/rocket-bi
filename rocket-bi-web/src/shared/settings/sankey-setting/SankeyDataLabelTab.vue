@@ -60,7 +60,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { ChartType, SelectOption } from '@/shared';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { LabelFormatOptions } from '@/shared/settings/common/options/LabelFormatOptions';
 import { DataLabelFormatterMode } from '@chart/PieChart';
 import { get } from 'lodash';
@@ -80,8 +80,8 @@ export default class SankeyDataLabelTab extends Vue {
   private readonly defaultSetting = {
     enabled: false,
     labelFormat: DataLabelFormatterMode.NameAndValue,
-    fontFamily: 'Roboto',
-    color: ChartOption.getThemeTextColor(),
+    fontFamily: ChartOption.getSecondaryFontFamily(),
+    color: ChartOption.getPrimaryTextColor(),
     fontSize: '12px',
     displayUnit: MetricNumberMode.Default,
     distance: 30,
@@ -129,7 +129,7 @@ export default class SankeyDataLabelTab extends Vue {
   }
 
   private get fontSizeOptions(): SelectOption[] {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get labelSettingStyle(): CSSStyleDeclaration {

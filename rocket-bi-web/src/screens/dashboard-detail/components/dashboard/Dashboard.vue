@@ -1,8 +1,9 @@
 <template>
-  <b-container :style="dashboardStyle" fluid="*">
-    <DiGridstack ref="gridstack" :canInteractive="enableEdit" :options="defaultOptions">
+  <div class="di-dashboard" :style="dashboardStyle">
+    <DiGridstack ref="gridstack" class="di-dashboard--gridstack" :canInteractive="allowEdit" :options="gridstackOptions">
       <template v-for="(position, id) in positions">
         <DiGridstackItem
+          class="di-dashboard--gridstack--item"
           :id="+id"
           :key="id"
           :height="position.height"
@@ -10,47 +11,42 @@
           :x="position.column"
           :y="position.row"
           :zIndex="position.zIndex"
-          @change="handleChangePosition"
+          @change="onPositionChanged"
           @onClick="handleClickItem(id, position)"
         >
-          <div :style="{ cursor: getCurrentCursor }" class="h-100 w-100">
+          <template>
             <FilterPanelViewer
-              v-if="isFilterPanel(getWidget(id))"
-              :widget="getWidget(id)"
+              v-if="isFilterPanel(widgetAsMap[id])"
+              :widget="widgetAsMap[id]"
               :id="`${id}-tab-view`"
               :isShowEdit="isEditMode"
-              @onChangePosition="handleChangePosition"
+              :widget-setting="widgetSetting"
+              @onChangePosition="onPositionChanged"
             />
             <TabViewer
-              v-else-if="isTabWidget(getWidget(id))"
-              :widget="getWidget(id)"
+              v-else-if="isTabWidget(widgetAsMap[id])"
+              :widget="widgetAsMap[id]"
               :id="`${id}-tab-view`"
               :isShowEdit="isEditMode"
-              @onChangePosition="handleChangePosition"
+              :widget-setting="widgetSetting"
+              @onChangePosition="onPositionChanged"
             />
-            <WidgetContainer v-else :isShowEdit="isEditMode" :widget="getWidget(id)" :id="`${id}-chart-holder`" />
-          </div>
+            <WidgetHolder v-else :isShowEdit="isEditMode" :widget="widgetAsMap[id]" :id="`${id}-chart-holder`" :widget-setting="widgetSetting" />
+          </template>
         </DiGridstackItem>
       </template>
     </DiGridstack>
     <WidgetContextMenu ref="widgetContextMenu"></WidgetContextMenu>
-  </b-container>
+  </div>
 </template>
 
 <script lang="ts" src="./Dashboard.ts" />
-<style lang="scss" scoped>
-@import '~@/themes/scss/di-variables.scss';
 
-.widget-blur {
-  background-color: $widgetColor;
-  border-radius: 4px;
-}
-
-.dashboard {
-  margin: -15px;
-}
-
-.ui-draggable-dragging {
-  z-index: var(--next-max-z-index) !important;
+<style lang="scss">
+.di-dashboard {
+  &--gridstack {
+    &--item {
+    }
+  }
 }
 </style>

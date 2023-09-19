@@ -1,4 +1,4 @@
-import { Field, FilterMode, Id, TabControlData } from '@core/common/domain/model';
+import { Field, FilterMode, Id, WidgetId } from '@core/common/domain/model';
 import { InputType } from '@/shared';
 
 export interface ConditionData {
@@ -16,5 +16,5 @@ export interface ConditionData {
   currentInputType: InputType;
   filterModeSelected: FilterMode;
   currentOptionSelected: string;
-  tabControl?: TabControlData;
+  controlId?: WidgetId;
 }

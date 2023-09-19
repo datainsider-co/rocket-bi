@@ -1,5 +1,3 @@
-export * from './Plan/PlanInfo';
-export * from './Plan/PlanDetail';
 export * from './user-activity/UserActivity';
 export * from './user-activity/GetUserActivityRequest';
 export * from './user-activity/ActivityResourceType';

@@ -10,26 +10,24 @@ import {
   Drilldownable,
   DrilldownData,
   Equal,
-  Filterable,
   Function,
   getFiltersAndSorts,
   InlineSqlView,
-  MapChartChartOption,
   OrderBy,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
-  VizSettingType,
+  ChartOptionClassName,
   WidgetId
 } from '@core/common/domain/model';
-import { ConditionUtils, JsonUtils, Log } from '@core/utils';
+import { ConditionUtils, JsonUtils } from '@core/utils';
 import { GeoArea } from '@core/common/domain/model/geolocation/GeoArea';
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
 import { cloneDeep } from 'lodash';
 import { GeolocationModule } from '@/store/modules/data-builder/GeolocationStore';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class MapQuerySetting extends QuerySetting<MapChartChartOption> implements Drilldownable, CrossFilterable {
-  readonly className = QuerySettingType.Map;
+export class MapQuerySetting extends QuerySetting implements Drilldownable, CrossFilterable {
+  readonly className = QuerySettingClassName.Map;
 
   constructor(
     public location: TableColumn,
@@ -39,7 +37,6 @@ export class MapQuerySetting extends QuerySetting<MapChartChartOption> implement
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-
     sqlViews: InlineSqlView[] = [],
     parameters: Record<string, string> = {}
   ) {
@@ -60,7 +57,7 @@ export class MapQuerySetting extends QuerySetting<MapChartChartOption> implement
     return [this.location.function, this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.location, this.value];
   }
 
@@ -73,8 +70,8 @@ export class MapQuerySetting extends QuerySetting<MapChartChartOption> implement
   }
 
   //TODO: Fix me => change geolocation value to setting instead of Store
-  protected setValueBySetting(setting: ChartOption) {
-    const isMapSetting = setting.className == VizSettingType.MapSetting;
+  protected assignChartOptionValue(setting: ChartOption) {
+    const isMapSetting = setting.className == ChartOptionClassName.MapSetting;
     if (isMapSetting) {
       const normalizedNameMap = cloneDeep(GeolocationModule.locationMatchedAsMap);
       const geoArea = GeolocationModule.areaAsMap.get(setting.options.geoArea ?? '');
@@ -84,7 +81,7 @@ export class MapQuerySetting extends QuerySetting<MapChartChartOption> implement
   }
 
   static isMapQuery(query: any): query is MapQuerySetting {
-    return query?.className === QuerySettingType.Map;
+    return query?.className === QuerySettingClassName.Map;
   }
 
   buildQueryDrilldown(drilldownData: DrilldownData): QuerySetting {
@@ -113,12 +110,12 @@ export class MapQuerySetting extends QuerySetting<MapChartChartOption> implement
     return this.location;
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.location = ConfigDataUtils.replaceDynamicFunction(this.location, functions);
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.value;
   }
 

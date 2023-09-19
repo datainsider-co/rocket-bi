@@ -6,7 +6,7 @@
 import { DraggableConfig, FunctionFamilyInfo, FunctionFamilyTypes, FunctionTreeNode, SortTypes } from '@/shared';
 import { ChartUtils, RandomUtils } from '@/utils';
 import { cloneDeep, isString } from 'lodash';
-import { DynamicFunctionWidget, Field, TableSchema } from '@core/common/domain/model';
+import { Field, TableSchema } from '@core/common/domain/model';
 import { FunctionFamilyBuilder } from '@/screens/chart-builder/config-builder/function-builder/FunctionFamilyBuilder';
 import { Log } from '@core/utils';
 

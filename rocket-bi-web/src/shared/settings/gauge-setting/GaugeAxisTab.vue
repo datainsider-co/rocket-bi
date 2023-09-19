@@ -118,7 +118,7 @@ import InputSetting from '@/shared/settings/common/InputSetting.vue';
 import { ChartOption, GaugeChartOption, SettingKey } from '@core/common/domain';
 import { SelectOption } from '@/shared';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 
 @Component({ components: { PanelHeader } })
 export default class GaugeAxisTab extends Vue {
@@ -136,7 +136,7 @@ export default class GaugeAxisTab extends Vue {
     target: '0',
     targetColor: '#2187FF',
     axisColor: 'var(--text-color)',
-    axisFont: 'Roboto',
+    axisFont: ChartOption.getSecondaryFontFamily(),
     axisFontSize: '10px',
     prefixMaxLength: 10,
     suffixMaxLength: 10,
@@ -234,7 +234,7 @@ export default class GaugeAxisTab extends Vue {
   }
 
   private get fontSizeOptions(): SelectOption[] {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private handlePrefixSaved(newText: string) {

@@ -100,7 +100,7 @@ class GenericJdbcWorker(
           val records: Seq[Record] = reader.next
           writers.foreach(writer => {
             if (records.nonEmpty) try {
-              writer.write(records, tableSchema)
+              writer.insertBatch(records, tableSchema)
             } catch {
               case e: Throwable => error(s"${writer.getClass} write ${records.length} records failed, reason: $e")
             }

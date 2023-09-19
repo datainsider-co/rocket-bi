@@ -1,7 +1,7 @@
 import { Action, getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import store from '@/store';
 import { Stores } from '@/shared';
-import { ClickhouseConfigService, DataSource, DataSourceType, RefreshSchemaHistory } from '@core/clickhouse-config';
+import { ConnectorService, Connector, ConnectorType, RefreshSchemaHistory, SSHPublicKeyResponse } from '@core/connector-config';
 import { Inject } from 'typescript-ioc';
 import { DIException } from '@core/common/domain';
 import { DataManager } from '@core/common/services';
@@ -11,22 +11,23 @@ import { AuthenticationModule, AuthenticationStore } from '@/store/modules/Authe
 import { Mutex } from 'async-mutex';
 
 export interface SourceResponse {
-  source: DataSource;
+  source: Connector;
   status: RefreshSchemaHistory;
 }
 
 @Module({ namespaced: true, store: store, dynamic: true, name: Stores.DataSourceConfigStore })
 export class ConnectionStore extends VuexModule {
-  source: DataSource | null = null;
+  source: Connector | null = null;
   status: RefreshSchemaHistory = RefreshSchemaHistory.default();
   isExistedSource = false;
   isInitialized = false;
   isInitialLoading = false;
   isPermitted = false;
   mutex = new Mutex();
+  SSHPublicKey = '';
 
   @Inject
-  private readonly clickhouseService!: ClickhouseConfigService;
+  private readonly clickhouseService!: ConnectorService;
 
   @Inject
   private readonly permissionAdminService!: PermissionAdminService;
@@ -87,14 +88,42 @@ export class ConnectionStore extends VuexModule {
   }
 
   @Action
-  async loadSource(): Promise<DataSource> {
+  async loadSSHPublicKey(): Promise<void> {
+    if (!this.SSHPublicKey) {
+      let response = await this.clickhouseService.getSSHPublicKey();
+
+      if (response.isExists) {
+        this.setSSHPublicKey(response.publicKey!);
+      } else {
+        await this.clickhouseService.createSSHPublicKey();
+        response = await this.clickhouseService.getSSHPublicKey();
+        this.setSSHPublicKey(response.publicKey!);
+      }
+    }
+  }
+
+  @Action
+  async createSSHPublicKey(): Promise<boolean> {
+    return await this.clickhouseService.createSSHPublicKey();
+  }
+
+  @Mutation
+  setSSHPublicKey(key: string) {
+    this.SSHPublicKey = key;
+  }
+
+  @Action
+  async loadSource(): Promise<Connector> {
     const source = await this.clickhouseService.getSource();
     this.setSource(source);
+    if (source.tunnelConfig) {
+      this.setSSHPublicKey(source.tunnelConfig.publicKey);
+    }
     return source;
   }
 
   @Action
-  async addSource(source: DataSource): Promise<DataSource> {
+  async addSource(source: Connector): Promise<Connector> {
     const sourceResponse = await this.clickhouseService.setSource(source);
     await this.loadStatus();
     this.setSource(source);
@@ -134,7 +163,7 @@ export class ConnectionStore extends VuexModule {
   }
 
   @Mutation
-  setSource(source: DataSource) {
+  setSource(source: Connector) {
     this.source = source;
   }
 

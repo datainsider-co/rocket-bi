@@ -12,5 +12,6 @@ export enum JobName {
   FacebookAdsJob = 'facebook_ads_job',
   TiktokAdsJob = 'tik_tok_ads_job',
   PalexyJob = 'palexy_job',
+  GoogleSearchConsoleJob = 'google_search_console_job',
   UnsupportedJob = 'unsupported_job'
 }

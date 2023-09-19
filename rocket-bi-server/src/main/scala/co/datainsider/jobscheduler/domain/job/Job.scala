@@ -38,6 +38,7 @@ import datainsider.client.domain.scheduler.ScheduleTime
     new Type(value = classOf[ShopeeJob], name = "shopee_job"),
     new Type(value = classOf[LazadaJob], name = "lazada_job"),
     new Type(value = classOf[PalexyJob], name = "palexy_job"),
+    new Type(value = classOf[GoogleSearchConsoleJob], name = "google_search_console_job"),
   )
 )
 trait Job {
@@ -192,6 +193,7 @@ object JobType extends Enumeration {
   val Shopee: JobType.Value = Value("Shopee")
   val Lazada: JobType.Value = Value("Lazada")
   val Palexy: JobType.Value = Value("Palexy")
+  val GoogleSearchConsole: JobType.Value = Value("GoogleSearchConsole")
   val Other: JobType.Value = Value("Others")
 }
 

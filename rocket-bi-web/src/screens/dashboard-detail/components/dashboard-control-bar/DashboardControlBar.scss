@@ -8,7 +8,6 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex-wrap: wrap;
 
   > div + div {
     margin-left: 4px;
@@ -40,6 +39,7 @@
     align-items: center;
     text-align: center;
     justify-content: center;
+    align-self: center;
     height: 24px;
     width: 24px;
   }
@@ -48,7 +48,7 @@
     height: 28px;
   }
 
-  @media screen and (max-width: 600px) {
+  &.dashboard-control-bar--mobile {
     .di-btn-icon-text span {
       display: none;
     }

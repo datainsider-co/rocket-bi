@@ -873,9 +873,10 @@ select {
   padding-right: 1px;
   cursor: default;
 
-  .status-loading {
-    height: 30vh !important;
-  }
+  // fixme: check css
+  //.status-loading {
+  //  height: 30vh !important;
+  //}
 
   @include media-breakpoint-down(lg) {
     height: 18vh;

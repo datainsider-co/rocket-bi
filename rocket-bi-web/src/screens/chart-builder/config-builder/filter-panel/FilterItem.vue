@@ -1,37 +1,32 @@
 <template>
   <div class="item">
-    <DynamicFilterPanel
+    <InternalFilterPanel
+      ref="filterPanel"
       :id="filterId"
       :filter.sync="currentFilter"
       :isShowDisable="false"
       :maxChipShowing="3"
+      :enableControlConfig="showChartControlConfig"
+      :isDefaultStyle="true"
+      :chartControls="chartControls"
+      container-id="app"
       class="filter-panel"
       boundary="scrollParent"
       placement="top"
       @onApplyFilter="handleApplyFilter"
-      @onRemove="handleDeleteFilter"
+      @onRemove="emitDeleteEvent"
       @onValuesChanged="handleApplyFilter"
-      :enableControlConfig="showChartControlConfig"
-      :isDefaultStyle="true"
-      :tab-controls="tabControls"
     >
-      <template #filter-value v-if="hasDynamicCondition">
-        <ChipListing :listChipData="tabControlChipData" @removeAt="handleRemoveTabControl" @onChipClicked="showFilter"></ChipListing>
-      </template>
       <template #conditionName>
         <ChangeFieldButton
-          :conditionTreeNode="conditionTreeNode"
-          :error-message="errorMessage"
-          :field-context-status="fieldContextStatus"
+          ref="changeFieldButton"
+          :node="conditionTreeNode"
           :nodeIndex="nodeIndex"
-          :profile-fields="profileFields"
-          :title="conditionTreeNode.title"
-          @handleChangeField="handleChangeField(andGroup, conditionTreeNode, nodeIndex, ...arguments)"
-          @handleClickButton="handleOnClickField"
+          @onChangedField="newField => handleOnChangedField(andGroup, conditionTreeNode, nodeIndex, newField)"
         >
         </ChangeFieldButton>
       </template>
-    </DynamicFilterPanel>
+    </InternalFilterPanel>
     <div class="more-icon btn-icon-border" v-if="!isReadOnly">
       <i class="di-icon-three-dot" @click="handleOpenMenu"></i>
     </div>
@@ -39,14 +34,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator';
-import { ConditionTreeNode, Status } from '@/shared';
-import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
-import { DatabaseInfo, DynamicFilter, InlineSqlView, SqlQuery, TabControl } from '@core/common/domain/model';
+import { Component, Emit, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
+import { ConditionTreeNode } from '@/shared';
+import { ChartControl, InternalFilter, InlineSqlView, SqlQuery } from '@core/common/domain/model';
 import { ChartUtils, SchemaUtils, TimeoutUtils } from '@/utils';
 import { cloneDeep } from 'lodash';
 import ChangeFieldButton from '@/screens/chart-builder/config-builder/filter-panel/ChangeFieldButton.vue';
-import DynamicFilterPanel from '@/shared/components/filters/dynamic-filter-panel/DynamicFilterPanel.vue';
+import InternalFilterPanel from '@/shared/components/filters/dynamic-filter-panel/InternalFilterPanel.vue';
 import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 import ChipListing, { ChipData } from '@/shared/components/ChipListing.vue';
@@ -55,97 +49,69 @@ import { Log } from '@core/utils';
 @Component({
   components: {
     ChangeFieldButton,
-    DynamicFilterPanel,
+    InternalFilterPanel,
     ChipListing
   }
 })
 export default class FilterItem extends Vue {
-  private errorMessage = '';
-  private fieldContextStatus = Status.Loaded;
-  private profileFields: FieldDetailInfo[] = [];
+  private currentFilter: InternalFilter = InternalFilter.empty();
 
   @Prop({ required: true, type: Array })
   private andGroup!: ConditionTreeNode[];
 
   @Prop({ required: true, type: Number })
-  private groupIndex!: number;
+  readonly groupIndex!: number;
 
   @Prop({ required: true, type: Number })
-  private nodeIndex!: number;
+  readonly nodeIndex!: number;
 
   @Prop({ required: true })
-  private conditionTreeNode!: ConditionTreeNode;
+  readonly conditionTreeNode!: ConditionTreeNode;
 
   @Prop({ required: true, type: Number })
   private opacity!: number;
 
-  @Prop({ required: false, type: Function, default: undefined })
-  private readonly fnShowFilter?: (filterId: number) => void;
-
   @Prop({ type: Boolean, default: true })
   private readonly showChartControlConfig!: boolean;
 
-  private currentFilter: DynamicFilter = DynamicFilter.empty();
-
   // id pattern: filter-[groupId]-[nodeId]
   @Prop({ required: true, type: String })
-  private readonly filterId!: string;
+  readonly filterId!: string;
 
   @Prop({ required: false, default: false })
   private readonly isReadOnly!: boolean; ///Không hiện thị nút config
 
+  @Ref()
+  private readonly changeFieldButton!: ChangeFieldButton;
+
+  @Ref()
+  private readonly filterPanel!: InternalFilterPanel;
+
+  protected get chartControls(): ChartControl[] {
+    return _BuilderTableSchemaStore.chartControls.filter(control => control.getValueController() && control.getValueController()?.isEnableControl());
+  }
+
   @Watch('conditionTreeNode', { immediate: true, deep: true })
-  handleOnConditionNodeChanged() {
-    if (this.conditionTreeNode.field && SchemaUtils.isDiff(this.currentFilter.field, this.conditionTreeNode.field)) {
+  private handleOnChangedNode() {
+    if (ChartUtils.isDiffFieldValue(this.currentFilter.field, this.conditionTreeNode.field)) {
       const clonedNode = cloneDeep(this.conditionTreeNode);
-      this.currentFilter = this.getDynamicFilter(clonedNode);
+      this.currentFilter = this.toInternalFilter(clonedNode);
     }
   }
 
-  private isDbAlreadyLoaded(dbName: string) {
-    return dbName === _BuilderTableSchemaStore.dbNameSelected;
-  }
-
-  private handleOnClickField(data: { conditionTreeNode: ConditionTreeNode; index: number }) {
-    if (data.conditionTreeNode) {
-      const selectedConditionNode = ChartUtils.toConditionData(data.conditionTreeNode);
-      if (_BuilderTableSchemaStore.databaseSchema && this.isDbAlreadyLoaded(selectedConditionNode.field.dbName)) {
-        this.loadProfileFields(_BuilderTableSchemaStore.databaseSchema, selectedConditionNode.field.tblName);
-      } else {
-        DatabaseSchemaModule.fetchDatabaseInfo(selectedConditionNode.field.dbName)
-          .then(selectedDatabaseSchema => this.loadProfileFields(selectedDatabaseSchema, selectedConditionNode.field.tblName))
-          .catch(e => {
-            this.fieldContextStatus = Status.Error;
-            this.errorMessage = 'Load table error, try again';
-          });
-      }
+  private handleOnChangedField(group: ConditionTreeNode[], oldNode: ConditionTreeNode, nodeIndex: number, newField: FieldDetailInfo, reRender = true): void {
+    const newNode: ConditionTreeNode = this.fromFieldDetailInfo(oldNode, newField);
+    if (ChartUtils.isDiffFieldValue(oldNode.field, newNode.field)) {
+      ChartUtils.setDefaultValue(newNode);
     }
+    this.$emit('onChangedFilter', group, newNode, nodeIndex, reRender);
   }
 
-  private loadProfileFields(databaseSchema: DatabaseInfo, tblName: string) {
-    this.fieldContextStatus = Status.Loaded;
-    this.profileFields = ChartUtils.getProfileFieldsFromDBSchemaTblName(databaseSchema, tblName);
-  }
-
-  @Emit('onFilterChanged')
-  private handleChangeField(
-    group: ConditionTreeNode[],
-    conditionTreeNode: ConditionTreeNode,
-    nodeIndex: number,
-    profileField: FieldDetailInfo
-  ): [ConditionTreeNode[], ConditionTreeNode, number] {
-    const newNode: ConditionTreeNode = this.handleMergeField(conditionTreeNode, profileField);
-    if (conditionTreeNode.field && SchemaUtils.isDiff(conditionTreeNode.field, profileField.field)) {
-      ChartUtils.resetNodeData(newNode);
-    }
-    return [group, newNode, nodeIndex];
-  }
-
-  private handleMergeField(conditionTreeNode: ConditionTreeNode, profileField: FieldDetailInfo) {
-    const clonedNode = cloneDeep(conditionTreeNode);
-    clonedNode.field = profileField.field;
-    clonedNode.title = profileField.displayName;
-    return clonedNode;
+  private fromFieldDetailInfo(node: ConditionTreeNode, field: FieldDetailInfo): ConditionTreeNode {
+    const newNode = cloneDeep(node);
+    newNode.field = field.field;
+    newNode.title = field.displayName;
+    return newNode;
   }
 
   private handleOpenMenu(mouseEvent: MouseEvent): void {
@@ -164,49 +130,37 @@ export default class FilterItem extends Vue {
 
   @Emit('onClickFilter')
   private showFilter(): string {
-    Log.debug('FilterItem::showFilter', this.currentFilter.control);
     return this.filterId;
   }
 
-  private getDynamicFilter(conditionTreeNode: ConditionTreeNode) {
-    if (conditionTreeNode.field) {
-      const query = _BuilderTableSchemaStore.getSqlQuery(conditionTreeNode.field.tblName);
-      const sqlView = query ? new InlineSqlView(conditionTreeNode.field.tblName, new SqlQuery(query)) : void 0;
-      const filter = DynamicFilter.from(
-        conditionTreeNode.field,
-        conditionTreeNode.title,
-        SchemaUtils.isNested(conditionTreeNode.field.tblName),
-        this.conditionTreeNode.id,
-        sqlView
-      );
-      this.setExtraData(filter, conditionTreeNode);
+  protected toInternalFilter(node: ConditionTreeNode): InternalFilter {
+    if (node.field) {
+      const query: string | undefined = _BuilderTableSchemaStore.getSqlQuery(node.field.tblName);
+      const sqlView: any = query ? new InlineSqlView(node.field.tblName, new SqlQuery(query)) : void 0;
+      const filter = InternalFilter.from(node.field, node.title, SchemaUtils.isNested(node.field.tblName), this.conditionTreeNode.id, sqlView);
+      filter.currentValues = node.allValues;
+      filter.filterModeSelected = node.filterModeSelected;
+      filter.currentInputType = node.currentInputType;
+      filter.currentOptionSelected = node.currentOptionSelected;
+      filter.controlId = node.controlId ?? null;
       return filter;
     } else {
-      return DynamicFilter.empty();
+      const filter = InternalFilter.empty();
+      filter.setTitle(node.title);
+      filter.controlId = node.controlId ?? null;
+      return filter;
     }
   }
 
-  private setExtraData(filter: DynamicFilter, conditionTreeNode: ConditionTreeNode) {
-    filter.currentValues = conditionTreeNode.allValues;
-    filter.filterModeSelected = conditionTreeNode.filterModeSelected;
-    filter.currentInputType = conditionTreeNode.currentInputType;
-    filter.currentOptionSelected = conditionTreeNode.currentOptionSelected;
-    Log.debug('setExtraData', filter, conditionTreeNode);
-    filter.control = cloneDeep(conditionTreeNode.tabControl);
-  }
-
-  @Emit('onFilterChanged')
-  private handleApplyFilter(): [ConditionTreeNode[], ConditionTreeNode, number] {
-    Log.debug('FilterItem::handleApplyFilter::', this.currentFilter.currentOptionSelected);
+  private handleApplyFilter(): void {
     const newFilter = this.currentFilter;
     this.currentFilter = newFilter; //Re render UI
-    const clonedNode = this.updateConditionNode(this.conditionTreeNode, newFilter);
-    Log.debug('FilterItem::handleApplyFilter::', this.currentFilter.currentOptionSelected);
-    return [this.andGroup, clonedNode, this.nodeIndex];
+    const clonedNode = this.buildNodeFromFilter(this.conditionTreeNode, newFilter);
+    this.$emit('onChangedFilter', this.andGroup, clonedNode, this.nodeIndex, true);
   }
 
-  private updateConditionNode(conditionTreeNode: ConditionTreeNode, newFilter: DynamicFilter) {
-    const newNode: ConditionTreeNode = cloneDeep(conditionTreeNode);
+  private buildNodeFromFilter(node: ConditionTreeNode, newFilter: InternalFilter): ConditionTreeNode {
+    const newNode: ConditionTreeNode = cloneDeep(node);
     newNode.allValues = newFilter.currentValues;
     newNode.firstValue = newFilter.currentValues[0];
     newNode.secondValue = newFilter.currentValues[1];
@@ -215,39 +169,31 @@ export default class FilterItem extends Vue {
     newNode.currentInputType = newFilter.currentInputType;
     newNode.currentOptionSelected = newFilter.currentOptionSelected;
     newNode.filterType = newFilter.currentOptionSelected;
+    newNode.controlId = newFilter.controlId ?? void 0;
 
-    newNode.tabControl = newFilter.control;
     return newNode;
   }
 
-  @Emit('onDeleteFilter')
-  private handleDeleteFilter(): [number, number] {
-    return [this.groupIndex, this.nodeIndex];
+  private emitDeleteEvent(): void {
+    this.$emit('delete', this.groupIndex, this.nodeIndex);
   }
 
-  private get hasDynamicCondition(): boolean {
-    return this.conditionTreeNode.tabControl !== undefined && this.conditionTreeNode.tabControl !== null;
+  public setupField(): void {
+    this.changeFieldButton?.click((newField: FieldDetailInfo) => {
+      this.handleOnChangedField(this.andGroup, this.conditionTreeNode, this.nodeIndex, newField, false);
+      this.setupFilterValue();
+    });
   }
 
-  private get tabControlChipData(): ChipData[] {
-    return this.conditionTreeNode.tabControl
-      ? [
-          {
-            title: this.conditionTreeNode.tabControl.displayName,
-            isShowRemove: true
-          }
-        ]
-      : [];
-  }
-
-  private handleRemoveTabControl() {
-    this.conditionTreeNode.tabControl = void 0;
-    this.currentFilter.control = void 0;
-    this.handleApplyFilter();
-  }
-
-  private get tabControls(): TabControl[] {
-    return _BuilderTableSchemaStore.tabControls;
+  public setupFilterValue(): void {
+    this.$root.$emit('bv::hide::popover');
+    //
+    // Wait for animation adding completed
+    this.$nextTick(() => {
+      this.$nextTick(() => {
+        this.filterPanel?.showPopover();
+      });
+    });
   }
 }
 </script>

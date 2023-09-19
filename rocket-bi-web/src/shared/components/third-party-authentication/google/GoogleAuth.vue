@@ -1,10 +1,9 @@
 <template>
   <div class="google-authen px-3">
-    <h3>DataInsider.co requires authorization to connect to your {{ productTitle }}</h3>
+    <h3>RocketBI requires authorization to connect to your {{ productTitle }}</h3>
     <DiButton class="access-gg-btn" :is-loading="loading" primary title="AUTHORIZE" @click="authorize"> </DiButton>
     <div style="font-weight: 400;margin-top: 8px;text-align: justify;">
-      ***<a href="https://www.datainsider.co/" target="_blank">Datainsider.co</a> use and transfer to any other app of information received from Google APIs
-      will adhere to
+      ***<a href="https://rocket.bi/" target="_blank">RocketBI</a> use and transfer to any other app of information received from Google APIs will adhere to
       <a href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes" target="_blank"
         >Google API Services User Data Policy</a
       >, including the Limited Use requirements.
@@ -28,7 +27,6 @@ import { ThirdPartyType } from '@/shared/components/third-party-authentication/T
   components: { DiButton }
 })
 export default class GoogleAuth extends Vue {
-  private googleConfig = require('@/screens/data-ingestion/constants/google-config.json');
   private loading = false;
 
   googleAuthenticationType = this.$attrs.config_type as ThirdPartyType;
@@ -56,9 +54,9 @@ export default class GoogleAuth extends Vue {
     } else {
       switch (this.googleAuthenticationType) {
         case ThirdPartyType.GoogleAnalytic:
-          return this.googleConfig.gaScope;
+          return window.appConfig.GA_SCOPES;
         case ThirdPartyType.GoogleSheet:
-          return this.googleConfig.sheetScope;
+          return window.appConfig.GOOGLE_SHEET_SCOPES;
         default:
           return '';
       }
@@ -71,7 +69,7 @@ export default class GoogleAuth extends Vue {
       return clientId;
       //todo: fixme delete if deploy new version for google ads
     } else {
-      return this.googleConfig.clientId;
+      return window.appConfig.GOOGLE_CLIENT_ID;
     }
   }
 

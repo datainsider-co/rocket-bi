@@ -14,12 +14,12 @@
         </div>
       </div>
       <div v-if="hintImg" class="hint-image">
-        <img :src="hintImg" alt="hint-icon" class="unselectable" />
+        <img :key="hintChart.name" :src="hintImg" alt="hint-icon" class="unselectable" />
       </div>
     </div>
     <div v-else class="d-flex flex-column default-hint align-items-center h-100 justify-content-center">
       <slot name="error"></slot>
-      <img :src="require(`@/assets/icon/charts/${itemSelected.src}`)" alt="icon" class="chart-icon unselectable" />
+      <img :key="itemSelected.src" :src="require(`@/assets/icon/charts/${itemSelected.src}`)" alt="icon" class="chart-icon unselectable" />
       <div class="hint-description">
         <img alt="help" class="btn-ghost help-icon" src="@/assets/icon/ic_help.svg" />
         <span> Learn to create {{ itemSelected.title }} Chart <strong class="btn-ghost">here</strong>. </span>
@@ -33,18 +33,21 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { VisualizationItemData } from '@/shared';
 import { HintChartData, HintCharts } from '@/shared/constants/HintChartData';
 import { _ThemeStore } from '@/store/modules/ThemeStore';
+import { ListUtils } from '@/utils';
 
 @Component
 export default class HintPanel extends Vue {
   @Prop({ required: true })
   private itemSelected!: VisualizationItemData;
 
-  private get hintChart(): HintChartData {
+  private get hintChart(): HintChartData | undefined {
     return HintCharts[this.itemSelected.type];
+    // return void 0
   }
 
-  private get hintImg(): any {
-    const imgSrc = _ThemeStore.isDarkTheme ? this.hintChart.pages[0].darkHint : this.hintChart.pages[0].lightHint;
+  private get hintImg(): any | null {
+    const pages = this.hintChart?.pages ?? [];
+    const imgSrc = _ThemeStore.isDarkTheme ? ListUtils.getHead(pages)?.darkHint : ListUtils.getHead(pages)?.lightHint;
     if (imgSrc) {
       return require(`@/assets/icon/${imgSrc}`);
     } else {

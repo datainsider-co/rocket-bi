@@ -78,7 +78,7 @@ import { ChartOption, PivotTableChartOption, SettingKey } from '@core/common/dom
 import DropdownSetting from '@/shared/settings/common/DropdownSetting.vue';
 import ColorSetting from '@/shared/settings/common/ColorSetting.vue';
 import AlignSetting from '@/shared/settings/common/AlignSetting.vue';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
 
 @Component({ components: { ToggleSetting, DropdownSetting, ColorSetting, PanelHeader, AlignSetting } })
@@ -86,15 +86,15 @@ export default class HeaderTab extends Vue {
   private readonly configSetting = window.chartSetting['header.tab'];
   @Prop({ required: false, type: Object })
   private readonly setting!: PivotTableChartOption;
-  private readonly fontSizeOptions = FontSizeOptions;
+  private readonly fontSizeOptions = SecondaryFontSizeOptions;
   private fontOptions = FontFamilyOptions;
   private readonly defaultStyle = {
-    color: ChartOption.getThemeTextColor(),
+    color: ChartOption.getPrimaryTextColor(),
     backgroundColor: ChartOption.getTableHeaderBackgroundColor(),
     outline: 'bottom',
     widthAuto: false,
     isWordWrap: false,
-    fontFamily: 'Roboto',
+    fontFamily: ChartOption.getPrimaryFontFamily(),
     fontSize: '12px',
     align: 'left'
   };

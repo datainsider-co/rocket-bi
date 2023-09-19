@@ -1,15 +1,40 @@
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Table_collapse" clip-path="url(#clip0_1277_11308)">
-<rect id="Rectangle" width="15" height="6" fill="#5577FF"/>
-<rect id="Rectangle Copy 457" x="16" width="15" height="6" fill="#5577FF"/>
-<rect id="Rectangle Copy 458" x="32" width="16" height="6" fill="#5577FF"/>
-<path id="Combined Shape" fill-rule="evenodd" clip-rule="evenodd" d="M15 7H0V20H15V7ZM31 7H16V13H31V7ZM32 7H48V13H32V7ZM31 21H16V27H31V21ZM32 21H48V27H32V21ZM15 35H0V41H15V35ZM16 35H31V41H16V35ZM48 35H32V41H48V35Z" fill="#7F98FE"/>
-<path id="Combined Shape_2" fill-rule="evenodd" clip-rule="evenodd" d="M31 14H16V20H31V14ZM48 14H32V20H48V14ZM0 21H15V34H0V21ZM31 28H16V34H31V28ZM32 28H48V34H32V28ZM15 42H0V48H15V42ZM16 42H31V48H16V42ZM48 42H32V48H48V42Z" fill="#B7C5FF"/>
-<path id="Union" fill-rule="evenodd" clip-rule="evenodd" d="M8 10H7V13H4V14H7V17H8V14H11V13H8V10Z" fill="white"/>
-<rect id="Rectangle 41" x="4" y="27" width="7" height="1" fill="white"/>
+<g clip-path="url(#clip0_3860_75933)">
+<mask id="mask0_3860_75933" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="48" height="48">
+<path d="M48 0H0V48H48V0Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_3860_75933)">
+<path d="M15 0H0V6H15V0Z" fill="url(#paint0_linear_3860_75933)"/>
+<path d="M31 0H16V6H31V0Z" fill="url(#paint1_linear_3860_75933)"/>
+<path d="M48 0H32V6H48V0Z" fill="url(#paint2_linear_3860_75933)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M15 7H0V20H15V7ZM31 7H16V13H31V7ZM32 7H48V13H32V7ZM31 21H16V27H31V21ZM32 21H48V27H32V21ZM15 35H0V41H15V35ZM16 35H31V41H16V35ZM48 35H32V41H48V35Z" fill="url(#paint3_linear_3860_75933)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M31 14H16V20H31V14ZM48 14H32V20H48V14ZM0 21H15V34H0V21ZM31 28H16V34H31V28ZM32 28H48V34H32V28ZM15 42H0V48H15V42ZM16 42H31V48H16V42ZM48 42H32V48H48V42Z" fill="url(#paint4_linear_3860_75933)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M8 10H7V13H4V14H7V17H8V14H11V13H8V10Z" fill="white"/>
+<path d="M11 27H4V28H11V27Z" fill="white"/>
+</g>
 </g>
 <defs>
-<clipPath id="clip0_1277_11308">
+<linearGradient id="paint0_linear_3860_75933" x1="-2.52509e-08" y1="3.02857" x2="15" y2="3.02857" gradientUnits="userSpaceOnUse">
+<stop stop-color="#A855F7"/>
+<stop offset="1" stop-color="#3B82F6"/>
+</linearGradient>
+<linearGradient id="paint1_linear_3860_75933" x1="16" y1="3.02857" x2="31" y2="3.02857" gradientUnits="userSpaceOnUse">
+<stop stop-color="#A855F7"/>
+<stop offset="1" stop-color="#3B82F6"/>
+</linearGradient>
+<linearGradient id="paint2_linear_3860_75933" x1="32" y1="3.02857" x2="48" y2="3.02857" gradientUnits="userSpaceOnUse">
+<stop stop-color="#A855F7"/>
+<stop offset="1" stop-color="#3B82F6"/>
+</linearGradient>
+<linearGradient id="paint3_linear_3860_75933" x1="-16.512" y1="77.7625" x2="52.2108" y2="62.1617" gradientUnits="userSpaceOnUse">
+<stop stop-color="#568E8B"/>
+<stop offset="0.776042" stop-color="#67F5ED"/>
+</linearGradient>
+<linearGradient id="paint4_linear_3860_75933" x1="-12.192" y1="40.35" x2="40.2441" y2="37.4986" gradientUnits="userSpaceOnUse">
+<stop stop-color="#F377B3"/>
+<stop offset="1" stop-color="#FEB3DD"/>
+</linearGradient>
+<clipPath id="clip0_3860_75933">
 <rect width="48" height="48" fill="white"/>
 </clipPath>
 </defs>

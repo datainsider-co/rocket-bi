@@ -15,11 +15,11 @@
 </template>
 
 <script lang="ts">
-import { FilterModule } from '@/screens/dashboard-detail/stores';
+import { DashboardControllerModule, FilterModule } from '@/screens/dashboard-detail/stores';
 import { Log } from '@core/utils';
 import { Component, Inject, Prop, Vue } from 'vue-property-decorator';
 import { DateRange, DateTimeConstants } from '@/shared';
-import { MainDateMode } from '@core/common/domain/model';
+import { MainDateFilter2, MainDateMode } from '@core/common/domain/model';
 import { CalendarData } from '@/shared/models';
 import DiCalendar from '@filter/main-date-filter-v2/DiCalendar.vue';
 import { DashboardModule } from '@/screens/dashboard-detail/stores/dashboard/DashboardStore';
@@ -34,7 +34,7 @@ import { Track } from '@/shared/anotation';
   }
 })
 export default class MainDateFilter extends Vue {
-  private readonly MainDateModeOptions = DateTimeConstants.ListDateRangeModeOptions;
+  private readonly MainDateModeOptions = DateTimeConstants.DATE_RANGE_MODE_OPTION_LIST;
 
   @Prop({ required: true })
   private readonly mainDateFilterMode!: MainDateMode;
@@ -51,22 +51,16 @@ export default class MainDateFilter extends Vue {
 
   // Inject from DashboardHeader.vue
   @Inject({ default: undefined })
-  private applyCompare?: (firstTime: DateRange, compareRange: DateRange) => void;
-
-  // Inject from DashboardHeader.vue
-  @Inject({ default: undefined })
   private applyMainDateAllTime?: () => void;
 
   private handleCalendarSelected(calendarData: CalendarData) {
-    DashboardModule.saveMainDateFilterMode({
+    DashboardModule.saveMainDate({
       mode: calendarData.filterMode,
       chosenDateRange: calendarData.chosenDateRange
     });
     Log.debug('MainDateFilter::handleCalendarSelected', calendarData, calendarData.isAllTime);
     if (calendarData.isAllTime && this.applyMainDateAllTime) {
       this.applyMainDateAllTime();
-    } else if (calendarData.isCompare && this.applyCompare) {
-      this.applyCompare(calendarData.chosenDateRange!, calendarData.compareDateRange!);
     } else if (this.applyMainDateFilter) {
       this.applyMainDateFilter(calendarData);
     }
@@ -91,9 +85,12 @@ export default class MainDateFilter extends Vue {
       if (DashboardModule.id) {
         await DashboardModule.handleRemoveMainDateFilter(DashboardModule.id);
         DashboardModule.setMainDateFilter(null);
-        TrackingUtils.track(TrackEvents.RemoveMainDateFilter, { dashboard_id: DashboardModule.id });
-        FilterModule.removeMainDateCalendar();
-        FilterModule.handleMainDateFilterChange();
+        FilterModule.removeMainDateData();
+        DashboardModule.updateMainDateFilter(void 0);
+        await DashboardControllerModule.applyDynamicValues({
+          id: MainDateFilter2.MAIN_DATE_ID,
+          valueMap: void 0
+        });
       } else {
         //@ts-ignore
         await this.$alert.fire({

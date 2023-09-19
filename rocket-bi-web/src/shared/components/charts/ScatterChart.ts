@@ -24,7 +24,7 @@ export default class ScatterChart extends BaseHighChartWidget<SeriesTwoResponse,
     const tooltipFormatter = this.tooltipFormatter;
     const xAxisFormatter = this.xAxisFormatter;
     const yAxisFormatter = this.yAxisFormatter;
-    const manualOptions: Highcharts.Options = {
+    const manualOptions = {
       chart: {
         type: 'scatter',
         zoomType: 'xy'
@@ -41,7 +41,7 @@ export default class ScatterChart extends BaseHighChartWidget<SeriesTwoResponse,
           labels: {
             // useHTML: true,
             formatter: function() {
-              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         },
@@ -49,7 +49,7 @@ export default class ScatterChart extends BaseHighChartWidget<SeriesTwoResponse,
           labels: {
             // useHTML: true,
             formatter: function() {
-              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         }
@@ -59,7 +59,7 @@ export default class ScatterChart extends BaseHighChartWidget<SeriesTwoResponse,
           labels: {
             // useHTML: true,
             formatter: function() {
-              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         },
@@ -67,7 +67,7 @@ export default class ScatterChart extends BaseHighChartWidget<SeriesTwoResponse,
           labels: {
             useHTML: true,
             formatter: function() {
-              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         }
@@ -79,7 +79,7 @@ export default class ScatterChart extends BaseHighChartWidget<SeriesTwoResponse,
         // Nếu để outside = false, thì không hiện được tooltip nằm trên cùng của chart do dataLabel và tooltip đều dùng use HTML = true, dẫn đến lỗi khi ở dashboard
         // Giải pháp tạm thời: Hardcode outside = false nếu ở Data builder; = true nếu ở dashboard/các trường hợp khác
         outside: !this.isPreview,
-        formatter: function(tooltip) {
+        formatter: function() {
           return tooltipFormatter((this as any) as Highcharts.TooltipFormatterContextObject);
         }
       }
@@ -246,23 +246,23 @@ export default class ScatterChart extends BaseHighChartWidget<SeriesTwoResponse,
 
   private tooltipFormatter(point: Highcharts.TooltipFormatterContextObject): string {
     // Log.debug('Scatter::tooltip::', point);
-    const formattedDataXAxis = this.numberFormatter.formatWithType(point.x, this.query.xAxis.function.field.fieldType);
-    const formattedDataYAxis = this.numberFormatter.formatWithType(point.y, this.query.yAxis.function.field.fieldType);
+    const formattedDataXAxis = this.numberFormatter.formatWithType(point.x as number, this.query.xAxis.function.field.fieldType);
+    const formattedDataYAxis = this.numberFormatter.formatWithType(point.y as number, this.query.yAxis.function.field.fieldType);
     const xAxisLabel = this.query.xAxis.name;
     const yAxisLabel = this.query.yAxis.name;
     const legend = point.series.name;
     const color = point.color;
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="color: ${textColor}; font-family: ${fontFamily}; text-align: left;">
               <div><span style="color:${color}; padding-right: 5px;">●</span>${legend}</div>
               <span>${xAxisLabel}: <b>${formattedDataXAxis}</b></span></br>
               <span>${yAxisLabel}: <b>${formattedDataYAxis}</b></span>
             </div>`;
   }
-  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const yAxisSetting = this.setting.options.yAxis;
-    const value = this.numberFormatter.format(axis.value);
+    const value = this.numberFormatter.format(axis.value as number);
     if (yAxisSetting && yAxisSetting[0]) {
       return this.customAxisLabel(value, yAxisSetting[0].prefix, yAxisSetting[0].postfix);
     } else {
@@ -278,9 +278,9 @@ export default class ScatterChart extends BaseHighChartWidget<SeriesTwoResponse,
       `;
   }
 
-  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const xAxisSetting = this.setting.options.xAxis;
-    const value = this.numberFormatter.format(axis.value);
+    const value = this.numberFormatter.format(axis.value as number);
     if (xAxisSetting && xAxisSetting[0]) {
       return this.customAxisLabel(value, xAxisSetting[0].prefix, xAxisSetting[0].postfix);
     } else {

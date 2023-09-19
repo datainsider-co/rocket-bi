@@ -136,4 +136,12 @@ export abstract class ListUtils {
     }
     return list;
   }
+
+  static flatten<T>(list: T[][]): T[] {
+    return list.flat();
+  }
+
+  static distinct<T>(list: T[]): T[] {
+    return [...new Set(list)];
+  }
 }

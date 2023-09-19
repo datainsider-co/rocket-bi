@@ -45,7 +45,7 @@
 <script lang="ts">
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { ParamValueType, QueryParameter } from '@core/common/domain';
-import { DateTimeFormatter, ListUtils, PopupUtils, StringUtils } from '@/utils';
+import { DateTimeUtils, ListUtils, PopupUtils, StringUtils } from '@/utils';
 import DiInputComponent from '@/shared/components/DiInputComponent.vue';
 import { Log } from '@core/utils';
 import PopoverV2 from '@/shared/components/common/popover-v2/PopoverV2.vue';
@@ -54,7 +54,7 @@ import DiDatePicker from '@/shared/components/DiDatePicker.vue';
 import moment from 'moment';
 import { max, min } from 'lodash';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
-import { AtomicAction } from '@/shared/anotation';
+import { AtomicAction } from '@core/common/misc';
 
 @Component({ components: { DiDropdown, DiInputDateTime, DiInputComponent, PopoverV2, DiDatePicker } })
 export default class ParamItem extends Vue {
@@ -130,7 +130,7 @@ export default class ParamItem extends Vue {
     }
   }
 
-  @AtomicAction({ timeUnlockAfterComplete: 500 })
+  @AtomicAction()
   unfocus() {
     this.isFocus = false;
     this.$emit('change', this.param.displayName, this.tempValue);
@@ -156,7 +156,7 @@ export default class ParamItem extends Vue {
       case ParamValueType.number:
         return `${this.tempValue}`;
       case ParamValueType.date:
-        return DateTimeFormatter.formatDateWithTime(this.tempValue, '');
+        return DateTimeUtils.formatDate(this.tempValue);
       default:
         return '';
     }
@@ -190,7 +190,7 @@ export default class ParamItem extends Vue {
   }
 
   private set tempValueAsDate(date: Date) {
-    this.tempValue = DateTimeFormatter.formatDateWithTime(date, '');
+    this.tempValue = DateTimeUtils.formatDate(date);
     this.unfocus();
   }
 
@@ -267,6 +267,9 @@ $opacityValue: 0.5;
       width: 80px;
       background: transparent;
       padding: 0 0 0 8px;
+    }
+    .vc-popover-content {
+      z-index: 1000;
     }
   }
 

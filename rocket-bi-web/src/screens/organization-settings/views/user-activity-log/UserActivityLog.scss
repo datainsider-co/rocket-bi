@@ -55,6 +55,8 @@
 }
 
 .user-activity-log {
+  background: var(--secondary);
+  border-radius: 4px;
   //height: calc(100% - 52.6px);
   .user-activity-log-body {
     height: 100%;

@@ -3,8 +3,8 @@ import { FunctionInfo } from '@/screens/chart-builder/config-builder/database-li
 import { Column, DatabaseInfo, TableSchema } from '@core/common/domain';
 import { FormulaController } from '@/shared/fomula/FormulaController';
 import { BigqueryFormulaController } from '@/shared/fomula/bigquery/BigqueryFormulaController';
-import { BigqueryCalculatedFieldController } from '@/shared/fomula/bigquery/BigqueryCalculatedFieldController';
-import { BigqueryMeasureFieldController } from '@/shared/fomula/bigquery/BigqueryMeasureFieldController';
+import { CalculatedFieldController } from '@/shared/fomula/CalculatedFieldController';
+import { MeasureController } from '@/shared/fomula/MeasureController';
 
 export class BigqueryFormulaHandler extends FormulaCreatorHandler {
   createController(allFunctions: FunctionInfo[], databaseSchemas: DatabaseInfo[]): FormulaController {
@@ -12,11 +12,11 @@ export class BigqueryFormulaHandler extends FormulaCreatorHandler {
   }
 
   createCalculatedFieldController(allFunctions: FunctionInfo[], columns: Column[]): FormulaController {
-    return new BigqueryCalculatedFieldController(allFunctions, columns);
+    return new CalculatedFieldController(allFunctions, columns);
   }
 
   createMeasureFieldController(allFunctions: FunctionInfo[], tblSchema: TableSchema): FormulaController {
-    return new BigqueryMeasureFieldController(allFunctions, tblSchema);
+    return new MeasureController(allFunctions, tblSchema);
   }
 
   getSyntaxFile(): string {

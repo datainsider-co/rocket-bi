@@ -25,7 +25,7 @@
 <script lang="ts">
 import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
 import { cloneDeep } from 'lodash';
-import { defaultQueryParameter, DIException, ParamValueType, QueryParameter } from '@core/common/domain';
+import { createQueryParameter, DIException, ParamValueType, QueryParameter } from '@core/common/domain';
 import DiCustomModal from '@/shared/components/DiCustomModal.vue';
 import DiInputComponent from '@/shared/components/DiInputComponent.vue';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
@@ -33,7 +33,7 @@ import { SelectOption } from '@/shared';
 import DynamicInputValue from '@/screens/data-management/components/DynamicInputValue.vue';
 import moment from 'moment';
 import { Log } from '@core/utils';
-import { DateTimeFormatter, ListUtils, StringUtils } from '@/utils';
+import { DateTimeUtils, ListUtils, StringUtils } from '@/utils';
 
 @Component({ components: { DiDropdown, DiInputComponent, DiCustomModal, DynamicInputValue } })
 export default class ParameterModal extends Vue {
@@ -55,7 +55,7 @@ export default class ParameterModal extends Vue {
       id: ParamValueType.list
     }
   ];
-  private param: QueryParameter = defaultQueryParameter();
+  private param: QueryParameter = createQueryParameter();
   private callback: ((param: QueryParameter) => void) | null = null;
   private blacklistNames: Set<string> = new Set();
   @Ref()
@@ -76,7 +76,7 @@ export default class ParameterModal extends Vue {
   }
 
   private reset() {
-    this.param = defaultQueryParameter();
+    this.param = createQueryParameter();
     this.blacklistNames = new Set();
     this.displayNameError = '';
     this.callback = null;
@@ -104,7 +104,7 @@ export default class ParameterModal extends Vue {
       case ParamValueType.number:
         return 0;
       case ParamValueType.date:
-        return DateTimeFormatter.formatDateWithTime(moment().toDate(), '');
+        return DateTimeUtils.formatDate(moment().toDate());
     }
   }
 

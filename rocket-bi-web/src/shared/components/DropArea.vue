@@ -1,25 +1,11 @@
 <template>
-  <div class="drop-area">
+  <div class="drop-area" :disabled="disabled">
     <div v-if="showTitle" class="d-flex flex-row header align-items-center">
       <div v-once class="title unselectable">{{ title }}</div>
       <div v-if="isOptional" v-once class="subtitle unselectable">(optional)</div>
     </div>
-    <drop :class="{ active: isDragging }" @drop="handleDrop" class="body">
-      <template v-if="$slots['drop-area']">
-        <slot name="drop-area"></slot>
-      </template>
-      <template v-else>
-        <slot name="items"></slot>
-        <slot v-if="showPlaceHolder" name="default">
-          <div class="tutorial-drop">
-            <div v-once class="unselectable">
-              <img alt="drag" src="@/assets/icon/ic-drag.svg" /> {{ placeholder }} or
-              <a href="#" style="cursor: pointer;" @click="emitTooltip($event)">click here</a>{{ placeholder }} or
-              <b @click="emitTooltip($event)">click here</b>
-            </div>
-          </div>
-        </slot>
-      </template>
+    <drop :class="{ active: isDragging && !disabled }" @drop="handleDrop" class="body">
+      <slot name="drop-area"></slot>
     </drop>
   </div>
 </template>
@@ -38,20 +24,11 @@ export default class DropArea extends Vue {
   @Prop({ type: String, required: false, default: '' })
   private title!: string;
 
-  @Prop({ required: true, type: String })
-  private placeholder!: string;
-
   @Prop({ required: false, type: Boolean, default: true })
   private showTitle!: boolean;
 
   @Prop({ required: false, type: Boolean, default: true })
-  private showHelpIcon!: boolean;
-
-  @Prop({ required: false, type: Boolean, default: true })
-  private allowDrop!: boolean;
-
-  @Prop({ required: true, type: Boolean, default: true })
-  private showPlaceHolder!: boolean;
+  private canDrop!: boolean;
 
   @Prop({ required: false, type: Boolean, default: false })
   private isDragging!: boolean;
@@ -59,21 +36,15 @@ export default class DropArea extends Vue {
   @Prop({ type: Boolean, default: false })
   private isOptional!: boolean;
 
-  private handleAdd(data: any): void {
-    //
-    Log.debug('add::', data);
-  }
+  @Prop({ type: Boolean, default: false })
+  private disabled!: boolean;
 
   private handleDrop(data: DataFlavor<any>, event: MouseEvent): void {
     Log.debug('DropArea::handleDrop::');
     event.stopPropagation();
-    if (this.allowDrop && data && data.node) {
+    if (this.canDrop && data && data.node) {
       this.$emit('onDrop', data);
     }
-  }
-  @Emit('onClickTooltip')
-  private emitTooltip(event: MouseEvent) {
-    return event;
   }
 }
 </script>
@@ -81,6 +52,9 @@ export default class DropArea extends Vue {
 @import '~@/themes/scss/mixin.scss';
 
 .drop-area {
+  &[disabled] {
+    pointer-events: none;
+  }
   .header {
     .title {
       @include medium-text();

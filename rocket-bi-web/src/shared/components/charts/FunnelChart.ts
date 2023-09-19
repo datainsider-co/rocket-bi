@@ -24,7 +24,7 @@ export default class FunnelChart extends BaseHighChartWidget<SeriesTwoResponse, 
 
   constructor() {
     super();
-    const plotFunnelOptions: Highcharts.PlotFunnelOptions = this.createRightClickAsOptions('name');
+    const plotFunnelOptions: Highcharts.PlotSeriesOptions = this.createRightClickAsOptions('name');
     const tooltipFormatter = this.tooltipFormatter;
     const dataLabelsFormatter = this.dataLabelsFormatter;
     const manualOptions: Highcharts.Options = {
@@ -34,7 +34,7 @@ export default class FunnelChart extends BaseHighChartWidget<SeriesTwoResponse, 
       colors: this.setting.colors,
       plotOptions: {
         funnel: {
-          ...plotFunnelOptions,
+          ...(plotFunnelOptions as Highcharts.PlotFunnelOptions),
           dataLabels: {
             useHTML: true,
             formatter: function() {
@@ -175,12 +175,12 @@ export default class FunnelChart extends BaseHighChartWidget<SeriesTwoResponse, 
   }
 
   private tooltipFormatter(point: TooltipFormatterContextObject) {
-    const formattedValue = this.numberFormatter.format(point.y);
+    const formattedValue = this.numberFormatter.format(point.y as number);
     const name = point.series.name;
     const x = point.key;
     const color = point.color;
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="text-align: left; color: ${textColor}; font-family: ${fontFamily}">
                 <span>${name}</span></br>
                 <span style="color:${color}; padding-right: 5px;">●</span>${x}: <b>${formattedValue}</b>

@@ -6,7 +6,7 @@
           <div class="profile-filter-title">Filters ({{ filterQuantity }})</div>
           <vuescroll>
             <FadeTransition class="d-flex flex-wrap filter-listing-area" group>
-              <DynamicFilterPanel
+              <InternalFilterPanel
                 v-for="(filter, index) in filters"
                 :key="filter.id"
                 :id="genFilterId(index)"
@@ -17,7 +17,7 @@
                 @onRemove="removeFilterAt(index)"
                 @onValuesChanged="handleValuesChange(index)"
               >
-              </DynamicFilterPanel>
+              </InternalFilterPanel>
             </FadeTransition>
           </vuescroll>
         </div>
@@ -28,22 +28,22 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Ref, Vue } from 'vue-property-decorator';
-import DynamicFilterPanel from '@/shared/components/filters/dynamic-filter-panel/DynamicFilterPanel.vue';
-import { DynamicFilter } from '@core/common/domain/model';
+import InternalFilterPanel from '@/shared/components/filters/dynamic-filter-panel/InternalFilterPanel.vue';
+import { InternalFilter } from '@core/common/domain/model';
 import { ListUtils } from '@/utils';
 import { CollapseTransition, FadeTransition } from 'vue2-transitions';
 import { IdGenerator } from '@/utils/IdGenerator';
 
 @Component({
   components: {
-    DynamicFilterPanel,
+    InternalFilterPanel,
     CollapseTransition,
     FadeTransition
   }
 })
 export default class FilterBar extends Vue {
   @Prop({ required: true, type: Array })
-  private readonly filters!: DynamicFilter[];
+  private readonly filters!: InternalFilter[];
 
   @Ref()
   private readonly containerRef!: HTMLElement;
@@ -66,12 +66,12 @@ export default class FilterBar extends Vue {
   }
 
   @Emit('onApplyFilter')
-  private applyFilterAt(index: number): DynamicFilter {
+  private applyFilterAt(index: number): InternalFilter {
     return this.filters[index];
   }
 
   @Emit('onStatusChange')
-  private handleStatusChange(index: number, isEnable: boolean): DynamicFilter {
+  private handleStatusChange(index: number, isEnable: boolean): InternalFilter {
     return this.filters[index];
   }
 

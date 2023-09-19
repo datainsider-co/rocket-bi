@@ -3,7 +3,7 @@
  * @created: 5/30/21, 9:42 PM
  */
 
-import { ChartFamilyType, DisplayTableType, TableColumn, TableOptionData, VizSettingType } from '@core/common/domain/model';
+import { DisplayTableType, TableColumn, TableOptionData, ChartOptionClassName } from '@core/common/domain/model';
 import { Scrollable } from '@core/common/domain/model/query/features/Scrollable';
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
 import { get } from 'lodash';
@@ -13,8 +13,7 @@ import { FormatterSetting } from './FormatterSetting';
 import { ConditionalFormattingUtils } from '@core/utils/ConditionalFormattingUtils';
 
 export class FlattenTableChartOption extends ChartOption<TableOptionData> implements Scrollable, FormatterSetting {
-  chartFamilyType = ChartFamilyType.FlattenTable;
-  className = VizSettingType.FlattenTableSetting;
+  className = ChartOptionClassName.FlattenTableSetting;
 
   constructor(options: TableOptionData = {}) {
     super(options);
@@ -25,33 +24,15 @@ export class FlattenTableChartOption extends ChartOption<TableOptionData> implem
   }
 
   static isTableSetting(setting: any): setting is FlattenTableChartOption {
-    return setting.className === VizSettingType.FlattenTableSetting;
+    return setting.className === ChartOptionClassName.FlattenTableSetting;
   }
 
   static getDefaultChartOption(title = 'Untitled Chart'): FlattenTableChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const gridColor = this.getTableGridLineColor();
     const options: TableOptionData = {
-      title: {
-        align: 'center',
-        enabled: true,
-        text: title,
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle({ title: title }),
+      subtitle: ChartOption.getDefaultSubtitle(),
       grid: {
         horizontal: {
           color: gridColor,
@@ -71,9 +52,9 @@ export class FlattenTableChartOption extends ChartOption<TableOptionData> implem
       },
       affectedByFilter: true,
       tooltip: {
-        fontFamily: 'Roboto',
+        fontFamily: ChartOption.getSecondaryFontFamily(),
         backgroundColor: 'var(--tooltip-background-color)',
-        valueColor: textColor
+        valueColor: ChartOption.getSecondaryTextColor()
       },
       value: {
         color: textColor,
@@ -83,8 +64,7 @@ export class FlattenTableChartOption extends ChartOption<TableOptionData> implem
         alternateColor: textColor,
         enableUrlIcon: false,
         style: {
-          color: textColor,
-          fontFamily: 'Roboto',
+          ...ChartOption.getSecondaryStyle(),
           fontSize: '12px',
           isWordWrap: false
         }
@@ -98,7 +78,9 @@ export class FlattenTableChartOption extends ChartOption<TableOptionData> implem
         style: {
           color: textColor,
           isWordWrap: false,
-          fontFamily: 'Roboto',
+          fontFamily: ChartOption.getPrimaryFontFamily(),
+          fontWeight: ChartOption.getPrimaryFontWeight(),
+          fontStyle: ChartOption.getPrimaryFontStyle(),
           fontSize: '12px'
         }
       },
@@ -126,5 +108,9 @@ export class FlattenTableChartOption extends ChartOption<TableOptionData> implem
 
   getFormatters(): TableColumn[] {
     return this.options.conditionalFormatting ? ConditionalFormattingUtils.buildTableColumns(this.options.conditionalFormatting) : [];
+  }
+
+  isEnableControl(): boolean {
+    return false;
   }
 }

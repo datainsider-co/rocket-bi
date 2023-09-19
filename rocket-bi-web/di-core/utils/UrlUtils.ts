@@ -33,7 +33,7 @@ export abstract class UrlUtils {
         width="1280"
         height="720"
         src="${source}"
-        title="Data Insider Dashboard"
+        title="RocketBI Dashboard"
         frameborder="0"
        ></iframe>`;
   }

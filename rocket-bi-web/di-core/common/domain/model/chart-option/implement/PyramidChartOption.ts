@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionData, SeriesOptionData, ChartOptionClassName } from '@core/common/domain/model';
 
 export class PyramidChartOption extends ChartOption<SeriesOptionData> {
   static readonly DEFAULT_SETTING = {
@@ -19,8 +19,8 @@ export class PyramidChartOption extends ChartOption<SeriesOptionData> {
       }
     }
   };
-  readonly chartFamilyType = ChartFamilyType.Pyramid;
-  readonly className = VizSettingType.PyramidSetting;
+
+  readonly className = ChartOptionClassName.PyramidSetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);
@@ -31,7 +31,7 @@ export class PyramidChartOption extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(): PyramidChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const options: SeriesOptionData = {
       legend: {
         enabled: false,
@@ -48,32 +48,11 @@ export class PyramidChartOption extends ChartOption<SeriesOptionData> {
           }
         }
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       },
       plotOptions: {
         pyramid: {
@@ -89,55 +68,6 @@ export class PyramidChartOption extends ChartOption<SeriesOptionData> {
       themeColor: { enabled: true },
       center: ['40%', '50%'],
       width: '80%',
-      // tooltip: {
-      //   fontFamily: 'Roboto',
-      //   backgroundColor: '#333645',
-      //   valueColor: '#FFFFFF'
-      // },
-      // value: {
-      //   color: '#ffffffcc',
-      //   backgroundColor: '#0000001A',
-      //   align: 'left',
-      //   alternateBackgroundColor: '#00000033',
-      //   alternateColor: '#ffffffcc',
-      //   enableUrlIcon: false,
-      //   style: {
-      //     color: '#ffffffcc',
-      //     fontFamily: 'Roboto',
-      //     fontSize: '12px',
-      //     isWordWrap: false
-      //   }
-      // },
-      // header: {
-      //   align: 'left',
-      //   backgroundColor: '#0000004D',
-      //   color: '#FFFFFFCC',
-      //   isWordWrap: false,
-      //   isAutoWidthSize: false,
-      //   style: {
-      //     color: '#FFFFFFCC',
-      //     isWordWrap: false,
-      //     fontFamily: 'Roboto',
-      //     fontSize: '12px'
-      //   }
-      // },
-      // total: {
-      //   enabled: true,
-      //   backgroundColor: '#00000033',
-      //   label: {
-      //     text: 'Total',
-      //     enabled: true,
-      //     align: 'left',
-      //     isWordWrap: false,
-      //     backgroundColor: '#2f3240',
-      //     style: {
-      //       fontFamily: 'Roboto',
-      //       fontSize: '12px',
-      //       color: '#FFFFFFCC',
-      //       isWordWrap: false
-      //     }
-      //   }
-      // },
       background: this.getThemeBackgroundColor()
     };
     return new PyramidChartOption(options);

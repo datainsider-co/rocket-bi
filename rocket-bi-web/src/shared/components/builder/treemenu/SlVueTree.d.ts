@@ -1,4 +1,6 @@
 import Vue from 'vue';
+import { Field } from '@core/common/domain';
+
 export interface SlTreeNodeModel<TDataType> {
   title: string;
   isLeaf?: boolean;
@@ -10,6 +12,16 @@ export interface SlTreeNodeModel<TDataType> {
   data?: TDataType;
   tag?: object;
   isNested?: boolean;
+  field?: Field;
+  /**
+   * icon component name, refer it than iconSrc
+   */
+  icon?: string;
+  /**
+   * icon as image url, it will be ignored if icon is set
+   * it will render as <img src="iconSrc" />
+   */
+  iconSrc?: string;
 }
 export interface SlTreeNode<TDataType> extends SlTreeNodeModel<TDataType> {
   isVisible?: boolean;

@@ -1,6 +1,6 @@
 <template>
   <div class="tiktok-auth px-3">
-    <h3>DataInsider.co requires authorization to connect to your tiktok ads account</h3>
+    <h3>RocketBI requires authorization to connect to your tiktok ads account</h3>
     <DiButton id="tiktok-btn" class="access-tik-tok-btn" primary title="Access to Tiktok Account" @click="authentication">
       <i v-if="loading" class="fa fa-spin fa-spinner"></i>
       <img alt="tiktok-logo" v-else src="@/assets/icon/ic_tiktok.svg" height="22" width="22" />

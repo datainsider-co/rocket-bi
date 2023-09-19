@@ -19,18 +19,14 @@ import VisualizeSelectionModal from '@/screens/chart-builder/config-builder/char
 import { DataBuilderConstantsV35, VisualizationItemData } from '@/shared';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import ChartBuilderModal, { TChartBuilderOptions } from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderModal.vue';
-import { ChartInfo, DatabaseInfo, Position, TabControl } from '@core/common/domain';
+import { ChartInfo, DatabaseInfo, Position, ChartControl } from '@core/common/domain';
 import { DashboardControllerModule, DashboardModule, FilterModule, QuerySettingModule, WidgetModule } from '@/screens/dashboard-detail/stores';
 import { ChartInfoUtils, PositionUtils } from '@/utils';
 import { ZoomModule } from '@/store/modules/ZoomStore';
 import { Log } from '@core/utils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Track } from '@/shared/anotation';
-import {
-  ChartBuilderConfig,
-  ControlBuilderConfig,
-  DefaultChartBuilderConfig
-} from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderConfig';
+import { ChartBuilderConfig, DefaultChartBuilderConfig } from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderConfig';
 import { cloneDeep } from 'lodash';
 
 @Component({
@@ -101,20 +97,20 @@ export default class ChartBuilderComponent extends Vue {
     onCompleted: (chartInfo: ChartInfo) => Promise<void>;
     onCancel?: () => void;
     config?: ChartBuilderConfig;
-    tabControls?: TabControl[];
+    chartControls?: ChartControl[];
   }) {
     if (!options.onCompleted) {
       Log.debug('option onCompleted in showModal must be not null');
       return;
     }
-    const { chart, database, selectedTables, onCompleted, onCancel, config, tabControls } = options;
+    const { chart, database, selectedTables, onCompleted, onCancel, config, chartControls } = options;
     this.callBack = onCompleted || null;
     this.cancelCallBack = onCancel || null;
     this.options = {
       database: database,
       selectedTables: selectedTables,
       config: config,
-      tabControls: tabControls
+      chartControls: chartControls
     };
     // Update
     if (chart) {
@@ -191,7 +187,7 @@ export default class ChartBuilderComponent extends Vue {
   private async onUpdateChart(chartInfo: ChartInfo) {
     await WidgetModule.handleUpdateWidget(chartInfo);
     WidgetModule.setWidget({ widgetId: chartInfo.id, widget: chartInfo });
-    ZoomModule.registerZoomData(chartInfo);
+    ZoomModule.registerZoomData({ id: chartInfo.id, setting: chartInfo.setting });
     FilterModule.setAffectFilterWidget(chartInfo);
     QuerySettingModule.setQuerySetting({ id: chartInfo.id, query: chartInfo.setting });
     await FilterModule.addFilterWidget(chartInfo);

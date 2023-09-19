@@ -9,7 +9,12 @@
       @onChanged="handleSettingChanged"
       @onMultipleChanged="handleMultipleSettingChanged"
     />
-    <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab
+      :color="setting.options.background"
+      :default-color="defaultBackgroundColor"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <TooltipTab :setting="setting.options.tooltip" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <VisualHeader :widget-type="currentWidget" :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
@@ -17,14 +22,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import {
-  ChartInfo,
-  GenericChartQuerySetting,
-  PieChartOption,
-  PieQuerySetting,
-  SettingKey,
-  VariablepieChartOption
-} from '@core/common/domain';
+import { ChartInfo, ChartOption, GenericChartQuerySetting, PieChartOption, PieQuerySetting, SettingKey, VariablepieChartOption } from '@core/common/domain';
 import LegendTab from '@/shared/settings/series-chart/LegendTab.vue';
 import { Log } from '@core/utils';
 import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
@@ -65,6 +63,10 @@ export default class VariablepieSetting extends Vue {
   }
   private get currentWidget(): ChartType {
     return _ConfigBuilderStore.chartType as ChartType;
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

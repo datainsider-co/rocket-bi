@@ -19,7 +19,7 @@ import { GoogleAdsJob, SyncMode } from '@core/data-ingestion';
 import DynamicSuggestionInput from './DynamicSuggestionInput.vue';
 import DiInputComponent from '@/shared/components/DiInputComponent.vue';
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
-import { DateTimeFormatter } from '@/utils';
+import { DateTimeUtils } from '@/utils';
 import { Log } from '@core/utils';
 
 @Component({
@@ -28,7 +28,7 @@ import { Log } from '@core/utils';
 export default class GoogleAdsSyncModeConfig extends Vue {
   private readonly syncMode = SyncMode;
   private readonly MIN_LAST_SYNC_VALUE: Date = new Date(2019, 0, 1);
-  private static readonly DEFAULT_LAST_SYNC_VALUE: string = DateTimeFormatter.formatDateWithTime(new Date(2019, 0, 1), '');
+  private static readonly DEFAULT_LAST_SYNC_VALUE: string = DateTimeUtils.formatDate(new Date(2019, 0, 1));
   private static readonly DEFAULT_COLUMN_SYNC_VALUE: string = 'segments.date';
   private incrementalValueError = '';
 
@@ -70,7 +70,7 @@ export default class GoogleAdsSyncModeConfig extends Vue {
   }
 
   private set lastSyncValueAsDate(date: Date) {
-    this.syncJob.lastSyncedValue = DateTimeFormatter.formatDateWithTime(date, '');
+    this.syncJob.lastSyncedValue = DateTimeUtils.formatDate(date);
   }
 }
 </script>

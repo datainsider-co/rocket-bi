@@ -23,5 +23,6 @@ export enum DataSourceType {
   Shopify = 'Shopify',
   S3 = 'S3',
   Facebook = 'Facebook',
-  Palexy = 'Palexy'
+  Palexy = 'Palexy',
+  GoogleSearchConsole = 'GoogleSearchConsole'
 }

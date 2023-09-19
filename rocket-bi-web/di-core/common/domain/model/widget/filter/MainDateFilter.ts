@@ -1,9 +1,16 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { FilterRequest } from '@core/common/domain';
 import { Field, MainDateMode } from '@core/common/domain/model';
 
+/**
+ * @deprecated use MainDateFilter2 instead of this
+ */
 export class MainDateFilter {
   affectedField: Field;
   mode?: MainDateMode;
+  /**
+   * Filter to apply boost mode
+   */
   filterRequest?: FilterRequest;
 
   constructor(affectedField: Field, mode?: MainDateMode, filterRequest?: FilterRequest) {

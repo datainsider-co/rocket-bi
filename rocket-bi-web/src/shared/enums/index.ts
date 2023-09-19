@@ -10,7 +10,6 @@ export * from './DefaultPaging';
 export * from './Direction';
 export * from './DisplayOption';
 export * from './DropMode';
-export * from './FilterComponentType';
 export * from './LabelFormatter';
 export * from './LabelPosition';
 export * from './Routers';

@@ -53,19 +53,19 @@
 <script lang="ts">
 import { Component, Vue, Prop, PropSync } from 'vue-property-decorator';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
-import { FilterPanel, TabWidget, TabWidgetOptions } from '@core/common/domain';
+import { GroupFilter, TabWidget, TabWidgetOptions } from '@core/common/domain';
 import { set } from 'lodash';
-import { FontFamilyOptions, FontSizeOptions } from '@/shared/settings/common/options';
+import { FontFamilyOptions, SecondaryFontSizeOptions } from '@/shared/settings/common/options';
 
 @Component({ components: { PanelHeader } })
 export default class FilterPanelFooterTab extends Vue {
-  readonly fontSizeOptions = FontSizeOptions;
+  readonly fontSizeOptions = SecondaryFontSizeOptions;
   readonly fontOptions = FontFamilyOptions;
 
   @PropSync('widget')
   tab!: TabWidget;
   private get defaultSetting(): TabWidgetOptions {
-    return FilterPanel.defaultSetting();
+    return GroupFilter.defaultSetting();
   }
   private handleAlignChanged(align: string) {
     set(this.tab, 'extraData.footer.align', align);

@@ -31,7 +31,7 @@ export default class PyramidChart extends BaseHighChartWidget<SeriesTwoResponse,
       colors: this.setting.colors,
       plotOptions: {
         pyramid: {
-          ...this.createRightClickAsOptions('name'),
+          ...(this.createRightClickAsOptions('name') as Highcharts.PlotPyramidOptions),
           center: ['40%', '50%'],
           width: '80%',
           dataLabels: {
@@ -168,12 +168,12 @@ export default class PyramidChart extends BaseHighChartWidget<SeriesTwoResponse,
   }
 
   private tooltipFormatter(point: TooltipFormatterContextObject) {
-    const formattedValue = this.numberFormatter.format(point.y);
+    const formattedValue = this.numberFormatter.format(point.y as number);
     const name = point.series.name;
     const x = point.key;
     const color = point.color;
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="text-align: left; color: ${textColor}; font-family: ${fontFamily}">
                 <span>${x}</span></br>
                 <span style="color:${color}; padding-right: 5px;">●</span>${name}: <b>${formattedValue}</b>

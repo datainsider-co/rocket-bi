@@ -4,11 +4,9 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionClassName, ChartOptionData, SeriesOptionData } from '@core/common/domain/model';
 import { MapUtils, MetricNumberMode } from '@/utils';
-import { cloneDeep, toNumber } from 'lodash';
-
-const deleteProperty = Reflect.deleteProperty;
+import { toNumber } from 'lodash';
 
 export class BellCurveChartOption extends ChartOption<SeriesOptionData> {
   static readonly DEFAULT_SETTING = {
@@ -44,8 +42,8 @@ export class BellCurveChartOption extends ChartOption<SeriesOptionData> {
       }
     ]
   };
-  chartFamilyType = ChartFamilyType.BellCurve;
-  className = VizSettingType.BellCurveSetting;
+
+  className = ChartOptionClassName.BellCurveSetting;
   baseTypes: Record<string, number>;
 
   constructor(options: ChartOptionData = {}, baseTypes: {} = {}) {
@@ -106,8 +104,8 @@ export class BellCurveChartOption2 extends ChartOption<SeriesOptionData> {
     //   }
     // ]
   };
-  chartFamilyType = ChartFamilyType.BellCurve;
-  className = VizSettingType.BellCurve2Setting;
+
+  className = ChartOptionClassName.BellCurve2Setting;
   baseTypes: Record<string, number>;
 
   constructor(options: ChartOptionData = {}, baseTypes: {} = {}) {
@@ -125,7 +123,7 @@ export class BellCurveChartOption2 extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(): BellCurveChartOption2 {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const options: SeriesOptionData = {
       legend: {
         enabled: true,
@@ -142,26 +140,8 @@ export class BellCurveChartOption2 extends ChartOption<SeriesOptionData> {
           }
         }
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       affectedByFilter: true,
       background: this.getThemeBackgroundColor(),
       xAxis: [
@@ -241,9 +221,7 @@ export class BellCurveChartOption2 extends ChartOption<SeriesOptionData> {
             enabled: false,
             displayUnit: MetricNumberMode.None,
             style: {
-              color: textColor,
-              fontSize: '11px',
-              fontFamily: 'Roboto',
+              ...ChartOption.getSecondaryStyle(),
               textOutline: 0
             }
           }
@@ -251,10 +229,7 @@ export class BellCurveChartOption2 extends ChartOption<SeriesOptionData> {
       },
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       }
     };
     return new BellCurveChartOption2(options);

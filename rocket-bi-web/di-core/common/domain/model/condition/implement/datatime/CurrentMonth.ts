@@ -3,15 +3,10 @@
  * @created: 5/29/21, 4:19 PM
  */
 
-/*
- * @author: tvc12 - Thien Vi
- * @created: 5/29/21, 4:09 PM
- */
-
 import { ConditionType, Field, FilterMode, ScalarFunction } from '@core/common/domain/model';
 import { FieldRelatedCondition } from '@core/common/domain/model/condition/FieldRelatedCondition';
 
-import { ConditionData, ConditionFamilyTypes, DateHistogramConditionTypes, InputType } from '@/shared';
+import { ConditionData, DateHistogramConditionTypes, InputType } from '@/shared';
 import { getScalarFunction } from '@core/utils/FunctionDataUtils';
 import { ValueCondition } from '@core/common/domain/model/condition/ValueCondition';
 import { DateRelatedCondition } from '@core/common/domain/model/condition/DateRelatedCondition';
@@ -32,24 +27,12 @@ export class CurrentMonth extends FieldRelatedCondition implements ValueConditio
     return new CurrentMonth(field, getScalarFunction(obj.scalarFunction), getScalarFunction(obj.intervalFunction));
   }
 
-  assignValue() {
-    // do nothing
-  }
-
   getValues(): string[] {
     return [];
   }
 
   setValues(values: string[]) {
     //
-  }
-
-  isDateCondition(): boolean {
-    return true;
-  }
-
-  getConditionTypes(): string[] {
-    return [ConditionFamilyTypes.dateHistogram, DateHistogramConditionTypes.currentMonth];
   }
 
   toConditionData(groupId: number): ConditionData {
@@ -66,11 +49,12 @@ export class CurrentMonth extends FieldRelatedCondition implements ValueConditio
       firstValue: void 0,
       secondValue: void 0,
       allValues: this.getValues(),
-      currentInputType: InputType.none,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.None,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: DateHistogramConditionTypes.currentMonth
     };
   }
+
   toString() {
     return 'current month';
   }

@@ -6,7 +6,7 @@
 import { ConditionType, Field, FilterMode, ScalarFunction } from '@core/common/domain/model';
 import { ValueCondition } from '@core/common/domain/model/condition/ValueCondition';
 import { ConditionUtils, getScalarFunction } from '@core/utils';
-import { ConditionData, ConditionFamilyTypes, InputType, StringConditionTypes } from '@/shared';
+import { ConditionData, InputType, StringConditionTypes } from '@/shared';
 import { FieldRelatedCondition } from '@core/common/domain/model/condition/FieldRelatedCondition';
 import { ListUtils, RandomUtils, SchemaUtils } from '@/utils';
 import { DIException } from '@core/common/domain';
@@ -26,10 +26,6 @@ export class NotLikeCaseInsensitive extends FieldRelatedCondition implements Val
     return new NotLikeCaseInsensitive(field, value, getScalarFunction(obj.scalarFunction));
   }
 
-  assignValue(value: string) {
-    this.value = value;
-  }
-
   getValues(): string[] {
     return [this.value];
   }
@@ -39,10 +35,6 @@ export class NotLikeCaseInsensitive extends FieldRelatedCondition implements Val
       throw new DIException('Value is require!');
     }
     this.value = values[0];
-  }
-
-  getConditionTypes(): string[] {
-    return [ConditionFamilyTypes.string, StringConditionTypes.notLikeCaseInsensitive];
   }
 
   toConditionData(groupId: number): ConditionData {
@@ -59,8 +51,8 @@ export class NotLikeCaseInsensitive extends FieldRelatedCondition implements Val
       firstValue: ListUtils.getHead(this.getValues()),
       secondValue: this.getValues()[1],
       allValues: this.getValues(),
-      currentInputType: InputType.text,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.Text,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: StringConditionTypes.notLikeCaseInsensitive
     };
   }

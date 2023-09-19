@@ -30,7 +30,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import DiInputComponent2 from '@/screens/login-v2/components/DiInputComponent2.vue';
 import { email, required } from 'vuelidate/lib/validators';
 import DiIconTextButton from '@/shared/components/common/DiIconTextButton.vue';
-import { AtomicAction } from '@/shared/anotation';
+import { AtomicAction } from '@core/common/misc';
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { PopupUtils } from '@/utils';
 

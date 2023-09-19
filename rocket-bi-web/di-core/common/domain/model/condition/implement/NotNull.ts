@@ -35,8 +35,8 @@ export class NotNull extends FieldRelatedCondition {
       firstValue: void 0,
       secondValue: void 0,
       allValues: [],
-      currentInputType: InputType.text,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.Text,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: StringConditionTypes.notNull
     };
   }

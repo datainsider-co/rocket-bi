@@ -1,21 +1,22 @@
 package co.datainsider.jobworker.domain
 
+import co.datainsider.jobworker.domain.DataDestination.DataDestination
+import co.datainsider.jobworker.domain.HubspotObjectType.HubspotObjectType
+import co.datainsider.jobworker.domain.Ids.SourceId
+import co.datainsider.jobworker.domain.JobStatus.JobStatus
+import co.datainsider.jobworker.domain.JobType.JobType
+import co.datainsider.jobworker.domain.SyncMode.SyncMode
 import co.datainsider.jobworker.util.JsonUtils
-import DataDestination.DataDestination
-import Ids.SourceId
-import JobStatus.JobStatus
-import JobType.JobType
-import SyncMode.SyncMode
 
 /**
   * Created by phg on 7/4/21.
- **/
+  */
 case class HubspotJob(
     orgId: Long,
     jobId: Int = 0,
     jobType: JobType = JobType.Hubspot,
     syncMode: SyncMode,
-    subType: HubspotSubJobType.Type = HubspotSubJobType.Contact,
+    subType: HubspotObjectType = HubspotObjectType.Contact,
     sourceId: SourceId,
     lastSuccessfulSync: Long,
     syncIntervalInMn: Int,
@@ -69,11 +70,9 @@ case class HubspotJob(
   }
 }
 
-object HubspotSubJobType extends Enumeration {
-  type Type = Value
-  val Contact: Type = Value("contact")
-  val Engagement: Type = Value("engagement")
-  val Company: Type = Value("company")
-  val Deal: Type = Value("deal")
-  val Unknown: Type = Value("unknown")
+object HubspotObjectType extends Enumeration {
+  type HubspotObjectType = Value
+  val Contact: HubspotObjectType = Value("contacts")
+  val Company: HubspotObjectType = Value("companies")
+  val Deal: HubspotObjectType = Value("deals")
 }

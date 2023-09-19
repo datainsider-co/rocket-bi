@@ -8,7 +8,12 @@
       @onMultipleChanged="handleMultipleSettingChanged"
       @onDefaultChanged="handleDefaultValueChanged"
     />
-    <BackgroundTab v-if="enableTitleSetting" :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab
+      v-if="enableTitleSetting"
+      :setting="setting.options.background"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <VisualHeader :setting="setting.options" :widget-type="currentWidget" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
 </template>
@@ -16,7 +21,7 @@
 <script lang="ts">
 import { isArray } from 'lodash';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { ChartInfo, FilterRequest, SettingKey, TabFilterOption, TabFilterQuerySetting } from '@core/common/domain';
+import { ChartInfo, ChartOption, FilterRequest, SettingKey, TabFilterOption, TabFilterQuerySetting } from '@core/common/domain';
 import BackgroundTab from '@/shared/settings/common/tabs/BackgroundTab.vue';
 import TabFilterControlTab from '@/shared/settings/tab-filter-setting/TabFilterControlTab.vue';
 import FilterTitleTab from '@/shared/settings/tab-filter-setting/FilterTitleTab.vue';
@@ -81,6 +86,10 @@ export default class TabFilterSetting extends Vue {
     // } else {
     //   //Nothing to do
     // }
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

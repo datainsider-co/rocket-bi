@@ -1,4 +1,4 @@
-import { PaymentInfo } from '@core/billing';
+import { PaymentInfo } from '@core/billing/domain/PaymentInfo';
 
 export class License {
   constructor(public key: string, public expired: boolean, public paymentInfo?: PaymentInfo, public createdAt?: number, public expiredAt?: number) {}

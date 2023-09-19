@@ -26,8 +26,4 @@ export class NotEqualField extends Condition {
     const rightField = Field.fromObject(obj.rightField);
     return new NotEqualField(leftField, rightField);
   }
-
-  assignValue(rightField: Field) {
-    this.rightField = rightField;
-  }
 }

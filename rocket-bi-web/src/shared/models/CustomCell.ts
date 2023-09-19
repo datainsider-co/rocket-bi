@@ -68,6 +68,8 @@ export interface HeaderData {
   customRenderBodyCell?: CustomCell;
   customRenderHeader?: CustomHeader;
   hiddenInMobile?: boolean;
+  disabledFormatBodyCell?: boolean;
+  disabledFormatFooterCell?: boolean;
 }
 
 export interface IndexedData {
@@ -96,6 +98,8 @@ export class IndexedHeaderData implements HeaderData, IndexedData {
   formatters?: HeaderData[];
   customRenderBodyCell?: CustomCell;
   customRenderHeader?: CustomHeader;
+  disabledFormatBodyCell?: boolean;
+  disabledFormatFooterCell?: boolean;
 
   constructor(headerData: HeaderData, indexedData: IndexedData, children?: IndexedHeaderData[], parent?: IndexedHeaderData) {
     this.colSpan = indexedData.colSpan;
@@ -117,6 +121,8 @@ export class IndexedHeaderData implements HeaderData, IndexedData {
     this.formatters = headerData.formatters;
     this.customRenderBodyCell = headerData.customRenderBodyCell;
     this.customRenderHeader = headerData.customRenderHeader;
+    this.disabledFormatBodyCell = headerData.disabledFormatBodyCell;
+    this.disabledFormatFooterCell = headerData.disabledFormatFooterCell;
   }
 
   getRowIndexEnd(): number {
@@ -146,6 +152,8 @@ export class IndexedHeaderData implements HeaderData, IndexedData {
     formatters?: HeaderData[];
     customRenderBodyCell?: CustomCell;
     customRenderHeader?: CustomHeader;
+    disabledFormatBodyCell?: boolean;
+    disabledFormatFooterCell?: boolean;
   }): IndexedHeaderData {
     return new IndexedHeaderData(
       {
@@ -160,7 +168,9 @@ export class IndexedHeaderData implements HeaderData, IndexedData {
         formatterKey: obj.formatterKey ?? this.formatterKey,
         formatters: obj.formatters ?? this.formatters,
         customRenderBodyCell: obj.customRenderBodyCell ?? this.customRenderBodyCell,
-        customRenderHeader: obj.customRenderHeader ?? this.customRenderHeader
+        customRenderHeader: obj.customRenderHeader ?? this.customRenderHeader,
+        disabledFormatBodyCell: obj.disabledFormatBodyCell ?? this.disabledFormatBodyCell,
+        disabledFormatFooterCell: obj.disabledFormatFooterCell ?? this.disabledFormatFooterCell
       },
       {
         rowSpan: obj.rowSpan ?? this.rowSpan,

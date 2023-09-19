@@ -1,4 +1,13 @@
-import { DataSourceType, FacebookAdsJob, GoogleAdsJob, GoogleAdsSourceInfo, PalexyJob, S3Job, TiktokAdsJob } from '@core/data-ingestion';
+import {
+  DataSourceType,
+  FacebookAdsJob,
+  GoogleAdsJob,
+  GoogleAdsSourceInfo,
+  GoogleSearchConsoleJob,
+  PalexyJob,
+  S3Job,
+  TiktokAdsJob
+} from '@core/data-ingestion';
 import { GoogleAnalyticJob } from '@core/data-ingestion/domain/job/google-analytic/GoogleAnalyticJob';
 
 import { JobName } from '@core/data-ingestion/domain/job/JobName';
@@ -92,6 +101,8 @@ export abstract class Job {
         return TiktokAdsJob.fromObject(obj);
       case JobName.PalexyJob:
         return PalexyJob.fromObject(obj);
+      case JobName.GoogleSearchConsoleJob:
+        return GoogleSearchConsoleJob.fromObject(obj);
       default:
         return UnsupportedJob.fromObject(obj);
     }
@@ -188,6 +199,8 @@ export abstract class Job {
         return 'ic_tiktok_ads_small.svg';
       case JobName.PalexyJob:
         return 'ic_palexy_small.svg';
+      case JobName.GoogleSearchConsoleJob:
+        return 'ic_google_search_console_small.svg';
       default:
         return 'ic_default.svg';
     }
@@ -228,6 +241,10 @@ export abstract class Job {
 
   static isGoogleAnalytic4Job(job: Job): boolean {
     return job.className === JobName.GA4Job;
+  }
+
+  static isGoogleSearchConsoleConfig(job: Job): boolean {
+    return job.className === JobName.GoogleSearchConsoleJob;
   }
 
   static isGoogleSheetJob(job: Job): boolean {
@@ -288,6 +305,7 @@ export class JobInfo {
       case JobName.S3Job:
       case JobName.GA4Job:
       case JobName.PalexyJob:
+      case JobName.GoogleSearchConsoleJob:
         return DataSourceInfo.fromDataSource(obj.source);
       case JobName.GoogleAdsJob:
         return GoogleAdsSourceInfo.default();

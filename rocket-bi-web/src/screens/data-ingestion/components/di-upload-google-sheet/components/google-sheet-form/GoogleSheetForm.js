@@ -14,6 +14,7 @@ import { SchedulerOnce } from '@/screens/data-ingestion/components/job-scheduler
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { TimeScheduler } from '@/screens/data-ingestion/components/job-scheduler-form/scheduler-time/TimeScheduler';
+import { AtomicAction } from '@core/common/misc';
 
 export default {
   name: 'GoogleSheetForm',
@@ -255,7 +256,7 @@ export default {
             this.value.accessToken,
             this.value.refreshToken
           );
-          const jobInfo = await JobModule.create(job);
+          await JobModule.create(job);
           DiUploadGoogleSheetActions.hideUploadGoogleSheet();
           await this.$router.push({ name: Routers.Job });
           TrackingUtils.track(TrackEvents.CreateGoogleSheetJob, {

@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionData, SeriesOptionData, ChartOptionClassName } from '@core/common/domain/model';
 
 export class PieChartOption extends ChartOption<SeriesOptionData> {
   static readonly DEFAULT_SETTING = {
@@ -26,8 +26,8 @@ export class PieChartOption extends ChartOption<SeriesOptionData> {
       }
     }
   };
-  readonly chartFamilyType = ChartFamilyType.Pie;
-  readonly className = VizSettingType.PieSetting;
+
+  readonly className = ChartOptionClassName.PieSetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);
@@ -38,7 +38,7 @@ export class PieChartOption extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(): PieChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const options: SeriesOptionData = {
       legend: {
         enabled: true,
@@ -55,34 +55,13 @@ export class PieChartOption extends ChartOption<SeriesOptionData> {
           }
         }
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
       themeColor: { enabled: true },
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       plotOptions: {
         pie: {
           dataLabels: {

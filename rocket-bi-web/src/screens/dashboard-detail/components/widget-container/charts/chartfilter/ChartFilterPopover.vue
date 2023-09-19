@@ -89,7 +89,7 @@ export default class ChartFilterPopover extends Vue {
   }
 
   private get displayAsTab(): boolean {
-    return (this.metaData.chartFilter!.setting.getChartOption() as TabFilterOption)?.options?.displayAs === TabFilterDisplay.normal;
+    return (this.metaData.chartFilter!.setting.getChartOption() as TabFilterOption)?.options?.displayAs === TabFilterDisplay.Normal;
   }
 
   private isSelected(item: SelectOption) {

@@ -119,7 +119,6 @@ export class TrackingServiceImpl extends TrackingService {
 
     properties['action'] = data.action;
     properties['widget_type'] = data.widgetType || '';
-    properties['chart_family_type'] = data.chartFamilyType || '';
     properties['chart_type'] = data.chartType || '';
     properties['widget_id'] = data.widgetId || 0;
     properties['widget_name'] = data.widgetName || '';
@@ -137,7 +136,7 @@ export class TrackingServiceImpl extends TrackingService {
       await DiAnalytics.track(event, properties).catch(error => {
         Log.debug(`Analytics Tracking ::${event}`, error);
       });
-      Log.debug(`track ::${event}`, properties);
+      // Log.debug(`track ::${event}`, properties);
 
       window.dataLayer.push({ event: event, properties: properties });
     } catch (e) {

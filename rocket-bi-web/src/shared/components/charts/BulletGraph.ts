@@ -202,13 +202,13 @@ export default class BulletGraph extends BaseHighChartWidget<SeriesOneResponse, 
   }
 
   private tooltipFormatter(contextObject: TooltipFormatterContextObject) {
-    const formattedData = this.numberFormatter.format(contextObject.y);
+    const formattedData = this.numberFormatter.format(contextObject.y as number);
     const tooltipLabel = contextObject.series.name;
     const pointColor = contextObject.color;
     //@ts-ignore
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
     //@ts-ignore
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="color: ${textColor}; font-family: ${fontFamily}">
 <!--                <span style="color:${pointColor}">●</span>-->
                 ${tooltipLabel}: <b>${formattedData}</b><br/>

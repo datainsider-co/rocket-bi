@@ -26,7 +26,7 @@ export class DefaultPivotTableBodyStyleRender implements TableBodyStyleRender {
   constructor(tableResponse: AbstractTableResponse, query: PivotTableQuerySetting) {
     this.tableResponse = tableResponse;
     this.querySetting = query;
-    this.vizSetting = query.getChartOption()!;
+    this.vizSetting = query.getChartOption<PivotTableChartOption>()!;
   }
 
   private static calculateBackgroundColor(bodyCellData: CustomBodyCellData, minMaxData: MinMaxData, colorConfiguration: ColorConfig): string {

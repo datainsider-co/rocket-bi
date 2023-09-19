@@ -181,13 +181,15 @@
                 />
                 <MeasureFieldManagement v-if="viewingMeasure && model.table" ref="measureFieldManagement" :keyword="columnKeyword" :model.sync="model" />
                 <StatusWidget v-else-if="loadingTableData"></StatusWidget>
-                <ChartContainer
+                <ChartHolder
                   v-else-if="tableData"
                   :meta-data="tableData"
+                  :widget-setting="previewWidgetSetting"
                   class="result-table position-relative"
                   disableEmptyChart
                   emptyMessage="Empty data"
-                ></ChartContainer>
+                  is-hide-shadow
+                />
               </template>
             </div>
           </div>
@@ -336,7 +338,7 @@
 
       .result-table ::v-deep .table-chart-container .table-chart-pagination-content {
         --header-background-color: var(--accent);
-        //--header-color: var(--text-color);
+        --table-page-active-color: white;
       }
     }
   }

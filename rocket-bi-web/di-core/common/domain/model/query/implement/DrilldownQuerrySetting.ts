@@ -4,26 +4,14 @@
  */
 
 import { QuerySetting } from '../QuerySetting';
-import {
-  Condition,
-  DrilldownChartOption,
-  Function,
-  getFiltersAndSorts,
-  InlineSqlView,
-  OrderBy,
-  QuerySettingType,
-  TableColumn,
-  WidgetId
-} from '@core/common/domain/model';
-import { ListUtils } from '@/utils';
-import { clone } from 'lodash';
+import { Condition, Function, getFiltersAndSorts, InlineSqlView, OrderBy, QuerySettingClassName, TableColumn, WidgetId } from '@core/common/domain/model';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
 /**
  * @deprecated unused from v1.0.0
  */
-export class DrilldownQueryChartSetting extends QuerySetting<DrilldownChartOption> {
-  readonly className = QuerySettingType.Drilldown;
+export class DrilldownQueryChartSetting extends QuerySetting {
+  readonly className = QuerySettingClassName.Drilldown;
 
   constructor(
     public legends: TableColumn[],
@@ -51,10 +39,10 @@ export class DrilldownQueryChartSetting extends QuerySetting<DrilldownChartOptio
     return [...this.legends.map(legend => legend.function), this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [...this.legends, this.value];
   }
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.legends = ConfigDataUtils.replaceDynamicFunctions(this.legends, functions);
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }

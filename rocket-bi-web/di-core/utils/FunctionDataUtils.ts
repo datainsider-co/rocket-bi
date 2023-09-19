@@ -1,5 +1,5 @@
 import { ConfigType, FunctionData, FunctionTreeNode } from '@/shared';
-import { Field, ScalarFunction, TabControlData, TableColumn } from '@core/common/domain/model';
+import { Field, ScalarFunction, ChartControlData, TableColumn } from '@core/common/domain/model';
 import { Log } from '@core/utils/Log';
 
 export abstract class FunctionDataUtils {
@@ -42,7 +42,7 @@ export abstract class FunctionDataUtils {
 
   static cloneFunctionData(data: FunctionData): FunctionData {
     if (data.dynamicFunction) {
-      const cloneTabControlData: TabControlData = this.cloneTabControlData(data.dynamicFunction);
+      const cloneTabControlData: ChartControlData = this.cloneTabControlData(data.dynamicFunction);
       return {
         ...data,
         field: cloneTabControlData.defaultTableColumns[0].function.field,
@@ -56,12 +56,11 @@ export abstract class FunctionDataUtils {
     }
   }
 
-  static cloneTabControlData(data: TabControlData): TabControlData {
+  static cloneTabControlData(data: ChartControlData): ChartControlData {
     return {
       ...data,
       tableColumns: data.tableColumns ? data.tableColumns.map(func => TableColumn.fromObject(func)) : [],
-      defaultTableColumns: data ? data.defaultTableColumns.map(func => TableColumn.fromObject(func)) : [],
-      values: data.values
+      defaultTableColumns: data ? data.defaultTableColumns.map(func => TableColumn.fromObject(func)) : []
     };
   }
 }

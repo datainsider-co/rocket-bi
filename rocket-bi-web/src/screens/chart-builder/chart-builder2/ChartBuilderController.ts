@@ -6,19 +6,19 @@
 import { Component, Emit, Prop, Ref, Vue } from 'vue-property-decorator';
 import { DataManager } from '@core/common/services';
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
-import { BuilderMode, ConditionData, FunctionData, Status, VisualizationItemData } from '@/shared';
+import { BuilderMode, ConditionData, FunctionData, Status, VerticalScrollConfigs, VisualizationItemData } from '@/shared';
 import BuilderComponents from '@/shared/components/builder';
 import DatabaseListing from '@/screens/chart-builder/config-builder/database-listing/DatabaseListing.vue';
 import DatabaseListingController from '@/screens/chart-builder/config-builder/database-listing/DatabaseListing.ts';
-import FilterPanel from '@/screens/chart-builder/config-builder/filter-panel/FilterPanel.vue';
 import VizPanel from '@/screens/chart-builder/viz-panel/VizPanel.vue';
 import {
+  ChartControlField,
   ChartInfo,
+  ChartInfoType,
   ChartOption,
   DatabaseInfo,
   MapQuerySetting,
   QuerySetting,
-  TabControl,
   WidgetCommonData,
   WidgetExtraData,
   WidgetId
@@ -39,25 +39,32 @@ import { ListUtils } from '@/utils';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 import { TChartBuilderOptions } from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderModal.vue';
 import { ChartBuilderConfig, DefaultChartBuilderConfig } from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderConfig';
+import { SlTreeNodeModel } from '@/shared/components/builder/treemenu/SlVueTree';
+import { SlideXLeftTransition } from 'vue2-transitions';
+import DefaultSetting from '@/shared/settings/common/DefaultSetting.vue';
 
 Vue.use(BuilderComponents);
 Vue.use(Settings);
 @Component({
   components: {
-    FilterPanel,
     DatabaseListing,
     ConfigBuilder,
     VizPanel,
     VizSettingModal,
-    MatchingLocationModal
+    MatchingLocationModal,
+    SlideXLeftTransition,
+    DefaultSetting
   }
 })
 export default class ChartBuilderController extends Vue {
   private readonly PREVIEW_CHART_ID = -1;
+  private readonly scrollOptions = VerticalScrollConfigs;
   private isDragging = false;
+  private draggingType: ChartInfoType | null = null;
   private databaseStatus = Status.Loading;
   private databaseErrorMsg = '';
   private config: ChartBuilderConfig = DefaultChartBuilderConfig;
+  private isSettingConfig = true;
 
   @Prop({ required: false, type: String, default: BuilderMode.Create })
   private readonly builderMode!: BuilderMode;
@@ -66,7 +73,8 @@ export default class ChartBuilderController extends Vue {
   private readonly visualizationItems!: VisualizationItemData[];
 
   private currentChartInfo: ChartInfo | null = null;
-  private preventWatchQueryChange = false; //Chặn việc Watch làm thay đổi setting khi đang init
+  // todo: Chặn việc Watch làm thay đổi setting khi đang init
+  private isPreventChangeQuery = false;
 
   @Ref()
   private readonly vizPanel!: VizPanel;
@@ -108,50 +116,63 @@ export default class ChartBuilderController extends Vue {
     return !this.currentChartInfo || ChartDataModule.statuses[this.currentChartInfo.id] === Status.Error;
   }
 
-  async init(chartInfo: ChartInfo, options?: TChartBuilderOptions) {
+  protected get toSettingComponent(): Function | undefined {
+    const setting = this.currentChartInfo?.setting?.getChartOption();
+    if (setting) {
+      return VizSettingModal.components.get(setting.className);
+    }
+    return void 0;
+  }
+
+  private updateBuilderConfig(value: boolean) {
+    this.isSettingConfig = value;
+    // this.vizPanel.resize();
+  }
+
+  private onChartInfoChanged(chartInfo: ChartInfo, reRender = false) {
+    this.currentChartInfo = cloneDeep(chartInfo);
+    if (reRender) {
+      this.vizPanel.renderChart(chartInfo);
+    } else {
+      this.vizPanel.updateChart(chartInfo);
+    }
+  }
+
+  async init(chartInfo: ChartInfo, options?: TChartBuilderOptions): Promise<void> {
     try {
-      this.preventWatchQueryChange = true;
+      this.isPreventChangeQuery = true;
       this.showDatabaseLoading();
       this.currentChartInfo = cloneDeep(chartInfo);
       this.config = options?.config ?? DefaultChartBuilderConfig;
       this.$nextTick(() => {
         this.vizPanel.renderChart(chartInfo);
-        this.preventWatchQueryChange = false;
+        this.isPreventChangeQuery = false;
       });
       await Promise.all([
-        GeolocationModule.loadGeolocationMap(),
-        _ConfigBuilderStore.initState(cloneDeep(chartInfo)),
+        GeolocationModule.init(),
+        _ConfigBuilderStore.init(cloneDeep(chartInfo)),
         GeolocationModule.loadGeolocationFromWidget(cloneDeep(chartInfo)),
         DatabaseSchemaModule.loadShortDatabaseInfos(false)
       ]);
-      this.setTabControls(options?.tabControls ?? []);
+      _BuilderTableSchemaStore.setChartControls(options?.chartControls ?? []);
       await this.selectDatabaseAndTable(chartInfo, options);
     } catch (ex) {
       Log.error('ChartBuilderController::init', ex);
-      this.preventWatchQueryChange = false;
+      this.isPreventChangeQuery = false;
       this.databaseStatus = Status.Error;
       this.databaseErrorMsg = 'Cannot load database schema';
       throw ex;
     }
   }
 
-  async initDefault(parentInfo?: ChartInfo | null, options?: TChartBuilderOptions | null) {
+  async initDefault(parentInfo?: ChartInfo | null, options?: TChartBuilderOptions | null): Promise<void> {
     this.databaseStatus = Status.Loading;
     this.config = options?.config ?? DefaultChartBuilderConfig;
 
     _ConfigBuilderStore.initDefaultState();
-    await Promise.all([GeolocationModule.loadGeolocationMap(), DatabaseSchemaModule.loadShortDatabaseInfos(false)]);
-    this.setTabControls(options?.tabControls ?? []);
+    await Promise.all([GeolocationModule.init(), DatabaseSchemaModule.loadShortDatabaseInfos(false)]);
+    _BuilderTableSchemaStore.setChartControls(options?.chartControls ?? []);
     await this.selectDatabaseAndTable(parentInfo, options);
-  }
-
-  private setTabControls(controls: TabControl[]) {
-    try {
-      _BuilderTableSchemaStore.loadTabControls(controls);
-    } catch (e) {
-      Log.error(e);
-      _BuilderTableSchemaStore;
-    }
   }
 
   private async selectDatabaseAndTable(chartInfo: ChartInfo | null | undefined, options?: TChartBuilderOptions | null) {
@@ -177,20 +198,19 @@ export default class ChartBuilderController extends Vue {
     _BuilderTableSchemaStore.expandTables(selectedTables);
   }
 
-  onQuerySettingChanged(querySetting: QuerySetting | null) {
-    if (!this.preventWatchQueryChange) {
+  protected onQuerySettingChanged(querySetting: QuerySetting | null) {
+    if (!this.isPreventChangeQuery) {
       const chartInfo: ChartInfo | null = this.createChartInfo(querySetting);
       this.currentChartInfo = chartInfo;
-      Log.debug('onQuerySettingChanged::', chartInfo?.setting.options.options);
+      // Log.debug('onQuerySettingChanged::', chartInfo?.setting.options.options);
       this.$nextTick(() => this.vizPanel.renderChart(chartInfo));
     }
   }
 
-  private clearData() {
+  protected clearData(): void {
     DataManager.removeCurrentDashboardId();
     DataManager.removeCurrentWidget();
-    DataManager.removeChartBuilderMode();
-    _ConfigBuilderStore.initDefaultState();
+    _ConfigBuilderStore.reset();
     _BuilderTableSchemaStore.reset();
   }
 
@@ -299,12 +319,12 @@ export default class ChartBuilderController extends Vue {
     Log.debug('ChartBuilderContainer::onSave');
 
     this.currentChartInfo = chart.copyWithId(this.PREVIEW_CHART_ID);
-    _ConfigBuilderStore.saveChartOption(this.currentChartInfo.setting.options);
+    _ConfigBuilderStore.setChartOption(this.currentChartInfo.setting.options);
 
     this.$nextTick(() => this.vizPanel.renderChart(this.currentChartInfo));
   }
 
-  private createChartInfo(query: QuerySetting | null): ChartInfo | null {
+  protected createChartInfo(query: QuerySetting | null): ChartInfo | null {
     if (query) {
       const commonSetting: WidgetCommonData = this.getWidgetCommonData(query.getChartOption());
       const querySetting: QuerySetting = cloneDeep(query);
@@ -342,7 +362,7 @@ export default class ChartBuilderController extends Vue {
   }
 
   private handleTableUpdated() {
-    const querySetting: QuerySetting<ChartOption> | null = this.configBuilder.getQuerySetting();
+    const querySetting: QuerySetting | null = this.configBuilder.getQuerySetting();
     if (querySetting) {
       this.onQuerySettingChanged(querySetting);
     }
@@ -353,5 +373,16 @@ export default class ChartBuilderController extends Vue {
     if (newStatus === Status.Error) {
       this.databaseErrorMsg = errorMsg;
     }
+  }
+
+  private onDragStart(node: SlTreeNodeModel<any>) {
+    if (ChartControlField.isChartControlField(node?.field)) {
+      this.draggingType = node.field.controlData.chartInfoType ?? null;
+    } else {
+      this.draggingType = null;
+    }
+  }
+  private onDragEnd(node: SlTreeNodeModel<any>) {
+    this.draggingType = null;
   }
 }

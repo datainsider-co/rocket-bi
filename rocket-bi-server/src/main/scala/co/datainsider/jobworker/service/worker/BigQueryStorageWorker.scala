@@ -98,7 +98,7 @@ class BigQueryStorageWorker(
         if (records.nonEmpty) {
           writers.foreach(writer => {
             try {
-              writer.write(records, tableSchema)
+              writer.insertBatch(records, tableSchema)
               lastSyncedValue = records.last(incrementalColumnIndex).toString
             } catch {
               case e: Throwable =>

@@ -1,9 +1,8 @@
 import { ChartOption } from '../ChartOption';
-import { ChartFamilyType, ChartOptionData, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionData, SeriesOptionData, ChartOptionClassName } from '@core/common/domain/model';
 
 export class SankeyChartOption extends ChartOption<SeriesOptionData> {
-  readonly chartFamilyType: ChartFamilyType = ChartFamilyType.Sankey;
-  readonly className: VizSettingType = VizSettingType.SankeySetting;
+  readonly className: ChartOptionClassName = ChartOptionClassName.SankeySetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);
@@ -14,38 +13,17 @@ export class SankeyChartOption extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(): SankeyChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
 
     return new SankeyChartOption({
       chart: {
         type: 'sankey'
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       },
       plotOptions: {
         series: {
@@ -53,9 +31,7 @@ export class SankeyChartOption extends ChartOption<SeriesOptionData> {
             {
               enabled: true,
               style: {
-                color: textColor,
-                fontSize: '11px',
-                fontFamily: 'Roboto',
+                ...ChartOption.getSecondaryStyle(),
                 textOutline: 0
               }
             }

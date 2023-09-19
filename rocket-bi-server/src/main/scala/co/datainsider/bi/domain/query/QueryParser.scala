@@ -167,7 +167,3 @@ final class QueryParserImpl @Inject() (@Assisted sqlParser: SqlParser) extends Q
   }
 
 }
-
-trait QueryParserFactory {
-  def createQueryParser(sqlParser: SqlParser): QueryParser
-}

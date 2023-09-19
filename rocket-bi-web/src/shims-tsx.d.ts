@@ -72,6 +72,24 @@ declare global {
     //Forgot password config
     TOTAL_PIN_CODE: number;
     TIMEOUT_SHOW_RESEND_SECOND: number;
+
+    //third party ingestion config
+    GOOGLE_CLIENT_ID: string;
+    GOOGLE_API_KEY: string;
+    GOOGLE_ROOT_ORIGIN: string;
+
+    GOOGLE_SHEET_URL: string;
+    GOOGLE_SHEET_SCOPES: string;
+    GA_URL: string;
+    GA_SCOPES: string;
+    GA4_URL: string;
+    GA4_SCOPES: string;
+    GOOGLE_ADS_URL: string;
+    GOOGLE_ADS_SCOPES: string;
+    GOOGLE_SEARCH_CONSOLE_URL: string;
+    GOOGLE_SEARCH_CONSOLE_SCOPES: string;
+    FACEBOOK_ADS_URL: string;
+    TIKTOK_ADS_URL: string;
   }
   export interface QueryLanguage {
     clickHouse: { default: string };

@@ -17,7 +17,7 @@
 <script lang="ts">
 import { Component, Vue, PropSync } from 'vue-property-decorator';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
-import { FilterPanel, TabWidget, TabWidgetOptions } from '@core/common/domain';
+import { GroupFilter, TabWidget, TabWidgetOptions } from '@core/common/domain';
 import { set } from 'lodash';
 
 @Component({ components: { PanelHeader } })
@@ -26,7 +26,7 @@ export default class FilterPanelBackgroundTab extends Vue {
   tab!: TabWidget;
 
   private get defaultSetting(): TabWidgetOptions {
-    return FilterPanel.defaultSetting();
+    return GroupFilter.defaultSetting();
   }
   private handleBackgroundActiveChanged(color: string) {
     set(this.tab, 'extraData.header.active.background', color);

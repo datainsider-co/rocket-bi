@@ -32,7 +32,7 @@ export class PivotTableBodyStyleRender implements TableBodyStyleRender {
   constructor(tableResponse: AbstractTableResponse, query: PivotTableQuerySetting, baseThemeColor: string) {
     this.tableResponse = tableResponse;
     this.querySetting = query;
-    this.vizSetting = query.getChartOption()!;
+    this.vizSetting = query.getChartOption<PivotTableChartOption>()!;
     this.styleFormatters = PivotTableBodyStyleRender.getStyleFormatters();
     this.baseThemeColor = baseThemeColor;
   }

@@ -12,7 +12,6 @@ export class DiConditionResolver implements ConditionResolver {
 
   buildCondition(index: number, conditionData: ConditionData): Condition | undefined {
     const condition = this.builder.buildCondition(conditionData);
-    Log.debug('DiConditionResolver::buildCondition', condition);
     if (condition && FieldRelatedCondition.isFieldRelatedCondition(condition) && conditionData.isNested) {
       if (condition.scalarFunction) {
         condition.scalarFunction.withScalarFunction(new GetArrayElement());

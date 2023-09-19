@@ -21,7 +21,7 @@ import DiDatePicker from '@/shared/components/DiDatePicker.vue';
 import moment from 'moment';
 import { Moment } from 'moment/moment';
 import { Log } from '@core/utils';
-import { DateTimeFormatter } from '@/utils';
+import { DateTimeUtils } from '@/utils';
 
 @Component({ components: { DiDatePicker } })
 export default class DiInputDateTime extends Vue {
@@ -56,7 +56,7 @@ export default class DiInputDateTime extends Vue {
 
   @Watch('date')
   onDateChanged() {
-    this.syncValue = DateTimeFormatter.formatDateWithTime(this.date, '');
+    this.syncValue = DateTimeUtils.formatDate(this.date);
   }
 
   // @Watch('selectedTime')

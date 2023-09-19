@@ -4,13 +4,9 @@ import { ConditionUtils } from '@core/utils';
 import { Pagination } from '@/shared/models';
 
 export class FilterStoreUtils {
-  static toMainDateFilterRequest(mainDateCompareRequest: MainDateCompareRequest): FilterRequest | undefined {
-    if (mainDateCompareRequest.currentRange && mainDateCompareRequest.mainDateMode) {
-      const condition = ConditionUtils.buildMainDateCondition(
-        mainDateCompareRequest.field,
-        mainDateCompareRequest.currentRange,
-        mainDateCompareRequest.mainDateMode
-      );
+  static toMainDateFilterRequest(mainDataData: MainDateCompareRequest): FilterRequest | undefined {
+    if (mainDataData.currentRange && mainDataData.mainDateMode) {
+      const condition = ConditionUtils.buildDateFilterCondition(mainDataData.field, mainDataData.currentRange, mainDataData.mainDateMode);
       if (condition) {
         return new FilterRequest(-1, condition);
       } else {
@@ -38,7 +34,7 @@ export class FilterStoreUtils {
     const filters: FilterRequest[] = FilterModule.getFilters(widgetId);
     const querySetting: QuerySetting = QuerySettingModule.buildQuerySetting(widgetId, isFlattenPivot);
 
-    if (mainDateFilter) {
+    if (mainDateFilter && mainDateFilter.isActive) {
       filters.push(mainDateFilter);
     }
 

@@ -2,11 +2,12 @@
 
 export * from './Comparable';
 export * from './Drilldownable';
-export * from './Filterable';
+export * from './FilterableSetting';
 export * from './Paginatable';
 export * from './Scrollable';
 export * from './Sortable';
 export * from './Zoomable';
 export * from './Queryable';
-export * from './FunctionControl';
+export * from './FunctionController';
 export * from './TransformQuery';
+export * from './ValueController';

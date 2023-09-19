@@ -3,30 +3,12 @@
  * @created: 12/3/20, 10:39 AM
  */
 
-import {
-  Condition,
-  Equal,
-  Filterable,
-  Function,
-  getFiltersAndSorts,
-  InlineSqlView,
-  LineStockChartOption,
-  OrderBy,
-  QuerySettingType,
-  SeriesChartOption,
-  TableColumn,
-  WidgetId,
-  Zoomable
-} from '@core/common/domain/model';
+import { Condition, Function, getFiltersAndSorts, InlineSqlView, OrderBy, QuerySettingClassName, TableColumn, WidgetId } from '@core/common/domain/model';
 import { QuerySetting } from '../QuerySetting';
-import { ZoomData } from '@/shared';
-import { Drilldownable, DrilldownData } from '@core/common/domain/model/query/features/Drilldownable';
-import { ConditionUtils } from '@core/utils';
-import { clone } from 'lodash';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class StockQuerySetting extends QuerySetting<LineStockChartOption> {
-  readonly className = QuerySettingType.Stocks;
+export class StockQuerySetting extends QuerySetting {
+  readonly className = QuerySettingClassName.Stocks;
 
   constructor(
     public values: TableColumn[],
@@ -57,7 +39,7 @@ export class StockQuerySetting extends QuerySetting<LineStockChartOption> {
     }
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     if (this.legend) {
       return [...this.values, this.legend];
     } else {
@@ -65,7 +47,7 @@ export class StockQuerySetting extends QuerySetting<LineStockChartOption> {
     }
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.values = ConfigDataUtils.replaceDynamicFunctions(this.values, functions);
     if (this.legend) {
       this.legend = ConfigDataUtils.replaceDynamicFunction(this.legend, functions);

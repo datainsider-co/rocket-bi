@@ -1,7 +1,16 @@
 import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
 import { DefaultFilterValue, Direction, SelectOption, TabFilterDisplay } from '@/shared';
 import { BaseChartWidget, PropsBaseChart } from '@chart/BaseChart';
-import { Condition, TabFilterOption, TabFilterQuerySetting, TableColumn } from '@core/common/domain/model';
+import {
+  Condition,
+  FilterableSetting,
+  QuerySetting,
+  TabFilterOption,
+  TabFilterQuerySetting,
+  TableColumn,
+  ValueControlType,
+  WidgetId
+} from '@core/common/domain/model';
 import { TableResponse } from '@core/common/domain/response/query/TableResponse';
 import { WidgetRenderer } from './widget-renderer';
 import { BaseWidget } from '@/screens/dashboard-detail/components/widget-container/BaseWidget';
@@ -16,7 +25,8 @@ import { PopupUtils } from '@/utils/PopupUtils';
 import TabSelection from '@/shared/components/TabSelection.vue';
 import { ListUtils } from '@/utils';
 import { StringUtils } from '@/utils/StringUtils';
-import { ExportType } from '@core/common/domain';
+import { ExportType, FilterRequest, QueryRequest } from '@core/common/domain';
+import { FilterModule, QuerySettingModule } from '@/screens/dashboard-detail/stores';
 
 enum TabMode {
   DynamicFunction = 'DynamicFunction',
@@ -36,14 +46,6 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
   @Prop({ type: Boolean, default: false })
   showEditComponent!: boolean;
 
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onAddMultiFilter?: (filters: SelectOption[]) => void;
-
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onChangeDynamicFunction?: (tableColumns: TableColumn[]) => void;
-
   private selected: Set<any> = this.getSelected();
 
   keyword = '';
@@ -53,7 +55,7 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
   }
 
   get displayAs(): TabFilterDisplay {
-    return this.setting.options.displayAs ?? TabFilterDisplay.normal;
+    return this.setting.options.displayAs ?? TabFilterDisplay.Normal;
   }
 
   get colorStyle() {
@@ -76,8 +78,8 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
 
   get activeColor() {
     switch (this.setting.options.displayAs) {
-      case TabFilterDisplay.multiChoice:
-      case TabFilterDisplay.singleChoice:
+      case TabFilterDisplay.MultiChoice:
+      case TabFilterDisplay.SingleChoice:
         return this.setting.options.choiceActiveColor;
       default:
         return this.setting.options.activeColor;
@@ -86,8 +88,8 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
 
   get deActiveColor() {
     switch (this.setting.options.displayAs) {
-      case TabFilterDisplay.multiChoice:
-      case TabFilterDisplay.singleChoice:
+      case TabFilterDisplay.MultiChoice:
+      case TabFilterDisplay.SingleChoice:
         return this.setting.options.choiceDeActiveColor;
       default:
         return this.setting.options.deActiveColor;
@@ -110,8 +112,8 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
     };
   }
 
-  private getTabMode(query: TabFilterQuerySetting) {
-    if (query.enableFunctionControl()) {
+  private getTabMode(query: TabFilterQuerySetting): TabMode {
+    if (query.isEnableFunctionControl()) {
       return TabMode.DynamicFunction;
     }
     return TabMode.Filter;
@@ -182,7 +184,7 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
   }
 
   get enableSearch(): boolean {
-    const isDropdown = this.displayAs === TabFilterDisplay.dropDown;
+    const isDropdown = this.displayAs === TabFilterDisplay.DropDown;
     const enableSearchInOptions = this.setting.options.search?.enabled ?? true;
     return !isDropdown && enableSearchInOptions;
   }
@@ -190,8 +192,7 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
   get containerClass(): any {
     const searchClass = this.enableSearch ? 'search' : '';
     const directionClass = this.direction === Direction.column ? 'vertical' : 'horizontal';
-    const padding = this.isPreview ? 'p-2' : '';
-    return `tab-filter-container ${directionClass} ${searchClass} ${padding}`;
+    return `tab-filter-container ${directionClass} ${searchClass}`;
   }
 
   get isFreezeTitle(): boolean {
@@ -209,29 +210,54 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
   }
 
   get filterClass(): string {
-    const dropdownClass = this.displayAs === TabFilterDisplay.dropDown ? 'dropdown' : '';
-    return this.showEditComponent ? `disable ${dropdownClass}` : `${dropdownClass}`;
+    const dropdownClass = this.displayAs === TabFilterDisplay.DropDown ? 'dropdown' : '';
+    return dropdownClass;
   }
 
   private handleFilterChanged(items: Set<any>) {
-    //In dashboard
-    if (this.onAddMultiFilter && !this.isPreview) {
-      const isSelectAll = this.selected.has(TabSelection.OPTION_SHOW_ALL.id);
-      const valueAsArray = isSelectAll ? [] : Array.from(items);
-      const selectedOptions: SelectOption[] = compact(valueAsArray.map(value => this.selectOptionAsMap.get(value)));
-      this.onAddMultiFilter(selectedOptions);
-    }
-    // in preview
-    else if (this.isPreview) {
+    if (this.isPreview) {
       const condition: Condition | undefined = this.buildCondition();
       this.saveTempSelectedValue({
         value: condition ? Array.from(items) : void 0,
         conditions: condition
       });
+    } else {
+      const filterRequest: FilterRequest | undefined = this.toFilterRequest(items);
+      const crossFilterValue: Map<ValueControlType, string[]> | undefined = this.getCrossFilterValueMap(items);
+      this.applyFilterRequest({
+        filterRequest: filterRequest,
+        filterValueMap: crossFilterValue
+      });
     }
   }
 
-  private handleDynamicFunctionChanged(items: Set<any>, query: TabFilterQuerySetting) {
+  private toFilterRequest(items: Set<any>): FilterRequest | undefined {
+    const isSelectAll = items.has(TabSelection.OPTION_SHOW_ALL.id);
+    const valueAsArray = isSelectAll ? [] : Array.from(items);
+    const filters: SelectOption[] = compact(valueAsArray.map(value => this.selectOptionAsMap.get(value)));
+    const isEmptyFilters = ListUtils.isEmpty(filters);
+    if (isEmptyFilters) {
+      return void 0;
+    } else if (FilterableSetting.isFilterable(this.setting) && this.setting.isEnableFilter()) {
+      const widgetId: WidgetId = +this.id;
+      const querySetting: QuerySetting = QuerySettingModule.buildQuerySetting(widgetId);
+      const values: any[] = filters.map(filter => filter.id);
+      return FilterRequest.fromValues(widgetId, querySetting, values);
+    } else {
+      return void 0;
+    }
+  }
+
+  private getCrossFilterValueMap(selectedItems: Set<any>): Map<ValueControlType, string[]> | undefined {
+    const isSelectAll = selectedItems.has(TabSelection.OPTION_SHOW_ALL.id);
+    if (isSelectAll) {
+      return void 0;
+    } else {
+      return new Map<ValueControlType, string[]>([[ValueControlType.SelectedValue, Array.from(selectedItems)]]);
+    }
+  }
+
+  private handleDynamicFunctionChanged(items: Set<any>, query: TabFilterQuerySetting): void {
     Log.debug('handleDynamicFunctionChanged', items);
     //In dashboard
     if (this.onChangeDynamicFunction && !this.isPreview) {
@@ -252,15 +278,17 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
     }
   }
 
-  handleItemChanged(item: SelectOption) {
+  handleItemChanged(item: SelectOption): void {
     const mode = this.getTabMode(this.query);
     switch (mode) {
       case TabMode.DynamicFunction:
         this.updateDynamicFunctionSelected(item);
-        return this.handleDynamicFunctionChanged(this.selected, this.query);
+        this.handleDynamicFunctionChanged(this.selected, this.query);
+        break;
       case TabMode.Filter:
         this.updateSelected(item);
-        return this.handleFilterChanged(this.selected);
+        this.handleFilterChanged(this.selected);
+        break;
     }
   }
 
@@ -312,7 +340,7 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
   }
 
   private updateSelected(item: SelectOption) {
-    const isMultiChoice = this.displayAs === TabFilterDisplay.multiChoice;
+    const isMultiChoice = this.displayAs === TabFilterDisplay.MultiChoice;
     isMultiChoice ? this.handleMultiChoiceSelect(item) : this.handleSingleChoiceSelect(item);
     ///Reactive
     this.selected = new Set(this.selected);
@@ -320,7 +348,7 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
   }
 
   private updateDynamicFunctionSelected(item: SelectOption) {
-    const isMultiChoice = this.displayAs === TabFilterDisplay.multiChoice;
+    const isMultiChoice = this.displayAs === TabFilterDisplay.MultiChoice;
     isMultiChoice ? this.handleMultiDynamicFunctionSelect(item) : this.handleSingleChoiceSelect(item);
     ///Reactive
     this.selected = new Set(this.selected);
@@ -384,7 +412,7 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
       return void 0;
     } else {
       const valueAsArray = Array.from(this.selected);
-      const filterColumn: TableColumn = this.query.getFilter();
+      const filterColumn: TableColumn = this.query.getFilterColumn();
       return ConditionUtils.buildInCondition(filterColumn, valueAsArray);
     }
   }

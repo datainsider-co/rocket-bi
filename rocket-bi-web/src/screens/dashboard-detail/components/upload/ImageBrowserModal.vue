@@ -104,7 +104,7 @@ import { Log, UrlUtils } from '@core/utils';
 import { ListUtils, TimeoutUtils } from '@/utils';
 import { DropdownData } from '@/shared/components/common/di-dropdown';
 import EmptyWidget from '@/screens/dashboard-detail/components/widget-container/charts/error-display/EmptyWidget.vue';
-import { AtomicAction } from '@/shared/anotation';
+import { AtomicAction } from '@core/common/misc';
 
 enum AddImageMode {
   Browse = 'browse',
@@ -235,7 +235,8 @@ export default class ImageBrowserModal extends Vue {
       url => {
         this.callback?.call(this, url);
       },
-      'Ok'
+      'Ok',
+      true
     );
   }
 

@@ -1,37 +1,141 @@
-.pad-x-32 {
-  padding: 0 32px;
-}
+//--------------- Padding Left Right -----------------//
 
 .pad-x-5 {
   padding: 0 5px;
+}
+
+.pad-x-12 {
+  padding: 0 12px;
+}
+
+.pad-x-15 {
+  padding: 0 15px;
 }
 
 .pad-x-24 {
   padding: 0 24px;
 }
 
+.pad-x-32 {
+  padding: 0 32px;
+}
+
+// --------------- Padding Top Bottom -----------------//
+
+.pad-y-4 {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.pad-y-8 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.pad-y-12 {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.pad-y-16 {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.pad-y-15 {
+  padding: 15px 0;
+}
+
+// --------------- Padding All -----------------//
+
+.pad-4 {
+  padding: 4px;
+}
+
+.pad-8 {
+  padding: 8px;
+}
+
+.pad-12 {
+  padding: 12px;
+}
+
 .pad-15 {
   padding: 15px;
+}
+
+.pad-16 {
+  padding: 16px;
+}
+
+// --------------- Padding Right -----------------//
+
+.pad-r-4 {
+  padding-right: 4px;
+}
+
+.pad-r-8 {
+  padding-right: 8px;
 }
 
 .pad-r-16 {
   padding-right: 16px !important;
 }
 
-.mar-b-16 {
-  margin-bottom: 16px;
+.pr-24 {
+  padding-right: 24px !important;
+}
+
+// --------------- Padding Left -----------------//
+
+.pad-l-4 {
+  padding-left: 4px;
+}
+
+.pad-l-8 {
+  padding-left: 8px;
+}
+
+pad-l-15 {
+  padding-left: 15px;
+}
+
+.pad-l-16 {
+  padding-left: 16px;
+}
+
+.pad-l-24 {
+  padding-left: 24px;
+}
+
+.pl-24 {
+  padding-left: 24px !important;
+}
+
+// --------------- Margin Bottom -----------------//
+
+.mar-b-4 {
+  margin-bottom: 4px;
+}
+
+.mar-b-8 {
+  margin-bottom: 8px;
 }
 
 .mar-b-12 {
   margin-bottom: 12px;
 }
 
-.mar-r-12 {
-  margin-right: 12px;
+.mar-b-16 {
+  margin-bottom: 16px;
 }
 
-.mar-t-12 {
-  margin-top: 12px;
+.mar-b-22 {
+  margin-bottom: 22px;
+}
+
+.mar-b-24 {
+  margin-bottom: 24px;
 }
 
 .mar-b-32 {
@@ -40,6 +144,46 @@
 
 .mar-b-48 {
   margin-bottom: 48px;
+}
+
+// --------------- Margin Right -----------------//
+
+.mar-r-4 {
+  margin-right: 4px;
+}
+
+.mar-r-8 {
+  margin-right: 8px;
+}
+
+.mar-r-12 {
+  margin-right: 12px;
+}
+
+.mar-r-16 {
+  margin-right: 16px;
+}
+
+.mar-r-22 {
+  margin-right: 22px;
+}
+
+.mar-r-24 {
+  margin-right: 24px;
+}
+
+// --------------- Margin Top -----------------//
+
+.mar-t-4 {
+  margin-top: 4px;
+}
+
+.mar-t-8 {
+  margin-top: 8px;
+}
+
+.mar-t-12 {
+  margin-top: 12px;
 }
 
 .mar-t-32 {
@@ -54,29 +198,23 @@
   margin-top: 15px;
 }
 
-.pad-x-12 {
-  padding: 0 12px;
+// --------------- Margin Top Bottom -----------------//
+
+.mar-y-4 {
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
-.pl-24 {
-  padding-left: 24px !important;
-}
-
-.pr-24 {
-  padding-right: 24px !important;
-}
-
-.pad-x-15 {
-  padding: 0 15px;
-}
-
-.pad-y-15 {
-  padding: 15px 0;
+.mar-y-8 {
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
 .mar-y-15 {
   padding: 15px 0;
 }
+
+// ------------------------------------------//
 
 img[class~='ic-16'] {
   @include ic-16;
@@ -146,6 +284,7 @@ img[class~='ic-40'] {
   white-space: nowrap;
   width: 100%;
 }
+
 //Wrap p with div and set width to it for using
 .single-line {
   white-space: nowrap;
@@ -179,6 +318,7 @@ svg[icon-size='24'] {
   width: 24px;
   height: 24px;
 }
+
 svg[icon-size='16'] {
   width: 16px;
   height: 16px;

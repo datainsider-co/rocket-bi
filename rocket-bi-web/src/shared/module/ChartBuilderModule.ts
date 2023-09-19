@@ -7,7 +7,6 @@ import {
   BubbleQuerySettingHandler,
   BubbleVizSettingHandler,
   BulletQuerySettingHandler,
-  ControlQuerySettingHandler,
   DateSelectFilterQuerySettingHandler,
   DrilldownPieQuerySettingHandler,
   DrilldownPieVizSettingHandler,
@@ -21,7 +20,6 @@ import {
   FunnelVizSettingHandler,
   GaugeQuerySettingHandler,
   GaugeVizSettingHandler,
-  GroupMeasureControlQuerySettingHandler,
   HeatMapQuerySettingHandler,
   HeatMapVizSettingHandler,
   HistogramQuerySettingHandler,
@@ -73,7 +71,7 @@ import {
   NumberCompareBuilder,
   SeriesCompareBuilder
 } from '@core/common/services';
-import { VizSettingType } from '@core/common/domain/model';
+import { ChartOptionClassName } from '@core/common/domain/model';
 import { FunctionConvertResolver } from '@/screens/chart-builder/config-builder/function-convertor/FunctionConvertResolver';
 import { BubbleFunctionConvertor } from '@/screens/chart-builder/config-builder/function-convertor/BubbleFunctionConvertor';
 import { FunctionConvertBuilder } from '@/screens/chart-builder/config-builder/function-convertor/FunctionConvertBuilder';
@@ -84,11 +82,14 @@ import { QuerySettingResolverBuilder } from '@/shared/resolver/query-setting-res
 import { DateConditionBuilder, DateHistogramConditionCreator } from '@chart/date-filter/date-histogram-conditon-builder/DateHistogramConditionBuilder';
 import { TreeFilterQuerySettingHandler } from '@/shared/resolver/query-setting-resolver/query-setting-handler/TreeFilterQuerySettingHandler';
 import { FormulaControllerResolverBuilder } from '@/shared/fomula/builder/FormulaControllerBuilder';
-import { DataSourceType } from '@core/clickhouse-config';
+import { ConnectorType } from '@core/connector-config';
 import { BigqueryFormulaHandler } from '@/shared/fomula/builder/impl/BigqueryFormulaHandler';
 import { ClickhouseFormulaHandler } from '@/shared/fomula/builder/impl/ClickhouseFormulaHandler';
 import { FormulaControllerResolver } from '@/shared/fomula/builder/FormulaControllerResolver';
 import { MySQLFormulaHandler } from '@/shared/fomula/builder/impl/MySQLFormulaHandler';
+import { PostgreSQLFormulaHandler } from '@/shared/fomula/builder/impl/PostgreSQLFormulaHandler';
+import { RedshiftFormulaController } from '@/shared/fomula/redshift/RedshiftFormulaController';
+import { RedshiftFormulaHandler } from '@/shared/fomula/builder/impl/RedshiftFormulaHandler';
 
 export class ChartBuilderModule implements BaseModule {
   configuration(): void {
@@ -107,8 +108,6 @@ export class ChartBuilderModule implements BaseModule {
     const drilldownHandler = new DrilldownQuerySettingHandler();
     const tableHandler = new TableQuerySettingHandler();
     const tabFilterHandler = new TabFilterQuerySettingHandler();
-    const measureControlHandler = new GroupMeasureControlQuerySettingHandler();
-    const controlQuerySettingHandler = new ControlQuerySettingHandler();
     const treeFilterHandler = new TreeFilterQuerySettingHandler();
     const pieChartHandler = new PieQuerySettingHandler();
     const builder: QuerySettingResolver = new QuerySettingResolverBuilder()
@@ -160,11 +159,6 @@ export class ChartBuilderModule implements BaseModule {
       .add(ChartType.FlattenPivotTable, new FlattenPivotQuerySettingHandler())
       .add(ChartType.Bullet, new BulletQuerySettingHandler())
       .add(ChartType.WindRose, stackingHandler)
-      .add(ChartType.TabMeasurement, measureControlHandler)
-      .add(ChartType.SingleChoiceMeasurement, measureControlHandler)
-      .add(ChartType.MultiChoiceMeasurement, measureControlHandler)
-      .add(ChartType.DropDownMeasurement, measureControlHandler)
-      .add(ChartType.InputControl, controlQuerySettingHandler)
       .add(ChartType.SingleTreeFilter, treeFilterHandler)
       .add(ChartType.MultiTreeFilter, treeFilterHandler)
       .add(ChartType.Variablepie, new VariablepieQuerySettingHandler())
@@ -223,8 +217,8 @@ export class ChartBuilderModule implements BaseModule {
   }
 
   private bindCompareResolver() {
-    const builders = new Map<VizSettingType, CompareBuilder>();
-    builders.set(VizSettingType.NumberSetting, new NumberCompareBuilder()).set(VizSettingType.SeriesSetting, new SeriesCompareBuilder());
+    const builders = new Map<ChartOptionClassName, CompareBuilder>();
+    builders.set(ChartOptionClassName.NumberSetting, new NumberCompareBuilder()).set(ChartOptionClassName.SeriesSetting, new SeriesCompareBuilder());
     Container.bindName(DIKeys.CompareBuilder).to(builders);
   }
 
@@ -277,9 +271,11 @@ export class ChartBuilderModule implements BaseModule {
 
   private bindQueryFormulaBuilder() {
     const creator: FormulaControllerResolver = new FormulaControllerResolverBuilder()
-      .add(DataSourceType.Clickhouse, new ClickhouseFormulaHandler())
-      .add(DataSourceType.Bigquery, new BigqueryFormulaHandler())
-      .add(DataSourceType.MySQL, new MySQLFormulaHandler())
+      .add(ConnectorType.Clickhouse, new ClickhouseFormulaHandler())
+      .add(ConnectorType.Bigquery, new BigqueryFormulaHandler())
+      .add(ConnectorType.MySQL, new MySQLFormulaHandler())
+      .add(ConnectorType.PostgreSQL, new PostgreSQLFormulaHandler())
+      .add(ConnectorType.Redshift, new RedshiftFormulaHandler())
       // .add(DataSourceType.Vertica, new BigqueryFormulaHandler())
       .addDefault(new ClickhouseFormulaHandler())
       .build();

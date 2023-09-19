@@ -25,6 +25,8 @@ class ObjectQueryBuilder {
 
   def addViews(view: Array[SqlView]): Unit = queryViews ++= view
 
+  def addTableView(view: TableView): Unit = queryViews += view
+
   def addJoinConditions(joinCondition: Array[JoinCondition]): Unit = joinConditions ++= joinCondition
 
   def addAggregateConditions(aggregateCondition: Array[AggregateCondition]): Unit =

@@ -1,12 +1,10 @@
-import { ChartType } from '@/shared';
-import { ChartFamilyType, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { SeriesOptionData, ChartOptionClassName } from '@core/common/domain/model';
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
 
 export class VariablepieChartOption extends ChartOption<SeriesOptionData> {
   static readonly DEFAULT_SETTING = {};
 
-  chartFamilyType = ChartFamilyType.Pie;
-  className = VizSettingType.VariablepieSetting;
+  className = ChartOptionClassName.VariablePieSetting;
 
   constructor(options: SeriesOptionData) {
     super(options);
@@ -17,31 +15,13 @@ export class VariablepieChartOption extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(): VariablepieChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const options: SeriesOptionData = {
       chart: {
         type: 'variablepie'
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       affectedByFilter: true,
       themeColor: { enabled: true },
       background: this.getThemeBackgroundColor(),
@@ -52,9 +32,8 @@ export class VariablepieChartOption extends ChartOption<SeriesOptionData> {
           dataLabels: {
             enabled: false,
             style: {
+              ...ChartOption.getSecondaryStyle(),
               color: textColor,
-              fontSize: '11px',
-              fontFamily: 'Roboto',
               textOutline: 0
             }
           }
@@ -120,7 +99,7 @@ export class VariablepieChartOption extends ChartOption<SeriesOptionData> {
         backgroundColor: this.getTooltipBackgroundColor(),
         style: {
           color: textColor,
-          fontFamily: 'Roboto'
+          fontFamily: ChartOption.getSecondaryFontFamily()
         }
       }
     };

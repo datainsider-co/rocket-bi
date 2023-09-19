@@ -148,7 +148,6 @@ class JobWorker2Impl(
       onReportProgress: (JobWorkerProgress) => Future[Unit]
   ): Unit = {
     var bufferRecords: ArrayBuffer[Record] = ArrayBuffer.empty[Record]
-    var syncedRows: Long = 0
     val isReadNext: AtomicBoolean = new AtomicBoolean(true)
     while (isJobRunning.get() && reader.hasNext() && isReadNext.get()) {
       try {
@@ -156,10 +155,9 @@ class JobWorker2Impl(
         bufferRecords.appendAll(records)
         if (bufferRecords.size >= writeBatchSize) {
           depotAssistant.put(bufferRecords)
-          syncedRows += bufferRecords.size
+          jobProgress.addSyncedRows(bufferRecords.size)
           bufferRecords = ArrayBuffer.empty[Record]
-          if (syncedRows % reportIntervalSize == 0) {
-            jobProgress.totalSyncedRows.set(syncedRows)
+          if (jobProgress.totalSyncedRows.get() % reportIntervalSize == 0) {
             onReportProgress(jobProgress).syncGet()
           }
         }
@@ -174,8 +172,7 @@ class JobWorker2Impl(
     }
     if (bufferRecords.nonEmpty) {
       depotAssistant.put(bufferRecords)
-      syncedRows += bufferRecords.size
-      jobProgress.totalSyncedRows.set(syncedRows)
+      jobProgress.addSyncedRows(bufferRecords.size)
       onReportProgress(jobProgress).syncGet()
     }
   }

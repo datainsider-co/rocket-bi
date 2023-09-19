@@ -3,7 +3,7 @@ package co.datainsider.jobworker.repository.writer
 import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.bi.util.ZConfig
 import co.datainsider.bi.util.profiler.Profiler
-import co.datainsider.jobworker.hubspot.util.JsonUtil
+import co.datainsider.jobworker.service.hubspot.util.JsonUtil
 import co.datainsider.jobworker.util.JsonUtils
 import co.datainsider.schema.domain.TableSchema
 import com.twitter.inject.Logging
@@ -31,7 +31,7 @@ class HadoopWriter(config: Config, fileConfig: LocalFileWriterConfig) extends Da
     * @param destSchema schema of destination table to parse data
     *  @return number of row inserted
     */
-  override def write(records: Seq[Record], destSchema: TableSchema): Int =
+  override def insertBatch(records: Seq[Record], destSchema: TableSchema): Int =
     Profiler(s"[DataWriter] ${this.getClass.getSimpleName}::write") {
       val lines: Seq[String] = records.map(JsonUtils.toJson(_, false))
       localFileService.writeLines(lines, destSchema)

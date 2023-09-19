@@ -64,7 +64,7 @@ import { SelectOption } from '@/shared';
 import { GeolocationModule } from '@/store/modules/data-builder/GeolocationStore';
 import { get } from 'lodash';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { StringUtils } from '@/utils';
 
 @Component({ components: { PanelHeader } })
@@ -76,8 +76,8 @@ export default class MapStyleTab extends Vue {
   private readonly defaultSetting = {
     geoArea: 'world.json',
     enabled: false,
-    fontFamily: 'Roboto',
-    color: ChartOption.getThemeTextColor(),
+    fontFamily: ChartOption.getSecondaryFontFamily(),
+    color: ChartOption.getPrimaryTextColor(),
     fontSize: '12px'
   };
 
@@ -103,7 +103,7 @@ export default class MapStyleTab extends Vue {
   }
 
   private get fontSizeOptions(): SelectOption[] {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get font(): string {

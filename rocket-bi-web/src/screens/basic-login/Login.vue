@@ -55,12 +55,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Ref, Watch } from 'vue-property-decorator';
+import { Component, Ref, Vue } from 'vue-property-decorator';
 import { Route } from 'vue-router';
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
-import { AtomicAction } from '@/shared/anotation';
+import { AtomicAction } from '@core/common/misc';
 import { Log } from '@core/utils';
-import { Di } from '@core/common/modules';
 import { DataManager } from '@core/common/services';
 import { LoginConstants, OauthType, Routers } from '@/shared';
 import { GoogleUtils } from '@/utils/GoogleUtils';
@@ -72,9 +71,8 @@ import LoginForm from '@/screens/basic-login/components/LoginForm.vue';
 import ResetPasswordForm from '@/screens/login/components/forgot-password/ResetPasswordForm.vue';
 import { UserResetPasswordRequest } from '@core/common/domain/request/authentication/UserResetPasswordRequest';
 import Swal from 'sweetalert2';
-import { Modals } from '@/utils';
 import { Inject } from 'typescript-ioc';
-import { ClickhouseConfigService, StageStatus } from '@core/clickhouse-config';
+import { ConnectorService } from '@core/connector-config';
 import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
 import { PlanAndBillingModule } from '@/screens/organization-settings/stores/PlanAndBillingStore';
 
@@ -107,7 +105,7 @@ export default class Login extends Vue {
   private isResetPasswordLoading = false;
 
   @Inject
-  clickhouseService!: ClickhouseConfigService;
+  clickhouseService!: ConnectorService;
 
   @Ref()
   private readonly loginForm?: LoginForm;

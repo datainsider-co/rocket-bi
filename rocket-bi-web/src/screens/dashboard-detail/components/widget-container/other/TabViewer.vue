@@ -41,7 +41,7 @@
                     @change="handleChangePosition"
                   >
                     <div :style="{ cursor: getCurrentCursor }" class="grid-item-container">
-                      <WidgetContainer :isShowEdit="isShowEdit" :widget="getWidget(id)" :id="`${id}-chart-holder`" />
+                      <WidgetHolder :isShowEdit="isShowEdit" :widget="getWidget(id)" :widget-setting="widgetSetting" :id="`${id}-chart-holder`" />
                     </div>
                   </DiGridstackItem>
                 </template>
@@ -94,7 +94,7 @@
 
 <script lang="ts">
 import SortModal from '@/screens/dashboard-detail/components/SortModal.vue';
-import WidgetContainer from '@/screens/dashboard-detail/components/widget-container';
+import WidgetHolder from '@/screens/dashboard-detail/components/widget-container/WidgetHolder.vue';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { DashboardModule, WidgetModule } from '@/screens/dashboard-detail/stores';
 import { ContextMenuItem } from '@/shared';
@@ -105,15 +105,13 @@ import DiGridstackItem from '@/shared/components/gridstack/DiGridstackItem.vue';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 import { GenIdMethods } from '@/utils/IdGenerator';
 import { PopupUtils } from '@/utils/PopupUtils';
-import { DIMap, Position, TabWidget, Widget, WidgetId, Tab } from '@core/common/domain';
-import { DashboardService } from '@core/common/services';
+import { DIMap, Position, Tab, TabWidget, Widget, WidgetId, WidgetSetting } from '@core/common/domain';
 import { cloneDeep, isNumber } from 'lodash';
 import { Component, Inject, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import Swal from 'sweetalert2';
-import { Log } from '@core/utils';
-import { DomUtils, ListUtils } from '@/utils';
+import { ListUtils } from '@/utils';
 
-@Component({ components: { WidgetContainer, DiGridstack, DiGridstackItem, DiRenameModal, SortModal } })
+@Component({ components: { WidgetHolder, DiGridstack, DiGridstackItem, DiRenameModal, SortModal } })
 export default class TabViewer extends Vue {
   $alert!: typeof Swal;
   @Prop()
@@ -128,6 +126,9 @@ export default class TabViewer extends Vue {
   @Prop({ type: Boolean, default: true })
   isShowComponent!: boolean;
 
+  @Prop({ type: Object, required: false, default: () => WidgetSetting.default() })
+  widgetSetting!: WidgetSetting;
+
   @Ref()
   renameModal!: DiRenameModal;
 
@@ -136,9 +137,9 @@ export default class TabViewer extends Vue {
 
   // Provide from DiGridstackItem
   @Inject({ default: undefined })
-  private readonly remove?: (fn: Function) => void;
+  protected readonly remove?: (fn: Function) => void;
 
-  private tabIndex = 0;
+  protected tabIndex = 0;
 
   mounted() {
     this.registerEvents();
@@ -167,7 +168,7 @@ export default class TabViewer extends Vue {
     this.emitResizeEvent();
   }
 
-  private emitResizeEvent() {
+  protected emitResizeEvent() {
     this.currentWidgetIds.forEach(id => {
       this.$nextTick(() => {
         this.$root.$emit(DashboardEvents.ResizeWidget, id);
@@ -175,15 +176,15 @@ export default class TabViewer extends Vue {
     });
   }
 
-  private get currentTab(): Tab | undefined {
+  protected get currentTab(): Tab | undefined {
     return isNumber(this.tabIndex) ? this.widget.tabItems[this.tabIndex] : void 0;
   }
 
-  private get currentWidgetIds(): WidgetId[] {
+  protected get currentWidgetIds(): WidgetId[] {
     return this.currentTab ? this.currentTab.widgetIds : [];
   }
 
-  private get positions(): DIMap<Position> {
+  protected get positions(): DIMap<Position> {
     const positions: DIMap<Position> = {};
     this.currentWidgetIds.forEach(id => {
       if (DashboardModule.positions[id]) {
@@ -193,7 +194,7 @@ export default class TabViewer extends Vue {
     return positions;
   }
 
-  private get defaultOptions(): CustomGridStackOptions {
+  protected get defaultOptions(): CustomGridStackOptions {
     return {
       animate: true,
       column: 48,
@@ -214,28 +215,28 @@ export default class TabViewer extends Vue {
     };
   }
 
-  private clickSelectTab(mouseEvent: MouseEvent) {
+  protected clickSelectTab(mouseEvent: MouseEvent) {
     PopupUtils.hideAllPopup();
     const buttonConfigWidget = GenIdMethods.genBtnId(`select-tab-${this.widget.id}`);
     const buttonEvent = HtmlElementRenderUtils.fixMenuOverlap(mouseEvent, buttonConfigWidget, 0, 0);
     this.$root.$emit(DashboardEvents.ShowContextMenu, mouseEvent, this.tabSelectOptions());
   }
 
-  private clickConfigWidget(mouseEvent: MouseEvent) {
+  protected clickConfigWidget(mouseEvent: MouseEvent) {
     PopupUtils.hideAllPopup();
     const buttonConfigWidget = GenIdMethods.genBtnId(`config-widget-${this.widget.id}`);
     const buttonEvent = HtmlElementRenderUtils.fixMenuOverlap(mouseEvent, buttonConfigWidget, 0, 0);
     this.$root.$emit(DashboardEvents.ShowContextMenu, mouseEvent, this.widgetConfigOptions);
   }
 
-  private clickConfigTab(mouseEvent: MouseEvent, tabIndex: number) {
+  protected clickConfigTab(mouseEvent: MouseEvent, tabIndex: number) {
     PopupUtils.hideAllPopup();
     const buttonConfigWidget = GenIdMethods.genBtnId(`config-tab-${this.widget.id}-${tabIndex}`);
     const buttonEvent = HtmlElementRenderUtils.fixMenuOverlap(mouseEvent, buttonConfigWidget);
     this.$root.$emit(DashboardEvents.ShowContextMenu, buttonEvent, this.tabConfigOptions(tabIndex));
   }
 
-  private async handleAddTab() {
+  protected async handleAddTab() {
     PopupUtils.hideAllPopup();
     const name = 'New tab';
     const widget = cloneDeep(this.widget).addTab(name);
@@ -243,12 +244,12 @@ export default class TabViewer extends Vue {
     WidgetModule.setWidget({ widgetId: widget.id, widget: widget });
   }
 
-  private async handleSortTab() {
+  protected async handleSortTab() {
     PopupUtils.hideAllPopup();
     this.$root.$emit(DashboardEvents.SortTab, this.widget);
   }
 
-  private async handleDeleteChart(tabIndex: number) {
+  protected async handleDeleteChart(tabIndex: number) {
     PopupUtils.hideAllPopup();
     const deleteTabWhenEmpty = true;
     this.$root.$emit(
@@ -268,7 +269,7 @@ export default class TabViewer extends Vue {
     );
   }
 
-  private get removeContent(): {
+  protected get removeContent(): {
     emptyText: string;
     actionName: string;
     title: string;
@@ -282,24 +283,24 @@ export default class TabViewer extends Vue {
     };
   }
 
-  private async handleAddChartToTab(tabIndex: number) {
+  protected async handleAddChartToTab(tabIndex: number) {
     PopupUtils.hideAllPopup();
     this.$root.$emit(DashboardEvents.AddChartToTab, this.widget, tabIndex);
   }
 
-  private async handleDeleteTab(index: number) {
+  protected async handleDeleteTab(index: number) {
     PopupUtils.hideAllPopup();
     const widget = cloneDeep(this.widget).removeTab(index);
     await WidgetModule.handleUpdateWidget(widget);
     WidgetModule.setWidget({ widgetId: widget.id, widget: widget });
   }
 
-  private handleConfigTab() {
+  protected handleConfigTab() {
     PopupUtils.hideAllPopup();
     this.$root.$emit(DashboardEvents.UpdateTab, this.widget);
   }
 
-  private async handleDeleteWidget() {
+  protected async handleDeleteWidget() {
     PopupUtils.hideAllPopup();
     const { isConfirmed } = await this.$alert.fire({
       icon: 'warning',
@@ -318,7 +319,7 @@ export default class TabViewer extends Vue {
     }
   }
 
-  private get widgetConfigOptions(): ContextMenuItem[] {
+  protected get widgetConfigOptions(): ContextMenuItem[] {
     return [
       {
         text: 'Add tab',
@@ -340,7 +341,7 @@ export default class TabViewer extends Vue {
     ];
   }
 
-  private tabSelectOptions(): ContextMenuItem[] {
+  protected tabSelectOptions(): ContextMenuItem[] {
     return this.widget.tabItems.map((tab, index) => {
       return {
         id: `${index}-${tab}`,
@@ -350,12 +351,12 @@ export default class TabViewer extends Vue {
     });
   }
 
-  private selectTab(index: number) {
+  protected selectTab(index: number) {
     PopupUtils.hideAllPopup();
     this.tabIndex = index;
   }
 
-  private tabConfigOptions(tabIndex: number): ContextMenuItem[] {
+  protected tabConfigOptions(tabIndex: number): ContextMenuItem[] {
     return [
       {
         text: 'Edit title',
@@ -376,30 +377,30 @@ export default class TabViewer extends Vue {
     ];
   }
 
-  private openRenameModal(name: string, tabIndex: number) {
+  protected openRenameModal(name: string, tabIndex: number) {
     PopupUtils.hideAllPopup();
     this.renameModal.show(name, (newName: string) => {
       this.handleRenameTab(newName, tabIndex);
     });
   }
 
-  private handleChangePosition(payload: { id: number; position: Position }) {
+  protected handleChangePosition(payload: { id: number; position: Position }) {
     if (this.isShowEdit) {
       const { position, id } = payload;
       this.$emit('onChangePosition', payload);
     }
   }
 
-  private get getCurrentCursor(): string {
+  protected get getCurrentCursor(): string {
     return this.isShowEdit ? 'move' : 'default';
   }
 
-  private getWidget(id: number): Widget {
+  protected getWidget(id: number): Widget {
     return DashboardModule.widgetAsMap[id];
   }
 
   //custom header title
-  private get headerStyle() {
+  protected get headerStyle() {
     return {
       'font-family': this.widget.extraData?.header?.fontFamily,
       color: this.widget.extraData?.header?.color,
@@ -408,7 +409,7 @@ export default class TabViewer extends Vue {
   }
 
   ///register color
-  private get tabStyle() {
+  protected get tabStyle() {
     return {
       '--tab-active-background-color': this.widget.extraData?.header?.active?.background,
       '--tab-inactive-background-color': this.widget.extraData?.header?.inActive?.background,
@@ -416,19 +417,19 @@ export default class TabViewer extends Vue {
     };
   }
 
-  private get isVerticalTab() {
+  protected get isVerticalTab() {
     return this.widget.extraData?.header?.position === 'vertical';
   }
 
-  private get navClass(): string[] {
+  protected get navClass(): string[] {
     return [this.isVerticalTab ? 'vertical' : '', 'nav-bar'];
   }
 
-  private get containerClass(): string[] {
+  protected get containerClass(): string[] {
     return [this.isVerticalTab ? 'vertical' : ''];
   }
 
-  private handleRenameTab(newName: string, tabIndex: number) {
+  protected handleRenameTab(newName: string, tabIndex: number) {
     this.renameModal.hide();
     this.widget.tabItems[tabIndex].name = newName;
     return WidgetModule.handleUpdateWidget(this.widget);
@@ -477,8 +478,8 @@ $border-radius: 4px;
       .grid-item-container {
         height: 100%;
         width: 100%;
-        border-radius: 4px;
-        border: 1px solid var(--tab-border-color, #f0f0f0) !important;
+        //border-radius: 4px;
+        //border: 1px solid var(--tab-border-color, #f0f0f0) !important;
 
         .tab-filter-container {
           border-radius: 4px;

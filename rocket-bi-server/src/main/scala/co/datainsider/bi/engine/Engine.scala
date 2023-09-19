@@ -5,6 +5,7 @@ import co.datainsider.bi.domain.Connection
 import co.datainsider.bi.domain.query.{AggregateCondition, Condition, Function, ScalarFunction}
 import co.datainsider.bi.engine.clickhouse.DataTable
 import co.datainsider.bi.repository.FileStorage.FileType.FileType
+import co.datainsider.caas.user_profile.domain.Implicits.FutureEnhanceLike
 import co.datainsider.datacook.pipeline.ExecutorResolver
 import co.datainsider.datacook.pipeline.operator.OperatorService
 import co.datainsider.jobworker.repository.writer.DataWriter
@@ -74,11 +75,20 @@ trait Engine[Source <: Connection] {
       existingExpressions: Map[String, String]
   ): Future[Column]
 
-  @deprecated("Unsupported implement this method", "v3.0.0")
-  def createWriter(source: Source): DataWriter = ???
+  def createWriter(source: Source): DataWriter = {
+    new DataWriter {
+      override def insertBatch(records: Seq[Record], destSchema: TableSchema): Int = {
+        write(source, destSchema, records).syncGet()
+      }
+
+      override def close(): Unit = Unit
+    }
+  }
 
   @deprecated("Unsupported implement this method", "v3.0.0")
-  def getPreviewExecutorResolver(source: Source, operatorService: OperatorService)(injector: Injector): ExecutorResolver = ???
+  def getPreviewExecutorResolver(source: Source, operatorService: OperatorService)(
+      injector: Injector
+  ): ExecutorResolver = ???
 
   @deprecated("Unsupported implement this method", "v3.0.0")
   def getExecutorResolver(source: Source, operatorService: OperatorService)(injector: Injector): ExecutorResolver = ???

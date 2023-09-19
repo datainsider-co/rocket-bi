@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionData, ChartOptionClassName } from '@core/common/domain/model';
 
 /**
  * @deprecated from v1.0.0
@@ -26,8 +26,8 @@ export class DrilldownPieChartOption extends ChartOption {
       }
     }
   };
-  chartFamilyType = ChartFamilyType.DrilldownPie;
-  className = VizSettingType.DrilldownPieSetting;
+
+  className = ChartOptionClassName.DrilldownPieSetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);

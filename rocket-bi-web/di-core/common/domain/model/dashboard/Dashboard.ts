@@ -1,22 +1,12 @@
-import { MapUtils, PositionUtils } from '@/utils';
-import {
-  BoostInfo,
-  DashboardId,
-  DashboardSetting,
-  DIMap,
-  MainDateFilter,
-  Position,
-  TabId,
-  TabWidget,
-  Widget,
-  WidgetId,
-  Widgets
-} from '@core/common/domain/model';
-import { Log } from '@core/utils';
+import { BoostInfo, DashboardId, DashboardSetting, DIMap, MainDateFilter, Position, TabWidget, Widget, WidgetId } from '@core/common/domain/model';
 
 export class Dashboard {
   id: DashboardId;
   name: string;
+  /**
+   * @deprecated field will remove as soon as possible
+   * use mainDateFilter in setting instead of
+   */
   mainDateFilter?: MainDateFilter;
   ownerId: string;
   widgets?: Widget[];

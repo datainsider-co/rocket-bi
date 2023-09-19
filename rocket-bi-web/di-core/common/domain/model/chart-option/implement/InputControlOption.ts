@@ -4,12 +4,11 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, DefaultSettings, InputOptionData, VizSettingType } from '@core/common/domain/model';
-import { ChartType, DateHistogramConditionTypes } from '@/shared';
+import { ChartOptionClassName, ChartOptionData, InputOptionData } from '@core/common/domain/model';
+import { ChartType } from '@/shared';
 
 export class InputControlOption extends ChartOption<InputOptionData> {
-  chartFamilyType = ChartFamilyType.TabFilter;
-  className = VizSettingType.InputControlSetting;
+  className = ChartOptionClassName.InputControlSetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);
@@ -20,28 +19,10 @@ export class InputControlOption extends ChartOption<InputOptionData> {
   }
 
   static getDefaultChartOption(): InputControlOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const options: ChartOptionData = {
-      title: {
-        align: 'left',
-        enabled: true,
-        text: 'Input control',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '14px'
-        }
-      },
-      subtitle: {
-        align: 'left',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle({ title: 'Input control', fontSize: '14px', align: 'left' }),
+      subtitle: ChartOption.getDefaultSubtitle({ align: 'left' }),
       placeHolder: 'Typing...',
       chartType: ChartType.InputControl,
       affectedByFilter: true,

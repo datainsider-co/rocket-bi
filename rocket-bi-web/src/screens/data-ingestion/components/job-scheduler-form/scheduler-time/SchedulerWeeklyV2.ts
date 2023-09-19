@@ -1,6 +1,6 @@
 import { SchedulerName } from '@/shared/enums/SchedulerName';
 import { DaysOfWeek } from '@/shared/enums/DayOfWeeks';
-import { DateTimeFormatter, ListUtils } from '@/utils';
+import { DateTimeUtils, ListUtils } from '@/utils';
 import { TimeScheduler } from '@/screens/data-ingestion/components/job-scheduler-form/scheduler-time/TimeScheduler';
 import { SchedulerWeekly } from '@/screens/data-ingestion/components/job-scheduler-form/scheduler-time/SchedulerWeekly';
 import moment from 'moment';

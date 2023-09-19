@@ -34,7 +34,8 @@ body div[builder-default-style] {
   --text-color: #4f4f4f;
   --secondary-text-color: #5f6368;
   --menu-background-color: #fff;
-  --menu-shadow: 0 2px 24px 0 rgba(0, 0, 0, 0.1);
+  --menu-shadow: 0px 4px 4px 0px #00000014;
+  --menu-shadow--root: 0px 4px 4px 0px #00000014;
   --menu-border: unset;
   --directory-action-color: #000;
   --icon-color: #5f6368;
@@ -113,12 +114,12 @@ body div[builder-default-style] {
   --grid-horizontal-color: #0000000f;
   --calendar-bg: #ffffff;
   ///New palette color
-  --white2: #FFFFFF;
-  --black2: #4F4F4F;
-  --grey2: #5F6368;
-  --background2: #F2F2F7;
-  --accent-2: #0066FF;
-  --line-f0f0f0: #F0F0F0;
-  --line-d6d6d6: #D6D6D6;
-  --error: #DE3618;
+  --white2: #ffffff;
+  --black2: #4f4f4f;
+  --grey2: #5f6368;
+  --background2: #f2f2f7;
+  --accent-2: #0066ff;
+  --line-f0f0f0: #f0f0f0;
+  --line-d6d6d6: #d6d6d6;
+  --error: #de3618;
 }

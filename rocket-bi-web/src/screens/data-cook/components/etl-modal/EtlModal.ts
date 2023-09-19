@@ -1,5 +1,6 @@
 import Modal from '@/screens/data-ingestion/components/di-upload-document/components/commons/Modal.vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import { AtomicAction } from '@core/common/misc';
 
 @Component({
   components: {
@@ -45,6 +46,7 @@ export default class EtlModal extends Vue {
     this.hide();
   }
 
+  @AtomicAction()
   submit() {
     this.$emit('submit');
     // this.hide();

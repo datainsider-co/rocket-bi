@@ -1,12 +1,21 @@
 export interface ContextMenuItem {
+  /**
+   * Using <i> tag for rendering icon
+   * Refer icon than iconSrc if both are provided
+   */
   icon?: string;
+  /**
+   * Render icon using <img> tag
+   * Refer icon than iconSrc if both are provided
+   */
+  iconSrc?: string;
+
   text?: string;
   divider?: string;
   disabled?: boolean;
   cursor?: string;
   textColor?: string;
-  click?: any;
+  click?: (event: MouseEvent) => void;
   id?: string;
-  refName?: string;
   hidden?: boolean;
 }

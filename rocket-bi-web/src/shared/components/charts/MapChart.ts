@@ -7,7 +7,7 @@ import { Component, Ref, Watch } from 'vue-property-decorator';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart';
 import { ClassProfiler } from '@/shared/profiler/Annotation';
 import { MapItem, MapResponse } from '@core/common/domain/response';
-import { ChartOption, MapChartChartOption, MapQuerySetting } from '@core/common/domain/model';
+import { ChartOption, MapChartChartOption, MapQuerySetting, ValueControlType } from '@core/common/domain/model';
 import { DIException } from '@core/common/domain/exception';
 import Highcharts from 'highcharts/highmaps';
 import mapInit from 'highcharts/modules/map';
@@ -36,9 +36,10 @@ export default class MapChart extends BaseHighChartWidget<MapResponse, MapChartC
 
   constructor() {
     super();
-    const selectSeriesItem = this.handleSelectSeriesItem;
+    const selectItem = this.handleSelectItem;
     const tooltipFormatter = this.tooltipFormatter;
     const dataLabelsFormatter = this.dataLabelsFormatter;
+    let selectedItem: MapItem | null = null;
     const manualOptions = {
       chart: {
         spacing: this.getSpacingOfMap()
@@ -83,7 +84,10 @@ export default class MapChart extends BaseHighChartWidget<MapResponse, MapChartC
             events: {
               click: function() {
                 const item: MapItem = MapItem.fromObject((this as any).options);
-                selectSeriesItem(item);
+                const isSelected = selectedItem?.code === item.code;
+                selectedItem = isSelected ? null : item;
+                Log.debug('MapChart::click', item, isSelected);
+                selectItem(item, isSelected);
               }
             }
           },
@@ -133,10 +137,18 @@ export default class MapChart extends BaseHighChartWidget<MapResponse, MapChartC
     return this.chart?.getChart();
   }
 
-  handleSelectSeriesItem(mapItem: MapItem) {
+  handleSelectItem(mapItem: MapItem, isSelected: boolean) {
     if (this.setting.options.isCrossFilter) {
-      const crossFilterData = new CrossFilterData(this.chartInfo.id, mapItem.name, { map: mapItem });
-      this.$root.$emit(DashboardEvents.ApplyCrossFilter, crossFilterData);
+      const valueMap: Map<ValueControlType, string[]> | undefined = this.toValueMap(mapItem, isSelected);
+      this.applyDirectCrossFilter(valueMap);
+    }
+  }
+
+  private toValueMap(value: MapItem, isSelected: boolean): Map<ValueControlType, string[]> | undefined {
+    if (isSelected) {
+      return new Map<ValueControlType, string[]>([[ValueControlType.SelectedValue, [value.name]]]);
+    } else {
+      return void 0;
     }
   }
 
@@ -217,7 +229,7 @@ export default class MapChart extends BaseHighChartWidget<MapResponse, MapChartC
     const value = this.numberFormatter.format(point.point.value ?? 0);
     const color = point.color;
     const textColor = this.setting.options.tooltip?.style?.color ?? '#fff';
-    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="text-align: left; color: ${textColor}; font-family: ${fontFamily}">
                 <span>${x}</span></br>
                 <span style="color:${color}; padding-right: 5px;">●</span>${name}: <b>${value}</b>
@@ -235,7 +247,7 @@ export default class MapChart extends BaseHighChartWidget<MapResponse, MapChartC
     if (isShow) {
       const textColor = this.setting.options?.plotOptions?.map?.dataLabels?.style?.color ?? '#fff';
       const fontSize = this.setting.options?.plotOptions?.map?.dataLabels?.style?.fontSize ?? '11px';
-      const fontFamily = this.setting.options?.plotOptions?.map?.dataLabels?.style?.fontFamily ?? 'Roboto';
+      const fontFamily = this.setting.options?.plotOptions?.map?.dataLabels?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
       const formattedData = this.numberFormatter.format(point.point.value ?? 0);
       return `<div style="color: ${textColor}, font-family: ${fontFamily}, font-size: ${fontSize}"> ${formattedData}</div>`;
     } else {

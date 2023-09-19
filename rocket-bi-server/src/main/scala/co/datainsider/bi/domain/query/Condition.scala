@@ -2,6 +2,7 @@ package co.datainsider.bi.domain.query
 
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
+import com.fasterxml.jackson.databind.JsonNode
 
 @JsonTypeInfo(
   use = JsonTypeInfo.Id.NAME,
@@ -360,7 +361,8 @@ case class NotEqualField(
 case class DynamicCondition(
     dynamicWidgetId: Long,
     baseCondition: Condition,
-    finalCondition: Option[Condition] = None
+    finalCondition: Option[Condition] = None,
+    extraData: Option[JsonNode] = None
 ) extends ControlCondition
 
 case class AlwaysTrue() extends ControlCondition

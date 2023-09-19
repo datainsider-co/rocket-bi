@@ -43,7 +43,7 @@ import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator';
 import { GoogleAnalyticJob, Job, SyncMode } from '@core/data-ingestion';
 import DynamicSuggestionInput from '@/screens/data-ingestion/components/DynamicSuggestionInput.vue';
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
-import { DateTimeFormatter, DateUtils, ListUtils } from '@/utils';
+import { DateTimeUtils, DateUtils, ListUtils } from '@/utils';
 import { DIException } from '@core/common/domain';
 import { Log } from '@core/utils';
 import { GoogleAnalyticTables } from '@/screens/data-ingestion/components/google-analytics/GoogleAnalyticTables';
@@ -173,7 +173,7 @@ export default class GoogleAnalytic4SyncModeConfig extends Vue {
       case GADateMode.Today:
         return dateMode as string;
       case GADateMode.Custom:
-        return DateTimeFormatter.formatDateWithTime(date, '');
+        return DateTimeUtils.formatDate(date);
       default:
         throw new DIException(`Unsupported job type ${dateMode}`);
     }

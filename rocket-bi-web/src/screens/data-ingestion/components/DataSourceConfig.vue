@@ -7,6 +7,7 @@
           <i class="fa fa-spinner fa-spin"></i>
         </div>
         <DiDropdown
+          :disabled="isDisabledSelectSource"
           id="datasource-dropdown"
           v-model="syncJob.sourceId"
           :appendAtRoot="true"
@@ -30,7 +31,7 @@ import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore
 import { DataSourceInfo, Job, SortRequest } from '@core/data-ingestion';
 import { DIException, SortDirection } from '@core/common/domain';
 import { Log } from '@core/utils';
-import { Component, PropSync, Vue } from 'vue-property-decorator';
+import { Component, Prop, PropSync, Vue } from 'vue-property-decorator';
 import { minValue } from 'vuelidate/lib/validators';
 
 @Component({
@@ -44,6 +45,9 @@ import { minValue } from 'vuelidate/lib/validators';
 export default class DataSourceConfig extends Vue {
   @PropSync('job')
   syncJob!: Job;
+
+  @Prop({ default: false })
+  isDisabledSelectSource!: boolean;
 
   private dataSourceLoading = false;
 

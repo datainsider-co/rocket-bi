@@ -23,7 +23,8 @@ import {
   Field,
   MapQuerySetting,
   NumberQuerySetting,
-  QuerySettingType
+  QuerySettingClassName,
+  ValueControlType
 } from '@core/common/domain';
 import { MouseEventData } from '@chart/BaseChart';
 import DataListing from '@/screens/dashboard-detail/components/widget-container/charts/action-widget/DataListing.vue';
@@ -149,7 +150,7 @@ export default class WidgetContextMenu extends Vue {
     const options: ContextMenuItem[] = [
       {
         text: 'Use as a filter',
-        click: () => this.handleClickUseAsCrossFilter(metaData, mouseEventData.data),
+        click: () => this.handleClickUseAsFilter(metaData, mouseEventData.data),
         disabled: !(CrossFilterable.isCrossFilterable(metaData.setting) && metaData.setting.isEnableCrossFilter())
       },
       {
@@ -248,7 +249,7 @@ export default class WidgetContextMenu extends Vue {
 
   private getAllMainFilters(metaData: ChartInfo, value: string) {
     const dataManager = DataManager;
-    const mainFilters = dataManager.getMainFilters(this.dashboardId());
+    const mainFilters = dataManager.getLocalFilters(this.dashboardId());
     const extraFilters = this.drillThroughResolver.createFilter(metaData, value);
     return [...mainFilters, ...extraFilters];
   }
@@ -279,7 +280,11 @@ export default class WidgetContextMenu extends Vue {
   }
 
   private isDisableResetFilter(metaData: ChartInfo): boolean {
-    return FilterModule.currentCrossFilterData === null;
+    if (QuerySettingModule.getDynamicValueAsMap(metaData.id).size !== 0) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   private isDisableDrilldown(metaData: ChartInfo, mouseEvent?: MouseEventData<string>): boolean {
@@ -302,7 +307,7 @@ export default class WidgetContextMenu extends Vue {
 
   private isDisableDrillThrough(metaData: ChartInfo) {
     switch (metaData.setting.className) {
-      case QuerySettingType.TabFilter:
+      case QuerySettingClassName.TabFilter:
         return true;
       default:
         return false;
@@ -323,11 +328,17 @@ export default class WidgetContextMenu extends Vue {
   }
 
   private resetCrossFilter(metaData: ChartInfo) {
-    FilterModule.handleRemoveCrossFilter();
+    DashboardControllerModule.applyDynamicValues({
+      id: metaData.id,
+      valueMap: void 0
+    });
   }
 
-  private handleClickUseAsCrossFilter(metaData: ChartInfo, value: string) {
-    this.$root.$emit(DashboardEvents.ApplyCrossFilter, new CrossFilterData(metaData.id, value));
+  private handleClickUseAsFilter(metaData: ChartInfo, value: string) {
+    DashboardControllerModule.applyDynamicValues({
+      id: metaData.id,
+      valueMap: new Map([[ValueControlType.SelectedValue, [value]]])
+    });
   }
 
   private isDisableResetDrilldown(metaData: ChartInfo) {
@@ -348,7 +359,7 @@ export default class WidgetContextMenu extends Vue {
   private handleClickUseAsCrossFilterOnWidget(metaData: ChartInfo, event: MouseEvent) {
     const chartResponse = ChartDataModule.getVisualizationResponse(metaData.id);
     if (DimensionListing.isDimensionListing(chartResponse)) {
-      this.dimensionPicker?.show(event, chartResponse, value => this.handleClickUseAsCrossFilter(metaData, value));
+      this.dimensionPicker?.show(event, chartResponse, value => this.handleClickUseAsFilter(metaData, value));
     }
   }
 

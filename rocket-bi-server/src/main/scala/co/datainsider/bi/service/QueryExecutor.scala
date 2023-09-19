@@ -45,7 +45,6 @@ trait QueryExecutor {
 }
 
 final class QueryExecutorImpl @Inject() (
-    parserFactory: QueryParserFactory,
     connectionService: ConnectionService,
     engineResolver: EngineResolver
 ) extends QueryExecutor
@@ -54,7 +53,7 @@ final class QueryExecutorImpl @Inject() (
   override def parseQuery(orgId: Long, query: Query, useAliasName: Boolean): Future[String] = {
     connectionService.getTunnelConnection(orgId).map { source =>
       val engine: Engine[Connection] = engineResolver.resolve(source.getClass).asInstanceOf[Engine[Connection]]
-      val queryParser: QueryParser = parserFactory.createQueryParser(engine.getSqlParser())
+      val queryParser: QueryParser = new QueryParserImpl(engine.getSqlParser())
       queryParser.parse(query, useAliasName)
     }
   }
@@ -683,7 +682,7 @@ final class QueryExecutorImpl @Inject() (
   override def exportToFile(orgId: Long, query: Query, fileType: FileType): Future[String] = {
     connectionService.getTunnelConnection(orgId).flatMap { source: Connection =>
       val engine = engineResolver.resolve(source.getClass).asInstanceOf[Engine[Connection]]
-      val parser: QueryParser = parserFactory.createQueryParser(engine.getSqlParser())
+      val parser: QueryParser = new QueryParserImpl(engine.getSqlParser())
       val sql: String = parser.parse(query, useAliasName = false)
       FileStorage.get(engine, source, sql, fileType)
     }

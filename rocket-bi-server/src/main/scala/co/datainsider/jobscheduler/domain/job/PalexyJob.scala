@@ -1,19 +1,16 @@
 package co.datainsider.jobscheduler.domain.job
 
-import co.datainsider.bi.util.Implicits.RichOption
 import co.datainsider.jobscheduler.domain.Ids.{JobId, SourceId}
 import co.datainsider.jobscheduler.domain.job.JobStatus.JobStatus
 import co.datainsider.jobscheduler.domain.job.JobType.JobType
 import co.datainsider.jobscheduler.domain.job.SyncMode.SyncMode
 import co.datainsider.jobscheduler.domain.{JobProgress, PalexyJobProgress}
 import co.datainsider.jobscheduler.util.JsonUtils
-import co.datainsider.jobworker.util.DateTimeUtils
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.JsonNode
-import com.twitter.finatra.validation.constraints.{NotEmpty, Pattern}
+import com.twitter.finatra.validation.constraints.NotEmpty
 import datainsider.client.domain.scheduler.{NoneSchedule, ScheduleMinutely, ScheduleTime}
 
-import java.sql.{Date, ResultSet}
+import java.sql.ResultSet
 
 case class PalexyJob(
     orgId: Long = -1,
@@ -34,7 +31,7 @@ case class PalexyJob(
     destinations: Seq[String],
     dimensions: Set[String],
     metrics: Set[String],
-    dateRange: PalexyDateRange,
+    dateRange: DateRangeInfo,
     storeIds: Set[String] = Set.empty,
     storeCodes: Set[String] = Set.empty,
     lastSyncedValue: Option[String] = None
@@ -97,22 +94,6 @@ case class PalexyJob(
   }
 }
 
-case class PalexyDateRange(
-    // yyyy-MM-dd, yesterday, last_n_days, today
-    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}|yesterday|last_\\d+_days|today")
-    fromDate: String,
-    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}|yesterday|last_\\d+_days|today")
-    toDate: String
-) {
-
-  @JsonIgnore
-  def calculateFromDate(): Date =
-    DateTimeUtils.parseToDate(fromDate).getOrElseThrow(new IllegalArgumentException(s"invalid date format $fromDate"))
-  @JsonIgnore
-  def calculateToDate(): Date =
-    DateTimeUtils.parseToDate(toDate).getOrElseThrow(new IllegalArgumentException(s"invalid date format $toDate"))
-}
-
 object PalexyJob {
   def fromResultSet(rs: ResultSet): PalexyJob = {
     val jobData: JsonNode = JsonUtils.readTree(rs.getString("job_data"))
@@ -144,7 +125,7 @@ object PalexyJob {
       destinations = dataDestinations,
       dimensions = JsonUtils.fromJson[Set[String]](jobData.at("/dimensions").textValue()),
       metrics = JsonUtils.fromJson[Set[String]](jobData.at("/metrics").textValue()),
-      dateRange = JsonUtils.fromJson[PalexyDateRange](jobData.at("/date_range").textValue()),
+      dateRange = JsonUtils.fromJson[DateRangeInfo](jobData.at("/date_range").textValue()),
       storeIds = JsonUtils.fromJson[Set[String]](jobData.at("/store_ids").textValue()),
       storeCodes = JsonUtils.fromJson[Set[String]](jobData.at("/store_codes").textValue()),
       lastSyncedValue =

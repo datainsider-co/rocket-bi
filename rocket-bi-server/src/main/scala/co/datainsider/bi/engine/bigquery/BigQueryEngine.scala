@@ -93,13 +93,13 @@ class BigQueryEngine(clientManager: ClientManager, maxQueryRows: Int = 10000, de
   override def testConnection(source: BigQueryConnection): Future[Boolean] =
     Future {
       try {
-        Using(createClient(source)) {
-         client: BigQueryClient => {
-           val connTimeoutMs = 30000L
-           client.query("select 1", Some(connTimeoutMs))((tableResult: TableResult) => {
-             tableResult.iterateAll().asScala.head.get(0).getLongValue.equals(1L)
-           })
-         }
+        Using(createClient(source)) { client: BigQueryClient =>
+          {
+            val connTimeoutMs = 30000L
+            client.query("select 1", Some(connTimeoutMs))((tableResult: TableResult) => {
+              tableResult.iterateAll().asScala.head.get(0).getLongValue.equals(1L)
+            })
+          }
         }
       } catch {
         case ex: Throwable => throw InternalError(s"unable to connect to bigquery, cause ${ex.getMessage}")

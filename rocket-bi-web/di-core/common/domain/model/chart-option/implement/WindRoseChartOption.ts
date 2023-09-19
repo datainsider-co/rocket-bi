@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionData, SeriesOptionData, ChartOptionClassName } from '@core/common/domain/model';
 import { StringUtils } from '@/utils/StringUtils';
 import { cloneDeep, merge } from 'lodash';
 import { ObjectUtils } from '@core/utils/ObjectUtils';
@@ -63,8 +63,7 @@ export class WindRoseChartOption extends ChartOption {
     }
   };
 
-  chartFamilyType = ChartFamilyType.Series;
-  className = VizSettingType.WindRoseSetting;
+  className = ChartOptionClassName.WindRoseSetting;
 
   /**
    * @key: label (Online, Offline)
@@ -90,7 +89,7 @@ export class WindRoseChartOption extends ChartOption {
   }
 
   static getDefaultChartOption(): WindRoseChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const gridLineColor: string = this.getGridLineColor();
     const options: SeriesOptionData = {
       chart: {
@@ -112,26 +111,8 @@ export class WindRoseChartOption extends ChartOption {
           }
         }
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       affectedByFilter: true,
       themeColor: { enabled: true },
       background: this.getThemeBackgroundColor(),
@@ -145,11 +126,7 @@ export class WindRoseChartOption extends ChartOption {
           },
           dataLabels: {
             enabled: false,
-            style: {
-              color: textColor,
-              fontSize: '11px',
-              fontFamily: 'Roboto'
-            }
+            style: ChartOption.getSecondaryStyle()
           }
         }
       },
@@ -193,10 +170,7 @@ export class WindRoseChartOption extends ChartOption {
       ],
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       }
     };
     return new WindRoseChartOption(options);

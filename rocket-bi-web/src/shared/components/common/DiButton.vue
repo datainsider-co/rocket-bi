@@ -1,5 +1,5 @@
 <template>
-  <div :id="id" :style="btnStyle" tabindex="-1" class="di-button" @click="handleClick">
+  <div :id="id" :style="btnStyle" :class="justifyContentClass" tabindex="-1" class="di-button" @click="handleClick">
     <template v-if="isLoading">
       <i class="fa fa-spin fa-spinner"></i>
     </template>
@@ -11,6 +11,7 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator';
+import { AtomicAction } from '@core/common/misc';
 
 @Component
 export default class DiButton extends Vue {
@@ -32,6 +33,23 @@ export default class DiButton extends Vue {
   @Prop({ required: false, type: Boolean })
   private readonly isLoading!: boolean;
 
+  /**
+   * align text in button (left, center, right)
+   */
+  @Prop({ required: false, type: String, default: 'center' })
+  private readonly align!: string;
+
+  protected get justifyContentClass(): string {
+    switch (this.align) {
+      case 'left':
+        return 'justify-content-start';
+      case 'right':
+        return 'justify-content-end';
+      default:
+        return 'justify-content-center';
+    }
+  }
+
   get fullStyle(): string {
     return !this.textStyle ? 'regular-text-14 flex-shrink-1 ' : 'flex-shrink-1 ' + this.textStyle;
   }
@@ -47,9 +65,9 @@ export default class DiButton extends Vue {
     }
   }
 
-  @Emit('click')
-  private handleClick(event: MouseEvent): MouseEvent {
-    return event;
+  @AtomicAction()
+  protected handleClick(event: MouseEvent): void {
+    this.$emit('click', event);
   }
 }
 </script>
@@ -67,13 +85,12 @@ export default class DiButton extends Vue {
   justify-content: center;
 
   .regular-text-14 {
-    line-height: 1;
+    line-height: 1.4; // cause issue with text-overflow: ellipsis
     padding-bottom: 0;
     padding-top: 0;
     text-align: center;
     white-space: nowrap;
-    //width: 100%;
-    padding-left: 6px;
+    padding-left: 8px;
     overflow: hidden;
     text-overflow: ellipsis;
 
@@ -99,6 +116,15 @@ export default class DiButton extends Vue {
     &:active,
     &:focus {
       background-color: var(--accent--root) !important;
+    }
+  }
+
+  &[hover-primary] {
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: var(--accent--root) !important;
+      color: white !important;
     }
   }
 
@@ -132,6 +158,7 @@ export default class DiButton extends Vue {
   &[border] {
     border: solid #d6d6d6 1px !important;
   }
+
   &[border-accent] {
     border: solid var(--accent) 1px !important;
     color: var(--accent) !important;

@@ -17,7 +17,14 @@ import com.twitter.inject.{Injector, IntegrationTest}
 class ETLPreviewServiceTest extends IntegrationTest {
   private lazy val previewService = injector.instance[ETLPreviewService]
 
-  override protected val injector: Injector = DiTestInjector(TestDataCookModule, TestContainerModule, TestModule, SchemaModule, MockCaasClientModule, MockSchemaClientModule).newInstance()
+  override protected val injector: Injector = DiTestInjector(
+    TestDataCookModule,
+    TestContainerModule,
+    TestModule,
+    SchemaModule,
+    MockCaasClientModule,
+    MockSchemaClientModule
+  ).newInstance()
   var jobId: JobHistoryId = _
 
   test("Get database name for preview with org: 1, id: 1") {
@@ -49,13 +56,22 @@ class ETLPreviewServiceTest extends IntegrationTest {
           )
         ),
         extraFields = Array(
-          ExpressionFieldConfiguration(fieldName = "name_lower_case", displayName = "Name To Lower case", expression = "lower(name)"),
-          ExpressionFieldConfiguration(fieldName = "age", displayName = "age", expression = "lower(age)", asType = Some(FieldType.Int32)),
+          ExpressionFieldConfiguration(
+            fieldName = "name_lower_case",
+            displayName = "Name To Lower case",
+            expression = "lower(name)"
+          ),
+          ExpressionFieldConfiguration(
+            fieldName = "age",
+            displayName = "age",
+            expression = "lower(age)",
+            asType = Some(FieldType.Int32)
+          )
         )
       )
     )
     val expectedQuery =
-      """select tbl_d796e7.id as `Name Normal`, cast(tbl_d796e7.name as Nullable(Int16)) as `Name as number 16`, lower(name) as `Name To Lower case`, cast(lower(age) as Nullable(Int32)) as `age`
+      """select tbl_d796e7.`id` as `Name Normal`, cast(tbl_d796e7.`name` as Nullable(Int16)) as `Name as number 16`, lower(name) as `Name To Lower case`, cast(lower(age) as Nullable(Int32)) as `age`
         |from test.animal tbl_d796e7""".stripMargin
 
     assert(query.trim == expectedQuery.trim)

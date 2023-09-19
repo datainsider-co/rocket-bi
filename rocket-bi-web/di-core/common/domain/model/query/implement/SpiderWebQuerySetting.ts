@@ -7,8 +7,7 @@ import {
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
-  SpiderWebChartOption,
+  QuerySettingClassName,
   TableColumn,
   WidgetId,
   Zoomable
@@ -20,8 +19,8 @@ import { Drilldownable, DrilldownData } from '@core/common/domain/model/query/fe
 import { ConditionUtils } from '@core/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class SpiderWebQuerySetting extends QuerySetting<SpiderWebChartOption> implements Zoomable, Drilldownable, CrossFilterable {
-  readonly className = QuerySettingType.SpiderWeb;
+export class SpiderWebQuerySetting extends QuerySetting implements Zoomable, Drilldownable, CrossFilterable {
+  readonly className = QuerySettingClassName.SpiderWeb;
 
   constructor(
     public legend: TableColumn,
@@ -29,7 +28,6 @@ export class SpiderWebQuerySetting extends QuerySetting<SpiderWebChartOption> im
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-
     sqlViews: InlineSqlView[] = [],
     parameters: Record<string, string> = {}
   ) {
@@ -53,7 +51,7 @@ export class SpiderWebQuerySetting extends QuerySetting<SpiderWebChartOption> im
     return [this.legend.function, ...this.values.map(yAxis => yAxis.function)];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.legend, ...this.values];
   }
 
@@ -86,12 +84,12 @@ export class SpiderWebQuerySetting extends QuerySetting<SpiderWebChartOption> im
     return this.legend;
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.legend = ConfigDataUtils.replaceDynamicFunction(this.legend, functions);
     this.values = ConfigDataUtils.replaceDynamicFunctions(this.values, functions);
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.legend;
   }
 

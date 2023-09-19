@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { ColumnType, Field, FlattenPivotTableQuerySetting, ScalarFunction, TableQueryChartSetting, TableSchema } from '@core/common/domain';
+import { ColumnType, ExportType, Field, FlattenPivotTableQuerySetting, ScalarFunction, TableQueryChartSetting, TableSchema } from '@core/common/domain';
 import { EQUAL_FIELD_TYPE, ETLOperatorType, JOIN_TYPE, PERSISTENT_TYPE } from './EtlEnum';
 import cloneDeep from 'lodash/cloneDeep';
 import { ThirdPartyPersistConfiguration } from '@core/data-cook/domain/etl/third-party-persist-configuration/ThirdPartyPersistConfiguration';
@@ -395,6 +395,7 @@ export class SendToGroupEmailOperator extends EtlOperator {
   content: string | null;
   fileNames: string[];
   isZip: boolean;
+  fileType: 'Csv' | 'Excel';
 
   constructor(
     public operators: EtlOperator[],
@@ -406,7 +407,8 @@ export class SendToGroupEmailOperator extends EtlOperator {
     fileNames: string[] = [],
     content?: string | null,
     displayName?: string | null,
-    isZip = false
+    isZip = false,
+    fileType: 'Csv' | 'Excel' = 'Csv'
   ) {
     super(ETLOperatorType.SendToGroupEmailOperator, destTableConfiguration, false, null, null, []);
     this.receivers = receivers;
@@ -417,6 +419,7 @@ export class SendToGroupEmailOperator extends EtlOperator {
     this.content = content || null;
     this.displayName = displayName || null;
     this.isZip = isZip;
+    this.fileType = fileType;
   }
 
   getParentOperators(): EtlOperator[] {
@@ -451,7 +454,8 @@ export class SendToGroupEmailOperator extends EtlOperator {
       operator.fileNames,
       operator.content,
       operator.displayName,
-      operator.isZip
+      operator.isZip,
+      operator.fileType ?? 'Csv'
     );
   }
 }

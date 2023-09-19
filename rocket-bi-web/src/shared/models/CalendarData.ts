@@ -8,6 +8,9 @@ import { MainDateMode } from '@core/common/domain/model';
 import { DIException } from '@core/common/domain';
 
 export class CalendarData {
+  /**
+   * @deprecated it is not used
+   */
   compareDateRange: DateRange | null;
   chosenDateRange: DateRange | null;
 
@@ -48,6 +51,9 @@ export class CalendarData {
     return this.filterMode == MainDateMode.allTime;
   }
 
+  /**
+   * @deprecated always return false, because compare mode is moved to query request
+   */
   get isCompare(): boolean {
     return this.compareMode != CompareMode.none;
   }

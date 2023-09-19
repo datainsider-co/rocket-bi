@@ -10,8 +10,7 @@ import {
   Function,
   getFiltersAndSorts,
   OrderBy,
-  PivotTableChartOption,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   ChartOption,
   InlineSqlView,
@@ -20,12 +19,12 @@ import {
 import { SortDirection } from '@core/common/domain/request';
 import { Sortable } from '@core/common/domain/model/query/features/Sortable';
 import { Paginatable } from '@core/common/domain/model/query/features/Paginatable';
-import { clone, cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { ListUtils } from '@/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class FlattenPivotTableQuerySetting extends QuerySetting<PivotTableChartOption> implements Sortable, Paginatable {
-  readonly className = QuerySettingType.FlattenPivot;
+export class FlattenPivotTableQuerySetting extends QuerySetting implements Sortable, Paginatable {
+  readonly className = QuerySettingClassName.FlattenPivot;
 
   constructor(
     public columns: TableColumn[],
@@ -53,7 +52,7 @@ export class FlattenPivotTableQuerySetting extends QuerySetting<PivotTableChartO
   }
 
   static isFlattenPivotChartSetting(setting: any): setting is FlattenPivotTableQuerySetting {
-    return setting.className == QuerySettingType.PivotTable;
+    return setting.className == QuerySettingClassName.PivotTable;
   }
 
   getAllFunction(): Function[] {
@@ -63,7 +62,7 @@ export class FlattenPivotTableQuerySetting extends QuerySetting<PivotTableChartO
     return [...columnFunctions, ...rowFunctions, ...valueFunctions];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [...this.columns, ...this.rows, ...this.values];
   }
 
@@ -106,13 +105,13 @@ export class FlattenPivotTableQuerySetting extends QuerySetting<PivotTableChartO
     this.formatters = formatters;
   }
 
-  protected setValueBySetting(setting: ChartOption) {
+  protected assignChartOptionValue(setting: ChartOption) {
     if (FormatterSetting.isFormatterSetting(setting)) {
       this.formatters = setting.getFormatters();
     }
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.columns = ConfigDataUtils.replaceDynamicFunctions(this.columns, functions);
     this.rows = ConfigDataUtils.replaceDynamicFunctions(this.rows, functions);
     this.values = ConfigDataUtils.replaceDynamicFunctions(this.values, functions);

@@ -8,21 +8,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Ref } from 'vue-property-decorator';
+import { Component, Model, Prop, Vue } from 'vue-property-decorator';
 import DiButtonGroup, { ButtonInfo } from '@/shared/components/common/DiButtonGroup.vue';
-import { TextAlign } from '@/screens/dashboard-detail/components/align-setting/TextAlign';
+import { TextAlign } from '@core/common/domain';
 
 @Component({
   components: {
     DiButtonGroup
   }
 })
-export default class TextStyleSetting extends Vue {
+export default class AlignSettingV2 extends Vue {
   @Prop({ type: String, default: 'Font style' })
-  title!: string;
+  protected readonly title!: string;
 
-  @Prop({ type: String, required: true })
-  settingValue!: string;
+  @Model('change', { type: String, required: true })
+  protected readonly settingValue!: TextAlign;
 
   private get alignOptions(): ButtonInfo[] {
     return [

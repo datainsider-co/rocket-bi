@@ -39,7 +39,7 @@ export default class CollapseTab extends Vue {
   @Prop({ required: false, type: Object })
   private readonly setting!: PivotTableChartOption;
   private readonly defaultValue = {
-    color: ChartOption.getThemeTextColor(),
+    color: ChartOption.getPrimaryTextColor(),
     background: ChartOption.getTableToggleColor()
   };
 

@@ -1,6 +1,6 @@
 import Highcharts, { Point } from 'highcharts';
 import { Component, Ref, Watch } from 'vue-property-decorator';
-import { ChartOption, ChartOptionData, DonutChartOption, PieQuerySetting } from '@core/common/domain/model';
+import { ChartOption, ChartOptionData, DonutChartOption, PieQuerySetting, ValueControlType } from '@core/common/domain/model';
 import { merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
 import { ClassProfiler } from '@/shared/profiler/Annotation';
@@ -24,7 +24,7 @@ export default class DonutChart extends BaseHighChartWidget<SeriesTwoResponse, D
 
   constructor() {
     super();
-    const selectSeriesItem = this.handleSelectSeriesItem;
+    const selectValue = this.handleSelectItem;
     const drilldownListener = this.createRightClickAsOptions('name');
     const tooltipFormatter = this.tooltipFormatter;
     const dataLabelsFormatter = this.dataLabelsFormatter;
@@ -34,7 +34,8 @@ export default class DonutChart extends BaseHighChartWidget<SeriesTwoResponse, D
       point: {
         events: {
           click: function() {
-            selectSeriesItem(((this as any) as Point).name);
+            const point = (this as any) as Point;
+            selectValue(point.name, point.selected);
           }
         }
       }
@@ -128,9 +129,18 @@ export default class DonutChart extends BaseHighChartWidget<SeriesTwoResponse, D
     this.options = merge({}, ChartOption.CONFIG, DonutChartOption.DEFAULT_SETTING, this.options, newOptions);
   }
 
-  handleSelectSeriesItem(value: string) {
+  handleSelectItem(value: string, isSelected: boolean) {
     if (this.setting.options.isCrossFilter) {
-      this.$root.$emit(DashboardEvents.ApplyCrossFilter, new CrossFilterData(this.chartInfo.id, value));
+      const valueMap: Map<ValueControlType, string[]> | undefined = this.toValueMap(value, isSelected);
+      this.applyDirectCrossFilter(valueMap);
+    }
+  }
+
+  private toValueMap(value: string, isSelected: boolean): Map<ValueControlType, string[]> | undefined {
+    if (isSelected) {
+      return new Map<ValueControlType, string[]>([[ValueControlType.SelectedValue, [value]]]);
+    } else {
+      return void 0;
     }
   }
 
@@ -175,10 +185,10 @@ export default class DonutChart extends BaseHighChartWidget<SeriesTwoResponse, D
     // Log.debug("Donut::Tooltip::Point:: ", point);
     const x = point.key;
     const name = point.series.name;
-    const value = this.numberFormatter.format(point.y);
+    const value = this.numberFormatter.format(point.y as number);
     const color = point.color;
     const textColor = this.setting.options.tooltip?.style?.color ?? '#fff';
-    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="text-align: left; color: ${textColor}; font-family: ${fontFamily}">
                 <span>${x}</span></br>
                 <span style="color:${color}; padding-right: 5px;">●</span>${name}: <b>${value}</b>

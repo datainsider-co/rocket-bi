@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /*
  * @author: tvc12 - Thien Vi
  * @created: 5/25/21, 5:00 PM
@@ -18,25 +19,32 @@ import {
   Condition,
   Dashboard,
   DIException,
-  DynamicFilter,
+  InternalFilter,
   Equatable,
-  Filterable,
-  FilterPanel,
+  FilterableSetting,
+  GroupFilter,
   FilterRequest,
   FilterWidget,
   MainDateMode,
   QueryRelatedWidget,
   QuerySetting,
   Widget,
-  WidgetId
+  WidgetId,
+  DashboardId,
+  MapItem,
+  ValueControlType
 } from '@core/common/domain';
 import { Log } from '@core/utils';
 import { Action, getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { FilterStoreUtils } from '@/screens/dashboard-detail/stores/widget/FilterStoreUtils';
 import { DataManager } from '@core/common/services';
 
+interface CrossFilterExtraData {
+  map?: MapItem;
+}
+
 export class CrossFilterData extends Equatable {
-  constructor(readonly activeId: WidgetId, readonly value: string, readonly extraData?: any) {
+  constructor(readonly activeId: WidgetId, readonly value: string, readonly extraData?: CrossFilterExtraData) {
     super();
   }
 
@@ -45,23 +53,34 @@ export class CrossFilterData extends Equatable {
   }
 }
 
-export class PanelFilterInfo {
+export class GroupFilterInfo {
   panelId: WidgetId;
   filterRequestAsMap: Map<WidgetId, FilterRequest>;
   removedFilterIdAsSet: Set<WidgetId>;
+  /**
+   * Key: is widget id
+   * Value: Map contains value to apply dynamic value, undefined if widget will remove value
+   */
+  crossFilterValueMap: Map<WidgetId, Map<ValueControlType, string[]> | undefined>;
 
-  constructor(panelId: WidgetId, filterRequests: Map<WidgetId, FilterRequest>, removedFilters: Set<WidgetId>) {
+  constructor(
+    panelId: WidgetId,
+    filterRequests: Map<WidgetId, FilterRequest>,
+    removedFilters: Set<WidgetId>,
+    filterValueMap: Map<WidgetId, Map<ValueControlType, string[]>>
+  ) {
     this.panelId = panelId;
     this.filterRequestAsMap = filterRequests;
     this.removedFilterIdAsSet = removedFilters;
+    this.crossFilterValueMap = filterValueMap;
   }
 
-  static empty(panelId: WidgetId): PanelFilterInfo {
-    return new PanelFilterInfo(panelId, new Map(), new Set());
+  static empty(panelId: WidgetId): GroupFilterInfo {
+    return new GroupFilterInfo(panelId, new Map(), new Set(), new Map());
   }
 
-  static fromRequest(panelId: WidgetId, request: FilterRequest): PanelFilterInfo {
-    return new PanelFilterInfo(panelId, new Map([[request.filterId, request]]), new Set());
+  static fromRequest(panelId: WidgetId, request: FilterRequest): GroupFilterInfo {
+    return new GroupFilterInfo(panelId, new Map([[request.filterId, request]]), new Set(), new Map<WidgetId, Map<ValueControlType, string[]>>());
   }
 
   setRequest(request: FilterRequest): boolean {
@@ -73,6 +92,10 @@ export class PanelFilterInfo {
       Log.error(ex);
       return false;
     }
+  }
+
+  setFilterValueMap(widgetId: WidgetId, valueMap?: Map<ValueControlType, string[]>) {
+    this.crossFilterValueMap.set(widgetId, valueMap);
   }
 
   removeRequest(id: WidgetId) {
@@ -97,41 +120,24 @@ export class PanelFilterInfo {
 
 @Module({ dynamic: true, namespaced: true, store: store, name: Stores.FilterStore })
 export class FilterStore extends VuexModule {
-  mainFilterWidgets: Map<WidgetId, FilterWidget> = new Map<WidgetId, FilterWidget>();
-  filterRequests: Map<WidgetId, FilterRequest> = new Map<WidgetId, FilterRequest>();
-  innerFilters: Map<WidgetId, FilterRequest> = new Map<WidgetId, FilterRequest>();
-  filterPanelAsMap: Map<WidgetId, PanelFilterInfo> = new Map<WidgetId, PanelFilterInfo>();
+  mainFilterRequestMap: Map<WidgetId, FilterRequest> = new Map<WidgetId, FilterRequest>();
+  innerFilterRequestMap: Map<WidgetId, FilterRequest> = new Map<WidgetId, FilterRequest>();
+  groupFilterMap: Map<WidgetId, GroupFilterInfo> = new Map<WidgetId, GroupFilterInfo>();
 
-  currentCrossFilterData: CrossFilterData | null = null;
-  //Main date Filter
+  // Main date Filter value it is save in memory.
   chosenRange: DateRange | null = null;
   mainDateMode: MainDateMode | null = null;
-
-  compareRange: DateRange | null = null;
   // filter in routers
-  routerFilters: DynamicFilter[] = [];
-  ///Is filter (single choice, multi choice, ...) or cross filter
-  excludeApplyFilterIds: Set<WidgetId> = new Set<WidgetId>();
+  routerFilters: InternalFilter[] = [];
   /**
    * all widget ignore filter.
    * if widget is in this list, it will not be affected by filter
    */
   unAffectByFilters: Set<WidgetId> = new Set<WidgetId>();
 
-  get crossFilterRequest(): FilterRequest | null {
-    if (this.currentCrossFilterData) {
-      const activeId: WidgetId = this.currentCrossFilterData.activeId;
-      const querySetting: QuerySetting = QuerySettingModule.buildQuerySetting(activeId);
-      const filterRequest: FilterRequest | undefined = FilterRequest.fromValue(activeId, querySetting, this.currentCrossFilterData.value);
-      return filterRequest || null;
-    } else {
-      return null;
-    }
-  }
-
-  get isAffectedByFilter(): (id: WidgetId) => boolean {
+  get canApplyFilter(): (id: WidgetId) => boolean {
     return id => {
-      return !this.unAffectByFilters.has(id) && !this.excludeApplyFilterIds.has(id);
+      return !this.unAffectByFilters.has(id);
     };
   }
 
@@ -141,82 +147,34 @@ export class FilterStore extends VuexModule {
    */
   get getFilters(): (id: WidgetId) => FilterRequest[] {
     return id => {
-      const isChartFilter = ChartInfoUtils.isChartFilterId(id);
-      const parentId = isChartFilter ? ChartInfoUtils.generatedChartParentId(id) : id;
-      const isAffectByFilter = this.isAffectedByFilter(parentId);
-      // const isFilter = this.excludeApplyFilterIds.has(parentId);
+      const isInnerFilter: boolean = ChartInfoUtils.isInnerFilterById(id);
+      const parentId: number = isInnerFilter ? ChartInfoUtils.revertParentId(id) : id;
+      const canApplyFilter: boolean = this.canApplyFilter(parentId);
       const filters = [];
-      filters.push(this.innerFilters.get(id));
-      Log.debug('getAllFilters::isChartFilter::', isChartFilter, '::parentId::', parentId, '::isAffectByFilter::', isAffectByFilter, '::isFilter::');
-      if (isAffectByFilter) {
-        filters.push(
-          this.crossFilterRequest,
-          ...[...this.filterRequests.values()].filter(request => request.filterId !== id), ///All filter request not me
-          ...Array.from(this.mainFilterWidgets.values()).map(widget => widget.toFilterRequest())
-        );
+      filters.push(this.innerFilterRequestMap.get(id));
+      Log.debug('getAllFilters::isChartFilter::', isInnerFilter, '::parentId::', parentId, '::isAffectByFilter::', canApplyFilter, '::isFilter::');
+      if (canApplyFilter) {
+        /// All filter request not me
+        const activeFilters = Array.from(this.mainFilterRequestMap.values()).filter(request => request.filterId !== id);
+        filters.push(...activeFilters);
       }
       ///remove undefined or null
-      return filters.filter((filter): filter is FilterRequest => filter instanceof FilterRequest);
+      return filters.filter((filter): filter is FilterRequest => filter !== undefined && filter !== null);
     };
   }
 
-  /**
-   * Main Date Filter Handler Implement
-   */
-  get mainDateCompareRequest(): MainDateCompareRequest {
-    return {
-      field: DashboardModule.mainDateFilter?.affectedField!,
-      currentRange: this.chosenRange,
-      compareRange: this.compareRange,
-      mainDateMode: this.mainDateMode
-    };
-  }
-
-  get isActivatedCrossFilter(): (crossFilterData: CrossFilterData) => boolean {
-    return crossFilterData => crossFilterData.equals(this.currentCrossFilterData);
-  }
   @Mutation
-  resetCrossFilter(): void {
-    this.currentCrossFilterData = null;
+  addGroupFilter(groupFilter: GroupFilter): void {
+    const groupInfo: GroupFilterInfo = GroupFilterInfo.empty(groupFilter.id);
+    this.groupFilterMap.set(groupInfo.panelId, groupInfo);
   }
 
-  @Action
-  async addFilterRequest(request: FilterRequest): Promise<void> {
-    const { tabId } = WidgetModule.findTabContainWidget(request.filterId);
-    if (tabId > -1) {
-      this.setFilterToFilterPanel({ filterPanelId: tabId, request: request });
-      return Promise.resolve();
-    } else {
-      this.setFilterRequest(request);
-      // avoid stuck ui
-      await this.applyFilters();
-    }
-  }
-
-  @Action
-  async handleApplyFilterPanel(panelId: WidgetId): Promise<void> {
-    if (!this.filterPanelAsMap.has(panelId)) {
+  @Mutation
+  removeGroupFilter(panelId: WidgetId) {
+    if (!this.groupFilterMap.has(panelId)) {
       throw new DIException(`Filter panel ${panelId} is not found!`);
     } else {
-      const filterPanel: PanelFilterInfo = this.filterPanelAsMap.get(panelId)!;
-      this.removeFilters(filterPanel.getRemovedFilterIds());
-      this.setFilterRequests(filterPanel.getRequests());
-      await this.applyFilters();
-    }
-  }
-
-  @Mutation
-  addFilterPanelInfo(filterPanel: FilterPanel): void {
-    const panelInfo: PanelFilterInfo = PanelFilterInfo.empty(filterPanel.id);
-    this.filterPanelAsMap.set(panelInfo.panelId, panelInfo);
-  }
-
-  @Mutation
-  removeFilterPanel(panelId: WidgetId) {
-    if (!this.filterPanelAsMap.has(panelId)) {
-      throw new DIException(`Filter panel ${panelId} is not found!`);
-    } else {
-      this.filterPanelAsMap.delete(panelId);
+      this.groupFilterMap.delete(panelId);
     }
   }
 
@@ -234,95 +192,101 @@ export class FilterStore extends VuexModule {
   }
 
   @Mutation
-  private setFilterRequest(request: FilterRequest): void {
-    this.filterRequests.set(request.filterId, request);
-    this.excludeApplyFilterIds.add(request.filterId);
+  addFilterRequest(request: FilterRequest): void {
+    this.mainFilterRequestMap.set(request.filterId, request);
+    this.unAffectByFilters.add(request.filterId);
   }
 
   @Mutation
-  private setFilterRequests(requests: FilterRequest[]): void {
+  addFilterRequests(requests: FilterRequest[]): void {
     requests.forEach(request => {
-      this.filterRequests.set(request.filterId, request);
-      this.excludeApplyFilterIds.add(request.filterId);
+      this.mainFilterRequestMap.set(request.filterId, request);
+      this.unAffectByFilters.add(request.filterId);
     });
   }
 
   @Mutation
-  private setFilterToFilterPanel(payload: { filterPanelId: WidgetId; request: FilterRequest }): void {
+  pushFilterToGroup(payload: { filterPanelId: WidgetId; request: FilterRequest }): void {
     const { filterPanelId, request } = payload;
-    if (this.filterPanelAsMap.has(filterPanelId)) {
-      this.filterPanelAsMap.get(filterPanelId)!.setRequest(request);
-    } else {
-      ///Create New
-      const filterPanel = PanelFilterInfo.fromRequest(filterPanelId, request);
-      this.filterPanelAsMap.set(filterPanelId, filterPanel);
+    if (!this.groupFilterMap.has(filterPanelId)) {
+      const group = GroupFilterInfo.empty(filterPanelId);
+      this.groupFilterMap.set(filterPanelId, group);
     }
-    this.filterPanelAsMap = new Map(this.filterPanelAsMap);
-    this.excludeApplyFilterIds.add(request.filterId);
+    this.groupFilterMap.get(filterPanelId)!.setRequest(request);
+    this.groupFilterMap = new Map(this.groupFilterMap);
+    this.unAffectByFilters.add(request.filterId);
   }
 
   @Mutation
-  private removeFilterInFilterPanel(payload: { panelId: WidgetId; requestId: WidgetId }) {
+  pushFilterValueToGroup(payload: { groupId: WidgetId; widgetId: WidgetId; valueMap?: Map<ValueControlType, string[]> }): void {
+    const { groupId, valueMap, widgetId } = payload;
+    if (!this.groupFilterMap.has(groupId)) {
+      const group = GroupFilterInfo.empty(groupId);
+      this.groupFilterMap.set(groupId, group);
+    }
+    this.groupFilterMap.get(groupId)!.setFilterValueMap(widgetId, valueMap);
+    this.groupFilterMap = new Map(this.groupFilterMap);
+  }
+
+  @Mutation
+  removeFilterFromGroup(payload: { panelId: WidgetId; requestId: WidgetId }): void {
     const { panelId, requestId } = payload;
-    if (this.filterPanelAsMap.has(panelId)) {
-      this.filterPanelAsMap.get(panelId)!.removeRequest(requestId);
-    } else {
-      throw new DIException(`Filter panel ${panelId} is not found!`);
+    if (this.groupFilterMap.has(panelId)) {
+      this.groupFilterMap.get(panelId)!.removeRequest(requestId);
+      this.groupFilterMap = new Map(this.groupFilterMap);
     }
   }
 
   @Mutation
   private setInnerFilter(request: FilterRequest): void {
-    this.innerFilters.set(request.filterId, request);
+    this.innerFilterRequestMap.set(request.filterId, request);
   }
 
-  @Mutation
-  setMainFilters(widgets: FilterWidget[]): void {
-    this.mainFilterWidgets.clear();
-    const widgetMap: [WidgetId, FilterWidget][] = widgets.map(widget => [widget.id, widget]);
-    this.mainFilterWidgets = new Map<WidgetId, FilterWidget>(widgetMap);
-  }
-
-  @Mutation
-  removeChartFilter(id: WidgetId): void {
-    this.innerFilters.delete(id);
-  }
-
-  @Mutation
-  loadLocalMainFilters(dashboard: Dashboard) {
-    const localMainFilters = DataManager.getMainFilters(dashboard.id.toString());
-    const filters = RouterUtils.getFilters(router.currentRoute);
-    this.routerFilters = filters;
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    FilterModule.setMainFilters(localMainFilters.concat(filters));
-  }
-
-  @Mutation
-  reset() {
-    this.mainFilterWidgets.clear();
-    this.filterRequests.clear();
-    this.currentCrossFilterData = null;
-    // Reset Main date filter
-    this.chosenRange = null;
-    this.compareRange = null;
-    this.routerFilters = [];
-    this.filterPanelAsMap.clear();
-    this.unAffectByFilters.clear();
-  }
-
-  @Mutation
-  loadDateRangeFilter(payload: MainDateData): void {
-    this.mainDateMode = payload.mode;
-    if (payload.mode == MainDateMode.custom) {
-      this.chosenRange = payload.chosenDateRange!;
-    } else {
-      this.chosenRange = DateUtils.getDateRange(payload.mode);
+  @Action
+  async setLocalFilters(widgets: FilterWidget[]): Promise<void> {
+    for (const widget of widgets) {
+      const request = widget.toFilterRequest();
+      if (request) {
+        this.addFilterRequest(request);
+      } else {
+        this.removeFilterRequest(widget.id);
+        this.removeIgnoreApplyFilterById(widget.id);
+      }
     }
   }
 
   @Mutation
-  setCompareRange(range: DateRange | null) {
-    this.compareRange = range;
+  removeChartFilter(id: WidgetId): void {
+    this.innerFilterRequestMap.delete(id);
+  }
+
+  @Action
+  async loadLocalFilters(id: DashboardId): Promise<void> {
+    const localFilters: InternalFilter[] = DataManager.getLocalFilters(String(id));
+    const listFilterInRouter: InternalFilter[] = RouterUtils.getFilters(router.currentRoute);
+    this.setRouterFilters(listFilterInRouter);
+    await this.setLocalFilters(localFilters.concat(listFilterInRouter));
+  }
+
+  @Mutation
+  reset() {
+    this.mainFilterRequestMap.clear();
+    // Reset Main date filter
+    this.chosenRange = null;
+    this.routerFilters = [];
+    this.groupFilterMap.clear();
+    this.unAffectByFilters.clear();
+  }
+
+  @Mutation
+  loadDateRange(payload: MainDateData): void {
+    const { chosenDateRange, mode } = payload;
+    this.mainDateMode = mode;
+    if (mode == MainDateMode.custom) {
+      this.chosenRange = chosenDateRange!;
+    } else {
+      this.chosenRange = DateUtils.getDateRange(mode);
+    }
   }
 
   @Mutation
@@ -331,162 +295,111 @@ export class FilterStore extends VuexModule {
   }
 
   @Mutation
-  setMainDateCalendar(calendar: CalendarData | null) {
-    Log.debug('FilterStore::setMainDateCalendar::', calendar);
+  setMainDateData(calendar: CalendarData | null): void {
+    Log.debug('FilterStore::setMainDateData::', calendar);
     this.chosenRange = calendar?.chosenDateRange ?? null;
     this.mainDateMode = calendar?.filterMode ?? null;
   }
 
   @Mutation
-  removeMainDateCalendar() {
+  removeMainDateData(): void {
     this.chosenRange = null;
     this.mainDateMode = null;
-    this.compareRange = null;
-  }
-
-  @Action
-  handleMainDateFilterChange(): void {
-    TimeoutUtils.waitAndExec(
-      null,
-      () => {
-        DashboardModule.updateMainDateFilter({ mainDateFilter: this.mainDateFilterRequest, mode: this.mainDateMode });
-        this.applyFilters();
-      },
-      150
-    );
   }
 
   @Mutation
-  setRouterFilters(routerFilters: DynamicFilter[]) {
+  setRouterFilters(routerFilters: InternalFilter[]) {
     this.routerFilters = routerFilters;
   }
 
-  /**
-   * Remove Current Cross filter and add new CrossFilter
-   * @param crossFilterData
-   */
-  @Action
-  async handleSetCrossFilter(crossFilterData: CrossFilterData): Promise<void> {
-    this.setCrossFilter(crossFilterData);
-    return this.applyFilters();
+  @Mutation
+  removeFilterRequest(id: WidgetId): void {
+    this.mainFilterRequestMap.delete(id);
   }
 
   @Mutation
-  setCrossFilter(crossFilterData: CrossFilterData) {
-    const oldActiveId = this.currentCrossFilterData?.activeId ?? -1;
-    this.excludeApplyFilterIds.delete(oldActiveId);
-
-    this.currentCrossFilterData = crossFilterData;
-    this.excludeApplyFilterIds.add(crossFilterData.activeId);
-  }
-
-  @Action
-  async handleRemoveCrossFilter(): Promise<void> {
-    const currentActiveId = this.currentCrossFilterData?.activeId ?? -1;
-    this.resetCrossFilter();
-    await this.applyFilters();
-    this.removeExcludeApplyFilterId(currentActiveId);
-  }
-
-  @Action
-  async handleRemoveFilter(id: WidgetId): Promise<void> {
-    const { tabId } = WidgetModule.findTabContainWidget(id);
-    if (tabId > -1) {
-      this.removeFilterInFilterPanel({ panelId: tabId, requestId: id });
-      return Promise.resolve();
-    } else if (this.filterRequests.has(id)) {
-      this.removeFilter(id);
-      await this.applyFilters();
-      // avoid reload current widget
-      this.removeExcludeApplyFilterId(id);
-    }
+  removeFilterRequests(ids: WidgetId[]): void {
+    ids.forEach(id => this.mainFilterRequestMap.delete(id));
   }
 
   @Mutation
-  removeFilter(id: WidgetId): void {
-    this.filterRequests.delete(id);
-  }
-
-  @Mutation
-  removeFilters(ids: WidgetId[]): void {
-    ids.forEach(id => this.filterRequests.delete(id));
-  }
-
-  @Mutation
-  private removeExcludeApplyFilterId(id: WidgetId) {
-    this.excludeApplyFilterIds.delete(id);
+  removeIgnoreApplyFilterById(id: WidgetId) {
+    this.unAffectByFilters.delete(id);
   }
 
   @Action
   async init(): Promise<void> {
-    await this.initFilterPanels(WidgetModule.widgets);
-    await this.initFilterRequests(WidgetModule.allQueryWidgets);
+    await this.initGroupFilter(WidgetModule.widgets);
+    await this.initMainFilterRequests(WidgetModule.allQueryWidgets);
     await this.initInnerFilterRequests(WidgetModule.allQueryWidgets);
     this.initAffectFilterWidgets(WidgetModule.allQueryWidgets);
   }
 
   @Action
-  private async initFilterPanels(widgets: Widget[]): Promise<void> {
-    widgets.filter(FilterPanel.isFilterPanel).forEach(panel => this.addFilterPanelInfo(panel));
+  private async initGroupFilter(widgets: Widget[]): Promise<void> {
+    widgets.filter(GroupFilter.isGroupFilter).forEach(panel => this.addGroupFilter(panel));
   }
 
   @Action
-  private async initFilterRequests(widgets: QueryRelatedWidget[]): Promise<void> {
+  private async initMainFilterRequests(widgets: QueryRelatedWidget[]): Promise<void> {
     widgets
-      .filter(widget => Filterable.isFilterable(widget.setting) && widget.setting.isEnableFilter() && !ChartInfoUtils.isChartFilterId(widget.id))
-      .forEach(filter => {
-        const hasDefault = ((filter.setting as any) as Filterable).hasDefaultValue();
-        Log.debug('FilterStore::widget is filter::', filter.id, filter, hasDefault);
+      .filter(widget => FilterableSetting.isFilterable(widget.setting) && widget.setting.isEnableFilter() && !ChartInfoUtils.isInnerFilterById(widget.id))
+      .forEach(widget => {
+        const filterSetting = (widget.setting as any) as FilterableSetting;
+        const hasDefault: boolean = filterSetting.hasDefaultCondition();
         if (hasDefault) {
-          const defaultCondition: Condition | undefined = ((filter.setting as any) as Filterable).getDefaultCondition()!;
-          const filterRequests = new FilterRequest(filter.id, defaultCondition);
-          this.setFilterRequest(filterRequests);
+          const defaultCondition: Condition | undefined = filterSetting.getDefaultCondition()!;
+          const filterRequests: FilterRequest = new FilterRequest(widget.id, defaultCondition);
+          this.addFilterRequest(filterRequests);
         }
       });
-    Log.debug('FilterStore::filterRequests::after::init', this.filterRequests);
+    Log.debug('FilterStore::filterRequests::after::init', this.mainFilterRequestMap);
   }
 
   @Action
   private async initInnerFilterRequests(widgets: QueryRelatedWidget[]): Promise<void> {
     widgets
-      .filter(widget => ChartInfo.isChartInfo(widget) && widget.containChartFilter)
+      .filter(widget => ChartInfo.isChartInfo(widget) && widget.hasInnerFilter)
       .forEach(parentWidget => {
-        const chartFilter = (parentWidget as ChartInfo).chartFilter!;
-        const isFilter = Filterable.isFilterable(chartFilter.setting) && chartFilter.setting.isEnableFilter();
-        const hasDefault = Filterable.isFilterable(chartFilter.setting) && chartFilter.setting.hasDefaultValue();
-        Log.debug('FilterStore::widget is inner filter::', chartFilter.id, chartFilter);
+        const innerChart: ChartInfo = (parentWidget as ChartInfo).chartFilter!;
+        const isFilter: boolean = FilterableSetting.isFilterable(innerChart.setting);
+        const hasDefault: boolean = FilterableSetting.isFilterable(innerChart.setting) && innerChart.setting.hasDefaultCondition();
+        Log.debug('FilterStore::widget is inner filter::', innerChart.id, isFilter, hasDefault);
         if (isFilter && hasDefault) {
-          const condition: Condition = ((chartFilter.setting as any) as Filterable).getDefaultCondition()!;
+          const condition: Condition = ((innerChart.setting as any) as FilterableSetting).getDefaultCondition()!;
           const filterRequests = new FilterRequest(parentWidget.id, condition);
           this.setInnerFilter(filterRequests);
         }
       });
-    Log.debug('FilterStore::innerFilters::after::init', this.innerFilters);
+    Log.debug('FilterStore::innerFilters::after::init', this.innerFilterRequestMap);
   }
 
   @Action
   async addFilterWidget(chart: ChartInfo): Promise<void> {
-    const isFilter: boolean = Filterable.isFilterable(chart.setting) && chart.setting.isEnableFilter();
-    const hasDefault: boolean = Filterable.isFilterable(chart.setting) && chart.setting.hasDefaultValue();
+    const isFilter: boolean = FilterableSetting.isFilterable(chart.setting) && chart.setting.isEnableFilter();
+    const hasDefault: boolean = FilterableSetting.isFilterable(chart.setting) && chart.setting.hasDefaultCondition();
     Log.debug('addFilterWidget::', chart, isFilter, hasDefault);
     if (isFilter && hasDefault) {
-      const condition: Condition = ((chart.setting as any) as Filterable).getDefaultCondition()!;
+      const condition: Condition = ((chart.setting as any) as FilterableSetting).getDefaultCondition()!;
       const filterRequests = new FilterRequest(chart.id, condition);
-      this.setFilterRequest(filterRequests);
+      this.addFilterRequest(filterRequests);
       await this.applyFilters();
     }
     return Promise.resolve();
   }
 
+  /**
+   * @deprecated remove as soon as possible. Method always return null, because it related with chart control
+   */
   get mainDateFilterRequest(): FilterRequest | null {
-    if (this.mainDateCompareRequest) {
-      return FilterStoreUtils.toMainDateFilterRequest(this.mainDateCompareRequest) ?? null;
-    }
+    // if (this.mainDateCompareRequest) {
+    //   return FilterStoreUtils.toMainDateFilterRequest(this.mainDateCompareRequest) ?? null;
+    // }
     return null;
   }
 
   @Mutation
-  ignoreWidgetFromFilters(id: WidgetId) {
+  ignoreApplyFilterToWidget(id: WidgetId) {
     this.unAffectByFilters.add(id);
   }
 
@@ -498,13 +411,15 @@ export class FilterStore extends VuexModule {
   @Mutation
   initAffectFilterWidgets(widgets: QueryRelatedWidget[]) {
     const unAffectFilterWidgetIds = widgets.filter(widget => !widget.setting.getChartOption()?.isAffectedByFilter()).map(widget => widget.id);
-    const filterWidgetIds = widgets.filter(widget => Filterable.isFilterable(widget.setting) && widget.setting.isEnableFilter()).map(widget => widget.id);
+    const filterWidgetIds = widgets
+      .filter(widget => FilterableSetting.isFilterable(widget.setting) && widget.setting.isEnableFilter())
+      .map(widget => widget.id);
     this.unAffectByFilters = new Set<WidgetId>([...unAffectFilterWidgetIds, ...filterWidgetIds]);
   }
 
   @Mutation
-  setAffectFilterWidget(widget: QueryRelatedWidget) {
-    const isFilter = Filterable.isFilterable(widget.setting) && widget.setting.isEnableFilter();
+  setAffectFilterWidget(widget: QueryRelatedWidget): void {
+    const isFilter = FilterableSetting.isFilterable(widget.setting) && widget.setting.isEnableFilter();
     const unAffectByFilter = !widget.setting.isAffectedByFilter();
     if (isFilter || unAffectByFilter) {
       this.unAffectByFilters.add(widget.id);
@@ -518,11 +433,11 @@ export class FilterStore extends VuexModule {
    */
   @Action({ rawError: true })
   async applyFilters(): Promise<void> {
-    const ids: number[] = WidgetModule.allQueryWidgets.filter(widget => this.isAffectedByFilter(widget.id)).map(widget => widget.id);
+    const affectedIds: number[] = WidgetModule.allQueryWidgets.filter(widget => this.canApplyFilter(widget.id)).map(widget => widget.id);
     // avoid stuck ui
     await TimeoutUtils.sleep(100);
     await DashboardControllerModule.renderCharts({
-      idList: ids,
+      idList: affectedIds,
       useBoost: DashboardModule.isUseBoost
     });
   }

@@ -16,5 +16,6 @@ export enum DataSources {
   S3Source = 'amazon_s3',
   FacebookAds = 'facebook_ads_source',
   TiktokAds = 'tik_tok_ads_source',
-  Palexy = 'palexy_source'
+  Palexy = 'palexy_source',
+  GoogleSearchConsole = 'google_search_console_source'
 }

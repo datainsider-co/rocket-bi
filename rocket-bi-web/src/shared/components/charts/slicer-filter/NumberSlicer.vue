@@ -73,7 +73,7 @@ import RangeSlider from '@/shared/components/common/di-slider/range-slider/Range
 import { toNumber } from 'lodash';
 import { SlicerRange } from '@/shared';
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
-import { DateTimeFormatter, DateUtils } from '@/utils';
+import { DateTimeUtils, DateUtils } from '@/utils';
 import { MouseEventData } from '@chart/BaseChart';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import moment, { isDate } from 'moment';
@@ -140,7 +140,7 @@ export default class NumberSlicer extends Vue {
   }
 
   private get fromDateAsString(): string {
-    return DateTimeFormatter.formatAsDDMMYYYY(this.fromValueAsDate);
+    return DateTimeUtils.formatAsDDMMYYYY(this.fromValueAsDate);
   }
 
   private get toValueAsDate(): Date {
@@ -153,7 +153,7 @@ export default class NumberSlicer extends Vue {
   }
 
   private get toDateAsString(): string {
-    return DateTimeFormatter.formatAsDDMMYYYY(this.toValueAsDate);
+    return DateTimeUtils.formatAsDDMMYYYY(this.toValueAsDate);
   }
 
   @Watch('range', { deep: true, immediate: true })

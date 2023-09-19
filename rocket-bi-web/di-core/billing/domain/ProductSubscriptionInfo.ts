@@ -1,5 +1,5 @@
-import { PaymentInfo, PaymentStatus, ProductInfo, ProductSubscription } from '@core/billing';
-import { PlanDetail } from '@core/organization';
+import { PaymentStatus, ProductInfo, ProductSubscription } from '@core/billing';
+import { PaymentInfo } from '@core/billing/domain/PaymentInfo';
 import { PlanType } from '@core/organization/domain/Plan/PlanType';
 
 export class ProductSubscriptionInfo {
@@ -8,26 +8,27 @@ export class ProductSubscriptionInfo {
   static fromObject(obj: ProductSubscriptionInfo) {
     const subscription = ProductSubscription.fromObject(obj.subscription);
     const product = ProductInfo.fromObject(obj.product);
-    const payment = obj?.payment ? PaymentInfo.fromObject(obj?.payment) : undefined;
+    const payment = obj?.payment ? PaymentInfo.fromObject(obj.payment) : void 0;
     return new ProductSubscriptionInfo(product, subscription, payment);
   }
 
-  toPlanDetail(): PlanDetail {
-    return new PlanDetail(
-      -1,
-      this.product.name as PlanType,
-      this.subscription.startTime,
-      this.subscription.endTime,
-      this.payment?.subscriptionId ?? '',
-      this.payment?.paymentId ?? '',
-      this.product?.price ?? 0,
-      'PayPal',
-      this.payment?.status ?? PaymentStatus.Unknown,
-      this.subscription.updatedTime,
-      this.payment?.billingEmail ?? '',
-      this.payment?.approvalLink ?? '',
-      this.subscription.id,
-      this.product.editorSeats
-    );
+  isPaymentSucceeded(): boolean {
+    return this.payment?.status === PaymentStatus.Succeeded;
+  }
+
+  get isPaidPlan(): boolean {
+    return [PlanType.Startup, PlanType.Business, PlanType.Cooperate, PlanType.OnPremise].includes(this.product.name);
+  }
+
+  get startTime(): number {
+    return this.subscription.startTime ?? 0;
+  }
+
+  get endTime(): number {
+    return this.subscription.endTime ?? 0;
+  }
+
+  get planType(): PlanType {
+    return this.product.name;
   }
 }

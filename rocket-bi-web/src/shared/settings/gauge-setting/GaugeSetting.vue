@@ -9,7 +9,12 @@
       @onChanged="handleSettingChanged"
       @onMultipleChanged="handleMultipleSettingChanged"
     />
-    <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab
+      :color="setting.options.background"
+      :default-color="defaultBackgroundColor"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <TooltipTab :setting="setting.options.tooltip" @onChhanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <VisualHeader :widget-type="currentWidget" :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
@@ -21,7 +26,7 @@ import TitleTab from '@/shared/settings/common/tabs/TitleTab.vue';
 import BackgroundTab from '@/shared/settings/common/tabs/BackgroundTab.vue';
 import DataLabelTab from '@/shared/settings/series-chart/DataLabelTab.vue';
 import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
-import { ChartInfo, GaugeQuerySetting, GaugeChartOption, SettingKey } from '@core/common/domain';
+import { ChartInfo, GaugeQuerySetting, GaugeChartOption, SettingKey, ChartOption } from '@core/common/domain';
 import GaugeAxisTab from '@/shared/settings/gauge-setting/GaugeAxisTab.vue';
 import TooltipTab from '@/shared/settings/common/tabs/TooltipTab.vue';
 import { ChartType } from '@/shared';
@@ -67,6 +72,10 @@ export default class GaugeSetting extends Vue {
     this.setting.setOptions(settings);
     this.query.setChartOption(this.setting);
     this.$emit('onChartInfoChanged', this.chartInfo);
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

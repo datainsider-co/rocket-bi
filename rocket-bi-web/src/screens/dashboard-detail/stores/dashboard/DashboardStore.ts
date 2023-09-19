@@ -9,12 +9,12 @@ import { TimeScheduler } from '@/shared/components/common/scheduler/scheduler-ti
 import { ApiExceptions, DateRange, Status, Stores } from '@/shared';
 import { Routers } from '@/shared/enums/Routers';
 import store from '@/store';
-import { GeolocationModule } from '@/store/modules/data-builder/GeolocationStore';
 import { _ThemeStore } from '@/store/modules/ThemeStore';
-import { ListUtils } from '@/utils';
+import { ChartInfoUtils, ListUtils } from '@/utils';
 import { ThemeUtils } from '@/utils/ThemeUtils';
 import {
   BoostInfo,
+  ChartControl,
   ChartInfo,
   Dashboard,
   DashboardId,
@@ -23,15 +23,13 @@ import {
   DIMap,
   Directory,
   DirectoryId,
-  FieldRelatedCondition,
-  FilterRequest,
   ImageWidget,
-  MainDateFilter,
+  MainDateFilter2,
   MainDateMode,
   Position,
+  ValueControlType,
   Widget
 } from '@core/common/domain';
-import { Di } from '@core/common/modules';
 import { DashboardService, DataManager, DirectoryService, UploadService } from '@core/common/services';
 import { DashboardAction } from '@core/tracking/domain/TrackingDataType';
 import { TrackingService } from '@core/tracking/service/TrackingService';
@@ -42,7 +40,7 @@ import { Route } from 'vue-router';
 import { Action, getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { CopiedData } from '@/screens/dashboard-detail/intefaces/CopiedData';
 import { cloneDeep } from 'lodash';
-import { AuthenticationModule, AuthenticationStore } from '@/store/modules/AuthenticationStore';
+import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 
 export interface MainDateData {
   mode: MainDateMode;
@@ -51,16 +49,14 @@ export interface MainDateData {
 
 @Module({ dynamic: true, namespaced: true, store: store, name: Stores.DashboardStore })
 export class DashboardStore extends VuexModule {
-  previousPage: Route | null = null;
   dashboardTitle = 'Untitled';
   dashboardStatus: Status = Status.Loading;
   errorMessage = '';
-  mainDateFilter: MainDateFilter | null = null;
-  mainDateFilterMode: MainDateMode = MainDateMode.allTime;
-  myDataPage: Route | null = null;
+  mainDateFilter: MainDateFilter2 | null = null;
+  previousPage: Route | null = null;
   ownerId: string | null = null;
-  setting: DashboardSetting = DashboardSetting.default();
-  private dashboardId?: DashboardId = void 0;
+  // setting: DashboardSetting = DashboardSetting.default();
+  dashboardId?: DashboardId = void 0;
   // TODO: avoid undefine
   currentDashboard: Dashboard | null = null;
   currentDirectory: Directory | null = null;
@@ -69,16 +65,16 @@ export class DashboardStore extends VuexModule {
   copiedData: CopiedData | null = null;
 
   @Inject
-  private dashboardService!: DashboardService;
+  private readonly dashboardService!: DashboardService;
 
   @Inject
-  private directoryService!: DirectoryService;
+  private readonly directoryService!: DirectoryService;
 
   @Inject
-  private uploadService!: UploadService;
+  private readonly uploadService!: UploadService;
 
   @Inject
-  private trackingService!: TrackingService;
+  private readonly trackingService!: TrackingService;
 
   get title() {
     return this.dashboardTitle || 'Untitled';
@@ -140,67 +136,76 @@ export class DashboardStore extends VuexModule {
     return this.currentDashboard?.useBoost ?? false;
   }
 
+  /**
+   * list all enable chart control in dashboard
+   */
+  get chartControls(): ChartControl[] {
+    const chartControls: ChartControl[] = WidgetModule.widgets.filter(widget => {
+      return !ChartInfoUtils.isInnerFilterById(widget.id) && ChartControl.isChartControl(widget) && widget.isEnableControl();
+    }) as any;
+    if (this.mainDateFilter && this.mainDateFilter.isEnableControl()) {
+      return [this.mainDateFilter, ...chartControls];
+    } else {
+      return chartControls;
+    }
+  }
+
+  /**
+   * get chart control by id.
+   * @return ChartControl if found and it's enable, otherwise return undefined
+   */
+  get getChartControl(): (controlId: number) => ChartControl | undefined {
+    return (controlId: number) => this.chartControls.find(controller => controller.getControlId() === controlId);
+  }
+
+  get mainDateFilterMode(): MainDateMode {
+    return this.mainDateFilter?.mode ?? MainDateMode.allTime;
+  }
+
+  get setting(): DashboardSetting {
+    if (this.currentDashboard && this.currentDashboard.setting) {
+      return this.currentDashboard.setting;
+    } else {
+      const defaultSetting = DashboardSetting.default();
+      // override default background color to default if not found
+      defaultSetting.background.color = 'var(--default-dashboard-background-color)';
+      defaultSetting.border.colorOpacity = 10;
+      return defaultSetting;
+    }
+  }
+
   @Action
-  handleError(ex: DIException) {
+  private async handleError(ex: DIException): Promise<void> {
     switch (ex.reason) {
       case ApiExceptions.unauthorized:
         this.showError("You don't have permission to view dashboard");
         break;
       case ApiExceptions.notFound:
-        return router.replace({ name: Routers.AllData });
+        await router.replace({ name: Routers.AllData });
+        break;
       default:
         this.showError('Load dashboard error!');
     }
   }
 
   @Action({ rawError: true })
-  async handleLoadDashboard(id: DashboardId): Promise<void> {
-    const startTime: number = Date.now();
+  async init(id: DashboardId): Promise<void> {
     try {
       this.setDashboardId(id);
       this.setDashboardStatus(Status.Loading);
-      const dashboard = await this.dashboardService.get(id);
-      this.saveOwnerId({ ownerId: dashboard.ownerId });
+      const dashboard: Dashboard = await this.dashboardService.get(id);
+      this.setOwner(dashboard.ownerId);
       await this.processDashboardData(dashboard);
       this.setDashboardStatus(Status.Loaded);
-      // await this.loadDirectoryFromDashboardId(id);
-      this.trackingService.trackDashboard({
-        action: DashboardAction.View,
-        dashboardId: dashboard.id,
-        dashboardName: dashboard.name,
-        extraProperties: {
-          di_duration: Date.now() - startTime,
-          di_start_time: startTime
-        }
-      });
     } catch (ex) {
-      Log.error('handleLoadDashboard::ex', ex);
       Log.trace('handleLoadDashboard::trace', ex);
-      this.trackingService.trackDashboard({
-        action: DashboardAction.View,
-        dashboardId: id,
-        isError: true,
-        extraProperties: {
-          di_duration: Date.now() - startTime,
-          di_start_time: startTime
-        }
-      });
       await this.handleError(ex);
     }
   }
 
   @Mutation
-  saveOwnerId(payload: { ownerId: string }) {
-    this.ownerId = payload.ownerId;
-  }
-
-  @Action
-  async handleEditMainDateFilter(newMainDateFilter: MainDateFilter): Promise<void> {
-    if (this.id) {
-      await this.dashboardService.editMainDateFilter(this.id, newMainDateFilter);
-    } else {
-      this.showError(`dashboard.store.ts::handleUploadMainDateFilter::dashboardId::${this.id}`);
-    }
+  private setOwner(ownerId: string): void {
+    this.ownerId = ownerId;
   }
 
   @Action
@@ -264,7 +269,7 @@ export class DashboardStore extends VuexModule {
   }
 
   @Mutation
-  setDashboardTitle(title: string) {
+  private setDashboardTitle(title: string): void {
     this.dashboardTitle = title;
     if (this.currentDashboard) {
       this.currentDashboard.name = title;
@@ -272,23 +277,13 @@ export class DashboardStore extends VuexModule {
   }
 
   @Mutation
-  setPreviousPage(payload: Route) {
-    this.previousPage = payload;
+  setPreviousPage(page: Route) {
+    this.previousPage = page;
   }
 
   @Mutation
-  setMyDataPage(payload: Route) {
-    this.myDataPage = payload;
-  }
-
-  @Mutation
-  setMainDateFilter(mainDateFilter: MainDateFilter | null) {
+  setMainDateFilter(mainDateFilter: MainDateFilter2 | null) {
     this.mainDateFilter = mainDateFilter;
-  }
-
-  @Mutation
-  setMainDateFilterMode(mode: MainDateMode) {
-    this.mainDateFilterMode = mode;
   }
 
   @Mutation
@@ -298,40 +293,41 @@ export class DashboardStore extends VuexModule {
     this.dashboardTitle = 'Untitled';
     this.errorMessage = '';
     this.mainDateFilter = null;
-    this.mainDateFilterMode = MainDateMode.allTime;
     this.ownerId = null;
-    this.setting = DashboardSetting.default();
     this.currentDashboard = null;
     this.currentDirectory = null;
   }
 
   @Mutation
-  setDashboardStatus(status: Status) {
+  private setDashboardStatus(status: Status): void {
     this.dashboardStatus = status;
   }
 
   @Action
-  saveMainDateFilterMode(payload: MainDateData) {
+  saveMainDate(newMainDateData: MainDateData): void {
     if (this.id) {
-      DataManager.saveMainDateData(this.id, payload);
+      DataManager.saveMainDateData(this.id, newMainDateData);
     }
   }
 
   @Mutation
-  setDashboardSetting(setting: DashboardSetting) {
-    this.setting = setting;
+  private setDashboardSetting(setting: DashboardSetting): void {
+    // this.setting = setting;
+    if (this.currentDashboard) {
+      this.currentDashboard.setting = setting;
+    }
     _ThemeStore.setDashboardTheme(setting.themeName);
   }
 
   @Mutation
   loadThemeFromLocal(id: DashboardId): void {
-    const setting = DataManager.getDashboardSetting(id);
+    const setting: DashboardSetting | undefined = DataManager.getDashboardSetting(id);
     const themeName = setting?.themeName ?? ThemeUtils.getDefaultThemeName();
     _ThemeStore.setDashboardTheme(themeName);
   }
 
   @Action
-  async loadDirectoryFromDashboardId(id: DashboardId): Promise<void> {
+  async loadDirectory(id: DashboardId): Promise<void> {
     const directoryId = await this.dashboardService.getDirectoryId(id);
     const directory = await this.directoryService.get(directoryId);
     this.setDirectory(directory);
@@ -344,37 +340,48 @@ export class DashboardStore extends VuexModule {
 
   @Action
   private async processDashboardData(dashboard: Dashboard): Promise<void> {
-    this.setCurrentDashboard(dashboard);
-    this.setDashboardTitle(dashboard.name);
+    this.setDashboard(dashboard);
     this.setDashboardSetting(dashboard.setting);
+    this.setDashboardTitle(dashboard.name);
     DataManager.saveDashboardSetting(dashboard.id, dashboard.setting);
-    await this.loadMainDateFilterMode(dashboard);
-    FilterModule.loadLocalMainFilters(dashboard);
+    await FilterModule.loadLocalFilters(dashboard.id);
     WidgetModule.setWidgets(dashboard.widgets || []);
     WidgetModule.setMapPosition(dashboard.widgetPositions || []);
-    QuerySettingModule.saveQuerySetting(WidgetModule.allQueryWidgets);
-    await GeolocationModule.loadGeolocationMap();
+    await QuerySettingModule.init(WidgetModule.allQueryWidgets);
+    await this.loadMainDateFilter(dashboard);
   }
 
   @Mutation
-  private setDashboardId(id: DashboardId) {
+  private setDashboardId(id: DashboardId): void {
     this.dashboardId = id;
   }
 
   @Action
-  private loadMainDateFilterMode(dashboard: Dashboard) {
-    if (dashboard.mainDateFilter) {
-      this.setMainDateFilter(dashboard.mainDateFilter);
-      const data = DataManager.getMainDateData(dashboard.id);
-      if (data) {
-        FilterModule.loadDateRangeFilter(data);
-        this.setMainDateFilterMode(data.mode);
+  private async loadMainDateFilter(dashboard: Dashboard): Promise<void> {
+    if (dashboard.setting.mainDateFilter || dashboard.mainDateFilter) {
+      const mainDateFilter: MainDateFilter2 = dashboard.setting.mainDateFilter ?? MainDateFilter2.fromMainDateFilter(dashboard.mainDateFilter!);
+      const localMainDateData: MainDateData | undefined = DataManager.getMainDateData(dashboard.id);
+      const newDateFilter = mainDateFilter.copyWith({ mode: localMainDateData?.mode });
+      const data: MainDateData = {
+        mode: newDateFilter.mode,
+        chosenDateRange: localMainDateData?.chosenDateRange
+      };
+      FilterModule.loadDateRange(data);
+      this.setMainDateFilter(newDateFilter);
+
+      if (mainDateFilter && mainDateFilter.isEnableControl() && mainDateFilter.getValueController().isEnableControl()) {
+        const controller = mainDateFilter.getValueController();
+        const valueMap: Map<ValueControlType, string[]> | undefined = controller.getDefaultValueMapWithDateData(data);
+        await QuerySettingModule.setDynamicValues({
+          id: mainDateFilter.getControlId(),
+          valueMap: valueMap
+        });
       }
     }
   }
 
   @Mutation
-  setCurrentDashboard(dashboard: Dashboard) {
+  private setDashboard(dashboard: Dashboard): void {
     this.currentDashboard = dashboard;
   }
 
@@ -419,36 +426,12 @@ export class DashboardStore extends VuexModule {
   }
 
   @Action
-  async updateMainDateFilter(payload: { mainDateFilter: FilterRequest | null; mode: MainDateMode | null }) {
+  async updateMainDateFilter(newMainDataFilter?: MainDateFilter2 | null): Promise<void> {
     try {
-      const { mainDateFilter, mode } = payload;
-      if (this.currentDashboard) {
-        this.setMainDateFilterRequest({ request: mainDateFilter, mainDateMode: mode });
-        await this.dashboardService.edit(this.currentDashboard.id, this.currentDashboard);
-      }
+      const newSetting: DashboardSetting = this.setting.withMainDateFilter(newMainDataFilter);
+      await this.saveSetting(newSetting);
     } catch (ex) {
-      Log.error(ex);
-    }
-  }
-
-  @Mutation
-  setMainDateFilterRequest(payload: { request: FilterRequest | null; mainDateMode: MainDateMode | null }) {
-    const { request, mainDateMode } = payload;
-    if (this.currentDashboard?.mainDateFilter) {
-      this.currentDashboard.mainDateFilter.filterRequest = request ?? void 0;
-    } else if (this.currentDashboard) {
-      const mainDateFilter = request && mainDateMode ? new MainDateFilter((request.condition as FieldRelatedCondition).field, mainDateMode, request) : void 0;
-      this.currentDashboard!.mainDateFilter = mainDateFilter;
-    }
-  }
-
-  @Action
-  async handleUpdateDashboard(dashboard: Dashboard) {
-    try {
-      await this.dashboardService.edit(dashboard.id, dashboard);
-      this.setCurrentDashboard(dashboard);
-    } catch (ex) {
-      Log.error(ex);
+      Log.error('updateMainDateFilter::', ex);
     }
   }
 

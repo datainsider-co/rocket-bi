@@ -135,7 +135,7 @@ export default class HighchartsSankeyChart extends BaseHighChartWidget<SeriesTwo
 
   private tooltipFormatter(contextObject: TooltipFormatterContextObject) {
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     const isHoverWeight: boolean = (contextObject.point as any).from != undefined;
     if (isHoverWeight) {
       const formattedData = this.numberFormatter.format((contextObject.point as any).weight ?? 0);

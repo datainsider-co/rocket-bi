@@ -6,7 +6,12 @@
     <XAxisTab :query="query" :setting="setting.options.xAxis" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <YAxisTab :query="query" :setting="setting.options.yAxis" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <ColorTab :setting="setting.options.themeColor" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
-    <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab
+      :color="setting.options.background"
+      :default-color="defaultBackgroundColor"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <TooltipTab :setting="setting.options.tooltip" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <VisualHeader :widget-type="currentWidget" :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
@@ -14,7 +19,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { BubbleQuerySetting, BubbleChartOption, ChartInfo, SettingKey } from '@core/common/domain';
+import { BubbleQuerySetting, BubbleChartOption, ChartInfo, SettingKey, ChartOption } from '@core/common/domain';
 import LegendTab from '@/shared/settings/series-chart/LegendTab.vue';
 import TitleTab from '@/shared/settings/common/tabs/TitleTab.vue';
 import BackgroundTab from '@/shared/settings/common/tabs/BackgroundTab.vue';
@@ -72,6 +77,10 @@ export default class BubbleSetting extends Vue {
 
   private get currentWidget(): ChartType {
     return _ConfigBuilderStore.chartType;
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

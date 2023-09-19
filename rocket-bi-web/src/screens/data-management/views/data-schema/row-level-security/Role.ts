@@ -56,9 +56,9 @@ export class Role {
             columnName: 'Sales Channel',
             isNested: false,
             allValues: ['Offline'],
-            filterModeSelected: FilterMode.range,
+            filterModeSelected: FilterMode.Range,
             currentOptionSelected: 'in',
-            currentInputType: InputType.text
+            currentInputType: InputType.Text
           }
         ]
       },

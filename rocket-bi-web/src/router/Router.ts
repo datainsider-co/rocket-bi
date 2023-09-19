@@ -44,7 +44,7 @@ const OrganizationOverview = () =>
 const UserActivity = () =>
   import(/* webpackChunkName: "organization-activity" */ '@/screens/organization-settings/views/user-activity-log/UserActivityLog.vue');
 const ClickhouseConfig = () =>
-  import(/* webpackChunkName: "organization-clickhouse-config" */ '@/screens/organization-settings/views/clickhouse-config/ClickhouseConfig.vue');
+  import(/* webpackChunkName: "organization-clickhouse-config" */ '@/screens/organization-settings/views/connector-config/ConnectorConfig.vue');
 const PlanAndBilling = () => import(/* webpackChunkName: "organization-billing" */ '@/screens/organization-settings/views/plan-and-billing/PlanAndBilling.vue');
 const APIKeyManagement = () =>
   import(/* webpackChunkName: "organization-api-key" */ '@/screens/organization-settings/views/token-management/APIKeyManagement.vue');
@@ -249,25 +249,25 @@ const routes: Array<RouteConfig> = [
   {
     path: '/shopify',
     name: Routers.ShopifyIntegrationStep1,
-    component: import(/* webpackChunkName: "ingestion-shopify" */ '@/screens/data-ingestion/components/shopify/ShopifyIntegrationStep1.vue'),
+    component: () => import(/* webpackChunkName: "ingestion-shopify" */ '@/screens/data-ingestion/components/shopify/ShopifyIntegrationStep1.vue'),
     props: true
   },
   {
     path: '/shopify/redirect',
     name: Routers.ShopifyIntegrationStep2,
-    component: import(/* webpackChunkName: "ingestion-shopify-2" */ '@/screens/data-ingestion/components/shopify/ShopifyIntegrationStep2.vue'),
+    component: () => import(/* webpackChunkName: "ingestion-shopify-2" */ '@/screens/data-ingestion/components/shopify/ShopifyIntegrationStep2.vue'),
     props: true
   },
   {
     path: '/third-party-auth/:config_type',
     name: Routers.ThirdPartyAuthentication,
-    component: import(/* webpackChunkName: "ingestion-3rd-party" */ '@/shared/components/third-party-authentication/ThirdPartyAuthentication.vue'),
+    component: () => import(/* webpackChunkName: "gg-oauth" */ '@/shared/components/third-party-authentication/ThirdPartyAuthentication.vue'),
     props: true
   },
   {
     path: '/gauthen/:config_type',
     name: Routers.GoogleAuthentication,
-    component: () => import(/* webpackChunkName: "ingestion-gg-oauth" */ '@/shared/components/third-party-authentication/google/GoogleAuth.vue'),
+    component: () => import(/* webpackChunkName: "gg-oauth" */ '@/shared/components/third-party-authentication/google/GoogleAuth.vue'),
     props: true
   },
   {
@@ -449,15 +449,12 @@ const router = new VueRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  Log.debug('From::', from.path, 'to::', to.path);
   next();
-  Log.debug(`Router::beforeEach:: open ${to.name} from ${from.name}  at ${Date.now()}`);
 
   await DiAnalytics.enterScreenStart(to.name || '');
 
   if (RouterUtils.isRoot(to.name) || RouterUtils.isNotNeedSession(to.name!)) {
-    const hasSession = await AuthenticationModule.checkSession();
-    if (hasSession) {
+    if (AuthenticationModule.isLoggedIn) {
       next({ name: Routers.AllData });
     }
   }

@@ -23,3 +23,4 @@ export * from './google-ads';
 export * from './facebook-ads';
 export * from './tiktok-job';
 export * from './palexy';
+export * from './google-search-console';

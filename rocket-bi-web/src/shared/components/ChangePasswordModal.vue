@@ -69,7 +69,7 @@ import InputPass from '@/screens/login/components/input-components/InputPass.vue
 import { minLength, required, sameAs } from 'vuelidate/lib/validators';
 import { Log } from '@core/utils';
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
+import { AtomicAction } from '@core/common/misc';
 import { Status } from '@/shared';
 
 @Component({

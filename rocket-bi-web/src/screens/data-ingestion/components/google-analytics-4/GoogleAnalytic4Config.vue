@@ -119,7 +119,6 @@ interface PropertyItem {
   components: { DiInputComponent, DiToggle, DiCalendar }
 })
 export default class GoogleAnalytic4Config extends Vue {
-  private googleConfig = require('@/screens/data-ingestion/constants/google-config.json');
   private propertyStatus: Status = Status.Loaded;
   private readonly gaTables = GoogleAnalytic4Tables;
 
@@ -240,8 +239,8 @@ export default class GoogleAnalytic4Config extends Vue {
       const sourceResponse: DataSourceResponse | undefined = DataSourceModule.dataSources.find(source => source.dataSource.id === this.syncedJob.sourceId);
       if (sourceResponse) {
         const gaSource = sourceResponse.dataSource as GASourceInfo;
-        const tokenResponse: TokenResponse = await this.sourcesService.getGoogleToken(new TokenRequest(gaSource.accessToken, gaSource.refreshToken));
-        await GoogleUtils.loadGA4Client(this.googleConfig.apiKey, tokenResponse.accessToken);
+        const tokenResponse: TokenResponse = await this.sourcesService.refreshGoogleToken(new TokenRequest(gaSource.accessToken, gaSource.refreshToken));
+        await GoogleUtils.loadGA4Client(window.appConfig.GOOGLE_API_KEY, tokenResponse.accessToken);
         await this.loadAccountSummarizes();
       }
       this.hidePropertyLoading();

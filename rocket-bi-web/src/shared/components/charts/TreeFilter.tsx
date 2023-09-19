@@ -1,7 +1,18 @@
 import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
 import { DefaultFilterValue, Direction, TabFilterDisplay, TableSettingColor } from '@/shared';
 import { BaseChartWidget, PropsBaseChart } from '@chart/BaseChart';
-import { And, Condition, Equal, Or, TableColumn, TreeFilterOption, TreeFilterQuerySetting, WidgetId } from '@core/common/domain/model';
+import {
+  And,
+  Condition,
+  Equal,
+  FilterableSetting,
+  Or,
+  TableColumn,
+  TreeFilterOption,
+  TreeFilterQuerySetting,
+  ValueControlType,
+  WidgetId
+} from '@core/common/domain/model';
 import { TableResponse } from '@core/common/domain/response/query/TableResponse';
 import { WidgetRenderer } from './widget-renderer';
 import { BaseWidget } from '@/screens/dashboard-detail/components/widget-container/BaseWidget';
@@ -13,7 +24,7 @@ import { clone, cloneDeep, difference } from 'lodash';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { ListUtils, StringUtils } from '@/utils';
 import { DefaultTreeFilter } from '@chart/widget-renderer/DefaultTreeFilter';
-import { ExportType, QueryRequest } from '@core/common/domain';
+import { ExportType, FilterRequest, QueryRequest } from '@core/common/domain';
 import { ChartDataModule, FilterModule } from '@/screens/dashboard-detail/stores';
 import NProgress from 'nprogress';
 import { FilterStoreUtils } from '@/screens/dashboard-detail/stores/widget/FilterStoreUtils';
@@ -31,14 +42,6 @@ export default class TreeFilter extends BaseChartWidget<TableResponse, TreeFilte
 
   @Prop({ type: Boolean, default: false })
   showEditComponent!: boolean;
-
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onAddCondition?: (condition: Condition) => void;
-
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onRemoveFilter?: () => void;
 
   private subRows: Map<string, any[]> = new Map();
 
@@ -61,7 +64,7 @@ export default class TreeFilter extends BaseChartWidget<TableResponse, TreeFilte
   }
 
   get displayAs(): TabFilterDisplay {
-    return this.setting.options.displayAs ?? TabFilterDisplay.normal;
+    return this.setting.options.displayAs ?? TabFilterDisplay.Normal;
   }
 
   get colorStyle() {
@@ -90,14 +93,6 @@ export default class TreeFilter extends BaseChartWidget<TableResponse, TreeFilte
     return this.setting.options.choiceDeActiveColor;
   }
 
-  //
-  get selectionStyle() {
-    return {
-      '--background-color': this.backgroundColor,
-      '--text-color': this.textColor
-    };
-  }
-
   get titleStyle() {
     return {
       ...this.setting.options.title?.style,
@@ -105,32 +100,13 @@ export default class TreeFilter extends BaseChartWidget<TableResponse, TreeFilte
       // 'padding-bottom': this.displayAs === TabFilterDisplay.dropDown ? '0' : '1rem'
     };
   }
-
-  private get directionClass(): string {
-    switch (this.direction) {
-      case Direction.row:
-        return 'flex-row tab-display-row';
-      case Direction.column:
-        return 'flex-column h-100 overflow-auto';
-    }
-  }
-
   get containerClass(): any {
-    if (this.isPreview) {
-      const background = this.backgroundColor ? '' : `${TableSettingColor.secondaryBackgroundColor}`;
-      const padding = this.id === -2 ? 'p-2' : '';
-      return `tab-filter-container ${background} ${padding}`;
-    }
     return `tab-filter-container`;
   }
 
   get infoClass(): string {
     const margin = 'mb-2';
     return `vert-tab-filter-info ${margin}`;
-  }
-
-  get filterClass(): string {
-    return this.showEditComponent ? `disable` : ``;
   }
 
   private saveTempSelectedValue(value: DefaultFilterValue) {
@@ -207,25 +183,42 @@ export default class TreeFilter extends BaseChartWidget<TableResponse, TreeFilte
 
   onCheck(keys: string[]) {
     this.selectKeys(keys);
-    const filter = this.buildFilterCondition(keys);
+    const orCondition: Or = this.buildOrCondition(keys);
     if (this.isPreview) {
       this.saveTempSelectedValue({
         value: {
           expandedKeys: this.expandedKeys,
           selectedKeys: this.selectedKeys
         },
-        conditions: filter
+        conditions: orCondition
       });
     } else {
-      if (ListUtils.isNotEmpty(filter.conditions) && this.onAddCondition) {
-        this.onAddCondition(filter);
-      } else if (ListUtils.isEmpty(filter.conditions) && this.onRemoveFilter) {
-        this.onRemoveFilter();
-      }
+      const filterRequest: FilterRequest | undefined = this.toFilterRequest(orCondition);
+      const filterValueMap: Map<ValueControlType, string[]> | undefined = this.getFilterValueMap(orCondition, keys);
+      this.applyFilterRequest({
+        filterRequest: filterRequest,
+        filterValueMap: filterValueMap
+      });
     }
   }
 
-  private selectKeys(keys: string[]) {
+  private toFilterRequest(condition: Condition): FilterRequest | undefined {
+    if (FilterableSetting.isFilterable(this.setting) && this.setting.isEnableFilter()) {
+      return new FilterRequest(+this.id, condition);
+    } else {
+      return void 0;
+    }
+  }
+
+  private getFilterValueMap(orCondition: Or, keys: string[]): Map<ValueControlType, string[]> | undefined {
+    if (ListUtils.isNotEmpty(orCondition.conditions)) {
+      return new Map([[ValueControlType.SelectedValue, this.getSelectedValues(keys)]]);
+    } else {
+      return void 0;
+    }
+  }
+
+  private selectKeys(keys: string[]): void {
     this.selectedKeys = keys;
     this.setSelectedKeys && !this.isPreview ? this.setSelectedKeys(+this.id, keys) : void 0;
   }
@@ -254,7 +247,7 @@ export default class TreeFilter extends BaseChartWidget<TableResponse, TreeFilte
   }
 
   get isSingleChoice(): boolean {
-    return this.setting.options.displayAs === TabFilterDisplay.singleChoice;
+    return this.setting.options.displayAs === TabFilterDisplay.SingleChoice;
   }
 
   async loadSubRows(expandedKey: string) {
@@ -305,6 +298,19 @@ export default class TreeFilter extends BaseChartWidget<TableResponse, TreeFilte
     ];
   }
 
+  private buildOrCondition(keys: string[]): Or {
+    const sortedKeys = clone(keys).sort();
+    const filters: Condition[] = [];
+    if (sortedKeys.includes(this.query.values[0].name)) {
+      return new Or([]);
+    }
+    sortedKeys.forEach(key => {
+      filters.push(this.buildFilterByTreeKey(this.query, key));
+    });
+    Log.debug('buildFilterCondition::', filters);
+    return new Or(filters);
+  }
+
   private buildFilterByTreeKey(querySetting: TreeFilterQuerySetting, key: string): And {
     //key: showAll//subValue1//subValue2//subValue3
     const depthValues = key.split('//');
@@ -318,17 +324,19 @@ export default class TreeFilter extends BaseChartWidget<TableResponse, TreeFilte
     return new And(conditions);
   }
 
-  private buildFilterCondition(keys: string[]) {
+  private getSelectedValues(keys: string[]): string[] {
     const sortedKeys = clone(keys).sort();
-    const filters: Condition[] = [];
     if (sortedKeys.includes(this.query.values[0].name)) {
-      return new Or([]);
+      return [];
     }
+    const values: string[] = [];
     sortedKeys.forEach(key => {
-      filters.push(this.buildFilterByTreeKey(this.query, key));
+      //key: showAll//subValue1//subValue2//subValue3
+      const depthValues = key.split('//');
+      depthValues.shift(); //Remove All Value
+      values.push(...depthValues);
     });
-    Log.debug('buildFilterCondition::', filters);
-    return new Or(filters);
+    return values;
   }
 
   private buildSubRowRequest(condition: Condition, depth: number): QueryRequest {

@@ -1,5 +1,5 @@
 import { MethodProfiler } from '@/shared/profiler/Annotation';
-import { ChartUtils, DateTimeFormatter, HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
+import { ChartUtils, DateTimeUtils, HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
 import { StringUtils } from '@/utils/StringUtils';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
 import { DIException } from '@core/common/domain/exception';
@@ -50,14 +50,14 @@ export default class LineStockChart extends BaseHighChartWidget<SeriesOneRespons
         {
           labels: {
             formatter: function() {
-              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         },
         {
           labels: {
             formatter: function() {
-              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         }
@@ -287,12 +287,12 @@ export default class LineStockChart extends BaseHighChartWidget<SeriesOneRespons
 
   private tooltipFormatter(point: TooltipFormatterContextObject) {
     const isTimeStampXAxis = ChartUtils.isTimeStampType(this.query.xAxis.function.scalarFunction?.className ?? '');
-    const x = isTimeStampXAxis ? DateTimeFormatter.formatAsDDMMYYYYHms(point.x) : point.x;
+    const x = isTimeStampXAxis ? DateTimeUtils.formatAsDDMMYYYYHms(point.x as number) : point.x;
     const name = point.series.name;
-    const value = this.numberFormatter.format(point.y);
+    const value = this.numberFormatter.format(point.y as number);
     const color = point.color;
     const textColor = this.setting.options.tooltip?.style?.color ?? '#fff';
-    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     const isComparePercentage = this.setting.options.plotOptions?.series?.compare === 'percent';
     const isCompareValue = this.setting.options.plotOptions?.series?.compare === 'value';
     let displayValue = '';
@@ -313,8 +313,8 @@ export default class LineStockChart extends BaseHighChartWidget<SeriesOneRespons
             </div>`;
   }
 
-  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
-    const value = this.numberFormatter.format(axis.value);
+  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
+    const value = this.numberFormatter.format(axis.value as number);
     const isComparePercentage = this.setting.options.plotOptions?.series?.compare === 'percent';
     if (isComparePercentage) {
       const positive = axis.value > 0 ? '+' : '';

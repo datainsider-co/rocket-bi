@@ -17,7 +17,7 @@ import { compact, isEqual } from 'lodash';
 import { ConditionUtils } from '@core/utils';
 
 export class VariablepieQuerySetting extends GenericChartQuerySetting implements CrossFilterable, Zoomable, Drilldownable {
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     if (!this.legend) {
       throw new DIException('Query is empty!');
     }

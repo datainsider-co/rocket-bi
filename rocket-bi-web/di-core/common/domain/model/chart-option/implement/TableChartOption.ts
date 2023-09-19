@@ -3,16 +3,7 @@
  * @created: 5/30/21, 9:42 PM
  */
 
-import {
-  ChartFamilyType,
-  ChartOptionData,
-  FieldFormatting,
-  GridSetting,
-  TableColumn,
-  TooltipSetting,
-  VisualHeader,
-  VizSettingType
-} from '@core/common/domain/model';
+import { ChartOptionData, FieldFormatting, GridSetting, TableColumn, TooltipSetting, VisualHeader, ChartOptionClassName } from '@core/common/domain/model';
 import { Scrollable } from '@core/common/domain/model/query/features/Scrollable';
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
 import { get } from 'lodash';
@@ -24,7 +15,6 @@ import { ToggleIconSetting } from '@core/common/domain/model/chart-option/extra-
 import { ConditionalFormatting } from '@core/common/domain/model/chart-option/extra-setting/condition-formatting/ConditionalFormatting';
 import { FormatterSetting } from './FormatterSetting';
 import { ConditionalFormattingUtils } from '@core/utils/ConditionalFormattingUtils';
-import { _ThemeStore } from '@/store/modules/ThemeStore';
 
 export enum DisplayTableType {
   Collapse = 'collapse',
@@ -46,8 +36,7 @@ export interface TableOptionData extends ChartOptionData {
 }
 
 export class TableChartOption extends ChartOption<TableOptionData> implements Scrollable, FormatterSetting {
-  chartFamilyType = ChartFamilyType.Table;
-  className = VizSettingType.TableSetting;
+  className = ChartOptionClassName.TableSetting;
 
   constructor(options: TableOptionData = {}) {
     super(options);
@@ -58,33 +47,15 @@ export class TableChartOption extends ChartOption<TableOptionData> implements Sc
   }
 
   static isTableSetting(setting: any): setting is TableChartOption {
-    return setting.className === VizSettingType.TableSetting;
+    return setting.className === ChartOptionClassName.TableSetting;
   }
 
   static getDefaultChartOption(): TableChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const gridColor = this.getTableGridLineColor();
     const options: TableOptionData = {
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       grid: {
         horizontal: {
           color: gridColor,
@@ -104,9 +75,9 @@ export class TableChartOption extends ChartOption<TableOptionData> implements Sc
       },
       affectedByFilter: true,
       tooltip: {
-        fontFamily: 'Roboto',
+        fontFamily: ChartOption.getSecondaryFontFamily(),
         backgroundColor: 'var(--tooltip-background-color)',
-        valueColor: textColor
+        valueColor: ChartOption.getSecondaryTextColor()
       },
       value: {
         color: textColor,
@@ -116,8 +87,7 @@ export class TableChartOption extends ChartOption<TableOptionData> implements Sc
         alternateColor: textColor,
         enableUrlIcon: false,
         style: {
-          color: textColor,
-          fontFamily: 'Roboto',
+          ...ChartOption.getSecondaryStyle(),
           fontSize: '12px',
           isWordWrap: false
         }
@@ -129,9 +99,9 @@ export class TableChartOption extends ChartOption<TableOptionData> implements Sc
         isWordWrap: false,
         isAutoWidthSize: false,
         style: {
+          ...ChartOption.getSecondaryStyle(),
           color: textColor,
           isWordWrap: false,
-          fontFamily: 'Roboto',
           fontSize: '12px'
         }
       },
@@ -159,5 +129,9 @@ export class TableChartOption extends ChartOption<TableOptionData> implements Sc
 
   getFormatters(): TableColumn[] {
     return this.options.conditionalFormatting ? ConditionalFormattingUtils.buildTableColumns(this.options.conditionalFormatting) : [];
+  }
+
+  isEnableControl(): boolean {
+    return false;
   }
 }

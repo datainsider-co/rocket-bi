@@ -3,17 +3,9 @@
  * @created: 5/30/21, 10:04 PM
  */
 
-/*
- * @author: tvc12 - Thien Vi
- * @created: 12/17/20, 11:51 AM
- */
-
-import { Position, StyleSettings, WidgetCommonData, Widgets } from '@core/common/domain/model';
+import { ChartOption, Position, StyleSettings, TextAlign, WidgetCommonData, Widgets } from '@core/common/domain/model';
 import { Widget } from '../Widget';
-import { TextStyle } from '@/screens/dashboard-detail/components/text-style-setting/TextStyle';
-import { TextAlign } from '@/screens/dashboard-detail/components/align-setting/TextAlign';
 import { get, set } from 'lodash';
-import base = Mocha.reporters.base;
 import { Log } from '@core/utils';
 
 export class TextWidget extends Widget {
@@ -27,33 +19,17 @@ export class TextWidget extends Widget {
     this.isHtmlRender = isHtmlRender;
   }
 
-  getContainerStyle() {
+  getRenderStyle(): Record<string, any> {
     return {
-      backgroundColor: this.background,
-      opacity: this.getOpacityCSSValue(this.backgroundOpacity)
-    };
-  }
-
-  getRenderStyle() {
-    const style: Record<string, any> = {
       color: this.fontColor,
       fontSize: this.fontSize,
       textAlign: this.textAlign,
       fontFamily: this.fontFamily,
-      opacity: this.getOpacityCSSValue(this.opacity)
+      opacity: this.opacity / 100,
+      fontWeight: this.isBold ? 'bold' : '',
+      fontStyle: this.isItalic ? 'italic' : '',
+      textDecoration: this.isUnderline ? 'underline' : ''
     };
-    switch (this.textStyle) {
-      case TextStyle.Bold:
-        style['fontWeight'] = 'bold';
-        break;
-      case TextStyle.Underline:
-        style['textDecoration'] = 'underline';
-        break;
-      case TextStyle.Italic:
-        style['fontStyle'] = 'italic';
-        break;
-    }
-    return style;
   }
 
   static empty() {
@@ -62,8 +38,8 @@ export class TextWidget extends Widget {
         id: -1,
         name: '',
         description: '',
-        textColor: 'var(--text-color)',
-        backgroundColor: 'var(--chart-background-color)',
+        textColor: ChartOption.getPrimaryTextColor(),
+        backgroundColor: ChartOption.getThemeBackgroundColor(),
         extraData: {
           currentChartType: Widgets.Text,
           styleSettings: TextWidget.defaultStyleSettings()
@@ -91,8 +67,12 @@ export class TextWidget extends Widget {
     set(this, 'extraData.styleSettings.backgroundOpacity', value);
   }
 
-  getOpacityCSSValue(opacity: number) {
-    return opacity ? opacity / 100 : 1;
+  getBackgroundColorOpacity(): number {
+    return this.backgroundOpacity;
+  }
+
+  getBackgroundColor(): string | undefined {
+    return this.background;
   }
 
   get fontSize(): string {
@@ -119,12 +99,28 @@ export class TextWidget extends Widget {
     set(this, 'extraData.styleSettings.background', value);
   }
 
-  get textStyle(): string {
-    return get(this, 'extraData.styleSettings.textStyle', TextStyle.Normal);
+  get isItalic(): boolean {
+    return get(this, 'extraData.styleSettings.isItalic', false);
   }
 
-  setTextStyle(value: TextStyle) {
-    set(this, 'extraData.styleSettings.textStyle', value);
+  set isItalic(value: boolean) {
+    set(this, 'extraData.styleSettings.isItalic', value);
+  }
+
+  get isBold(): boolean {
+    return get(this, 'extraData.styleSettings.isBold', false);
+  }
+
+  set isBold(value: boolean) {
+    set(this, 'extraData.styleSettings.isBold', value);
+  }
+
+  get isUnderline(): boolean {
+    return get(this, 'extraData.styleSettings.isUnderline', false);
+  }
+
+  set isUnderline(value: boolean) {
+    set(this, 'extraData.styleSettings.isUnderline', value);
   }
 
   get fontColor(): string {
@@ -137,7 +133,7 @@ export class TextWidget extends Widget {
     set(this, 'extraData.styleSettings.fontColor', value);
   }
 
-  get textAlign(): string {
+  get textAlign(): TextAlign {
     return get(this, 'extraData.styleSettings.textAlign', TextAlign.Left);
   }
 
@@ -174,14 +170,16 @@ export class TextWidget extends Widget {
 
   static defaultStyleSettings(): StyleSettings {
     return {
-      background: '#fff',
-      fontColor: 'var(--text-color)',
+      background: ChartOption.getThemeBackgroundColor(),
+      fontColor: ChartOption.getPrimaryTextColor(),
       fontSize: '12px',
-      fontFamily: 'Roboto',
-      textStyle: TextStyle.Normal,
-      textAlign: TextAlign.Left,
+      fontFamily: ChartOption.getPrimaryFontFamily(),
+      textAlign: ChartOption.getPrimaryFontAlign() as TextAlign,
       opacity: 100,
-      backgroundOpacity: 100
+      backgroundOpacity: 100,
+      isItalic: false,
+      isBold: false,
+      isUnderline: false
     };
   }
 }

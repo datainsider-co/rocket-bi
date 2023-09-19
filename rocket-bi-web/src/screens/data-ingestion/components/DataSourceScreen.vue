@@ -65,10 +65,11 @@
     <DataSourceTypeSelection :is-show.sync="isShowDatabaseSelectionModal" @onDataSourceTypeSelected="handleSelectDataSource"></DataSourceTypeSelection>
     <DiUploadGoogleSheetComponent ref="diUp"></DiUploadGoogleSheetComponent>
     <S3SourceConfigModal ref="s3SourceModal" />
-    <S3JobConfigModal ref="s3JobConfigModal" />
+    <S3JobConfigModal :is-disabled-select-source="true" ref="s3JobConfigModal" />
     <S3PreviewTableModal ref="s3PreviewModal" />
     <JobConfigModal ref="jobConfigModal" :job-config-form-render="jobFormRenderer" title="Job config"></JobConfigModal>
-    <JobCreationModal ref="jobCreationModal" @submit="redirectToJobScreen"></JobCreationModal>
+    <JobCreationModal :is-disabled-select-source="true" ref="jobCreationModal" @submit="redirectToJobScreen"></JobCreationModal>
+    <MultiJobCreationModal :is-disabled-select-source="true" ref="multiJobCreationModal" @submit="redirectToJobScreen"></MultiJobCreationModal>
     <DocumentModal ref="documentModal" />
   </LayoutContent>
 </template>
@@ -89,19 +90,18 @@ import S3PreviewTableModal from '@/screens/data-ingestion/components/S3PreviewTa
 import { ALL_DATASOURCE } from '@/screens/data-ingestion/constants/Datasource';
 import { DataSourceFormFactory } from '@/screens/data-ingestion/form-builder/DataSourceFormFactory';
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
-import { JobFormFactory } from '@/screens/data-ingestion/form-builder/JobFormFactory';
 import { JobFormRender } from '@/screens/data-ingestion/form-builder/JobFormRender';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
 import { JobModule } from '@/screens/data-ingestion/store/JobStore';
 import { ApiExceptions, DefaultPaging, ItemData, Routers, Status, VisualizationItemData } from '@/shared';
 import { Track } from '@/shared/anotation';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
+import { AtomicAction } from '@core/common/misc';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import DiTable2 from '@/shared/components/common/di-table/DiTable2.vue';
 import { LayoutContent, LayoutHeader, LayoutNoData } from '@/shared/components/layout-wrapper';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { CustomCell, HeaderData, IndexedHeaderData, Pagination, RowData } from '@/shared/models';
-import { DateTimeFormatter, ListUtils, TimeoutUtils } from '@/utils';
+import { DateTimeUtils, ListUtils, TimeoutUtils } from '@/utils';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 
 import { Modals } from '@/utils/Modals';
@@ -113,8 +113,9 @@ import {
   DataSourceType,
   FormMode,
   GoogleAdsSourceInfo,
+  GoogleSearchConsoleType,
   Job,
-  JobInfo,
+  JobService,
   S3Job,
   S3SourceInfo,
   SortRequest,
@@ -142,6 +143,9 @@ import { GASourceInfo } from '@core/data-ingestion/domain/data-source/GASourceIn
 import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4SourceInfo';
 import { FacebookResponse, validFacebookResponse } from '@/shared/components/third-party-authentication/fb/FacebookResponse';
 import JobCreationModal from '@/screens/data-ingestion/components/JobCreationModal.vue';
+import { GoogleSearchConsoleSourceInfo } from '@core/data-ingestion/domain/data-source/GoogleSearchConsoleSourceInfo';
+import MultiJobCreationModal from '@/screens/data-ingestion/components/MultiJobCreationModal.vue';
+import { GoogleSearchConsoleJob } from '@core/data-ingestion/domain/job/google-search-console';
 
 @Component({
   components: {
@@ -162,7 +166,8 @@ import JobCreationModal from '@/screens/data-ingestion/components/JobCreationMod
     S3SourceConfigModal,
     S3PreviewTableModal,
     SlideXLeftTransition,
-    JobCreationModal
+    JobCreationModal,
+    MultiJobCreationModal
   }
 })
 export default class DataSourceScreen extends Vue {
@@ -193,6 +198,9 @@ export default class DataSourceScreen extends Vue {
   private jobCreationModal!: JobCreationModal;
 
   @Ref()
+  private multiJobCreationModal!: MultiJobCreationModal;
+
+  @Ref()
   private dataSourceConfigModal!: DataSourceConfigModal;
 
   @Inject
@@ -210,7 +218,6 @@ export default class DataSourceScreen extends Vue {
   private tableErrorMessage = '';
   private tableStatus: Status = Status.Loading;
   private dataSourceFormRender: DataSourceFormRender = this.defaultDataSourceFormRender();
-  private googleConfig = require('@/screens/data-ingestion/constants/google-config.json');
   defaultDatasourceIcon = require('@/assets/icon/data_ingestion/datasource/ic_default.svg');
   private checkboxController = new CheckBoxHeaderController();
   selectedIndexAsSet = new Set<SourceId>();
@@ -276,7 +283,7 @@ export default class DataSourceScreen extends Vue {
         label: 'Last Modified',
         customRenderBodyCell: new CustomCell(rowData => {
           const lastModify = DataSourceResponse.fromObject(rowData).dataSource.lastModify;
-          const data = lastModify !== 0 ? DateTimeFormatter.formatAsMMMDDYYYHHmmss(lastModify) : '--';
+          const data = lastModify !== 0 ? DateTimeUtils.formatAsMMMDDYYYHHmmss(lastModify) : '--';
           return HtmlElementRenderUtils.renderText(data, 'span', 'text-truncate');
         }),
         width: 180
@@ -315,6 +322,7 @@ export default class DataSourceScreen extends Vue {
   private get dataSourceListing(): RowData[] {
     // return []
     return this.dataSources.map(dataSource => {
+      Log.debug('DataSourceScreen::dataSourceListing::source::', dataSource.dataSource);
       return {
         ...dataSource,
         isExpanded: false,
@@ -466,26 +474,44 @@ export default class DataSourceScreen extends Vue {
     try {
       this.closeDatabaseSelection();
       await TimeoutUtils.sleep(150);
-      switch (selectedItem.type) {
+      await this.handleOpenThirdPartyWindow(selectedItem.type);
+    } catch (e) {
+      const exception = DIException.fromObject(e);
+      PopupUtils.showError(exception.message);
+      Log.error('DataSourceConfigModal::handleSelectDataSource::exception::', exception.message);
+    }
+  }
+
+  private async handleOpenThirdPartyWindow(type: DataSourceType | string) {
+    try {
+      switch (type) {
         case 'csv': {
           DiUploadDocumentActions.showUploadDocument();
           break;
         }
         case 'sheet': {
-          await this.handleSelectGoogleSourceType(`${this.googleConfig.sheetUrl}?redirect=${window.location.origin}&scope=${this.googleConfig.sheetScope}`);
+          await this.handleSelectGoogleSourceType(
+            `${window.appConfig.GOOGLE_SHEET_URL}?redirect=${window.location.origin}&scope=${window.appConfig.GOOGLE_SHEET_SCOPES}`
+          );
           break;
         }
         case DataSourceType.GA: {
-          await this.handleSelectGoogleSourceType(`${this.googleConfig.gaUrl}?redirect=${window.location.origin}&scope=${this.googleConfig.gaScope}`);
+          await this.handleSelectGoogleSourceType(`${window.appConfig.GA_URL}?redirect=${window.location.origin}&scope=${window.appConfig.GA_SCOPES}`);
           break;
         }
         case DataSourceType.GA4: {
-          await this.handleSelectGoogleSourceType(`${this.googleConfig.ga4Url}?redirect=${window.location.origin}&scope=${this.googleConfig.ga4Scope}`);
+          await this.handleSelectGoogleSourceType(`${window.appConfig.GA4_URL}?redirect=${window.location.origin}&scope=${window.appConfig.GA4_SCOPES}`);
+          break;
+        }
+        case DataSourceType.GoogleSearchConsole: {
+          await this.handleSelectGoogleSourceType(
+            `${window.appConfig.GOOGLE_SEARCH_CONSOLE_URL}?redirect=${window.location.origin}&scope=${window.appConfig.GOOGLE_SEARCH_CONSOLE_SCOPES}`
+          );
           break;
         }
         case DataSourceType.GoogleAds: {
           await this.handleSelectGoogleSourceType(
-            `${this.googleConfig.gAdvertiseUrl}?redirect=${window.location.origin}&scope=${this.googleConfig.gAdvertiseScope}`
+            `${window.appConfig.GOOGLE_ADS_URL}?redirect=${window.location.origin}&scope=${window.appConfig.GOOGLE_ADS_SCOPES}`
           );
           break;
         }
@@ -498,14 +524,14 @@ export default class DataSourceScreen extends Vue {
         }
         case DataSourceType.Facebook: {
           await this.handleSelectGoogleSourceType(
-            `${this.googleConfig.facebookUrl}?redirect=${window.location.origin}&scope=${window.appConfig.VUE_APP_FACEBOOK_SCOPE}`
+            `${window.appConfig.FACEBOOK_ADS_URL}?redirect=${window.location.origin}&scope=${window.appConfig.VUE_APP_FACEBOOK_SCOPE}`
           );
           // await this.loginFacebook(this.handleFacebookLogin);
           break;
         }
         case DataSourceType.Tiktok: {
-          Log.debug('link::', `${this.googleConfig.tiktokUrl}&redirect=${window.location.origin}`);
-          await this.handleSelectGoogleSourceType(`${this.googleConfig.tiktokUrl}?redirect=${window.location.origin}`);
+          Log.debug('link::', `${window.appConfig.TIKTOK_ADS_URL}&redirect=${window.location.origin}`);
+          await this.handleSelectGoogleSourceType(`${window.appConfig.TIKTOK_ADS_URL}?redirect=${window.location.origin}`);
           // await this.loginFacebook(this.handleFacebookLogin);
           break;
         }
@@ -515,19 +541,18 @@ export default class DataSourceScreen extends Vue {
         case DataSourceType.Android:
         case DataSourceType.Flutter:
         case DataSourceType.ReactNative: {
-          await this.openDocumentForm(selectedItem.type);
+          await this.openDocumentForm(type);
           break;
         }
         default: {
-          const defaultDataSource = DataSourceInfo.default(selectedItem.type as DataSourceType);
+          const defaultDataSource = DataSourceInfo.default(type as DataSourceType);
           Log.debug('handleSelected::faultDataSource::', defaultDataSource);
           this.openDataSourceForm(defaultDataSource);
         }
       }
     } catch (e) {
-      const exception = DIException.fromObject(e);
-      PopupUtils.showError(exception.message);
-      Log.error('DataSourceConfigModal::handleSelectDataSource::exception::', exception.message);
+      Log.error('DataSourceConfigModal::handleOpenThirdPartyWindow::exception::', e);
+      PopupUtils.showError(e.message);
     }
   }
 
@@ -599,12 +624,6 @@ export default class DataSourceScreen extends Vue {
     this.documentModal.show(source);
   }
 
-  private openJobConfigModal(jobInfo: JobInfo) {
-    this.jobFormRenderer = new JobFormFactory().createRender(jobInfo);
-    this.jobConfigModal.show(job => this.submitJob(job));
-    Log.debug('openJobConfigModal::', jobInfo);
-  }
-
   @AtomicAction()
   private async handleSubmitDataSource() {
     try {
@@ -624,25 +643,44 @@ export default class DataSourceScreen extends Vue {
   }
 
   private handleAfterCreateSource(source: DataSourceInfo) {
-    if (source.sourceType === DataSourceType.Palexy) {
-      const job = Job.default(source);
-      job.displayName = 'Palexy job';
-      this.jobCreationModal.show(Job.default(source));
-      this.jobCreationModal.handleSelectPalexy(source);
+    switch (source.sourceType) {
+      case DataSourceType.Palexy: {
+        const job = Job.default(source);
+        job.displayName = 'Palexy job';
+        this.jobCreationModal.show(Job.default(source));
+        this.jobCreationModal.handleSelectPalexy(source);
+        break;
+      }
+      case DataSourceType.GoogleSearchConsole: {
+        const job = Job.default(source);
+        job.displayName = 'Google search console job';
+        this.multiJobCreationModal.show(
+          job,
+          (job: Job, isSingleTable: boolean) => this.handleCreateGoogleConsoleJob(job, isSingleTable),
+          this.multiJobCreationModal.hide
+        );
+        this.multiJobCreationModal.handleSelectGoogleSearchConsole(source);
+        break;
+      }
     }
   }
 
-  private async handleReAuthen(sourceInfo: DataSourceInfo) {
-    switch (sourceInfo.sourceType) {
-      case DataSourceType.GA: {
-        await this.handleSelectGoogleSourceType(`${this.googleConfig.gaUrl}?redirect=${window.location.origin}&scope=${this.googleConfig.gaScope}`);
-        break;
-      }
-      case DataSourceType.GA4: {
-        await this.handleSelectGoogleSourceType(`${this.googleConfig.ga4Url}?redirect=${window.location.origin}&scope=${this.googleConfig.ga4Scope}`);
-        break;
-      }
+  private async handleCreateGoogleConsoleJob(job: Job, isSingleTable: boolean) {
+    if (isSingleTable) {
+      await JobModule.create(job);
+    } else {
+      const newJob = job as GoogleSearchConsoleJob;
+      const searchAnalyticJob = cloneDeep(newJob);
+      const searchAppearanceJob = cloneDeep(newJob);
+      searchAppearanceJob.tableType = GoogleSearchConsoleType.SearchAppearance;
+      searchAnalyticJob.tableType = GoogleSearchConsoleType.SearchAnalytics;
+      await JobModule.multiCreateV2({ jobs: [searchAnalyticJob.createSingleJob(), searchAppearanceJob.createSingleJob()] });
     }
+    await this.redirectToJobScreen();
+  }
+
+  private async handleReAuthen(sourceInfo: DataSourceInfo) {
+    await this.handleOpenThirdPartyWindow(sourceInfo.sourceType);
   }
 
   private handleResetDataSourceFormRender() {
@@ -761,7 +799,10 @@ export default class DataSourceScreen extends Vue {
     const height = 550;
     const left = screen.width / 2 - width / 2;
     const top = screen.height / 2 - height / 2;
-    window.open(url, '_blank', `toolbar=yes,scrollbars=yes,resizable=yes,top=${top},left=${left},width=${width},height=${height}`);
+    const wd: Window | null = window.open('', '_blank', `toolbar=yes,scrollbars=yes,resizable=yes,top=${top},left=${left},width=${width},height=${height}`);
+    if (wd && !wd.location.hostname) {
+      wd.location.href = url;
+    }
   }
 
   private addMessageEvent() {
@@ -787,7 +828,7 @@ export default class DataSourceScreen extends Vue {
     Log.debug('verifyMessage::', event);
     const origin = event.origin;
     const error = event.data?.error ?? null;
-    if (origin !== this.googleConfig.rootOrigin) {
+    if (origin !== window.appConfig.GOOGLE_ROOT_ORIGIN) {
       return;
     }
     if (error) {
@@ -810,6 +851,11 @@ export default class DataSourceScreen extends Vue {
         case ThirdPartyType.GA4: {
           Log.debug('DataSourceScreen::handleThirdPartyAuthMessage::GA4Case::');
           this.handleGA4Message(authorizeResponse.access_token, authorizeResponse.code);
+          break;
+        }
+        case ThirdPartyType.GoogleSearchConsole: {
+          Log.debug('DataSourceScreen::handleThirdPartyAuthMessage::GoogleSearchConsole::', authorizeResponse);
+          this.handleGoogleSearchConsoleMessage(authorizeResponse.access_token, authorizeResponse.code);
           break;
         }
         case ThirdPartyType.GoogleSheet: {
@@ -892,6 +938,23 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
+  private async handleGoogleSearchConsoleMessage(accessToken: string, authorizationCode: string) {
+    try {
+      ///handle loading here
+      const consoleSourceInfo: GoogleSearchConsoleSourceInfo = this.isDefaultSource
+        ? GoogleSearchConsoleSourceInfo.default()
+        : (this.renderSource as GoogleSearchConsoleSourceInfo);
+      Log.debug('DateSourceScreen::handleGoogleSearchConsoleMessage::', consoleSourceInfo);
+      consoleSourceInfo.setAccessToken(accessToken);
+      const refreshToken = await DataSourceModule.getRefreshToken(authorizationCode);
+      consoleSourceInfo.setRefreshToken(refreshToken);
+      Log.debug('DataSourceScreen::handleGoogleSearchConsoleMessage::GoogleAnalyticJob::', consoleSourceInfo);
+      this.openDataSourceForm(consoleSourceInfo);
+    } catch (e) {
+      PopupUtils.showError(e.message);
+    }
+  }
+
   private handleGoogleSheetMessage(accessToken: string, authorizationCode: string) {
     Log.debug('DataSourceScreen::handleGoogleSheetMessage::', accessToken, authorizationCode);
     DiUploadGoogleSheetActions.showUploadGoogleSheet();
@@ -925,7 +988,7 @@ export default class DataSourceScreen extends Vue {
     try {
       const job: Job = this.jobFormRenderer.createJob();
       Log.debug('Submit Job', job);
-      const jobInfo = await JobModule.create(job);
+      await JobModule.create(job);
       TrackingUtils.track(TrackEvents.CreateGoogleAnalyticJob, {
         job_name: job.displayName,
         job_type: job.jobType,
@@ -939,6 +1002,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
+  @AtomicAction()
   private async submitJob(job: Job) {
     const clonedJob = cloneDeep(job);
     clonedJob.scheduleTime = TimeScheduler.toSchedulerV2(job.scheduleTime!);
@@ -949,14 +1013,6 @@ export default class DataSourceScreen extends Vue {
       job_type: job.jobType,
       job_id: job.jobId
     });
-  }
-
-  private async handleCancelCreateGaJob(id: SourceId) {
-    try {
-      await DataSourceModule.deleteDataSource(id);
-    } catch (e) {
-      Log.error('DataSourceScreen::handleDeleteDataSource::error::', e.message);
-    }
   }
 
   private async handleKeywordChange(newKeyword: string) {

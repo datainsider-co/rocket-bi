@@ -5,9 +5,8 @@
 - Define **enum**:
 
   - Define [WidgetType](src/shared/enums/ChartType.ts) for new chart type
-  - Define [QuerySettingType](di-core/common/domain/model/query/QuerySettingType.ts) for new query type
-  - Define [VizSettingType](di-core/common/domain/model/chart-option/VizSettingType.ts) for new type
-  - Define [ChartFamilyType](di-core/common/domain/model/chart-option/ChartFamilyType.ts) for display
+  - Define [QuerySettingType](di-core/common/domain/model/query/QuerySettingClassName.ts) for new query type
+  - Define [VizSettingType](di-core/common/domain/model/chart-option/ChartOptionClassName.ts) for new type
 
 - Implement [VizSetting](di-core/common/domain/model/chart-option/ChartOption.ts):
 

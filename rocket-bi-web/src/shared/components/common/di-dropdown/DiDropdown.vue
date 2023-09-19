@@ -1,11 +1,12 @@
 <!-- eslint-disable max-len -->
 <template>
-  <div class="select-container" :class="{ open: isDropdownOpen }" :title="label || placeholder">
+  <div class="select-container" :class="{ open: isDropdownOpen }" :title="label || placeholder" :border="border">
     <div v-click-outside="hideDropdown" class="relative">
-      <span :id="dropdownButtonId" ref="dropdown">
+      <span :id="buttonId" ref="dropdown">
         <slot :id="id" :disabled="disabled" :onToggleDropdown="toggleDropdown" :title="label || placeholder" name="dropdown-button">
           <button
             :id="id"
+            class="di-dropdown--button"
             :class="{ disabled: disabled }"
             :disabled="disabled"
             aria-expanded="true"
@@ -14,7 +15,7 @@
             type="button"
             @click.stop="toggleDropdown"
           >
-            <div>
+            <div class="di-dropdown--button--left">
               <BInput
                 ref="inputKeyword"
                 name="di-dropdown"
@@ -48,7 +49,7 @@
                 </slot>
               </div>
             </div>
-            <span class="icon-dropdown">
+            <span class="icon-dropdown di-dropdown--button--right">
               <slot name="icon-dropdown">
                 <img alt="dropdown" src="@/assets/icon/ic-16-arrow-down.svg" />
               </slot>
@@ -58,8 +59,8 @@
       </span>
       <BPopover
         :boundary="boundary"
-        :container="selectId"
-        :customClass="popoverClass"
+        :container="computedContainerId"
+        customClass="select-area-popover"
         :show.sync="isDropdownOpen"
         :target="id"
         @shown="scrollToIndex(selectedIndex, false)"

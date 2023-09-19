@@ -171,20 +171,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
-import {
-  AxisSetting,
-  ChartOption,
-  HeatMapQuerySetting,
-  PlotOptions,
-  QuerySetting,
-  QuerySettingType,
-  SeriesQuerySetting,
-  SettingKey
-} from '@core/common/domain';
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { AxisSetting, ChartOption, PlotOptions, QuerySetting, QuerySettingClassName, SettingKey } from '@core/common/domain';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { DashOptions } from '@/shared/settings/common/options/DashOptions';
 import { enableCss } from '@/shared/settings/common/install';
 import { ChartType, SelectOption } from '@/shared';
@@ -194,26 +185,25 @@ import { Log } from '@core/utils';
 @Component({ components: { PanelHeader } })
 export default class SeriesYAxisTab extends Vue {
   @Prop({ required: false, type: Array })
-  private readonly setting!: AxisSetting[];
+  protected readonly setting!: AxisSetting[];
   @Prop({ required: false, type: Object })
-  private readonly plotOptions!: PlotOptions;
+  protected readonly plotOptions!: PlotOptions;
   @Prop({ required: false, type: Object })
-  private readonly query!: QuerySetting;
+  protected readonly query!: QuerySetting;
   @Prop({ required: false, type: Array })
-  private readonly seriesOptions?: SelectOption[];
+  protected readonly seriesOptions?: SelectOption[];
   @Prop({ required: false, type: String })
-  private readonly chartType?: ChartType;
+  protected readonly chartType?: ChartType;
 
-  private readonly defaultSetting = {
+  protected readonly defaultSetting = {
     visible: true,
-    categoryFont: 'Roboto',
-    categoryColor: ChartOption.getThemeTextColor(),
+    categoryFont: ChartOption.getSecondaryFontFamily(),
+    categoryColor: ChartOption.getPrimaryTextColor(),
     categoryFontSize: '11px',
     titleEnabled: true,
-    titleFont: 'Roboto',
-    titleColor: ChartOption.getThemeTextColor(),
+    titleFont: ChartOption.getSecondaryFontFamily(),
+    titleColor: ChartOption.getPrimaryTextColor(),
     titleFontSize: '11px',
-    title: this.defaultText,
     gridLineColor: ChartOption.getGridLineColor(),
     gridLineDashStyle: 'Solid',
     gridLineWidth: '0.5',
@@ -226,169 +216,157 @@ export default class SeriesYAxisTab extends Vue {
     prefixText: '',
     postfixText: ''
   };
-  private selectedLegend = '';
 
-  @Watch('seriesOptions', { immediate: true })
-  onResponseChanged() {
-    this.selectedLegend = get(this.seriesOptions, '[1].id', '') || get(this.seriesOptions, '[0].id', '');
-  }
-
-  private get defaultText() {
+  getDefaultText(): string {
     switch (this.query.className) {
-      case QuerySettingType.Series:
-        return (this.query as SeriesQuerySetting).yAxis[0].name;
-      case QuerySettingType.HeatMap:
-        return (this.query as HeatMapQuerySetting).yAxis.name;
+      case QuerySettingClassName.Series:
+        return get(this.query, 'yAxis[0].name', 'Untitled');
+      case QuerySettingClassName.HeatMap:
+        return get(this.query, 'yAxis.name', 'Untitled');
       default:
         return '';
     }
   }
-  // mounted() {
-  //   const hasOneSettingYAxis = this.setting.length == 1;
-  //   if (hasOneSettingYAxis) {
-  //     this.$emit('onMultipleChanged', this.defaultDualAxisConfig);
-  //   }
-  // }
 
-  private get tabTitle(): string {
+  protected get tabTitle(): string {
     if (this.chartType == ChartType.Bar) {
       return 'X Axis';
     }
     return 'Y Axis';
   }
 
-  private get enabled(): boolean {
+  protected get enabled(): boolean {
     return get(this.setting, '[0].visible', this.defaultSetting.visible);
   }
 
-  private get categoryFont(): string {
+  protected get categoryFont(): string {
     Log.debug('get::categoryFont', this.setting);
     return get(this.setting, '[0].labels.style.fontFamily', this.defaultSetting.categoryFont);
   }
 
-  private get categoryColor(): string {
+  protected get categoryColor(): string {
     return get(this.setting, '[0].labels.style.color', this.defaultSetting.categoryColor);
   }
 
-  private get categoryFontSize(): string {
+  protected get categoryFontSize(): string {
     return get(this.setting, '[0].labels.style.fontSize', this.defaultSetting.categoryFontSize);
   }
 
-  private get titleEnabled(): boolean {
+  protected get titleEnabled(): boolean {
     return get(this.setting, '[0].title.enabled', this.defaultSetting.titleEnabled);
   }
 
-  private get titleFont(): string {
+  protected get titleFont(): string {
     return get(this.setting, '[0].title.style.fontFamily', this.defaultSetting.titleFont);
   }
 
-  private get titleColor(): string {
+  protected get titleColor(): string {
     return get(this.setting, '[0].title.style.color', this.defaultSetting.titleColor);
   }
 
-  private get titleFontSize(): string {
+  protected get titleFontSize(): string {
     return get(this.setting, '[0].title.style.fontSize', this.defaultSetting.titleFontSize);
   }
 
-  private get fontOptions() {
+  protected get fontOptions() {
     return FontFamilyOptions;
   }
 
-  private get fontSizeOptions() {
-    return FontSizeOptions;
+  protected get fontSizeOptions() {
+    return SecondaryFontSizeOptions;
   }
 
-  private get title(): string {
-    return get(this.setting, '[0].title.text', this.defaultSetting.title);
+  protected get title(): string {
+    return get(this.setting, '[0].title.text', this.getDefaultText());
   }
 
-  private get dualTitle(): string {
+  protected get dualTitle(): string {
     return get(this.setting, '[1].title.text', this.defaultSetting.dualTitle);
   }
 
-  private get gridLineColor(): string {
+  protected get gridLineColor(): string {
     return get(this.setting, '[0].gridLineColor', this.defaultSetting.gridLineColor);
   }
 
-  private get gridLineWidth(): string {
+  protected get gridLineWidth(): string {
     return get(this.setting, '[0].gridLineWidth', this.defaultSetting.gridLineWidth);
   }
 
-  private get maxYAxis(): string {
+  protected get maxYAxis(): string {
     // Log.debug("maxYaxis::", this.setting[0]?.condition.max.value)
     return get(this.setting, '[0].condition.max.value', this.defaultSetting.max);
   }
 
-  private get minYAxis(): string {
+  protected get minYAxis(): string {
     return get(this.setting, '[0].condition.min.value', this.defaultSetting.min);
   }
 
-  private get gridLineDashStyle(): string {
+  protected get gridLineDashStyle(): string {
     return get(this.setting, '[0].gridLineDashStyle', this.defaultSetting.gridLineDashStyle);
   }
 
-  private get dashOptions() {
+  protected get dashOptions() {
     return DashOptions;
   }
 
-  private get gridEnabled(): boolean {
+  protected get gridEnabled(): boolean {
     return get(this.setting, '[0].gridLineWidth', 0) !== 0;
   }
 
-  private get prefixText(): string {
+  protected get prefixText(): string {
     return this.setting[0]?.prefix?.text ?? this.defaultSetting.prefixText;
   }
 
-  private get postfixText(): string {
+  protected get postfixText(): string {
     return this.setting[0]?.postfix?.text ?? this.defaultSetting.postfixText;
   }
 
-  private get gridLineChildrenSettingStyle(): CSSStyleDeclaration {
+  protected get gridLineChildrenSettingStyle(): CSSStyleDeclaration {
     return {
       ...enableCss(this.gridEnabled && this.enabled),
       marginBottom: '16px'
     } as CSSStyleDeclaration;
   }
 
-  private get minMaxConditionStyle(): CSSStyleDeclaration {
+  protected get minMaxConditionStyle(): CSSStyleDeclaration {
     return {
       ...enableCss(this.enableMinMaxCondition)
     } as CSSStyleDeclaration;
   }
 
-  private get minConditionStyle(): CSSStyleDeclaration {
+  protected get minConditionStyle(): CSSStyleDeclaration {
     return {
       ...enableCss(this.enableMinCondition)
     } as CSSStyleDeclaration;
   }
 
-  private get maxConditionStyle(): CSSStyleDeclaration {
+  protected get maxConditionStyle(): CSSStyleDeclaration {
     return {
       ...enableCss(this.enableMaxCondition)
     } as CSSStyleDeclaration;
   }
 
-  private get axisSettingStyle(): CSSStyleDeclaration {
+  protected get axisSettingStyle(): CSSStyleDeclaration {
     return {
       ...enableCss(this.enabled)
     } as CSSStyleDeclaration;
   }
 
-  private get titleSettingStyle(): CSSStyleDeclaration {
+  protected get titleSettingStyle(): CSSStyleDeclaration {
     return {
       ...enableCss(this.enabled && this.titleEnabled)
     } as CSSStyleDeclaration;
   }
 
-  private get enableMinMaxCondition(): boolean {
+  protected get enableMinMaxCondition(): boolean {
     return this.setting[0]?.condition?.enabled ?? false;
   }
 
-  private get enableMaxCondition(): boolean {
+  protected get enableMaxCondition(): boolean {
     return get(this.setting, '[0].condition.max.enabled', false);
   }
 
-  private get enableMinCondition(): boolean {
+  protected get enableMinCondition(): boolean {
     return get(this.setting, '[0].condition.min.enabled', false);
   }
 
@@ -398,7 +376,7 @@ export default class SeriesYAxisTab extends Vue {
     }
   }
 
-  private handleGridEnabled(enabled: boolean) {
+  protected handleGridEnabled(enabled: boolean) {
     if (enabled) {
       return this.$emit('onChanged', 'yAxis[0].gridLineWidth', '0.5');
     } else {
@@ -406,106 +384,106 @@ export default class SeriesYAxisTab extends Vue {
     }
   }
 
-  private handleAxisEnabled(enabled: boolean) {
+  protected handleAxisEnabled(enabled: boolean) {
     this.$emit('onChanged', 'yAxis[0].visible', enabled);
     if (!enabled) {
       this.handleConditionChanged(false);
     }
   }
 
-  private handleCategoryFontChanged(newFont: string) {
+  protected handleCategoryFontChanged(newFont: string) {
     return this.$emit('onChanged', 'yAxis[0].labels.style.fontFamily', newFont);
   }
 
-  private handleCategoryFontSizeChanged(newFontSize: string) {
+  protected handleCategoryFontSizeChanged(newFontSize: string) {
     return this.$emit('onChanged', 'yAxis[0].labels.style.fontSize', newFontSize);
   }
 
-  private handleCategoryColorChanged(newColor: string) {
+  protected handleCategoryColorChanged(newColor: string) {
     return this.$emit('onChanged', 'yAxis[0].labels.style.color', newColor);
   }
 
-  private handleTitleEnabled(enabled: boolean) {
+  protected handleTitleEnabled(enabled: boolean) {
     return this.$emit('onChanged', 'yAxis[0].title.enabled', enabled);
   }
 
-  private handleTitleSaved(newText: string) {
+  protected handleTitleSaved(newText: string) {
     return this.$emit('onChanged', 'yAxis[0].title.text', newText);
   }
 
-  private handleTitleFontChanged(newFont: string) {
+  protected handleTitleFontChanged(newFont: string) {
     return this.$emit('onChanged', 'yAxis[0].title.style.fontFamily', newFont);
   }
 
-  private handleTitleColorChanged(newColor: string) {
+  protected handleTitleColorChanged(newColor: string) {
     return this.$emit('onChanged', 'yAxis[0].title.style.color', newColor);
   }
 
-  private handleTitleFontSizeChanged(newFontSize: string) {
+  protected handleTitleFontSizeChanged(newFontSize: string) {
     return this.$emit('onChanged', 'yAxis[0].title.style.fontSize', newFontSize);
   }
 
-  private handleRevert() {
+  protected handleRevert() {
     const settingAsMap: Map<SettingKey, boolean | string | number> = new Map([...this.defaultMainAxisConfig]);
     this.$emit('onMultipleChanged', settingAsMap);
   }
 
-  private handleGridLineWidthChanged(newWidth: number) {
+  protected handleGridLineWidthChanged(newWidth: number) {
     if (this.gridEnabled) {
       return this.$emit('onChanged', 'yAxis[0].gridLineWidth', newWidth);
     }
   }
 
-  private handleGridColorChanged(newColor: string) {
+  protected handleGridColorChanged(newColor: string) {
     return this.$emit('onChanged', 'yAxis[0].gridLineColor', newColor);
   }
 
-  private handleGridLineDashStyleChanged(newDashStyle: string) {
+  protected handleGridLineDashStyleChanged(newDashStyle: string) {
     return this.$emit('onChanged', 'yAxis[0].gridLineDashStyle', newDashStyle);
   }
 
-  private handleConditionChanged(enable: boolean) {
+  protected handleConditionChanged(enable: boolean) {
     this.$emit('onChanged', 'yAxis[0].condition.enabled', enable);
   }
 
-  private handleMinConditionChanged(enable: boolean) {
+  protected handleMinConditionChanged(enable: boolean) {
     this.$emit('onChanged', 'yAxis[0].condition.min.enabled', enable);
     if (enable) {
       this.handleMinValueChanged(this.minYAxis);
     }
   }
 
-  private handleMaxConditionChanged(enable: boolean) {
+  protected handleMaxConditionChanged(enable: boolean) {
     this.$emit('onChanged', 'yAxis[0].condition.max.enabled', enable);
     if (enable) {
       this.handleMaxValueChanged(this.maxYAxis);
     }
   }
 
-  private handleMinValueChanged(value: string) {
+  protected handleMinValueChanged(value: string) {
     this.$emit('onChanged', 'yAxis[0].condition.min.value', +value);
   }
 
-  private handleMaxValueChanged(value: string) {
+  protected handleMaxValueChanged(value: string) {
     this.$emit('onChanged', 'yAxis[0].condition.max.value', +value);
   }
 
-  private handlePrefixSaved(newText: string) {
+  protected handlePrefixSaved(newText: string) {
     return this.$emit('onChanged', 'yAxis[0].prefix.text', newText);
   }
 
-  private handlePostfixSaved(newText: string) {
+  protected handlePostfixSaved(newText: string) {
     return this.$emit('onChanged', 'yAxis[0].postfix.text', newText);
   }
 
-  private get defaultMainAxisConfig(): Map<SettingKey, boolean | string | number> {
+  protected get defaultMainAxisConfig(): Map<SettingKey, boolean | string | number> {
     const settingAsMap: Map<SettingKey, boolean | string | number> = new Map();
     settingAsMap.set('yAxis[0].visible', this.defaultSetting.visible);
     settingAsMap.set('yAxis[0].labels.style.fontFamily', this.defaultSetting.categoryFont);
     settingAsMap.set('yAxis[0].labels.style.fontSize', this.defaultSetting.categoryFontSize);
     settingAsMap.set('yAxis[0].labels.style.color', this.defaultSetting.categoryColor);
     settingAsMap.set('yAxis[0].title.enabled', this.defaultSetting.titleEnabled);
-    settingAsMap.set('yAxis[0].title.text', this.defaultSetting.title);
+    settingAsMap.set('yAxis[0].title.text', this.getDefaultText());
     settingAsMap.set('yAxis[0].title.style.fontFamily', this.defaultSetting.titleFont);
     settingAsMap.set('yAxis[0].title.style.fontSize', this.defaultSetting.titleFontSize);
     settingAsMap.set('yAxis[0].title.style.color', this.defaultSetting.titleColor);
@@ -523,14 +501,8 @@ export default class SeriesYAxisTab extends Vue {
     return settingAsMap;
   }
 
-  private handleSelectedLegend(newLegend: SelectOption) {
-    this.selectedLegend = newLegend.id.toString();
-  }
-
-  private get format(): string {
+  protected get format(): string {
     return get(this.setting, '[0].labels.format', this.defaultSetting.format);
   }
 }
 </script>
-
-<style lang="scss" scoped />

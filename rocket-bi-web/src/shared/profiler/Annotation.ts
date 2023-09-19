@@ -94,7 +94,7 @@ function record(key: string | symbol, time: number) {
   profiler.record(key, time);
 }
 
-export function getOriginalFunction(descriptor: TypedPropertyDescriptor<any>, options?: ProfilerAnnotationOption) {
+export function getOriginalMethod(descriptor: TypedPropertyDescriptor<any>, options?: ProfilerAnnotationOption): any {
   if (descriptor.value) {
     return descriptor.value;
   } else if (descriptor.get && (options?.getIncluded ?? true)) {
@@ -120,7 +120,7 @@ function wrapClass(target: object, key: PropertyKey, className: string, option?:
     return;
   }
 
-  const originalFunction = getOriginalFunction(descriptor, option);
+  const originalFunction = getOriginalMethod(descriptor, option);
 
   if (!originalFunction || typeof originalFunction !== 'function') {
     return;
@@ -159,7 +159,7 @@ function wrapMethod(target: object, key: PropertyKey, descriptor: TypedPropertyD
     return;
   }
 
-  const originalFunction = getOriginalFunction(descriptor);
+  const originalFunction = getOriginalMethod(descriptor);
 
   if (!originalFunction || typeof originalFunction !== 'function') {
     return;

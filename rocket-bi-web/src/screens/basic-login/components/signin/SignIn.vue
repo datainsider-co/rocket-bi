@@ -30,15 +30,10 @@ import { Component, Vue } from 'vue-property-decorator';
 import { AuthenticationModule, AuthenticationStatus } from '@/store/modules/AuthenticationStore';
 import { LoginConstants, OauthType, Routers } from '@/shared';
 import { Log } from '@core/utils';
-import { Di } from '@core/common/modules';
 import { DataManager } from '@core/common/services';
 import { GoogleUtils } from '@/utils/GoogleUtils';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
-import { RouterEnteringHook } from '@/shared/components/vue-hook/RouterEnteringHook';
+import { AtomicAction } from '@core/common/misc';
 import { Route } from 'vue-router';
-import { NavigationGuardNext } from 'vue-router/types/router';
-import { _ThemeStore } from '@/store/modules/ThemeStore';
-import { RouterLeavingHook } from '@/shared/components/vue-hook/RouterLeavingHook';
 import { RouterUtils } from '@/utils/RouterUtils';
 
 @Component({

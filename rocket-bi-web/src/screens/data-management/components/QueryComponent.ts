@@ -5,7 +5,7 @@ import {
   ChartInfo,
   DashboardId,
   DatabaseInfo,
-  defaultQueryParameter,
+  createQueryParameter,
   DIException,
   ExportType,
   InlineSqlView,
@@ -66,6 +66,11 @@ class AdHocAnalysisInfo {
     return ListUtils.getHead(this.chartInfo.setting.sqlViews)?.query.query ?? '';
   }
 
+  get rawQuery(): string {
+    const rawQueryInOptions = this.chartInfo.setting.getChartOption()?.options.rawQuery;
+    return rawQueryInOptions || this.query;
+  }
+
   constructor(chartInfo: ChartInfo) {
     this.chartInfo = chartInfo;
   }
@@ -89,10 +94,10 @@ class AdHocAnalysisInfo {
   }
 })
 export default class QueryComponent extends Vue {
-  private readonly QUERY_PARAM_REGEX = new RegExp('{{\\s*\\w+\\s*}}', 'g');
-  private readonly queryModes = QueryEditorMode;
-  private readonly Statuses = Status;
-  private readonly horizontalScroll = {
+  protected readonly QUERY_PARAM_REGEX = new RegExp('{{\\s*\\w+\\s*}}', 'g');
+  protected readonly queryModes = QueryEditorMode;
+  protected readonly Statuses = Status;
+  protected readonly horizontalScroll = {
     ...HorizontalScrollConfig,
     bar: {
       background: 'var(--scrollbar-background)',
@@ -101,110 +106,88 @@ export default class QueryComponent extends Vue {
     }
   };
 
-  private queryStatus = Status.Empty;
-  private errorMsg = '';
-  private isAddChartLoading = false;
+  protected queryStatus = Status.Empty;
+  protected errorMsg = '';
+  protected isAddChartLoading = false;
   isSavingAdhocChart = false;
-  private query = '';
-  private disablePagination = false;
+  protected query = '';
+  protected disablePagination = false;
 
-  private listAdhocInfo: AdHocAnalysisInfo[] = [];
+  protected listAdhocInfo: AdHocAnalysisInfo[] = [];
   parameters: QueryParameter[] = [];
 
   parameterValues: Map<string, any> = new Map();
-  private currentAdHocIndex = 0;
-  private readonly tableSchemaAsMap = new Map<string, TableSchema>();
+  protected currentAdHocIndex = 0;
+  protected readonly tableSchemaAsMap = new Map<string, TableSchema>();
   $alert!: typeof Swal;
   @Prop({ required: false, type: String, default: '' })
-  private tempQuery!: string;
+  protected tempQuery!: string;
 
   @Prop({ required: false, type: String, default: '' })
-  private readonly defaultQuery!: string;
+  protected readonly defaultQuery!: string;
 
   @Prop({ required: false, type: Boolean, default: true })
-  private readonly showCreateTableButton!: boolean;
+  protected readonly showCreateTableButton!: boolean;
 
   @Prop({ required: false, type: Object })
-  private readonly formulaController!: FormulaController;
+  protected readonly formulaController!: FormulaController;
 
   @Prop({ required: true, type: Object })
-  private readonly editorController!: EditorController;
+  protected readonly editorController!: EditorController;
 
   @Prop({ required: false, type: Function })
-  private convertor?: (query: string) => string;
+  protected convertor?: (query: string) => string;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly isQueryOnFirstTime!: boolean;
+  protected readonly isQueryOnFirstTime!: boolean;
 
   @Prop({ required: false, type: Boolean, default: true })
-  private readonly showAdHocAnalysis!: boolean;
+  protected readonly showAdHocAnalysis!: boolean;
 
   @Prop({ required: false, type: Number, default: QueryEditorMode.Query })
-  private readonly mode!: QueryEditorMode;
+  protected readonly mode!: QueryEditorMode;
 
   @Prop({ required: false, type: Boolean, default: true })
-  private readonly showParameter!: boolean;
+  protected readonly showParameter!: boolean;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly isReadOnly!: boolean;
+  protected readonly isReadOnly!: boolean;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly isEnableDownloadCsv!: boolean;
+  protected readonly isEnableDownloadCsv!: boolean;
 
   @Ref()
-  private readonly formulaCompletionInput?: FormulaCompletionInput;
+  protected readonly formulaCompletionInput?: FormulaCompletionInput;
 
   @Ref()
-  private chartHolder?: ChartHolder;
+  protected readonly chartBuilderComponent!: ChartBuilderComponent;
 
   @Ref()
-  private readonly chartBuilderComponent!: ChartBuilderComponent;
-
-  @Ref()
-  private readonly actionRow!: HTMLDivElement;
-
-  @Ref()
-  private readonly formulaInputPlaceholder?: BFormTextarea;
-
-  @Ref()
-  private readonly contextMenu!: ContextMenu;
+  protected readonly contextMenu!: ContextMenu;
 
   @ioc
-  private readonly schemaService!: SchemaService;
+  protected readonly schemaService!: SchemaService;
 
   @Ref()
-  private readonly paramModal!: ParameterModal;
+  protected readonly paramModal!: ParameterModal;
 
   @Inject({ from: 'preProcessQuery', default: undefined })
-  private readonly preProcessQuery?: (url: string) => Promise<string>;
+  protected readonly preProcessQuery?: (url: string) => Promise<string>;
 
   timeout: number | undefined = void 0;
 
   @Watch('defaultQuery')
-  private onDefaultQueryChanged(newValue: string) {
+  protected onDefaultQueryChanged(newValue: string) {
     Log.debug('Change query::', this.query, newValue);
     this.query = newValue;
   }
 
-  private get showAddChartButton(): boolean {
+  protected get showAddChartButton(): boolean {
     Log.debug('showAddChartButton::', this.queryStatus === Status.Loaded, this.isMobile());
     return this.queryStatus === Status.Loaded && !this.isMobile();
   }
 
-  private get isLimitQuery() {
-    return QueryUtils.isLimitQuery(this.query);
-  }
-
-  private charHolderContainerHeight() {
-    Log.debug('actionRow::', this.actionRow.clientHeight);
-    return this.actionRow.clientHeight + 16 + this.queryEditorHeight() + 16 + 16;
-  }
-
-  private queryEditorHeight() {
-    return this.formulaCompletionInput?.$el.clientHeight ?? this.formulaInputPlaceholder?.$el.clientHeight ?? 0;
-  }
-
-  private isMobile() {
+  protected isMobile() {
     return ChartUtils.isMobile();
   }
 
@@ -225,18 +208,18 @@ export default class QueryComponent extends Vue {
     this.$root.$emit(DashboardEvents.ResizeWidget, this.currentAdhocAnalysis.chartInfo.id);
   }
 
-  getLengthOfParams() {
+  getParamsSize(): number {
     return Object.entries(this.parameters).length;
   }
 
   mounted() {
     if (this.isQueryOnFirstTime && StringUtils.isNotEmpty(this.query)) {
-      this.handleQuery();
+      this.handleExecuteQuery();
     }
     this.trackEventAdhocMode();
   }
 
-  private trackEventAdhocMode() {
+  protected trackEventAdhocMode() {
     switch (this.mode) {
       case QueryEditorMode.Dashboard: {
         TrackingUtils.track(TrackEvents.AdhocEditMode, { adhoc_id: this.$route.query?.adhoc });
@@ -252,22 +235,22 @@ export default class QueryComponent extends Vue {
     return isFunction(this.convertor) ? this.convertor(this.query) : this.query;
   }
 
-  private onClickPlaceholder() {
+  protected onClickPlaceholder() {
     this.formulaCompletionInput?.focus();
   }
 
   @Track(TrackEvents.AdhocCreateTableFromQuery)
   @Emit('onCreateTable')
-  private emitCreateTable(event: Event) {
+  protected emitCreateTable(event: Event) {
     return this.assignQueryParameter(this.currentQuery, this.parameters, this.parameterValues);
   }
 
   @Emit('onUpdateTable')
-  private emitUpdateTable(event: Event) {
+  protected emitUpdateTable(event: Event) {
     return this.currentQuery;
   }
 
-  private getSaveOptions(mouseEvent: MouseEvent): ContextMenuItem[] {
+  protected getSaveOptions(mouseEvent: MouseEvent): ContextMenuItem[] {
     return [
       {
         text: 'Create Table',
@@ -323,7 +306,7 @@ export default class QueryComponent extends Vue {
     this.showActionOptions(mouseEvent, options);
   }
 
-  private showActionOptions(event: Event, action: ContextMenuItem[]) {
+  protected showActionOptions(event: Event, action: ContextMenuItem[]) {
     this.contextMenu.show(
       event,
       action.filter(option => !option.hidden)
@@ -338,7 +321,7 @@ export default class QueryComponent extends Vue {
     chart_id: (_: ChartBuilderModal, args: any) => args[1].id
   })
   @Emit('onSaveAdhoc')
-  private emitSaveAdhoc(event: Event, chartInfo: ChartInfo) {
+  protected emitSaveAdhoc(event: Event, chartInfo: ChartInfo) {
     Log.debug('event::emitSaveAdhoc', event);
     return { event: event, chart: chartInfo };
   }
@@ -349,22 +332,22 @@ export default class QueryComponent extends Vue {
     chart_queries: (_: QueryComponent, args: any) => _.listAdhocInfo.map(adhoc => adhoc.query).join(',')
   })
   @Emit('onSaveQuery')
-  private emitSaveQuery(event: Event, saveAs: boolean) {
+  protected emitSaveQuery(event: Event, saveAs: boolean) {
     return { mouseEvent: event, saveAs: saveAs };
   }
 
   @Track(TrackEvents.ExecuteQuery, { query: (_: QueryComponent) => _.query })
-  async handleQuery() {
+  async handleExecuteQuery(): Promise<void> {
     try {
       this.errorMsg = '';
       this.queryStatus = Status.Loading;
-      this.disablePagination = this.isLimitQuery;
-      const queryProcessed = await this.getProcessedQuery();
-      Log.debug('Query::handleQuery::queryProcessed::', queryProcessed);
+      const finalQuery: string = await this.getProcessedQuery();
+      Log.debug('Query::handleQuery::finalQuery::', finalQuery);
+      this.disablePagination = QueryUtils.isLimitQuery(finalQuery);
       const chart: ChartInfo =
         this.currentAdHocIndex === 0
-          ? this.buildMainAdhocChart(StringUtils.fixCommentInSql(queryProcessed), this.parameters)
-          : this.buildAdhocChart(StringUtils.fixCommentInSql(queryProcessed), this.parameters);
+          ? this.buildMainAdhocChart(StringUtils.fixCommentInSql(finalQuery), this.parameters)
+          : this.buildAdhocChart(StringUtils.fixCommentInSql(finalQuery), this.parameters);
       const adhocInfo = new AdHocAnalysisInfo(chart);
       const pagination = this.disablePagination ? Pagination.defaultPagination() : void 0;
       await this.renderChart(adhocInfo.chartInfo, pagination);
@@ -375,18 +358,19 @@ export default class QueryComponent extends Vue {
       // }
       this.$emit('query', this.query);
     } catch (e) {
-      Log.error(e);
-      this.renderChartError(e.message);
+      Log.error('Query::handleQuery::error::', e);
+      this.queryStatus = Status.Error;
+      this.errorMsg = e.message;
     }
   }
 
-  private async getProcessedQuery(): Promise<string> {
+  protected async getProcessedQuery(): Promise<string> {
     const isSelectAllText = this.editorController.isSelectingAll();
     const query = isSelectAllText ? this.currentQuery : this.editorController.getSelectedText();
     return this.preProcessQuery ? await this.preProcessQuery(query) : query;
   }
 
-  private assignQueryParameter(query: string, params: QueryParameter[], paramValue: Map<string, string>) {
+  protected assignQueryParameter(query: string, params: QueryParameter[], paramValue: Map<string, string>) {
     let newQuery = cloneDeep(query);
     Log.debug('assignQueryParameter::', params);
     params.forEach(param => {
@@ -400,7 +384,7 @@ export default class QueryComponent extends Vue {
     return StringUtils.fixCommentInSql(newQuery);
   }
 
-  private async handleSave(event: Event) {
+  protected async handleSave(event: Event) {
     switch (this.mode) {
       case QueryEditorMode.Dashboard: {
         this.handleClickSaveAnalysis(event);
@@ -434,7 +418,7 @@ export default class QueryComponent extends Vue {
     }
   }
 
-  private getParameterNormalizeValues(params: QueryParameter[], paramValues: Map<string, any>): Record<string, string> {
+  protected getParameterNormalizeValues(params: QueryParameter[], paramValues: Map<string, any>): Record<string, string> {
     Log.debug('getParameterNormalizeValues::', params, paramValues);
     const result: Record<string, string> = {};
     const paramAsMap: Map<string, QueryParameter> = new Map(params.map(param => [param.displayName, param]));
@@ -445,13 +429,14 @@ export default class QueryComponent extends Vue {
     return result;
   }
 
-  private buildMainAdhocChart(query: string, params: QueryParameter[]): ChartInfo {
+  protected buildMainAdhocChart(query: string, params: QueryParameter[]): ChartInfo {
     const id = get(this.listAdhocInfo, '[0].chartInfo.id', ChartInfoUtils.getNextId());
     const queryParams = this.getParameterNormalizeValues(params, this.parameterValues);
     const querySetting: QuerySetting = RawQuerySetting.fromQuery(query).withQueryParameters(queryParams);
     const defaultChartOption = TableChartOption.getDefaultChartOption();
     defaultChartOption.setOption('header.color', '#FFFFFF');
     defaultChartOption.setOption('queryParameter', params);
+    defaultChartOption.setOption('rawQuery', query);
     querySetting.setChartOption(defaultChartOption);
     const commonSetting: WidgetCommonData = {
       id: id,
@@ -465,27 +450,23 @@ export default class QueryComponent extends Vue {
     return new ChartInfo(commonSetting, querySetting);
   }
 
-  private buildAdhocChart(query: string, params: QueryParameter[]) {
+  protected buildAdhocChart(query: string, params: QueryParameter[]) {
     const cloneChartInfo: ChartInfo = cloneDeep(this.currentAdhocAnalysis.chartInfo);
     const aliasName = get(cloneChartInfo, `setting.sqlViews[0].aliasName`, '');
     const queryParams = this.getParameterNormalizeValues(params, this.parameterValues);
     cloneChartInfo.setting.withQueryParameters(queryParams);
     cloneChartInfo.setting.updateInlineView(aliasName, query);
     cloneChartInfo.setting.getChartOption()?.setOption('queryParameter', params);
+    cloneChartInfo.setting.getChartOption()?.setOption('rawQuery', query);
     return cloneChartInfo;
   }
 
-  private async renderChart(chartInfo: ChartInfo, pagination?: Pagination) {
+  protected async renderChart(chartInfo: ChartInfo, pagination?: Pagination, forceFetch = true): Promise<void> {
     this.queryStatus = Status.Loading;
     QuerySettingModule.setQuerySetting({ id: chartInfo.id, query: chartInfo.setting });
-    await DashboardControllerModule.renderChart({ id: chartInfo.id, forceFetch: true, pagination: pagination });
+    await DashboardControllerModule.renderChart({ id: chartInfo.id, forceFetch: forceFetch, pagination: pagination });
     this.queryStatus = ChartDataModule.statuses[chartInfo.id];
     this.errorMsg = ChartDataModule.mapErrorMessage[chartInfo.id] ?? '';
-  }
-
-  private reRenderChart() {
-    // todo: Re-render chart for update UI
-    this.$root.$emit(DashboardEvents.ResizeWidget, this.currentAdhocAnalysis.chartInfo.id);
   }
 
   scrollTo(id: string) {
@@ -499,7 +480,7 @@ export default class QueryComponent extends Vue {
   }
 
   @Track(TrackEvents.AdhocAddChart, { query: (_: QueryComponent) => _.query })
-  private async handleNewChart() {
+  protected async handleNewChart() {
     try {
       this.isAddChartLoading = true;
       const tableSchema = await this.getOrDetectAdhocTable(this.assignQueryParameter(this.currentQuery, this.parameters, this.parameterValues));
@@ -523,7 +504,7 @@ export default class QueryComponent extends Vue {
     }
   }
 
-  private async getOrDetectAdhocTable(query: string, tblName?: string): Promise<TableSchema> {
+  protected async getOrDetectAdhocTable(query: string, tblName?: string): Promise<TableSchema> {
     if (tblName && this.tableSchemaAsMap.has(tblName)) {
       return this.tableSchemaAsMap.get(tblName)!;
     } else {
@@ -540,10 +521,22 @@ export default class QueryComponent extends Vue {
     chart_type: (_: QueryComponent, args: any) => _.listAdhocInfo[args[0]].chartInfo?.extraData?.currentChartType,
     chart_id: (_: QueryComponent, args: any) => _.listAdhocInfo[args[0]].chartInfo?.id
   })
-  private async handleSelectChart(index: number) {
+  protected async handleSelectChart(index: number): Promise<void> {
     this.currentAdHocIndex = index;
-    this.query = this.currentAdhocAnalysis.query;
-    this.setParameters(this.currentAdhocAnalysis.chartInfo.setting.getChartOption()?.options.queryParameter);
+    const selectedAdhoc: AdHocAnalysisInfo | undefined = this.listAdhocInfo[index];
+    if (selectedAdhoc) {
+      try {
+        this.errorMsg = '';
+        this.query = selectedAdhoc.rawQuery;
+        this.disablePagination = QueryUtils.isLimitQuery(selectedAdhoc.rawQuery);
+        this.setParameters(selectedAdhoc.chartInfo.setting.getChartOption()?.options.queryParameter);
+        await this.renderChart(selectedAdhoc.chartInfo, void 0, false);
+      } catch (ex) {
+        Log.error('QueryComponent::handleSelectChart::error::', ex);
+        this.errorMsg = ex.message;
+        this.queryStatus = Status.Error;
+      }
+    }
   }
 
   get currentAdhocAnalysis(): AdHocAnalysisInfo {
@@ -554,7 +547,7 @@ export default class QueryComponent extends Vue {
     window.removeEventListener('resize', this.resizeChart);
   }
 
-  private getVizItem(chartType: ChartType): VisualizationItemData | null {
+  protected getVizItem(chartType: ChartType): VisualizationItemData | null {
     return DataBuilderConstantsV35.ALL_ITEMS_AS_MAP.get(chartType) ?? null;
   }
 
@@ -564,7 +557,7 @@ export default class QueryComponent extends Vue {
     chart_type: (_: QueryComponent, args: any) => _.currentAdhocAnalysis.chartInfo?.extraData?.currentChartType,
     chart_id: (_: QueryComponent, args: any) => _.listAdhocInfo[args[0]].chartInfo?.id
   })
-  private async handleClickEditChart() {
+  protected async handleClickEditChart() {
     try {
       this.isAddChartLoading = true;
       const inlineViews: InlineSqlView[] = this.currentAdhocAnalysis.chartInfo.setting.sqlViews;
@@ -601,7 +594,7 @@ export default class QueryComponent extends Vue {
     chart_title: (_: QueryComponent, args: any) => _.listAdhocInfo[args[0]].chartInfo?.name ?? 'Untitled chart',
     chart_id: (_: QueryComponent, args: any) => _.listAdhocInfo[args[0]].chartInfo?.id
   })
-  private async handleDeleteAdhocAnalysis(index: number) {
+  protected async handleDeleteAdhocAnalysis(index: number) {
     try {
       ///Call Api delete widget if is in Dashboard mode
       if (this.mode == QueryEditorMode.Dashboard) {
@@ -635,7 +628,7 @@ export default class QueryComponent extends Vue {
     try {
       const adhoc = new AdHocAnalysisInfo(chartInfo.copyWithId(this.currentAdhocAnalysis.chartInfo.id));
       this.setAdHoc(adhoc, this.currentAdHocIndex);
-      this.updateQuery(adhoc.query);
+      this.updateQuery(adhoc.rawQuery);
       this.goToAdHoc(this.currentAdHocIndex);
       await this.renderChart(adhoc.chartInfo);
       this.$emit('onUpdateChart', adhoc.chartInfo);
@@ -654,7 +647,7 @@ export default class QueryComponent extends Vue {
     try {
       const analysisInfo = await this.createWidget(this.buildAddAdhocAnalysis(chartInfo, currentQuery, params, paramsValue));
       this.setAdHoc(analysisInfo, this.listAdhocInfo.length);
-      this.updateQuery(analysisInfo.query);
+      this.updateQuery(analysisInfo.rawQuery);
       this.goToAdHoc(this.listAdhocInfo.length - 1);
       await this.renderChart(analysisInfo.chartInfo);
     } catch (e) {
@@ -663,11 +656,11 @@ export default class QueryComponent extends Vue {
   }
 
   ///return null not have id in router
-  private get queryDashboardId(): DashboardId | null {
+  protected get queryDashboardId(): DashboardId | null {
     return toNumber(this.$route.query.adhoc) || null;
   }
 
-  private validDashboard() {
+  protected validDashboard() {
     const dashboardId = this.queryDashboardId;
     if (!dashboardId) {
       PopupUtils.showError('Analysis Not Found!');
@@ -675,7 +668,7 @@ export default class QueryComponent extends Vue {
     }
   }
 
-  private async createWidget(adhoc: AdHocAnalysisInfo): Promise<AdHocAnalysisInfo> {
+  protected async createWidget(adhoc: AdHocAnalysisInfo): Promise<AdHocAnalysisInfo> {
     if (this.mode === QueryEditorMode.Dashboard) {
       this.validDashboard();
       const widgetCreated = await WidgetModule.handleCreateNewWidget({
@@ -689,10 +682,16 @@ export default class QueryComponent extends Vue {
     }
   }
 
-  private buildAddAdhocAnalysis(chartInfo: ChartInfo, currentQuery: string, params: QueryParameter[], paramsValue: Record<string, string>): AdHocAnalysisInfo {
+  protected buildAddAdhocAnalysis(
+    chartInfo: ChartInfo,
+    currentQuery: string,
+    params: QueryParameter[],
+    paramsValue: Record<string, string>
+  ): AdHocAnalysisInfo {
     const newChartInfo = chartInfo.copyWithId(ChartInfoUtils.getNextId());
     const defaultChartOption = newChartInfo.setting.getChartOption() || TableChartOption.getDefaultChartOption();
     defaultChartOption.setOption('queryParameter', params);
+    defaultChartOption.setOption('rawQuery', currentQuery);
     newChartInfo.setting.setChartOption(defaultChartOption);
     const aliasName: string = ListUtils.getHead(newChartInfo.setting.sqlViews)?.aliasName ?? '';
     newChartInfo.setting.updateInlineView(aliasName, currentQuery);
@@ -735,27 +734,28 @@ export default class QueryComponent extends Vue {
     }
   }
 
-  private get showSaveQueryButton(): boolean {
+  protected get showSaveQueryButton(): boolean {
     return this.mode !== QueryEditorMode.EditTable;
   }
 
-  private handleClickSaveAnalysis(event: Event) {
+  protected handleClickSaveAnalysis(event: Event) {
     const mouseEvent = HtmlElementRenderUtils.fixMenuOverlap(event, 'button-save-adhoc', 0, 8);
     const isSaveAs = this.mode === QueryEditorMode.Query;
     this.emitSaveQuery(mouseEvent, isSaveAs);
   }
 
-  private onAddParam(index: number) {
-    const paramName = `untitle_param_${index}`;
+  protected onAddParam(index: number): void {
+    const paramName = `untitled_param_${index}`;
     const param: QueryParameter | undefined = this.parameters.find(param => param.displayName === paramName);
     if (param) {
       this.onAddParam(index + 1);
       return;
     } else {
-      const newParam = defaultQueryParameter();
-      newParam.displayName = `untitle_param_${index}`;
-      this.setParameter(newParam);
-      this.query = this.query.concat(` {{${newParam.displayName}}}`);
+      const parameter: QueryParameter = createQueryParameter();
+      parameter.displayName = paramName;
+      this.setParameter(parameter);
+      const paramSQLSyntax = ` {{ ${paramName} }}`;
+      this.editorController.multiAppendText(paramSQLSyntax, true);
       if (this.mode === QueryEditorMode.Dashboard) {
         this.emitSaveQuery(new Event(''), false);
       }
@@ -763,7 +763,7 @@ export default class QueryComponent extends Vue {
     }
   }
 
-  setParameter(parameter: QueryParameter, index?: number) {
+  setParameter(parameter: QueryParameter, index?: number): void {
     if (index !== undefined) {
       this.parameters.splice(index, 0, parameter);
     } else {
@@ -773,14 +773,14 @@ export default class QueryComponent extends Vue {
     this.$forceUpdate();
   }
 
-  private onConfigParam(event: MouseEvent, param: QueryParameter, currentValue: any) {
+  protected onConfigParam(event: MouseEvent, param: QueryParameter, currentValue: any) {
     const target = `action-${param.displayName}`;
     const mouseEvent = HtmlElementRenderUtils.fixMenuOverlap(event, target, 0, 8);
     const options = this.getParamOptions(param, currentValue);
     this.showActionOptions(mouseEvent, options);
   }
 
-  private getParamOptions(param: QueryParameter, currentValue: any): ContextMenuItem[] {
+  protected getParamOptions(param: QueryParameter, currentValue: any): ContextMenuItem[] {
     return [
       {
         text: 'Edit',
@@ -821,7 +821,7 @@ export default class QueryComponent extends Vue {
     ];
   }
 
-  private onQueryChanged() {
+  protected onQueryChanged() {
     clearTimeout(this.timeout);
     this.timeout = setTimeout(() => {
       Log.debug('QueryComponent::query', this.query);
@@ -835,7 +835,7 @@ export default class QueryComponent extends Vue {
     }, 1000);
   }
 
-  private buildQueryParams(params: RegExpMatchArray) {
+  protected buildQueryParams(params: RegExpMatchArray) {
     params.forEach(param => {
       ///{{ value test}} -> value_test
       const paramName = param
@@ -860,7 +860,7 @@ export default class QueryComponent extends Vue {
     });
   }
 
-  private getQueryParamsNotUse(query: string, queryParams: QueryParameter[]): string[] {
+  protected getQueryParamsNotUse(query: string, queryParams: QueryParameter[]): string[] {
     const result: string[] = [];
     const allParamKeys = queryParams.map(param => param.displayName);
     allParamKeys.forEach(paramKey => {
@@ -872,13 +872,13 @@ export default class QueryComponent extends Vue {
     return result;
   }
 
-  private async updateParamValue(paramKey: string, value: any) {
+  protected async updateParamValue(paramKey: string, value: any) {
     this.parameterValues.set(paramKey, value);
     this.$forceUpdate();
-    return this.handleQuery();
+    return this.handleExecuteQuery();
   }
 
-  private editParam(param: QueryParameter) {
+  protected editParam(param: QueryParameter) {
     const oldName = param.displayName;
     // const oldValue = param.value;
     this.paramModal.show(param, async (edited: QueryParameter) => {
@@ -887,7 +887,7 @@ export default class QueryComponent extends Vue {
       this.setParameter(edited, indexOfOldParam);
       this.replaceParamInQuery(param, `{{ ${edited.displayName} }}`);
       if (param.value !== edited.value) {
-        await this.handleQuery();
+        await this.handleExecuteQuery();
       }
       if (this.mode === QueryEditorMode.Dashboard) {
         this.emitSaveQuery(new Event(''), false);
@@ -895,12 +895,12 @@ export default class QueryComponent extends Vue {
     });
   }
 
-  private replaceParamInQuery(param: QueryParameter, value: string) {
+  protected replaceParamInQuery(param: QueryParameter, value: string) {
     const regex = StringUtils.buildQueryParamRegex(param.displayName);
     this.query = this.query.replaceAll(regex, value);
   }
 
-  private deleteMultiParams(paramKeys: string[], deleteCurrentValue: boolean) {
+  protected deleteMultiParams(paramKeys: string[], deleteCurrentValue: boolean) {
     paramKeys.forEach(key => {
       this.parameters = ListUtils.remove(this.parameters, param => param.displayName === key);
       // delete this.parameterValues[key];
@@ -911,7 +911,7 @@ export default class QueryComponent extends Vue {
     }
   }
 
-  private deleteParam(param: QueryParameter, onDeleted?: (param: QueryParameter) => void) {
+  protected deleteParam(param: QueryParameter, onDeleted?: (param: QueryParameter) => void) {
     this.parameters = ListUtils.remove(this.parameters, taget => taget.displayName === param.displayName);
     this.$forceUpdate();
     if (this.mode === QueryEditorMode.Dashboard) {
@@ -921,7 +921,7 @@ export default class QueryComponent extends Vue {
     this.$emit('delete', param);
   }
 
-  private async showEnsureModal(title: string, html: string, confirmButtonText?: string, cancelButtonText?: string) {
+  protected async showEnsureModal(title: string, html: string, confirmButtonText?: string, cancelButtonText?: string) {
     //@ts-ignore
     return this.$alert.fire({
       icon: 'warning',
@@ -933,7 +933,7 @@ export default class QueryComponent extends Vue {
     });
   }
 
-  private get titleSaveAnalysis(): string {
+  protected get titleSaveAnalysis(): string {
     switch (this.mode) {
       case QueryEditorMode.Dashboard:
         return this.tempQuery !== this.currentQuery ? 'Save*' : 'Save';
@@ -942,30 +942,16 @@ export default class QueryComponent extends Vue {
     }
   }
 
-  private get isDiffQuery(): boolean {
-    return this.query !== this.defaultQuery;
-  }
-
   getQuery() {
     return this.buildMainAdhocChart(this.query, this.parameters);
   }
 
-  private renderChartError(message: string) {
-    Log.error(message);
-    this.queryStatus = Status.Error;
-    this.errorMsg = message;
-  }
-
-  private async handleExport(adhoc: AdHocAnalysisInfo, type: ExportType) {
+  protected async handleExport(adhoc: AdHocAnalysisInfo, type: ExportType) {
     const id: number = adhoc.chartInfo.id;
     await DashboardControllerModule.handleExport({ widgetId: id, type: type });
   }
 
-  private get isTestAccount(): boolean {
+  protected get isTestAccount(): boolean {
     return DataManager.isTestAccount();
-  }
-
-  private get paramNames(): string[] {
-    return this.parameters.map(param => param.displayName);
   }
 }

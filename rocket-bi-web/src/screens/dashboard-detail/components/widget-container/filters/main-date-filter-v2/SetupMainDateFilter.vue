@@ -3,32 +3,27 @@
     <SelectFieldButton
       ref="selectButton"
       id="btn-set-main-date-filter"
+      title="Setup Main Date Filter"
       :isShowPopoverImmediate="isResetMainDateFilter"
-      :title="getTitle"
       :isShowResetFilterButton="false"
       :isShowGroupedHeader="false"
-      @handle-clear-reset-main-date="handleClearResetMainDate"
-      :isShowExtraSlot="isShowSelectDefaultTime"
+      :isShowExtraSlot="true"
       :dashboardId="dashboardId"
       :fnProfileFieldFilter="fnProfileFieldFilter"
+      @handle-clear-reset-main-date="handleClearResetMainDate"
     >
       <template #icon>
         <i class="di-icon-calendar"></i>
       </template>
       <template #extraStep>
         <div class="select-default-time">
-          <div @click.prevent="handleBackOnSelectDB" class="back-to-select-db btn-ghost align-items-center">
-            <img src="@/assets/icon/ic-16-arrow-left.svg" />
-            <div class="title-btn-back">Select another database</div>
-          </div>
-
           <div class="title">Choose Default Time Range</div>
           <vuescroll class="vuescroll-select-default-time">
             <div class="dropdown-default-time-container">
               <a
                 href=""
                 class="default-time-item btn-ghost"
-                v-for="(item, index) in listDefaultTime"
+                v-for="(item, index) in DATE_MODE_LIST"
                 :key="index"
                 @click.prevent="handleSelectDefaultTime(item.mode)"
               >
@@ -42,8 +37,8 @@
   </div>
 </template>
 
-<script lang="ts" scoped>
-import { Component, Inject, Prop, Provide, Ref, Vue } from 'vue-property-decorator';
+<script lang="ts">
+import { Component, Prop, Provide, Ref, Vue } from 'vue-property-decorator';
 import FieldListingItem from '@/shared/components/FieldListingItem.vue';
 import SelectFieldButton from '@/screens/dashboard-detail/components/SelectFieldButton.vue';
 import { MainDateMode } from '@core/common/domain/model';
@@ -62,12 +57,11 @@ import { Log } from '@core/utils';
   }
 })
 export default class SetupMainDateFilter extends Vue {
-  private readonly listDefaultTime = DateTimeConstants.mapMainDateFilterMode;
-  private selectedProfileField!: FieldDetailInfo;
-  private isShowSelectDefaultTime = false;
+  private readonly DATE_MODE_LIST: { mode: MainDateMode; text: string }[] = DateTimeConstants.MAIN_DATE_FILTER_MODE_LIST;
+  private selectedProfileField: FieldDetailInfo = FieldDetailInfo.default();
 
-  @Prop()
-  isResetMainDateFilter!: boolean;
+  @Prop({ required: false, default: false, type: Boolean })
+  readonly isResetMainDateFilter!: boolean;
 
   @Ref()
   private readonly selectButton?: SelectFieldButton;
@@ -76,13 +70,8 @@ export default class SetupMainDateFilter extends Vue {
   // FIXME: rename this folder
   private handleAddNewFilter(profileField: FieldDetailInfo) {
     Log.debug('SetupMainDateFilter::handleSelectedField::profilField: ', profileField);
-    this.isShowSelectDefaultTime = true;
     this.selectedProfileField = profileField;
     this.selectButton?.show();
-  }
-
-  handleBackOnSelectDB() {
-    this.isShowSelectDefaultTime = false;
   }
 
   handleClearResetMainDate() {
@@ -90,9 +79,7 @@ export default class SetupMainDateFilter extends Vue {
   }
 
   private handleSelectDefaultTime(mainDateFilterMode: MainDateMode) {
-    this.$emit('handle-setup-main-date-filter', this.selectedProfileField.field, mainDateFilterMode);
-    Log.debug('SetupMainDateFilter::handleSelectDefaultTime::', this.selectedProfileField.field, mainDateFilterMode);
-    this.isShowSelectDefaultTime = false;
+    this.$emit('handle-setup-main-date-filter', mainDateFilterMode);
   }
 
   private get dashboardId(): number | undefined {
@@ -100,12 +87,8 @@ export default class SetupMainDateFilter extends Vue {
     return DashboardModule.id;
   }
 
-  private fnProfileFieldFilter(profileField: FieldDetailInfo) {
+  private fnProfileFieldFilter(profileField: FieldDetailInfo): boolean {
     return ChartUtils.isDateType(profileField.field.fieldType);
-  }
-
-  private get getTitle() {
-    return 'Select Main Date Filter';
   }
 }
 </script>
@@ -120,7 +103,7 @@ export default class SetupMainDateFilter extends Vue {
 
 .select-default-time {
   .title {
-    color: var(--text-color);
+    color: var(--text-color--root);
     font-weight: 600;
     padding: 8px 0;
     font-size: 14px;
@@ -130,7 +113,7 @@ export default class SetupMainDateFilter extends Vue {
     display: flex;
     align-items: center;
     opacity: 0.8;
-    color: var(--text-color);
+    color: var(--text-color--root);
     padding: 8px 0;
     font-size: 14px;
 
@@ -158,14 +141,14 @@ export default class SetupMainDateFilter extends Vue {
 
       .default-time-item {
         opacity: 0.8;
-        color: var(--text-color);
+        color: var(--text-color--root);
         padding-top: 8px;
         padding-bottom: 8px;
         padding-left: 20px;
         text-decoration: none;
 
         &:hover {
-          color: var(--text-color);
+          color: var(--text-color--root);
         }
       }
     }

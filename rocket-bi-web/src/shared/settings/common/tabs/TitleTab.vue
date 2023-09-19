@@ -135,7 +135,7 @@ import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { SelectOption, ChartType } from '@/shared';
 import { ChartOption, ChartOptionData, SettingKey } from '@core/common/domain';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 
 @Component({ components: { PanelHeader } })
 export default class TitleTab extends Vue {
@@ -146,22 +146,25 @@ export default class TitleTab extends Vue {
   private widgetType?: ChartType;
   @Ref()
   private panel!: PanelHeader;
+
+  private defaultTitleStyle = ChartOption.getDefaultTitle();
+  private defaultSubtitleStyle = ChartOption.getDefaultSubtitle();
   private defaultStyle = {
     title: {
-      text: 'Untitled chart',
-      enabled: true,
-      fontFamily: 'Roboto',
-      color: ChartOption.getThemeTextColor(),
-      fontSize: '20px',
-      align: 'center'
+      text: this.defaultTitleStyle.text ?? 'Untitled chart',
+      enabled: this.defaultTitleStyle.enabled ?? true,
+      fontFamily: this.defaultTitleStyle.style?.fontFamily ?? ChartOption.getPrimaryFontFamily(),
+      color: this.defaultTitleStyle.style?.color ?? ChartOption.getPrimaryTextColor(),
+      fontSize: this.defaultTitleStyle.style?.fontSize ?? '20px',
+      align: this.defaultTitleStyle.align ?? 'center'
     },
     subtitle: {
-      text: '',
-      enabled: true,
-      fontFamily: 'Roboto',
-      color: ChartOption.getThemeTextColor(),
-      fontSize: '11px',
-      align: 'center'
+      text: this.defaultSubtitleStyle.text ?? '',
+      enabled: this.defaultSubtitleStyle.enabled ?? true,
+      fontFamily: this.defaultSubtitleStyle.style?.fontFamily ?? ChartOption.getSecondaryFontFamily(),
+      color: this.defaultSubtitleStyle.style?.color ?? ChartOption.getSecondaryTextColor(),
+      fontSize: this.defaultSubtitleStyle.style?.fontSize ?? '11px',
+      align: this.defaultSubtitleStyle.align ?? 'center'
     }
   };
 
@@ -190,7 +193,7 @@ export default class TitleTab extends Vue {
   }
 
   private get fontSizeOptions(): SelectOption[] {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get titleAlign(): string {

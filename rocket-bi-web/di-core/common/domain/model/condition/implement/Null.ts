@@ -36,8 +36,8 @@ export class Null extends FieldRelatedCondition {
       firstValue: void 0,
       secondValue: void 0,
       allValues: [],
-      currentInputType: InputType.none,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.None,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: StringConditionTypes.isnull
     };
   }

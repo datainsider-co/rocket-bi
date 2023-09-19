@@ -18,7 +18,7 @@ import DropItem from '@/shared/components/DropItem.vue';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { ConditionTreeNode, DataFlavor, DraggableConfig, FunctionData, FunctionNode, FunctionTreeNode, LabelNode } from '@/shared/interfaces';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
-import { ChartConfigUtils, ChartUtils, DomUtils, ListUtils, RandomUtils } from '@/utils';
+import { ChartConfigUtils, ChartUtils, DomUtils, HtmlElementRenderUtils, ListUtils, RandomUtils } from '@/utils';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { Column, ExpressionField, Field, FieldType, TableSchema } from '@core/common/domain/model';
 import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
@@ -64,6 +64,10 @@ export default class ConfigDraggable extends Vue {
 
   @Prop({ type: Boolean, default: true })
   private readonly showHelpIcon!: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  private readonly disabled!: boolean;
+
   private currentFunctions: FunctionTreeNode[] = [];
   private selectedNode: FunctionTreeNode | null = null;
   private editingNode: FunctionTreeNode | null = null;
@@ -86,6 +90,9 @@ export default class ConfigDraggable extends Vue {
   @Ref()
   private calculatedFieldModal!: CalculatedFieldModal;
 
+  @Ref()
+  private readonly clickHereButton!: HTMLElement;
+
   private get enableSorting(): boolean {
     return this.configType == ConfigType.sorting;
   }
@@ -99,7 +106,11 @@ export default class ConfigDraggable extends Vue {
   }
 
   private get isShowPlaceHolder(): boolean {
-    return this.canDrop;
+    if (isNumber(this.config.maxItem)) {
+      return this.currentFunctions.length < this.config.maxItem;
+    } else {
+      return true;
+    }
   }
 
   private subFunctionGroups(node: FunctionTreeNode | null): any[] {
@@ -133,18 +144,14 @@ export default class ConfigDraggable extends Vue {
 
   private get canReplace(): boolean {
     if (isNumber(this.config.maxItem)) {
-      return this.config.maxItem! === 1 && this.currentFunctions.length === this.config.maxItem!;
+      return this.config.maxItem! === 1 && this.currentFunctions.length === 1;
     } else {
       return false;
     }
   }
 
-  private get canDraggable(): boolean {
-    return ListUtils.isNotEmpty(this.currentFunctions);
-  }
-
   // https://github.com/SortableJS/Sortable#event-object-demo
-  private get groupConfig(): GroupConfig {
+  get groupConfig(): GroupConfig {
     return {
       name: this.config.key,
       put: this.handlePut,
@@ -223,11 +230,15 @@ export default class ConfigDraggable extends Vue {
   }
 
   private closeAllContext(target: VueContext) {
-    Object.values(this.$refs).map((ref: any) => {
-      if (ref !== target && ref.close) {
-        ref.close();
-      }
-    });
+    try {
+      Object.values(this.$refs).map((ref: any) => {
+        if (ref !== target && ref.close) {
+          ref.close();
+        }
+      });
+    } catch (ex) {
+      //
+    }
   }
 
   private async handleDrop(data: DataFlavor<FunctionTreeNode>): Promise<void> {
@@ -404,7 +415,7 @@ export default class ConfigDraggable extends Vue {
     if (node) {
       let configMerged = this.mergeConfig(node, index);
       Log.debug('handleReplaceFunction::', configMerged);
-      if (ChartUtils.isDifferentFieldType(this.currentFunctions[index].field, configMerged.field)) {
+      if (ChartUtils.isDiffFieldType(this.currentFunctions[index].field, configMerged.field)) {
         configMerged = this.setDefaultFunction(configMerged);
       }
       await this.updateConfig(configMerged, index);
@@ -454,7 +465,7 @@ export default class ConfigDraggable extends Vue {
 
   private handleChangeField(child: ContextData, fieldDetail: FieldDetailInfo) {
     let clonedNode = ConfigDataUtils.clone(child.data.node, fieldDetail);
-    if (ChartUtils.isDifferentFieldType(child.data.node.field, fieldDetail.field)) {
+    if (ChartUtils.isDiffFieldType(child.data.node.field, fieldDetail.field)) {
       clonedNode = this.setDefaultFunction(clonedNode);
     }
     this.updateConfig(clonedNode, child.data.i);
@@ -546,8 +557,9 @@ export default class ConfigDraggable extends Vue {
     };
   }
 
-  private async handleClickSuggestTableAndField(event: MouseEvent): Promise<void> {
+  private async handleClickHere(event: MouseEvent): Promise<void> {
     Log.debug('handleClickTooltip::', event);
-    this.selectFieldContext.showSuggestTableAndFields(event);
+    const newEvent = HtmlElementRenderUtils.fixMenuOverlapForContextMenu(event, this.clickHereButton);
+    this.selectFieldContext.showTableAndFields(newEvent);
   }
 }

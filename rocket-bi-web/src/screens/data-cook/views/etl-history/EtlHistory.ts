@@ -11,7 +11,7 @@ import { SortDirection } from '@core/common/domain';
 import { SortRequest } from '@core/data-ingestion';
 import { StringUtils } from '@/utils/StringUtils';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
-import { DateTimeFormatter } from '@/utils';
+import { DateTimeUtils } from '@/utils';
 import { LayoutContent, LayoutHeader, LayoutNoData } from '@/shared/components/layout-wrapper';
 import DiTable2 from '@/shared/components/common/di-table/DiTable2.vue';
 import { RouterUtils } from '@/utils/RouterUtils';
@@ -77,7 +77,7 @@ export default class EtlHistory extends Vue {
         width: 130,
         customRenderBodyCell: new CustomCell(rowData => {
           const totalTime = rowData.totalExecutionTime;
-          return DateTimeFormatter.formatAsHms(totalTime ?? 0);
+          return DateTimeUtils.formatAsHms(totalTime ?? 0);
         })
         // customRenderBodyCell: new TimeCell()
       },

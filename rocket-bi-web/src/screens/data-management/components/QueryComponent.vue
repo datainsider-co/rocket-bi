@@ -20,7 +20,7 @@
               :isReadOnly="isReadOnly"
               class="query-input"
               placeholder="select * from..."
-              @onExecute="handleQuery"
+              @onExecute="handleExecuteQuery"
               @onSave="handleSave"
               @input="onQueryChanged"
             />
@@ -37,7 +37,7 @@
                 class="btn-ghost default-button"
                 title="Add Param"
                 tabindex="-1"
-                @click="onAddParam(getLengthOfParams())"
+                @click="onAddParam(getParamsSize())"
               >
                 <i class="di-icon-add"></i>
               </DiButton>
@@ -45,7 +45,7 @@
           </vuescroll>
         </div>
 
-        <div class="row-limit-container d-flex align-items-center" ref="actionRow">
+        <div class="row-limit-container d-flex align-items-center">
           <div v-if="showAdHocAnalysis" class="d-flex w-100 align-items-center">
             <template v-if="listAdhocInfo.length > 0">
               <div class="list-viz-item">
@@ -125,7 +125,7 @@
               :id="genBtnId('query')"
               class="btn-query flex-fill btn-primary"
               title="Execute"
-              @click="handleQuery"
+              @click="handleExecuteQuery"
             >
               <i v-if="queryStatus === Statuses.Loading" class="fa fa-spin fa-spinner"></i>
             </DiButton>
@@ -144,19 +144,23 @@
       <div v-else-if="currentAdhocAnalysis" class="query-result d-flex flex-column text-left h-100">
         <div class="table-container flex-grow-1 table-container-padding-15">
           <ChartHolder
-            :isPreview="true"
-            v-if="currentAdhocAnalysis"
             ref="chartHolder"
+            v-if="currentAdhocAnalysis"
+            :key="currentAdhocAnalysis.chartInfo.id"
+            disableSort
+            :isPreview="true"
             :disablePagination="disablePagination"
             :meta-data="currentAdhocAnalysis.chartInfo"
             class="result-table position-relative"
-            disableSort
             :disableEmptyChart="currentAdHocIndex === 0"
-          ></ChartHolder>
-          <div v-if="currentAdHocIndex !== 0" style="z-index: 2; background: transparent" class="chart-action">
-            <i class="di-icon-edit p-2 btn-icon-border mr-2" :class="{ disabled: isReadOnly }" @click="handleClickEditChart"></i>
-            <i class="di-icon-delete p-2 btn-icon-border" :class="{ disabled: isReadOnly }" @click="handleDeleteAdhocAnalysis(currentAdHocIndex)"></i>
-          </div>
+          >
+            <template #action-bar>
+              <div v-if="currentAdHocIndex !== 0" style="z-index: 2; background: transparent" class="chart-action">
+                <i class="di-icon-edit p-2 btn-icon-border mr-2" :class="{ disabled: isReadOnly }" @click="handleClickEditChart"></i>
+                <i class="di-icon-delete p-2 btn-icon-border" :class="{ disabled: isReadOnly }" @click="handleDeleteAdhocAnalysis(currentAdHocIndex)"></i>
+              </div>
+            </template>
+          </ChartHolder>
         </div>
       </div>
       <div id="query-result-empty" v-else class="query-result d-flex align-items-center h-100 justify-content-center" style="font-weight: 500; padding: 8px">
@@ -164,7 +168,7 @@
       </div>
       <ChartBuilderComponent ref="chartBuilderComponent"></ChartBuilderComponent>
     </SplitArea>
-    <ContextMenu id="save-query-menu" ref="contextMenu" :ignoreOutsideClass="['action-button']" minWidth="200px" textColor="#fff" z-index="2" />
+    <ContextMenu id="save-query-menu" ref="contextMenu" :ignoreOutsideClass="['action-button']" minWidth="200px" textColor="#fff" />
     <ParameterModal ref="paramModal" />
   </Split>
 </template>

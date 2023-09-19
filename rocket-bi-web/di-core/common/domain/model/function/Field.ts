@@ -5,10 +5,11 @@
  * @created: 5/30/21, 8:59 PM
  */
 
-import { Column, DefaultExpression, Expression, MaterializedExpression, SelectExpression, TabControlData, TableColumn } from '@core/common/domain';
+import { Column, DefaultExpression, Expression, MaterializedExpression, SelectExpression, ChartControlData, TableColumn } from '@core/common/domain';
 import { Equatable } from '@core/common/domain/model/Equatable';
 import { DataType } from '@core/schema/service/FieldFilter';
 import { ChartUtils } from '@/utils';
+import { ChartType } from '@/shared';
 
 export enum FieldType {
   TableField = 'table_field',
@@ -238,22 +239,21 @@ export class CalculationField extends Field {
 }
 
 export class ChartControlField extends Field {
-  controlData: TabControlData;
-  constructor(controlData: TabControlData) {
+  controlData: ChartControlData;
+  constructor(controlData: ChartControlData) {
     super(FieldType.ChartControlField, '', '', '', '');
     this.controlData = controlData;
   }
 
-  static fromObject(obj: any): TableField {
+  static fromObject(obj: any): ChartControlField {
     return new ChartControlField(obj.controlData);
   }
 
   static default() {
     return new ChartControlField({
       displayName: '',
-      chartType: '',
+      chartType: ChartType.Table,
       defaultTableColumns: [],
-      values: [],
       tableColumns: [],
       id: -1
     });

@@ -9,8 +9,8 @@ import {
   ChartInfo,
   Condition,
   ExportType,
-  DynamicValues,
-  FunctionControl,
+  ExportTypeDisplayNames,
+  FunctionController,
   PivotTableQuerySetting,
   QueryParameter,
   QueryRelatedWidget,
@@ -18,14 +18,14 @@ import {
   QuerySetting,
   TableColumn,
   TableResponse,
+  ValueControlType,
   VisualizationResponse,
   Widget,
-  WidgetId,
-  ExportTypeDisplayNames
+  WidgetId
 } from '@core/common/domain';
 import { Action, getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import store from '@/store';
-import { ListUtils, QuerySettingUtils, RandomUtils, StringUtils } from '@/utils';
+import { ListUtils, QuerySettingUtils, StringUtils } from '@/utils';
 import { ChartDataModule, DashboardModule, FilterModule, QuerySettingModule, WidgetModule } from '@/screens/dashboard-detail/stores';
 import { Status, Stores } from '@/shared';
 import { ZoomModule } from '@/store/modules/ZoomStore';
@@ -34,32 +34,29 @@ import { Pagination, RowData } from '@/shared/models';
 import { cloneDeep } from 'lodash';
 import { FilterStoreUtils } from '@/screens/dashboard-detail/stores/widget/FilterStoreUtils';
 import { Semaphore } from 'async-mutex';
-import Vue from 'vue';
 import Swal from 'sweetalert2';
 import FileSaver from 'file-saver';
 
-const semaphore = new Semaphore(6);
+const CONCURRENCY_REQUEST_SIZE = 7;
+const semaphore = new Semaphore(CONCURRENCY_REQUEST_SIZE);
 
 @Module({ dynamic: true, namespaced: true, store: store, name: Stores.DashboardControllerStore })
 export class DashboardControllerStore extends VuexModule {
-  dynamicFunctions: Map<WidgetId, TableColumn[]> = new Map();
-  dynamicFilter: Map<WidgetId, string[]> = new Map();
-
-  private readonly DEFAULT_CHUNK_SIZE = 4;
-
+  /**
+   * Save all dynamic function of of widget.
+   * @type {Map<WidgetId, TableColumn[]>}
+   */
+  dynamicFunctionMap: Map<WidgetId, TableColumn[]> = new Map();
   get updateDynamicFunctionValue(): (querySetting: QuerySetting) => QuerySetting {
     return querySetting => {
-      const allDynamicFnc = querySetting.getAllDynamicFunction();
-      Log.debug('updateDynamicFunctionValue::allDynamicFnc::', allDynamicFnc);
+      const dynamicFunctions: TableColumn[] = querySetting.getControlledFunctions();
       //Lấy TableColumn hiện tại tương ứng với dynamic function
-      const tableColumnsToReplace = new Map(
-        allDynamicFnc.map(func => [func.dynamicFunctionId!, this.getCurrentTableColumnOfDynamicFunction(func.dynamicFunctionId!)])
-      );
-      Log.debug('updateDynamicFunctionValue::tableColumnsToReplace::', allDynamicFnc);
+      const tableColumnsToReplace = new Map(dynamicFunctions.map(func => [func.dynamicFunctionId!, this.getDynamicFunctions(func.dynamicFunctionId!)]));
+      Log.debug('updateDynamicFunctionValue::tableColumnsToReplace::', dynamicFunctions);
       //Set vào query setting
       const cloneQuerySetting = cloneDeep(querySetting);
 
-      cloneQuerySetting.setDynamicFunctions(tableColumnsToReplace);
+      cloneQuerySetting.applyDynamicFunctions(tableColumnsToReplace);
       Log.debug('updateDynamicFunctionValue::cloneQuerySetting::', cloneQuerySetting);
       return cloneQuerySetting;
     };
@@ -71,9 +68,9 @@ export class DashboardControllerStore extends VuexModule {
   ///Ví dụ: DynamicFunction có id = 123, có 2 TableColumn là [Sum TotalProfit], [Count TotalCost]; trong dashboard đang chọn là Count TotalCost
   ///Input: id = 123
   ///Output: Count TotalCost
-  get getCurrentTableColumnOfDynamicFunction(): (id: WidgetId) => TableColumn[] {
+  get getDynamicFunctions(): (id: WidgetId) => TableColumn[] {
     return id => {
-      return this.dynamicFunctions.get(id) ?? [];
+      return this.dynamicFunctionMap.get(id) ?? [];
     };
   }
 
@@ -81,8 +78,8 @@ export class DashboardControllerStore extends VuexModule {
   async init(forceFetch = true): Promise<void> {
     const widgets: QueryRelatedWidget[] = WidgetModule.allQueryWidgets;
     ZoomModule.initZoomLevels(widgets);
-    ZoomModule.initMultiZoomData(widgets);
-    await this.initTabControl(widgets);
+    ZoomModule.multiRegisterZoomData(widgets);
+    await this.initChartControls(widgets);
     await this.renderCharts({
       idList: widgets.map(widget => widget.id),
       forceFetch: forceFetch,
@@ -90,6 +87,7 @@ export class DashboardControllerStore extends VuexModule {
     });
     await this.renderAllInnerFilters(widgets);
   }
+
   // load all inner filter in dashboard
   @Action
   private async renderAllInnerFilters(widgets: QueryRelatedWidget[]): Promise<void> {
@@ -112,7 +110,11 @@ export class DashboardControllerStore extends VuexModule {
     });
     if (pagination) request.setPaging(pagination.from, pagination.size);
     if (request.querySetting.canQuery()) {
-      return ChartDataModule.handleQueryAndRenderChart({ chartId: id, isForceFetch: forceFetch ?? false, request: request });
+      return ChartDataModule.handleQueryAndRenderChart({
+        chartId: id,
+        isForceFetch: forceFetch ?? false,
+        request: request
+      });
     } else {
       ChartDataModule.setVisualizationResponse({ id: id, data: TableResponse.empty() });
       ChartDataModule.setStatusLoaded(id);
@@ -126,9 +128,12 @@ export class DashboardControllerStore extends VuexModule {
   @Action
   async renderCharts(payload: { idList: WidgetId[]; forceFetch?: boolean; pagination?: Pagination; useBoost?: boolean }): Promise<void> {
     try {
-      const { forceFetch, pagination, useBoost } = payload;
-      ChartDataModule.setStatuses({ ids: payload.idList, status: forceFetch ? Status.Loading : Status.Updating });
-      const sortedIds: number[] = await WidgetModule.sortByPosition(payload.idList);
+      const { idList, forceFetch, pagination, useBoost } = payload;
+      if (ListUtils.isEmpty(idList)) {
+        return;
+      }
+      ChartDataModule.setStatuses({ ids: idList, status: forceFetch ? Status.Loading : Status.Updating });
+      const sortedIds: number[] = await WidgetModule.sortByPosition(idList);
       const results: Promise<void>[] = sortedIds.map(async widgetId => {
         await semaphore.runExclusive(async () => {
           try {
@@ -147,7 +152,7 @@ export class DashboardControllerStore extends VuexModule {
 
   @Mutation
   reset() {
-    this.dynamicFunctions.clear();
+    this.dynamicFunctionMap.clear();
   }
 
   @Action
@@ -208,18 +213,25 @@ export class DashboardControllerStore extends VuexModule {
   }
 
   @Action
-  private async initTabControl(widgets: QueryRelatedWidget[]) {
-    widgets.forEach(widget => {
-      if (FunctionControl.isFunctionControl(widget.setting) && widget.setting.enableFunctionControl()) {
-        this.replaceDynamicFunction({ widget: widget, selected: widget.setting.getDefaultFunctions(), apply: false });
-      } else if (DynamicValues.isValuesControl(widget.setting) && widget.setting.enableDynamicValues()) {
-        this.replaceDynamicValues({ widget: widget, values: widget.setting.getDefaultValues(), apply: false });
-      }
-    });
+  private async initChartControls(widgets: QueryRelatedWidget[]): Promise<void> {
+    for (const widget of widgets) {
+      await this.loadDynamicControl(widget);
+    }
+  }
+
+  @Action
+  private async loadDynamicControl(widget: QueryRelatedWidget): Promise<void> {
+    if (FunctionController.isFunctionController(widget.setting) && widget.setting.isEnableFunctionControl()) {
+      await this.replaceDynamicFunction({
+        id: widget.id,
+        selectedFunctions: widget.setting.getDefaultTableColumns(),
+        forceRender: false
+      });
+    }
   }
 
   @Mutation
-  private setDynamicFunction(payload: { id: WidgetId; tblColumns: TableColumn[] }) {
+  private setDynamicFunction(payload: { id: WidgetId; tblColumns: TableColumn[] }): void {
     const { id } = payload;
     ///Cập nhật dynamicFunctionId với id của widget đc select
     const tblColumns = cloneDeep(payload.tblColumns).map(column => {
@@ -228,13 +240,7 @@ export class DashboardControllerStore extends VuexModule {
         dynamicFunctionId: id
       });
     });
-    this.dynamicFunctions.set(id, tblColumns);
-  }
-
-  @Mutation
-  setDynamicValues(payload: { id: WidgetId; values: string[] }) {
-    const { id, values } = payload;
-    this.dynamicFilter.set(id, values);
+    this.dynamicFunctionMap.set(id, tblColumns);
   }
 
   @Action
@@ -251,7 +257,11 @@ export class DashboardControllerStore extends VuexModule {
       mainDateFilter: FilterModule.mainDateFilterRequest,
       pagination: cloneDeep(pagination)
     });
-    currentRequest.querySetting = await this.buildSubRowQuerySetting({ setting: setting, currentRow: currentRow, valueKey: valueKey });
+    currentRequest.querySetting = await this.buildSubRowQuerySetting({
+      setting: setting,
+      currentRow: currentRow,
+      valueKey: valueKey
+    });
     currentRequest.setPaging(-1, -1);
     const response: AbstractTableResponse = (await ChartDataModule.query(currentRequest)) as AbstractTableResponse;
     return response.records as any;
@@ -271,59 +281,79 @@ export class DashboardControllerStore extends VuexModule {
     return clonedSetting;
   }
 
-  ///Hàm xử lí khi Tab Control đổi
+  /**
+   * Hàm xử lí khi Tab Control đổi
+   * @param payload.id: Id của widget đang được select
+   * @param payload.selectedFunctions: Danh sách các function được select
+   * @param payload.forceRender: Có render lại widget hay không
+   */
   @Action
-  async replaceDynamicFunction(payload: { widget: Widget; selected: TableColumn[]; apply: boolean }) {
-    const { widget, selected, apply } = payload;
-    const { id } = widget;
-    Log.debug('replaceDynamicFunction::', payload);
-    this.setDynamicFunction({ id: id, tblColumns: selected });
-    ///Apply cho tất cả widget nào có Tab control
-    WidgetModule.allQueryWidgets
-      .filter(widget => widget.setting.affectByDynamicFunction(id))
-      .forEach(widget => {
-        ZoomModule.deleteZoomData(widget.id);
-        const dynamicFunctionAsMap = new Map([[id, this.dynamicFunctions.get(id)!]]);
-        widget.setting.setDynamicFunctions(dynamicFunctionAsMap);
-        widget.setting.setSortDynamicFunctions(dynamicFunctionAsMap);
-        if (apply) {
-          const useBoost = DashboardModule.currentDashboard?.useBoost ?? false;
-          this.renderChart({ id: widget.id, useBoost: useBoost }).then(() => {
-            ZoomModule.registerZoomData(widget);
-          });
-        }
+  async replaceDynamicFunction(payload: { id: WidgetId; selectedFunctions: TableColumn[]; forceRender: boolean }): Promise<void> {
+    const { id, selectedFunctions, forceRender } = payload;
+    this.setDynamicFunction({ id: id, tblColumns: selectedFunctions });
+    /// Apply cho tất cả widget nào có chart control
+    const affectedQueryMap: Map<WidgetId, QuerySetting> = QuerySettingModule.getQueryHasFunctionControlMap(id);
+    affectedQueryMap.forEach((setting, widgetId) => {
+      ZoomModule.deleteZoomData(widgetId);
+      const dynamicFunctionAsMap = new Map([[id, this.dynamicFunctionMap.get(id)!]]);
+      setting.applyDynamicFunctions(dynamicFunctionAsMap);
+      setting.applyDynamicSortFunction(dynamicFunctionAsMap);
+    });
+
+    if (forceRender) {
+      await this.renderCharts({
+        idList: Array.from(affectedQueryMap.keys()),
+        useBoost: DashboardModule.isUseBoost
       });
+      const payload = Array.from(affectedQueryMap.keys()).map(widgetId => {
+        return { id: widgetId, setting: affectedQueryMap.get(widgetId)! };
+      });
+      ZoomModule.multiRegisterZoomData(payload);
+    }
   }
 
-  @Action
-  async replaceDynamicValues(payload: { widget: Widget; values: string[]; apply: boolean }): Promise<void> {
-    const { widget, values, apply } = payload;
-    const { id } = widget;
+  // @Action
+  // async replaceDynamicValues(payload: { widget: Widget; values: string[]; apply: boolean }): Promise<void> {
+  //   const { widget, values, apply } = payload;
+  //   const { id } = widget;
+  //
+  //   const queryParam: QueryParameter | undefined =
+  //     ChartInfo.isChartInfo(widget) && widget.setting.isQueryParameter() ? widget.setting.toQueryParameter() : void 0;
+  //   this.setDynamicValues({ id: id, values: values });
+  //   WidgetModule.allQueryWidgets
+  //     .filter(widget => widget.setting.canApplyValueControl(id) || widget.setting.isAffectByQueryParameter(id))
+  //     .forEach(queryWidget => {
+  //       ///Apply cho tất cả widget nào có Tab control
+  //       const existTabControl = queryWidget.setting.canApplyValueControl(id);
+  //       if (existTabControl) {
+  //         // queryWidget.setting.applyDynamicFilterValues(new Map([[id, this.dynamicFilterValuesMap.get(id)!]]));
+  //       }
+  //       ///Apply cho tất cả widget nào có Query Param
+  //       const existQueryParam = queryParam && queryWidget.setting.isAffectByQueryParameter(id);
+  //       if (existQueryParam) {
+  //         const cloneParams = cloneDeep(queryWidget.setting.parameters);
+  //         cloneParams[queryParam!.displayName] = QuerySetting.formatParamValue(queryParam!.valueType, ListUtils.getHead(values) ?? "");
+  //         queryWidget.setting.withQueryParameters(cloneParams);
+  //       }
+  //       //
+  //       if (apply && (existTabControl || existQueryParam)) {
+  //         const useBoost = DashboardModule.currentDashboard?.useBoost ?? false;
+  //         this.renderChart({ id: queryWidget.id, useBoost: useBoost });
+  //       }
+  //     });
+  // }
 
-    const queryParam: QueryParameter | undefined =
-      ChartInfo.isChartInfo(widget) && widget.setting.isQueryParameter() ? widget.setting.toQueryParameter() : void 0;
-    this.setDynamicValues({ id: id, values: values });
-    WidgetModule.allQueryWidgets
-      .filter(widget => widget.setting.affectByDynamicCondition(id) || widget.setting.isAffectByQueryParameter(id))
-      .forEach(queryWidget => {
-        ///Apply cho tất cả widget nào có Tab control
-        const existTabControl = queryWidget.setting.affectByDynamicCondition(id);
-        if (existTabControl) {
-          queryWidget.setting.setDynamicFilter(new Map([[id, this.dynamicFilter.get(id)!]]));
-        }
-        ///Apply cho tất cả widget nào có Query Param
-        const existQueryParam = queryParam && queryWidget.setting.isAffectByQueryParameter(id);
-        if (existQueryParam) {
-          const cloneParams = cloneDeep(queryWidget.setting.parameters);
-          cloneParams[queryParam!.displayName] = QuerySetting.formatParamValue(queryParam!.valueType, ListUtils.getHead(values) ?? '');
-          queryWidget.setting.withQueryParameters(cloneParams);
-        }
-        //
-        if (apply && (existTabControl || existQueryParam)) {
-          const useBoost = DashboardModule.currentDashboard?.useBoost ?? false;
-          this.renderChart({ id: queryWidget.id, useBoost: useBoost });
-        }
+  @Action
+  async applyDynamicValues(payload: { id: WidgetId; valueMap: Map<ValueControlType, string[]> | undefined; ignoreReRender?: boolean }): Promise<WidgetId[]> {
+    QuerySettingModule.setDynamicValues(payload);
+    const effectedIds: WidgetId[] = QuerySettingModule.getAffectedIdByControlId(payload.id);
+    if (!payload.ignoreReRender && ListUtils.isNotEmpty(effectedIds)) {
+      await this.renderCharts({
+        idList: effectedIds,
+        useBoost: DashboardModule.isUseBoost
       });
+    }
+    return effectedIds;
   }
 }
 

@@ -1,8 +1,8 @@
 <template>
   <b-col cols="7">
     <div class="oath-form-container">
-      <h2 class="unselectable">Welcome to Rocket.BI</h2>
-      <h4 class="unselectable">Register Your Rocket.BI Account</h4>
+      <h2 class="unselectable">Welcome to RocketBI</h2>
+      <h4 class="unselectable">Register Your RocketBI Account</h4>
       <div id="login-form">
         <div class="user-name-section">
           <DiInputComponent2

@@ -29,7 +29,7 @@
           </div>
           <div class="job-section">
             <div class="input">
-              <DataSourceConfig :job.sync="job" @selected="handleSelectDataSource" />
+              <DataSourceConfig :is-disabled-select-source="isDisabledSelectSource" :job.sync="job" @selected="handleSelectDataSource" />
               <S3DataSourceConfig :job.sync="job" ref="s3FromSuggestion" />
             </div>
           </div>
@@ -76,12 +76,11 @@ import S3DataSourceConfig from '@/screens/data-ingestion/components/s3-csv/S3Dat
 import JobSyncConfig from '@/screens/data-ingestion/components/sync-confg/JobSyncConfig.vue';
 import JobWareHouseConfig from '@/screens/data-ingestion/components/warehouse-config/JobWareHouseConfig.vue';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
-import { JobModule } from '@/screens/data-ingestion/store/JobStore';
 import LakeHouseConfig from '@/screens/lake-house/views/job/output-form/LakeHouseConfig.vue';
 import WareHouseConfig from '@/screens/lake-house/views/job/output-form/WareHouseConfig.vue';
 import { ApiExceptions, Status } from '@/shared';
 import { Track } from '@/shared/anotation';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
+import { AtomicAction } from '@core/common/misc';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
 import SingleChoiceItem from '@/shared/components/filters/SingleChoiceItem.vue';
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
@@ -95,7 +94,7 @@ import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Log } from '@core/utils';
 import { cloneDeep } from 'lodash';
 import { Inject } from 'typescript-ioc';
-import { Component, Ref, Vue } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import { minValue, required } from 'vuelidate/lib/validators';
 
 @Component({
@@ -134,6 +133,10 @@ export default class S3JobConfigModal extends Vue {
   private isCreateNewDatabase = false;
   private newDbName = '';
   private isSingleTable = true;
+
+  @Prop({ default: false })
+  isDisabledSelectSource!: boolean;
+
   @Inject
   private readonly schemaService!: SchemaService;
 
@@ -273,25 +276,6 @@ export default class S3JobConfigModal extends Vue {
     }
 
     return true;
-  }
-
-  private async submitJob(job: Job) {
-    const jobConfigFormMode: FormMode = Job.getJobFormConfigMode(job);
-    switch (jobConfigFormMode) {
-      case FormMode.Create:
-        if (this.isSingleTable) {
-          await JobModule.create(job);
-        } else {
-          const tableNames = [...DataSourceModule.tableNames];
-          await JobModule.createMulti({ job: job, tables: tableNames });
-        }
-        break;
-      case FormMode.Edit:
-        await JobModule.update(job);
-        break;
-      default:
-        throw new DIException(`Unsupported ${jobConfigFormMode} Job`);
-    }
   }
 
   @Track(TrackEvents.DataSourceSelect, {

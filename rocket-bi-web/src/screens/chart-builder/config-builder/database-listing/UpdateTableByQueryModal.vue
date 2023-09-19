@@ -79,7 +79,7 @@ import { PopupUtils } from '@/utils/PopupUtils';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
-import { DataSourceType } from '@core/clickhouse-config';
+import { ConnectorType } from '@core/connector-config';
 import { Di } from '@core/common/modules';
 import { FormulaControllerResolver } from '@/shared/fomula/builder/FormulaControllerResolver';
 // import QueryComponentCtrl from '@/screens/data-management/components/QueryComponent.ts';
@@ -122,7 +122,7 @@ export default class UpdateTableByQueryModal extends Vue {
   }
 
   private initFormulaController() {
-    const sourceType: DataSourceType = ConnectionModule.source?.className ?? DataSourceType.Clickhouse;
+    const sourceType: ConnectorType = ConnectionModule.source?.className ?? ConnectorType.Clickhouse;
     const syntax = Di.get(FormulaControllerResolver).getSyntax(sourceType);
     FormulaSuggestionModule.initSuggestFunction({
       fileNames: [syntax]

@@ -8,7 +8,12 @@
       @onChanged="handleSettingChanged"
       @onMultipleChanged="handleMultipleSettingChanged"
     />
-    <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab
+      :color="setting.options.background"
+      :default-color="defaultBackgroundColor"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <TooltipTab :setting="setting.options.tooltip" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <VisualHeader :widget-type="currentWidget" :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
@@ -16,7 +21,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator';
-import { ChartInfo, SettingKey, SankeyChartOption, SankeyQuerySetting } from '@core/common/domain';
+import { ChartInfo, SettingKey, SankeyChartOption, SankeyQuerySetting, ChartOption } from '@core/common/domain';
 import { ChartType } from '@/shared';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import { Log } from '@core/utils';
@@ -65,6 +70,10 @@ export default class SankeySetting extends Vue {
     this.setting.setOptions(settings);
     this.query.setChartOption(this.setting);
     this.$emit('onChartInfoChanged', this.chartInfo);
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

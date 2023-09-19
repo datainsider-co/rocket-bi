@@ -112,7 +112,7 @@ import { cloneDeep } from 'lodash';
 export default class UserActivityHeader extends Vue {
   private popupItem: Element | null = null;
   private readonly filterPopoverId = 'activity-filter-popover';
-  private readonly DateRangeOptions = DateTimeConstants.ListDateRangeModeOptions;
+  private readonly DateRangeOptions = DateTimeConstants.DATE_RANGE_MODE_OPTION_LIST;
 
   private username = '';
   private userProfiles: UserProfile[] = [];

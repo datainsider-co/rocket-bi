@@ -31,7 +31,12 @@
     />
     <ColorTab :setting="setting.options.themeColor" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <DataLabelTab :setting="setting.options.plotOptions" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
-    <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab
+      :color="setting.options.background"
+      :default-color="defaultBackgroundColor"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <TooltipTab :setting="setting.options.tooltip" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <VisualHeader :setting="setting.options" :widget-type="currentWidget" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
@@ -39,7 +44,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { ChartInfo, SeriesOneResponse, SeriesChartOption, SeriesQuerySetting, SettingKey } from '@core/common/domain';
+import { ChartInfo, SeriesOneResponse, SeriesChartOption, SeriesQuerySetting, SettingKey, ChartOption } from '@core/common/domain';
 import LegendTab from '@/shared/settings/series-chart/LegendTab.vue';
 import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
 import BackgroundTab from '@/shared/settings/common/tabs/BackgroundTab.vue';
@@ -124,6 +129,10 @@ export default class CircularBarSetting extends Vue {
 
   private get chartType(): ChartType {
     return _ConfigBuilderStore.chartType as ChartType;
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

@@ -23,12 +23,16 @@ export class OrganizationStore extends VuexModule {
 
   @Action
   async init(): Promise<void> {
-    const organization: Organization | null = DataManager.getOrganization();
-    Log.debug('init', organization);
-    if (organization && !organization.isExpiredCache()) {
-      this.setOrganization(organization);
-    } else {
-      await OrganizationStoreModule.loadAndCacheOrganization();
+    try {
+      const organization: Organization | null = DataManager.getOrganization();
+      Log.debug('init', organization);
+      if (organization && !organization.isExpiredCache()) {
+        this.setOrganization(organization);
+      } else {
+        await OrganizationStoreModule.loadAndCacheOrganization();
+      }
+    } catch (e) {
+      Log.error('init', e);
     }
   }
 

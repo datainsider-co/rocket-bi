@@ -50,7 +50,9 @@ case class DataSourceFactoryImpl() extends DataSourceFactory {
       case DataSourceType.Shopee          => buildShopeeSource(orgId, id, displayName, creatorId, lastModify, config)
       case DataSourceType.Lazada          => buildLazadaSource(orgId, id, displayName, creatorId, lastModify, config)
       case DataSourceType.Palexy          => buildPalexySource(orgId, id, displayName, creatorId, lastModify, config)
-      case _                              => throw new UnsupportedOperationException(s"No support for dataSourceType=$dataSourceType, id=$id")
+      case DataSourceType.GoogleSearchConsole =>
+        buildGoogleSearchConsoleSource(orgId, id, displayName, creatorId, lastModify, config)
+      case _ => throw new UnsupportedOperationException(s"No support for dataSourceType=$dataSourceType, id=$id")
     }
   }
 
@@ -400,6 +402,25 @@ case class DataSourceFactoryImpl() extends DataSourceFactory {
       creatorId = creatorId,
       lastModify = lastModify,
       apiKey = config.at("/api_key").asText()
+    )
+  }
+
+  private def buildGoogleSearchConsoleSource(
+      orgId: Long,
+      id: Long,
+      displayName: String,
+      creatorId: String,
+      lastModify: Long,
+      config: JsonNode
+  ) = {
+    GoogleSearchConsoleSource(
+      orgId = orgId,
+      id = id,
+      displayName = displayName,
+      creatorId = creatorId,
+      lastModify = lastModify,
+      accessToken = config.at("/access_token").asText(),
+      refreshToken = config.at("/refresh_token").asText()
     )
   }
 }

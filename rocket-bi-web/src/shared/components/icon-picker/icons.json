@@ -1,0 +1,1048 @@
+[
+  {
+    "groupName": "Recent",
+    "icons": []
+  },
+  {
+    "groupName": "Outlined",
+    "icons": [
+      {
+        "iconClass": "setting-icon-account-balance-wallet-bold",
+        "displayName": "setting-icon-account-balance-wallet-bold"
+      },
+      {
+        "iconClass": "setting-icon-account-box-bold",
+        "displayName": "setting-icon-account-box-bold"
+      },
+      {
+        "iconClass": "setting-icon-account-circle-bold",
+        "displayName": "setting-icon-account-circle-bold"
+      },
+      {
+        "iconClass": "setting-icon-account-tree-bold",
+        "displayName": "setting-icon-account-tree-bold"
+      },
+      {
+        "iconClass": "setting-icon-add-alert-bold",
+        "displayName": "setting-icon-add-alert-bold"
+      },
+      {
+        "iconClass": "setting-icon-analytics-bold",
+        "displayName": "setting-icon-analytics-bold"
+      },
+      {
+        "iconClass": "setting-icon-assessment-bold",
+        "displayName": "setting-icon-assessment-bold"
+      },
+      {
+        "iconClass": "setting-icon-assignment-ind-bold",
+        "displayName": "setting-icon-assignment-ind-bold"
+      },
+      {
+        "iconClass": "setting-icon-assignment-bold",
+        "displayName": "setting-icon-assignment-bold"
+      },
+      {
+        "iconClass": "setting-icon-clean-hands-bold",
+        "displayName": "setting-icon-clean-hands-bold"
+      },
+      {
+        "iconClass": "setting-icon-error-bold",
+        "displayName": "setting-icon-error-bold"
+      },
+      {
+        "iconClass": "setting-icon-home-bold",
+        "displayName": "setting-icon-home-bold"
+      },
+      {
+        "iconClass": "setting-icon-hourglass-bottom-bold",
+        "displayName": "setting-icon-hourglass-bottom-bold"
+      },
+      {
+        "iconClass": "setting-icon-hourglass-top-bold",
+        "displayName": "setting-icon-hourglass-top-bold"
+      },
+      {
+        "iconClass": "setting-icon-luggage-bold",
+        "displayName": "setting-icon-luggage-bold"
+      },
+      {
+        "iconClass": "setting-icon-military-tech-bold",
+        "displayName": "setting-icon-military-tech-bold"
+      },
+      {
+        "iconClass": "setting-icon-outdoor-grill-bold",
+        "displayName": "setting-icon-outdoor-grill-bold"
+      },
+      {
+        "iconClass": "setting-icon-pageview-bold",
+        "displayName": "setting-icon-pageview-bold"
+      },
+      {
+        "iconClass": "setting-icon-people-alt-bold",
+        "displayName": "setting-icon-people-alt-bold"
+      },
+      {
+        "iconClass": "setting-icon-People-bold",
+        "displayName": "setting-icon-People-bold"
+      },
+      {
+        "iconClass": "setting-icon-person-bold",
+        "displayName": "setting-icon-person-bold"
+      },
+      {
+        "iconClass": "setting-icon-psychology-bold",
+        "displayName": "setting-icon-psychology-bold"
+      },
+      {
+        "iconClass": "setting-icon-public-bold",
+        "displayName": "setting-icon-public-bold"
+      },
+      {
+        "iconClass": "setting-icon-recommend-bold",
+        "displayName": "setting-icon-recommend-bold"
+      },
+      {
+        "iconClass": "setting-icon-reduce-capacity-bold",
+        "displayName": "setting-icon-reduce-capacity-bold"
+      },
+      {
+        "iconClass": "setting-icon-school-bold",
+        "displayName": "setting-icon-school-bold"
+      },
+      {
+        "iconClass": "setting-icon-star-half-bold",
+        "displayName": "setting-icon-star-half-bold"
+      },
+      {
+        "iconClass": "setting-icon-star1-bold-bold",
+        "displayName": "setting-icon-star1-bold-bold"
+      },
+      {
+        "iconClass": "setting-icon-stream-bold",
+        "displayName": "setting-icon-stream-bold"
+      },
+      {
+        "iconClass": "setting-icon-thumb-down-alt-bold",
+        "displayName": "setting-icon-thumb-down-alt-bold"
+      },
+      {
+        "iconClass": "setting-icon-thumb-up-bold",
+        "displayName": "setting-icon-thumb-up-bold"
+      },
+      {
+        "iconClass": "setting-icon-warning-bold",
+        "displayName": "setting-icon-warning-bold"
+      },
+      {
+        "iconClass": "setting-icon-whatshot-bold",
+        "displayName": "setting-icon-whatshot-bold"
+      },
+      {
+        "iconClass": "setting-icon-work-off-bold",
+        "displayName": "setting-icon-work-off-bold"
+      },
+      {
+        "iconClass": "setting-icon-work-bold",
+        "displayName": "setting-icon-work-bold"
+      },
+      {
+        "iconClass": "setting-icon-chart-bold-1",
+        "displayName": "setting-icon-chart-bold-1"
+      },
+      {
+        "iconClass": "setting-icon-chart-bold-2",
+        "displayName": "setting-icon-chart-bold-2"
+      },
+      {
+        "iconClass": "setting-icon-chart-bold-3",
+        "displayName": "setting-icon-chart-bold-3"
+      },
+      {
+        "iconClass": "setting-icon-chart-bold",
+        "displayName": "setting-icon-chart-bold"
+      },
+      {
+        "iconClass": "setting-icon-chart-circle-bold-2",
+        "displayName": "setting-icon-chart-circle-bold-2"
+      },
+      {
+        "iconClass": "setting-icon-chart-circle-bold",
+        "displayName": "setting-icon-chart-circle-bold"
+      },
+      {
+        "iconClass": "setting-icon-chart-fail-bold",
+        "displayName": "setting-icon-chart-fail-bold"
+      },
+      {
+        "iconClass": "setting-icon-chart-square-bold",
+        "displayName": "setting-icon-chart-square-bold"
+      },
+      {
+        "iconClass": "setting-icon-chart-success-bold",
+        "displayName": "setting-icon-chart-success-bold"
+      },
+      {
+        "iconClass": "setting-icon-diagram-bold",
+        "displayName": "setting-icon-diagram-bold"
+      },
+      {
+        "iconClass": "setting-icon-document-filter-bold",
+        "displayName": "setting-icon-document-filter-bold"
+      },
+      {
+        "iconClass": "setting-icon-document-forward-bold",
+        "displayName": "setting-icon-document-forward-bold"
+      },
+      {
+        "iconClass": "setting-icon-document-like-bold",
+        "displayName": "setting-icon-document-like-bold"
+      },
+      {
+        "iconClass": "setting-icon-dollar-circle-bold",
+        "displayName": "setting-icon-dollar-circle-bold"
+      },
+      {
+        "iconClass": "setting-icon-dollar-square-bold",
+        "displayName": "setting-icon-dollar-square-bold"
+      },
+      {
+        "iconClass": "setting-icon-eart-edit-bold",
+        "displayName": "setting-icon-eart-edit-bold"
+      },
+      {
+        "iconClass": "setting-icon-empty-wallet-add-bold",
+        "displayName": "setting-icon-empty-wallet-add-bold"
+      },
+      {
+        "iconClass": "setting-icon-empty-wallet-bold",
+        "displayName": "setting-icon-empty-wallet-bold"
+      },
+      {
+        "iconClass": "setting-icon-empty-wallet-change-bold",
+        "displayName": "setting-icon-empty-wallet-change-bold"
+      },
+      {
+        "iconClass": "setting-icon-empty-wallet-time-bold",
+        "displayName": "setting-icon-empty-wallet-time-bold"
+      },
+      {
+        "iconClass": "setting-icon-favorite-chart-bold",
+        "displayName": "setting-icon-favorite-chart-bold"
+      },
+      {
+        "iconClass": "setting-icon-flag-bold-2",
+        "displayName": "setting-icon-flag-bold-2"
+      },
+      {
+        "iconClass": "setting-icon-flag-bold",
+        "displayName": "setting-icon-flag-bold"
+      },
+      {
+        "iconClass": "setting-icon-flash-bold",
+        "displayName": "setting-icon-flash-bold"
+      },
+      {
+        "iconClass": "setting-icon-folder-bold-2",
+        "displayName": "setting-icon-folder-bold-2"
+      },
+      {
+        "iconClass": "setting-icon-folder-bold",
+        "displayName": "setting-icon-folder-bold"
+      },
+      {
+        "iconClass": "setting-icon-gift-bold",
+        "displayName": "setting-icon-gift-bold"
+      },
+      {
+        "iconClass": "setting-icon-global-bold",
+        "displayName": "setting-icon-global-bold"
+      },
+      {
+        "iconClass": "setting-icon-heart-add-bold",
+        "displayName": "setting-icon-heart-add-bold"
+      },
+      {
+        "iconClass": "setting-icon-heart-circle-bold",
+        "displayName": "setting-icon-heart-circle-bold"
+      },
+      {
+        "iconClass": "setting-icon-presention-chart-bold",
+        "displayName": "setting-icon-presention-chart-bold"
+      },
+      {
+        "iconClass": "setting-icon-wallet-add-bold-1",
+        "displayName": "setting-icon-wallet-add-bold-1"
+      },
+      {
+        "iconClass": "setting-icon-wallet-add-bold",
+        "displayName": "setting-icon-wallet-add-bold"
+      },
+      {
+        "iconClass": "setting-icon-wallet-bold-1",
+        "displayName": "setting-icon-wallet-bold-1"
+      },
+      {
+        "iconClass": "setting-icon-wallet-bold-2",
+        "displayName": "setting-icon-wallet-bold-2"
+      },
+      {
+        "iconClass": "setting-icon-wallet-bold-3",
+        "displayName": "setting-icon-wallet-bold-3"
+      },
+      {
+        "iconClass": "setting-icon-wallet-bold",
+        "displayName": "setting-icon-wallet-bold"
+      },
+      {
+        "iconClass": "setting-icon-wallet-check-bold",
+        "displayName": "setting-icon-wallet-check-bold"
+      },
+      {
+        "iconClass": "setting-icon-wallet-minus-bold",
+        "displayName": "setting-icon-wallet-minus-bold"
+      },
+      {
+        "iconClass": "setting-icon-wallet-money-bold",
+        "displayName": "setting-icon-wallet-money-bold"
+      },
+      {
+        "iconClass": "setting-icon-wallet-remove-bold",
+        "displayName": "setting-icon-wallet-remove-bold"
+      },
+      {
+        "iconClass": "setting-icon-wallet-search-bold",
+        "displayName": "setting-icon-wallet-search-bold"
+      }
+    ]
+  },
+  {
+    "groupName": "Inlined",
+    "icons": [
+      {
+        "iconClass": "setting-icon-increase",
+        "displayName": "setting-icon-increase"
+      },
+      {
+        "iconClass": "setting-icon-exit",
+        "displayName": "setting-icon-exit"
+      },
+      {
+        "iconClass": "setting-icon-three-dot",
+        "displayName": "setting-icon-three-dot"
+      },
+      {
+        "iconClass": "setting-icon-wallet-inlined",
+        "displayName": "setting-icon-wallet-inlined"
+      },
+      {
+        "iconClass": "setting-icon-variant209",
+        "displayName": "setting-icon-variant209"
+      },
+      {
+        "iconClass": "setting-icon-column-chart",
+        "displayName": "setting-icon-column-chart"
+      },
+      {
+        "iconClass": "setting-icon-two-way",
+        "displayName": "setting-icon-two-way"
+      },
+      {
+        "iconClass": "setting-icon-chat",
+        "displayName": "setting-icon-chat"
+      },
+      {
+        "iconClass": "setting-icon-info",
+        "displayName": "setting-icon-info"
+      },
+      {
+        "iconClass": "setting-icon-down",
+        "displayName": "setting-icon-down"
+      },
+      {
+        "iconClass": "setting-icon-peoples",
+        "displayName": "setting-icon-peoples"
+      },
+      {
+        "iconClass": "setting-icon-success",
+        "displayName": "setting-icon-success"
+      },
+      {
+        "iconClass": "setting-icon-back",
+        "displayName": "setting-icon-back"
+      },
+      {
+        "iconClass": "setting-icon-search",
+        "displayName": "setting-icon-search"
+      },
+      {
+        "iconClass": "setting-icon-setting",
+        "displayName": "setting-icon-setting"
+      },
+      {
+        "iconClass": "setting-icon-document",
+        "displayName": "setting-icon-document"
+      },
+      {
+        "iconClass": "setting-icon-people",
+        "displayName": "setting-icon-people"
+      },
+      {
+        "iconClass": "setting-icon-decrease",
+        "displayName": "setting-icon-decrease"
+      },
+      {
+        "iconClass": "setting-icon-add-payment-card",
+        "displayName": "setting-icon-add-payment-card"
+      },
+      {
+        "iconClass": "setting-icon-alarm",
+        "displayName": "setting-icon-alarm"
+      },
+      {
+        "iconClass": "setting-icon-bitcoin",
+        "displayName": "setting-icon-bitcoin"
+      },
+      {
+        "iconClass": "setting-icon-botcoin-coin",
+        "displayName": "setting-icon-botcoin-coin"
+      },
+      {
+        "iconClass": "setting-icon-clock",
+        "displayName": "setting-icon-clock"
+      },
+      {
+        "iconClass": "setting-icon-dollar-coin",
+        "displayName": "setting-icon-dollar-coin"
+      },
+      {
+        "iconClass": "setting-icon-dollar",
+        "displayName": "setting-icon-dollar"
+      },
+      {
+        "iconClass": "setting-icon-donut-chart",
+        "displayName": "setting-icon-donut-chart"
+      },
+      {
+        "iconClass": "setting-icon-ellipse",
+        "displayName": "setting-icon-ellipse"
+      },
+      {
+        "iconClass": "setting-icon-graph",
+        "displayName": "setting-icon-graph"
+      },
+      {
+        "iconClass": "setting-icon-hexagon",
+        "displayName": "setting-icon-hexagon"
+      },
+      {
+        "iconClass": "setting-icon-history",
+        "displayName": "setting-icon-history"
+      },
+      {
+        "iconClass": "setting-icon-home-1",
+        "displayName": "setting-icon-home-1"
+      },
+      {
+        "iconClass": "setting-icon-home-2",
+        "displayName": "setting-icon-home-2"
+      },
+      {
+        "iconClass": "setting-icon-hourglass-off",
+        "displayName": "setting-icon-hourglass-off"
+      },
+      {
+        "iconClass": "setting-icon-hourglass",
+        "displayName": "setting-icon-hourglass"
+      },
+      {
+        "iconClass": "setting-icon-line-board-1",
+        "displayName": "setting-icon-line-board-1"
+      },
+      {
+        "iconClass": "setting-icon-line-board-2",
+        "displayName": "setting-icon-line-board-2"
+      },
+      {
+        "iconClass": "setting-icon-line-candles-1",
+        "displayName": "setting-icon-line-candles-1"
+      },
+      {
+        "iconClass": "setting-icon-line-candles-2",
+        "displayName": "setting-icon-line-candles-2"
+      },
+      {
+        "iconClass": "setting-icon-line-candles-3",
+        "displayName": "setting-icon-line-candles-3"
+      },
+      {
+        "iconClass": "setting-icon-line-candles-4",
+        "displayName": "setting-icon-line-candles-4"
+      },
+      {
+        "iconClass": "setting-icon-line-candles-5",
+        "displayName": "setting-icon-line-candles-5"
+      },
+      {
+        "iconClass": "setting-icon-line-candles-6",
+        "displayName": "setting-icon-line-candles-6"
+      },
+      {
+        "iconClass": "setting-icon-line-candles-7",
+        "displayName": "setting-icon-line-candles-7"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-19",
+        "displayName": "setting-icon-line-chart-19"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-1",
+        "displayName": "setting-icon-line-chart-1"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-2",
+        "displayName": "setting-icon-line-chart-2"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-3",
+        "displayName": "setting-icon-line-chart-3"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-4",
+        "displayName": "setting-icon-line-chart-4"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-5",
+        "displayName": "setting-icon-line-chart-5"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-6",
+        "displayName": "setting-icon-line-chart-6"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-7",
+        "displayName": "setting-icon-line-chart-7"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-8",
+        "displayName": "setting-icon-line-chart-8"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-9",
+        "displayName": "setting-icon-line-chart-9"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-10",
+        "displayName": "setting-icon-line-chart-10"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-11",
+        "displayName": "setting-icon-line-chart-11"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-12",
+        "displayName": "setting-icon-line-chart-12"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-13",
+        "displayName": "setting-icon-line-chart-13"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-14",
+        "displayName": "setting-icon-line-chart-14"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-15",
+        "displayName": "setting-icon-line-chart-15"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-16",
+        "displayName": "setting-icon-line-chart-16"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-17",
+        "displayName": "setting-icon-line-chart-17"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-18",
+        "displayName": "setting-icon-line-chart-18"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-20",
+        "displayName": "setting-icon-line-chart-20"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-21",
+        "displayName": "setting-icon-line-chart-21"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-22",
+        "displayName": "setting-icon-line-chart-22"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-23",
+        "displayName": "setting-icon-line-chart-23"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-24",
+        "displayName": "setting-icon-line-chart-24"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-25",
+        "displayName": "setting-icon-line-chart-25"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-26",
+        "displayName": "setting-icon-line-chart-26"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-27",
+        "displayName": "setting-icon-line-chart-27"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-28",
+        "displayName": "setting-icon-line-chart-28"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-29",
+        "displayName": "setting-icon-line-chart-29"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-30",
+        "displayName": "setting-icon-line-chart-30"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-31",
+        "displayName": "setting-icon-line-chart-31"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-32",
+        "displayName": "setting-icon-line-chart-32"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-33",
+        "displayName": "setting-icon-line-chart-33"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-34",
+        "displayName": "setting-icon-line-chart-34"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-35",
+        "displayName": "setting-icon-line-chart-35"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-36",
+        "displayName": "setting-icon-line-chart-36"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-37",
+        "displayName": "setting-icon-line-chart-37"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-38",
+        "displayName": "setting-icon-line-chart-38"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-39",
+        "displayName": "setting-icon-line-chart-39"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-40",
+        "displayName": "setting-icon-line-chart-40"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-41",
+        "displayName": "setting-icon-line-chart-41"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-42",
+        "displayName": "setting-icon-line-chart-42"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-43",
+        "displayName": "setting-icon-line-chart-43"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-44",
+        "displayName": "setting-icon-line-chart-44"
+      },
+      {
+        "iconClass": "setting-icon-line-chart-45",
+        "displayName": "setting-icon-line-chart-45"
+      },
+      {
+        "iconClass": "setting-icon-line-cloud-1",
+        "displayName": "setting-icon-line-cloud-1"
+      },
+      {
+        "iconClass": "setting-icon-line-cloud-2",
+        "displayName": "setting-icon-line-cloud-2"
+      },
+      {
+        "iconClass": "setting-icon-line-cloud-3",
+        "displayName": "setting-icon-line-cloud-3"
+      },
+      {
+        "iconClass": "setting-icon-line-cloud-4",
+        "displayName": "setting-icon-line-cloud-4"
+      },
+      {
+        "iconClass": "setting-icon-line-cloud-5",
+        "displayName": "setting-icon-line-cloud-5"
+      },
+      {
+        "iconClass": "setting-icon-line-cloud-6",
+        "displayName": "setting-icon-line-cloud-6"
+      },
+      {
+        "iconClass": "setting-icon-line-cloud-7",
+        "displayName": "setting-icon-line-cloud-7"
+      },
+      {
+        "iconClass": "setting-icon-line-cloud-8",
+        "displayName": "setting-icon-line-cloud-8"
+      },
+      {
+        "iconClass": "setting-icon-line-cloud-9",
+        "displayName": "setting-icon-line-cloud-9"
+      },
+      {
+        "iconClass": "setting-icon-line-counter",
+        "displayName": "setting-icon-line-counter"
+      },
+      {
+        "iconClass": "setting-icon-line-database-1",
+        "displayName": "setting-icon-line-database-1"
+      },
+      {
+        "iconClass": "setting-icon-line-database-2",
+        "displayName": "setting-icon-line-database-2"
+      },
+      {
+        "iconClass": "setting-icon-line-database-3",
+        "displayName": "setting-icon-line-database-3"
+      },
+      {
+        "iconClass": "setting-icon-line-database-4",
+        "displayName": "setting-icon-line-database-4"
+      },
+      {
+        "iconClass": "setting-icon-line-database-5",
+        "displayName": "setting-icon-line-database-5"
+      },
+      {
+        "iconClass": "setting-icon-line-doc-1",
+        "displayName": "setting-icon-line-doc-1"
+      },
+      {
+        "iconClass": "setting-icon-line-doc-2",
+        "displayName": "setting-icon-line-doc-2"
+      },
+      {
+        "iconClass": "setting-icon-line-doc-3",
+        "displayName": "setting-icon-line-doc-3"
+      },
+      {
+        "iconClass": "setting-icon-line-doc-4",
+        "displayName": "setting-icon-line-doc-4"
+      },
+      {
+        "iconClass": "setting-icon-line-doc-5",
+        "displayName": "setting-icon-line-doc-5"
+      },
+      {
+        "iconClass": "setting-icon-line-doc-6",
+        "displayName": "setting-icon-line-doc-6"
+      },
+      {
+        "iconClass": "setting-icon-line-doc-7",
+        "displayName": "setting-icon-line-doc-7"
+      },
+      {
+        "iconClass": "setting-icon-line-doughnut-2",
+        "displayName": "setting-icon-line-doughnut-2"
+      },
+      {
+        "iconClass": "setting-icon-line-doughnut-3",
+        "displayName": "setting-icon-line-doughnut-3"
+      },
+      {
+        "iconClass": "setting-icon-line-doughnut-4",
+        "displayName": "setting-icon-line-doughnut-4"
+      },
+      {
+        "iconClass": "setting-icon-line-doughnut-5",
+        "displayName": "setting-icon-line-doughnut-5"
+      },
+      {
+        "iconClass": "setting-icon-line-doughnut-6",
+        "displayName": "setting-icon-line-doughnut-6"
+      },
+      {
+        "iconClass": "setting-icon-line-file",
+        "displayName": "setting-icon-line-file"
+      },
+      {
+        "iconClass": "setting-icon-line-fish-bones-1",
+        "displayName": "setting-icon-line-fish-bones-1"
+      },
+      {
+        "iconClass": "setting-icon-line-fish-bones-2",
+        "displayName": "setting-icon-line-fish-bones-2"
+      },
+      {
+        "iconClass": "setting-icon-line-fish-bones-3",
+        "displayName": "setting-icon-line-fish-bones-3"
+      },
+      {
+        "iconClass": "setting-icon-line-fish-bones-4",
+        "displayName": "setting-icon-line-fish-bones-4"
+      },
+      {
+        "iconClass": "setting-icon-line-magnifier-1",
+        "displayName": "setting-icon-line-magnifier-1"
+      },
+      {
+        "iconClass": "setting-icon-line-magnifier-2",
+        "displayName": "setting-icon-line-magnifier-2"
+      },
+      {
+        "iconClass": "setting-icon-line-pie-chart-2",
+        "displayName": "setting-icon-line-pie-chart-2"
+      },
+      {
+        "iconClass": "setting-icon-line-pie-chart-3",
+        "displayName": "setting-icon-line-pie-chart-3"
+      },
+      {
+        "iconClass": "setting-icon-line-pie-chart-4",
+        "displayName": "setting-icon-line-pie-chart-4"
+      },
+      {
+        "iconClass": "setting-icon-line-pyramid-1",
+        "displayName": "setting-icon-line-pyramid-1"
+      },
+      {
+        "iconClass": "setting-icon-line-pyramid-2",
+        "displayName": "setting-icon-line-pyramid-2"
+      },
+      {
+        "iconClass": "setting-icon-lock-payment-card",
+        "displayName": "setting-icon-lock-payment-card"
+      },
+      {
+        "iconClass": "setting-icon-money-dollar",
+        "displayName": "setting-icon-money-dollar"
+      },
+      {
+        "iconClass": "setting-icon-money",
+        "displayName": "setting-icon-money"
+      },
+      {
+        "iconClass": "setting-icon-payment-card",
+        "displayName": "setting-icon-payment-card"
+      },
+      {
+        "iconClass": "setting-icon-pentagon",
+        "displayName": "setting-icon-pentagon"
+      },
+      {
+        "iconClass": "setting-icon-pie-chart-1",
+        "displayName": "setting-icon-pie-chart-1"
+      },
+      {
+        "iconClass": "setting-icon-pie-chart",
+        "displayName": "setting-icon-pie-chart"
+      },
+      {
+        "iconClass": "setting-icon-remove-payment-card",
+        "displayName": "setting-icon-remove-payment-card"
+      },
+      {
+        "iconClass": "setting-icon-rupee-coin",
+        "displayName": "setting-icon-rupee-coin"
+      },
+      {
+        "iconClass": "setting-icon-rupee",
+        "displayName": "setting-icon-rupee"
+      },
+      {
+        "iconClass": "setting-icon-square",
+        "displayName": "setting-icon-square"
+      },
+      {
+        "iconClass": "setting-icon-star",
+        "displayName": "setting-icon-star"
+      },
+      {
+        "iconClass": "setting-icon-tag",
+        "displayName": "setting-icon-tag"
+      },
+      {
+        "iconClass": "setting-icon-timer-off",
+        "displayName": "setting-icon-timer-off"
+      },
+      {
+        "iconClass": "setting-icon-timer",
+        "displayName": "setting-icon-timer"
+      },
+      {
+        "iconClass": "setting-icon-triangle",
+        "displayName": "setting-icon-triangle"
+      },
+      {
+        "iconClass": "setting-icon-update",
+        "displayName": "setting-icon-update"
+      },
+      {
+        "iconClass": "setting-icon-user-add",
+        "displayName": "setting-icon-user-add"
+      },
+      {
+        "iconClass": "setting-icon-user-check",
+        "displayName": "setting-icon-user-check"
+      },
+      {
+        "iconClass": "setting-icon-user-circle",
+        "displayName": "setting-icon-user-circle"
+      },
+      {
+        "iconClass": "setting-icon-user-delete",
+        "displayName": "setting-icon-user-delete"
+      },
+      {
+        "iconClass": "setting-icon-user-group",
+        "displayName": "setting-icon-user-group"
+      },
+      {
+        "iconClass": "setting-icon-user",
+        "displayName": "setting-icon-user"
+      },
+      {
+        "iconClass": "setting-icon-wallet",
+        "displayName": "setting-icon-wallet"
+      },
+      {
+        "iconClass": "setting-icon-watch",
+        "displayName": "setting-icon-watch"
+      },
+      {
+        "iconClass": "setting-icon-money-2",
+        "displayName": "setting-icon-money-2"
+      },
+      {
+        "iconClass": "setting-icon-money-3",
+        "displayName": "setting-icon-money-3"
+      },
+      {
+        "iconClass": "setting-icon-money-4",
+        "displayName": "setting-icon-money-4"
+      },
+      {
+        "iconClass": "setting-icon-money-add",
+        "displayName": "setting-icon-money-add"
+      },
+      {
+        "iconClass": "setting-icon-money-archive",
+        "displayName": "setting-icon-money-archive"
+      },
+      {
+        "iconClass": "setting-icon-money-change",
+        "displayName": "setting-icon-money-change"
+      },
+      {
+        "iconClass": "setting-icon-money-forbidden",
+        "displayName": "setting-icon-money-forbidden"
+      },
+      {
+        "iconClass": "setting-icon-money-recive",
+        "displayName": "setting-icon-money-recive"
+      },
+      {
+        "iconClass": "setting-icon-money-remove",
+        "displayName": "setting-icon-money-remove"
+      },
+      {
+        "iconClass": "setting-icon-money-send",
+        "displayName": "setting-icon-money-send"
+      },
+      {
+        "iconClass": "setting-icon-money-tick",
+        "displayName": "setting-icon-money-tick"
+      },
+      {
+        "iconClass": "setting-icon-money-time",
+        "displayName": "setting-icon-money-time"
+      },
+      {
+        "iconClass": "setting-icon-money1",
+        "displayName": "setting-icon-money1"
+      },
+      {
+        "iconClass": "setting-icon-moneys",
+        "displayName": "setting-icon-moneys"
+      },
+      {
+        "iconClass": "setting-icon-add-task",
+        "displayName": "setting-icon-add-task"
+      },
+      {
+        "iconClass": "setting-icon-insert-emoticon",
+        "displayName": "setting-icon-insert-emoticon"
+      },
+      {
+        "iconClass": "setting-icon-people-outline",
+        "displayName": "setting-icon-people-outline"
+      },
+      {
+        "iconClass": "setting-icon-perm-identity",
+        "displayName": "setting-icon-perm-identity"
+      },
+      {
+        "iconClass": "setting-icon-person-add-alt",
+        "displayName": "setting-icon-person-add-alt"
+      },
+      {
+        "iconClass": "setting-icon-person-outline",
+        "displayName": "setting-icon-person-outline"
+      },
+      {
+        "iconClass": "setting-icon-plus-one",
+        "displayName": "setting-icon-plus-one"
+      },
+      {
+        "iconClass": "setting-icon-sentiment-dissatisfied",
+        "displayName": "setting-icon-sentiment-dissatisfied"
+      },
+      {
+        "iconClass": "setting-icon-sentiment-neutral",
+        "displayName": "setting-icon-sentiment-neutral"
+      },
+      {
+        "iconClass": "setting-icon-sentiment-satisfied",
+        "displayName": "setting-icon-sentiment-satisfied"
+      },
+      {
+        "iconClass": "setting-icon-sentiment-very-dissatisfied",
+        "displayName": "setting-icon-sentiment-very-dissatisfied"
+      },
+      {
+        "iconClass": "setting-icon-sentiment-very-satisfied",
+        "displayName": "setting-icon-sentiment-very-satisfied"
+      },
+      {
+        "iconClass": "setting-icon-star-border",
+        "displayName": "setting-icon-star-border"
+      },
+      {
+        "iconClass": "setting-icon-star-outline",
+        "displayName": "setting-icon-star-outline"
+      },
+      {
+        "iconClass": "setting-icon-workspaces-filled",
+        "displayName": "setting-icon-workspaces-filled"
+      }
+    ]
+  }
+]

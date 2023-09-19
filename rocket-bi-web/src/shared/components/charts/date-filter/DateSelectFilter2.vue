@@ -32,7 +32,7 @@
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { DateRange, DateTimeConstants } from '@/shared';
 import moment from 'moment';
-import { DateTimeFormatter, DateUtils, ListUtils, RandomUtils } from '@/utils';
+import { DateTimeUtils, DateUtils, ListUtils, RandomUtils } from '@/utils';
 import { MainDateMode } from '@core/common/domain';
 import DiCalendar from '@filter/main-date-filter-v2/DiCalendar.vue';
 import { CalendarData } from '@/shared/models';
@@ -42,7 +42,7 @@ import { DateFilterUtils } from '@chart/date-filter/DateFilterUtils';
 
 @Component({ components: { DiCalendar } })
 export default class DateSelectFilter2 extends Vue {
-  private readonly MainDateModeOptions = DateTimeConstants.ListDateRangeModeOptions;
+  private readonly MainDateModeOptions = DateTimeConstants.DATE_RANGE_MODE_OPTION_LIST;
   private id = RandomUtils.nextInt(0, 10000);
   private readonly dateMode = MainDateMode.custom;
 
@@ -84,7 +84,7 @@ export default class DateSelectFilter2 extends Vue {
       default:
         {
           if (calendarData.chosenDateRange) {
-            dates.push(DateTimeFormatter.formatDate(calendarData.chosenDateRange.start), DateTimeFormatter.formatDate(calendarData.chosenDateRange.end));
+            dates.push(DateTimeUtils.formatDate(calendarData.chosenDateRange.start), DateTimeUtils.formatDate(calendarData.chosenDateRange.end, true));
           }
         }
         break;
@@ -98,8 +98,8 @@ export default class DateSelectFilter2 extends Vue {
 
   private get dateRange(): string {
     if (ListUtils.isNotEmpty(this.localValue.dates)) {
-      const startDate = DateTimeFormatter.formatAsDDMMYYYY(this.localValue.dates[0]);
-      const endDate = DateTimeFormatter.formatAsDDMMYYYY(this.localValue.dates[1]);
+      const startDate = DateTimeUtils.formatAsDDMMYYYY(this.localValue.dates[0]);
+      const endDate = DateTimeUtils.formatAsDDMMYYYY(this.localValue.dates[1]);
       return `${startDate} - ${endDate}`;
     }
     return 'All Time';

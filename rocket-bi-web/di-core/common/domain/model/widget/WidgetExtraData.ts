@@ -4,7 +4,7 @@
  */
 
 import { ConditionData, ConfigType, FunctionData } from '@/shared';
-import { ChartInfo, Id, StyleSettings } from '@core/common/domain/model';
+import { Id, StyleSettings } from '@core/common/domain/model';
 
 export interface WidgetExtraData {
   configs?: Record<ConfigType, FunctionData[]>;

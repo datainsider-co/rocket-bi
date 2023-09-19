@@ -6,8 +6,7 @@
 import { ConfigType, FunctionData, FunctionFamilyTypes } from '@/shared';
 import { cloneDeep } from 'lodash';
 import { ConvertType, FunctionConvertor, FunctionConvertorData } from '@/screens/chart-builder/config-builder/function-convertor/FunctionConvertor';
-import { Log } from '@core/utils';
-import { DynamicFunctionWidget } from '@core/common/domain';
+import { ChartControl } from '@core/common/domain';
 
 export class TableFunctionConvertor extends FunctionConvertor {
   private configAllowConvert = new Set([ConfigType.columns]);
@@ -38,8 +37,8 @@ export class TableFunctionConvertor extends FunctionConvertor {
       for (let index = 0; index < listFunctionData.length; index++) {
         const functionData: FunctionData = listFunctionData[index];
         ///Not convert if column is dynamic
-        const isDynamicWidget = DynamicFunctionWidget.isDynamicFunctionWidget(functionData.dynamicFunction);
-        if (functionData.id != currentFunction.id && this.isNotSameFunction(currentFunction, functionData) && !isDynamicWidget) {
+        const isChartControlData = ChartControl.isChartControlData(functionData.dynamicFunction);
+        if (functionData.id != currentFunction.id && this.isNotSameFunction(currentFunction, functionData) && !isChartControlData) {
           listFunctionData[index] = this.handleConvert(functionData, targetType);
         }
       }

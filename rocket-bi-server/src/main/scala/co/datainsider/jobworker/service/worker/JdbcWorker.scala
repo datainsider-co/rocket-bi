@@ -28,7 +28,7 @@ class JdbcWorker(
     schemaService: SchemaClientService,
     jobInQueue: KVS[Long, Boolean],
     engine: Engine[Connection],
-    connection: Connection,
+    connection: Connection
 ) extends JobWorker[JdbcJob]
     with Logging {
 
@@ -114,7 +114,7 @@ class JdbcWorker(
 
         writers.foreach(writer => {
           if (records.nonEmpty) try {
-            writer.write(records, destTblSchema)
+            writer.insertBatch(records, destTblSchema)
           } catch {
             case e: Throwable => error(s"${writer.getClass} write ${records.length} records failed, reason: $e")
           }
@@ -216,7 +216,7 @@ class JdbcWorker(
     if (isSuccess) {
       tableAsOption
     } else {
-      throw new Exception(s"fail to interact with ingestion-service when ensure destination table")
+      None
     }
   }
 

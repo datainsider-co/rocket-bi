@@ -10,17 +10,17 @@ import {
   HistogramChartOption,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
-  VizSettingType,
+  ChartOptionClassName,
   WidgetId
 } from '@core/common/domain/model';
 import { QuerySetting } from '../QuerySetting';
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class HistogramQuerySetting extends QuerySetting<HistogramChartOption> {
-  readonly className = QuerySettingType.Histogram;
+export class HistogramQuerySetting extends QuerySetting {
+  readonly className = QuerySettingClassName.Histogram;
 
   constructor(
     public value: TableColumn,
@@ -28,7 +28,6 @@ export class HistogramQuerySetting extends QuerySetting<HistogramChartOption> {
     sorts: OrderBy[] = [],
     public binsNumber?: number,
     options: Record<string, any> = {},
-
     sqlViews: InlineSqlView[] = [],
     parameters: Record<string, string> = {}
   ) {
@@ -47,7 +46,7 @@ export class HistogramQuerySetting extends QuerySetting<HistogramChartOption> {
     return [this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.value];
   }
 
@@ -57,8 +56,8 @@ export class HistogramQuerySetting extends QuerySetting<HistogramChartOption> {
     }
   }
 
-  setValueBySetting(setting: ChartOption) {
-    const isHistogramSetting = setting.className == VizSettingType.HistogramSetting;
+  assignChartOptionValue(setting: ChartOption) {
+    const isHistogramSetting = setting.className == ChartOptionClassName.HistogramSetting;
     if (isHistogramSetting) {
       const binsNumber = (setting as HistogramChartOption).options.binNumber;
       this.changeBinsNumber(binsNumber);
@@ -66,10 +65,10 @@ export class HistogramQuerySetting extends QuerySetting<HistogramChartOption> {
   }
 
   static isHistogramQuerySetting(obj: any): obj is HistogramQuerySetting {
-    return obj.className === QuerySettingType.Histogram;
+    return obj.className === QuerySettingClassName.Histogram;
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
 }

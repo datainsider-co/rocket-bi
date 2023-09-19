@@ -1,135 +1,95 @@
 <template>
-  <div>
-    <DiButton :id="randomId" class="display-name text-decoration-none change-field-btn text-nowrap" @click="handleClickButton" :title="title"></DiButton>
-    <BPopover :show.sync="isShowPopover" :target="randomId" custom-class="popover-dropdown" placement="bottom-right" triggers="blur click">
-      <div class="popover-custom">
-        <StatusWidget :error="errorMessage" :status="fieldContextStatus">
-          <vuescroll>
-            <div class="list-profile-field">
-              <div v-for="(profileField, i) in profileFields" :key="i" class="active" @click="handleChangeField(profileField)">
-                <li>
-                  <a href="#">{{ profileField.displayName }}</a>
-                  <span v-if="title === profileField.displayName">&#10003;</span>
-                </li>
-              </div>
-            </div>
-          </vuescroll>
-        </StatusWidget>
-      </div>
-    </BPopover>
+  <div class="change-field-button">
+    <template v-if="node.field">
+      <DiButton class="display-name text-decoration-none change-field-btn text-nowrap" @click="selectField" :title="node.title" ref="button"></DiButton>
+    </template>
+    <template v-else>
+      <DiButton
+        class="display-name text-decoration-none change-field-btn text-nowrap select-field"
+        @click="selectField"
+        title="Select field"
+        ref="button"
+      ></DiButton>
+    </template>
+    <SelectFieldContext ref="selectFieldContext" @select-column="handleOnSelectField"></SelectFieldContext>
   </div>
 </template>
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator';
-import { ConditionTreeNode, Status } from '@/shared';
-import { RandomUtils, SchemaUtils } from '@/utils';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
+import SelectFieldContext from '../config-panel/SelectFieldContext.vue';
+import { SlTreeNodeModel } from '@/shared/components/builder/treemenu/SlVueTree';
+import { HtmlElementRenderUtils, PopupUtils } from '@/utils';
+import DiButton from '@/shared/components/common/DiButton.vue';
+import { isFunction } from 'lodash';
 
-@Component
+@Component({
+  components: {
+    SelectFieldContext
+  }
+})
 export default class ChangeFieldButton extends Vue {
-  @Prop({ required: true, type: String })
-  errorMessage!: string;
+  @Prop({ required: false, type: Object })
+  private readonly node!: SlTreeNodeModel<any>;
 
-  @Prop({ required: true })
-  fieldContextStatus!: Status;
+  @Prop({ required: false, type: Number })
+  private readonly nodeIndex!: number;
 
-  @Prop({ required: true, type: Array })
-  profileFields!: FieldDetailInfo[];
+  @Ref()
+  private readonly selectFieldContext!: SelectFieldContext;
 
-  @Prop({ required: true, type: String })
-  title!: string;
+  @Ref()
+  private readonly button!: DiButton;
 
-  @Prop({ required: true })
-  conditionTreeNode!: ConditionTreeNode;
+  private onChangedFieldFn?: (field: FieldDetailInfo) => void;
 
-  @Prop({ required: true, type: Number })
-  nodeIndex!: number;
-
-  private isShowPopover = false;
-
-  private randomId = RandomUtils.nextInt(0, 50000).toString();
-
-  @Emit('handleClickButton')
-  private handleClickButton() {
-    this.isShowPopover = !this.isShowPopover;
-    return { conditionTreeNode: this.conditionTreeNode, index: this.nodeIndex };
+  selectField(event: MouseEvent, onChangedFieldFn?: (field: FieldDetailInfo) => void) {
+    this.onChangedFieldFn = onChangedFieldFn;
+    PopupUtils.hideAllPopup();
+    const newEvent = HtmlElementRenderUtils.fixMenuOverlapForContextMenu(event, this.button.$el);
+    this.selectFieldContext.showTableAndFields(newEvent);
   }
 
-  @Emit('handleChangeField')
-  private handleChangeField(profileField: FieldDetailInfo) {
-    this.isShowPopover = false;
-    return profileField;
+  private handleOnSelectField(field: FieldDetailInfo) {
+    if (isFunction(this.onChangedFieldFn)) {
+      this.onChangedFieldFn(field);
+    } else {
+      this.$emit('onChangedField', field);
+    }
   }
 
-  private get fieldDetailInfo(): string {
-    return SchemaUtils.getFieldName(this.conditionTreeNode);
+  /**
+   * Click on the button
+   * if onChangedField is not null, it will be called after the field is selected instead of emitting onChangedField event
+   */
+  public click(onChangedFieldFn?: (field: FieldDetailInfo) => void) {
+    const event = new MouseEvent('click');
+    this.selectField(event, onChangedFieldFn);
   }
 }
 </script>
 
-<style lang="scss" scoped>
-@import '~@/themes/scss/mixin.scss';
-
-.change-field-btn {
-  background: none;
-  border: none;
-}
-
-.display-name {
-  @include bold-text();
-  font-size: 14px;
-  margin: 0;
-  padding: 0 4px;
-  text-decoration: underline;
-}
-
-.popover-dropdown {
-  background: none;
-  border: none;
-  max-width: unset;
-
-  ::v-deep {
-    .arrow {
-      display: none;
-    }
+<style lang="scss">
+.change-field-button {
+  .change-field-btn {
+    background: none;
+    border: none;
   }
 
-  .popover-custom {
-    background: var(--primary);
-    max-width: 200px;
-    min-height: 250px;
-    height: 250px;
-    border-radius: 4px;
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.16), 0 4px 4px 0 rgba(0, 0, 0, 0.16);
+  .display-name {
+    font-weight: bold;
+    letter-spacing: 0.2px;
+    color: var(--text-color);
+    cursor: default;
+    font-size: 14px;
+    margin: 0;
+    padding: 0 4px;
+    text-decoration: underline;
+  }
 
-    .list-profile-field {
-      max-height: 150px;
-      //padding: 8px;
-      li {
-        display: flex;
-        list-style: none;
-        padding: 8px;
-
-        a {
-          color: var(--secondary-text-color);
-          font-size: 14px;
-          margin-right: auto;
-          text-decoration: none;
-        }
-
-        span {
-          color: #1d8cf8;
-          font-size: 14px;
-        }
-
-        &:hover {
-          background-color: var(--hover-color);
-          a {
-            color: var(--text-color);
-          }
-        }
-      }
-    }
+  .select-field {
+    font-weight: normal;
+    color: var(--accent) !important;
   }
 }
 </style>

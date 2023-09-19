@@ -3,8 +3,9 @@
     <div class="background-tab">
       <ColorSetting
         id="background-color"
-        :default-color="defaultStyle.background"
-        :value="background"
+        :default-color="defaultColor"
+        :value="color"
+        :is-solid="isSolid"
         enabledRevert="true"
         label="Color"
         size="small"
@@ -21,25 +22,29 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { PivotTableChartOption, ChartOptionData, ChartOption } from '@core/common/domain';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { Log } from '@core/utils';
+import { ColorUtils } from '@/utils';
 
 @Component({ components: { PanelHeader } })
 export default class BackgroundTab extends Vue {
-  private defaultStyle = {
-    background: ChartOption.getThemeBackgroundColor()
-  };
-  @Prop({ required: false, type: Object })
-  private readonly setting!: ChartOptionData;
+  @Prop({ required: false, type: String, default: 'background' })
+  private readonly settingKey!: string;
 
-  private get background() {
-    return this.setting?.background ?? this.defaultStyle.background;
-  }
+  @Prop({ required: false, type: String, default: '#ffffff' })
+  private readonly color!: string;
+
+  @Prop({ required: false, type: String, default: '#ffffff' })
+  private readonly defaultColor!: string;
 
   private handleBackgroundColorChanged(newColor: string) {
-    this.$emit('onChanged', 'background', newColor);
+    this.$emit('onChanged', this.settingKey, newColor);
   }
+
   private handleBackgroundRevert() {
-    Log.debug('On reset');
-    this.$emit('onChanged', 'background', this.defaultStyle.background);
+    this.$emit('onChanged', this.settingKey, this.defaultColor);
+  }
+
+  private get isSolid(): boolean {
+    return ColorUtils.isGradientColor(this.color);
   }
 }
 </script>

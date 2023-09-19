@@ -72,26 +72,22 @@ import DiIconTextButton from '@/shared/components/common/DiIconTextButton.vue';
     FieldListingSearchable,
     DataListingSearchable,
     SlideXRightTransition
-  },
-  computed: {
-    ...mapGetters(Stores.DashboardStore, ['databaseUniqueNames'])
   }
 })
 export default class SelectFieldButton extends Vue {
   @Prop({ type: Boolean, default: false })
-  isShowExtraSlot!: boolean;
+  readonly isShowExtraSlot!: boolean;
   @Prop({ type: Boolean, default: true })
-  isShowResetFilterButton!: boolean;
+  readonly isShowResetFilterButton!: boolean;
   @Prop({ type: Boolean, default: true })
-  isShowGroupedHeader!: boolean;
+  readonly isShowGroupedHeader!: boolean;
   @Prop({ required: true, type: Number })
-  dashboardId!: number;
+  readonly dashboardId!: number;
   @Prop()
-  fnProfileFieldFilter?: (profileField: FieldDetailInfo) => boolean;
+  readonly fnProfileFieldFilter?: (profileField: FieldDetailInfo) => boolean;
   private isShowPopover = false;
   private databaseStatus = Status.Loading;
   private databaseError = '';
-  private databaseUniqueNames!: string[];
   private databaseInfos: DatabaseInfo[] = [];
   private databaseSelected: DatabaseInfo | null = null;
   private tableSelected: TableSchema | null = null;
@@ -104,6 +100,10 @@ export default class SelectFieldButton extends Vue {
 
   @Ref()
   private readonly btn!: any;
+
+  private get databaseUniqueNames(): string[] {
+    return DashboardModule.databaseUniqueNames;
+  }
 
   private get databaseOptions(): SelectOption[] {
     return this.databaseInfos.map((item, index) => {
@@ -208,15 +208,14 @@ export default class SelectFieldButton extends Vue {
     this.tableSelected = null;
   }
 
-  private async handleLoadDatabases() {
+  private async handleLoadDatabases(): Promise<void> {
     this.databaseStatus = Status.Loading;
     this.databaseError = '';
     if (ListUtils.isNotEmpty(this.databaseUniqueNames)) {
       try {
         this.databaseInfos = (await this.schemaService.getListDatabaseSchema(this.databaseUniqueNames)).map(dbInfos => dbInfos.database);
-        this.loadDatabaseSelectedFromSession();
         if (!this.databaseSelected) {
-          this.loadDatabaseSelectedFromUsedFrequency();
+          this.loadUsedDatabaseInfo();
         }
         this.databaseStatus = Status.Loaded;
       } catch (ex) {
@@ -234,20 +233,11 @@ export default class SelectFieldButton extends Vue {
     }
   }
 
-  private loadDatabaseSelectedFromSession() {
-    if (this.dashboardId) {
-      const dbSelected = DataManager.getDatabaseSelected(this.dashboardId);
-      if (dbSelected) {
-        this.databaseSelected = this.getDatabaseInfo(dbSelected);
-      }
-    }
-  }
-
   private getDatabaseInfo(dbName: string) {
     return (this.databaseSelected = this.databaseInfos.find(dbInfo => dbInfo.name === dbName) ?? null);
   }
 
-  private loadDatabaseSelectedFromUsedFrequency() {
+  private loadUsedDatabaseInfo(): void {
     const dbSelected = DashboardModule.mainDatabase;
     if (dbSelected) {
       this.databaseSelected = this.getDatabaseInfo(dbSelected);
@@ -258,9 +248,9 @@ export default class SelectFieldButton extends Vue {
 
 <style lang="scss" scoped>
 .db-listing-searchable {
-  background-color: var(--primary);
+  background-color: var(--secondary--root);
   border-radius: 4px;
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+  box-shadow: var(--menu-shadow--root);
   box-sizing: content-box;
   max-width: unset;
   padding: 16px;

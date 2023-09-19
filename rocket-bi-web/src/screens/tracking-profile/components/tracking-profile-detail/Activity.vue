@@ -99,7 +99,7 @@ export default class Activity extends Vue {
   defaultDateRange: DateRange;
   mainDateFilterMode = MainDateMode.custom;
 
-  private readonly MainDateModeOptions = DateTimeConstants.ListDateRangeModeOptions;
+  private readonly MainDateModeOptions = DateTimeConstants.DATE_RANGE_MODE_OPTION_LIST;
 
   @Ref()
   scroller!: any;

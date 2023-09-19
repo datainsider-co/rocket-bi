@@ -30,7 +30,7 @@
           </div>
           <div class="job-section">
             <div class="input">
-              <DataSourceConfig :job.sync="jdbcJob" @selected="handleSelectDataSource" />
+              <DataSourceConfig :is-disabled-select-source="isDisabledSelectSource" :job.sync="jdbcJob" @selected="handleSelectDataSource" />
               <BigQueryExtraForm
                 v-if="isBigQueryJob"
                 :big-query-job.sync="jdbcJob"
@@ -117,6 +117,16 @@
               :hide-sync-all-table-option="true"
             ></GoogleAnalytic4Config>
           </div>
+          <div v-if="isGoogleSearchConsoleConfig" class="job-section export-form">
+            <GoogleSearchConsoleConfig
+              ref="googleSearchConsoleConfig"
+              :job.sync="jdbcJob"
+              :single-table="true"
+              :hide-sync-all-table-option="true"
+              @selectDatabase="fromDatabaseChanged"
+              @selectTable="fromTableChanged"
+            ></GoogleSearchConsoleConfig>
+          </div>
           <div v-if="isPalexyJob" class="job-section export-form">
             <PalexySourceConfig ref="palexySourceConfig" :job.sync="jdbcJob"></PalexySourceConfig>
           </div>
@@ -143,7 +153,7 @@
   </EtlModal>
 </template>
 <script lang="ts">
-import { Component, Ref, Vue } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
 import {
   DataDestination,
@@ -153,6 +163,7 @@ import {
   FormMode,
   GA4Job,
   GoogleAnalyticJob,
+  GoogleSearchConsoleJob,
   JdbcJob,
   Job,
   JobType,
@@ -170,7 +181,7 @@ import WareHouseConfig from '@/screens/lake-house/views/job/output-form/WareHous
 import DynamicSuggestionInput from '@/screens/data-ingestion/components/DynamicSuggestionInput.vue';
 import SchedulerSettingV2 from '@/screens/data-ingestion/components/job-scheduler-form/SchedulerSettingV2.vue';
 import SingleChoiceItem from '@/shared/components/filters/SingleChoiceItem.vue';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
+import { AtomicAction } from '@core/common/misc';
 import { JobModule } from '@/screens/data-ingestion/store/JobStore';
 import { minValue, required } from 'vuelidate/lib/validators';
 import { ApiExceptions, Status, VerticalScrollConfigs } from '@/shared';
@@ -209,6 +220,8 @@ import GoogleAnalytic4Config from './google-analytics-4/GoogleAnalytic4Config.vu
 import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4SourceInfo';
 import PalexySourceConfig from '@/screens/data-ingestion/components/palexy/PalexySourceConfig.vue';
 import { PalexySourceInfo } from '@core/data-ingestion/domain/data-source/PalexySourceInfo';
+import { GoogleSearchConsoleSourceInfo } from '@core/data-ingestion/domain/data-source/GoogleSearchConsoleSourceInfo';
+import GoogleSearchConsoleConfig from '@/screens/data-ingestion/components/google-search-console/GoogleSearchConsoleConfig.vue';
 
 @Component({
   components: {
@@ -238,7 +251,8 @@ import { PalexySourceInfo } from '@core/data-ingestion/domain/data-source/Palexy
     GoogleAnalyticConfig,
     TiktokAdsFromDatabaseSuggestion,
     TiktokSourceConfig,
-    GoogleAnalytic4Config
+    GoogleAnalytic4Config,
+    GoogleSearchConsoleConfig
   },
   validations: {
     jdbcJob: {
@@ -262,6 +276,9 @@ export default class JobCreationModal extends Vue {
 
   private isCreateNewDatabase = false;
   private newDbDisplayName = '';
+  @Prop({ default: false })
+  isDisabledSelectSource!: boolean;
+
   @Inject
   private readonly schemaService!: SchemaService;
 
@@ -288,6 +305,9 @@ export default class JobCreationModal extends Vue {
 
   @Ref()
   private readonly s3FromSuggestion!: S3DataSourceConfig;
+
+  @Ref()
+  private readonly googleSearchConsoleConfig!: GoogleSearchConsoleConfig;
 
   @Ref()
   //@ts-ignore
@@ -371,6 +391,10 @@ export default class JobCreationModal extends Vue {
     return Job.isGoogleAnalytic4Job(this.jdbcJob);
   }
 
+  private get isGoogleSearchConsoleConfig(): boolean {
+    return Job.isGoogleSearchConsoleConfig(this.jdbcJob);
+  }
+
   private get isPalexyJob(): boolean {
     return Job.isPalexyJob(this.jdbcJob);
   }
@@ -396,11 +420,13 @@ export default class JobCreationModal extends Vue {
   }
 
   async show(jdbcJob: Job) {
+    await this.$nextTick(async () => {
+      await this.loadFromData();
+    });
     this.jdbcJob = jdbcJob;
     this.isShowModal = true;
     //@ts-ignored
     this.modal.show();
-    await this.loadFromData();
   }
 
   async loadFromData() {
@@ -426,6 +452,7 @@ export default class JobCreationModal extends Vue {
             case JobType.GoogleAnalytics:
             case JobType.GA4:
             case JobType.Palexy:
+            case JobType.GoogleSearchConsole:
               ///Nothing to do
               break;
             case JobType.Tiktok:
@@ -599,6 +626,9 @@ export default class JobCreationModal extends Vue {
           case DataSources.Palexy:
             await this.handleSelectPalexy(item.source);
             break;
+          case DataSources.GoogleSearchConsole:
+            await this.handleSelectGoogleSearchConsole(item.source);
+            break;
           default:
             await this.handleSelectJdbcSource(item.source);
         }
@@ -727,6 +757,24 @@ export default class JobCreationModal extends Vue {
     return jdbcJob;
   }
 
+  private async handleSelectGoogleSearchConsole(source: DataSourceInfo) {
+    this.jdbcJob = this.getJobFromGoogleSearchConsoleSource(source as GoogleSearchConsoleSourceInfo);
+    this.$nextTick(async () => {
+      this.jobWareHouseConfig.setDatabaseName(this.jdbcJob.destDatabaseName);
+      this.jobWareHouseConfig.setTableName(this.jdbcJob.destTableName);
+      const googleSearchConsoleSource = source as GoogleSearchConsoleSourceInfo;
+      await this.googleSearchConsoleConfig?.handleLoadSiteUrls(googleSearchConsoleSource.accessToken, googleSearchConsoleSource.refreshToken);
+    });
+  }
+
+  private getJobFromGoogleSearchConsoleSource(source: GoogleSearchConsoleSourceInfo) {
+    const jdbcJob = GoogleSearchConsoleJob.default();
+    jdbcJob.jobId = this.jdbcJob.jobId;
+    jdbcJob.displayName = this.jdbcJob.displayName;
+    jdbcJob.sourceId = source.id;
+    return jdbcJob;
+  }
+
   public async handleSelectPalexy(source: DataSourceInfo) {
     this.jdbcJob = this.getJobFromPalexySource(source as PalexySourceInfo);
   }
@@ -760,6 +808,8 @@ export default class JobCreationModal extends Vue {
         return this.googleAnalytic4Config.isValidSource();
       case JobType.Palexy:
         return this.palexySourceConfig?.isValidSource();
+      case JobType.GoogleSearchConsole:
+        return this.googleSearchConsoleConfig?.isValidSource();
       default:
         return this.jdbcFromDatabaseSuggestion.isValidDatabaseSuggestion();
     }

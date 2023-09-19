@@ -28,6 +28,7 @@ object SchemaModule extends TwitterModule {
     bind[ShareService].to[ShareServiceImpl].asEagerSingleton()
 
     bindSingleton[SchemaRepository].to[SchemaRepositoryImpl]
+    bindSingleton[MigrateDataTool].to[ClickhouseMigrateDataTool]
 
     bind[OldCsvUploadService].to[OldCsvUploadServiceImpl].asEagerSingleton()
     bind[CsvIngestionService].to[CsvIngestionServiceImpl].asEagerSingleton()

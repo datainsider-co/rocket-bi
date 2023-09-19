@@ -4,7 +4,7 @@
  */
 
 import {
-  ChartFamilyType,
+  ChartOptionClassName,
   ChartOptionData,
   FieldFormatting,
   FormatterSetting,
@@ -13,8 +13,7 @@ import {
   TableColumn,
   TooltipSetting,
   TotalSetting,
-  VisualHeader,
-  VizSettingType
+  VisualHeader
 } from '@core/common/domain/model';
 import { Scrollable } from '@core/common/domain/model/query/features/Scrollable';
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
@@ -26,7 +25,6 @@ import { ValueStyleSetting } from '@core/common/domain/model/chart-option/extra-
 import { ToggleIconSetting } from '@core/common/domain/model/chart-option/extra-setting/table-style/ToggleIconSetting';
 import { ConditionalFormatting } from '@core/common/domain/model/chart-option/extra-setting/condition-formatting/ConditionalFormatting';
 import { ConditionalFormattingUtils } from '@core/utils/ConditionalFormattingUtils';
-import { _ThemeStore } from '@/store/modules/ThemeStore';
 
 export type Disabled = false | null | undefined;
 
@@ -47,8 +45,7 @@ export interface PivotTableOptionData extends ChartOptionData {
 }
 
 export class PivotTableChartOption extends ChartOption<PivotTableOptionData> implements Scrollable, FormatterSetting {
-  readonly chartFamilyType = ChartFamilyType.Pivot;
-  readonly className = VizSettingType.PivotTableSetting;
+  readonly className = ChartOptionClassName.PivotTableSetting;
 
   constructor(options: PivotTableOptionData = {}) {
     super(options);
@@ -59,33 +56,15 @@ export class PivotTableChartOption extends ChartOption<PivotTableOptionData> imp
   }
 
   static isPivotTableSetting(obj: any): obj is PivotTableChartOption {
-    return obj.className === VizSettingType.PivotTableSetting;
+    return obj.className === ChartOptionClassName.PivotTableSetting;
   }
 
   static getDefaultChartOption(): PivotTableChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const gridColor = this.getTableGridLineColor();
     const options: PivotTableOptionData = {
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       grid: {
         horizontal: {
           color: gridColor,
@@ -105,9 +84,9 @@ export class PivotTableChartOption extends ChartOption<PivotTableOptionData> imp
       },
       affectedByFilter: true,
       tooltip: {
-        fontFamily: 'Roboto',
+        fontFamily: ChartOption.getSecondaryFontFamily(),
         backgroundColor: 'var(--tooltip-background-color)',
-        valueColor: textColor
+        valueColor: ChartOption.getSecondaryTextColor()
       },
       value: {
         color: textColor,
@@ -117,8 +96,7 @@ export class PivotTableChartOption extends ChartOption<PivotTableOptionData> imp
         alternateColor: textColor,
         enableUrlIcon: false,
         style: {
-          color: textColor,
-          fontFamily: 'Roboto',
+          ...ChartOption.getSecondaryStyle(),
           fontSize: '12px',
           isWordWrap: false
         }
@@ -130,9 +108,9 @@ export class PivotTableChartOption extends ChartOption<PivotTableOptionData> imp
         isWordWrap: false,
         isAutoWidthSize: false,
         style: {
+          ...ChartOption.getSecondaryStyle(),
           color: textColor,
           isWordWrap: false,
-          fontFamily: 'Roboto',
           fontSize: '12px'
         }
       },
@@ -146,7 +124,7 @@ export class PivotTableChartOption extends ChartOption<PivotTableOptionData> imp
           isWordWrap: false,
           backgroundColor: this.getTableTotalColor(),
           style: {
-            fontFamily: 'Roboto',
+            ...ChartOption.getSecondaryStyle(),
             fontSize: '12px',
             color: textColor,
             isWordWrap: false
@@ -177,5 +155,9 @@ export class PivotTableChartOption extends ChartOption<PivotTableOptionData> imp
 
   getFormatters(): TableColumn[] {
     return this.options.conditionalFormatting ? ConditionalFormattingUtils.buildTableColumns(this.options.conditionalFormatting) : [];
+  }
+
+  isEnableControl(): boolean {
+    return false;
   }
 }

@@ -12,6 +12,7 @@ import { StringUtils } from '@/utils/StringUtils';
 import { BFormInput } from 'bootstrap-vue';
 import { IdGenerator } from '@/utils/IdGenerator';
 import { PopupUtils } from '@/utils/PopupUtils';
+import { Log } from '@core/utils';
 
 @Component({
   directives: {
@@ -55,30 +56,33 @@ export default class DiDropdown extends Vue {
   @Prop({ required: false, type: String, default: 'No options available.' })
   private readonly emptyPlaceholder!: string;
 
+  /**
+   * target element show at element when appendAtRoot = false.
+   * if targetId is null and appendAtRoot = false, target element is parent element.
+   * @type {string} is id of element to show dropdown.
+   */
+  @Prop({ required: false, type: [String, Object] })
+  private readonly containerId!: string;
+
+  @Prop({ required: false, type: Boolean, default: false })
+  private readonly border!: boolean;
+
   @Ref()
   private readonly scroller?: any;
 
   private selectedIndex = 1;
 
   @Ref()
-  private dropdown!: HTMLSpanElement;
+  private readonly dropdown!: HTMLSpanElement;
   private currentWidth = 350;
   private isDropdownOpen = false;
-  private readonly selectId = `selected-id-${RandomUtils.nextInt()}`;
+  private readonly buttonId = `selected-id-${RandomUtils.nextInt()}`;
   @Ref()
   private readonly inputKeyword?: BFormInput;
 
   get finalOptions(): DropdownData[] {
     const results = this.filter(this.keyword, this._allOptions);
     return this.removeGroupEmpty(results);
-  }
-
-  private get dropdownButtonId(): string | undefined {
-    if (this.appendAtRoot) {
-      return void 0;
-    } else {
-      return this.selectId;
-    }
   }
 
   private get _allOptions(): DropdownData[] {
@@ -99,30 +103,26 @@ export default class DiDropdown extends Vue {
     return this.selectedItem ? this.getLabel(this.selectedItem) : null;
   }
 
-  private get popoverClass(): string {
-    if (this.appendAtRoot) {
-      return 'select-area-popover';
-    } else {
-      return 'select-area-popover w-100';
-    }
+  protected get popoverStyle(): CSSStyleDeclaration {
+    return {
+      width: `${this.currentWidth}px`
+    } as CSSStyleDeclaration;
   }
 
-  private get popoverStyle(): CSSStyleDeclaration {
-    if (this.appendAtRoot) {
-      return {
-        width: `${this.currentWidth}px`
-      } as CSSStyleDeclaration;
-    } else {
-      return {
-        width: '100%'
-      } as CSSStyleDeclaration;
-    }
-  }
-
-  private get inputClass(): any {
+  protected get inputClass(): any {
     return {
       'cursor-pointer': !this.isDropdownOpen
     };
+  }
+
+  protected get computedContainerId(): string | undefined {
+    if (this.appendAtRoot) {
+      return void 0;
+    }
+    if (this.containerId) {
+      return this.containerId;
+    }
+    return this.buttonId;
   }
 
   handleScroll(vertical: any, _: any, __: any) {
@@ -212,6 +212,7 @@ export default class DiDropdown extends Vue {
     this.selectedIndex = this.getCurrentSelectedIndex();
     // this.scrollToIndex(this.selectedIndex);
     this.currentWidth = this.dropdown.clientWidth ?? 300;
+    Log.debug('currentWidth', this.dropdown.clientWidth);
     this.$root.$emit(DiDropdown.SHOWN_KEY, this.id);
   }
 

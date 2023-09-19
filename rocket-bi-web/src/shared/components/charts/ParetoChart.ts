@@ -54,7 +54,7 @@ export default class HighchartsParetoChart extends BaseHighChartWidget<SeriesOne
           labels: {
             useHTML: true,
             formatter: function() {
-              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         },
@@ -62,7 +62,7 @@ export default class HighchartsParetoChart extends BaseHighChartWidget<SeriesOne
           labels: {
             useHTML: true,
             formatter: function() {
-              return paretoYAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return paretoYAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         }
@@ -176,7 +176,7 @@ export default class HighchartsParetoChart extends BaseHighChartWidget<SeriesOne
           labels: {
             useHTML: true,
             formatter: function() {
-              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         }
@@ -208,14 +208,14 @@ export default class HighchartsParetoChart extends BaseHighChartWidget<SeriesOne
   }
 
   private tooltipFormatter(contextObject: TooltipFormatterContextObject) {
-    const formattedData = this.numberFormatter.format(contextObject.y);
+    const formattedData = this.numberFormatter.format(contextObject.y as number);
     const field = contextObject.series.name;
     const fieldProperty = contextObject.key;
     const pointColor = contextObject.color;
     //@ts-ignore
     const textColor = this.setting?.options?.tooltip?.style?.color ?? '#fff';
     //@ts-ignore
-    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting?.options?.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="color: ${textColor}; font-family: ${fontFamily}; text-align: left">
                 <span>${field}</span><br/>
                 <span style="color:${pointColor}">●</span>
@@ -264,9 +264,9 @@ export default class HighchartsParetoChart extends BaseHighChartWidget<SeriesOne
     });
   }
 
-  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const yAxisSetting = this.setting.options.yAxis;
-    const value = this.numberFormatter.format(axis.value);
+    const value = this.numberFormatter.format(axis.value as number);
     if (yAxisSetting && yAxisSetting[0]) {
       return this.customAxisLabel(value, yAxisSetting[0].prefix, yAxisSetting[0].postfix);
     } else {
@@ -282,17 +282,17 @@ export default class HighchartsParetoChart extends BaseHighChartWidget<SeriesOne
       `;
   }
 
-  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const xAxisSetting = this.setting.options.xAxis;
     const value = axis.value;
     if (xAxisSetting && xAxisSetting[0]) {
-      return this.customAxisLabel(value, xAxisSetting[0].prefix, xAxisSetting[0].postfix);
+      return this.customAxisLabel(value as string, xAxisSetting[0].prefix, xAxisSetting[0].postfix);
     } else {
       return `<div>${value}</div>`;
     }
   }
 
-  private paretoYAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private paretoYAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const value = axis.value;
     return `
         <div>${value}</div>

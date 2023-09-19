@@ -283,6 +283,11 @@
   resolved "https://registry.npmjs.org/@babel/parser/-/parser-7.11.3.tgz#9e1eae46738bcd08e23e867bab43e7b95299a8f9"
   integrity sha512-REo8xv7+sDxkKvoxEywIdsNFiZLybwdI7hcT5uEPyQrSMB4YQ973BfC9OOrD/81MaIjh6UxdulIQXkjmiH3PcA==
 
+"@babel/parser@^7.18.4":
+  version "7.22.10"
+  resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.22.10.tgz#e37634f9a12a1716136c44624ef54283cabd3f55"
+  integrity sha512-lNbdGsQb9ekfsnjFGhEiF4hfFqGgfOP3H3d27re3n+CGhNuTSUEQdfWk556sTLNTloczcdM5TYF2LhzmDQKyvQ==
+
 "@babel/plugin-proposal-async-generator-functions@^7.10.4":
   version "7.10.5"
   resolved "https://registry.npmjs.org/@babel/plugin-proposal-async-generator-functions/-/plugin-proposal-async-generator-functions-7.10.5.tgz#3491cabf2f7c179ab820606cec27fed15e0e8558"
@@ -1022,6 +1027,13 @@
     "@types/gapi.client" "*"
     "@types/gapi.client.discovery" "*"
 
+"@maxim_mazurok/gapi.client.webmasters@latest":
+  version "3.0.20190428"
+  resolved "https://registry.yarnpkg.com/@maxim_mazurok/gapi.client.webmasters/-/gapi.client.webmasters-3.0.20190428.tgz#588b100587ab03a3d57befc18fcaa6b1039dda89"
+  integrity sha512-lkqkKCTYEDpib6Wo/fn8lp//XlkXtttxea/7Py9rGIAmarh3pYHS9d1AKSJE2RDlVbs2NAczJYVfiopxGAMmxQ==
+  dependencies:
+    "@types/gapi.client" "*"
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.npmjs.org/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"
@@ -1261,6 +1273,13 @@
   integrity sha512-1Aiu11rNNoyPDHW6v8TVcSmlDN+MkxSuafwiawaK5YqZ+uYA+O63vjUvkK+3qNduSLh7D9qBJc/8GGwgN6gsTw==
   dependencies:
     "@maxim_mazurok/gapi.client.sheets-v4" latest
+
+"@types/gapi.client.webmasters@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@types/gapi.client.webmasters/-/gapi.client.webmasters-3.0.2.tgz#b62c1abbfb47779b5570b63f58bc43a5d99bb3da"
+  integrity sha512-cIwZ5HA3A8eAViWx52J8wbbKafpfMQp07jNAU9CGDA/OuNuEI7bx+NDLfZDMqxRMk3Q0b62tJTeA2Y6PXQQh0g==
+  dependencies:
+    "@maxim_mazurok/gapi.client.webmasters" latest
 
 "@types/gapi.client@*", "@types/gapi.client@^1.0.5":
   version "1.0.5"
@@ -1847,6 +1866,15 @@
     request "^2.88.2"
     semver "^6.1.0"
     strip-ansi "^6.0.0"
+
+"@vue/compiler-sfc@2.7.14":
+  version "2.7.14"
+  resolved "https://registry.yarnpkg.com/@vue/compiler-sfc/-/compiler-sfc-2.7.14.tgz#3446fd2fbb670d709277fc3ffa88efc5e10284fd"
+  integrity sha512-aNmNHyLPsw+sVvlQFQ2/8sjNuLtK54TC6cuKnVzAY93ks4ZBrvwQSnkkIh7bsbNhum5hJBS00wSDipQ937f5DA==
+  dependencies:
+    "@babel/parser" "^7.18.4"
+    postcss "^8.4.14"
+    source-map "^0.6.1"
 
 "@vue/component-compiler-utils@^3.1.0", "@vue/component-compiler-utils@^3.1.2":
   version "3.2.0"
@@ -4306,7 +4334,7 @@ collection-visit@^1.0.0:
     map-visit "^1.0.0"
     object-visit "^1.0.0"
 
-color-convert@^1.9.0, color-convert@^1.9.1, color-convert@^1.9.3:
+color-convert@^1.9.0, color-convert@^1.9.1:
   version "1.9.3"
   resolved "https://registry.npmjs.org/color-convert/-/color-convert-1.9.3.tgz#bb71850690e1f136567de629d2d5471deda4c1e8"
   integrity sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg==
@@ -4343,7 +4371,7 @@ color-string@^1.5.2:
     color-name "^1.0.0"
     simple-swizzle "^0.2.2"
 
-color-string@^1.6.0:
+color-string@^1.9.0:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/color-string/-/color-string-1.9.1.tgz#4467f9146f036f855b764dfb5bf8582bf342c7a4"
   integrity sha512-shrVawQFojnZv6xM40anx4CkoDP+fZsw/ZerEMsW/pyzsRbElpsL/DBVW7q3ExxwusdNXI3lXpuhEZkzs8p5Eg==
@@ -4364,13 +4392,13 @@ color@^3.0.0:
     color-convert "^1.9.1"
     color-string "^1.5.2"
 
-color@^3.1.3:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/color/-/color-3.2.1.tgz#3544dc198caf4490c3ecc9a790b54fe9ff45e164"
-  integrity sha512-aBl7dZI9ENN6fUGC7mWpMTPNHmWUSNan9tuWN6ahh5ZLNk9baLJOnSMlrQkHcrfFgz2/RigjUVAjdx36VcemKA==
+color@^4.2.3:
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/color/-/color-4.2.3.tgz#d781ecb5e57224ee43ea9627560107c0e0c6463a"
+  integrity sha512-1rXeuUUiGGrykh+CeBdu5Ie7OJwinCgQY0bc7GCRxy5xVHy+moaqkpL/jqQq0MtQOeYcrqEz4abc5f0KtU7W4A==
   dependencies:
-    color-convert "^1.9.3"
-    color-string "^1.6.0"
+    color-convert "^2.0.1"
+    color-string "^1.9.0"
 
 colorette@^1.2.1:
   version "1.2.1"
@@ -4943,6 +4971,11 @@ cssstyle@^2.0.0:
   integrity sha512-AZL67abkUzIuvcHqk7c09cezpGNcxUxU4Ioi/05xHk4DQeTkWmGYftIE6ctU6AEt+Gn4n1lDStOtj7FKycP71A==
   dependencies:
     cssom "~0.3.6"
+
+csstype@^3.1.0:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.2.tgz#1d4bf9d572f11c14031f0436e1c10bc1f571f50b"
+  integrity sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==
 
 cyclist@^1.0.1:
   version "1.0.1"
@@ -6936,15 +6969,20 @@ highcharts-custom-events@^3.0.10:
   dependencies:
     highcharts ">=5.0.9"
 
+highcharts-vue@^1.4.3:
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/highcharts-vue/-/highcharts-vue-1.4.3.tgz#8cb7452c005282ee70f237021af93725d1c9a4f4"
+  integrity sha512-qIy9EFuLIgOw+reNkTvu0pvMBcSE0BAPtONAqZoEl0qaAIpGxiyXqhRNPDufWieSC0YlybpCznxE8EK19Kcg+A==
+
 highcharts@>=5.0.9:
   version "9.0.1"
   resolved "https://registry.npmjs.org/highcharts/-/highcharts-9.0.1.tgz#49ec994a7897a96fc3e0880f49a0eca34adff6a2"
   integrity sha512-0UmcCz2RmFuqfT/Igu3h5sGnkeSqqZwfuYrTzJ/htptmJAo5SSxH62NFcTjVRk+3WstoBJmoXR0v5FVGQUzK5A==
 
-highcharts@^8.2.2:
-  version "8.2.2"
-  resolved "https://registry.npmjs.org/highcharts/-/highcharts-8.2.2.tgz#3eb1a694cff013d3385c3ca8e58e69a27be52cab"
-  integrity sha512-F63TXO7RxsvTcpO/KOubQZWualYpCMyCTuKtoWbt7KCsfQ3Kl7Fr6HEyyJdjkYl+XlnmnKlSRi9d3HjLK9Q0wg==
+highcharts@^11.1.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/highcharts/-/highcharts-11.1.0.tgz#715eb55fd081351b526e28cd89ac0e4e30b35c15"
+  integrity sha512-vhmqq6/frteWMx0GKYWwEFL25g4OYc7+m+9KQJb/notXbNtIb8KVy+ijOF7XAFqF165cq0pdLIePAmyFY5ph3g==
 
 highlight.js@^9.6.0:
   version "9.18.3"
@@ -8919,6 +8957,11 @@ nan@^2.17.0:
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.17.0.tgz#c0150a2368a182f033e9aa5195ec76ea41a199cb"
   integrity sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ==
 
+nanoid@^3.3.6:
+  version "3.3.6"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.6.tgz#443380c856d6e9f9824267d960b4236ad583ea4c"
+  integrity sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==
+
 nanomatch@^1.2.9:
   version "1.2.13"
   resolved "https://registry.npmjs.org/nanomatch/-/nanomatch-1.2.13.tgz#b87a8aa4fc0de8fe6be88895b38983ff265bd119"
@@ -10123,6 +10166,15 @@ postcss@^7.0.0, postcss@^7.0.1, postcss@^7.0.14, postcss@^7.0.27, postcss@^7.0.3
     source-map "^0.6.1"
     supports-color "^6.1.0"
 
+postcss@^8.4.14:
+  version "8.4.28"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.4.28.tgz#c6cc681ed00109072816e1557f889ef51cf950a5"
+  integrity sha512-Z7V5j0cq8oEKyejIKfpD8b4eBy9cwW2JWPk0+fB1HOAMsfHbnAXLLS+PfVWlzMSLQaWttKDt607I0XHmpE67Vw==
+  dependencies:
+    nanoid "^3.3.6"
+    picocolors "^1.0.0"
+    source-map-js "^1.0.2"
+
 prelude-ls@~1.1.2:
   version "1.1.2"
   resolved "https://registry.npmjs.org/prelude-ls/-/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
@@ -11304,6 +11356,11 @@ source-list-map@^2.0.0:
   resolved "https://registry.npmjs.org/source-list-map/-/source-list-map-2.0.1.tgz#3993bd873bfc48479cca9ea3a547835c7c154b34"
   integrity sha512-qnQ7gVMxGNxsiL4lEuJwe/To8UnK7fAnmbGEEH8RpLouuKbeEm0lhbQVFIrNSuB+G7tVrAlVsZgETT5nljf+Iw==
 
+source-map-js@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.0.2.tgz#adbc361d9c62df380125e7f161f71c826f1e490c"
+  integrity sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==
+
 source-map-resolve@^0.5.0:
   version "0.5.3"
   resolved "https://registry.npmjs.org/source-map-resolve/-/source-map-resolve-0.5.3.tgz#190866bece7553e1f8f267a2ee82c606b5509a1a"
@@ -11949,7 +12006,7 @@ tinycolor2@^1.1.2:
   resolved "https://registry.npmjs.org/tinycolor2/-/tinycolor2-1.4.2.tgz#3f6a4d1071ad07676d7fa472e1fac40a719d8803"
   integrity sha512-vJhccZPs965sV/L2sU4oRQVAos0pQXwsvTLkWYdqJ+a8Q5kPFzJTuOFwy7UniPli44NKQGAglksjvOcpo95aZA==
 
-tinycolor2@^1.4.1:
+tinycolor2@^1.4.1, tinycolor2@^1.4.2, tinycolor2@^1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.6.0.tgz#f98007460169b0263b97072c5ae92484ce02d09e"
   integrity sha512-XPaBkWQJdsf3pLKJV9p4qN/S+fm2Oj8AIPo1BTUhg5oxkvm9+SVEGFdhyOz7tTdUTfvxMiAs4sp6/eZO2Ew+pw==
@@ -12560,7 +12617,7 @@ vue-clipboard2@^0.3.1:
   dependencies:
     clipboard "^2.0.0"
 
-vue-color@^2.7.1:
+vue-color@^2.7.1, vue-color@^2.8.1:
   version "2.8.1"
   resolved "https://registry.yarnpkg.com/vue-color/-/vue-color-2.8.1.tgz#a090f3dcf8ed6f07afdb865cac84b19a73302e70"
   integrity sha512-BoLCEHisXi2QgwlhZBg9UepvzZZmi4176vbr+31Shen5WWZwSLVgdScEPcB+yrAtuHAz42309C0A4+WiL9lNBw==
@@ -12610,6 +12667,15 @@ vue-functional-data-merge@^3.1.0:
   version "3.1.0"
   resolved "https://registry.npmjs.org/vue-functional-data-merge/-/vue-functional-data-merge-3.1.0.tgz#08a7797583b7f35680587f8a1d51d729aa1dc657"
   integrity sha512-leT4kdJVQyeZNY1kmnS1xiUlQ9z1B/kdBFCILIjYYQDqZgLqCLa0UhjSSeRX6c3mUe6U5qYeM8LrEqkHJ1B4LA==
+
+vue-gpickr@0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/vue-gpickr/-/vue-gpickr-0.4.2.tgz#2cf909bebf7e2498edb4f48d5064e6ada209c00b"
+  integrity sha512-dtdaXmmiJyBLnUx3l0RFFl2WKfiv4uYZrf4wK6vWlWWIQerTipgQ+zUSTGbFin8cA9qidjnvjvlE279tf06eiw==
+  dependencies:
+    tinycolor2 "^1.4.2"
+    vue "^2.6.14"
+    vue-color "^2.8.1"
 
 vue-hot-reload-api@^2.3.0:
   version "2.3.4"
@@ -12736,6 +12802,14 @@ vue@^2.6.11:
   version "2.6.11"
   resolved "https://registry.npmjs.org/vue/-/vue-2.6.11.tgz#76594d877d4b12234406e84e35275c6d514125c5"
   integrity sha512-VfPwgcGABbGAue9+sfrD4PuwFar7gPb1yl1UK1MwXoQPAw0BKSqWfoYCT/ThFrdEVWoI51dBuyCoiNU9bZDZxQ==
+
+vue@^2.6.14:
+  version "2.7.14"
+  resolved "https://registry.yarnpkg.com/vue/-/vue-2.7.14.tgz#3743dcd248fd3a34d421ae456b864a0246bafb17"
+  integrity sha512-b2qkFyOM0kwqWFuQmgd4o+uHGU7T+2z3T+WQp8UBjADfEv2n4FEMffzBmCKNP0IGzOEEfYjvtcC62xaSKeQDrQ==
+  dependencies:
+    "@vue/compiler-sfc" "2.7.14"
+    csstype "^3.1.0"
 
 vuedraggable@^2.24.3:
   version "2.24.3"

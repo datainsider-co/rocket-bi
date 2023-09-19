@@ -106,7 +106,7 @@ case class SendGridEmailService(
     val personalization: Personalization = buildPersonalization(emailConfig)
     mail.addPersonalization(personalization)
     // trick for send email with content empty
-    val content = emailConfig.content.getOrElse("") + "</br"
+    val content = emailConfig.content.getOrElse("") + "</br>"
     mail.addContent(new Content(MediaType.Html, content))
     mail.setSubject(emailConfig.subject)
 

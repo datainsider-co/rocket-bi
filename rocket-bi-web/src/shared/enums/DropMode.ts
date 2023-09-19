@@ -1,7 +1,8 @@
 export enum DropMode {
-  DropOr = 0,
-  DropAnd = 1,
-  DropOrAndReplace = 2,
-  DropOrAndInsert = 3,
-  None = 4
+  DropToOr = 0,
+  DropToAnd = 1,
+  /**
+   * @deprecated unused
+   */
+  ReplaceToOr = 2
 }

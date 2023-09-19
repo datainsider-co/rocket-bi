@@ -1,10 +1,10 @@
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionClassName, ChartOptionData, SeriesOptionData } from '@core/common/domain/model';
 
 export class BulletChartOption extends ChartOption<SeriesOptionData> {
   static readonly DEFAULT_SETTING = {};
-  chartFamilyType = ChartFamilyType.Gauge;
-  className = VizSettingType.BulletSetting;
+
+  className = ChartOptionClassName.BulletSetting;
 
   constructor(options: ChartOptionData = {}) {
     super({ ...options });
@@ -19,28 +19,10 @@ export class BulletChartOption extends ChartOption<SeriesOptionData> {
     const mileStone1 = 5000;
     const mileStone2 = 7500;
     const max = 10000;
-    const textColor: string = this.getThemeTextColor();
+    const textColor: string = this.getPrimaryTextColor();
     const options: SeriesOptionData = {
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       affectedByFilter: true,
       background: this.getThemeBackgroundColor(),
       plotOptions: {
@@ -78,10 +60,7 @@ export class BulletChartOption extends ChartOption<SeriesOptionData> {
       ],
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       }
     };
     return new BulletChartOption(options);

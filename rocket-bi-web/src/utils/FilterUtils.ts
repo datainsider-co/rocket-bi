@@ -4,14 +4,14 @@ import {
   ConditionType,
   CrossFilterable,
   DynamicValueCondition,
-  DynamicValues,
+  ValueController,
   Equal,
   FieldRelatedCondition,
-  Filterable,
-  FunctionControl,
+  FilterableSetting,
+  FunctionController,
   NestedCondition,
   TableColumn,
-  VizSettingType
+  ChartOptionClassName
 } from '@core/common/domain/model';
 import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
 import { ListUtils } from '@/utils/ListUtils';
@@ -19,11 +19,11 @@ import { Log } from '@core/utils';
 
 export abstract class FilterUtils {
   static getFilterColumn(querySetting: QuerySetting): TableColumn | undefined {
-    if (Filterable.isFilterable(querySetting)) {
-      return querySetting.getFilter();
+    if (FilterableSetting.isFilterable(querySetting)) {
+      return querySetting.getFilterColumn();
     }
     if (CrossFilterable.isCrossFilterable(querySetting)) {
-      return querySetting.getFilter();
+      return querySetting.getFilterColumn();
     }
     return void 0;
   }

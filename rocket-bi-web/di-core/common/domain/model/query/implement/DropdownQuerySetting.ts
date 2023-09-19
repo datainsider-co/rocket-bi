@@ -6,20 +6,22 @@
 import { QuerySetting } from '../QuerySetting';
 import {
   Condition,
-  DropdownChartOption,
-  Filterable,
+  FilterableSetting,
   Function,
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   WidgetId
 } from '@core/common/domain/model';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class DropdownQuerySetting extends QuerySetting<DropdownChartOption> implements Filterable {
-  readonly className = QuerySettingType.Dropdown;
+/**
+ * @deprecated use TabFilterQuerySetting instead
+ */
+export class DropdownQuerySetting extends QuerySetting implements FilterableSetting {
+  readonly className = QuerySettingClassName.Dropdown;
 
   constructor(
     public value: TableColumn,
@@ -44,19 +46,19 @@ export class DropdownQuerySetting extends QuerySetting<DropdownChartOption> impl
     return [this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.value];
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.value;
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
 
-  hasDefaultValue(): boolean {
+  hasDefaultCondition(): boolean {
     return this.getChartOption()?.options?.default?.setting?.conditions != undefined;
   }
 
@@ -66,6 +68,6 @@ export class DropdownQuerySetting extends QuerySetting<DropdownChartOption> impl
   }
 
   isEnableFilter(): boolean {
-    return true;
+    return false;
   }
 }

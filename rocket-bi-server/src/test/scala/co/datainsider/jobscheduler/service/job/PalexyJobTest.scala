@@ -3,7 +3,7 @@ package co.datainsider.jobscheduler.service.job
 import co.datainsider.bi.module.TestContainerModule
 import co.datainsider.caas.user_profile.module.MockCaasClientModule
 import co.datainsider.jobscheduler.domain.Ids.JobId
-import co.datainsider.jobscheduler.domain.job.{JobStatus, PalexyDateRange, PalexyJob}
+import co.datainsider.jobscheduler.domain.job.{JobStatus, DateRangeInfo, PalexyJob}
 import co.datainsider.jobscheduler.domain.request.{PaginationRequest, PaginationResponse, UpdateJobRequest}
 import co.datainsider.jobscheduler.domain.response.JobInfo
 import co.datainsider.jobscheduler.domain.source.PalexySource
@@ -43,7 +43,7 @@ class PalexyJobTest extends IntegrationTest with BeforeAndAfterAll {
     lastSyncedValue = Some("tvc12"),
     dimensions = Set("dimension1", "dimension2"),
     metrics = Set("metric1", "metric2"),
-    dateRange = PalexyDateRange(
+    dateRange = DateRangeInfo(
       fromDate = "2019-01-01",
       toDate = "2019-01-02"
     ),
@@ -119,7 +119,7 @@ class PalexyJobTest extends IntegrationTest with BeforeAndAfterAll {
       storeIds = Set("1234"),
       dimensions = Set("1234"),
       metrics = Set("1234"),
-      dateRange = PalexyDateRange(
+      dateRange = DateRangeInfo(
         fromDate = "2019-01-01",
         toDate = "2019-01-02"
       )

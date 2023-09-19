@@ -7,7 +7,7 @@
         <span v-else> Uploading... ({{ percentCompleted }}) </span>
       </a>
     </div>
-    <Modal ref="uploadModal" hide-footer backdrop="static" :keyboard="false" :width="610" title="Upload data">
+    <Modal ref="uploadModal" hide-footer backdrop="static" :keyboard="false" :width="610" title="Upload data" show-at-body>
       <template #header-action>
         <button @click.prevent="minimize" aria-label="Close" class="close minimize" type="button" v-if="isShowMinimize">
           <span aria-hidden="true">-</span>
@@ -64,6 +64,8 @@ import { RouterUtils } from '@/utils/RouterUtils';
 import { UploadType } from '@/screens/lake-house/components/lake-upload/UploadType';
 import { UploadService } from '@core/common/services';
 import { DIException } from '@core/common/domain';
+import { TimeoutUtils } from '@/utils';
+import { AtomicAction } from '@core/common/misc';
 
 @Component({ components: { Modal } })
 export default class LakeUploadData extends Vue {
@@ -96,7 +98,8 @@ export default class LakeUploadData extends Vue {
 
   private callback: ((path: string) => void) | null = null;
 
-  async startUpload(file: File, onUploaded: (path: string) => void, okTitle = 'Ok'): Promise<void> {
+  @AtomicAction()
+  async startUpload(file: File, onUploaded: (path: string) => void, okTitle = 'Ok', skipConfirmOk = false): Promise<void> {
     try {
       this.reset();
       this.file = file;
@@ -116,6 +119,12 @@ export default class LakeUploadData extends Vue {
       this.isStopped = true;
       this.done = true;
       this.loading = false;
+    }
+
+    if (skipConfirmOk && this.success) {
+      // trick to avoid variable not updated
+      await TimeoutUtils.sleep(200);
+      await this.handleUploadSuccess();
     }
   }
   private async uploadDefault(file: File): Promise<string> {
@@ -190,7 +199,8 @@ export default class LakeUploadData extends Vue {
     this.reset();
   }
 
-  private async handleUploadSuccess() {
+  @AtomicAction()
+  private async handleUploadSuccess(): Promise<void> {
     const finalPath = this.getPath(this.uploadType);
     this.callback ? this.callback(finalPath) : void 0;
     await this.close();

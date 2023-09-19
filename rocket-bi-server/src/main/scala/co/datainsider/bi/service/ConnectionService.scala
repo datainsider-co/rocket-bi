@@ -76,7 +76,7 @@ class ConnectionServiceImpl @Inject() (
           .getKeyPair(connection.orgId)
           .map((keyPair: SshKeyPair) => {
             val session: SshSession = SshSessionManager.getSession(keyPair, sshConnection.tunnelConfig.get)
-            val newPorts = session.forwardLocalPorts(sshConnection.getRemotePorts())
+            val newPorts = session.forwardLocalPorts(sshConnection.getRemoteHost(), sshConnection.getRemotePorts())
             sshConnection.copyHostPorts(
               host = session.getLocalHost(),
               ports = newPorts

@@ -99,9 +99,10 @@ div.v-context.dashboard-context-menu {
       min-height: 160px;
       position: relative;
 
-      > .status-loading {
-        position: absolute;
-      }
+      // fixme: check css
+      //> .status-loading {
+      //  position: absolute;
+      //}
     }
   }
 }

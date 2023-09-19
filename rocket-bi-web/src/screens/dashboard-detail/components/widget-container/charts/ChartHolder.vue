@@ -1,6 +1,6 @@
 <template>
-  <div v-b-hover="handleHover" class="w-100 h-100 position-relative chart-holder-component" :style="{ backgroundColor: backgroundColor }">
-    <StatusWidget :class="chartWidgetClass" :error="errorMessage" :renderWhen="renderWhen" :status="status" @retry="retryLoadData">
+  <WidgetContainer :widget="currentChartInfo" :default-setting="widgetSetting" :isHideShadow="isHideShadow" class="chart-holder-component">
+    <StatusWidget :error="errorMessage" :status="status" @retry="retryLoadData" class="chart-holder-component--status">
       <template #default>
         <template v-if="hasData">
           <CaptureException name="chart" @onError="handleChartRenderError">
@@ -25,69 +25,41 @@
         </template>
       </template>
     </StatusWidget>
-    <div class="widget-action d-flex flex-column">
-      <div class="d-flex flex-row">
-        <InnerFilter
-          v-if="currentChartInfo.containChartFilter && !isPreview"
-          :meta-data="currentChartInfo"
-          :id="`${currentChartInfo.id}-chart-filter`"
-          @onFilterSelect="handleChartFilterSelect"
-          @onDelete="handleDeleteChartFilter"
-        />
-        <template>
-          <template v-if="isFullSizeMode">
-            <ActionWidgetFilter
-              v-if="hasFilter()"
-              :id="genBtnId('filter-full-mode', currentChartInfo.id)"
-              :filter-requests="getFilterRequests()"
-              :is-apply-filter="isAffectByFilter()"
-            />
-            <ActionWidgetMore
-              v-if="enableMoreAction"
-              :id="genBtnId('more-action-full-mode', currentChartInfo.id)"
-              :dashboardMode="dashboardMode"
-              :drilldownId="genBtnId('drilldown-full-mode', currentChartInfo.id)"
-              :meta-data="currentChartInfo"
-              :zoomId="genBtnId('zoom-full-mode', currentChartInfo.id)"
-            />
-            <!--          <img-->
-            <!--            :id="genBtnId('hide-full-mode', currentChartInfo.id)"-->
-            <!--            alt="Minimize Screen"-->
-            <!--            class="icon-title di-popup ic-40 cursor-pointer btn-ghost"-->
-            <!--            src="@/assets/icon/ic_minimize.svg"-->
-            <!--            @click="hideFullSize"-->
-            <!--          />-->
-          </template>
-          <template v-else>
-            <ActionWidgetFilter
-              v-if="hasFilter()"
-              :id="genBtnId('filter', currentChartInfo.id)"
-              :filter-requests="getFilterRequests()"
-              :is-apply-filter="isAffectByFilter()"
-            />
-            <ActionWidgetMore
-              v-if="enableMoreAction"
-              :id="genBtnId('more-action', currentChartInfo.id)"
-              :dashboardMode="dashboardMode"
-              :drilldownId="genBtnId('drilldown', currentChartInfo.id)"
-              :meta-data="currentChartInfo"
-              :zoomId="genBtnId('zoom', currentChartInfo.id)"
-            />
-            <!--          <img-->
-            <!--            v-if="canShowFullScreen"-->
-            <!--            :id="genBtnId('hide', currentChartInfo.id)"-->
-            <!--            alt="Full Screen"-->
-            <!--            class="icon-title di-popup ic-40 cursor-pointer btn-ghost"-->
-            <!--            src="@/assets/icon/ic-full-screen.svg"-->
-            <!--            @click="showFullSize"-->
-            <!--          />-->
-          </template>
-        </template>
-      </div>
-    </div>
-  </div>
+    <template #action-bar>
+      <InnerFilter
+        class="mar-r-4"
+        v-if="currentChartInfo.hasInnerFilter && !isPreview"
+        :meta-data="currentChartInfo"
+        :id="`${currentChartInfo.id}-chart-filter`"
+        @onFilterSelect="handleChartFilterSelect"
+        @onDelete="handleDeleteChartFilter"
+      />
+      <ActionWidgetFilter
+        v-if="hasFilter()"
+        class="mar-r-4"
+        :id="genBtnId('filter', currentChartInfo.id)"
+        :filter-requests="getFilterRequests()"
+        :is-apply-filter="isAffectByFilter()"
+      />
+      <ActionWidgetMore
+        v-if="enableMoreAction"
+        :id="genBtnId('more-action', currentChartInfo.id)"
+        :dashboardMode="dashboardMode"
+        :drilldownId="genBtnId('drilldown', currentChartInfo.id)"
+        :meta-data="currentChartInfo"
+        :zoomId="genBtnId('zoom', currentChartInfo.id)"
+      />
+      <slot name="action-bar"></slot>
+    </template>
+  </WidgetContainer>
 </template>
 
 <script lang="ts" src="./ChartHolder.ts"></script>
 
-<style lang="scss" src="./ChartHolder.scss" scoped></style>
+<style lang="scss">
+.chart-holder-component {
+  &--status {
+    position: unset;
+  }
+}
+</style>

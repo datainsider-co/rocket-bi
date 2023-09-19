@@ -59,11 +59,11 @@ export default Vue.extend({
     handleClick(node, event) {
       this.$emit('clickField', node, event);
     },
-    handleDragStart() {
-      this.$emit('onDragstartitem');
+    handleDragStart(node) {
+      this.$emit('onDragStartItem', node);
     },
-    handleDragEnd() {
-      this.$emit('onDragEndItem');
+    handleDragEnd(node) {
+      this.$emit('onDragEndItem', node);
     },
     getNodes(nodes, parentPaths = []) {
       return nodes.map((node, index) => {

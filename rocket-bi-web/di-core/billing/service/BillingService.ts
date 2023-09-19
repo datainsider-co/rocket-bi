@@ -11,25 +11,31 @@ export abstract class BillingService {
   abstract getSubscriptionInfo(licenseKey: string): Promise<ProductSubscriptionInfo>;
 
   abstract cancelSubscription(licenseKey: string): Promise<ProductSubscriptionInfo>;
+
+  abstract redeemCode(licenseKey: string, code: string): Promise<boolean>;
 }
 
 export class BillingServiceImpl extends BillingService {
   @Inject
-  private readonly billingRepo!: BillingRepository;
+  private readonly repository!: BillingRepository;
 
   getProducts(): Promise<ProductInfo[]> {
-    return this.billingRepo.getProducts();
+    return this.repository.getProducts();
   }
 
   subscribeProduct(licenseKey: string, planType: PlanType): Promise<ProductSubscriptionInfo> {
-    return this.billingRepo.subscribeProduct(licenseKey, planType);
+    return this.repository.subscribeProduct(licenseKey, planType);
   }
 
   getSubscriptionInfo(licenseKey: string): Promise<ProductSubscriptionInfo> {
-    return this.billingRepo.getSubscriptionInfo(licenseKey);
+    return this.repository.getSubscriptionInfo(licenseKey);
   }
 
   cancelSubscription(licenseKey: string): Promise<ProductSubscriptionInfo> {
-    return this.billingRepo.cancelSubscription(licenseKey);
+    return this.repository.cancelSubscription(licenseKey);
+  }
+
+  redeemCode(licenseKey: string, code: string): Promise<boolean> {
+    return this.repository.redeemCode(licenseKey, code);
   }
 }

@@ -44,6 +44,7 @@
 
       &-comparison {
         .percentage-bar {
+          padding: 0 var(--widget-padding);
           margin-bottom: 8px;
           span {
             justify-items: flex-end;

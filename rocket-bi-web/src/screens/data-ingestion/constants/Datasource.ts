@@ -78,19 +78,24 @@ export const ALL_DATASOURCE: ItemData[] = [
     type: DataSourceType.S3
   },
   {
-    title: 'Facebook',
+    title: 'Facebook Ads',
     src: 'ic_fb_ads.svg',
     type: DataSourceType.Facebook
   },
   {
-    title: 'TikTok',
+    title: 'TikTok Ads',
     src: 'ic_tiktok_ads.svg',
     type: DataSourceType.Tiktok
   },
   {
-    title: 'Paley',
+    title: 'Palexy',
     src: 'ic_palexy.svg',
     type: DataSourceType.Palexy
+  },
+  {
+    title: 'Google Search Console',
+    src: 'ic_google_search_console.svg',
+    type: DataSourceType.GoogleSearchConsole
   }
   // {
   //   title: 'iOS',

@@ -25,6 +25,11 @@ export abstract class DashboardService {
 
   abstract deleteWidget(dashboardId: DashboardId, widgetId: WidgetId): Promise<boolean>;
 
+  /**
+   * @deprecated field will remove as soon as possible
+   * @param dashboardId
+   * @param mainDateFilter
+   */
   abstract editMainDateFilter(dashboardId: DashboardId, mainDateFilter: MainDateFilter): Promise<boolean>;
 
   abstract removeMainDateFilter(dashboardId: DashboardId): Promise<boolean>;

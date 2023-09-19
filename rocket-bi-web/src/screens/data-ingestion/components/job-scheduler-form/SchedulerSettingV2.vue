@@ -102,7 +102,7 @@ import {
 import { TimeScheduler } from '@/screens/data-ingestion/components/job-scheduler-form/scheduler-time/TimeScheduler';
 import moment, { Moment } from 'moment';
 import { Log } from '@core/utils';
-import { DateTimeFormatter } from '@/utils';
+import { DateTimeUtils } from '@/utils';
 import { toNumber } from 'lodash';
 import { SchedulerName } from '@/shared/enums/SchedulerName';
 import { SchedulerType } from '@/shared/enums/SchedulerType';
@@ -202,9 +202,9 @@ export default class SchedulerSettingV2 extends Vue {
   }
 
   private get dateAsMs(): number {
-    const stringFormat = DateTimeFormatter.formatAsHHmmss(this.selectedTime);
+    const stringFormat = DateTimeUtils.formatAsHHmmss(this.selectedTime);
     Log.debug('StringFormat::', stringFormat, this.selectedTime);
-    return Date.parse(DateTimeFormatter.formatDateWithTime(this.date, stringFormat));
+    return Date.parse(DateTimeUtils.formatDateWithTime(this.date, stringFormat));
   }
 
   mounted() {

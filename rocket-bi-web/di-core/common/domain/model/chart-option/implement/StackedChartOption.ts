@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionData, SeriesOptionData, ChartOptionClassName } from '@core/common/domain/model';
 import { StringUtils } from '@/utils/StringUtils';
 import { cloneDeep, merge } from 'lodash';
 import { ObjectUtils } from '@core/utils/ObjectUtils';
@@ -77,8 +77,8 @@ export class StackedChartOption extends ChartOption<StackedOptionData> {
       }
     }
   };
-  readonly chartFamilyType = ChartFamilyType.Series;
-  readonly className = VizSettingType.StackedSeriesSetting;
+
+  readonly className = ChartOptionClassName.StackedSeriesSetting;
   /**
    * @key: label (Online, Offline)
    * @value: group (stack_group_0, stack_group_1)
@@ -102,7 +102,7 @@ export class StackedChartOption extends ChartOption<StackedOptionData> {
   }
 
   static getDefaultChartOption(chartType: ChartType): StackedChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const gridLineColor: string = this.getGridLineColor();
     const options: StackedOptionData = {
       chart: {
@@ -123,26 +123,8 @@ export class StackedChartOption extends ChartOption<StackedOptionData> {
           }
         }
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       affectedByFilter: true,
       themeColor: { enabled: true },
       background: this.getThemeBackgroundColor(),
@@ -156,11 +138,7 @@ export class StackedChartOption extends ChartOption<StackedOptionData> {
           },
           dataLabels: {
             enabled: false,
-            style: {
-              color: textColor,
-              fontSize: '11px',
-              fontFamily: 'Roboto'
-            }
+            style: ChartOption.getSecondaryStyle()
           }
         }
       },
@@ -204,10 +182,7 @@ export class StackedChartOption extends ChartOption<StackedOptionData> {
       ],
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       }
     };
     return new StackedChartOption(options);

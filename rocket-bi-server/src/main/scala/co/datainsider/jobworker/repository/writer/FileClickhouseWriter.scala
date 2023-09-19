@@ -105,7 +105,7 @@ class FileClickhouseWriter(
     * @param destSchema schema of destination table to parse data
     *  @return number of row inserted
     */
-  override def write(records: Seq[Record], destSchema: TableSchema): Int =
+  override def insertBatch(records: Seq[Record], destSchema: TableSchema): Int =
     Profiler(s"[DataWriter] ${this.getClass.getSimpleName}::write") {
       val lines: Seq[String] = records.map(record => JsonUtils.toJson(record, false))
       localFileService.writeLines(lines, destSchema)

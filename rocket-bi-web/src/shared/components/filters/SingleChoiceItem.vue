@@ -23,9 +23,8 @@ export default class SingleChoiceItem extends Vue {
   @Prop({ required: true })
   private readonly item!: SelectOption;
 
-  @Emit('onSelectItem')
-  private handClickItem(): SelectOption {
-    return this.item;
+  private handClickItem(event: MouseEvent): void {
+    this.$emit('onSelectItem', this.item, event);
   }
 }
 </script>

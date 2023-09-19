@@ -9,10 +9,10 @@ import {
   Function,
   getFiltersAndSorts,
   InlineSqlView,
+  KPITheme,
   MainDateMode,
-  NumberChartOption,
   OrderBy,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   WidgetId
 } from '@core/common/domain/model';
@@ -22,9 +22,10 @@ import { ComparisonUtils } from '@core/utils/ComparisonUtils';
 import { DateRange } from '@/shared';
 import { Log } from '@core/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
+import { KPILayout } from '@chart/widget-renderer/number-render/layout-implement/KPILayout';
 
-export class NumberQuerySetting extends QuerySetting<NumberChartOption> implements Comparable {
-  readonly className = QuerySettingType.Number;
+export class NumberQuerySetting extends QuerySetting implements Comparable {
+  readonly className = QuerySettingClassName.Number;
   compareRequest: CompareRequest | null;
 
   constructor(
@@ -45,7 +46,7 @@ export class NumberQuerySetting extends QuerySetting<NumberChartOption> implemen
   }
 
   getCompareRequest(): CompareRequest | undefined {
-    return ComparisonUtils.getCompareRequest(this.getChartOption()?.options ?? {}, CompareMode.RawValues);
+    return ComparisonUtils.toCompareRequest(this.getChartOption()?.options ?? {}, CompareMode.RawValues);
   }
 
   static fromObject(obj: NumberQuerySetting): NumberQuerySetting {
@@ -60,7 +61,7 @@ export class NumberQuerySetting extends QuerySetting<NumberChartOption> implemen
     return [this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.value];
   }
 
@@ -74,14 +75,25 @@ export class NumberQuerySetting extends QuerySetting<NumberChartOption> implemen
   }
 
   static isNumberQuerySetting(setting: QuerySetting): setting is NumberQuerySetting {
-    return setting.className === QuerySettingType.Number;
+    return setting.className === QuerySettingClassName.Number;
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
 
   getDefaultSize(): [number, number] {
-    return [8, 8];
+    switch (this.getChartOption()?.options.theme) {
+      case KPITheme.Style9:
+      case KPITheme.Style10:
+      case KPITheme.Style11:
+      case KPITheme.Style12:
+        return [8, 8];
+      case KPITheme.Style8:
+      case KPITheme.Style7:
+        return [15, 5];
+      default:
+        return [16, 8];
+    }
   }
 }

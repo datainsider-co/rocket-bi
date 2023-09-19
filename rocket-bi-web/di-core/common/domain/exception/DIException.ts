@@ -9,7 +9,7 @@ const MessageAsMap = new Map<string, string>([
   [ApiExceptions.alreadyExisted, 'This email existed. Please try again.'],
   [ApiExceptions.registrationRequired, 'You need to register account first.'],
   [ApiExceptions.verificationCodeInvalid, 'The code is invalid.'],
-  [ApiExceptions.internalError, 'Oops internal error! Try to refresh page or feel free contact us if issue persists.'],
+  // [ApiExceptions.internalError, 'Oops internal error! Try to refresh page or feel free contact us if issue persists.'],
   [ApiExceptions.invalidCredentials, 'Incorrect email or password.']
 ]);
 

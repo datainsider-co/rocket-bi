@@ -16,12 +16,14 @@
             <div class="title mb-2">To</div>
             <TagsInput
               id="email"
+              ref="emailInput"
+              placeholder="recipient@gmail.com ..."
               :default-tags="defaultListReceivers"
-              placeholder="Recipients"
               :addOnKey="[13, ',', ';', ' ']"
               :validations="emailValidations"
               :avoidDuplicate="false"
               :is-duplicate="() => false"
+              autofocus
               @tagsChanged="handleListEmailChanged"
             >
             </TagsInput>
@@ -32,24 +34,28 @@
           </div>
           <div class="mar-b-12">
             <div class="title mb-2">Subject</div>
-            <BFormInput autocomplete="off" class="mar-b-12 text-truncate" placeholder="Input email subject" v-model="model.subject"></BFormInput>
+            <BFormInput autocomplete="off" class="mar-b-12 text-truncate" placeholder="What is this email about?" v-model="model.subject"></BFormInput>
             <template v-if="$v.model.subject.$error">
               <div ref="errorSubjectElement" v-if="!$v.model.subject.required" class="mt-1 error">Subject is required.</div>
             </template>
           </div>
           <div class="mar-b-12">
-            <div class="title mb-2">Descriptions</div>
+            <div class="title mb-2">Content</div>
             <BFormTextarea
               autocomplete="off"
-              class="description mar-b-12 text-truncate"
-              placeholder="Input description"
+              class="description mar-b-12"
+              placeholder="Write your message to the recipient"
               v-model="model.content"
             ></BFormTextarea>
+          </div>
+          <div class="mar-b-12 d-flex flex-row align-items-center">
+            <div class="title file-type-title">File type</div>
+            <DiButtonGroup :buttons="buttonInfoList" style="width: 200px"></DiButtonGroup>
           </div>
           <ToggleSetting class="group-config mar-b-12" id="enabled-zip-id" :value="model.isZip" label="Enable zip" @onChanged="value => (model.isZip = value)">
           </ToggleSetting>
           <template v-for="(fileName, index) in model.fileNames">
-            <div :key="index"><i class="di-icon-attach mr-2"></i>{{ fileName }}.csv</div>
+            <div :key="index"><i class="di-icon-attach mr-2"></i>{{ fileName }}.{{ fileExtension }}</div>
           </template>
           <input type="submit" class="d-none" />
         </div>
@@ -60,7 +66,7 @@
 <script lang="ts">
 import { Component, Inject, Ref, Vue } from 'vue-property-decorator';
 import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
-import { EmailConfiguration, ETLOperatorType, EtlOperator, SendToGroupEmailOperator, TableConfiguration } from '@core/data-cook';
+import { EtlOperator, ETLOperatorType, SendToGroupEmailOperator, TableConfiguration } from '@core/data-cook';
 import SelectDatabaseAndTable from '@/screens/data-cook/components/select-database-and-table/SelectDatabaseAndTable.vue';
 import OracleSourceInfo from '@/screens/data-cook/components/save-to-database/oracle-source-form/OracleSourceInfo.vue';
 import DestConfigurationForm from '@/screens/data-cook/components/save-to-database/oracle-source-form/DestConfigurationForm.vue';
@@ -73,12 +79,14 @@ import MsSQLDestConfigForm from '@/screens/data-cook/components/save-to-database
 import PostgresSourceInfo from '@/screens/data-cook/components/save-to-database/postgres-source-form/PostgresSourceInfo.vue';
 import PostgresDestConfigForm from '@/screens/data-cook/components/save-to-database/postgres-source-form/PostgresDestConfigForm.vue';
 import { StringUtils } from '@/utils/StringUtils';
-import { ListUtils } from '@/utils';
+import { ListUtils, TimeoutUtils } from '@/utils';
 import { required } from 'vuelidate/lib/validators';
 import { cloneDeep, isFunction } from 'lodash';
 import TagsInput from '@/shared/components/TagsInput.vue';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Track } from '@/shared/anotation/TrackingAnotation';
+import DiButtonGroup, { ButtonInfo } from '@/shared/components/common/DiButtonGroup.vue';
+import { ExportType } from '@core/common/domain';
 
 // type TEmailConfigurationCallback = (emailConfiguration: EmailConfiguration, index: number) => void;
 
@@ -88,6 +96,7 @@ const validReceivers = (receivers: string[]) => {
 const requiredReceivers = (receivers: string[]) => ListUtils.isNotEmpty(receivers);
 @Component({
   components: {
+    DiButtonGroup,
     MsSQLDestConfigForm,
     MsSQLSourceInfo,
     PostgresDestConfigForm,
@@ -131,6 +140,34 @@ export default class SendToEmail extends Vue {
   @Ref()
   private scrollBody!: HTMLDivElement;
 
+  @Ref()
+  private readonly emailInput!: TagsInput;
+
+  protected get buttonInfoList(): ButtonInfo[] {
+    return [
+      {
+        displayName: 'Csv',
+        id: 'csv',
+        isActive: this.model?.fileType === 'Csv',
+        onClick: () => {
+          this.model!.fileType = 'Csv';
+        }
+      },
+      {
+        displayName: 'Excel',
+        id: 'excel',
+        isActive: this.model?.fileType === 'Excel',
+        onClick: () => {
+          this.model!.fileType = 'Excel';
+        }
+      }
+    ];
+  }
+
+  private get fileExtension() {
+    return this.model?.fileType === 'Csv' ? 'csv' : 'xlsx';
+  }
+
   private get actionName() {
     return this.isUpdate ? 'Update' : 'Add';
   }
@@ -151,6 +188,7 @@ export default class SendToEmail extends Vue {
     this.model = cloneDeep(operator);
     this.defaultListReceivers = this.model?.receivers ?? [];
     this.modal.show();
+    this.focusEmailInput();
   }
 
   @Track(TrackEvents.ETLSaveToEmail)
@@ -163,6 +201,12 @@ export default class SendToEmail extends Vue {
     this.model!.fileNames = fileNames;
     this.defaultListReceivers = [];
     this.modal.show();
+    this.focusEmailInput();
+  }
+
+  protected async focusEmailInput(): Promise<void> {
+    await TimeoutUtils.sleep(150);
+    this.emailInput?.focus();
   }
 
   private resetModel() {
@@ -218,7 +262,7 @@ label.di-radio {
   }
 
   .scroll-body {
-    max-height: 389px;
+    max-height: 450px;
     padding-right: 24px;
   }
 
@@ -232,13 +276,25 @@ label.di-radio {
     line-height: 1;
   }
 
+  .file-type-title {
+    margin-bottom: 0;
+    margin-right: 16px;
+  }
+
   .description {
     resize: none;
     height: 122px;
     padding: 5px 16px;
+    font-size: 14px;
+    line-height: 1.4;
 
     &::placeholder {
-      padding-top: 5px;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 1.4;
+
+      color: #677883;
     }
   }
 

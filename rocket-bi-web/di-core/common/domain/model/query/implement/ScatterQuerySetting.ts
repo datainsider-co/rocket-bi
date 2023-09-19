@@ -16,7 +16,7 @@ import {
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
+  QuerySettingClassName,
   ScatterChartOption,
   TableColumn,
   WidgetId,
@@ -30,9 +30,9 @@ import { ConditionUtils } from '@core/utils';
 import { Paginatable } from '@core/common/domain/model/query/features/Paginatable';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class ScatterQuerySetting extends QuerySetting<ScatterChartOption> implements Zoomable, Drilldownable, Paginatable {
+export class ScatterQuerySetting extends QuerySetting implements Zoomable, Drilldownable, Paginatable {
   private static readonly DEFAULT_NUM_DATA_POINT = 1000;
-  readonly className = QuerySettingType.Scatter;
+  readonly className = QuerySettingClassName.Scatter;
 
   constructor(
     public xAxis: TableColumn,
@@ -82,7 +82,7 @@ export class ScatterQuerySetting extends QuerySetting<ScatterChartOption> implem
     }
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     if (this.legend) {
       return [this.xAxis, this.yAxis, this.legend];
     } else {
@@ -129,7 +129,7 @@ export class ScatterQuerySetting extends QuerySetting<ScatterChartOption> implem
     }
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.xAxis = ConfigDataUtils.replaceDynamicFunction(this.xAxis, functions);
     this.yAxis = ConfigDataUtils.replaceDynamicFunction(this.yAxis, functions);
     if (this.legend) {

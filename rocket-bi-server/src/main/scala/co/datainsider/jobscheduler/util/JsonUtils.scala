@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind._
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import datainsider.client.exception.InternalError
 
 import java.lang.reflect.{ParameterizedType, Type}
 
@@ -56,7 +57,41 @@ object JsonUtils {
       }
   }
 
-  implicit class ImplicitJsonNode(jsonNode: JsonNode) {
+  implicit class ImplicitJsonNode(val jsonNode: JsonNode) extends AnyVal {
+
+    /**
+     * get value as type T from json node. Use like this:
+     * jsonNode.asOpt[MyClass]("/path/to/field")
+     * @param jsonPtrExpr json pointer expression
+     * @tparam T type of return value
+     * @return value as type T, if not found, return None
+     */
+    def asOpt[T: Manifest](jsonPtrExpr: String): Option[T] = {
+      val valNode: JsonNode = jsonNode.at(jsonPtrExpr)
+      if (valNode.isNullOrMissing) {
+        return None
+      } else {
+        Option(JsonUtils.fromJson[T](valNode.textValue()))
+      }
+    }
+
+    /**
+     * get value as type T from json node. Use like this:
+     * jsonNode.asOpt[MyClass]("/path/to/field")
+     *
+     * @param jsonPtrExpr json pointer expression
+     * @tparam T type of return value
+     * @return value as type T, if not found, return None
+     * @throws InternalError if value not found
+     */
+    def as[T: Manifest](jsonPtrExpr: String): T = {
+      val valNode: JsonNode = jsonNode.at(jsonPtrExpr)
+      if (valNode.isNullOrMissing) {
+        throw InternalError(s"Cannot find value at $jsonPtrExpr")
+      } else {
+        JsonUtils.fromJson[T](valNode.textValue())
+      }
+    }
 
     def atOpt(jsonPtrExpr: String): Option[JsonNode] = {
       jsonNode.at(jsonPtrExpr) match {

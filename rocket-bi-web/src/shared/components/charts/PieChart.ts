@@ -1,12 +1,12 @@
 import Highcharts, { Point } from 'highcharts';
 import { Component, Ref, Watch } from 'vue-property-decorator';
-import { ChartOption, ChartOptionData, PieChartOption, PieQuerySetting } from '@core/common/domain/model';
+import { ChartOption, ChartOptionData, PieChartOption, PieQuerySetting, ValueControlType } from '@core/common/domain/model';
 import { merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
 import { ClassProfiler } from '@/shared/profiler/Annotation';
 import { DIException } from '@core/common/domain/exception';
 import { SeriesTwoResponse } from '@core/common/domain/response';
-import { HighchartUtils, MetricNumberMode } from '@/utils';
+import { DomUtils, HighchartUtils, MetricNumberMode } from '@/utils';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
 import { JsonUtils, Log } from '@core/utils';
@@ -29,7 +29,7 @@ export default class PieChart extends BaseHighChartWidget<SeriesTwoResponse, Pie
 
   constructor() {
     super();
-    const selectSeriesItem = this.handleSelectSeriesItem;
+    const selectItem = this.handleSelectItem;
     const drilldownListener = this.createRightClickAsOptions('name');
     const tooltipFormatter = this.tooltipFormatter;
     const dataLabelsFormatter = this.dataLabelsFormatter;
@@ -39,7 +39,8 @@ export default class PieChart extends BaseHighChartWidget<SeriesTwoResponse, Pie
       point: {
         events: {
           click: function() {
-            selectSeriesItem(((this as any) as Point).name);
+            const that = (this as any) as Point;
+            selectItem(that.name, that.selected);
           }
         }
       }
@@ -75,6 +76,7 @@ export default class PieChart extends BaseHighChartWidget<SeriesTwoResponse, Pie
       plotOptions: {
         pie: {
           ...piePlotOptions,
+          borderRadius: 0,
           dataLabels: {
             useHTML: true,
             formatter: function() {
@@ -131,11 +133,21 @@ export default class PieChart extends BaseHighChartWidget<SeriesTwoResponse, Pie
 
   updateOptions(newOptions: any) {
     this.options = merge({}, ChartOption.CONFIG, PieChartOption.DEFAULT_SETTING, this.options, newOptions);
+    Log.debug('PieChart::updateOptions::options::', this.options);
   }
 
-  handleSelectSeriesItem(value: string) {
+  handleSelectItem(value: string, isSelected: boolean): void {
     if (this.setting.options.isCrossFilter) {
-      this.$root.$emit(DashboardEvents.ApplyCrossFilter, new CrossFilterData(this.chartInfo.id, value));
+      const valueMap: Map<ValueControlType, string[]> | undefined = this.toValueMap(value, isSelected);
+      this.applyDirectCrossFilter(valueMap);
+    }
+  }
+
+  private toValueMap(value: string, isSelected: boolean): Map<ValueControlType, string[]> | undefined {
+    if (isSelected) {
+      return new Map<ValueControlType, string[]>([[ValueControlType.SelectedValue, [value]]]);
+    } else {
+      return void 0;
     }
   }
 
@@ -151,6 +163,7 @@ export default class PieChart extends BaseHighChartWidget<SeriesTwoResponse, Pie
       HighchartUtils.updateChart(this.getChart(), this.setting.options);
       this.updateChartInfo();
       HighchartUtils.drawChart(this.getChart());
+      Log.debug('PieChart::buildHighchart::setting::', this.getChart()?.options);
       this.assignDrilldownClick();
     } catch (e) {
       if (e instanceof DIException) {
@@ -180,10 +193,10 @@ export default class PieChart extends BaseHighChartWidget<SeriesTwoResponse, Pie
     // Log.debug("Pie::Tooltip::Point:: ", point);
     const x = point.key;
     const name = point.series.name;
-    const value = this.numberFormatter.format(point.y);
+    const value = this.numberFormatter.format(point.y as number);
     const color = point.color;
     const textColor = this.setting.options.tooltip?.style?.color ?? '#fff';
-    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="text-align: left; color: ${textColor}; font-family: ${fontFamily}">
                 <span>${x}</span></br>
                 <span style="color:${color}; padding-right: 5px;">●</span>${name}: <b>${value}</b>

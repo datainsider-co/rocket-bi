@@ -5,7 +5,7 @@ import { Geolocation } from '@core/common/domain/model/geolocation/Geolocation';
 import { Inject } from 'typescript-ioc';
 import { GeolocationService } from '@core/common/services';
 import { MapResponse } from '@core/common/domain/response';
-import { ChartInfo, MapQuerySetting, QueryRelatedWidget, QuerySettingType, WidgetId } from '@core/common/domain/model';
+import { ChartInfo, MapQuerySetting, QueryRelatedWidget, QuerySettingClassName, WidgetId } from '@core/common/domain/model';
 import { JsonUtils, Log } from '@core/utils';
 import { GeoArea } from '@core/common/domain/model/geolocation/GeoArea';
 import { HighchartUtils } from '@/utils';
@@ -24,7 +24,7 @@ class GeolocationStore extends VuexModule {
   private readonly geoService!: GeolocationService;
 
   @Action({ commit: 'saveArea' })
-  async loadGeolocationMap(): Promise<GeoArea[]> {
+  async init(): Promise<GeoArea[]> {
     const areas: GeoArea[] = await this.geoService.listAreas();
     const areaSelected = areas.find(area => area.zoneLvl === 1) ?? areas[0];
     this.saveCurrentArea(areaSelected.mapUrl);

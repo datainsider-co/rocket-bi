@@ -1,7 +1,6 @@
 package co.datainsider.bi.controller.http
 
 import co.datainsider.bi.domain.request.ContactUsRequest
-import co.datainsider.bi.util.SlackUtils
 import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.caas.user_profile.controller.http.filter.parser.UserContext.UserContextSyntax
 import co.datainsider.caas.user_profile.util.JsonParser
@@ -39,8 +38,7 @@ class HealthController @Inject() (licenseClientService: LicenseClientService) ex
   post("/contact_us") { request: ContactUsRequest =>
     {
       val message = s"New customer's contact submission:\n ${JsonParser.toJson(request)}"
-      SlackUtils.send(message = message)
-      response.ok
+      licenseClientService.notify(message = message)
     }
   }
 

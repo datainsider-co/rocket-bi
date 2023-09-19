@@ -1,0 +1,24 @@
+@import '~@/themes/scss/mixin.scss';
+@import '~@/themes/scss/di-variables';
+
+.connector-config {
+  background: var(--secondary);
+
+  .clickhouse-config-table {
+    height: 100%;
+  }
+
+  .icon-live {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #07bc40;
+  }
+
+  .icon-dead {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--danger);
+  }
+}

@@ -67,9 +67,9 @@ export default class InputDateSetting extends Vue {
 
   private get modeOptions() {
     if (this.inputDateType === InputDateType.DateRange) {
-      return DateTimeConstants.ListDateRangeModeOptions;
+      return DateTimeConstants.DATE_RANGE_MODE_OPTION_LIST;
     } else {
-      return DateTimeConstants.ListCompareModeOptions;
+      return DateTimeConstants.COMPARE_MODE_OPTION_LIST;
     }
   }
 

@@ -10,6 +10,7 @@ import { UnsupportedSource } from '@core/data-ingestion/domain/response/Unsuppor
 import { GA4Source } from '@core/data-ingestion/domain/response/GA4Source';
 import { GASource } from '@core/data-ingestion/domain/response/GASource';
 import { PalexySource } from '@core/data-ingestion/domain/response/PalexySource';
+import { GoogleSearchConsoleSource } from '@core/data-ingestion/domain/response/GoogleSearchConsoleSource';
 
 export abstract class DataSource {
   abstract readonly className: DataSources;
@@ -41,6 +42,8 @@ export abstract class DataSource {
         return TiktokSource.fromObject(obj);
       case DataSources.Palexy:
         return PalexySource.fromObject(obj);
+      case DataSources.GoogleSearchConsole:
+        return GoogleSearchConsoleSource.fromObject(obj);
       default:
         return UnsupportedSource.fromObject(obj);
     }

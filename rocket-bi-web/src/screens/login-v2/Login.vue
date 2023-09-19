@@ -16,7 +16,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
-import { AtomicAction } from '@/shared/anotation';
+import { AtomicAction } from '@core/common/misc';
 import { FormLoginMode } from '@/screens/basic-login/Login.vue';
 import LoginDecoPanel from '@/screens/login-v2/components/login/LoginDecoPanel.vue';
 import LoginPanel from '@/screens/login-v2/components/LoginPanel.vue';

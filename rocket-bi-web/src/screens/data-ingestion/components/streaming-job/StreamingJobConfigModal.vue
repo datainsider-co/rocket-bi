@@ -33,7 +33,7 @@ import { KafkaStreamingJob } from '@core/data-ingestion';
 import { DIException } from '@core/common/domain';
 import { Log } from '@core/utils';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
+import { AtomicAction } from '@core/common/misc';
 import { ApiExceptions, Status, VerticalScrollConfigs } from '@/shared';
 import { JobName } from '@core/data-ingestion/domain/job/JobName';
 import { ChartUtils, TimeoutUtils } from '@/utils';

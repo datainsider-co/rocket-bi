@@ -10,3 +10,4 @@ export * from './LabelFormatOptions';
 export * from './LabelPositionOptions';
 export * from './PrecisionOptions';
 export * from './VerticalAlignOptions';
+export * from './FontWeightOptions';

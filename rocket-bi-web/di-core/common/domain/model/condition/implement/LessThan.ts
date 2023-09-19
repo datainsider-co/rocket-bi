@@ -7,7 +7,7 @@ import { ConditionType, Field, FilterMode, ScalarFunction } from '@core/common/d
 import { ValueCondition } from '@core/common/domain/model/condition/ValueCondition';
 import { ConditionUtils, getScalarFunction } from '@core/utils';
 import { FieldRelatedCondition } from '@core/common/domain/model/condition/FieldRelatedCondition';
-import { ConditionData, ConditionFamilyTypes, DateHistogramConditionTypes, InputType, NumberConditionTypes, StringConditionTypes } from '@/shared';
+import { ConditionData, ConditionTypes, DateHistogramConditionTypes, InputType, NumberConditionTypes, StringConditionTypes } from '@/shared';
 import { ListUtils, RandomUtils, SchemaUtils } from '@/utils';
 import { DIException } from '@core/common/domain';
 
@@ -51,8 +51,8 @@ export class LessThan extends FieldRelatedCondition implements ValueCondition {
       firstValue: this.value,
       secondValue: void 0,
       allValues: this.getValues(),
-      currentInputType: InputType.text,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.Text,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: NumberConditionTypes.lessThan
     };
   }

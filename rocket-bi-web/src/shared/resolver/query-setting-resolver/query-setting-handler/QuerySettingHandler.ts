@@ -15,11 +15,13 @@ export const getConditionBuilder = (): ConditionResolver => {
   return Di.get(ConditionResolver);
 };
 
+/**
+ * @return [conditions, sortList, tooltips]
+ */
 export const getExtraData = (configsAsMap: Map<ConfigType, FunctionData[]>, filterAsMap: Map<Id, ConditionData[]>): [Condition[], OrderBy[], any[]] => {
   const conditions: Condition[] = getConditionBuilder().buildConditions(filterAsMap);
-  Log.debug('getExtraData::conditions::', filterAsMap, conditions);
-  const sortings: OrderBy[] = QuerySettingUtils.buildListOrderBy(configsAsMap);
-  return [conditions, sortings, []];
+  const sortList: OrderBy[] = QuerySettingUtils.buildListOrderBy(configsAsMap);
+  return [conditions, sortList, []];
 };
 
 export abstract class QuerySettingHandler {

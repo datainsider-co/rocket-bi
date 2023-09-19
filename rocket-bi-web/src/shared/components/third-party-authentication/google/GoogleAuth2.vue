@@ -1,10 +1,9 @@
 <template>
   <div class="google-auth-2 px-3">
-    <h3>DataInsider.co requires authorization to connect to your {{ productTitle }}</h3>
+    <h3>RocketBI requires authorization to connect to your {{ productTitle }}</h3>
     <DiButton class="access-gg-btn" :is-loading="loading" primary title="AUTHORIZE" @click="authentication"> </DiButton>
     <div style="font-weight: 400;margin-top: 8px;text-align: justify;">
-      ***<a href="https://www.datainsider.co/" target="_blank">Datainsider.co</a> use and transfer to any other app of information received from Google APIs
-      will adhere to
+      ***<a href="https://rocket.bi" target="_blank">RocketBI</a> use and transfer to any other app of information received from Google APIs will adhere to
       <a href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes" target="_blank"
         >Google API Services User Data Policy</a
       >, including the Limited Use requirements.
@@ -22,7 +21,6 @@ import { Log } from '@core/utils';
 
 @Component({ components: {} })
 export default class GoogleAuth2 extends AbstractAuthentication {
-  private googleConfig = require('@/screens/data-ingestion/constants/google-config.json');
   private loading = false;
 
   private get productTitle(): string {
@@ -50,7 +48,7 @@ export default class GoogleAuth2 extends AbstractAuthentication {
       return clientId;
       //todo: fixme delete if deploy new version for google ads
     } else {
-      return this.googleConfig.clientId;
+      return window.appConfig.GOOGLE_CLIENT_ID;
     }
   }
 

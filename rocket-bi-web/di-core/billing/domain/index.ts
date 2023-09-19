@@ -1,7 +1,7 @@
-export * from './ProductInfo';
-export * from './ProductSubscriptionInfo';
+// created from 'create-ts-index'
+
+export * from './PaymentInfo';
 export * from './License';
-export * from './PaymentInfo/PaymentInfo';
-export * from './PaymentInfo/PaymentMethod';
-export * from './PaymentInfo/PaymentStatus';
+export * from './ProductInfo';
 export * from './ProductSubscription';
+export * from './ProductSubscriptionInfo';

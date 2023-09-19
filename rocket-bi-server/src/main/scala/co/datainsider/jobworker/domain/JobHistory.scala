@@ -1,10 +1,10 @@
 package co.datainsider.jobworker.domain
 
+import co.datainsider.jobworker.domain.Ids.{JobId, SyncId}
+import co.datainsider.jobworker.domain.JobStatus.JobStatus
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
-import Ids.{JobId, SyncId}
-import JobStatus.JobStatus
 
 case class JobHistory(
     syncId: SyncId,
@@ -38,6 +38,7 @@ case class JobHistory(
     new Type(value = classOf[ShopeeJobProgress], name = "shopee_job_progress"),
     new Type(value = classOf[LazadaJobProgress], name = "lazada_job_progress"),
     new Type(value = classOf[PalexyJobProgress], name = "palexy_job_progress"),
+    new Type(value = classOf[GoogleJobProgress], name = "google_job_progress")
   )
 )
 trait JobProgress {
@@ -64,7 +65,7 @@ trait JobProgress {
   def customCopy(jobStatus: JobStatus): JobProgress
 }
 
-/***
+/** *
   *
   * @param jobId id of job
   * @param jobStatus current status of job
@@ -400,6 +401,24 @@ case class LazadaJobProgress(
 }
 
 case class PalexyJobProgress(
+    orgId: Long,
+    syncId: SyncId,
+    jobId: JobId,
+    updatedTime: Long,
+    jobStatus: JobStatus,
+    totalSyncRecord: Long,
+    totalExecutionTime: Long,
+    lastSyncedValue: String = "",
+    message: Option[String] = None
+) extends JobProgress {
+  override def progressData: Map[String, Any] = Map("last_synced_value" -> lastSyncedValue)
+
+  override def customCopy(jobStatus: JobStatus): JobProgress = {
+    this.copy(jobStatus = jobStatus)
+  }
+}
+
+case class GoogleJobProgress(
     orgId: Long,
     syncId: SyncId,
     jobId: JobId,

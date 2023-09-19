@@ -36,6 +36,10 @@ export const FontFamilyOptions: SelectOption[] = [
     id: 'Helvetica, sans-serif'
   },
   {
+    displayName: 'Montserrat',
+    id: 'Montserrat'
+  },
+  {
     displayName: 'Times New Roman',
     id: 'Times New Roman, serif'
   },
@@ -46,5 +50,19 @@ export const FontFamilyOptions: SelectOption[] = [
   {
     displayName: 'Garamond',
     id: 'Garamond, serif'
+  },
+  {
+    displayName: 'Primary Text Font',
+    id: 'var(--widget-primary-font-family, Roboto)',
+    data: {
+      isDefault: true
+    }
+  },
+  {
+    displayName: 'Secondary Text Font',
+    id: 'var(--widget-secondary-font-family, Roboto)',
+    data: {
+      isDefault: true
+    }
   }
 ].sort((item, nextItem) => StringUtils.compare(item.displayName, nextItem.displayName));

@@ -1,3 +1,4 @@
+/* eslint-disable no-fallthrough */
 /*
  * @author: tvc12 - Thien Vi
  * @created: 11/26/20, 6:47 PM
@@ -8,16 +9,17 @@ import {
   BellCurveQuerySetting,
   BubbleQuerySetting,
   ChartOption,
+  ChartOptionClassName,
   Condition,
   DrilldownQueryChartSetting,
   DropdownQuerySetting,
   DynamicFunction,
+  DynamicValueCondition,
   FlattenPivotTableQuerySetting,
   Function,
   FunnelQuerySetting,
   GaugeQuerySetting,
   GroupedTableQuerySetting,
-  GroupMeasurementQuerySetting,
   HeatMapQuerySetting,
   HistogramQuerySetting,
   InputControlQuerySetting,
@@ -32,7 +34,7 @@ import {
   PyramidQuerySetting,
   Queryable,
   QueryParameter,
-  QuerySettingType,
+  QuerySettingClassName,
   RawQuerySetting,
   SankeyQuerySetting,
   ScatterQuerySetting,
@@ -40,15 +42,16 @@ import {
   SpiderWebQuerySetting,
   SqlQuery,
   StackedQuerySetting,
+  TabFilterQuerySetting,
   TableColumn,
   TableQueryChartSetting,
+  TreeFilterQuerySetting,
   TreeMapQuerySetting,
   ValueCondition,
-  VizSettingType,
+  ValueControlType,
+  VariablepieQuerySetting,
   WidgetId,
-  WordCloudQuerySetting,
-  TreeFilterQuerySetting,
-  TabFilterQuerySetting, GenericChartQuerySetting, VariablepieQuerySetting
+  WordCloudQuerySetting
 } from '@core/common/domain/model';
 import { Log, NumberUtils } from '@core/utils';
 import { InlineSqlView } from '@core/common/domain/model/query/InlineSqlView';
@@ -61,8 +64,8 @@ export const getFiltersAndSorts: (obj: QuerySetting) => [Condition[], OrderBy[]]
   return [filters, sorts];
 };
 
-export abstract class QuerySetting<T extends ChartOption = ChartOption> implements Queryable {
-  abstract className: QuerySettingType;
+export abstract class QuerySetting implements Queryable {
+  abstract className: QuerySettingClassName;
   public filters: Condition[];
   public sorts: OrderBy[];
   public options: Record<string, any>;
@@ -77,72 +80,65 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
     this.parameters = parameters;
   }
 
-  static fromObject(obj: QuerySetting): QuerySetting | undefined {
+  static fromObject(obj: any): QuerySetting | undefined {
     // return new PreviewChartRequest(filters, sorts);
-    switch (obj.className) {
-      case QuerySettingType.GroupedTable:
+    switch (obj?.className) {
+      case QuerySettingClassName.GroupedTable:
         return GroupedTableQuerySetting.fromObject(obj);
-      case QuerySettingType.Table:
+      case QuerySettingClassName.Table:
         return TableQueryChartSetting.fromObject(obj);
-      case QuerySettingType.Pie:
-        return PieQuerySetting.fromObject(obj as PieQuerySetting);
-      case QuerySettingType.Funnel:
-        return FunnelQuerySetting.fromObject(obj as FunnelQuerySetting);
-      case QuerySettingType.Pyramid:
-        return PyramidQuerySetting.fromObject(obj as PyramidQuerySetting);
-      case QuerySettingType.Series:
-        return QuerySetting.fromObjectWithSettingType(obj);
-      // Scatter or bell is not different
-      case QuerySettingType.Scatter:
-        return QuerySetting.fromObjectWithSettingType(obj);
-      case QuerySettingType.Bubble:
-        return BubbleQuerySetting.fromObject(obj as BubbleQuerySetting);
-      case QuerySettingType.HeatMap:
-        return HeatMapQuerySetting.fromObject(obj as HeatMapQuerySetting);
-      case QuerySettingType.Gauge:
-        return QuerySetting.fromObjectWithSettingType(obj);
-      case QuerySettingType.Number:
-        return NumberQuerySetting.fromObject(obj as NumberQuerySetting);
-      case QuerySettingType.Drilldown:
-        return DrilldownQueryChartSetting.fromObject(obj as DrilldownQueryChartSetting);
-      case QuerySettingType.WordCloud:
-        return WordCloudQuerySetting.fromObject(obj as WordCloudQuerySetting);
-      case QuerySettingType.TreeMap:
-        return TreeMapQuerySetting.fromObject(obj as TreeMapQuerySetting);
-      case QuerySettingType.Histogram:
-        return HistogramQuerySetting.fromObject(obj as HistogramQuerySetting);
-      case QuerySettingType.Dropdown:
-        return DropdownQuerySetting.fromObject(obj as DropdownQuerySetting);
-      case QuerySettingType.Map:
-        return MapQuerySetting.fromObject(obj as MapQuerySetting);
-      case QuerySettingType.TabFilter:
-        return QuerySetting.fromObjectWithSettingType(obj);
-      case QuerySettingType.PivotTable:
+      case QuerySettingClassName.Pie:
+        return PieQuerySetting.fromObject(obj);
+      case QuerySettingClassName.Funnel:
+        return FunnelQuerySetting.fromObject(obj);
+      case QuerySettingClassName.Pyramid:
+        return PyramidQuerySetting.fromObject(obj);
+      case QuerySettingClassName.Bubble:
+        return BubbleQuerySetting.fromObject(obj);
+      case QuerySettingClassName.HeatMap:
+        return HeatMapQuerySetting.fromObject(obj);
+      case QuerySettingClassName.Number:
+        return NumberQuerySetting.fromObject(obj);
+      case QuerySettingClassName.Drilldown:
+        return DrilldownQueryChartSetting.fromObject(obj);
+      case QuerySettingClassName.WordCloud:
+        return WordCloudQuerySetting.fromObject(obj);
+      case QuerySettingClassName.TreeMap:
+        return TreeMapQuerySetting.fromObject(obj);
+      case QuerySettingClassName.Histogram:
+        return HistogramQuerySetting.fromObject(obj);
+      case QuerySettingClassName.Dropdown:
+        return DropdownQuerySetting.fromObject(obj);
+      case QuerySettingClassName.Map:
+        return MapQuerySetting.fromObject(obj);
+      case QuerySettingClassName.PivotTable:
         return PivotTableQuerySetting.fromObject(obj);
-      case QuerySettingType.Parliament:
+      case QuerySettingClassName.Parliament:
         return ParliamentQuerySetting.fromObject(obj);
-      case QuerySettingType.SpiderWeb:
-        return SpiderWebQuerySetting.fromObject(obj as SpiderWebQuerySetting);
-      case QuerySettingType.BellCurve:
-        return BellCurve2QuerySetting.fromObject(obj as BellCurve2QuerySetting);
-      case QuerySettingType.Sankey:
-        return SankeyQuerySetting.fromObject(obj as SankeyQuerySetting);
-      case QuerySettingType.FlattenPivot:
-        return FlattenPivotTableQuerySetting.fromObject(obj as FlattenPivotTableQuerySetting);
-      case QuerySettingType.RawQuery:
-        return RawQuerySetting.fromObject(obj as RawQuerySetting);
-      case QuerySettingType.Stocks:
+      case QuerySettingClassName.SpiderWeb:
+        return SpiderWebQuerySetting.fromObject(obj);
+      case QuerySettingClassName.BellCurve:
+        return BellCurve2QuerySetting.fromObject(obj);
+      case QuerySettingClassName.Sankey:
+        return SankeyQuerySetting.fromObject(obj);
+      case QuerySettingClassName.FlattenPivot:
+        return FlattenPivotTableQuerySetting.fromObject(obj);
+      case QuerySettingClassName.RawQuery:
+        return RawQuerySetting.fromObject(obj);
+      case QuerySettingClassName.InputQuerySetting:
+        return InputControlQuerySetting.fromObject(obj);
+      case QuerySettingClassName.TreeFilter:
+        return TreeFilterQuerySetting.fromObject(obj);
+
+      // Scatter or bell is not different
+      case QuerySettingClassName.Scatter:
+      case QuerySettingClassName.Series:
+      case QuerySettingClassName.Stocks:
+      case QuerySettingClassName.GenericChart:
+      case QuerySettingClassName.TabFilterQuerySetting:
+      case QuerySettingClassName.TabFilter:
+      case QuerySettingClassName.Gauge:
         return QuerySetting.fromObjectWithSettingType(obj);
-      case QuerySettingType.GroupMeasurement:
-        return GroupMeasurementQuerySetting.fromObject(obj as GroupMeasurementQuerySetting);
-      case QuerySettingType.TabControl:
-        return QuerySetting.fromObjectWithSettingType(obj);
-      case QuerySettingType.InputControl:
-        return InputControlQuerySetting.fromObject(obj as InputControlQuerySetting);
-      case QuerySettingType.TreeFilter:
-        return TreeFilterQuerySetting.fromObject(obj as TreeFilterQuerySetting);
-      case QuerySettingType.GenericChart:
-        return this.fromObjectWithSettingType(obj);
       default:
         Log.info(`QuerySetting:: ${obj.className} unsupported`);
         return void 0;
@@ -150,39 +146,36 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
   }
 
   private static fromObjectWithSettingType(obj: any | QuerySetting): QuerySetting | undefined {
-    if (obj.options) {
-      switch (obj.options.className) {
-        case VizSettingType.BellCurveSetting:
-          return BellCurveQuerySetting.fromObject(obj);
-        case VizSettingType.ScatterSetting:
-          return ScatterQuerySetting.fromObject(obj);
-        case VizSettingType.SeriesSetting:
-          return SeriesQuerySetting.fromObject(obj);
-        case VizSettingType.StackedSeriesSetting:
-          return StackedQuerySetting.fromObject(obj);
-        case VizSettingType.CircularBarSetting:
-          return StackedQuerySetting.fromObject(obj);
-        case VizSettingType.ParetoSetting:
-          return ParetoQuerySetting.fromObject(obj);
-        case VizSettingType.BulletSetting:
-          return GaugeQuerySetting.fromObject(obj);
-        case VizSettingType.GaugeSetting:
-          return GaugeQuerySetting.fromObject(obj as GaugeQuerySetting);
-        case VizSettingType.WindRoseSetting:
-          return StackedQuerySetting.fromObject(obj);
-        case VizSettingType.TabFilterSetting:
-          return TabFilterQuerySetting.fromObject(obj as TabFilterQuerySetting);
-        case VizSettingType.LineStockSetting:
-          return SeriesQuerySetting.fromObject(obj);
-        case VizSettingType.TabMeasurementSetting:
-          return GroupMeasurementQuerySetting.fromObject(obj);
-        case VizSettingType.TreeFilterSetting:
-          return TreeFilterQuerySetting.fromObject(obj as TreeFilterQuerySetting);
-        case VizSettingType.VariablepieSetting:
-          return VariablepieQuerySetting.fromObject(obj as any);
-      }
+    switch (obj?.options?.className) {
+      case ChartOptionClassName.BellCurveSetting:
+        return BellCurveQuerySetting.fromObject(obj);
+      case ChartOptionClassName.ScatterSetting:
+        return ScatterQuerySetting.fromObject(obj);
+      case ChartOptionClassName.SeriesSetting:
+        return SeriesQuerySetting.fromObject(obj);
+      case ChartOptionClassName.StackedSeriesSetting:
+        return StackedQuerySetting.fromObject(obj);
+      case ChartOptionClassName.CircularBarSetting:
+        return StackedQuerySetting.fromObject(obj);
+      case ChartOptionClassName.ParetoSetting:
+        return ParetoQuerySetting.fromObject(obj);
+      case ChartOptionClassName.BulletSetting:
+        return GaugeQuerySetting.fromObject(obj);
+      case ChartOptionClassName.GaugeSetting:
+        return GaugeQuerySetting.fromObject(obj);
+      case ChartOptionClassName.WindRoseSetting:
+        return StackedQuerySetting.fromObject(obj);
+      case ChartOptionClassName.TabFilterSetting:
+        return TabFilterQuerySetting.fromObject(obj);
+      case ChartOptionClassName.LineStockSetting:
+        return SeriesQuerySetting.fromObject(obj);
+      case ChartOptionClassName.TreeFilterSetting:
+        return TreeFilterQuerySetting.fromObject(obj);
+      case ChartOptionClassName.VariablePieSetting:
+        return VariablepieQuerySetting.fromObject(obj);
+      default:
+        return void 0;
     }
-    return void 0;
   }
 
   /**
@@ -191,50 +184,59 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
    */
   abstract getAllFunction(): Function[];
 
-  abstract getAllTableColumn(): TableColumn[];
+  abstract getAllTableColumns(): TableColumn[];
 
-  getChartOption(): T | undefined {
+  getChartOption<T extends ChartOption = ChartOption<any>>(): T | undefined {
     return this.options?.className ? (ChartOption.fromObject(this.options as any) as T) : void 0;
   }
 
-  setChartOption(vizSetting: ChartOption): void {
+  setChartOption(newChartOption: ChartOption): void {
     // function assign or merge is working
-    const options: any = Object.assign({}, vizSetting);
+    const options: any = Object.assign({}, newChartOption);
     this.options = options;
     try {
-      const finalVizSetting = ChartOption.fromObject(options);
-      if (finalVizSetting) {
-        this.setValueBySetting(finalVizSetting);
+      const finalChartOption = ChartOption.fromObject(options);
+      if (finalChartOption) {
+        this.assignChartOptionValue(finalChartOption);
       }
     } catch (ex) {
-      Log.error('setVisualizationSetting::ex', ex);
+      Log.error('QuerySetting::setChartOption::ex', ex);
     }
   }
 
-  protected setValueBySetting(setting: ChartOption) {
+  /**
+   * method will assign all value to implement class.
+   * Class override this method will assign current value to implement class
+   * @param otherChartOption is a chart option will be assigned to implement class
+   */
+  protected assignChartOptionValue(otherChartOption: ChartOption): void {
     //Nothing to do
   }
 
-  get hasDynamicFunction(): boolean {
-    return ListUtils.isNotEmpty(this.getAllTableColumn().map(column => column.dynamicFunctionId !== undefined));
+  hasDynamicFunction(): boolean {
+    return this.getAllTableColumns().some(column => column.dynamicFunctionId !== undefined);
   }
 
-  get hasDynamicCondition(): boolean {
+  hasDynamicValue(): boolean {
     return ListUtils.isNotEmpty(FilterUtils.getDynamicConditions(this.filters, []));
   }
 
-  getAllDynamicFunction(): TableColumn[] {
-    return this.getAllTableColumn().filter(column => column.dynamicFunctionId !== undefined);
+  getControlledFunctions(): TableColumn[] {
+    return this.getAllTableColumns().filter(column => column.dynamicFunctionId !== undefined);
   }
 
-  affectByDynamicFunction(id: WidgetId): boolean {
-    return this.getAllTableColumn().find(column => column.dynamicFunctionId === id) !== undefined;
+  /**
+   * check setting is affect by dynamic control
+   * @param controllerId related with widget, who control this query
+   */
+  canControlFunction(controllerId: WidgetId): boolean {
+    return this.getAllTableColumns().some(column => column.dynamicFunctionId === controllerId);
   }
 
-  affectByDynamicCondition(id: WidgetId): boolean {
+  canApplyValueControl(controllerId: WidgetId): boolean {
     const dynamicConditions = FilterUtils.getDynamicConditions(this.filters, []);
-    Log.debug('affectByDynamicControl::', dynamicConditions, this.filters);
-    return ListUtils.isNotEmpty(dynamicConditions.filter(condition => condition.dynamicWidgetId === id));
+    // Log.debug('affectByDynamicControl::', dynamicConditions, this.filters);
+    return dynamicConditions.some(condition => condition.dynamicWidgetId === controllerId);
   }
 
   isAffectByQueryParameter(id: WidgetId): boolean {
@@ -248,9 +250,13 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
    *Value: Replace Column
    *
    */
-  abstract setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void;
+  abstract applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void;
 
-  setSortDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  /**
+   * fixme: move setSortDynamicFunctions to applyDynamicFunctions method
+   * @deprecated
+   */
+  applyDynamicSortFunction(functions: Map<WidgetId, TableColumn[]>): void {
     functions.forEach((tblColumns, dynamicWidgetId) => {
       const currentSort = this.sorts.find(sort => DynamicFunction.isDynamicFunction(sort.function) && sort.function.dynamicWidgetId === dynamicWidgetId);
       if (currentSort) {
@@ -270,19 +276,18 @@ export abstract class QuerySetting<T extends ChartOption = ChartOption> implemen
     });
   }
 
-  /*
-   *Key: Dynamic Filter Id cần replace
-   *
-   *Value: Replace Value
-   *
-   */
-  setDynamicFilter(filterValueAsMap: Map<WidgetId, string[]>) {
-    FilterUtils.getDynamicConditions(this.filters, []).forEach(filter => {
-      if (filterValueAsMap.has(filter.dynamicWidgetId)) {
+  applyDynamicFilters(filterAsMap: Map<WidgetId, Map<ValueControlType, string[]>>): void {
+    FilterUtils.getDynamicConditions(this.filters, []).forEach((filter: DynamicValueCondition) => {
+      if (filterAsMap.has(filter.dynamicWidgetId)) {
         if (ValueCondition.isValueCondition(filter.baseCondition)) {
           ///Assign values to filter
-          const values = filterValueAsMap.get(filter.dynamicWidgetId)!;
-          filter.withValues(values);
+          const valueMap: Map<ValueControlType, string[]> = filterAsMap.get(filter.dynamicWidgetId) ?? new Map();
+          const controlTypes: ValueControlType[] = filter.extraData.controlTypes ?? [];
+          const allValues: string[] = controlTypes.flatMap(controlType => {
+            const values: string[] = valueMap.get(controlType) ?? [];
+            return values;
+          });
+          filter.withValues(allValues);
           return;
         }
       }

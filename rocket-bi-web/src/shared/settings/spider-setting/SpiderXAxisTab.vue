@@ -117,10 +117,10 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
-import { AxisSetting, ChartOption, HeatMapQuerySetting, QuerySettingType, ScatterQuerySetting, SeriesQuerySetting, SettingKey } from '@core/common/domain';
+import { AxisSetting, ChartOption, HeatMapQuerySetting, QuerySettingClassName, ScatterQuerySetting, SeriesQuerySetting, SettingKey } from '@core/common/domain';
 import { QuerySetting } from '@core/common/domain/model/query/QuerySetting.ts';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { DashOptions } from '@/shared/settings/common/options/DashOptions';
 import { ListUtils } from '@/utils';
 import { _ThemeStore } from '@/store/modules/ThemeStore';
@@ -136,8 +136,8 @@ export default class SpiderXAxisTab extends Vue {
   private readonly query!: QuerySetting;
   private readonly defaultSetting = {
     visible: true,
-    categoryFont: 'Roboto',
-    categoryColor: ChartOption.getThemeTextColor(),
+    categoryFont: ChartOption.getSecondaryFontFamily(),
+    categoryColor: ChartOption.getPrimaryTextColor(),
     categoryFontSize: '11px',
     gridLineColor: ChartOption.getGridLineColor(),
     gridLineDashStyle: 'Solid',
@@ -181,7 +181,7 @@ export default class SpiderXAxisTab extends Vue {
   }
 
   private get fontSizeOptions() {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get gridLineColor(): string {
@@ -226,9 +226,9 @@ export default class SpiderXAxisTab extends Vue {
     return false;
   }
   private get enableSettingGridLine(): boolean {
-    const isScatter: boolean = this.query.className == QuerySettingType.Scatter;
-    const isBubble: boolean = this.query.className == QuerySettingType.Bubble;
-    const isSpider: boolean = this.query.className == QuerySettingType.SpiderWeb;
+    const isScatter: boolean = this.query.className == QuerySettingClassName.Scatter;
+    const isBubble: boolean = this.query.className == QuerySettingClassName.Bubble;
+    const isSpider: boolean = this.query.className == QuerySettingClassName.SpiderWeb;
     return isScatter || isBubble || isSpider;
   }
 

@@ -56,7 +56,7 @@ export default class ErrorWidget extends Vue {
     flex-shrink: 1;
     font-size: 14px;
     -webkit-line-clamp: 4;
-    opacity: 0.6;
+    //opacity: 0.6;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
@@ -70,7 +70,7 @@ export default class ErrorWidget extends Vue {
 
   .chart-error-icon {
     font-size: 58px;
-    color: #9799ac;
+    color: var(--secondary-text-color);
     margin-bottom: 17px;
   }
 

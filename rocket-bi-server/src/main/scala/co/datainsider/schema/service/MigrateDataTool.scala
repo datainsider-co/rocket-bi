@@ -1,117 +1,117 @@
 package co.datainsider.schema.service
 
-import co.datainsider.bi.client.JdbcClient
-import co.datainsider.schema.domain.{DatabaseSchema, TableType}
-import co.datainsider.schema.repository.{DDLExecutor, SchemaMetadataStorage}
+import co.datainsider.bi.client.{NativeJDbcClient, NativeJdbcClientWithProperties}
+import co.datainsider.schema.domain.{DatabaseSchema, TableSchema}
+import co.datainsider.schema.repository.{MySqlSchemaMetadataStorage, SchemaRepository}
+import com.google.inject.Inject
 import com.twitter.inject.Logging
-import datainsider.client.domain.Implicits.FutureEnhanceLike
+import com.twitter.util.Future
+import datainsider.client.domain.Implicits.{FutureEnhanceLike, async}
 
-import javax.inject.Inject
-import scala.collection.mutable
+import java.util.Properties
 
-// fixme: remove this class
-@deprecated("use MigrateDataTool instead", "1.0.0")
-class MigrateDataTool @Inject() (ddlExecutor: DDLExecutor, storage: SchemaMetadataStorage, client: JdbcClient)
-    extends Logging {
+case class MigrateRequest(
+    orgId: Long,
+    srcClickhouseHost: String,
+    srcClickhousePort: Int,
+    srcClickhouseUsername: String,
+    srcClickhousePassword: String,
+    srcMySqlHost: String,
+    srcMySqlPort: Int,
+    srcMySqlUsername: String,
+    srcMySqlPassword: String,
+    destClickhouseHost: String,
+    destClickhousePort: Int,
+    destClickhouseUsername: String,
+    destClickhousePassword: String
+) {
+  def toMySqlUrl =
+    s"jdbc:mysql://${srcMySqlHost}:${srcMySqlPort}?useUnicode=true&amp&characterEncoding=UTF-8&useLegacyDatetimeCode=false&serverTimezone=Asia/Ho_Chi_Minh"
+}
 
-  private val affectedTables = mutable.Map.empty[String, Int]
+/**
+  * Usage example:
+  *    val tool = injector.instance[MigrateDataTool]
+  *    tool.migrate(
+  *      MigrateRequest(
+  *        orgId = 22,
+  *        srcClickhouseHost = "118.69.169.48",
+  *        srcClickhousePort = 9200,
+  *        srcClickhouseUsername = "default",
+  *        srcClickhousePassword = "",
+  *        srcMySqlHost = "118.69.169.48",
+  *        srcMySqlPort = 3306,
+  *        srcMySqlUsername = "root",
+  *        srcMySqlPassword = "di@2020!",
+  *        destClickhouseHost = "34.101.114.204",
+  *        destClickhousePort = 8123,
+  *        destClickhouseUsername = "default",
+  *        destClickhousePassword = ""
+  *      )
+  *    )
+  */
+trait MigrateDataTool {
+  def migrate(request: MigrateRequest): Future[Unit]
+}
 
-  /**
-    * migrate data from one clickhouse cluster to another
-    * @param orgId org to migrate data
-    * @param sourceDbUrl <host>:<port>  E.g: 127.0.0.1:9001
-    * @return
-    */
-  def startMigrate(orgId: Long, sourceDbUrl: String): Boolean = {
+class ClickhouseMigrateDataTool @Inject() (destSchemaRepository: SchemaRepository)
+    extends MigrateDataTool
+    with Logging {
+  def migrate(request: MigrateRequest): Future[Unit] =
+    async {
+      val srcMysqlClient = NativeJDbcClient(request.toMySqlUrl, request.srcMySqlUsername, request.srcMySqlPassword)
+      val sourceMetadataStorage = new MySqlSchemaMetadataStorage(srcMysqlClient)
 
-    val task = new Thread {
-      override def run() {
-        migrateData(orgId, sourceDbUrl)
-      }
+      val sourceDbs: Seq[DatabaseSchema] = sourceMetadataStorage.getDatabases(request.orgId).syncGet()
+
+      sourceDbs.foreach(db => {
+        try {
+          val isDbExisted = destSchemaRepository.isDatabaseExists(request.orgId, db.name, true).syncGet()
+
+          if (!isDbExisted) {
+            destSchemaRepository.createDatabase(request.orgId, db.name, db.displayName).syncGet()
+          }
+
+          db.tables.foreach(tbl => {
+            try {
+              destSchemaRepository.createTableOrOverrideSchema(tbl).syncGet()
+              copyData(tbl, request)
+              info(s"migrate done tbl: ${tbl.name}")
+            } catch {
+              case e: Throwable => error(s"migrate fail tbl: ${tbl.name}, message: ${e.getMessage}", e)
+            }
+          })
+        } catch {
+          case e: Throwable => error(s"migrate fail db: ${db.name}, message: ${e.getMessage}", e)
+        }
+      })
     }
 
-    task.start()
-    true
+  def copyData(tblSchema: TableSchema, request: MigrateRequest): Unit = {
+    val sourceUrl = s"${request.srcClickhouseHost}:${request.srcClickhousePort}"
+
+    val properties = new Properties()
+    properties.setProperty("user", request.destClickhouseUsername)
+    properties.setProperty("password", request.destClickhousePassword)
+    properties.setProperty("connect_timeout_with_failover_ms", "1000")
+    val client = NativeJdbcClientWithProperties(
+      jdbcUrl = s"jdbc:clickhouse://${request.destClickhouseHost}:${request.destClickhousePort}",
+      properties = properties
+    )
+
+    val removeOldDataQuery =
+      s"""
+         |truncate table ${tblSchema.dbName}.${tblSchema.name}
+         |""".stripMargin
+
+    client.executeUpdate(removeOldDataQuery)
+
+    val copyDataQuery =
+      s"""
+        |INSERT INTO ${tblSchema.dbName}.${tblSchema.name}
+        |SELECT * FROM remote('$sourceUrl', ${tblSchema.dbName}.${tblSchema.name})
+        |""".stripMargin
+
+    client.executeUpdate(copyDataQuery)
   }
-
-  def getStats: mutable.Map[String, Int] = affectedTables
-
-  private def migrateData(orgId: Long, sourceDbUrl: String): mutable.Map[String, Int] = {
-    val databases: Seq[DatabaseSchema] = storage.getDatabases(orgId).syncGet()
-
-    // reconstruct clickhouse tables according to table schemas
-    databases.foreach(db => {
-      val dbCreated: Boolean = ddlExecutor.createDatabase(db.name).syncGet()
-
-      if (dbCreated) {
-        db.tables.foreach(tblSchema => {
-          try {
-            val isTblExisted = ddlExecutor.existTableSchema(db.name, tblSchema.name).syncGet()
-
-            if (!isTblExisted) {
-              ddlExecutor.createTable(tblSchema).syncGet()
-            }
-
-            record(db.name, tblSchema.name, 0)
-
-          } catch {
-            case e: Throwable =>
-              record("error::create", s"${db.name}.${tblSchema.name}", 1)
-              logger.info(s"create table fail: $e")
-          }
-        })
-
-      } else {
-        logger.info(s"create db fail: ${db.name}")
-      }
-    })
-
-    // insert data to tables
-    databases.foreach(db => {
-      db.tables.foreach(tblSchema => {
-
-        // insert to normal tables only
-        tblSchema.getTableType match {
-          case TableType.Default =>
-            try {
-              val isTblExisted: Boolean = ddlExecutor.existTableSchema(db.name, tblSchema.name).syncGet()
-              val currentNumRows: Int = getTotalRow(db.name, tblSchema.name)
-
-              if (isTblExisted && currentNumRows == 0) {
-                val query =
-                  s"""
-                       |INSERT INTO ${db.name}.${tblSchema.name}
-                       |SELECT * FROM remote('$sourceDbUrl', ${db.name}.${tblSchema.name})
-                       |""".stripMargin
-
-                client.executeUpdate(query)
-
-                val numRowInserted: Int = getTotalRow(db.name, tblSchema.name)
-                record(db.name, tblSchema.name, numRowInserted)
-              }
-            } catch {
-              case e: Throwable =>
-                logger.error(s"insert to table failed: $e")
-                record("error::insert", s"${db.name}.${tblSchema.name}", 1)
-            }
-
-          case _ => // do nothing
-        }
-
-      })
-    })
-
-    record("finish", "migration", 1)
-    affectedTables
-  }
-
-  private def record(dbName: String, tblName: String, numRows: Int): Unit = {
-    affectedTables.put(s"$dbName.$tblName", numRows)
-  }
-
-  private def getTotalRow(dbName: String, tblName: String): Int = {
-    val countQuery = s"select count(*) from $dbName.$tblName"
-    client.executeQuery(countQuery)(rs => if (rs.next()) rs.getInt(1) else 0)
-  }
-
 }

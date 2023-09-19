@@ -6,7 +6,7 @@
 import { Component, Prop, Ref, Watch } from 'vue-property-decorator';
 import NProgress from 'nprogress';
 import { BPagination } from 'bootstrap-vue';
-import { DefaultPaging, DefaultSettingColor, TableSettingClass, TableSettingColor } from '@/shared/enums';
+import { DefaultPaging, DefaultSettingColor } from '@/shared/enums';
 import { PivotTableChartOption, PivotTableOptionData, PivotTableQuerySetting } from '@core/common/domain/model';
 import { ClassProfiler } from '@/shared/profiler/Annotation';
 import { HeaderData, Pagination, RowData } from '@/shared/models';
@@ -34,11 +34,9 @@ import { TableFooterStyleRender } from '@chart/table/style-render/TableFooterSty
 import { PivotTableFooterStyleRender } from '@chart/table/pivot-table/style/footer/PivotTableFooterStyleRender';
 import { PivotTableHeaderStyleRender } from '@chart/table/pivot-table/style/header/PivotTableHeaderStyleRender';
 import { TableStyleUtils } from '@chart/table/TableStyleUtils';
-import { _ThemeStore } from '@/store/modules/ThemeStore';
 import { MouseEventData } from '@chart/BaseChart';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
-import { ColorUtils } from '@/utils/ColorUtils';
 import { ExportType } from '@core/common/domain';
 
 @Component({
@@ -100,7 +98,7 @@ export default class PivotTable extends BaseWidget {
     this.pagination = new Pagination({ page: 1, rowsPerPage: this.defaultRowsPerPage });
   }
   private get vizSetting(): PivotTableChartOption | null {
-    return this.querySetting.getChartOption() ?? null;
+    return this.querySetting.getChartOption<PivotTableChartOption>() ?? null;
   }
 
   private get chartId() {
@@ -137,6 +135,8 @@ export default class PivotTable extends BaseWidget {
       'font-size': this.vizSetting?.getTitleFontSize(),
       'text-align': this.vizSetting?.getTitleAlign(),
       'font-family': options.title?.style?.fontFamily,
+      'font-weight': options.title?.style?.fontWeight,
+      'font-style': options.title?.style?.fontStyle,
       'background-color': options.title?.backgroundColor,
       'white-space': options.title?.isWordWrap ? 'pre-wrap' : 'nowrap'
     };
@@ -156,6 +156,9 @@ export default class PivotTable extends BaseWidget {
       'font-size': this.vizSetting?.getSubtitleFontSize(),
       'text-align': this.vizSetting?.getSubtitleAlign(),
       'font-family': options.subtitle?.style?.fontFamily,
+      'font-weight': options.subtitle?.style?.fontWeight,
+      'font-style': options.subtitle?.style?.fontStyle,
+      'text-decoration': options.subtitle?.style?.textDecoration,
       'background-color': options.subtitle?.backgroundColor,
       'white-space': options.subtitle?.isWordWrap ? 'pre-wrap' : 'nowrap'
     };
@@ -171,14 +174,6 @@ export default class PivotTable extends BaseWidget {
       '--background-color': this.backgroundColor,
       ...this.getPivotSettingStyle(this.vizSetting)
     };
-  }
-
-  get tableChartContainerClass(): any {
-    if (this.backgroundColor) {
-      return `${TableSettingClass.tableChartContainer}`;
-    } else {
-      return `${TableSettingClass.tableChartContainer} ${TableSettingColor.secondaryBackgroundColor}`;
-    }
   }
 
   private get perPageBackgroundColor() {
@@ -491,23 +486,23 @@ export default class PivotTable extends BaseWidget {
     const widgetColor: string | undefined = currentSetting.background;
     const baseThemeColor: string = this.baseThemeColor;
     const cssObject = {
-      '--header-color': ColorUtils.parseColor(currentSetting.header?.style?.color),
+      '--table-header-color': currentSetting.header?.style?.color,
       '--header-background-color': TableStyleUtils.combineColor(baseThemeColor, currentSetting.header?.backgroundColor, widgetColor),
       '--header-font-family': currentSetting.header?.style?.fontFamily,
       '--header-font-size': StringUtils.toPx(currentSetting.header?.style?.fontSize),
       '--header-white-space': currentSetting.header?.isWordWrap ? 'normal' : void 0,
       '--header-text-align': currentSetting.header?.align,
       // row
-      '--row-even-color': ColorUtils.parseColor(currentSetting.value?.color),
+      '--row-even-color': currentSetting.value?.color,
       '--row-even-background-color': TableStyleUtils.combineColor(baseThemeColor, currentSetting.value?.backgroundColor, widgetColor),
-      '--row-odd-color': ColorUtils.parseColor(currentSetting.value?.alternateColor),
+      '--row-odd-color': currentSetting.value?.alternateColor,
       '--row-odd-background-color': TableStyleUtils.combineColor(baseThemeColor, currentSetting.value?.alternateBackgroundColor, widgetColor),
       '--row-font-family': currentSetting.value?.style?.fontFamily,
       '--row-font-size': StringUtils.toPx(currentSetting.value?.style?.fontSize),
       '--row-white-space': currentSetting.value?.style?.isWordWrap ? 'normal' : void 0,
       // '--row-text-align': currentSetting.value?.align,
       // footer
-      '--footer-color': ColorUtils.parseColor(currentSetting.total?.label?.style?.color),
+      '--footer-color': currentSetting.total?.label?.style?.color,
       '--footer-background-color': TableStyleUtils.combineColor(baseThemeColor, currentSetting.total?.backgroundColor, widgetColor),
       '--footer-font-family': currentSetting.total?.label?.style?.fontFamily,
       '--footer-font-size': StringUtils.toPx(currentSetting.total?.label?.style?.fontSize),
@@ -517,14 +512,14 @@ export default class PivotTable extends BaseWidget {
       ...TableStyleUtils.getGridStyle(currentSetting.grid),
       '--grid-horizontal-padding': StringUtils.toPx(currentSetting.grid?.horizontal?.rowPadding),
       // tooltip
-      '--tooltip-background-color': ColorUtils.parseColor(currentSetting.tooltip?.backgroundColor),
-      '--tooltip-color': ColorUtils.parseColor(currentSetting.tooltip?.valueColor),
+      '--tooltip-background-color': currentSetting.tooltip?.backgroundColor,
+      '--tooltip-color': currentSetting.tooltip?.valueColor,
       '--tooltip-font-family': currentSetting.tooltip?.fontFamily,
       // toggle icon
-      '--toggle-icon-background-color': ColorUtils.parseColor(currentSetting.toggleIcon?.backgroundColor),
-      '--toggle-icon-color': ColorUtils.parseColor(currentSetting.toggleIcon?.color),
+      '--toggle-icon-background-color': currentSetting.toggleIcon?.backgroundColor,
+      '--toggle-icon-color': currentSetting.toggleIcon?.color,
       // paging
-      '--table-page-active-color': ColorUtils.parseColor(currentSetting.header?.style?.color)
+      '--table-page-active-color': currentSetting.header?.style?.color
     };
     return ObjectUtils.removeKeyIfValueNotExist(cssObject);
   }
@@ -537,10 +532,6 @@ export default class PivotTable extends BaseWidget {
     return this.footerStyleRender.createStyle(cellData);
   }
 
-  private get baseThemeColor(): string {
-    return _ThemeStore.baseDashboardTheme;
-  }
-
   private showContextMenu(mouseData: MouseEventData<string>): void {
     TableTooltipUtils.hideTooltip();
     Log.debug('pivot::showContextMenu', mouseData);
@@ -549,5 +540,11 @@ export default class PivotTable extends BaseWidget {
 
   async export(type: ExportType): Promise<void> {
     await DashboardControllerModule.handleExport({ widgetId: this.chartId, type: type });
+  }
+
+  handleOnRightClick(e: MouseEvent) {
+    Log.debug('PivotTable::handleOnClick::event::', e);
+    e.preventDefault();
+    this.showContextMenu(new MouseEventData<string>(e, ''));
   }
 }

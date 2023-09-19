@@ -3,53 +3,40 @@ import DashboardSettingModal from '@/screens/dashboard-detail/components/dashboa
 import PerformanceBoostModal from '@/screens/dashboard-detail/components/PerformanceBoostModal.vue';
 import SelectFieldButton from '@/screens/dashboard-detail/components/SelectFieldButton.vue';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
-import { ChartDataModule, DashboardModeModule, DashboardModule, FilterModule, MainDateData, WidgetModule } from '@/screens/dashboard-detail/stores';
+import {
+  ChartDataModule,
+  DashboardControllerModule,
+  DashboardModeModule,
+  DashboardModule,
+  FilterModule,
+  WidgetModule
+} from '@/screens/dashboard-detail/stores';
 import { ContextMenuItem, DashboardMode, DashboardOptions, DateRange } from '@/shared';
 import { Track } from '@/shared/anotation';
 import PermissionWidget from '@/shared/components/PermissionWidget.vue';
-import { Stores } from '@/shared/enums/Stores';
 import { ListUtils } from '@/utils';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 import { GenIdMethods } from '@/utils/IdGenerator';
-import { ActionType, ResourceType } from '@/utils/PermissionUtils';
+import { ActionType } from '@/utils/PermissionUtils';
 import { PopupUtils } from '@/utils/PopupUtils';
-import {
-  DashboardSetting,
-  DIException,
-  Field,
-  MainDateFilter as DateFilter,
-  MainDateMode,
-  Position,
-  TabWidget,
-  TextWidget,
-  UserProfile
-} from '@core/common/domain';
-import { Di } from '@core/common/modules';
+import { DashboardSetting, DIException, MainDateFilter2, MainDateMode, Position, TabWidget, TextWidget, UserProfile } from '@core/common/domain';
 import { DataManager } from '@core/common/services';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Log } from '@core/utils';
-import { ChartUtils } from '@/utils/ChartUtils';
 import MainDateFilter from '@filter/main-date-filter-v2/MainDateFilter.vue';
 import SetupMainDateFilter from '@filter/main-date-filter-v2/SetupMainDateFilter.vue';
 import { Component, Inject, Prop, Provide, Ref, Vue } from 'vue-property-decorator';
-import { mapGetters, mapState } from 'vuex';
 import RelationshipModal from '@/screens/dashboard-detail/components/RelationshipModal.vue';
 import DashboardRelationshipIcon from '@/shared/components/Icon/DashboardRelationshipIcon.vue';
 import RLSViewAsModal from '@/screens/dashboard-detail/components/dashboard-control-bar/RLSViewAsModal.vue';
 import { BPopover } from 'bootstrap-vue';
 import DiIconTextButton from '@/shared/components/common/DiIconTextButton.vue';
-import ClickOutside from 'vue-click-outside';
 import { EventBus } from '@/event-bus/EventBus';
-import { FilterPanel } from '@core/common/domain/model/widget/normal/FilterPanel';
+import { GroupFilter } from '@core/common/domain/model/widget/normal/GroupFilter';
 
 const $ = window.$;
 
 @Component({
-  computed: {
-    ...mapGetters(Stores.DashboardModeStore, ['isViewMode', 'isFullScreen', 'isTVMode']),
-    ...mapState(Stores.DashboardModeStore, ['mode']),
-    ...mapState(Stores.DashboardStore, ['mainDateFilter'])
-  },
   components: {
     MainDateFilter,
     PermissionWidget,
@@ -61,36 +48,26 @@ const $ = window.$;
     RelationshipModal,
     DashboardRelationshipIcon,
     RLSViewAsModal
-  },
-  directives: {
-    ClickOutside
   }
 })
 export default class DashboardControlBar extends Vue {
-  private popupItem: Element | null = null;
-
-  static readonly TO_EDIT_MODE = 'to_edit';
-  static readonly TO_VIEW_MODE = 'to_view';
-  static readonly TO_FULL_SCREEN_MODE = 'to_full_screen';
-  static readonly TO_TV_MODE = 'to_tv_mode';
-  static readonly TO_RLS_VIEW_AS = 'to_rls_view_as';
-
-  private readonly optionMenuId = 'dashboard-options-menu';
   private readonly optionButtonId = 'dashboard-options-button';
   private isShowOptionMenu = false;
 
-  @Prop({ type: Boolean, default: false })
-  showResetFilters!: boolean;
-  isFullScreen!: boolean;
-  isTVMode!: boolean;
-  isViewMode!: boolean;
-  mode!: DashboardMode;
-  textWidget!: TextWidget;
-  mainDateFilter!: DateFilter;
   date: DateRange = {
     start: '',
     end: ''
   };
+
+  @Prop({ type: Boolean, default: false })
+  protected readonly showResetFilters!: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  protected readonly isMobile!: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  protected readonly isEmbeddedView!: boolean;
+
   @Ref()
   private readonly imagePicker?: HTMLInputElement;
 
@@ -113,7 +90,27 @@ export default class DashboardControlBar extends Vue {
   @Ref()
   private optionButton?: DiIconTextButton;
 
-  private isResetMainDateFilter = false;
+  private isResetMainDateFlow = false;
+
+  protected get mainDateFilter(): MainDateFilter2 | null {
+    return DashboardModule.currentDashboard?.setting.mainDateFilter ?? DashboardModule.mainDateFilter;
+  }
+
+  protected get mode(): DashboardMode {
+    return DashboardModeModule.mode;
+  }
+
+  protected get isFullScreen(): boolean {
+    return DashboardModeModule.isFullScreen;
+  }
+
+  protected get isTVMode(): boolean {
+    return DashboardModeModule.isTVMode;
+  }
+
+  protected get isViewMode(): boolean {
+    return DashboardModeModule.isViewMode;
+  }
 
   private get items(): ContextMenuItem[] {
     return [
@@ -126,7 +123,7 @@ export default class DashboardControlBar extends Vue {
         click: this.handleAddTab
       },
       {
-        text: DashboardOptions.ADD_FILTER_PANEL,
+        text: DashboardOptions.ADD_GROUP_FILTER,
         click: this.handleAddFilterPanel
       },
       {
@@ -148,9 +145,6 @@ export default class DashboardControlBar extends Vue {
   // Provide from DashboardHeader.vue
   @Inject()
   private handleResetFilter?: () => void;
-
-  private currentDirectoryId: number | null = null;
-
   get disabledPasteChart(): boolean {
     return !DashboardModule.copiedData;
   }
@@ -166,23 +160,15 @@ export default class DashboardControlBar extends Vue {
     return ChartDataModule.viewAsUser;
   }
 
-  get isShowMainDateFilter() {
+  get hasMainDate(): boolean {
     //sua ten
-    if (this.mainDateFilter && !this.isResetMainDateFilter) {
+    if (this.mainDateFilter && !this.isResetMainDateFlow) {
       return true;
     }
     return false;
   }
 
-  private isMobile() {
-    return ChartUtils.isMobile();
-  }
-
-  private get optionMenuPlacement(): string {
-    return 'bottom';
-  }
-
-  private get isEditDashboardMode() {
+  private get isEditMode() {
     return this.mode === DashboardMode.Edit;
   }
 
@@ -216,45 +202,41 @@ export default class DashboardControlBar extends Vue {
 
   //get Inject from DiCalender.ts
   @Provide()
-  handleResetMainDate() {
-    this.isResetMainDateFilter = true;
+  handleResetMainDate(): void {
+    this.isResetMainDateFlow = true;
     Log.debug('Catch reset main date filter');
   }
 
-  async switchMode(mode: string): Promise<void> {
-    switch (mode) {
-      case DashboardControlBar.TO_VIEW_MODE: {
-        const newMode = this.mode == DashboardMode.EditFullScreen ? DashboardMode.ViewFullScreen : DashboardMode.View;
-        await this.setupTvMode(false);
-        DashboardModeModule.setMode(newMode);
-        break;
-      }
+  async toViewMode(): Promise<void> {
+    this.hideMenuOptions();
+    const newMode = this.mode == DashboardMode.EditFullScreen ? DashboardMode.ViewFullScreen : DashboardMode.View;
+    await this.setupTvMode(false);
+    DashboardModeModule.setMode(newMode);
+  }
 
-      case DashboardControlBar.TO_EDIT_MODE: {
-        const newMode = this.mode == DashboardMode.ViewFullScreen ? DashboardMode.EditFullScreen : DashboardMode.Edit;
-        DashboardModeModule.setMode(newMode);
-        break;
-      }
+  async toEditMode(): Promise<void> {
+    this.hideMenuOptions();
+    const newMode = this.mode == DashboardMode.ViewFullScreen ? DashboardMode.EditFullScreen : DashboardMode.Edit;
+    DashboardModeModule.setMode(newMode);
+  }
 
-      case DashboardControlBar.TO_FULL_SCREEN_MODE: {
-        const newMode = this.mode == DashboardMode.View ? DashboardMode.ViewFullScreen : DashboardMode.View;
-        DashboardModeModule.setMode(newMode);
-        // this.onFullscreenChange()
-        this.resizeChart();
-        break;
-      }
+  async toFullScreenMode(): Promise<void> {
+    this.hideMenuOptions();
+    const newMode = this.mode == DashboardMode.View ? DashboardMode.ViewFullScreen : DashboardMode.View;
+    DashboardModeModule.setMode(newMode);
+    // this.onFullscreenChange()
+    this.resizeChart();
+  }
 
-      case DashboardControlBar.TO_RLS_VIEW_AS: {
-        DashboardModeModule.setMode(DashboardMode.RLSViewAsMode);
-        break;
-      }
+  async toTvMode(): Promise<void> {
+    this.hideMenuOptions();
+    DashboardModeModule.setMode(DashboardMode.TVMode);
+    await this.setupTvMode(true);
+  }
 
-      case DashboardControlBar.TO_TV_MODE: {
-        DashboardModeModule.setMode(DashboardMode.TVMode);
-        await this.setupTvMode(true);
-        break;
-      }
-    }
+  async toRlsViewAsMode(): Promise<void> {
+    this.hideMenuOptions();
+    DashboardModeModule.setMode(DashboardMode.RLSViewAsMode);
   }
 
   clickAdding(event: MouseEvent) {
@@ -292,7 +274,8 @@ export default class DashboardControlBar extends Vue {
     //TODO(tvc12): show error here
   }
 
-  async clickShare() {
+  async clickShare(): Promise<void> {
+    this.hideMenuOptions();
     try {
       if (this.dashboardId) {
         Log.debug('DashboardControlBar::clickShare::dashboardId::', this.dashboardId);
@@ -306,8 +289,9 @@ export default class DashboardControlBar extends Vue {
     }
   }
 
-  private async clickViewAs() {
+  private clickViewAs(): void {
     // await this.switchMode(DashboardControlBar.TO_RLS_VIEW_AS);
+    this.hideMenuOptions();
     this.showRLSViewAsModal();
   }
 
@@ -318,61 +302,21 @@ export default class DashboardControlBar extends Vue {
     this.$root.$emit(DashboardEvents.ShowShareModal, +dashboardId);
   }
 
-  async handleEditMainDateFilter(newMainDateFilter: DateFilter) {
+  async handleSetupMainDateFilter(mode: MainDateMode): Promise<void> {
     try {
-      await DashboardModule.handleEditMainDateFilter(newMainDateFilter);
-    } catch (e) {
-      Log.debug('DashboardControlBar::handleUploadMainDateFilter::err::', e);
-    }
-  }
-
-  async handleSetupMainDateFilter(field: Field, mode: MainDateMode) {
-    const mainDateFilter: DateFilter = new DateFilter(field, mode);
-    try {
-      this.handleEditMainDateFilter(mainDateFilter);
+      const mainDateFilter: MainDateFilter2 = MainDateFilter2.fromMode(mode);
       DashboardModule.setMainDateFilter(mainDateFilter);
-      const mainDateDate: MainDateData = { mode: mode };
-      DashboardModule.saveMainDateFilterMode(mainDateDate);
-      DashboardModule.setMainDateFilterMode(mode);
-      FilterModule.loadDateRangeFilter(mainDateDate);
-      FilterModule.handleMainDateFilterChange();
+      DashboardModule.saveMainDate({ mode: mode });
+      FilterModule.loadDateRange({ mode: mode });
+      DashboardModule.updateMainDateFilter(mainDateFilter);
+      await DashboardControllerModule.applyDynamicValues({
+        id: mainDateFilter.id,
+        valueMap: mainDateFilter.getValueController().getDefaultValueAsMap()
+      });
     } catch (e) {
       Log.debug('dashboardControlBar::handleSetupMainDateFilter::error', e);
-    }
-
-    this.isResetMainDateFilter = false;
-  }
-
-  private mounted() {
-    $(window.document.body).on('fullscreenchange', this.onFullscreenChange);
-  }
-
-  private destroyed() {
-    $(window.document.body).off('fullscreenchange', this.onFullscreenChange);
-  }
-
-  private async onFullscreenChange() {
-    const dashboardEl = $('.grid-stack-container');
-    if (!window.document.fullscreenElement) {
-      await this.switchMode(DashboardControlBar.TO_VIEW_MODE);
-      // remove scale dashboard
-      dashboardEl.css({
-        transform: ''
-      });
-    } else {
-      // scale dashboard
-      if (dashboardEl.length > 0) {
-        const dashboardHeight = dashboardEl.height();
-        const contentHeight = $('body').height() - 60;
-        const scale = contentHeight / dashboardHeight;
-        const translateY = ((contentHeight - dashboardHeight) / 2 / contentHeight) * 100;
-        Log.info({ dashboardHeight, contentHeight, scale, translateY });
-        if (scale < 1) {
-          dashboardEl.css({
-            transform: `scale(${scale}) translateY(${translateY}%)`
-          });
-        }
-      }
+    } finally {
+      this.isResetMainDateFlow = false;
     }
   }
 
@@ -381,6 +325,7 @@ export default class DashboardControlBar extends Vue {
       // request fullscreen
       if (!window.document.fullscreenElement) {
         await window.document.body.requestFullscreen().catch(err => {
+          PopupUtils.showError('Error attempting to enable full-screen mode');
           Log.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
         });
       }
@@ -424,23 +369,12 @@ export default class DashboardControlBar extends Vue {
   private async handleAddFilterPanel() {
     try {
       PopupUtils.hideAllPopup();
-      const newTab = FilterPanel.empty();
-      const panel: FilterPanel = (await WidgetModule.handleCreateTabWidget(newTab)) as FilterPanel;
-      FilterModule.addFilterPanelInfo(panel);
+      const newTab = GroupFilter.empty();
+      const panel: GroupFilter = (await WidgetModule.handleCreateTabWidget(newTab)) as GroupFilter;
+      FilterModule.addGroupFilter(panel);
     } catch (ex) {
       Log.error('DashboardControlBar::handleAddFilterPanel::ex', ex);
     }
-  }
-
-  private handleAddDynamicControl() {
-    PopupUtils.hideAllPopup();
-    const dashboard = DashboardModule.currentDashboard;
-    if (dashboard) {
-      DataManager.saveCurrentDashboardId(dashboard.id.toString());
-      DataManager.saveCurrentDashboard(dashboard);
-    }
-    // RouteUtils.navigateToDataBuilder(this.$route, FilterModule.routerFilters);
-    this.$root.$emit(DashboardEvents.AddDynamicControl);
   }
 
   @Track(TrackEvents.DashboardResetFilter, { dashboard_id: (_: DashboardControlBar) => _.dashboardId })
@@ -451,12 +385,13 @@ export default class DashboardControlBar extends Vue {
   }
 
   private handleClearResetMainDate() {
-    if (this.isResetMainDateFilter) {
-      this.isResetMainDateFilter = false;
+    if (this.isResetMainDateFlow) {
+      this.isResetMainDateFlow = false;
     }
   }
 
   private showDashboardSetting() {
+    this.hideMenuOptions();
     if (this.dashboardSettingModal) {
       this.dashboardSettingModal.show({
         setting: DashboardModule.setting,
@@ -468,7 +403,7 @@ export default class DashboardControlBar extends Vue {
   }
 
   private handlePasteChart() {
-    this.hideOptionMenu();
+    this.hideMenuOptions();
     if (DashboardModule.copiedData) {
       EventBus.pasteData(DashboardModule.copiedData);
     }
@@ -495,22 +430,30 @@ export default class DashboardControlBar extends Vue {
     return DashboardModule.currentDashboard?.boostInfo?.enable ?? false;
   }
 
-  private openRelationshipModal() {
-    this.relationshipModal?.show();
+  private openRelationshipModal(): void {
+    this.hideMenuOptions();
+    this.$nextTick(() => {
+      this.$nextTick(() => {
+        this.relationshipModal?.show();
+      });
+    });
   }
 
-  private openOptionMenu() {
-    this.isShowOptionMenu = !this.isShowOptionMenu;
-    this.popupItem = this.popupItem = document.querySelector('#' + this.optionButtonId);
+  private openOptionMenu(): void {
+    this.$nextTick(() => {
+      this.$nextTick(() => {
+        this.isShowOptionMenu = !this.isShowOptionMenu;
+      });
+    });
   }
 
-  hideOptionMenu() {
+  hideMenuOptions(): void {
     this.isShowOptionMenu = false;
   }
 
   private exitRLSViewAs() {
     ChartDataModule.resetViewAsUser();
-    this.switchMode(DashboardControlBar.TO_VIEW_MODE);
+    this.toViewMode();
     EventBus.exitRLSViewAs();
   }
 
@@ -522,7 +465,7 @@ export default class DashboardControlBar extends Vue {
     this.rlsViewAsModal?.show(user => {
       ChartDataModule.setViewAsUser(user);
       EventBus.rlsViewAs(user);
-      this.switchMode(DashboardControlBar.TO_RLS_VIEW_AS);
+      this.toRlsViewAsMode();
     });
   }
 }

@@ -8,13 +8,11 @@ import {
   CrossFilterable,
   Equal,
   FieldRelatedFunction,
-  Filterable,
   Function,
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  PyramidChartOption,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   WidgetId,
   Zoomable
@@ -26,8 +24,8 @@ import { ZoomData } from '@/shared';
 import { ConditionUtils } from '@core/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class PyramidQuerySetting extends QuerySetting<PyramidChartOption> implements Zoomable, Drilldownable, CrossFilterable {
-  readonly className = QuerySettingType.Pyramid;
+export class PyramidQuerySetting extends QuerySetting implements Zoomable, Drilldownable, CrossFilterable {
+  readonly className = QuerySettingClassName.Pyramid;
 
   constructor(
     public legend: TableColumn,
@@ -35,7 +33,6 @@ export class PyramidQuerySetting extends QuerySetting<PyramidChartOption> implem
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-
     sqlViews: InlineSqlView[] = [],
     parameters: Record<string, string> = {}
   ) {
@@ -59,7 +56,7 @@ export class PyramidQuerySetting extends QuerySetting<PyramidChartOption> implem
     return [this.legend.function, this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.legend, this.value];
   }
 
@@ -92,12 +89,12 @@ export class PyramidQuerySetting extends QuerySetting<PyramidChartOption> implem
     }
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.legend = ConfigDataUtils.replaceDynamicFunction(this.legend, functions);
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.legend;
   }
 

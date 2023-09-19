@@ -25,8 +25,12 @@ import scala.jdk.CollectionConverters.mapAsJavaMapConverter
   *
   * @author tvc12 - Thien Vi
   */
-class VerticaEngine(clientManager: ClientManager, clientSize: Int = 10, timeoutMs: Int = 30000, insertBatchSize: Int = 100000)
-  extends Engine[VerticaConnection] {
+class VerticaEngine(
+    clientManager: ClientManager,
+    clientSize: Int = 10,
+    timeoutMs: Int = 30000,
+    insertBatchSize: Int = 100000
+) extends Engine[VerticaConnection] {
   private val clazz = getClass.getSimpleName
   def createClient(source: VerticaConnection, clientSize: Int = 10): JdbcClient = {
     val properties = new Properties()
@@ -35,7 +39,8 @@ class VerticaEngine(clientManager: ClientManager, clientSize: Int = 10, timeoutM
     HikariClient(source.jdbcUrl, source.username, source.password, Some(clientSize), Some(properties))
   }
 
-  private def getClient(source: VerticaConnection): JdbcClient = clientManager.get(source)(() => createClient(source, clientSize))
+  private def getClient(source: VerticaConnection): JdbcClient =
+    clientManager.get(source)(() => createClient(source, clientSize))
 
   override def execute(source: VerticaConnection, sql: String, doFormatValues: Boolean): Future[DataTable] =
     Profiler(s"[Engine] $clazz::execute") {
@@ -122,8 +127,8 @@ class VerticaEngine(clientManager: ClientManager, clientSize: Int = 10, timeoutM
   override def testConnection(source: VerticaConnection): Future[Boolean] =
     Profiler(s"[Engine] $clazz::testConnection") {
       Future {
-        Using(createClient(source, 1)) {
-          client => client.testConnection(timeoutMs)
+        Using(createClient(source, 1)) { client =>
+          client.testConnection(timeoutMs)
         }
       }
     }

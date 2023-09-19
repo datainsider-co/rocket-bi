@@ -1,12 +1,6 @@
 <template>
-  <vuescroll @handle-scroll="onScroll" :ops="scrollConfig">
+  <vuescroll class="multi-selection" @handle-scroll="onScroll" :ops="scrollConfig">
     <b-form-checkbox-group class="w-100" stacked v-model="selectedColumns">
-      <!--    <DynamicScroller :id="id" :items="options" :key-field="keyField" :min-item-size="40" ref="scroller" @scroll.native="onScroll">-->
-      <!--      <template v-slot="{ item, index, active }">-->
-      <!--        <DynamicScrollerItem :active="active" :item="item" :size-dependencies="[item.value]" :data-index="index">-->
-      <!--        </DynamicScrollerItem>-->
-      <!--      </template>-->
-      <!--    </DynamicScroller>-->
       <div>
         <template v-for="(item, index) in options">
           <b-form-checkbox :key="index" :value="item[keyField]" :disabled="item.disabled">
@@ -19,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator';
 import { CheckboxGroupOption } from '../interfaces';
 import { VerticalScrollConfigs } from '@/shared';
 
@@ -33,7 +27,7 @@ export default class MultiSelection extends Vue {
   @Prop({ required: true, type: Array })
   private readonly model!: string[];
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: false, type: String, default: () => `multi-selection-${Date.now()}` })
   private readonly id!: string;
 
   @Prop({ required: false, type: String, default: 'value' })
@@ -70,10 +64,8 @@ export default class MultiSelection extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-@import '~@/themes/scss/mixin';
-
-::v-deep {
+<style lang="scss">
+.multi-selection {
   input[type='checkbox'],
   input[type='checkbox'] + label {
     cursor: pointer;
@@ -95,6 +87,7 @@ export default class MultiSelection extends Vue {
     background-image: unset !important;
     color: var(--white);
     text-align: center;
+    line-height: 1;
   }
 
   .custom-control-input:checked ~ .custom-control-label::before {
@@ -102,12 +95,15 @@ export default class MultiSelection extends Vue {
   }
 
   .custom-control-label {
-    @include regular-text;
-    opacity: 0.8 !important;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    cursor: default;
     font-size: 16px !important;
     letter-spacing: 0.27px !important;
-    color: var(--text-color) !important;
-    margin: 8px 0;
+    color: var(--secondary-text-color) !important;
+    line-height: 1.4;
+    margin: 6px 0;
   }
 }
 </style>

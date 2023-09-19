@@ -1,21 +1,19 @@
 package co.datainsider.bi.module
 
 import co.datainsider.bi.client.JdbcClient
-import co.datainsider.bi.domain.query.{QueryParser, QueryParserFactory, QueryParserImpl}
 import co.datainsider.bi.domain.response.ChartResponse
 import co.datainsider.bi.domain.{BigQueryConnection, ClickhouseConnection}
 import co.datainsider.bi.engine.bigquery.BigQueryEngine
 import co.datainsider.bi.engine.clickhouse.ClickhouseEngine
 import co.datainsider.bi.engine.factory.{EngineResolver, EngineResolverImpl}
 import co.datainsider.bi.engine.{ClientManager, Engine}
-import co.datainsider.bi.module.BIServiceModule._
+import co.datainsider.bi.module.BIServiceModule.{bind, _}
 import co.datainsider.bi.repository._
 import co.datainsider.bi.service._
 import co.datainsider.bi.util.{Using, ZConfig}
 import co.datainsider.caas.user_profile.client.{MockOrgAuthorizationClientServiceImpl, MockProfileClientServiceImpl}
 import co.datainsider.caas.user_profile.domain.Implicits.FutureEnhanceLike
 import co.datainsider.share.service.{MockPermissionAssigner, MockShareService, PermissionAssigner}
-import com.google.inject.assistedinject.FactoryModuleBuilder
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Provides, Singleton}
 import com.twitter.inject.TwitterModule
@@ -40,12 +38,6 @@ object TestModule extends TwitterModule {
     bind[AdminService].to[MockAdminService].asEagerSingleton()
     bind[StarredDirectoryService].to[StarredDirectoryServiceImpl].asEagerSingleton()
     bind[PermissionAssigner].to[MockPermissionAssigner].asEagerSingleton()
-    // install query parser factory
-    install(
-      new FactoryModuleBuilder()
-        .implement(classOf[QueryParser], classOf[QueryParserImpl])
-        .build(classOf[QueryParserFactory])
-    )
   }
 
   @Provides

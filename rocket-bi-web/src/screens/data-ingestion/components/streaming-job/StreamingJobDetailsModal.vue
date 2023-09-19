@@ -63,7 +63,7 @@
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import DiCustomModal from '@/shared/components/DiCustomModal.vue';
 import vuescroll from 'vuescroll';
-import { DateTimeFormatter } from '@/utils';
+import { DateTimeUtils } from '@/utils';
 import { Log } from '@core/utils/Log';
 import Highcharts from 'highcharts';
 import { KafkaStreamingJob, StreamingJobService, StreamingStatusResponse } from '@core/data-ingestion';
@@ -129,7 +129,7 @@ export default class StreamingJobDetailsModal extends Vue {
 
   private formatDateTime(data: any): any {
     try {
-      return DateTimeFormatter.formatAsDDMMYYYYHms(data);
+      return DateTimeUtils.formatAsDDMMYYYYHms(data);
     } catch (error) {
       return data;
     }
@@ -150,7 +150,6 @@ export default class StreamingJobDetailsModal extends Vue {
   }
 
   .streaming-detail-info-container {
-    .status-loading,
     .chart-error {
       height: 150px !important;
     }

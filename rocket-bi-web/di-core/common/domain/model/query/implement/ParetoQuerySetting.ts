@@ -13,8 +13,7 @@ import {
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  ParetoChartOption,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   WidgetId,
   Zoomable
@@ -26,8 +25,8 @@ import { ZoomData } from '@/shared';
 import { ConditionUtils } from '@core/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class ParetoQuerySetting extends QuerySetting<ParetoChartOption> implements Zoomable, Drilldownable, CrossFilterable {
-  readonly className = QuerySettingType.Series;
+export class ParetoQuerySetting extends QuerySetting implements Zoomable, Drilldownable, CrossFilterable {
+  readonly className = QuerySettingClassName.Series;
 
   constructor(
     public xAxis: TableColumn,
@@ -36,7 +35,6 @@ export class ParetoQuerySetting extends QuerySetting<ParetoChartOption> implemen
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-
     sqlViews: InlineSqlView[] = [],
     parameters: Record<string, string> = {}
   ) {
@@ -61,7 +59,7 @@ export class ParetoQuerySetting extends QuerySetting<ParetoChartOption> implemen
     }
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     if (this.legend) {
       return [this.xAxis, ...this.yAxis, this.legend];
     } else {
@@ -111,7 +109,7 @@ export class ParetoQuerySetting extends QuerySetting<ParetoChartOption> implemen
     return this.xAxis;
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.xAxis = ConfigDataUtils.replaceDynamicFunction(this.xAxis, functions);
     this.yAxis = ConfigDataUtils.replaceDynamicFunctions(this.yAxis, functions);
     if (this.legend) {
@@ -119,7 +117,7 @@ export class ParetoQuerySetting extends QuerySetting<ParetoChartOption> implemen
     }
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.xAxis;
   }
 

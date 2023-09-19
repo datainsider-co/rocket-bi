@@ -10,6 +10,7 @@ export enum JobType {
   GoogleAnalytics = 'Google_Analytics',
   GoogleAds = 'GoogleAds',
   GA4 = 'Ga4',
+  GoogleSearchConsole = 'GoogleSearchConsole',
   Mongo = 'MongoDb',
   BigQuery = 'Bigquery',
   Shopify = 'Shopify',

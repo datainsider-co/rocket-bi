@@ -7,7 +7,7 @@ import co.datainsider.bi.engine.mysql.MysqlConnection
 import co.datainsider.bi.engine.{ClientManager, DataStream, Engine, SqlParser}
 import co.datainsider.bi.repository.FileStorage
 import co.datainsider.bi.repository.FileStorage.FileType.FileType
-import co.datainsider.bi.util.Implicits
+import co.datainsider.bi.util.{Implicits, Using}
 import co.datainsider.datacook.pipeline.ExecutorResolver
 import co.datainsider.datacook.pipeline.operator.OperatorService
 import co.datainsider.jobworker.repository.writer.DataWriter
@@ -94,7 +94,10 @@ class RedshiftEngine(
 
   override def testConnection(source: RedshiftConnection): Future[Boolean] =
     Future {
-      getClient(source).testConnection(timeoutMs)
+      val clientSize = 1
+      Using(createClient(source, clientSize))({ client =>
+        client.testConnection(timeoutMs)
+      })
     }
 
   override def getSqlParser(): SqlParser = RedshiftParser

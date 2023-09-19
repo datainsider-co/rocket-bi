@@ -1,14 +1,12 @@
 package co.datainsider.jobworker.domain.job
 
-import co.datainsider.jobscheduler.domain.job.PalexyDateRange
+import co.datainsider.jobscheduler.domain.job.DateRangeInfo
 import co.datainsider.jobworker.domain.DataDestination.DataDestination
 import co.datainsider.jobworker.domain.Ids.SourceId
 import co.datainsider.jobworker.domain.JobStatus.JobStatus
 import co.datainsider.jobworker.domain.JobType.JobType
 import co.datainsider.jobworker.domain.SyncMode.SyncMode
 import co.datainsider.jobworker.domain.{Job, JobType, SyncMode}
-
-import java.sql.Date
 
 case class PalexyJob(
     orgId: Long = -1,
@@ -24,7 +22,7 @@ case class PalexyJob(
     destinations: Seq[DataDestination],
     dimensions: Set[String],
     metrics: Set[String],
-    dateRange: PalexyDateRange,
+    dateRange: DateRangeInfo,
     storeIds: Set[String] = Set.empty,
     storeCodes: Set[String] = Set.empty,
     lastSyncedValue: Option[String] = None

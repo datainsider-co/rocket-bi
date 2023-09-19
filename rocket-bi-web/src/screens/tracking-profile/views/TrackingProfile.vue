@@ -51,7 +51,7 @@ import { ProfileModule } from '@/screens/tracking-profile/store/ProfileStore';
 import { DataManager } from '@core/common/services';
 import { Routers, Status, Stores } from '@/shared';
 import FilterBar from '@/shared/components/FilterBar.vue';
-import { DynamicFilter, FilterWidget, TableSchema } from '@core/common/domain/model';
+import { InternalFilter, FilterWidget, TableSchema } from '@core/common/domain/model';
 import { SchemaUtils } from '@/utils/SchemaUtils';
 import { CustomCell, HeaderData, IndexedHeaderData, Pagination, RowData } from '@/shared/models';
 import { ListUtils } from '@/utils';
@@ -87,7 +87,7 @@ export default class TrackingProfile extends Vue implements RouterEnteringHook, 
   profileSettingInfo!: TableSchema;
   userProfileData!: AbstractTableResponse;
 
-  filters: DynamicFilter[] = [];
+  filters: InternalFilter[] = [];
   private defaultImg = require('@/assets/icon/default-avatar.svg');
   private errorMsg = '';
   private status = Status.Loading;
@@ -184,11 +184,11 @@ export default class TrackingProfile extends Vue implements RouterEnteringHook, 
     this.getUserProfileData(value);
   }
 
-  configFilterChanged(filters: DynamicFilter[]): Promise<void> {
+  configFilterChanged(filters: InternalFilter[]): Promise<void> {
     return this.handleFiltersChanged(filters);
   }
 
-  clearFilters(value: DynamicFilter[]): Promise<void> {
+  clearFilters(value: InternalFilter[]): Promise<void> {
     this.filters = value;
     return this.handleFiltersChanged(value);
   }
@@ -248,8 +248,8 @@ export default class TrackingProfile extends Vue implements RouterEnteringHook, 
     }
   }
 
-  private async handleFiltersChanged(filters: DynamicFilter[]) {
-    DataManager.saveMainFilters(TrackingProfile.FILTER_KEY, filters);
+  private async handleFiltersChanged(filters: InternalFilter[]) {
+    DataManager.saveLocalFilters(TrackingProfile.FILTER_KEY, filters);
     await this.getUserProfileData(void 0, filters);
   }
 
@@ -266,26 +266,26 @@ export default class TrackingProfile extends Vue implements RouterEnteringHook, 
     }
   }
 
-  private handleApplyFilter(filterApplied: DynamicFilter) {
+  private handleApplyFilter(filterApplied: InternalFilter) {
     Log.debug('handleApplyFilter::');
     this.configFilterChanged(this.filters);
   }
 
-  private handleFilterStatusChange(filterStatusChange: DynamicFilter) {
+  private handleFilterStatusChange(filterStatusChange: InternalFilter) {
     Log.debug('handleFilterStatusChange::');
     this.configFilterChanged(this.filters);
   }
 
-  private handleValuesFilterChange(filter: DynamicFilter) {
+  private handleValuesFilterChange(filter: InternalFilter) {
     Log.debug('handleValuesFilterChange::', filter);
     this.configFilterChanged(this.filters);
   }
 
   @Provide()
   private handleAddNewFilter(profileField: FieldDetailInfo) {
-    const filter: DynamicFilter = DynamicFilter.from(profileField.field, profileField.displayName, profileField.isNested);
+    const filter: InternalFilter = InternalFilter.from(profileField.field, profileField.displayName, profileField.isNested);
     this.filters.push(filter);
-    DataManager.saveMainFilters(TrackingProfile.FILTER_KEY, this.filters);
+    DataManager.saveLocalFilters(TrackingProfile.FILTER_KEY, this.filters);
     // showFilter
     const filterIndex: number = this.filters.indexOf(filter);
     this.filterBar.showFilter(filterIndex);
@@ -304,8 +304,8 @@ export default class TrackingProfile extends Vue implements RouterEnteringHook, 
     }
   }
 
-  private getFilters(): DynamicFilter[] {
-    return DataManager.getMainFilters(TrackingProfile.FILTER_KEY);
+  private getFilters(): InternalFilter[] {
+    return DataManager.getLocalFilters(TrackingProfile.FILTER_KEY);
   }
 
   private removeHiddenHeaders(columns: HeaderData[]) {

@@ -35,8 +35,8 @@ interface DatabaseListingResponseMap {
 }
 
 @Module({ dynamic: true, namespaced: true, store: store, name: Stores.DataManagementStore })
-class DataManagementStore extends VuexModule {
-  private static DEFAULT_TABLE_ID = -2;
+export class DataManagementStore extends VuexModule {
+  public static DEFAULT_TABLE_ID = -2;
 
   //database listing data warehouse
   private databaseResponseMap: DatabaseListingResponseMap = {};
@@ -51,20 +51,6 @@ class DataManagementStore extends VuexModule {
 
   @Inject
   private readonly schemaService!: SchemaService;
-
-  get tableChartInfo(): ChartInfo {
-    const querySetting: QuerySetting = new TableQueryChartSetting(
-      [],
-      [],
-      [],
-      new TableChartOption({
-        background: '#00000000'
-      }),
-      []
-    );
-    const commonSetting: WidgetCommonData = { id: DataManagementStore.DEFAULT_TABLE_ID, name: '', description: '' };
-    return new ChartInfo(commonSetting, querySetting);
-  }
 
   get databaseInfos(): DatabaseInfo[] {
     return DatabaseSchemaModule.databaseInfos || [];

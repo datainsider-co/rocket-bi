@@ -68,7 +68,7 @@ import DiCalendar from '@filter/main-date-filter-v2/DiCalendar.vue';
 export default class FacebookAdsSyncModeConfig extends Vue {
   private readonly syncMode = SyncMode;
   private readonly DateMode: MainDateMode = MainDateMode.custom;
-  private readonly DateRangeOptions = DateTimeConstants.ListDateRangeModeOptions;
+  private readonly DateRangeOptions = DateTimeConstants.DATE_RANGE_MODE_OPTION_LIST;
 
   @PropSync('job')
   syncJob!: FacebookAdsJob;

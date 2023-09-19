@@ -13,6 +13,9 @@ import { ForceMode } from '@core/lake-house/domain/lake-job/ForceMode';
 export abstract class JobService {
   abstract create(request: Job): Promise<JobInfo>;
 
+  /**
+   * @deprecated use multiCreateV2 instead
+   */
   abstract multiCreate(request: Job, tables: string[]): Promise<boolean>;
 
   abstract list(request: ListingRequest, currentStatuses?: JobStatus[]): Promise<ListingResponse<JobInfo>>;

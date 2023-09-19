@@ -1,4 +1,4 @@
-import { Component, Inject, Prop, Watch } from 'vue-property-decorator';
+import { Component, Prop, Watch } from 'vue-property-decorator';
 import { BaseWidget } from '@/screens/dashboard-detail/components/widget-container/BaseWidget';
 import {
   ChartInfo,
@@ -9,7 +9,8 @@ import {
   FilterRequest,
   GroupTableResponse,
   InputControlQuerySetting,
-  MainDateMode
+  MainDateMode,
+  ValueControlType
 } from '@core/common/domain';
 import { WidgetRenderer } from '@chart/widget-renderer';
 import { ConditionData, DateHistogramConditionTypes, DateRange, InputType, TableSettingColor } from '@/shared';
@@ -18,16 +19,11 @@ import { Di } from '@core/common/modules';
 import { ConditionUtils, Log } from '@core/utils';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import moment from 'moment/moment';
-import { DateTimeFormatter, DateUtils, ListUtils } from '@/utils';
+import { DateTimeUtils, DateUtils, ListUtils } from '@/utils';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { DefaultDateFilter2 } from '@chart/date-filter/DefaultDateFilter2';
 import { DateFilterUtils } from '@chart/date-filter/DateFilterUtils';
 import { DateFilterData } from '@chart/date-filter/DateFilterData';
-
-enum DateFilterMode {
-  DynamicValues = 'DynamicValues',
-  Filter = 'Filter'
-}
 
 @Component({ components: {} })
 export default class DateFilter2 extends BaseWidget {
@@ -62,17 +58,6 @@ export default class DateFilter2 extends BaseWidget {
 
   @Prop({ type: Object, required: true })
   chartInfo!: ChartInfo;
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private addFilter?: (request: FilterRequest) => void;
-
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onRemoveFilter?: () => void;
-
-  // Inject from ChartContainer.vue
-  @Inject({ default: undefined })
-  private onChangeDynamicValues?: (values: string[]) => void;
 
   filterData: DateFilterData = this.getDateSelected();
 
@@ -99,20 +84,7 @@ export default class DateFilter2 extends BaseWidget {
   }
 
   get containerClass(): any {
-    if (this.id == -2) {
-      if (this.backgroundColor) {
-        return `p-2 flex-column`;
-      } else {
-        return `tab-filter-container${TableSettingColor.secondaryBackgroundColor}`;
-      }
-    } else if (this.isPreview) {
-      if (this.backgroundColor) {
-        return `p-2 flex-column`;
-      } else {
-        return `tab-filter-container${TableSettingColor.secondaryBackgroundColor}`;
-      }
-    }
-    return `tab-filter-container flex-column pt-1`;
+    return `tab-filter-container flex-column`;
   }
 
   get containerStyle() {
@@ -144,10 +116,17 @@ export default class DateFilter2 extends BaseWidget {
   }
 
   get filterClass(): string {
-    return this.showEditComponent ? `disable ml-1 mt-3` : `ml-1 mt-3`;
+    return `ml-1 mt-3`;
   }
 
-  private handleDateFilterSelected(dates: string[]) {
+  handleDatesSelected(dates: string[], dateMode: MainDateMode) {
+    const formatDates: string[] = this.formatDate(this.getDateTimeWithMode(dateMode, dates));
+    this.setFilterDate(formatDates, dateMode);
+    Log.debug('handleDatesSelected', dates, dateMode);
+    this.applyFilter(formatDates, dateMode);
+  }
+
+  private applyFilter(dates: string[], dateMode: MainDateMode): void {
     const subType = DateHistogramConditionTypes.betweenAndIncluding;
     const filterRequest: FilterRequest | undefined = ListUtils.isEmpty(dates) ? void 0 : this.buildFilterRequest(dates, subType);
     Log.debug('handleDateFilterSelected::', dates, filterRequest);
@@ -155,37 +134,48 @@ export default class DateFilter2 extends BaseWidget {
       //In Data builder
       this.saveTempSelectedValue(filterRequest?.condition ?? void 0);
     } else {
-      //In Dashboard
-      if (filterRequest) {
-        this.addFilter ? this.addFilter(filterRequest) : void 0;
-      } else {
-        this.onRemoveFilter ? this.onRemoveFilter() : void 0;
+      const filterValueMap: Map<ValueControlType, string[]> | undefined = this.getFilterValueMap(dates, dateMode);
+      this.applyFilterRequest({
+        filterRequest: filterRequest,
+        filterValueMap: filterValueMap
+      });
+    }
+  }
+
+  private getFilterValueMap(dates: string[], dateMode: MainDateMode): Map<ValueControlType, string[]> | undefined {
+    if (dateMode === MainDateMode.allTime) {
+      return void 0;
+    } else {
+      return new Map([
+        [ValueControlType.MinValue, [dates[0]]],
+        [ValueControlType.MaxValue, [dates[1]]]
+      ]);
+    }
+  }
+
+  private formatDate(date: (string | Date)[]): string[] {
+    if (date.length < 2) {
+      return [];
+    } else {
+      const startDate = DateTimeUtils.formatDate(date[0]);
+      const endDate = DateTimeUtils.formatDate(date[1], true);
+      return [startDate, endDate];
+    }
+  }
+
+  private getDateTimeWithMode(mode: MainDateMode, customDates: string[]): (string | Date)[] {
+    switch (mode) {
+      case MainDateMode.allTime:
+        return [];
+      case MainDateMode.custom:
+        return customDates;
+      default: {
+        const dateRange: DateRange | null = DateUtils.getDateRange(mode);
+        return dateRange ? [dateRange.start, dateRange.end] : [];
       }
     }
   }
 
-  private handleDynamicValueChanged(dates: string[]): void {
-    if (this.isPreview) {
-      this.saveTempSelectedValue(void 0);
-    } else {
-      this.onChangeDynamicValues ? this.onChangeDynamicValues(dates) : void 0;
-    }
-  }
-
-  handleDatesSelected(dates: string[], dateMode: MainDateMode) {
-    const formatDates = InputControlQuerySetting.getDates(dates, dateMode);
-    this.saveFilterDate(formatDates, dateMode);
-    Log.debug('handleDatesSelected', dates, dateMode);
-    const mode = this.getMode(this.query);
-    switch (mode) {
-      case DateFilterMode.DynamicValues:
-        this.handleDynamicValueChanged(formatDates);
-        break;
-      case DateFilterMode.Filter:
-        this.handleDateFilterSelected(formatDates);
-        break;
-    }
-  }
   private saveTempSelectedValue(condition: Condition | undefined) {
     _ConfigBuilderStore.setTempFilterValue({
       value: this.filterData,
@@ -193,31 +183,33 @@ export default class DateFilter2 extends BaseWidget {
     });
   }
 
-  private buildFilterRequest(dates: string[], type: DateHistogramConditionTypes) {
-    const familyType = ConditionUtils.getFamilyTypeFromFieldType(this.query.getFilter().function.field.fieldType);
-    if (familyType) {
-      const conditionData: ConditionData = {
-        field: this.query.getFilter().function.field,
-        familyType: familyType,
-        subType: type,
-        isNested: false,
-        id: +this.id,
-        groupId: -1,
-        firstValue: dates[0] ?? void 0,
-        secondValue: dates[1] ?? void 0,
-        allValues: dates,
-        currentInputType: InputType.date,
-        currentOptionSelected: type,
-        filterModeSelected: FilterMode.selection
-      };
-      const conditionBuilder: ConditionBuilder = Di.get(ConditionBuilder);
-      const condition: Condition | undefined = conditionBuilder.buildCondition(conditionData);
-      return condition ? new FilterRequest(+this.id, condition) : void 0;
+  private buildFilterRequest(dates: string[], type: DateHistogramConditionTypes): any {
+    if (ListUtils.isNotEmpty(this.query.values)) {
+      const familyType = ConditionUtils.getFamilyTypeFromFieldType(this.query.getFilterColumn().function.field.fieldType);
+      if (familyType) {
+        const conditionData: ConditionData = {
+          field: this.query.getFilterColumn().function.field,
+          familyType: familyType,
+          subType: type,
+          isNested: false,
+          id: +this.id,
+          groupId: -1,
+          firstValue: dates[0] ?? void 0,
+          secondValue: dates[1] ?? void 0,
+          allValues: dates,
+          currentInputType: InputType.Date,
+          currentOptionSelected: type,
+          filterModeSelected: FilterMode.Selection
+        };
+        const conditionBuilder: ConditionBuilder = Di.get(ConditionBuilder);
+        const condition: Condition | undefined = conditionBuilder.buildCondition(conditionData);
+        return condition ? new FilterRequest(+this.id, condition) : void 0;
+      }
     }
     return void 0;
   }
 
-  private saveFilterDate(dates: string[], mode: MainDateMode) {
+  private setFilterDate(dates: string[], mode: MainDateMode) {
     this.filterData = {
       dates: dates,
       mode: mode
@@ -249,7 +241,7 @@ export default class DateFilter2 extends BaseWidget {
         mode: defaultValue.mode
       };
     } else {
-      return DateFilterUtils.defaultDateFilterData;
+      return DateFilterUtils.DEFAULT_DATE_FILTER_DATA;
     }
   }
 
@@ -280,12 +272,5 @@ export default class DateFilter2 extends BaseWidget {
 
   async export(type: ExportType): Promise<void> {
     PopupUtils.showError('Unsupported Download CSV');
-  }
-
-  private getMode(query: InputControlQuerySetting) {
-    if (query.enableDynamicValues()) {
-      return DateFilterMode.DynamicValues;
-    }
-    return DateFilterMode.Filter;
   }
 }

@@ -21,8 +21,6 @@
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { DataFlavor } from '@/shared';
 import { Drop } from 'vue-drag-drop';
-import { Log } from '@core/utils';
-import { DynamicConditionWidget } from '@core/common/domain';
 
 @Component({
   components: {
@@ -122,9 +120,7 @@ export default class DropItem extends Vue {
     this.handleDragExitItem();
     event.stopPropagation();
     if (data) {
-      const isDynamicControl = !!data?.node?.tag?.values;
-      const eventName = isDynamicControl ? 'onReplaceDynamic' : 'onReplace';
-      this.$emit(eventName, [data.node, this.index]);
+      this.$emit('onReplace', [data.node, this.index]);
     }
   }
 
@@ -132,9 +128,7 @@ export default class DropItem extends Vue {
     this.handleDragExitItem();
     event.stopPropagation();
     if (data) {
-      const isDynamicControl = !!data?.node?.tag?.values;
-      const eventName = isDynamicControl ? 'onInsertDynamic' : 'onInsert';
-      this.$emit(eventName, [data.node, this.index]);
+      this.$emit('onInsert', [data.node, this.index]);
     }
   }
 

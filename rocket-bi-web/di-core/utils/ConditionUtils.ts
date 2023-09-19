@@ -27,28 +27,27 @@ import {
   Or,
   TableColumn
 } from '@core/common/domain/model';
-import { ConditionFamilyTypes, ConditionTreeNode, DateRange, SlicerValue } from '@/shared';
+import { ConditionTreeNode, ConditionTypes, DateRange, SlicerValue } from '@/shared';
 import { ConditionData } from '@/shared/interfaces/ConditionData';
-import { ChartUtils, DateTimeFormatter, DateUtils, ListUtils, SchemaUtils } from '@/utils';
-import { FunctionDataUtils } from '@core/utils/FunctionDataUtils';
+import { ChartUtils, DateTimeUtils, DateUtils, ListUtils, SchemaUtils } from '@/utils';
 
 export abstract class ConditionUtils {
-  static getFamilyTypeFromFieldType(fieldType: string): ConditionFamilyTypes | undefined {
+  static getFamilyTypeFromFieldType(fieldType: string): ConditionTypes | undefined {
     if (ChartUtils.isDateType(fieldType)) {
-      return ConditionFamilyTypes.dateHistogram;
+      return ConditionTypes.DateHistogram;
     }
     if (ChartUtils.isTextType(fieldType)) {
-      return ConditionFamilyTypes.string;
+      return ConditionTypes.String;
     }
     if (ChartUtils.isNumberType(fieldType)) {
-      return ConditionFamilyTypes.number;
+      return ConditionTypes.Number;
     } else {
       return void 0;
     }
   }
 
-  static buildMainDateCondition(field: Field, currentRange: DateRange, mainDateMode: MainDateMode): FieldRelatedCondition | undefined {
-    const condition: FieldRelatedCondition | undefined = this.buildMainDateModeCondition(field, currentRange, mainDateMode);
+  static buildDateFilterCondition(field: Field, dataRange: DateRange, dateMode: MainDateMode): FieldRelatedCondition | undefined {
+    const condition: FieldRelatedCondition | undefined = this.buildConditionByDataRange(field, dataRange, dateMode);
     if (condition) {
       if (SchemaUtils.isNested(field.tblName)) {
         condition.setScalarFunction(new GetArrayElement());
@@ -59,7 +58,7 @@ export abstract class ConditionUtils {
     }
   }
 
-  private static buildMainDateModeCondition(field: Field, currentRange: DateRange, mainDateMode: MainDateMode): FieldRelatedCondition | undefined {
+  private static buildConditionByDataRange(field: Field, currentRange: DateRange, mainDateMode: MainDateMode): FieldRelatedCondition | undefined {
     switch (mainDateMode) {
       case MainDateMode.thisDay:
         return new CurrentDay(field);
@@ -85,16 +84,15 @@ export abstract class ConditionUtils {
         return new LastNDay(field, '7');
       case MainDateMode.last30Days:
         return new LastNDay(field, '30');
-      case MainDateMode.custom: {
-        const rangeFormatted = {
-          start: DateTimeFormatter.formatDate(currentRange.start),
-          end: DateTimeFormatter.formatDateWithTime(currentRange.end, '23:59:59')
-        };
-        return new BetweenAndIncluding(field, rangeFormatted.start.toString(), rangeFormatted.end.toString());
-      }
+      case MainDateMode.custom:
+        return ConditionUtils.buildBetweenConditionByDateRange(field, currentRange);
       default:
         return void 0;
     }
+  }
+
+  static buildBetweenConditionByDateRange(field: Field, range: DateRange): FieldRelatedCondition {
+    return new BetweenAndIncluding(field, DateTimeUtils.formatDate(range.start), DateTimeUtils.formatDate(range.end, true));
   }
 
   static buildDateCondition(field: Field, currentRange: DateRange | null | undefined): FieldRelatedCondition {
@@ -108,8 +106,8 @@ export abstract class ConditionUtils {
 
   static formatDateRange(currentRange: DateRange | null | undefined): { start: string; end: string } {
     return {
-      start: DateTimeFormatter.formatDate(currentRange?.start || DateUtils.DefaultMinDate),
-      end: DateTimeFormatter.formatDateWithTime(currentRange?.end || DateUtils.DefaultMaxDate, '23:59:59')
+      start: DateTimeUtils.formatDate(currentRange?.start || DateUtils.DefaultMinDate),
+      end: DateTimeUtils.formatDate(currentRange?.end || DateUtils.DefaultMaxDate, true)
     };
   }
 
@@ -119,10 +117,6 @@ export abstract class ConditionUtils {
 
   static buildInCondition(column: TableColumn, values: string[]): In {
     return new In(column.function.field, values, column.function.scalarFunction);
-  }
-
-  static buildBetweenAndIncludingCondition(column: TableColumn, min: number, max: number): BetweenAndIncluding {
-    return new BetweenAndIncluding(column.function.field, `${min}`, `${max}`, column.function.scalarFunction);
   }
 
   /// Build conditions for drilldown
@@ -169,11 +163,11 @@ export abstract class ConditionUtils {
     return listConditionData.map(conditionData => ConditionUtils.cloneConditionData(conditionData));
   }
 
-  private static cloneConditionData(conditionData: ConditionData) {
+  private static cloneConditionData(conditionData: ConditionData): ConditionData {
     return {
       ...conditionData,
       field: Field.fromObject(conditionData.field),
-      tabControl: conditionData.tabControl ? FunctionDataUtils.cloneTabControlData(conditionData.tabControl) : void 0
+      controlId: conditionData.controlId
     };
   }
 
@@ -222,7 +216,7 @@ export abstract class ConditionDataUtils {
           currentOptionSelected: condition.currentOptionSelected,
           filterModeSelected: condition.filterModeSelected,
           allValues: allValues.filter(item => item !== ''),
-          tabControl: condition?.tabControl
+          controlId: condition.controlId
         } as ConditionTreeNode;
       });
       data.push(dataFlavors);

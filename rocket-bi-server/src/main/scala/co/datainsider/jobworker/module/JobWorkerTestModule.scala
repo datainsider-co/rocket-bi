@@ -5,18 +5,14 @@ import co.datainsider.bi.util.ZConfig
 import co.datainsider.jobworker.client.{HttpClient, HttpClientImpl}
 import co.datainsider.jobworker.domain.job._
 import co.datainsider.jobworker.domain.source._
-import co.datainsider.jobworker.module.JobWorkerModule.bindSingleton
+import co.datainsider.jobworker.module.JobWorkerModule.{bindSingleton, createSearchConsoleReaderFactory}
 import co.datainsider.jobworker.repository.reader.facebook_ads.FacebookAdsFactory
 import co.datainsider.jobworker.repository.reader.factory._
+import co.datainsider.jobworker.repository.reader.googlesearchconsole.SearchConsoleReaderFactory
 import co.datainsider.jobworker.repository.reader.lazada.LazadaReaderFactory
 import co.datainsider.jobworker.repository.reader.palexy.PalexyReaderFactory
 import co.datainsider.jobworker.repository.reader.shopee.ShopeeReaderFactory
-import co.datainsider.jobworker.repository.{
-  DataSourceRepository,
-  HttpScheduleRepository,
-  MockHttpSourceRepository,
-  ScheduleRepository
-}
+import co.datainsider.jobworker.repository.{DataSourceRepository, HttpScheduleRepository, MockHttpSourceRepository, ScheduleRepository}
 import co.datainsider.jobworker.service.jobprogress._
 import co.datainsider.jobworker.service.worker2.{FullSyncJobWorker, JobWorker2, JobWorker2Impl}
 import co.datainsider.jobworker.service._
@@ -137,33 +133,29 @@ object JobWorkerTestModule extends TwitterModule {
   }
   @Singleton
   @Provides
-  def providesReaderResolver(
-      shoppeReaderFactory: ReaderFactory[ShopeeSource, ShopeeJob]
-  ): ReaderResolver = {
+  def providesReaderResolver(): ReaderResolver = {
     val clientId = ZConfig.getString("google.gg_client_id")
     val clientSecret = ZConfig.getString("google.gg_client_secret")
     val ga4BatchSize = ZConfig.getInt("ga4.batch_size", 10000)
     val appSecret = ZConfig.getString("facebook_ads.app_secret")
     val appId = ZConfig.getString("facebook_ads.app_id")
-    val ga4ReaderFactory = createGaReaderFactory()
     val palexyApiUrl = ZConfig.getString("palexy.base_url", "https://ica.palexy.com")
 
     ReaderResolver
       .builder()
       .add(classOf[GoogleServiceAccountSource], classOf[Ga4Job], new Ga4ServiceAccountReaderFactory(ga4BatchSize))
       .add(classOf[Ga4Source], classOf[Ga4Job], new Ga4ReaderFactory(clientId, clientSecret, ga4BatchSize))
-      .add(classOf[GaSource], classOf[GaJob], ga4ReaderFactory)
-      .add(classOf[MockDataSource], classOf[GaJob], new OldGaReaderFactory(ga4ReaderFactory))
+      .add(classOf[GaSource], classOf[GaJob], createGaReaderFactory())
+      .add(classOf[MockDataSource], classOf[GaJob], new OldGaReaderFactory(createGaReaderFactory()))
       .add(classOf[FacebookAdsSource], classOf[FacebookAdsJob], new FacebookAdsFactory(appSecret, appId))
-      .add(classOf[ShopeeSource], classOf[ShopeeJob], shoppeReaderFactory)
+      .add(classOf[ShopeeSource], classOf[ShopeeJob], createShopeeReaderFactory())
       .add(classOf[LazadaSource], classOf[LazadaJob], new LazadaReaderFactory)
       .add(classOf[PalexySource], classOf[PalexyJob], new PalexyReaderFactory(palexyApiUrl))
+      .add(classOf[GoogleSearchConsoleSource], classOf[GoogleSearchConsoleJob], createSearchConsoleReaderFactory())
       .build()
   }
 
-  @Provides
-  @Singleton
-  private def providesShopeeFactory(): ReaderFactory[ShopeeSource, ShopeeJob] = {
+  private def createShopeeReaderFactory(): ReaderFactory[ShopeeSource, ShopeeJob] = {
     val apiUrl: String = ZConfig.getString("shopee.api_url")
     val partnerId: String = ZConfig.getString("shopee.partner_id")
     val partnerKey: String = ZConfig.getString("shopee.partner_key")
@@ -171,22 +163,30 @@ object JobWorkerTestModule extends TwitterModule {
   }
 
   private def createGaReaderFactory(): ReaderFactory[GaSource, GaJob] = {
-    val applicationName: String = ZConfig.getString("google.application_name", "Data Insider")
-    val readTimeoutMs: Int = ZConfig.getInt("google.read_timeout_ms", 300000) //default: 5ms
-    val connTimeoutMs: Int = ZConfig.getInt("google.connection_timeout_ms", 300000)
-    val batchSize: Int = ZConfig.getInt("google.batch_size", 100000)
-    val googleOAuthConfig = GoogleOAuthConfig(
+    new GaReaderFactory(
+      googleOAuthConfig = getOAuthConfig(),
+      applicationName = ZConfig.getString("google.application_name", "Data Insider"),
+      connTimeoutMs = ZConfig.getInt("google.connection_timeout_ms", 300000),
+      readTimeoutMs = ZConfig.getInt("google.read_timeout_ms", 300000), //default: 5ms,
+      batchSize = ZConfig.getInt("google.batch_size", 100000)
+    )
+  }
+
+  private def getOAuthConfig(): GoogleOAuthConfig = {
+    GoogleOAuthConfig(
       clientId = ZConfig.getString("google.gg_client_id"),
       clientSecret = ZConfig.getString("google.gg_client_secret"),
       redirectUri = ZConfig.getString("google.redirect_uri"),
       serverEncodedUrl = ZConfig.getString("google.server_encoded_url")
     )
-    new GaReaderFactory(
-      googleOAuthConfig = googleOAuthConfig,
-      applicationName = applicationName,
-      connTimeoutMs = connTimeoutMs,
-      readTimeoutMs = readTimeoutMs,
-      batchSize = batchSize
+  }
+
+  private def createSearchConsoleReaderFactory(): SearchConsoleReaderFactory = {
+    new SearchConsoleReaderFactory(
+      googleOAuthConfig = getOAuthConfig(),
+      applicationName = ZConfig.getString("google.application_name", "Data Insider"),
+      connTimeoutMs = ZConfig.getInt("google.connection_timeout_ms", 300000),
+      readTimeoutMs = ZConfig.getInt("google.read_timeout_ms", 300000)
     )
   }
 
@@ -222,6 +222,7 @@ object JobWorkerTestModule extends TwitterModule {
       .add(classOf[ShopeeJob], new ShopeeProgressFactory())
       .add(classOf[LazadaJob], new LazadaProgressFactory())
       .add(classOf[PalexyJob], new PalexyProgressFactory())
+      .add(classOf[GoogleSearchConsoleJob], new GoogleSearchConsoleProgressFactory())
       .build()
   }
 }

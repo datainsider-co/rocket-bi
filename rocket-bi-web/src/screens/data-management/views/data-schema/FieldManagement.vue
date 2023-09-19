@@ -189,7 +189,7 @@ import { DataSchemaModel, ViewMode } from '@/screens/data-management/views/data-
 import { BoolColumn, ColumnType, DIException, StringColumn, TableSchema } from '@core/common/domain';
 import { cloneDeep, get, isEqual } from 'lodash';
 import { BoolOptions, ColumnTypeOptions } from '@/screens/data-management/views/data-schema/DataSchema.options';
-import { ChartUtils, DateTimeFormatter, ListUtils } from '@/utils';
+import { ChartUtils, DateTimeUtils, ListUtils } from '@/utils';
 import { SelectOption, Status } from '@/shared';
 import moment from 'moment';
 import InputSetting from '@/shared/settings/common/InputSetting.vue';
@@ -352,7 +352,7 @@ export default class FieldManagement extends Vue {
       case ColumnType.datetime:
       case ColumnType.datetime64:
         // @ts-ignore
-        return column.defaultValue ? DateTimeFormatter.formatAsDDMMYYYY(column.defaultValue) : '--';
+        return column.defaultValue ? DateTimeUtils.formatAsDDMMYYYY(column.defaultValue) : '--';
       case ColumnType.array:
       case ColumnType.nested:
         // @ts-ignore

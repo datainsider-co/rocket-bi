@@ -22,7 +22,7 @@
     .config-filter-area,
     .database-panel,
     .visualization-panel {
-      background-color: var(--secondary);
+      background-color: var(--secondary-2);
       border-radius: 4px;
       max-height: calc(100vh - 140px);
     }

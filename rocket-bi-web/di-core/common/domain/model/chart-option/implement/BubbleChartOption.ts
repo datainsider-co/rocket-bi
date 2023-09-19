@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionClassName, ChartOptionData, SeriesOptionData } from '@core/common/domain/model';
 import { toNumber } from 'lodash';
 
 export class BubbleChartOption extends ChartOption<SeriesOptionData> {
@@ -59,8 +59,8 @@ export class BubbleChartOption extends ChartOption<SeriesOptionData> {
       }
     }
   };
-  chartFamilyType = ChartFamilyType.Bubble;
-  className = VizSettingType.BubbleSetting;
+
+  className = ChartOptionClassName.BubbleSetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);
@@ -71,7 +71,7 @@ export class BubbleChartOption extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(): BubbleChartOption {
-    const textColor: string = this.getThemeTextColor();
+    const textColor: string = this.getPrimaryTextColor();
     const gridLineColor: string = this.getGridLineColor();
     const options: SeriesOptionData = {
       legend: {
@@ -89,32 +89,11 @@ export class BubbleChartOption extends ChartOption<SeriesOptionData> {
           }
         }
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       },
       affectedByFilter: true,
       background: this.getThemeBackgroundColor(),
@@ -125,11 +104,7 @@ export class BubbleChartOption extends ChartOption<SeriesOptionData> {
           },
           dataLabels: {
             enabled: false,
-            style: {
-              color: textColor,
-              fontSize: '11px',
-              fontFamily: 'Roboto'
-            }
+            style: ChartOption.getSecondaryStyle()
           }
         }
       },

@@ -85,7 +85,7 @@ class BigqueryWriter(bigquery: BigQueryClient, fileWriterConfig: LocalFileWriter
     * @param destSchema schema of destination table to parse data
     *  @return number of row inserted
     */
-  override def write(records: Seq[Record], destSchema: TableSchema): Int =
+  override def insertBatch(records: Seq[Record], destSchema: TableSchema): Int =
     Profiler(s"[DataWriter] ${this.getClass.getSimpleName}::write") {
       val lines: Seq[String] = BigQueryUtils.toLines(records, destSchema)
       fileWriter.writeLines(lines, destSchema)

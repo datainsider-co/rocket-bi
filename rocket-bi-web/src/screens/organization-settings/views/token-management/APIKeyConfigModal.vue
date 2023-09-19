@@ -60,7 +60,7 @@ import { Component, Ref, Vue } from 'vue-property-decorator';
 import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
 import { DIException } from '@core/common/domain';
 import { Log } from '@core/utils';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
+import { AtomicAction } from '@core/common/misc';
 import { Status, VerticalScrollConfigs } from '@/shared';
 import DiInputComponent from '@/shared/components/DiInputComponent.vue';
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
@@ -325,6 +325,7 @@ export default class APIKeyConfigModal extends Vue {
   width: 100%;
 
   .privilege-status {
+    // fixme: check css
     .status-loading,
     .chart-error {
       min-height: 371px;

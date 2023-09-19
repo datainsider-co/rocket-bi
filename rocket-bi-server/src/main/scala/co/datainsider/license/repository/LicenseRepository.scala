@@ -13,6 +13,10 @@ import java.util.concurrent.TimeUnit
 
 trait LicenseRepository {
   def get(licenseKey: String): Future[Option[License]]
+
+  def notify(message: String): Future[Boolean]
+
+  def createTrialSubscription(licenseKey: String): Future[Boolean]
 }
 
 class HttpLicenseRepository(host: String, maxCacheSize: Int = 1000, refreshIntervalMin: Int = 60)
@@ -41,6 +45,16 @@ class HttpLicenseRepository(host: String, maxCacheSize: Int = 1000, refreshInter
     }
   }
 
+  override def notify(message: String): Future[Boolean] = {
+    try {
+      HttpClient.post(url = s"$host/notify", message).isSuccess
+    } catch {
+      case e: Throwable =>
+        logger.error(s"${this.getClass.getSimpleName}::notify failed with exception: $e", e)
+        false
+    }
+  }
+
   private val licenseKeyCache = CacheBuilder
     .newBuilder()
     .maximumSize(maxCacheSize)
@@ -52,6 +66,17 @@ class HttpLicenseRepository(host: String, maxCacheSize: Int = 1000, refreshInter
       licenseKeyCache.getUnchecked(licenseKey)
     }
   }
+
+  override def createTrialSubscription(licenseKey: String): Future[Boolean] =
+    async {
+      try {
+        val resp: HttpClient.HttpResponse = HttpClient.post(url = s"$host/plan/$licenseKey/trial", "{}")
+        resp.isSuccess
+      } catch {
+        case e: Throwable =>
+          throw InternalError(s"Call to license server $host failed with exception: ${e.getMessage}", e)
+      }
+    }
 }
 
 class MockLicenseRepository extends LicenseRepository {
@@ -84,4 +109,7 @@ class MockLicenseRepository extends LicenseRepository {
       Some(mockLicense)
     }
 
+  override def notify(message: String): Future[Boolean] = Future.True
+
+  override def createTrialSubscription(licenseKey: String): Future[Boolean] = Future.True
 }

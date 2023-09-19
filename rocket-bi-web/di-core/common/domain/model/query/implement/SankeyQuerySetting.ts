@@ -1,11 +1,10 @@
 import { getFiltersAndSorts, QuerySetting } from '../QuerySetting';
-import { Condition, OrderBy, QuerySettingType, SankeyChartOption, TableColumn, Function, InlineSqlView, WidgetId } from '@core/common/domain/model';
-import { ListUtils } from '@/utils';
-import { clone } from 'lodash';
+import { Condition, Function, InlineSqlView, OrderBy, QuerySettingClassName, TableColumn, WidgetId } from '@core/common/domain/model';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class SankeyQuerySetting extends QuerySetting<SankeyChartOption> {
-  className: QuerySettingType = QuerySettingType.Sankey;
+export class SankeyQuerySetting extends QuerySetting {
+  className: QuerySettingClassName = QuerySettingClassName.Sankey;
+
   constructor(
     public source: TableColumn,
     public destination: TableColumn,
@@ -14,7 +13,6 @@ export class SankeyQuerySetting extends QuerySetting<SankeyChartOption> {
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-
     sqlViews: InlineSqlView[] = [],
     parameters: Record<string, string> = {}
   ) {
@@ -25,9 +23,10 @@ export class SankeyQuerySetting extends QuerySetting<SankeyChartOption> {
     return [this.source.function, this.destination.function, ...this.breakdowns.map(breakdown => breakdown.function), this.weight.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.source, this.destination, ...this.breakdowns, this.weight];
   }
+
   static fromObject(obj: SankeyQuerySetting) {
     const source = TableColumn.fromObject(obj.source);
     const destination = TableColumn.fromObject(obj.destination);
@@ -39,7 +38,7 @@ export class SankeyQuerySetting extends QuerySetting<SankeyChartOption> {
     return new SankeyQuerySetting(source, destination, breakdowns, weight, filters, sorts, obj.options, sqlViews, obj.parameters);
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.source = ConfigDataUtils.replaceDynamicFunction(this.source, functions);
     this.destination = ConfigDataUtils.replaceDynamicFunction(this.destination, functions);
     this.breakdowns = ConfigDataUtils.replaceDynamicFunctions(this.breakdowns, functions);

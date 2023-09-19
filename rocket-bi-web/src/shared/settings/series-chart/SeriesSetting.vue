@@ -48,7 +48,7 @@
       @onChanged="handleSettingChanged"
       @onMultipleChanged="handleMultipleSettingChanged"
     />
-    <BackgroundTab :setting="seriesOption.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab :setting="seriesOption.options.background" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <TooltipTab :setting="seriesOption.options.tooltip" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <VisualHeader
       :widget-type="chartType"
@@ -143,6 +143,10 @@ export default class SeriesSetting extends Vue {
     this.seriesOption.setOptions(settingAsMap);
     this.query.setChartOption(this.seriesOption);
     this.$emit('onChartInfoChanged', this.chartInfo);
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

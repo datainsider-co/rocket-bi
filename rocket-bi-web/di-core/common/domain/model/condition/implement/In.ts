@@ -26,21 +26,12 @@ export class In extends FieldRelatedCondition implements ValueCondition {
     return new In(field, possibleValues, getScalarFunction(obj.scalarFunction));
   }
 
-  assignValue(possibleValues: string[]) {
-    this.possibleValues = possibleValues;
-  }
-
   getValues(): string[] {
     return this.possibleValues;
   }
 
   setValues(values: string[]) {
     this.possibleValues = values;
-  }
-
-  getConditionTypes(): string[] {
-    // const filterType = ChartUtils.getDefaultFilterByColumnType(this.field.fieldType);
-    return [];
   }
 
   toConditionData(groupId: number): ConditionData {
@@ -57,8 +48,8 @@ export class In extends FieldRelatedCondition implements ValueCondition {
       firstValue: ListUtils.getHead(this.getValues()),
       secondValue: this.getValues()[1],
       allValues: this.getValues(),
-      currentInputType: InputType.multiSelect,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.MultiSelect,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: StringConditionTypes.in
     };
   }

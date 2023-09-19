@@ -2,7 +2,7 @@
   <div class="datasource-item cursor-pointer d-flex flex-column" @click="handClickItem">
     <img width="118" height="80" :src="require(`@/assets/icon/data_ingestion/datasource/${item.src}`)" alt="" />
     <div class="title">
-      <div class="  h-100 d-flex align-items-center justify-content-center">{{ item.title }}</div>
+      <div class="h-100 d-flex align-items-center justify-content-center">{{ item.title }}</div>
     </div>
   </div>
 </template>
@@ -49,6 +49,7 @@ export default class DataSourceItem extends Vue {
       font-weight: 500;
       letter-spacing: 0.2px;
       color: var(--text-color);
+      text-align: center;
     }
   }
 }

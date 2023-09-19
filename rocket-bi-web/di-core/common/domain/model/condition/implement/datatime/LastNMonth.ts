@@ -11,7 +11,7 @@
 import { ConditionType, Field, FilterMode, ScalarFunction } from '@core/common/domain/model';
 import { ValueCondition } from '@core/common/domain/model/condition/ValueCondition';
 import { ConditionUtils, getScalarFunction } from '@core/utils';
-import { ConditionData, ConditionFamilyTypes, DateHistogramConditionTypes, InputType } from '@/shared';
+import { ConditionData, DateHistogramConditionTypes, InputType } from '@/shared';
 import { FieldRelatedCondition } from '@core/common/domain/model/condition/FieldRelatedCondition';
 import { DateRelatedCondition } from '@core/common/domain/model/condition/DateRelatedCondition';
 import { ListUtils, RandomUtils, SchemaUtils } from '@/utils';
@@ -34,17 +34,10 @@ export class LastNMonth extends FieldRelatedCondition implements ValueCondition,
     return new LastNMonth(field, nMonth, getScalarFunction(obj.scalarFunction), getScalarFunction(obj.intervalFunction));
   }
 
-  assignValue(nMonth: string) {
-    this.nMonth = nMonth;
-  }
-
-  getConditionTypes(): string[] {
-    return [ConditionFamilyTypes.dateHistogram, DateHistogramConditionTypes.lastNMonths];
-  }
-
   getValues(): string[] {
     return [this.nMonth];
   }
+
   setValues(values: string[]) {
     if (ListUtils.isEmpty(values)) {
       throw new DIException('Value is require!');
@@ -52,9 +45,6 @@ export class LastNMonth extends FieldRelatedCondition implements ValueCondition,
     this.nMonth = values[0];
   }
 
-  isDateCondition(): boolean {
-    return true;
-  }
   toConditionData(groupId: number): ConditionData {
     const familyType = ConditionUtils.getFamilyTypeFromFieldType(this.field.fieldType) as string;
     return {
@@ -69,8 +59,8 @@ export class LastNMonth extends FieldRelatedCondition implements ValueCondition,
       firstValue: this.nMonth,
       secondValue: void 0,
       allValues: this.getValues(),
-      currentInputType: InputType.text,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.Text,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: DateHistogramConditionTypes.lastNMonths
     };
   }

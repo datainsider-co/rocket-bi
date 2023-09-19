@@ -1,5 +1,5 @@
 import { ListUtils } from '@/utils';
-import { DIMap, Position, TabId, FilterPanel, WidgetCommonData, WidgetExtraData, WidgetId, Widgets } from '@core/common/domain/model';
+import { DIMap, Position, TabId, GroupFilter, WidgetCommonData, WidgetExtraData, WidgetId, Widgets } from '@core/common/domain/model';
 import { Widget } from '../Widget';
 
 export class Tab {
@@ -115,8 +115,8 @@ export class TabWidget extends Widget {
   }
 
   static fromObject(obj: TabWidget): TabWidget {
-    if (FilterPanel.isFilterPanel(obj)) {
-      return FilterPanel.fromObject(obj);
+    if (GroupFilter.isGroupFilter(obj)) {
+      return GroupFilter.fromObject(obj);
     } else {
       const tabs = (obj as TabWidget).tabItems ? (obj as TabWidget).tabItems.map(tab => Tab.fromObject(tab)) : [];
       return new TabWidget(obj, tabs, (obj as TabWidget).extraData);

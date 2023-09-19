@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import ContextMenu from '@/shared/components/ContextMenu.vue';
-import { DateTimeFormatter, TimeoutUtils } from '@/utils';
+import { DateTimeUtils, TimeoutUtils } from '@/utils';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
 import { BoostInfo } from '@core/common/domain';
 import { Component, Ref, Vue } from 'vue-property-decorator';
@@ -40,7 +40,7 @@ export default class BoostContextMenu extends Vue {
   }
 
   private get nextRunTime(): string {
-    return DateTimeFormatter.formatAsDDMMYYYYHms(this.info?.nextRunTime ?? 0, false);
+    return DateTimeUtils.formatAsDDMMYYYYHms(this.info?.nextRunTime ?? 0, false);
   }
 
   private handleRefresh() {

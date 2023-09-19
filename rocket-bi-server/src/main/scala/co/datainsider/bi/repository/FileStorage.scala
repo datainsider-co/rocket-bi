@@ -6,6 +6,7 @@ import co.datainsider.bi.repository.FileStorage.FileType.FileType
 import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.bi.util.{StringUtils, Using}
 import co.datainsider.schema.domain.column._
+import com.fasterxml.jackson.core.`type`.TypeReference
 import com.twitter.util.Future
 import com.twitter.util.logging.Logging
 import datainsider.client.exception.InternalError
@@ -29,10 +30,7 @@ object FileStorage extends Logging {
   scheduleAutoCleanup()
 
   def get(engine: Engine[Connection], source: Connection, sql: String, fileType: FileType): Future[String] = {
-    val fileExtension = fileType match {
-      case FileType.Csv   => "csv"
-      case FileType.Excel => "xlsx"
-    }
+    val fileExtension = getFileExtension(fileType)
 
     val destPath: String = s"$WORK_DIR/${StringUtils.shortMd5(source.orgId + sql)}.$fileExtension"
     val file = new File(destPath)
@@ -41,6 +39,13 @@ object FileStorage extends Logging {
       Future(destPath)
     } else {
       engine.exportToFile(source, sql, destPath, fileType)
+    }
+  }
+
+  def getFileExtension(fileType: FileType): String = {
+    fileType match {
+      case FileType.Csv   => "csv"
+      case FileType.Excel => "xlsx"
     }
   }
 
@@ -111,6 +116,9 @@ object FileStorage extends Logging {
     val Csv: FileType = Value("Csv")
     val Excel: FileType = Value("Excel")
   }
+
+  class FileTypeRef extends TypeReference[FileType.type]
+
 
   object ExcelUtils {
 

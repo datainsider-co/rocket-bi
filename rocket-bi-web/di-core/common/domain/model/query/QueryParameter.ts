@@ -17,7 +17,7 @@ export interface ParameterValue {
   value: any;
 }
 
-export function defaultQueryParameter(): QueryParameter {
+export function createQueryParameter(): QueryParameter {
   return {
     displayName: '',
     value: '',

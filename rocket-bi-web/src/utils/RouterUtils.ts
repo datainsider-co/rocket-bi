@@ -5,7 +5,7 @@ import { isNumber, isString } from 'lodash';
 import { StringUtils } from '@/utils/StringUtils';
 import { DataManager } from '@core/common/services';
 import router from '@/router/Router';
-import { DynamicFilter } from '@core/common/domain';
+import { InternalFilter } from '@core/common/domain';
 import { ListUtils } from '@/utils/ListUtils';
 import { RawLocation } from 'vue-router/types/router';
 //@ts-ignored
@@ -119,7 +119,7 @@ export class RouterUtils {
     return !!DataManager.getToken();
   }
 
-  static async navigateToDataBuilder(route: Route, routerFilters: DynamicFilter[]) {
+  static async navigateToDataBuilder(route: Route, routerFilters: InternalFilter[]) {
     const query = RouterUtils.buildDataBuilderQuery(route, routerFilters);
     return router.push({
       name: Routers.ChartBuilder,
@@ -127,17 +127,17 @@ export class RouterUtils {
     });
   }
 
-  static getFilters(route: Route): DynamicFilter[] {
+  static getFilters(route: Route): InternalFilter[] {
     try {
       const filtersAsString: string = (route.query?.filters || '[]') as string;
       const filters: any[] = JSON.parse(filtersAsString);
-      return filters.map(filter => DynamicFilter.fromObject(filter));
+      return filters.map(filter => InternalFilter.fromObject(filter));
     } catch (ex) {
       return [];
     }
   }
 
-  private static buildDataBuilderQuery(route: Route, routerFilters: DynamicFilter[]) {
+  private static buildDataBuilderQuery(route: Route, routerFilters: InternalFilter[]) {
     if (ListUtils.isNotEmpty(routerFilters)) {
       const filtersAsString = JSON.stringify(routerFilters);
       return {

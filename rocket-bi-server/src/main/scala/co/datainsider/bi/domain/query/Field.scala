@@ -34,6 +34,8 @@ abstract class Field {
   @JsonIgnore
   def fullFieldName: String = s"$aliasViewName.$fieldName"
 
+  def fullFieldNameWithEscape: String = s"$aliasViewName.`$fieldName`"
+
   @JsonIgnoreProperties
   @JsonIgnore
   def normalizedFieldName: String = s"${aliasViewName.replace('.', '_')}_$fieldName"
@@ -95,6 +97,8 @@ case class ExpressionField(
 
   override val fullFieldName: String = fieldName
 
+  override val fullFieldNameWithEscape: String = fieldName
+
   val aliasViewName: String = tblAliasName.getOrElse("tbl_" + StringUtils.shortMd5(s"$dbName.$tblName"))
 
   override def customCopy(aliasViewName: String, fieldName: String, fieldType: String): Field = {
@@ -113,6 +117,8 @@ case class CalculatedField(
 ) extends Field {
 
   override val fullFieldName: String = fieldName
+
+  override val fullFieldNameWithEscape: String = fieldName
 
   val aliasViewName: String = tblAliasName.getOrElse("tbl_" + StringUtils.shortMd5(s"$dbName.$tblName"))
 

@@ -1,5 +1,5 @@
 import { ChartType } from '@/shared';
-import { ChartFamilyType, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { SeriesOptionData, ChartOptionClassName } from '@core/common/domain/model';
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
 
 export class LineStockChartOption extends ChartOption<SeriesOptionData> {
@@ -58,8 +58,7 @@ export class LineStockChartOption extends ChartOption<SeriesOptionData> {
     }
   };
 
-  chartFamilyType = ChartFamilyType.Series;
-  className = VizSettingType.LineStockSetting;
+  className = ChartOptionClassName.LineStockSetting;
 
   constructor(options: SeriesOptionData) {
     super(options);
@@ -70,33 +69,15 @@ export class LineStockChartOption extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(chartType: ChartType): LineStockChartOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const gridLineColor: string = this.getGridLineColor();
     const enableMarker = chartType === ChartType.Lollipop;
     const options: SeriesOptionData = {
       chart: {
         type: this.getHighchartType(chartType)
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       affectedByFilter: true,
       themeColor: { enabled: true },
       background: this.getThemeBackgroundColor(),
@@ -114,9 +95,7 @@ export class LineStockChartOption extends ChartOption<SeriesOptionData> {
           dataLabels: {
             enabled: false,
             style: {
-              color: textColor,
-              fontSize: '11px',
-              fontFamily: 'Roboto',
+              ...ChartOption.getSecondaryStyle(),
               textOutline: 0
             }
           }
@@ -180,10 +159,7 @@ export class LineStockChartOption extends ChartOption<SeriesOptionData> {
       ],
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       }
     };
     return new LineStockChartOption(options);

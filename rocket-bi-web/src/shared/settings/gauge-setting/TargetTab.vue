@@ -42,7 +42,7 @@ import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { SelectOption } from '@/shared';
 import { DisplayUnitOptions } from '@/shared/settings/common/options/DisplayUnitOptions';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { ChartOption, GaugeChartOption, SettingKey } from '@core/common/domain';
 
 @Component({ components: { PanelHeader } })
@@ -51,8 +51,8 @@ export default class TargetTab extends Vue {
   private readonly setting!: GaugeChartOption;
   private readonly defaultSetting = {
     enabled: false,
-    fontFamily: 'Roboto',
-    color: ChartOption.getThemeTextColor(),
+    fontFamily: ChartOption.getSecondaryFontFamily(),
+    color: ChartOption.getPrimaryTextColor(),
     fontSize: '12px',
     displayUnit: 'default'
   };
@@ -86,7 +86,7 @@ export default class TargetTab extends Vue {
   }
 
   private get fontSizeOptions(): SelectOption[] {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private handleTargetEnabled(enabled: boolean) {

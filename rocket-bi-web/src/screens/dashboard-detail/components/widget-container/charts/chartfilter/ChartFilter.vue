@@ -139,7 +139,7 @@ export default class ChartFilter extends Vue {
   }
 
   private get displayAsTab(): boolean {
-    return (this.metaData.chartFilter!.setting.getChartOption() as TabFilterOption)?.options?.displayAs === TabFilterDisplay.normal;
+    return (this.metaData.chartFilter!.setting.getChartOption() as TabFilterOption)?.options?.displayAs === TabFilterDisplay.Normal;
   }
 
   // created() {
@@ -210,7 +210,7 @@ export default class ChartFilter extends Vue {
   private getSelectedValue() {
     const isUsingDefault = this.options?.options?.default?.setting?.value != null;
     const valueFromSetting = get(this.options, 'options.default.setting.value[0]', this.OPTION_SHOW_ALL.id);
-    const valueInStore = (FilterModule.innerFilters.get(this.metaData.id)?.condition as In)?.possibleValues[0] ?? void 0;
+    const valueInStore = (FilterModule.innerFilterRequestMap.get(this.metaData.id)?.condition as In)?.possibleValues[0] ?? void 0;
     return valueInStore ?? (isUsingDefault ? valueFromSetting : this.OPTION_SHOW_ALL.id);
   }
 

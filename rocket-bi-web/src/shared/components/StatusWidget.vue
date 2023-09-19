@@ -1,19 +1,15 @@
 <template>
-  <div :class="loadingClass">
+  <div class="di-status-widget">
     <slot v-if="isLoading" name="loading">
-      <div class="w-100 h-100 d-flex flex-row align-items-center justify-content-center status-loading">
-        <DiLoading></DiLoading>
-      </div>
+      <DiLoading class="di-status-widget--loading"></DiLoading>
     </slot>
     <slot v-else-if="isError" :error="error" :onRetry="handleRetry" name="error">
-      <ErrorWidget :error="error" :hide-retry="hideRetry" @onRetry="handleRetry"></ErrorWidget>
+      <ErrorWidget class="di-status-widget--error" :error="error" :hide-retry="hideRetry" @onRetry="handleRetry"></ErrorWidget>
     </slot>
     <slot v-else-if="isUpdating" name="updating">
       <slot></slot>
       <slot name="progress-updating">
-        <div class="w-100 h-100 d-flex flex-row align-items-center justify-content-center status-loading update-background">
-          <DiLoading></DiLoading>
-        </div>
+        <DiLoading class="di-status-widget--updating"></DiLoading>
       </slot>
     </slot>
     <slot v-else-if="isEmpty" name="empty"></slot>
@@ -37,12 +33,6 @@ export default class StatusWidget extends Vue {
 
   @Prop({ required: false, default: false })
   private readonly hideRetry!: boolean;
-
-  @Prop({ default: () => [Status.Loaded, Status.Error] })
-  private readonly renderWhen!: Status[];
-
-  @Prop({ required: false, type: String, default: 'w-100 h-100' })
-  private readonly loadingClass!: string;
 
   private get isLoading(): boolean {
     return this.status === Status.Loading;
@@ -68,14 +58,35 @@ export default class StatusWidget extends Vue {
 </script>
 
 <style lang="scss">
-.update-background {
-  background-color: var(--hover-color);
-  border-radius: 4px;
-  left: 0;
-  opacity: 0.8;
-  position: absolute;
-  top: 0;
-  //todo: change z-index here
-  z-index: 100;
+.di-status-widget {
+  position: relative;
+  height: 100%;
+  width: 100%;
+
+  &--loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  &--error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  &--updating {
+    background: var(--hover-color);
+    filter: opacity(0.6);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
 }
 </style>

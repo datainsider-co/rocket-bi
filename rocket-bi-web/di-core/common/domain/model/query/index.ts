@@ -3,6 +3,6 @@
 export * from './features';
 export * from './implement';
 export * from './QuerySetting';
-export * from './QuerySettingType';
+export * from './QuerySettingClassName';
 export * from './InlineSqlView';
 export * from './QueryParameter';

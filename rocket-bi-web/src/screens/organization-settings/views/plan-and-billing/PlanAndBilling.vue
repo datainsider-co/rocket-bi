@@ -8,10 +8,11 @@
         </div>
       </div>
       <PlanDetailComponent
-        v-else-if="planDetail && planDetail.isPaidPlan"
-        :planDetail="planDetail"
+        v-else-if="subscriptionInfo && subscriptionInfo.isPaidPlan"
+        :subscriptionInfo="subscriptionInfo"
         @cancelPlan="onCancelPlan"
         @modifyPlan="onModifyPlan"
+        @clickRedeemCode="onClickRedeemCode"
       ></PlanDetailComponent>
       <template v-else :ops="scrollOptions">
         <div class="plan-and-billing-content">
@@ -50,6 +51,7 @@
                 <div class="plan-and-billing-header-title">
                   A plan for every product
                 </div>
+                <DiButton title="Use Redeem Code" border @click.prevent="onClickRedeemCode" />
                 <!--                <div class="plan-and-billing-header-actions">-->
                 <!--                  <a href="#">View plan details</a>-->
                 <!--                </div>-->
@@ -70,13 +72,13 @@
       </template>
       <ModifyPlan ref="modify" @buyNow="onRevisePlan" @contactUs="onContactUs"></ModifyPlan>
       <ContactUsModal ref="contactUsModal"></ContactUsModal>
+      <DiRenameModal ref="redeemCodeModal" title="Redeem Code Submission" placeholder="Enter redeem code" label="Redeem code" action-name="Submit" />
     </div>
   </LayoutContent>
 </template>
 <script lang="ts">
 import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
-import { Routers, VerticalScrollConfigs } from '@/shared';
-import { OrganizationService, PlanDetail } from '@core/organization';
+import { VerticalScrollConfigs } from '@/shared';
 import PlanDetailComponent from '../../components/plan-detail/PlanDetailComponent.vue';
 import DiLoading from '@/shared/components/DiLoading.vue';
 import { Log } from '@core/utils';
@@ -85,13 +87,16 @@ import { PlanDisplayNames, PlanType } from '@core/organization/domain/Plan/PlanT
 import PlanTypeItem from '@/screens/organization-settings/components/PlanTypeItem.vue';
 import Swal from 'sweetalert2';
 import { LayoutContent, LayoutHeader } from '@/shared/components/layout-wrapper';
-import { PaymentStatus } from '@core/billing';
+import { PaymentStatus, PaypalPaymentInfo, ProductSubscriptionInfo } from '@core/billing';
 import { PlanAndBillingModule } from '@/screens/organization-settings/stores/PlanAndBillingStore';
 import ContactUsModal from '@/screens/organization-settings/components/ContactUsModal.vue';
-import { Inject } from 'typescript-ioc';
+import DiRenameModal from '@/shared/components/DiRenameModal.vue';
+import { DIException } from '@core/common/domain';
+import { PopupUtils, TimeoutUtils } from '@/utils';
+import { AtomicAction } from '@core/common/misc';
 
 @Component({
-  components: { ContactUsModal, PlanDetailComponent, DiLoading, ModifyPlan, PlanTypeItem, LayoutContent, LayoutHeader }
+  components: { ContactUsModal, PlanDetailComponent, DiLoading, ModifyPlan, PlanTypeItem, LayoutContent, LayoutHeader, DiRenameModal }
 })
 export default class PlanAndBilling extends Vue {
   private error: string | null = null;
@@ -110,8 +115,11 @@ export default class PlanAndBilling extends Vue {
   @Ref()
   private readonly contactUsModal?: ContactUsModal;
 
-  private get planDetail() {
-    return PlanAndBillingModule.planDetail?.toPlanDetail() ?? null;
+  @Ref()
+  protected readonly redeemCodeModal?: DiRenameModal;
+
+  protected get subscriptionInfo(): ProductSubscriptionInfo | null {
+    return PlanAndBillingModule.planDetail;
   }
 
   get dateLeft() {
@@ -144,15 +152,18 @@ export default class PlanAndBilling extends Vue {
   }
 
   get countdown() {
-    if (this.planDetail && this.currentTime > 0 && this.planDetail.endDate > this.currentTime) return this.planDetail.endDate - this.currentTime;
-    return 0;
+    if (this.subscriptionInfo && this.currentTime > 0 && this.subscriptionInfo.endTime > this.currentTime) {
+      return this.subscriptionInfo.endTime - this.currentTime;
+    } else {
+      return 0;
+    }
   }
 
   startCountdown() {
     this.countdownInterval = setTimeout(() => {
-      if (!this.planDetail) this.stopCountdown();
+      if (!this.subscriptionInfo) this.stopCountdown();
       this.currentTime = new Date().valueOf();
-      if (this.planDetail && this.currentTime < this.planDetail.endDate) {
+      if (this.subscriptionInfo && this.currentTime < this.subscriptionInfo.endTime) {
         this.startCountdown();
       } else {
         this.stopCountdown();
@@ -194,7 +205,7 @@ export default class PlanAndBilling extends Vue {
       this.loading = true;
     } else {
       this.startCountdown();
-      this.verifyPayment(this.planDetail);
+      this.verifyPayment(this.subscriptionInfo);
       if (PlanAndBillingModule.initError) {
         this.error = PlanAndBillingModule.initError;
       }
@@ -207,7 +218,7 @@ export default class PlanAndBilling extends Vue {
     clearInterval(this.fetchPlanInterval);
     if (status === PaymentStatus.BillingApproval || status === PaymentStatus.UpdateApproval) {
       this.fetchPlanInterval = setInterval(async () => {
-        await PlanAndBillingModule.getPlan();
+        await PlanAndBillingModule.handleReloadPlanning();
         if (PlanAndBillingModule.paymentStatus !== PaymentStatus.BillingApproval && PlanAndBillingModule.paymentStatus !== PaymentStatus.UpdateApproval) {
           clearInterval(this.fetchPlanInterval);
         }
@@ -227,8 +238,9 @@ export default class PlanAndBilling extends Vue {
     }
   }
 
-  private verifyPayment(planDetail: PlanDetail | null) {
-    if (planDetail && planDetail.payPalApprovalUrl) {
+  private verifyPayment(subscriptionInfo: ProductSubscriptionInfo | null) {
+    if (subscriptionInfo && PaypalPaymentInfo.isPaypalPaymentInfo(subscriptionInfo.payment) && subscriptionInfo.payment.approvalLink) {
+      const approvalLink = subscriptionInfo.payment.approvalLink;
       this.$alert
         .fire({
           title: 'Your payment was not successful!',
@@ -241,22 +253,22 @@ export default class PlanAndBilling extends Vue {
         })
         .then(result => {
           if (result.isConfirmed) {
-            window.open(planDetail.payPalApprovalUrl);
+            window.open(approvalLink);
           }
         });
     }
   }
 
   private isActivePlan(planType: PlanType) {
-    return this.planDetail?.planType === planType;
+    return this.subscriptionInfo?.planType === planType;
   }
 
   private get planDisplayName(): string {
-    return PlanDisplayNames[this.planDetail?.planType ?? PlanType.NoPlan];
+    return PlanDisplayNames[this.subscriptionInfo?.planType ?? PlanType.NoPlan];
   }
 
   private async onCancelPlan() {
-    if (!this.planDetail) return;
+    if (!this.subscriptionInfo) return;
     const { isConfirmed } = await this.$alert.fire({
       icon: 'warning',
       title: 'Cancel Plan',
@@ -298,9 +310,33 @@ export default class PlanAndBilling extends Vue {
     }
   }
 
-  private onModifyPlan() {
-    if (this.planDetail) {
-      this.modify?.show(this.planDetail);
+  private onModifyPlan(): void {
+    this.modify?.show(this.subscriptionInfo?.planType);
+  }
+
+  @AtomicAction()
+  protected onClickRedeemCode(): void {
+    if (this.redeemCodeModal) {
+      const redeemModal = this.redeemCodeModal!;
+      redeemModal.show('', async newCode => {
+        try {
+          redeemModal.setLoading(true);
+          Log.debug('PlanAndBilling::onClickRedeemCode::newCode::', newCode);
+          await PlanAndBillingModule.redeem(newCode);
+          redeemModal.hide();
+          // avoid stuck ui
+          await TimeoutUtils.sleep(500);
+          PopupUtils.showSuccess('Redeem code success');
+          await PlanAndBillingModule.handleReloadPlanning();
+        } catch (error) {
+          const ex = DIException.fromObject(error);
+          Log.error('PlanAndBilling::onClickRedeemCode::error::', ex);
+          redeemModal.setError(ex.getPrettyMessage());
+        } finally {
+          redeemModal.setLoading(false);
+        }
+        //
+      });
     }
   }
 
@@ -333,8 +369,8 @@ export default class PlanAndBilling extends Vue {
         confirmButtonText: 'OK'
         // timer: 2000
       });
-      if (this.planDetail?.payPalApprovalUrl) {
-        window.open(this.planDetail?.payPalApprovalUrl);
+      if (this.subscriptionInfo && PaypalPaymentInfo.isPaypalPaymentInfo(this.subscriptionInfo.payment) && this.subscriptionInfo.payment.approvalLink) {
+        window.open(this.subscriptionInfo.payment.approvalLink);
       }
     } catch (e) {
       Log.info(e);
@@ -371,8 +407,8 @@ export default class PlanAndBilling extends Vue {
         confirmButtonText: 'OK'
         // timer: 2000
       });
-      if (this.planDetail?.payPalApprovalUrl) {
-        window.open(this.planDetail?.payPalApprovalUrl);
+      if (this.subscriptionInfo && PaypalPaymentInfo.isPaypalPaymentInfo(this.subscriptionInfo.payment) && this.subscriptionInfo.payment.approvalLink) {
+        window.open(this.subscriptionInfo.payment.approvalLink);
       }
     } catch (e) {
       Log.info(e);

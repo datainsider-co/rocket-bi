@@ -14,20 +14,19 @@ import co.datainsider.schema.domain.TableSchema
 trait DataWriter {
 
   /** *
-   * persist data to a jdbc source
-   *
-   * @param records list of rows to be inserted
-   * @return number of row inserted
-   */
-  // TODO: get info from job instead of TableSchema
-  def write(records: Seq[Record], destSchema: TableSchema): Int
+    * persist data to a jdbc source
+    *
+    * @param records list of rows to be inserted
+    * @return number of row inserted
+    */
+  def insertBatch(records: Seq[Record], destSchema: TableSchema): Int
 
   /** *
-   * Finalize and wait until all data in written to destination source
-   *
-   * @return
-   * @throws DataWriterException if error when finishing
-   */
+    * Finalize and wait until all data in written to destination source
+    *
+    * @return
+    * @throws DataWriterException if error when finishing
+    */
   @throws[DataWriterException]
   def close(): Unit
 }

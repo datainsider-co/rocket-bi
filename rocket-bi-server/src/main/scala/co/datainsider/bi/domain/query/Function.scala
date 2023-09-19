@@ -2,6 +2,7 @@ package co.datainsider.bi.domain.query
 
 import co.datainsider.bi.domain.Order.Order
 import co.datainsider.bi.domain.{Order, OrderType}
+import co.datainsider.schema.domain.column.ColType
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
@@ -58,46 +59,96 @@ abstract class FieldRelatedFunction extends Function {
   val field: Field
   val scalarFunction: Option[ScalarFunction]
   val aliasName: Option[String]
+
+  def customCopy(aliasName: Option[String]): FieldRelatedFunction
 }
 
 case class Select(field: Field, scalarFunction: Option[ScalarFunction] = None, aliasName: Option[String] = None)
-    extends FieldRelatedFunction
+    extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 case class SelectDistinct(field: Field, scalarFunction: Option[ScalarFunction] = None, aliasName: Option[String] = None)
-    extends FieldRelatedFunction
+    extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 case class GroupBy(field: Field, scalarFunction: Option[ScalarFunction] = None, aliasName: Option[String] = None)
-    extends FieldRelatedFunction
+    extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 case class Count(field: Field, scalarFunction: Option[ScalarFunction] = None, aliasName: Option[String] = None)
-    extends FieldRelatedFunction
+    extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 case class CountDistinct(field: Field, scalarFunction: Option[ScalarFunction] = None, aliasName: Option[String] = None)
-    extends FieldRelatedFunction
+    extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 case class Avg(field: Field, scalarFunction: Option[ScalarFunction] = None, aliasName: Option[String] = None)
-    extends FieldRelatedFunction
+    extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 case class Sum(field: Field, scalarFunction: Option[ScalarFunction] = None, aliasName: Option[String] = None)
-    extends FieldRelatedFunction
+    extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 case class Min(field: Field, scalarFunction: Option[ScalarFunction] = None, aliasName: Option[String] = None)
-    extends FieldRelatedFunction
+    extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 case class Max(field: Field, scalarFunction: Option[ScalarFunction] = None, aliasName: Option[String] = None)
-    extends FieldRelatedFunction
+    extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 case class First(field: Field, scalarFunction: Option[ScalarFunction] = None, aliasName: Option[String] = None)
-    extends FieldRelatedFunction
+    extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 case class Last(field: Field, scalarFunction: Option[ScalarFunction] = None, aliasName: Option[String] = None)
-    extends FieldRelatedFunction
+    extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 case class SelectExpression(
     field: ExpressionField,
     scalarFunction: Option[ScalarFunction] = None,
     aliasName: Option[String] = None
-) extends FieldRelatedFunction
+) extends FieldRelatedFunction {
+  override def customCopy(aliasName: Option[String]): FieldRelatedFunction = {
+    this.copy(aliasName = aliasName)
+  }
+}
 
 // functions that control behaviour of data
 @JsonTypeInfo(
@@ -197,79 +248,141 @@ case class DynamicFunction(
 )
 abstract class ScalarFunction {
   val innerFn: Option[ScalarFunction]
+  val resultType: String
 }
 
-case class ToYear(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToYear(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToQuarter(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToQuarter(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToMonth(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToMonth(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToWeek(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToWeek(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToDate(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToDate(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Date) extends ScalarFunction
 
-case class ToDateTime(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToDateTime(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.DateTime)
+    extends ScalarFunction
 
-case class ToDayOfYear(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToDayOfYear(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32)
+    extends ScalarFunction
 
-case class ToDayOfMonth(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToDayOfMonth(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32)
+    extends ScalarFunction
 
-case class ToDayOfWeek(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToDayOfWeek(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32)
+    extends ScalarFunction
 
-case class ToHour(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToHour(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToMinute(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToMinute(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToSecond(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class ToSecond(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToYearNum(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+/**
+  * return an int represent number of years since day 0 month 0 of year 0 (0000-00-00).
+  * E.g: date = 2023-08-03 => toQuarterNum(date) = 2023
+  */
+case class ToYearNum(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToQuarterNum(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+/**
+  * return an int represent number of quarters since day 0 month 0 of year 0 (0000-00-00).
+  * E.g: date = 2023-08-03 => toQuarterNum(date) = 8094
+  */
+case class ToQuarterNum(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32)
+    extends ScalarFunction
 
-case class ToMonthNum(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+/**
+  * return an int represent number of months since day 0 month 0 of year 0 (0000-00-00).
+  * E.g: date = 2023-08-03 => toMonthNum(date) = 24284
+  */
+case class ToMonthNum(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToWeekNum(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+/**
+  * return an int represent number of weeks since day 1 month 1 of year 1970 (1970-01-01).
+  * E.g: date = 2023-08-03 => toWeekNum(date) = 2796
+  */
+case class ToWeekNum(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToDayNum(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+/**
+  * return an int represent number of days since day 1 month 1 of year 1970 (1970-01-01).
+  * E.g: date = 2023-08-03 => toDayNum(date) = 19572
+  */
+case class ToDayNum(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToHourNum(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+/**
+  * return an int represent number of hours since day 1 month 1 of year 1970 (1970-01-01).
+  * E.g: date = 2023-08-03 => toHourNum(date) = 469728
+  */
+case class ToHourNum(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
 
-case class ToMinuteNum(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+/**
+  * return an int represent number of minutes since day 1 month 1 of year 1970 (1970-01-01).
+  * E.g: date = 2023-08-03 => toMinuteNum(date) = 28183680
+  */
+case class ToMinuteNum(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32)
+    extends ScalarFunction
 
-case class ToSecondNum(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+/**
+  * return an int represent number of seconds since day 1 month 1 of year 1970 (1970-01-01).
+  * E.g: date = 2023-08-03 => toSecondNum(date) = 1691020800
+  */
+case class ToSecondNum(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32)
+    extends ScalarFunction
 
-case class DateDiff(unit: String, fromDate: String, innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class DateDiff(
+    unit: String,
+    fromDate: String,
+    innerFn: Option[ScalarFunction] = None,
+    resultType: String = ColType.Int32
+) extends ScalarFunction
 
-case class Decrypt(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class Decrypt(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.String) extends ScalarFunction
 
 /**
   * Indexes in an array begin from one.
   */
-case class GetArrayElement(innerFn: Option[ScalarFunction] = None, index: Option[Int] = None) extends ScalarFunction
+case class GetArrayElement(
+    innerFn: Option[ScalarFunction] = None,
+    index: Option[Int] = None,
+    resultType: String = ColType.String
+) extends ScalarFunction
 
 // Datetime conversion
-case class SecondsToDateTime(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class SecondsToDateTime(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.DateTime)
+    extends ScalarFunction
 
-case class MillisToDateTime(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class MillisToDateTime(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.DateTime)
+    extends ScalarFunction
 
-case class NanosToDateTime(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class NanosToDateTime(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.DateTime)
+    extends ScalarFunction
 
-case class DatetimeToSeconds(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class DatetimeToSeconds(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32)
+    extends ScalarFunction
 
-case class DatetimeToMillis(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class DatetimeToMillis(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int64)
+    extends ScalarFunction
 
-case class DatetimeToNanos(innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class DatetimeToNanos(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int64)
+    extends ScalarFunction
 
 // Date interval
-case class PastNYear(nYear: Int, innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class PastNYear(nYear: Int, innerFn: Option[ScalarFunction] = None, resultType: String = ColType.DateTime)
+    extends ScalarFunction
 
-case class PastNQuarter(nQuarter: Int, innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class PastNQuarter(nQuarter: Int, innerFn: Option[ScalarFunction] = None, resultType: String = ColType.DateTime)
+    extends ScalarFunction
 
-case class PastNMonth(nMonth: Int, innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class PastNMonth(nMonth: Int, innerFn: Option[ScalarFunction] = None, resultType: String = ColType.DateTime)
+    extends ScalarFunction
 
-case class PastNWeek(nWeek: Int, innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class PastNWeek(nWeek: Int, innerFn: Option[ScalarFunction] = None, resultType: String = ColType.DateTime)
+    extends ScalarFunction
 
-case class PastNDay(nDay: Int, innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class PastNDay(nDay: Int, innerFn: Option[ScalarFunction] = None, resultType: String = ColType.DateTime)
+    extends ScalarFunction
 
-case class Cast(asType: String, innerFn: Option[ScalarFunction] = None) extends ScalarFunction
+case class Cast(asType: String, innerFn: Option[ScalarFunction] = None) extends ScalarFunction {
+  override val resultType: String = asType
+}

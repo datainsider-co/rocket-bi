@@ -4,10 +4,8 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, SeriesOptionData, ChartOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionClassName, ChartOptionData, SeriesOptionData } from '@core/common/domain/model';
 import { MapUtils } from '@/utils';
-import { cloneDeep } from 'lodash';
-const deleteProperty = Reflect.deleteProperty;
 
 export class ParetoChartOption extends ChartOption<SeriesOptionData> {
   static readonly DEFAULT_SETTING = {
@@ -39,8 +37,8 @@ export class ParetoChartOption extends ChartOption<SeriesOptionData> {
       }
     }
   };
-  chartFamilyType = ChartFamilyType.Pareto;
-  className = VizSettingType.ParetoSetting;
+
+  className = ChartOptionClassName.ParetoSetting;
   baseTypes: Record<string, number>;
 
   constructor(options: ChartOptionData = {}, baseTypes: {} = {}) {
@@ -68,7 +66,7 @@ export class ParetoChartOption extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(): ParetoChartOption {
-    const textColor: string = this.getThemeTextColor();
+    const textColor: string = this.getPrimaryTextColor();
     const gridLineColor: string = this.getGridLineColor();
     const options: SeriesOptionData = {
       chart: {
@@ -89,26 +87,8 @@ export class ParetoChartOption extends ChartOption<SeriesOptionData> {
           }
         }
       },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       xAxis: [
         {
           visible: true,
@@ -163,10 +143,7 @@ export class ParetoChartOption extends ChartOption<SeriesOptionData> {
       background: this.getThemeBackgroundColor(),
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       },
       plotOptions: {
         series: {
@@ -176,9 +153,7 @@ export class ParetoChartOption extends ChartOption<SeriesOptionData> {
           dataLabels: {
             enabled: false,
             style: {
-              color: textColor,
-              fontSize: '11px',
-              fontFamily: 'Roboto',
+              ...ChartOption.getSecondaryStyle(),
               textOutline: 0
             }
           }

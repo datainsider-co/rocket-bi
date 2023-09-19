@@ -18,7 +18,7 @@ export class ZoomStore extends VuexModule {
   zoomDataAsMap: ZoomState['zoomDataAsMap'] = new Map<WidgetId, ZoomData>();
 
   @Mutation
-  initMultiZoomData(widgets: QueryRelatedWidget[]) {
+  multiRegisterZoomData(widgets: { id: WidgetId; setting: QuerySetting }[]): void {
     widgets.forEach(widget => {
       const isEnableZoom: boolean = widget.setting.getChartOption()?.isEnableZoom() ?? false;
       if (isEnableZoom && Zoomable.isZoomable(widget.setting)) {
@@ -28,10 +28,11 @@ export class ZoomStore extends VuexModule {
   }
 
   @Mutation
-  registerZoomData(widget: QueryRelatedWidget) {
-    const isEnableZoom: boolean = widget.setting.getChartOption()?.isEnableZoom() ?? false;
-    if (isEnableZoom && Zoomable.isZoomable(widget.setting)) {
-      this.zoomDataAsMap.set(widget.id, widget.setting.zoomData);
+  registerZoomData(payload: { id: WidgetId; setting: QuerySetting }): void {
+    const { id, setting } = payload;
+    const isEnableZoom: boolean = setting.getChartOption()?.isEnableZoom() ?? false;
+    if (isEnableZoom && Zoomable.isZoomable(setting)) {
+      this.zoomDataAsMap.set(id, setting.zoomData);
     }
   }
 

@@ -1,7 +1,7 @@
 import monaco, { editor, Selection } from 'monaco-editor';
 import IIdentifiedSingleEditOperation = editor.IIdentifiedSingleEditOperation;
 import { Log } from '@core/utils';
-import { ListUtils, StringUtils } from '@/utils';
+import { ListUtils } from '@/utils';
 
 export class EditorController {
   private editor!: monaco.editor.ICodeEditor;
@@ -11,7 +11,7 @@ export class EditorController {
   }
 
   /**
-   * append text in current cursor focus
+   * append text in current cursor focus. it is single cursor
    */
   appendText(text: string, isAutoFocus = true) {
     const insertOptions: IIdentifiedSingleEditOperation = {
@@ -25,13 +25,17 @@ export class EditorController {
     }
   }
 
-  getCursor(): number[] {
-    const selections = this.editor.getSelections();
-    Log.debug('getCursor::', selections);
-    if (ListUtils.isNotEmpty(selections)) {
-      return selections!.map(selection => selection.endColumn - 1);
-    } else {
-      return [0];
+  /**
+   * append text in all selections. it is multi cursor. and focus in last cursor
+   */
+  multiAppendText(text: string, isAutoFocus = true) {
+    const selections = this.editor.getSelections() ?? [];
+    this.editor.executeEdits(
+      'insert-text',
+      selections.map(selection => ({ range: selection, text: text, forceMoveMarkers: true }))
+    );
+    if (isAutoFocus) {
+      this.editor.focus();
     }
   }
 

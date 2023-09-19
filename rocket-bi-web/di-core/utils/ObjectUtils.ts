@@ -168,8 +168,9 @@ export class ObjectUtils {
     return ObjectType.Normal;
   }
 
-  static set(obj: any, key: string, value: any) {
-    set(obj, key, value);
+  // assign default value to value by key. if key contains dot, it will be assigned to nested object
+  static set(targetObject: any, key: string, value: any): void {
+    set(targetObject, key, value);
   }
 
   static isEmpty(obj: any): boolean {

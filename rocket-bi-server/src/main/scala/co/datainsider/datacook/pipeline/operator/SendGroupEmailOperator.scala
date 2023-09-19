@@ -1,6 +1,11 @@
 package co.datainsider.datacook.pipeline.operator
 
-import co.datainsider.bi.domain.ClickhouseConnection
+import co.datainsider.bi.domain.Connection
+import co.datainsider.bi.domain.query._
+import co.datainsider.bi.engine.Engine
+import co.datainsider.bi.repository.FileStorage
+import co.datainsider.bi.repository.FileStorage.FileType
+import co.datainsider.bi.repository.FileStorage.FileType.FileType
 import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.datacook.domain.persist.EmailConfiguration
 import co.datainsider.datacook.pipeline.exception.{InputInvalid, OperatorException}
@@ -10,14 +15,12 @@ import co.datainsider.schema.domain.TableSchema
 import com.twitter.finagle.http.MediaType
 import com.twitter.util.logging.Logging
 import datainsider.client.domain.Implicits.FutureEnhanceLike
-import datainsider.client.util.Using
 import org.apache.commons.io.FileUtils
 
 import java.io.File
-import java.nio.file.Paths
+import java.nio.file.{Files, Paths}
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import scala.io.Source
 import scala.sys.process._
 
 case class SendGroupEmailOperator(
@@ -29,7 +32,8 @@ case class SendGroupEmailOperator(
     fileNames: Seq[String] = Seq.empty,
     content: Option[String] = None,
     displayName: Option[String] = None,
-    isZip: Boolean = false
+    isZip: Boolean = false,
+    fileType: FileType = FileType.Csv
 ) extends Operator
 
 case class SendGroupEmailResult(id: OperatorId, attachmentSize: Long, response: EmailResponse) extends OperatorResult {
@@ -41,7 +45,8 @@ case class SendGroupEmailResult(id: OperatorId, attachmentSize: Long, response: 
 }
 
 case class SendGroupEmailOperatorExecutor(
-    source: ClickhouseConnection,
+    engine: Engine[_ <: Connection],
+    connection: Connection,
     emailService: EmailService,
     baseDir: String,
     rateLimitRetry: Int = 20,
@@ -56,13 +61,12 @@ case class SendGroupEmailOperatorExecutor(
 
       ensureInput(operator, context.mapResults)
       val sourceTables: Seq[TableSchema] = getOperatorResults(operator.parentIds, context.mapResults)
-      val folderPath: String =
-        Paths.get(baseDir, context.orgId.toString, System.currentTimeMillis().toString).toAbsolutePath.toString
+      val folderPath: String = Paths.get(baseDir, context.orgId.toString, System.currentTimeMillis().toString).toAbsolutePath.toString
       try {
-        val files: Seq[File] = dumpDataToFiles(folderPath, sourceTables, operator.isZip)
-        val mediaType: String = if (operator.isZip) MediaType.Zip else MediaType.Csv
-        val emailConfig =
-          EmailConfiguration(operator.receivers, operator.cc, operator.bcc, operator.subject, "", operator.content)
+        ensureCreatedFolder(folderPath)
+        val files: Seq[File] = writeDataToFiles(folderPath, sourceTables, operator.isZip, operator.fileType)
+        val mediaType: String = toMediaType(operator)
+        val emailConfig = EmailConfiguration(operator.receivers, operator.cc, operator.bcc, operator.subject, "", operator.content)
         val mailResponse: EmailResponse = emailService.send(emailConfig, files.map(_.getPath), mediaType).syncGet()
         SendGroupEmailResult(
           operator.id,
@@ -73,6 +77,23 @@ case class SendGroupEmailOperatorExecutor(
         deleteFolder(folderPath)
       }
     }
+
+  private def toMediaType(operator: SendGroupEmailOperator): String = {
+    if (operator.isZip) {
+      MediaType.Zip
+    } else if (operator.fileType == FileType.Csv) {
+      MediaType.Csv
+    } else {
+      MediaType.Html
+    }
+  }
+
+  private def ensureCreatedFolder(folderPath: String): Unit = {
+    val folder: File = new File(folderPath)
+    if (!folder.exists()) {
+      Files.createDirectories(Paths.get(folderPath))
+    }
+  }
 
   @throws[OperatorException]
   private def zipFiles(filePaths: Seq[String], outputPath: String): File = {
@@ -99,41 +120,51 @@ case class SendGroupEmailOperatorExecutor(
   }
 
   @throws[OperatorException]
-  private def dumpDataToFiles(folderPath: String, sourceTables: Seq[TableSchema], isZip: Boolean): Seq[File] = {
-    val csvFiles: Seq[File] = sourceTables.map(tableSchema => {
-      val csvFile: File = prepareCsvFile(folderPath, tableSchema)
-      dumpDataToFile(tableSchema.dbName, tableSchema.name, csvFile)
-      ensureFileReady(csvFile)
-      ensureFileFormat(csvFile, tableSchema)
-      csvFile
+  private def writeDataToFiles(
+      folderPath: String,
+      sourceTables: Seq[TableSchema],
+      isZip: Boolean,
+      fileType: FileType
+  ): Seq[File] = {
+    val parser = new QueryParserImpl(engine.getSqlParser())
+
+    val files: Seq[File] = sourceTables.map(tableSchema => {
+      val query: String = parser.parse(toObjectQuery(tableSchema))
+      val tmpFile: File = prepareFile(folderPath, tableSchema, fileType)
+      val finalPath = engine.asInstanceOf[Engine[Connection]].exportToFile(connection, query, tmpFile.getPath, fileType).syncGet()
+      val file: File = new File(finalPath)
+      ensureFileReady(file)
+      file
     })
     if (isZip) {
       val zipName = s"${sourceTables.head.name}_${System.currentTimeMillis()}.zip"
       val outputPath: String = Paths.get(folderPath, zipName).toAbsolutePath.toString
-      val fileZip: File = zipFiles(csvFiles.map(_.getAbsolutePath), outputPath)
+      val fileZip: File = zipFiles(files.map(_.getAbsolutePath), outputPath)
       Seq(fileZip)
     } else {
-      csvFiles
+      files
     }
   }
 
-  private def dumpDataToFile(dbName: String, tblName: String, file: File): Unit = {
-    val dumpCmd = ArrayBuffer(
-      "clickhouse-client",
-      s"--host=${source.host}",
-      s"--port=${source.tcpPort}",
-      s"--user=${source.username}",
-      s"--query=select * from `${dbName}`.`${tblName}`",
-      "--format=CSVWithNames"
-    )
-    if (source.password.nonEmpty) {
-      dumpCmd += s"--password=${source.password}"
-    }
-    if (source.useSsl) dumpCmd += s"--secure"
-
-    val message: String = dumpCmd.#>(file).!!
-    info(s"dump data to file ${file.getPath}, message: ${message}")
+  private def toObjectQuery(tableSchema: TableSchema): ObjectQuery = {
+    val builder = new ObjectQueryBuilder()
+    builder.addFunction(new SelectAll())
+    builder.addTableView(new TableView(tableSchema.dbName, tableSchema.name))
+    builder.build()
   }
+
+
+  private def prepareFile(folderPath: String, sourceTable: TableSchema, fileType: FileType): File = {
+    val fileExtension: String = FileStorage.getFileExtension(fileType)
+    val fileName = s"${sourceTable.name}_${System.currentTimeMillis()}.${fileExtension}"
+    val filePath: String = Paths.get(folderPath, fileName).toAbsolutePath.toString
+    val file: File = new File(filePath)
+    if (!file.getParentFile.exists()) {
+      file.getParentFile.mkdirs()
+    }
+    file
+  }
+
 
   @throws[OperatorException]
   private def ensureFileReady(file: File): Unit = {
@@ -144,29 +175,6 @@ case class SendGroupEmailOperatorExecutor(
       Thread.sleep(sleepInMillis)
     }
     throw new OperatorException(s"wait file ${file.getPath} ready failed, cause retry wait exhausted")
-  }
-
-  @throws[OperatorException]
-  private def ensureFileFormat(file: File, tableSchema: TableSchema, delimiter: String = ","): Unit = {
-    if (!file.exists()) {
-      throw new OperatorException(s"path ${file.toString} not found")
-    }
-    val columnNames: Array[String] =
-      Using(Source.fromFile(file))(source => source.getLines().take(1).mkString("\n")).split(delimiter)
-    info(s"ensureFileFormat:: path: ${file.getPath}, sample data: ${columnNames.mkString("Array(", ", ", ")")}")
-    if (columnNames.isEmpty) {
-      throw new OperatorException(s"dump ${tableSchema.name}.${tableSchema.dbName} to ${file.getPath} incorrect format")
-    }
-  }
-
-  private def prepareCsvFile(folderPath: String, sourceTable: TableSchema): File = {
-    val fileName = s"${sourceTable.dbName}_${sourceTable.name}_${System.currentTimeMillis()}.csv"
-    val filePath: String = Paths.get(folderPath, fileName).toAbsolutePath.toString
-    val file: File = new File(filePath)
-    if (!file.getParentFile.exists()) {
-      file.getParentFile.mkdirs()
-    }
-    file
   }
 
   @throws[InputInvalid]
@@ -222,13 +230,4 @@ case class MockGroupSendEmailExecutor() extends Executor[SendGroupEmailOperator]
       throw InputInvalid("missing input for send to email operator")
     }
   }
-}
-
-case class SendGroupEmailOperatorExecutor2(
-    emailService: EmailService,
-    baseDir: String,
-    rateLimitRetry: Int = 20,
-    sleepInMillis: Int = 1000
-) extends Executor[SendGroupEmailOperator] {
-  override def execute(operator: SendGroupEmailOperator, context: ExecutorContext): OperatorResult = ???
 }

@@ -91,7 +91,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { ChartOption, PivotTableChartOption, SettingKey } from '@core/common/domain';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 
 @Component({ components: { PanelHeader } })
 export default class ValuesTab extends Vue {
@@ -99,13 +99,13 @@ export default class ValuesTab extends Vue {
 
   // TODO: change here
   private readonly defaultStyle = {
-    color: ChartOption.getThemeTextColor(),
+    color: ChartOption.getPrimaryTextColor(),
     backgroundColor: 'var(----row-even-background-color)',
-    alternateColor: ChartOption.getThemeTextColor(),
+    alternateColor: ChartOption.getPrimaryTextColor(),
     alternateBackgroundColor: '--row-odd-background-color',
     enableUrlIcon: false,
     isWordWrap: false,
-    fontFamily: 'Roboto',
+    fontFamily: ChartOption.getSecondaryFontFamily(),
     fontSize: '12px',
     align: 'left'
   };
@@ -115,7 +115,7 @@ export default class ValuesTab extends Vue {
 
   ///Font Color
   private fontOptions = FontFamilyOptions;
-  private fontSizeOptions = FontSizeOptions;
+  private fontSizeOptions = SecondaryFontSizeOptions;
 
   private get fontColor(): string {
     return this.setting?.options?.value?.color ?? this.defaultStyle.color;

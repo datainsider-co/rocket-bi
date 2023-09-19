@@ -7,6 +7,7 @@ export interface AxisSetting {
   title?: TextSetting;
   labels?: LabelsSetting;
   gridLineColor?: string;
+  lineColor?: string;
   gridLineDashStyle?: DashStyleValue;
   gridLineInterpolation?: string;
   gridLineWidth?: number | string;

@@ -19,7 +19,7 @@
           placeholder="Your email"
           @enter="login(email, password)"
         >
-          <template v-if="!isEmailEmpty" #suffix>
+          <template v-if="!isEmailEmpty" #suffix-icon>
             <div>
               <i class="di-icon-close btn-icon-border" @click="handleResetEmail"></i>
             </div>

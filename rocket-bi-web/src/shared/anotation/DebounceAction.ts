@@ -3,7 +3,7 @@
  * @created: 5/7/21, 5:48 PM
  */
 
-import { getOriginalFunction } from '@/shared/profiler/Annotation';
+import { getOriginalMethod } from '@/shared/profiler/Annotation';
 import { TimeoutUtils } from '@/utils';
 import { Log } from '@core/utils';
 
@@ -33,7 +33,7 @@ function wrapMethod(target: object, key: PropertyKey, descriptor: TypedPropertyD
     return;
   }
 
-  const originalFunction = getOriginalFunction(descriptor);
+  const originalFunction = getOriginalMethod(descriptor);
 
   if (!originalFunction || typeof originalFunction !== 'function') {
     return;

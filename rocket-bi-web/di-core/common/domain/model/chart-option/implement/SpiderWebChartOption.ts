@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, SeriesOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionData, SeriesOptionData, ChartOptionClassName } from '@core/common/domain/model';
 import { StringUtils } from '@/utils/StringUtils';
 import { cloneDeep, merge } from 'lodash';
 import { ObjectUtils } from '@core/utils/ObjectUtils';
@@ -63,8 +63,7 @@ export class SpiderWebChartOption extends ChartOption {
     }
   };
 
-  chartFamilyType = ChartFamilyType.Series;
-  className = VizSettingType.SpiderWebSetting;
+  className = ChartOptionClassName.SpiderWebSetting;
 
   /**
    * @key: label (Online, Offline)
@@ -91,7 +90,7 @@ export class SpiderWebChartOption extends ChartOption {
 
   static getDefaultChartOption(): SpiderWebChartOption {
     const gridLineColor: string = this.getGridLineColor();
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const options: SeriesOptionData = {
       legend: {
         enabled: true,
@@ -133,26 +132,8 @@ export class SpiderWebChartOption extends ChartOption {
           }
         }
       ],
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       affectedByFilter: true,
       themeColor: { enabled: true },
       background: this.getThemeBackgroundColor(),
@@ -166,9 +147,8 @@ export class SpiderWebChartOption extends ChartOption {
           dataLabels: {
             enabled: false,
             style: {
+              ...ChartOption.getSecondaryStyle(),
               color: textColor,
-              fontSize: '11px',
-              fontFamily: 'Roboto',
               textOutline: 0
             }
           }
@@ -176,10 +156,7 @@ export class SpiderWebChartOption extends ChartOption {
       },
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       }
     };
     return new SpiderWebChartOption(options);

@@ -1,6 +1,7 @@
 <template>
   <BModal
     id="chart-builder-modal"
+    ignore-enforce-focus-selector=".internal-filter-popover"
     v-model="isShowChartBuilder"
     :cancel-disabled="false"
     :hide-footer="true"
@@ -33,7 +34,7 @@
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import ChartBuilder from '@/screens/chart-builder/chart-builder2/ChartBuilderController.vue';
 import ChartBuilderController from '@/screens/chart-builder/chart-builder2/ChartBuilderController';
-import { ChartInfo, DatabaseInfo, DIException, TabControl } from '@core/common/domain';
+import { ChartInfo, DatabaseInfo, DIException, ChartControl } from '@core/common/domain';
 import { Log } from '@core/utils';
 import { PopupUtils } from '@/utils/PopupUtils';
 import { BuilderMode, VisualizationItemData } from '@/shared';
@@ -46,7 +47,7 @@ export interface TChartBuilderOptions {
   database?: DatabaseInfo | null;
   selectedTables?: string[] | null;
   config?: ChartBuilderConfig;
-  tabControls?: TabControl[];
+  chartControls?: ChartControl[];
 }
 
 @Component({
@@ -167,46 +168,41 @@ export default class ChartBuilderModal extends Vue {
 
 <style lang="scss">
 #chart-builder-modal {
-  > .modal-max {
-    height: 100vh;
-    margin: auto;
+  .modal-dialog {
+    //max-height: 735px;
+    //min-height: 640px;
 
-    //max-width: calc(80vh / 0.5625);
-    max-width: 100%;
-    min-width: 900px;
-    width: 85% !important;
+    max-width: 1400px !important;
+  }
+
+  > .modal-max {
+    max-height: 100%;
 
     > .modal-content {
-      height: 88vh;
+      max-height: 735px;
       min-height: 640px;
-      overflow: auto;
+      display: flex;
+      border-radius: 20px !important;
 
       > .modal-body {
-        height: inherit;
-        padding: 0;
+        max-height: 735px;
+        height: calc(100vh - 100px);
+        min-height: 640px;
+        padding: 0 !important;
+        overflow: hidden;
+        border-radius: 20px !important;
+
+        .loading-area {
+          display: flex;
+          flex: 1;
+          #builder-controller {
+            display: flex;
+            flex: 1;
+            z-index: 0;
+          }
+        }
       }
     }
-
-    //
-    //@media (min-width: 1200px) and (max-width: 1400px) {
-    //  max-width: 1150px;
-    //  > .modal-content {
-    //    height: 650px;
-    //  }
-    //}
-    //@media (min-width: 1400px) and (max-width: 1800px) {
-    //  max-width: 1290px;
-    //  > .modal-content {
-    //    height: 735px;
-    //  }
-    //}
-    //@media (min-width: 1800px) {
-    //  max-width: calc(77vh / 0.5652);
-    //  > .modal-content {
-    //    height: 77vh;
-    //    min-height: 735px;
-    //  }
-    //}
   }
 }
 </style>

@@ -4,7 +4,7 @@
       <p v-if="isLabel" class="single-line m-0">{{ label }}</p>
       <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>
     </div>
-    <div class="d-flex align-items-center justify-content-between align-container" style="height: 34px;">
+    <div class="d-flex align-items-center justify-content-between align-container" style="height: 34px ">
       <b-icon-text-left :class="`${iconClass(`left`)}`" @click="selectAlign(`left`)" />
       <b-icon-text-center :class="`${iconClass(`center`)}`" @click="selectAlign(`center`)" />
       <b-icon-text-right :class="`${iconClass(`right`)}`" @click="selectAlign(`right`)" />

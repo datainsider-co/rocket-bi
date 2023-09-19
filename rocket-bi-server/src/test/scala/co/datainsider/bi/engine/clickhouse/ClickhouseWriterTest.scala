@@ -20,11 +20,13 @@ class ClickhouseWriterTest extends IntegrationTest with BeforeAndAfterAll {
   val localFileWriter = LocalFileWriterConfig(
     baseDir = "./tmp/clickhouse",
     fileExtension = "json",
-    maxFileSizeInBytes = 1024 * 1024, // 1MB
+    maxFileSizeInBytes = 1024 * 1024 // 1MB
   )
-  val connection = injector.instance[ClickhouseConnection].copy(
-    host = "127.0.0.1"
-  )
+  val connection = injector
+    .instance[ClickhouseConnection]
+    .copy(
+      host = "127.0.0.1"
+    )
   val fileClickhouseWriter = new FileClickhouseWriter(connection, localFileWriter, sleepIntervalMs = 500)
 
   val clickhouseClient = injector.instance[JdbcClient](Names.named("clickhouse"))
@@ -87,12 +89,11 @@ class ClickhouseWriterTest extends IntegrationTest with BeforeAndAfterAll {
       Array(5, null, null, null, null, null, null, null)
     )
 
-
     val lines = records.map(record => JsonUtils.toJson(record, false))
     fileClickhouseWriter.localFileService.writeLines(lines, tableSchema)
     fileClickhouseWriter.localFileService.flushUnfinishedFiles()
 
-    fileClickhouseWriter.write(records, tableSchema)
+    fileClickhouseWriter.insertBatch(records, tableSchema)
     fileClickhouseWriter.close()
 
     val numInsertedRecords = getTotalRows(dbName, tblName)

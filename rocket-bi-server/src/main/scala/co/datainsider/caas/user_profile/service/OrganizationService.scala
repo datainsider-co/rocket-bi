@@ -1,5 +1,7 @@
 package co.datainsider.caas.user_profile.service
 
+import co.datainsider.bi.client.MailChimpClient
+import co.datainsider.bi.util.ZConfig
 import co.datainsider.caas.admin.service.AdminUserService
 import co.datainsider.caas.user_caas.domain.Page
 import co.datainsider.caas.user_caas.repository.UserRepository
@@ -8,12 +10,12 @@ import co.datainsider.caas.user_profile.domain.org.Organization
 import co.datainsider.caas.user_profile.repository.OrganizationRepository
 import co.datainsider.caas.user_profile.service.verification.ChannelService
 import co.datainsider.caas.user_profile.util.JsonParser
+import co.datainsider.license.service.LicenseClientService
 import com.fasterxml.jackson.databind.JsonNode
 import com.twitter.inject.Logging
 import com.twitter.util.{Future, Return, Throw}
-import datainsider.client.exception.{BadRequestError, InternalError, NotFoundError}
-import co.datainsider.bi.util.{SlackUtils, ZConfig}
 import datainsider.client.domain.Implicits.ScalaFutureLike
+import datainsider.client.exception.{BadRequestError, InternalError, NotFoundError}
 import education.x.commons.I32IdGenerator
 import org.nutz.ssdb4j.spi.SSDB
 import scalaj.http.{Http, HttpResponse}
@@ -43,6 +45,8 @@ trait OrganizationService {
 
   def getByDomain(domain: String): Future[Organization]
 
+  def getByLicenseKey(licenseKey: String): Future[Organization]
+
   def register(request: RegisterOrgRequest): Future[Organization]
 
   def isDomainValid(domain: String): Future[Boolean]
@@ -59,7 +63,8 @@ case class OrganizationServiceImpl(
     adminUserService: AdminUserService,
     client: SSDB,
     emailChannel: ChannelService,
-    defaultOrganizationId: Long
+    defaultOrganizationId: Long,
+    licenseClientService: LicenseClientService
 ) extends OrganizationService
     with Logging {
 
@@ -137,6 +142,14 @@ case class OrganizationServiceImpl(
       }
     }
 
+  override def getByLicenseKey(licenseKey: String): Future[Organization] =
+    Future {
+      organizationRepository.list(licenseKey = Some(licenseKey)).headOption match {
+        case Some(org) => org
+        case _         => throw BadRequestError(s"not found org with license key $licenseKey")
+      }
+    }
+
   /**
     * get organization default for single tenant
     */
@@ -154,7 +167,16 @@ case class OrganizationServiceImpl(
       _ <- isDomainValid(request.subDomain)
       org <- doRegister(request)
     } yield {
-      SlackUtils.send(s"New org registered:\n${JsonParser.toJson(org)}")
+      licenseClientService.notify(s"New org registered:\n${JsonParser.toJson(org)}").rescue {
+        case e =>
+          error(e)
+          Future.Unit
+      }
+      Future(MailChimpClient().addMember(request.workEmail, request.firstName, request.lastName)).rescue {
+        case e =>
+          error(e)
+          Future.Unit
+      }
       org
     }
   }
@@ -171,6 +193,7 @@ case class OrganizationServiceImpl(
     for {
       orgId <- idGenerator.getNextId().map(generatedIdShouldExists).asTwitter
       organization <- createOrganization(request.toCreateOrganizationReq(orgId, request.workEmail, request.subDomain))
+      _ <- licenseClientService.createTrialSubscription(organization.licenceKey.get)
       ownerId <- adminUserService.createAdminAccount(orgId, request.toCreateAdminAccountReq)
       permissionAdded <- adminUserService.assignAdminPermissions(organization.organizationId, ownerId)
     } yield {
@@ -208,14 +231,17 @@ case class OrganizationServiceImpl(
       try {
         val path = ZConfig.getString("recaptcha.host")
         val secret = ZConfig.getString("recaptcha.secret")
-        val response: HttpResponse[String] = Http(path)
-          .postData("")
-          .param("secret", secret)
-          .param("response", token)
-          .asString
 
-        val jsonResp: JsonNode = JsonParser.fromJson[JsonNode](response.body)
-        jsonResp.get("success").booleanValue()
+        if (secret.nonEmpty) {
+          val response: HttpResponse[String] = Http(path)
+            .postData("")
+            .param("secret", secret)
+            .param("response", token)
+            .asString
+
+          val jsonResp: JsonNode = JsonParser.fromJson[JsonNode](response.body)
+          jsonResp.get("success").booleanValue()
+        } else true
       } catch {
         case e: Throwable => throw InternalError(s"error when validate recaptcha token: $e")
       }

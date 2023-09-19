@@ -130,7 +130,7 @@ class GoogleAdsWorker(
           if (incrementalColumnIndex == -1) throw new InternalError("can not find incremental column")
           else records.last(incrementalColumnIndex).toString
       }
-      writers.foreach(writer => writer.write(records, tableSchema))
+      writers.foreach(writer => writer.insertBatch(records, tableSchema))
       reportToScheduler(syncId, report, reportProgress, lastSyncedValue)
     }
 

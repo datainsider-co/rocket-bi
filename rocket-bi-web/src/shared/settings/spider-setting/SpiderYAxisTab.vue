@@ -80,10 +80,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { AxisSetting, ChartOption, HeatMapQuerySetting, QuerySetting, QuerySettingType, SeriesQuerySetting, SettingKey } from '@core/common/domain';
+import { AxisSetting, ChartOption, HeatMapQuerySetting, QuerySetting, QuerySettingClassName, SeriesQuerySetting, SettingKey } from '@core/common/domain';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { DashOptions } from '@/shared/settings/common/options/DashOptions';
 import { ListUtils } from '@/utils';
 import { enableCss } from '@/shared/settings/common/install';
@@ -98,8 +98,8 @@ export default class YAxisTab extends Vue {
 
   private readonly defaultSetting = {
     visible: true,
-    categoryFont: 'Roboto',
-    categoryColor: ChartOption.getThemeTextColor(),
+    categoryFont: ChartOption.getSecondaryFontFamily(),
+    categoryColor: ChartOption.getPrimaryTextColor(),
     categoryFontSize: '11px',
     gridLineColor: ChartOption.getGridLineColor(),
     gridLineDashStyle: 'Solid',
@@ -143,7 +143,7 @@ export default class YAxisTab extends Vue {
   }
 
   private get fontSizeOptions() {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get gridLineColor(): string {

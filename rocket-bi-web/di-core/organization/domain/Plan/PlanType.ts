@@ -1,5 +1,3 @@
-import { PlanAndBillingModule } from '@/screens/organization-settings/stores/PlanAndBillingStore';
-
 export enum PlanType {
   Startup = 'startup_plan',
   Business = 'business_plan',
@@ -43,13 +41,4 @@ export const PlanDescriptions: Record<PlanType, string> = {
   [PlanType.OnPremise]: 'Best for medium size teams',
   [PlanType.NoPlan]: '--',
   [PlanType.Trial]: 'Trial'
-};
-
-export const PlanPrice: Record<PlanType, string> = {
-  [PlanType.Startup]: '$45/mo',
-  [PlanType.Business]: '$800/mo',
-  [PlanType.Cooperate]: '$1200/mo',
-  [PlanType.OnPremise]: '$3000/mo',
-  [PlanType.NoPlan]: '--',
-  [PlanType.Trial]: '--'
 };

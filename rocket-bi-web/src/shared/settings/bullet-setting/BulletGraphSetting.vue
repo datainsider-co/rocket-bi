@@ -4,7 +4,12 @@
     <DataValuesTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <BulletColorTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <TargetAndValueTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
-    <BackgroundTab :setting="setting.options" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
+    <BackgroundTab
+      :color="setting.options.background"
+      :default-color="defaultBackgroundColor"
+      @onChanged="handleSettingChanged"
+      @onMultipleChanged="handleMultipleSettingChanged"
+    />
     <TooltipTab :setting="setting.options.tooltip" @onChhanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
     <VisualHeader :setting="setting.options" :widget-type="currentWidget" @onChanged="handleSettingChanged" @onMultipleChanged="handleMultipleSettingChanged" />
   </div>
@@ -15,7 +20,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import TitleTab from '@/shared/settings/common/tabs/TitleTab.vue';
 import BackgroundTab from '@/shared/settings/common/tabs/BackgroundTab.vue';
 import VisualHeader from '@/shared/settings/common/tabs/VisualHeader.vue';
-import { BulletChartOption, ChartInfo, GaugeQuerySetting, SettingKey } from '@core/common/domain';
+import { BulletChartOption, ChartInfo, ChartOption, GaugeQuerySetting, SettingKey } from '@core/common/domain';
 import { ChartType } from '@/shared';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import { Log } from '@core/utils';
@@ -65,6 +70,10 @@ export default class BulletGraphSetting extends Vue {
     this.setting.setOptions(settings);
     this.query.setChartOption(this.setting);
     this.$emit('onChartInfoChanged', this.chartInfo);
+  }
+
+  private get defaultBackgroundColor(): string {
+    return ChartOption.getThemeBackgroundColor();
   }
 }
 </script>

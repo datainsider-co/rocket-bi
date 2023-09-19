@@ -45,9 +45,9 @@ import { Log } from '@core/utils';
 })
 export default class TabSelection extends Vue {
   static readonly componentsWithDisplay: Map<TabFilterDisplay, string> = new Map<TabFilterDisplay, string>([
-    [TabFilterDisplay.normal, 'NormalTabItem'],
-    [TabFilterDisplay.multiChoice, 'MultiChoiceItem'],
-    [TabFilterDisplay.singleChoice, 'SingleChoiceItem']
+    [TabFilterDisplay.Normal, 'NormalTabItem'],
+    [TabFilterDisplay.MultiChoice, 'MultiChoiceItem'],
+    [TabFilterDisplay.SingleChoice, 'SingleChoiceItem']
   ]);
   static readonly OPTION_SHOW_ALL = {
     displayName: 'All',
@@ -60,7 +60,7 @@ export default class TabSelection extends Vue {
   @Prop({ type: Array, default: [], required: false })
   selectOptions!: SelectOption[];
 
-  @Prop({ type: String, default: TabFilterDisplay.normal })
+  @Prop({ type: String, default: TabFilterDisplay.Normal })
   displayAs!: TabFilterDisplay;
 
   @Prop({ type: String, default: Direction.row })
@@ -77,7 +77,7 @@ export default class TabSelection extends Vue {
   }
 
   private get isDropdown(): boolean {
-    return this.displayAs == TabFilterDisplay.dropDown;
+    return this.displayAs == TabFilterDisplay.DropDown;
   }
 
   private get tabContainerClass(): string {
@@ -104,12 +104,12 @@ export default class TabSelection extends Vue {
 
   private get displayClass(): string {
     switch (this.displayAs) {
-      case TabFilterDisplay.normal:
+      case TabFilterDisplay.Normal:
         return '';
-      case TabFilterDisplay.singleChoice:
-      case TabFilterDisplay.multiChoice:
+      case TabFilterDisplay.SingleChoice:
+      case TabFilterDisplay.MultiChoice:
         return 'choice';
-      case TabFilterDisplay.dropDown:
+      case TabFilterDisplay.DropDown:
         return 'dropdown-item';
       default:
         return '';

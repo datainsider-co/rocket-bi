@@ -1,6 +1,9 @@
 import { SelectOption } from '@/shared';
 
-export const FontSizeOptions: SelectOption[] = [
+/**
+ * use for subtitle font size
+ */
+export const SecondaryFontSizeOptions: SelectOption[] = [
   {
     displayName: '10',
     id: '10px'
@@ -40,10 +43,14 @@ export const FontSizeOptions: SelectOption[] = [
   {
     displayName: '26',
     id: '26px'
+  },
+  {
+    displayName: '42',
+    id: '42px'
   }
 ];
 
-export const LargeFontSizeOptions: SelectOption[] = [
+export const PrimaryFontSizeOptions: SelectOption[] = [
   {
     displayName: '11',
     id: '11px'
@@ -51,6 +58,10 @@ export const LargeFontSizeOptions: SelectOption[] = [
   {
     displayName: '12',
     id: '12px'
+  },
+  {
+    displayName: '14',
+    id: '14px'
   },
   {
     displayName: '16',
@@ -87,6 +98,10 @@ export const LargeFontSizeOptions: SelectOption[] = [
   {
     displayName: '36',
     id: '36px'
+  },
+  {
+    displayName: '42',
+    id: '42px'
   },
   {
     displayName: '48',

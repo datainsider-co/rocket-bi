@@ -2,8 +2,9 @@
   <div>
     <BPopover :show.sync="isShow" :target="id" placement="top" triggers="blur" custom-class="popover-color-picker-v2" boundary="window">
       <template>
-        <div id="main-picker-area" class="main-picker-area">
-          <Sketch v-model="colors" :presetColors="[]"></Sketch>
+        <div id="main-picker-area" class="main-picker-area" :class="{ 'gradient-picker': !isSolid }">
+          <Sketch v-if="isSolid" v-model="colors" :presetColors="[]"></Sketch>
+          <VueGpickr v-else v-model="gradient"></VueGpickr>
           <div class="extend-area">
             <div :id="genBtnId('color-picker-reset-default')" class="d-flex flex-row btn-reset btn-ghost align-items-center" @click.prevent="resetToDefault">
               <div class="user-select-none">Reset to default</div>
@@ -30,11 +31,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { Component, Model, Prop, Vue, Watch } from 'vue-property-decorator';
 // @ts-ignored
 import { Sketch } from 'vue-color';
+// @ts-ignored
+import { VueGpickr, LinearGradient } from 'vue-gpickr';
 import ClickOutside from 'vue-click-outside';
 import { ColorUtils } from '@/utils/ColorUtils';
+import { Log } from '@core/utils';
 
 interface ObjectColor {
   source: 'hex' | 'hsl' | 'hsv' | 'rgba' | 'hex8';
@@ -53,43 +57,48 @@ export enum PickerType {
 
 @Component({
   components: {
-    Sketch: Sketch
+    Sketch: Sketch,
+    VueGpickr: VueGpickr
   },
   directives: {
     ClickOutside
   }
 })
 export default class ColorPickerV2 extends Vue {
-  private readonly PickerType = PickerType;
-  @Prop({ type: String, default: '#ffffff' })
-  value!: string;
+  protected readonly PickerType = PickerType;
 
-  @Prop({ type: String, default: '#ffffff' })
-  defaultColor!: string;
-
-  @Prop({ type: Boolean, default: false })
-  allowValueNull!: boolean;
-
-  @Prop({ type: Boolean, default: false })
-  allowWatchValueChange!: boolean;
-
-  private currentColor = '';
-
-  private colorInPopover = '';
-
-  private currentProcess: number | undefined = void 0;
-
-  private isShow = false;
-
-  @Prop({ required: true, type: String })
-  private readonly id!: string;
+  @Prop({ type: String, default: () => `color-picker-${Date.now()}` })
+  protected readonly id!: string;
 
   @Prop({ required: false, type: String, default: PickerType.InputAndPreview })
-  private readonly pickerType!: PickerType;
+  protected readonly pickerType!: PickerType;
 
-  private popupItem: Element | null = null;
+  @Model('change', { type: String, default: '#ffffff' })
+  protected readonly value!: string;
 
-  private get colors(): ObjectColor {
+  @Prop({ type: String, default: '#ffffff' })
+  protected readonly defaultColor!: string;
+
+  @Prop({ type: Boolean, default: false })
+  protected readonly allowValueNull!: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  protected readonly allowWatchValueChange!: boolean;
+
+  protected currentColor = '';
+
+  protected colorInPopover = '';
+
+  protected currentProcess: number | undefined = void 0;
+
+  protected isShow = false;
+
+  protected popupItem: Element | null = null;
+
+  private get isSolid(): boolean {
+    return !ColorUtils.isGradientColor(this.value);
+  }
+  protected get colors(): ObjectColor {
     if (this.currentColor?.length === 8) {
       return {
         source: 'hex',
@@ -103,7 +112,7 @@ export default class ColorPickerV2 extends Vue {
     }
   }
 
-  private set colors(newColors: ObjectColor) {
+  protected set colors(newColors: ObjectColor) {
     if (newColors.a === 1) {
       this.colorInPopover = newColors.hex || '#ffffff';
     } else {
@@ -111,6 +120,19 @@ export default class ColorPickerV2 extends Vue {
     }
   }
 
+  private get gradient(): LinearGradient | null {
+    if (!this.isSolid && ColorUtils.isGradientColor(this.colorInPopover)) {
+      return new LinearGradient({ ...ColorUtils.parseGradient(this.colorInPopover) });
+    }
+    return null;
+  }
+
+  private set gradient(gradient: LinearGradient | null) {
+    if (gradient) {
+      const cssValue = gradient.toString();
+      this.colorInPopover = cssValue;
+    }
+  }
   @Watch('currentColor')
   onValueChanged(newColor: string) {
     if (this.currentProcess) {
@@ -126,7 +148,7 @@ export default class ColorPickerV2 extends Vue {
     this.colorInPopover = this.currentColor = this.getColorOrDefault();
   }
 
-  private getColorOrDefault(): string {
+  protected getColorOrDefault(): string {
     if (this.allowValueNull) {
       return this.value || this.defaultColor || '#00000000';
     } else {
@@ -171,13 +193,14 @@ export default class ColorPickerV2 extends Vue {
     this.colorInPopover = this.value;
     this.hidePicker();
   }
+
   private get colorInPopoverAsHex(): string {
     return ColorUtils.getColorFromCssVariable(this.colorInPopover);
   }
-  private get currentColorAsHex(): string {
+  protected get currentColorAsHex(): string {
     return ColorUtils.getColorFromCssVariable(this.currentColor);
   }
-  private set currentColorAsHex(newValue: string) {
+  protected set currentColorAsHex(newValue: string) {
     this.currentColor = newValue;
   }
 }
@@ -190,7 +213,7 @@ export default class ColorPickerV2 extends Vue {
 .popover-color-picker-v2 {
   background-color: transparent;
   padding: 0;
-  max-width: 310px;
+  max-width: 600px;
   box-shadow: var(--menu-shadow);
 
   ::v-deep {
@@ -202,6 +225,13 @@ export default class ColorPickerV2 extends Vue {
         background-color: var(--primary);
         border: solid 0.5px rgba(#ffffff, 0.1);
         border-radius: 4px;
+
+        &.gradient-picker {
+          .vue-gpickr {
+            border-radius: unset;
+            box-shadow: unset;
+          }
+        }
 
         .vc-sketch {
           border: none 0;
@@ -314,21 +344,27 @@ export default class ColorPickerV2 extends Vue {
 <style lang="scss">
 .color-picker-v2-button {
   padding: 10px 14px 10px 10px;
-  width: fit-content;
-  border: 1px solid #e5e5e5 !important;
+  width: 100%;
   height: 40px;
   border-radius: 6px;
+  margin-left: 1px;
+  margin-right: 1px;
+  box-shadow: 0 0 0 1px #d6d6d6;
+  // avoid box-shadow overlap
 
   .regular-text-14 {
     padding-left: 0;
   }
   &:hover {
-    background-color: #f0f0f0 !important;
+    box-shadow: 0 0 0 1px var(--accent);
   }
 
   &--container {
     display: flex;
     align-items: center;
+    width: inherit;
+    justify-content: space-evenly;
+
     img {
       margin-right: 12px;
     }

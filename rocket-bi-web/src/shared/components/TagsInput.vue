@@ -190,6 +190,16 @@ export default class TagsInput extends Vue {
     this.popoverWidth = this.tagInputContainer.clientWidth;
     this.showSuggestion();
   }
+
+  focus(): void {
+    this.$nextTick(() => {
+      try {
+        this.tagInput.$refs.newTagInput.focus();
+      } catch (ex) {
+        Log.error('TagsInput::focus::', ex);
+      }
+    });
+  }
 }
 </script>
 

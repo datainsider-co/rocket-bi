@@ -76,6 +76,7 @@ body[dashboard-theme='light-default'] div[widget-preview-area] {
   --header-active-background-color: #fff;
   --header-background-color: #f5f5f5;
   --matching-header-color: #f5f5f5;
+  --default-dashboard-background-color: #fafafb;
 }
 
 body[dashboard-theme='anzac'] #app,
@@ -100,6 +101,7 @@ body[dashboard-theme='anzac'] div[widget-preview-area] {
   --header-active-background-color: #fff;
   --header-background-color: #f5f5f5;
   --matching-header-color: #f5f5f5;
+  --default-dashboard-background-color: #fafafb;
 }
 
 body[dashboard-theme='electric-violet'] #app,
@@ -124,6 +126,7 @@ body[dashboard-theme='electric-violet'] div[widget-preview-area] {
   --header-active-background-color: #fff;
   --header-background-color: #f5f5f5;
   --matching-header-color: #f5f5f5;
+  --default-dashboard-background-color: #fafafb;
 }
 
 body[dashboard-theme='curious-blue'] #app,
@@ -148,6 +151,7 @@ body[dashboard-theme='curious-blue'] div[widget-preview-area] {
   --header-active-background-color: #fff;
   --header-background-color: #f5f5f5;
   --matching-header-color: #f5f5f5;
+  --default-dashboard-background-color: #fafafb;
 }
 
 body[dashboard-theme='ebony-clay'] #app,
@@ -172,6 +176,7 @@ body[dashboard-theme='ebony-clay'] div[widget-preview-area] {
   --header-active-background-color: #fff;
   --header-background-color: #f5f5f5;
   --matching-header-color: #f5f5f5;
+  --default-dashboard-background-color: #fafafb;
 }
 
 body[dashboard-theme='dark-default'] #app,
@@ -183,7 +188,7 @@ body[dashboard-theme='dark-default'] div[widget-preview-area] {
   --accent: #597fff;
   --accent-hover-color: #4b6ee1;
   --accent-active-color: #4160c2;
-  --dashboard-panel-background-color: rgba(0, 0, 0, 0.1);
+  --dashboard-panel-background-color: #00000019;
   --filter-accent-bg: #fff;
   --filter-accent-color: #000;
   --accent-text-color: #fff;
@@ -197,6 +202,7 @@ body[dashboard-theme='dark-default'] div[widget-preview-area] {
   --matching-header-color: #121a22;
 
   --dashboard-gradient-background-color: #16212b;
+  --default-dashboard-background-color: #00000019;
 }
 
 body[dashboard-theme='clear-sky'] #app,
@@ -221,6 +227,7 @@ body[dashboard-theme='clear-sky'] div[widget-preview-area] {
   --header-active-background-color: var(--accent);
   --header-background-color: #0000004d;
   --dashboard-gradient-background-color: #223060;
+  --default-dashboard-background-color: #00000019;
 }
 
 body[dashboard-theme='deep-sea-space'] #app,
@@ -246,6 +253,7 @@ body[dashboard-theme='deep-sea-space'] div[widget-preview-area] {
   --header-background-color: #0000004d;
 
   --dashboard-gradient-background-color: #224960;
+  --default-dashboard-background-color: #00000019;
 }
 
 body[dashboard-theme='lawrencium'] #app,
@@ -271,6 +279,7 @@ body[dashboard-theme='lawrencium'] div[widget-preview-area] {
   --header-background-color: #0000004d;
 
   --dashboard-gradient-background-color: #223160;
+  --default-dashboard-background-color: #00000019;
 }
 
 body[dashboard-theme='dark'] #app,
@@ -296,6 +305,7 @@ body[dashboard-theme='dark'] div[widget-preview-area] {
   --header-background-color: #0000004d;
 
   --dashboard-gradient-background-color: #1f2435;
+  --default-dashboard-background-color: #00000019;
 }
 
 body div[builder-default-style] {

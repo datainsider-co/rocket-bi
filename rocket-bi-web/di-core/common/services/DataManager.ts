@@ -1,8 +1,8 @@
-import { Dashboard, DashboardId, DashboardSetting, DynamicFilter, FieldDetailInfo, Organization, UserInfo, UserProfile, Widget } from '@core/common/domain';
+import { Dashboard, DashboardId, DashboardSetting, FieldDetailInfo, InternalFilter, Organization, UserInfo, UserProfile, Widget } from '@core/common/domain';
 import { CookieManger } from '@core/common/services/index';
 import { JsonUtils, Log } from '@core/utils';
 import { SessionInfo } from '@core/common/domain/response';
-import { BuilderMode, OauthType } from '@/shared';
+import { OauthType } from '@/shared';
 import router from '@/router/Router';
 import { RouterUtils } from '@/utils/RouterUtils';
 import { MainDateData } from '@/screens/dashboard-detail/stores';
@@ -15,19 +15,18 @@ enum DataManagerKeys {
   SessionId = 'ssid',
   DashboardId = 'dashboard_id',
   Widget = 'widget',
-  ChartBuilderMode = 'chart_builder_mode',
-  Token = 'token',
   Filters = 'filters_of_dashboard',
   UserProfileConfigColumns = 'user_profile_config_columns',
   DynamicFilters = 'dynamic_filters',
-  DbSelected = 'db_selected',
+  // DbSelected = 'db_selected',
   MainFilterMode = 'main_filter_mode',
   // MainDatabase = 'db_highest_used',
   DashboardSetting = 'dashboard_setting',
   LoginType = 'login_type',
   Dashboard = 'dashboard',
   SelectedColumns = 'selected_columns',
-  Organization = 'organization'
+  Organization = 'organization',
+  RecentIcons = 'recent_icons'
 }
 
 export class DataManager {
@@ -116,25 +115,6 @@ export class DataManager {
     return true;
   }
 
-  static saveChartBuilderMode(mode: BuilderMode): boolean {
-    sessionStorage.setItem(DataManagerKeys.ChartBuilderMode, mode.valueOf().toString());
-    return true;
-  }
-
-  static getChartBuilderMode(): BuilderMode {
-    const mode = sessionStorage.getItem(DataManagerKeys.ChartBuilderMode);
-    if (mode) {
-      return mode as BuilderMode;
-    } else {
-      return BuilderMode.Create;
-    }
-  }
-
-  static removeChartBuilderMode(): boolean {
-    sessionStorage.removeItem(DataManagerKeys.ChartBuilderMode);
-    return true;
-  }
-
   static getToken(): string | null {
     return RouterUtils.getToken(router.currentRoute);
   }
@@ -153,33 +133,22 @@ export class DataManager {
     return [];
   }
 
-  static saveMainFilters(id: string, filters: DynamicFilter[]): boolean {
+  static saveLocalFilters(id: string, filters: InternalFilter[]): boolean {
     const json: string = JsonUtils.toJson(filters);
     const key = this.buildKey([DataManagerKeys.DynamicFilters, id]);
     localStorage.setItem(key, json);
     return true;
   }
 
-  static getMainFilters(id: string): DynamicFilter[] {
+  static getLocalFilters(id: string): InternalFilter[] {
     const key = this.buildKey([DataManagerKeys.DynamicFilters, id]);
     const json: string | null = localStorage.getItem(key);
     if (json) {
       const filterAsObjects: any[] = JsonUtils.fromObject<any[]>(json);
-      return filterAsObjects.map(filter => DynamicFilter.fromObject(filter));
+      return filterAsObjects.map(filter => InternalFilter.fromObject(filter));
     } else {
       return [];
     }
-  }
-
-  static getDatabaseSelected(dashboardId: number): string | undefined {
-    const key = this.buildKey([DataManagerKeys.DbSelected, dashboardId]);
-    return localStorage.getItem(key) ?? void 0;
-  }
-
-  static saveDatabaseSelected(dashboardId: number, dbName: string): boolean {
-    const key = this.buildKey([DataManagerKeys.DbSelected, dashboardId]);
-    localStorage.setItem(key, dbName);
-    return true;
   }
 
   static saveMainDateData(dashboardId: DashboardId, data: MainDateData): boolean {
@@ -271,5 +240,19 @@ export class DataManager {
 
   static isTestAccount(): boolean {
     return this.getUserProfile()?.email === DataManager.TEST_ACCOUNT;
+  }
+
+  static saveRecentIcons(data: string[]) {
+    localStorage.setItem(DataManagerKeys.RecentIcons, JSON.stringify(data));
+  }
+
+  static getRecentIcons(): string[] {
+    try {
+      const recentIconString = localStorage.getItem(DataManagerKeys.RecentIcons);
+      return recentIconString ? JSON.parse(recentIconString) : [];
+    } catch (e) {
+      Log.error('DataManager::getRecentIcons::error::', e);
+      return [];
+    }
   }
 }

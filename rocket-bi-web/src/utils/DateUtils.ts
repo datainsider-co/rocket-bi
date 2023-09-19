@@ -4,7 +4,6 @@ import { MainDateMode } from '@core/common/domain/model';
 import { StringUtils } from '@/utils/StringUtils';
 // import { TimeUnit } from '@core/lake-house/domain';
 import { DaysOfWeek } from '@/shared/enums/DayOfWeeks';
-import { PlanDisplayNames, PlanType } from '@core/organization/domain/Plan/PlanType';
 
 enum DisplayFormatType {
   SameYear,
@@ -12,18 +11,33 @@ enum DisplayFormatType {
   Default
 }
 
-export class DateTimeFormatter {
-  static formatDate(currentData: Date | string): string {
+export class DateTimeUtils {
+  /**
+   * format with format: yyyy-MM-dd HH:mm:ss
+   * if (isEndOfDay) => format: yyyy-MM-dd 23:59:59
+   * otherwise => format: yyyy-MM-dd 00:00:00
+   */
+  static formatDate(currentData: Date | string | number, isEndOfDay = false): string {
     const date = moment(currentData).toDate();
     let day = date.getDate().toString();
     let month = (date.getMonth() + 1).toString();
     const year = date.getFullYear().toString();
     if (month.length < 2) month = '0' + month;
     if (day.length < 2) day = '0' + day;
-    return `${year}-${month}-${day} 00:00:00`;
+    if (isEndOfDay) {
+      return `${year}-${month}-${day} 23:59:59`;
+    } else {
+      return `${year}-${month}-${day} 00:00:00`;
+    }
   }
 
-  static formatDateWithTime(currentData: Date | string | number, time: string) {
+  /**
+   * @param currentData is Date or string or number
+   * @param time is string format: HH:mm:ss
+   * @return format: yyyy-MM-dd HH:mm:ss if time is not empty
+   * otherwise => format: yyyy-MM-dd
+   */
+  static formatDateWithTime(currentData: Date | string | number, time: string): string {
     const date = moment(currentData).toDate();
     let day = date.getDate().toString();
     let month = (date.getMonth() + 1).toString();
@@ -37,6 +51,10 @@ export class DateTimeFormatter {
     }
   }
 
+  /**
+   * @return format Aug 23, 2021
+   * @deprecated use formatASMMMDDYYYY instead of
+   */
   static formatDateDisplay(currentData: Date | string): string {
     const date = moment(currentData).toDate();
     let day = date.getDate().toString();
@@ -162,14 +180,14 @@ export class DateTimeFormatter {
 
   static formatDisplayDateRange(dateRange: DateRange): string {
     const { start, end } = dateRange;
-    const formatType = DateTimeFormatter.getDisplayFormatType(start, end);
+    const formatType = DateTimeUtils.getDisplayFormatType(start, end);
     switch (formatType) {
       case DisplayFormatType.SameYear:
-        return `${DateTimeFormatter.formatAsMMMMD(start)} - ${DateTimeFormatter.formatAsMMMMD(end)}`;
+        return `${DateTimeUtils.formatAsMMMMD(start)} - ${DateTimeUtils.formatAsMMMMD(end)}`;
       case DisplayFormatType.SameMonthYear:
-        return `${DateTimeFormatter.formatAsMMMMD(start)} - ${DateTimeFormatter.formatAsD(end)}`;
+        return `${DateTimeUtils.formatAsMMMMD(start)} - ${DateTimeUtils.formatAsD(end)}`;
       default:
-        return `${DateTimeFormatter.formatASMMMDDYYYY(start)} - ${DateTimeFormatter.formatASMMMDDYYYY(end)}`;
+        return `${DateTimeUtils.formatASMMMDDYYYY(start)} - ${DateTimeUtils.formatASMMMDDYYYY(end)}`;
     }
   }
 
@@ -193,8 +211,8 @@ export class DateTimeFormatter {
       case DateTypes.hour: {
         if (range) {
           const { start, end } = range;
-          const startDateAsString = DateTimeFormatter.formatAsDDMMYYYYHM(start);
-          const endDateAsString = DateTimeFormatter.formatAsHM(end);
+          const startDateAsString = DateTimeUtils.formatAsDDMMYYYYHM(start);
+          const endDateAsString = DateTimeUtils.formatAsHM(end);
           return `${startDateAsString} - ${endDateAsString}`;
         }
         return '';
@@ -202,8 +220,8 @@ export class DateTimeFormatter {
       default: {
         if (range) {
           const { start, end } = range;
-          const startDateAsString = DateTimeFormatter.formatAsDDMMYYYY(start);
-          const endDateAsString = DateTimeFormatter.formatAsDDMMYYYY(end);
+          const startDateAsString = DateTimeUtils.formatAsDDMMYYYY(start);
+          const endDateAsString = DateTimeUtils.formatAsDDMMYYYY(end);
           const isStartFirst = moment(start).valueOf() - moment(end).valueOf() < 0;
           return isStartFirst ? `${startDateAsString} - ${endDateAsString}` : `${endDateAsString} - ${startDateAsString}`;
         }
@@ -364,6 +382,10 @@ export class DateUtils {
     return { start: new Date(), end: new Date() };
   }
 
+  /**
+   * Get date range by mode
+   * @returns null when mode is custom or allTime
+   */
   static getDateRange(mode: MainDateMode): DateRange | null {
     switch (mode) {
       case MainDateMode.thisDay:
@@ -420,20 +442,27 @@ export class DateUtils {
     }
   }
 
-  static getCompareDateRange(compareMode: CompareMode, currentRange: DateRange): DateRange | null {
+  /**
+   * get compare date range by compare mode
+   * @param compareMode
+   * @param firstRange
+   * @returns null if compareMode is none or custom
+   */
+  static getCompareDateRange(compareMode: CompareMode, firstRange: DateRange): DateRange | null {
     switch (compareMode) {
-      case CompareMode.none:
-        return null;
       case CompareMode.previousPeriod:
-        return DateUtils.compareToPreviousPeriod(currentRange?.start, currentRange?.end);
+        return DateUtils.compareToPreviousPeriod(firstRange?.start, firstRange?.end);
       case CompareMode.samePeriodLastMonth:
-        return DateUtils.compareToSamePeriodLastMonth(currentRange?.start, currentRange?.end);
+        return DateUtils.compareToSamePeriodLastMonth(firstRange?.start, firstRange?.end);
       case CompareMode.samePeriodLastQuarter:
-        return DateUtils.compareToSamePeriodLastQuarter(currentRange?.start, currentRange?.end);
+        return DateUtils.compareToSamePeriodLastQuarter(firstRange?.start, firstRange?.end);
       case CompareMode.samePeriodLastYear:
-        return DateUtils.compareToSamePeriodLastYear(currentRange?.start, currentRange?.end);
+        return DateUtils.compareToSamePeriodLastYear(firstRange?.start, firstRange?.end);
+      case CompareMode.none:
+      case CompareMode.custom:
+        return null;
       default:
-        return currentRange;
+        return null;
     }
   }
 
@@ -624,13 +653,13 @@ export class DateUtils {
   }
 
   static calculateDelayTimesOfWeek(day: DaysOfWeek, time: number) {
-    const timeAsMS = DateUtils.HHMMSSToMs(DateTimeFormatter.formatAsHHmmss(moment(time).toDate()));
+    const timeAsMS = DateUtils.HHMMSSToMs(DateTimeUtils.formatAsHHmmss(moment(time).toDate()));
     const dayAsNumber = this.dayToNumber(day);
     return dayAsNumber * timeAsMS;
   }
 
   static calculateDelayTimesOfMonth(day: number, time: number) {
-    const timeAsMS = DateUtils.HHMMSSToMs(DateTimeFormatter.formatAsHHmmss(moment(time).toDate()));
+    const timeAsMS = DateUtils.HHMMSSToMs(DateTimeUtils.formatAsHHmmss(moment(time).toDate()));
     return timeAsMS + day * 86400000;
   }
 

@@ -45,7 +45,7 @@
           trim
           autocomplete="off"
           class="form-control"
-          placeholder="Data Insider"
+          placeholder="RocketBI"
           type="text"
           @keydown.enter="handleClickOk"
         />

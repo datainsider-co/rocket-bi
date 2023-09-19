@@ -1,7 +1,7 @@
 <template>
   <div class="form-panel">
     <div class="oath-form-container">
-      <h2 class="unselectable">Welcome to Rocket.BI</h2>
+      <h2 class="unselectable">Welcome to RocketBI</h2>
       <h4 class="unselectable">Login</h4>
       <div id="login-form">
         <DiInputComponent2
@@ -65,7 +65,7 @@ import DiInputComponent2 from '@/screens/login-v2/components/DiInputComponent2.v
 import { PopupUtils, RouterUtils, StringUtils } from '@/utils';
 import { Log } from '@core/utils';
 import { email, required } from 'vuelidate/lib/validators';
-import { AtomicAction } from '@/shared/anotation';
+import { AtomicAction } from '@core/common/misc';
 import { DataManager } from '@core/common/services';
 import { LoginConstants, OauthType, Routers } from '@/shared';
 import { PlanAndBillingModule } from '@/screens/organization-settings/stores/PlanAndBillingStore';

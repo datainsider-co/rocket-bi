@@ -1,26 +1,35 @@
 <template>
-  <div>
-    <div class="row no-gutters text-center control-bar flex-nowrap overflow-auto">
-      <div class="dashboard-title-container d-flex flex-row align-items-center overflow-hidden">
-        <div :id="genBtnId('dashboard-header-back')" class="regular-icon-16 btn-icon-border" @click.stop="handleBack">
-          <BackIcon></BackIcon>
-        </div>
-        <div class="regular-text-24 text-left dashboard-title">{{ title || 'Untitled' }}</div>
-        <transition name="fade">
-          <template v-if="showEditComponent()">
-            <i class="di-icon-edit edit-icon btn-icon-border" @click="onClickRename"></i>
-          </template>
-        </transition>
+  <div
+    class="dashboard-header"
+    :class="{
+      'embedded-dashboard-header': isEmbeddedView
+    }"
+  >
+    <div class="dashboard-header--bar">
+      <div class="dashboard-header--bar--left">
+        <i
+          :id="genBtnId('dashboard-header-back')"
+          class="di-icon-arrow-left-large btn-icon-border dashboard-header--bar--left--back"
+          @click.stop="handleBack"
+          v-show="!isEmbeddedView"
+        ></i>
+        <h4 :title="title">{{ title }}</h4>
+        <i
+          v-show="isEditMode() && !isEmbeddedView"
+          class="di-icon-inline-edit btn-icon-border dashboard-header--bar--left--rename"
+          @click="renameDashboard"
+        ></i>
       </div>
-      <div class="col-auto flex-shrink-1">
-        <DashboardControlBar :showResetFilters="haveFilters" />
+      <div class="dashboard-header--bar--right">
+        <DashboardControlBar ref="controlBar" :showResetFilters="haveFilters" :isMobile="isMobile" :isEmbeddedView="isEmbeddedView" />
       </div>
-      <DiRenameModal ref="renameModal" />
+      <DiRenameModal title="Rename Dashboard" label="Dashboard Name" ref="renameDashboardModal" />
+      <DiRenameModal title="Rename Chart" label="Chart Name" ref="renameChartModal" />
     </div>
-    <div v-if="enableFilter && !isMobile()" class="filters-bar">
+    <div v-if="enableFilter && !isMobile && !isEmbeddedView" class="dashboard-header--filter">
       <FilterBar
         ref="filterBar"
-        :filters="allFilters"
+        :filters="allLocalFilters"
         class="user-profile-filter"
         @onApplyFilter="handleApplyFilter"
         @onRemoveAt="handleRemoveFilterAt"
@@ -34,44 +43,33 @@
 <script lang="ts">
 import { CalendarData } from '@/shared/models';
 import { Component, Prop, Provide, Ref, Vue, Watch } from 'vue-property-decorator';
-import { mapGetters, mapState } from 'vuex';
-import { DashboardId, DIException, DynamicFilter, FieldDetailInfo, Widget } from '@core/common/domain';
+import { DashboardId, DIException, FieldDetailInfo, InternalFilter, MainDateFilter2, ValueControlType, Widget } from '@core/common/domain';
 import { DashboardMode, DateRange, isEdit, Routers } from '@/shared';
-import { DashboardModule, FilterModule, WidgetModule } from '@/screens/dashboard-detail/stores';
+import { DashboardControllerModule, DashboardModeModule, DashboardModule, FilterModule, WidgetModule } from '@/screens/dashboard-detail/stores';
 
 import DashboardControlBar from '@/screens/dashboard-detail/components/dashboard-control-bar/DashboardControlBar.vue';
-import { Stores } from '@/shared/enums/Stores';
 import FilterBar from '@/shared/components/FilterBar.vue';
-import { DateUtils, ListUtils, ChartUtils } from '@/utils';
+import { ChartUtils, DateTimeUtils, ListUtils } from '@/utils';
 import { DataManager } from '@core/common/services';
-import { Di } from '@core/common/modules';
 import { Log } from '@core/utils';
 import DiRenameModal from '@/shared/components/DiRenameModal.vue';
-import { PopupUtils } from '@/utils/PopupUtils';
 import { RouterUtils } from '@/utils/RouterUtils';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
-import MainDateFilter from '@filter/main-date-filter-v2/MainDateFilter.vue';
 
 @Component({
-  components: { DashboardControlBar, FilterBar, DiRenameModal },
-  computed: {
-    ...mapState(Stores.DashboardStore, ['dashboardId']),
-    ...mapGetters(Stores.DashboardStore, ['title']),
-    ...mapState(Stores.DashboardModeStore, ['mode'])
-  }
+  components: { DashboardControlBar, FilterBar, DiRenameModal }
 })
 export default class DashboardHeader extends Vue {
-  private readonly mode!: DashboardMode;
-  private readonly title!: string;
-  private readonly dashboardId!: DashboardId;
-
   @Prop({ type: Boolean, default: false })
   private readonly isLogin!: boolean;
 
   @Ref()
-  private readonly renameModal!: DiRenameModal;
+  private readonly renameDashboardModal!: DiRenameModal;
+
+  @Ref()
+  private readonly renameChartModal!: DiRenameModal;
 
   @Ref()
   private readonly filterBar?: FilterBar;
@@ -79,19 +77,36 @@ export default class DashboardHeader extends Vue {
   @Prop({ required: false, type: Boolean, default: true })
   private readonly enableFilter!: boolean;
 
-  private mainFilters: DynamicFilter[] = [];
-  private routerFilters: DynamicFilter[] = [];
+  @Prop({ required: false, type: Boolean, default: false })
+  private readonly isMobile!: boolean;
 
-  private get allFilters(): DynamicFilter[] {
-    return [...this.mainFilters, ...this.routerFilters];
+  @Prop({ required: false, type: Boolean, default: false })
+  private readonly isEmbeddedView!: boolean;
+
+  private localFilters: InternalFilter[] = [];
+  private routerFilters: InternalFilter[] = [];
+
+  @Ref()
+  private readonly controlBar!: DashboardControlBar;
+
+  private get title(): string {
+    return DashboardModule.title ?? 'Untitled dashboard';
   }
 
-  private isMobile() {
-    return ChartUtils.isMobile();
+  private get dashboardId(): DashboardId {
+    return DashboardModule.dashboardId || -1;
+  }
+
+  private get mode(): DashboardMode {
+    return DashboardModeModule.mode;
+  }
+
+  protected get allLocalFilters(): InternalFilter[] {
+    return [...this.localFilters, ...this.routerFilters];
   }
 
   private get haveFilters(): boolean {
-    return ListUtils.isNotEmpty(this.mainFilters);
+    return ListUtils.isNotEmpty(this.localFilters);
   }
 
   mounted() {
@@ -103,210 +118,253 @@ export default class DashboardHeader extends Vue {
   }
 
   private onShowEditChartTitleModal(widget: Widget) {
-    this.renameModal?.show(widget.name, (newName: string) => {
-      this.handleRenameWidget(newName, widget);
+    this.renameChartModal.show(widget.name, async (newName: string) => {
+      try {
+        this.renameChartModal.setLoading(true);
+        await WidgetModule.updateTitleWidget({ widget: widget, newName: newName });
+        this.renameChartModal.setLoading(false);
+        this.renameChartModal.hide();
+      } catch (ex) {
+        const exception = DIException.fromObject(ex);
+        this.renameChartModal.setError(exception.getPrettyMessage());
+        this.renameChartModal.setLoading(false);
+      }
     });
   }
 
   @Provide()
   handleResetFilter() {
-    this.mainFilters = [];
-    this.applyMainFilters();
-    this.saveMainFilters();
+    this.localFilters = [];
+    this.applyLocalFilters();
+    this.saveLocalFilters();
   }
 
   @Watch('dashboardId', { immediate: true })
   private onDashboardIdChanged() {
     if (this.dashboardId) {
-      this.mainFilters = DataManager.getMainFilters(this.dashboardId.toString());
+      this.localFilters = DataManager.getLocalFilters(this.dashboardId.toString());
       this.routerFilters = RouterUtils.getFilters(this.$route);
     }
   }
 
-  public showEditComponent(): boolean {
+  isEditMode(): boolean {
     return isEdit(this.mode);
-  }
-
-  @Track(TrackEvents.DashboardSubmitRename, {
-    dashboard_new_name: (_: DashboardHeader, args: any) => args[0],
-    dashboard_id: (_: DashboardHeader, args: any) => _.dashboardId
-  })
-  private async handleRenameDashboard(newName: string): Promise<void> {
-    if (DashboardModule.dashboardTitle !== newName) {
-      try {
-        this.renameModal.hide();
-        await DashboardModule.handleRenameDashboard(newName);
-        this.updateRouter(this.dashboardId, newName);
-      } catch (ex) {
-        this.handleError(ex);
-      }
-    }
-  }
-
-  private handleError(ex: any) {
-    const exception = DIException.fromObject(ex);
-    Log.error('DashboardHeader::handleError::', ex);
-    PopupUtils.showError(exception.message);
   }
 
   @Track(TrackEvents.DashboardRename, {
     dashboard_new_name: (_: DashboardHeader, args: any) => args[0],
     dashboard_id: (_: DashboardHeader, args: any) => _.dashboardId
   })
-  private onClickRename(): void {
-    this.renameModal.show(this.title, (newName: string) => {
-      this.handleRenameDashboard(newName);
+  protected renameDashboard(): void {
+    this.renameDashboardModal.show(this.title, async (newName: string) => {
+      try {
+        this.renameDashboardModal.setLoading(true);
+        await DashboardModule.handleRenameDashboard(newName);
+        this.updateRouter(this.dashboardId, newName);
+        this.renameDashboardModal.setLoading(false);
+        this.renameDashboardModal.hide();
+      } catch (ex) {
+        const exception = DIException.fromObject(ex);
+        this.renameDashboardModal.setLoading(false);
+        this.renameDashboardModal.setError(exception.getPrettyMessage());
+      }
     });
   }
 
   @Provide()
-  private applyMainDateFilter(calendar: CalendarData) {
-    FilterModule.setMainDateCalendar(calendar);
-    FilterModule.setCompareRange(null);
-    FilterModule.handleMainDateFilterChange();
-  }
-
-  @Provide()
-  private applyCompare(firstTime: DateRange, compareRange: DateRange) {
-    FilterModule.setChosenRange(firstTime);
-    FilterModule.setCompareRange(compareRange);
-    FilterModule.handleMainDateFilterChange();
-  }
-
-  @Provide()
-  private applyMainDateAllTime() {
-    FilterModule.removeMainDateCalendar();
-    FilterModule.handleMainDateFilterChange();
-  }
-
-  @Track(TrackEvents.SubmitRenameChart, {
-    chart_id: (_: DashboardHeader, args: any) => args[1].id,
-    chart_type: (_: DashboardHeader, args: any) => args[1].extraData?.currentChartType,
-    chart_old_title: (_: DashboardHeader, args: any) => args[1].name ?? 'Untitled chart',
-    chart_new_title: (_: DashboardHeader, args: any) => args[0]
-  })
-  private async handleRenameWidget(newName: string, currentWidget: Widget): Promise<void> {
-    if (currentWidget) {
-      try {
-        this.renameModal.hide();
-        await WidgetModule.updateTitleWidget({ widget: currentWidget, newName: newName });
-      } catch (ex) {
-        this.handleError(ex);
-      }
+  private applyMainDateFilter(calendar: CalendarData | null): void {
+    FilterModule.setMainDateData(calendar);
+    if (calendar && calendar.chosenDateRange) {
+      const valueMap = this.toValueMap(calendar.chosenDateRange);
+      DashboardControllerModule.applyDynamicValues({
+        id: MainDateFilter2.MAIN_DATE_ID,
+        valueMap: valueMap
+      });
+    } else {
+      this.applyMainDateAllTime();
     }
   }
 
-  private applyMainFilters() {
-    // trick
-    FilterModule.setMainFilters(this.allFilters);
+  private toValueMap(chosenDateRange: DateRange): Map<ValueControlType, string[]> {
+    return new Map([
+      [ValueControlType.MinValue, [DateTimeUtils.formatDate(chosenDateRange.start)]],
+      [ValueControlType.MaxValue, [DateTimeUtils.formatDate(chosenDateRange.end, true)]]
+    ]);
+  }
+
+  @Provide()
+  private applyMainDateAllTime(): void {
+    FilterModule.removeMainDateData();
+    DashboardControllerModule.applyDynamicValues({
+      id: MainDateFilter2.MAIN_DATE_ID,
+      valueMap: void 0
+    });
+  }
+
+  private async applyLocalFilters(): Promise<void> {
+    await FilterModule.setLocalFilters(this.allLocalFilters);
     FilterModule.setRouterFilters(this.routerFilters);
-    FilterModule.handleMainDateFilterChange();
+    await FilterModule.applyFilters();
   }
 
   @Track(TrackEvents.DashboardRemoveFilter)
   private handleRemoveFilterAt(index: number) {
-    const inLocalStorage = this.mainFilters.length > index;
+    const inLocalStorage = this.localFilters.length > index;
     if (inLocalStorage) {
-      this.mainFilters = ListUtils.removeAt(this.mainFilters, index);
+      this.localFilters = ListUtils.removeAt(this.localFilters, index);
     } else {
-      this.routerFilters = ListUtils.removeAt(this.routerFilters, index - this.mainFilters.length);
+      this.routerFilters = ListUtils.removeAt(this.routerFilters, index - this.localFilters.length);
     }
-    this.applyMainFilters();
-    this.saveMainFilters();
+    this.applyLocalFilters();
+    this.saveLocalFilters();
   }
 
   @Track(TrackEvents.DashboardAddFilter)
-  private handleApplyFilter(appliedFilter: DynamicFilter) {
-    this.applyMainFilters();
-    this.saveMainFilters();
+  private handleApplyFilter(appliedFilter: InternalFilter) {
+    this.applyLocalFilters();
+    this.saveLocalFilters();
   }
 
-  private handleFilterStatusChange(filter: DynamicFilter) {
-    this.applyMainFilters();
-    this.saveMainFilters();
+  private handleFilterStatusChange(filter: InternalFilter) {
+    this.applyLocalFilters();
+    this.saveLocalFilters();
   }
 
-  private handleValuesFilterChange(filter: DynamicFilter) {
-    this.applyMainFilters();
-    this.saveMainFilters();
+  private handleValuesFilterChange(filter: InternalFilter) {
+    this.applyLocalFilters();
+    this.saveLocalFilters();
   }
 
   @Provide()
   private handleAddNewFilter(profileField: FieldDetailInfo) {
-    const filter = DynamicFilter.from(profileField.field, profileField.displayName, profileField.isNested);
-    this.mainFilters.push(filter);
-    this.saveMainFilters();
-    this.filterBar?.showFilter(this.mainFilters.indexOf(filter));
+    const filter = InternalFilter.from(profileField.field, profileField.displayName, profileField.isNested);
+    this.localFilters.push(filter);
+    this.saveLocalFilters();
+    this.filterBar?.showFilter(this.localFilters.indexOf(filter));
   }
 
-  private saveMainFilters() {
-    DataManager.saveMainFilters(this.dashboardId.toString(), this.mainFilters);
+  private saveLocalFilters() {
+    DataManager.saveLocalFilters(this.dashboardId.toString(), this.localFilters);
   }
 
   private handleBack() {
-    Log.debug('handleBack::', DashboardModule.myDataPage);
-    if (DashboardModule.myDataPage && DashboardModule.myDataPage.name && DashboardModule.myDataPage.name != Routers.ChartBuilder) {
+    if (DashboardModule.previousPage && DashboardModule.previousPage.name != Routers.ChartBuilder) {
       this.$router.push({
-        path: DashboardModule.myDataPage.fullPath
+        path: DashboardModule.previousPage.fullPath
       });
     } else {
       this.$router.push({ name: Routers.AllData });
     }
   }
 
-  private updateRouter(dashboardId: DashboardId, name: string) {
-    this.$router.replace({
-      params: {
-        name: RouterUtils.buildParamPath(dashboardId, name)
-      },
-      query: this.$route.query
-    });
+  protected async updateRouter(dashboardId: DashboardId, name: string): Promise<void> {
+    try {
+      await this.$router.replace({
+        params: {
+          name: RouterUtils.buildParamPath(dashboardId, name)
+        },
+        query: this.$route.query
+      });
+    } catch (ex) {
+      Log.debug('DashboardHeader::updateRouter::error::', ex);
+    }
+  }
+
+  getControlBar(): DashboardControlBar {
+    return this.controlBar;
   }
 }
 </script>
 
-<style lang="scss" scoped>
-@import '~@/themes/scss/mixin.scss';
-@import '~@/themes/scss/di-variables.scss';
+<style lang="scss">
+.dashboard-header {
+  //background: rgba(255, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0 47px 0 28px;
+  width: 100%;
 
-.dashboard-title-container {
-  flex: 1;
-  width: max-content;
-  min-width: 200px;
-}
-.dashboard-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-::v-deep {
-  .b-icon.bi {
-    vertical-align: middle !important;
-  }
-
-  .control-bar {
+  &--bar {
+    display: flex;
+    flex-direction: row;
     align-items: center;
-    min-height: 38px;
+    justify-content: space-between;
+    flex: 1;
+    margin: 9px 0;
+    width: 100%;
 
-    @include media-breakpoint-only(xs) {
-      flex-direction: column;
-      align-items: start;
+    &--left {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      flex: 1;
+      transition: flex 500ms;
+      // don't use overflow: hidden, it will cut a part of button back hover effect
+
+      &--back {
+        font-size: 16px;
+        margin-right: 8px;
+        padding: 6px;
+        margin-left: -4px;
+      }
+
+      h4 {
+        font-weight: 500;
+        font-size: 20px;
+        line-height: 23.44px;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        line-clear: 1;
+        text-align: left;
+      }
+
+      h4 + &--rename {
+        margin-left: 10px;
+      }
+
+      &--rename {
+        font-size: 16px;
+        margin-right: 16px;
+        padding: 6px;
+        //margin-left: -4px;
+      }
+    }
+
+    &--right {
     }
   }
 
-  .ml-auto {
-    float: left;
+  &--filter {
   }
 
-  .edit-icon {
-    margin-left: 8px;
-    padding: 8px;
-    opacity: 0.8;
+  &.embedded-dashboard-header {
+    padding: 0 16px;
+
+    .dashboard-header--bar--left {
+      margin: 0;
+    }
   }
 
-  .filters-bar {
-    margin-left: 5px;
+  @media screen and (max-width: 768px) {
+    padding: 0 16px;
+
+    &--bar {
+      align-items: flex-start;
+      flex-wrap: wrap;
+
+      &--left {
+        flex: unset;
+        align-self: center;
+        max-width: calc(100% - 60px);
+      }
+
+      &--right {
+        flex: 1;
+      }
+    }
   }
 }
 </style>

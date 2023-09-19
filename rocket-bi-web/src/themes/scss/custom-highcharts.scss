@@ -1,0 +1,30 @@
+.highcharts-container {
+  .highcharts-title,
+  .highcharts-subtitle {
+    text-transform: unset !important;
+  }
+}
+
+.highcharts_heat_map_chart_setting {
+  .highcharts-yaxis-labels {
+    span {
+      left: 0 !important;
+    }
+  }
+  .highcharts-subtitle {
+    > div {
+      margin-bottom: 11px !important;
+      p {
+        margin: 0;
+      }
+    }
+  }
+}
+
+.title-chart {
+  @include regular-text;
+  font-size: 20px;
+  font-weight: 300;
+  letter-spacing: 0.86px;
+  text-transform: unset;
+}

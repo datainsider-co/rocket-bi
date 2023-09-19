@@ -13,10 +13,9 @@ import {
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
+  QuerySettingClassName,
   TableColumn,
   WidgetId,
-  WordCloudChartOption,
   Zoomable
 } from '@core/common/domain/model';
 import { Drilldownable, DrilldownData } from '@core/common/domain/model/query/features/Drilldownable';
@@ -25,8 +24,8 @@ import { ConditionUtils } from '@core/utils';
 import { isEqual } from 'lodash';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class WordCloudQuerySetting extends QuerySetting<WordCloudChartOption> implements Zoomable, Drilldownable, CrossFilterable {
-  readonly className = QuerySettingType.WordCloud;
+export class WordCloudQuerySetting extends QuerySetting implements Zoomable, Drilldownable, CrossFilterable {
+  readonly className = QuerySettingClassName.WordCloud;
 
   constructor(
     public legend: TableColumn,
@@ -34,7 +33,6 @@ export class WordCloudQuerySetting extends QuerySetting<WordCloudChartOption> im
     filters: Condition[] = [],
     sorts: OrderBy[] = [],
     options: Record<string, any> = {},
-
     sqlViews: InlineSqlView[] = [],
     parameters: Record<string, string> = {}
   ) {
@@ -58,7 +56,7 @@ export class WordCloudQuerySetting extends QuerySetting<WordCloudChartOption> im
     return [this.legend.function, this.value.function];
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return [this.legend, this.value];
   }
 
@@ -76,6 +74,7 @@ export class WordCloudQuerySetting extends QuerySetting<WordCloudChartOption> im
   getColumnWillDrilldown(): TableColumn {
     return this.legend;
   }
+
   buildNewZoomData(data: ZoomData, nextLvl: string): ZoomData {
     return data.createNewHorizontalField(nextLvl);
   }
@@ -89,12 +88,13 @@ export class WordCloudQuerySetting extends QuerySetting<WordCloudChartOption> im
       this.value.function.setScalarFunction(newScalarFn);
     }
   }
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.legend = ConfigDataUtils.replaceDynamicFunction(this.legend, functions);
     this.value = ConfigDataUtils.replaceDynamicFunction(this.value, functions);
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.legend;
   }
 

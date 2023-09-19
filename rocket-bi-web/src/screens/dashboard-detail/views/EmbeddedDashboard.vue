@@ -1,42 +1,38 @@
 <template>
-  <div class="embedded-dashboard-detail-screen dashboard-theme">
-    <vuescroll :ops="dashboardScrollConfigs" @handle-scroll="onScrollDashboard">
-      <div :class="dashboardPaddingClass" class="dashboard-area">
-        <header ref="actionBar" class="header-sticky">
-          <EmbeddedDashboardHeader ref="dashboardHeader" :enableFilter="hasWidget" :isLogin="isLogin" />
-        </header>
-        <StatusWidget :class="statusClass" :error="errorMessage" :status="dashboardStatus" class="dashboard-status" @retry="loadDashboard">
-          <template #loading>
-            <div class="d-flex flex-row align-items-center justify-content-center status-loading">
-              <DiLoading></DiLoading>
-            </div>
-          </template>
-          <template #error="{ error , onRetry}">
-            <div class="error-panel">
-              <ErrorWidget :error="error" @onRetry="onRetry"></ErrorWidget>
-            </div>
-          </template>
-          <template #default>
-            <Dashboard v-if="hasWidget" :style="dashboardStyle" />
-            <EmptyDashboard v-else class="empty-dashboard" />
-          </template>
-        </StatusWidget>
+  <div class="dashboard-detail-screen" :style="dashboardCssStyle">
+    <header ref="headerBar" class="dashboard-detail-screen--header">
+      <DashboardHeader
+        class="dashboard-detail-screen--header--dashboard"
+        ref="dashboardHeader"
+        :enableFilter="hasWidget"
+        :isLogin="isLogin"
+        :isMobile="isMobile"
+        isEmbeddedView
+      />
+    </header>
+    <div ref="dashboardBody" class="dashboard-detail-screen--body" @scroll="onScrollDashboard">
+      <div class="dashboard--content" :image-fit-mode="dashboardSetting.backgroundImage.fitMode" ref="dashboardContent">
+        <div v-if="dashboardStatus === Status.Loading" class="dashboard--content--loading">
+          <DiLoading></DiLoading>
+        </div>
+        <div v-else-if="dashboardStatus === Status.Error" class="dashboard--content--error">
+          <ErrorWidget :error="errorMsg" @onRetry="loadDashboard"></ErrorWidget>
+        </div>
+        <div v-else class="dashboard--content--loaded">
+          <Dashboard v-if="hasWidget" class="dashboard--content--loaded--body" ref="dashboard" />
+          <EmptyDashboard v-else class="dashboard--content--loaded--empty" />
+        </div>
+        <div v-show="isEditMode" ref="settingButton" class="dashboard--content--setting" title="Setting Dashboard" @click="onClickDashboardSetting">
+          <i class="di-icon-setting"></i>
+        </div>
       </div>
-    </vuescroll>
-    <div class="embed-footer">Powered By <a target="_blank" href="https://www.datainsider.co/">DataInsider.co</a></div>
+    </div>
     <template>
-      <ContextMenu ref="contextMenu" :ignoreOutsideClass="['di-popup']" minWidth="200px" textColor="#fff" />
-      <EditTextModal ref="editTextModal" @onCreateText="handleCreateText" @onEditText="handleEditText" />
-      <DiShareModal ref="shareModal" />
-      <WidgetFullScreenModal ref="widgetFullScreenModal"></WidgetFullScreenModal>
-      <ChartBuilderComponent ref="chartBuilderComponent"></ChartBuilderComponent>
       <PasswordModal ref="passwordModal" />
     </template>
   </div>
 </template>
 
-<script lang="ts" src="./EmbeddedDashboard.ts" />
+<script lang="ts" src="./DashboardDetail.ts" />
 
-<style lang="scss" src="./EmbeddedDashboardDetail.scss"></style>
-<style lang="scss" src="./DashboardTheme.scss"></style>
-<style lang="scss" src="./DashboardPopoverTheme.scss"></style>
+<style lang="scss" src="./DashboardDetail.scss"></style>

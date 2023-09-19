@@ -1,7 +1,7 @@
 import { cloneDeep } from 'lodash';
 import { DIException } from '@core/common/domain';
 import { StringUtils } from '@/utils/StringUtils';
-import { DateTimeFormatter, DateUtils } from '@/utils';
+import { DateTimeUtils, DateUtils } from '@/utils';
 import { Log } from '@core/utils';
 
 export class ApiKeyInfo {
@@ -20,7 +20,7 @@ export class ApiKeyInfo {
 
   get expireDateAsDisplay() {
     Log.debug(`ApiKeyInfo::expireDateAsDisplay::expiredTime::`, this.expireDate);
-    return DateTimeFormatter.formatASMMMDDYYYY(this.expireDate);
+    return DateTimeUtils.formatASMMMDDYYYY(this.expireDate);
   }
 
   updateExpireTime(date?: Date) {

@@ -2,7 +2,17 @@ import { Inject } from 'typescript-ioc';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { DataSourceRepository } from '@core/data-ingestion/repository/DataSourceRepository';
 import { ListingRequest, SourceId, TableSchema } from '@core/common/domain';
-import { TokenResponse, Job, ListingResponse, PreviewResponse, S3Job, S3SourceInfo, TokenRequest, TiktokAccessTokenResponse } from '@core/data-ingestion';
+import {
+  TokenResponse,
+  Job,
+  ListingResponse,
+  PreviewResponse,
+  S3Job,
+  S3SourceInfo,
+  TokenRequest,
+  TiktokAccessTokenResponse,
+  DataSource
+} from '@core/data-ingestion';
 import { DataSourceResponse } from '@core/data-ingestion/domain/response/DataSourceResponse';
 
 export abstract class DataSourceService {
@@ -13,6 +23,8 @@ export abstract class DataSourceService {
   abstract createGaSource(displayName: string, authorizationCode: string): Promise<DataSourceInfo>;
 
   abstract list(request: ListingRequest): Promise<ListingResponse<DataSourceResponse>>;
+
+  abstract get(id: number): Promise<DataSourceInfo>;
 
   abstract delete(id: SourceId): Promise<boolean>;
 
@@ -42,7 +54,7 @@ export abstract class DataSourceService {
 
   abstract listTiktokReport(): Promise<string[]>;
 
-  abstract getGoogleToken(request: TokenRequest): Promise<TokenResponse>;
+  abstract refreshGoogleToken(request: TokenRequest): Promise<TokenResponse>;
 }
 
 export class DataSourceServiceImpl extends DataSourceService {
@@ -122,7 +134,11 @@ export class DataSourceServiceImpl extends DataSourceService {
     return this.dataSourceRepository.multiDelete(ids);
   }
 
-  getGoogleToken(request: TokenRequest): Promise<TokenResponse> {
-    return this.dataSourceRepository.getGoogleToken(request);
+  refreshGoogleToken(request: TokenRequest): Promise<TokenResponse> {
+    return this.dataSourceRepository.refreshGoogleToken(request);
+  }
+
+  get(id: number): Promise<DataSourceInfo> {
+    return this.dataSourceRepository.get(id);
   }
 }

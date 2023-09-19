@@ -24,6 +24,7 @@ object DataSourceType extends Enumeration {
   val Shopee: DataSourceType = Value("Shopee")
   val Lazada: DataSourceType = Value("Lazada")
   val Palexy: DataSourceType = Value("Palexy")
+  val GoogleSearchConsole: DataSourceType = Value("GoogleSourceConsole")
 }
 
 class DataSourceTypeRef extends TypeReference[DataSourceType.type]

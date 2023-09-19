@@ -2,6 +2,7 @@ package co.datainsider.jobscheduler.repository
 
 import co.datainsider.bi.client.JdbcClient
 import co.datainsider.bi.client.JdbcClient.Record
+import co.datainsider.bi.util.ZConfig
 import co.datainsider.jobscheduler.domain.Ids.{JobId, SourceId}
 import co.datainsider.jobscheduler.domain.job.JobStatus.JobStatus
 import co.datainsider.jobscheduler.domain.job.JobType.JobType
@@ -175,26 +176,27 @@ class MySqlJobRepository @Inject() (
     while (rs.next()) {
       val jobType: JobType = JobType.withName(rs.getString("job_type"))
       val job: Job = jobType match {
-        case JobType.Jdbc           => JdbcJob.fromResultSet(rs)
-        case JobType.GenericJdbc    => GenericJdbcJob.fromResultSet(rs)
-        case JobType.Ga             => GaJob.fromResultSet(rs)
-        case JobType.Hubspot        => HubspotJob.fromResultSet(rs)
-        case JobType.FacebookAds    => FacebookAdsJob.fromResultSet(rs)
-        case JobType.GoogleSheets   => GoogleSheetJob.fromResultSet(rs)
-        case JobType.GoogleSheetsV2 => GoogleSheetJobV2.fromResultSet(rs)
-        case JobType.MongoDb        => MongoJob.fromResultSet(rs)
-        case JobType.Solana         => SolanaJob.fromResultSet(rs)
-        case JobType.Bigquery       => BigQueryStorageJob.fromResultSet(rs)
-        case JobType.CoinMarketCap  => CoinMarketCapJob.fromResultSet(rs)
-        case JobType.Shopify        => ShopifyJob.fromResultSet(rs)
-        case JobType.S3             => AmazonS3Job.fromResultSet(rs)
-        case JobType.GoogleAds      => GoogleAdsJob.fromResultSet(rs)
-        case JobType.Ga4            => Ga4Job.fromResultSet(rs)
-        case JobType.TikTokAds      => TikTokAdsJob.fromResultSet(rs)
-        case JobType.Shopee         => ShopeeJob.fromResultSet(rs)
-        case JobType.Lazada         => LazadaJob.fromResultSet(rs)
-        case JobType.Palexy         => PalexyJob.fromResultSet(rs)
-        case _                      => throw new UnsupportedOperationException
+        case JobType.Jdbc                => JdbcJob.fromResultSet(rs)
+        case JobType.GenericJdbc         => GenericJdbcJob.fromResultSet(rs)
+        case JobType.Ga                  => GaJob.fromResultSet(rs)
+        case JobType.Hubspot             => HubspotJob.fromResultSet(rs)
+        case JobType.FacebookAds         => FacebookAdsJob.fromResultSet(rs)
+        case JobType.GoogleSheets        => GoogleSheetJob.fromResultSet(rs)
+        case JobType.GoogleSheetsV2      => GoogleSheetJobV2.fromResultSet(rs)
+        case JobType.MongoDb             => MongoJob.fromResultSet(rs)
+        case JobType.Solana              => SolanaJob.fromResultSet(rs)
+        case JobType.Bigquery            => BigQueryStorageJob.fromResultSet(rs)
+        case JobType.CoinMarketCap       => CoinMarketCapJob.fromResultSet(rs)
+        case JobType.Shopify             => ShopifyJob.fromResultSet(rs)
+        case JobType.S3                  => AmazonS3Job.fromResultSet(rs)
+        case JobType.GoogleAds           => GoogleAdsJob.fromResultSet(rs)
+        case JobType.Ga4                 => Ga4Job.fromResultSet(rs)
+        case JobType.TikTokAds           => TikTokAdsJob.fromResultSet(rs)
+        case JobType.Shopee              => ShopeeJob.fromResultSet(rs)
+        case JobType.Lazada              => LazadaJob.fromResultSet(rs)
+        case JobType.Palexy              => PalexyJob.fromResultSet(rs)
+        case JobType.GoogleSearchConsole => GoogleSearchConsoleJob.fromResultSet(rs)
+        case _                           => throw new UnsupportedOperationException
       }
       jobs += job
     }
@@ -230,9 +232,15 @@ class MySqlJobRepository @Inject() (
 
   override def getNextJob(): Future[Option[Job]] =
     Future {
+      val biServiceDbName = if (isTestEnv) {
+        ZConfig.getString("database_schema_testing.database.name")
+      } else ZConfig.getString("database_schema.database.name")
+
       val query =
         s"""
-         |select * from $dbName.$tblName
+         |select *
+         |from $biServiceDbName.connection
+         |  left join $dbName.$tblName on org_id = organization_id
          |where unix_timestamp() * 1000 >= next_run_time
          |and current_sync_status != 'Queued'
          |and current_sync_status != 'Syncing'
@@ -387,5 +395,10 @@ class MySqlJobRepository @Inject() (
         JobStatus.Queued.toString
       ) >= 0
     }
+  }
+
+  private def isTestEnv: Boolean = {
+    val env = System.getProperty("mode", "local")
+    env != "production" && env != "development"
   }
 }

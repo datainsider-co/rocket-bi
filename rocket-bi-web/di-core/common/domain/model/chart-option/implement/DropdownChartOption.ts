@@ -4,14 +4,13 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionData, ChartOptionClassName } from '@core/common/domain/model';
 
 /**
  * @deprecated unused
  */
 export class DropdownChartOption extends ChartOption {
-  chartFamilyType = ChartFamilyType.Dropdown;
-  className = VizSettingType.DropdownSetting;
+  className = ChartOptionClassName.DropdownSetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);

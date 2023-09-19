@@ -8,7 +8,6 @@ import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchem
 import { ChartType, ConditionData, FunctionData, Status } from '@/shared';
 import BuilderComponents from '@/shared/components/builder';
 import DatabaseListing from '@/screens/chart-builder/config-builder/database-listing/DatabaseListing.vue';
-import FilterPanel from '@/screens/chart-builder/config-builder/filter-panel/FilterPanel.vue';
 import VizPanel from '@/screens/chart-builder/viz-panel/VizPanel.vue';
 import {
   ChartInfo,
@@ -38,7 +37,6 @@ Vue.use(BuilderComponents);
 Vue.use(Settings);
 @Component({
   components: {
-    FilterPanel,
     DatabaseListing,
     ConfigBuilder,
     VizPanel,
@@ -47,7 +45,7 @@ Vue.use(Settings);
   }
 })
 export default class ChartBuilder extends Vue {
-  private readonly DatabaseEditionMode = DatabaseListingMode;
+  private readonly DatabaseListingMode = DatabaseListingMode;
   private readonly PREVIEW_CHART_ID = -1;
   private isDragging = false;
 
@@ -79,7 +77,7 @@ export default class ChartBuilder extends Vue {
     return !this.currentChartInfo || ChartDataModule.statuses[this.currentChartInfo.id] === Status.Error;
   }
 
-  private injectChartOption(querySetting: QuerySetting<ChartOption>) {
+  private injectChartOption(querySetting: QuerySetting) {
     const newQuery = cloneDeep(querySetting);
     switch (this.defaultChartType) {
       case ChartType.FlattenTable:
@@ -98,7 +96,7 @@ export default class ChartBuilder extends Vue {
     this.initChartBuilder();
   }
 
-  private initChartBuilder() {
+  private initChartBuilder(): void {
     if (this.querySetting) {
       const querySetting = this.injectChartOption(this.querySetting);
       const chartInfo = ChartInfo.from(querySetting, this.extraData);
@@ -111,12 +109,12 @@ export default class ChartBuilder extends Vue {
   async init(chartInfo: ChartInfo) {
     this.currentChartInfo = chartInfo;
     this.$nextTick(() => this.vizPanel.renderChart(this.currentChartInfo));
-    await Promise.all([_ConfigBuilderStore.initState(chartInfo), this.selectTable(this.tableSchema)]);
+    await Promise.all([_ConfigBuilderStore.init(chartInfo), this.selectTable(this.tableSchema)]);
   }
 
-  async initDefault() {
+  async initDefault(): Promise<void> {
     _ConfigBuilderStore.initDefaultState();
-    _ConfigBuilderStore.setCurrentChartSelected(this.defaultChartType);
+    _ConfigBuilderStore.setSelectedChartType(this.defaultChartType);
     _ConfigBuilderStore.changeConfig(_ConfigBuilderStore.itemSelected);
 
     await this.selectTable(this.tableSchema);
@@ -130,7 +128,7 @@ export default class ChartBuilder extends Vue {
   }
 
   beforeDestroy() {
-    _ConfigBuilderStore.initDefaultState();
+    _ConfigBuilderStore.reset();
     DatabaseSchemaModule.removeDatabaseInfo(this.tableSchema.dbName);
   }
 

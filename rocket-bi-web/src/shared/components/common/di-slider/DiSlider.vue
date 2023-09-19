@@ -1,9 +1,9 @@
 <template>
-  <input v-model="currentValue" :max="max" :min="min" :style="sliderStyle" class="di-slider" type="range" />
+  <input :title="currentValue" v-model="currentValue" :max="max" :min="min" :style="sliderStyle" class="di-slider" type="range" />
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator';
+import { Component, Emit, Model, Prop, Vue, Watch } from 'vue-property-decorator';
 import { ChartUtils } from '@/utils';
 import { MinMaxData } from '@core/common/domain';
 import { Log } from '@core/utils';
@@ -11,7 +11,7 @@ import { toNumber } from 'lodash';
 
 @Component
 export default class DiSlider extends Vue {
-  @Prop({ required: false, default: 10 })
+  @Model('onChanged', { required: false, default: 10 })
   private readonly value!: number;
 
   @Prop({ required: false, type: String, default: '' })
@@ -56,7 +56,7 @@ export default class DiSlider extends Vue {
 <style lang="scss">
 input[type='range'].di-slider {
   $accent: var(--accent);
-  $neutral: var(--neutral);
+  $neutral: #d8d8d8;
   $percentage: var(--percentage);
 
   -webkit-appearance: none;

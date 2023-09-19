@@ -15,7 +15,7 @@ import { SchedulerName } from '@/shared/enums/SchedulerName';
 import { GaDate } from '@core/data-ingestion/domain/job/google-analytic/GaDate';
 import { GaDateRange } from '@core/data-ingestion/domain/job/google-analytic/GaDateRange';
 import moment from 'moment';
-import { DateTimeFormatter, DateUtils } from '@/utils';
+import { DateTimeUtils, DateUtils } from '@/utils';
 
 export class GoogleAnalyticJob implements Job {
   className = JobName.GoogleAnalyticJob;
@@ -135,7 +135,7 @@ export class GoogleAnalyticJob implements Job {
       JobStatus.Initialized,
       '',
       '',
-      [{ startDate: DateTimeFormatter.formatDateWithTime(GoogleAnalyticJob.defaultStartDate(), ''), endDate: GaDate.Today }],
+      [{ startDate: DateTimeUtils.formatDate(GoogleAnalyticJob.defaultStartDate()), endDate: GaDate.Today }],
       [],
       [],
       [],

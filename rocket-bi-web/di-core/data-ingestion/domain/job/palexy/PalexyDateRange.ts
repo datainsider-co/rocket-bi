@@ -1,5 +1,5 @@
 import { PalexyTime } from './PalexyTime';
-import { DateTimeFormatter, DateUtils } from '@/utils';
+import { DateTimeUtils, DateUtils } from '@/utils';
 import moment from 'moment/moment';
 
 export class PalexyDateRange {

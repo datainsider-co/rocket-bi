@@ -1,17 +1,4 @@
-import {
-  ChartInfo,
-  DateFilter,
-  DynamicFilter,
-  DynamicFunctionWidget,
-  ImageWidget,
-  LinkWidget,
-  TabWidget,
-  TextWidget,
-  WidgetId,
-  Widgets,
-  Position,
-  DynamicConditionWidget
-} from '@core/common/domain/model';
+import { ChartInfo, DateFilter, InternalFilter, ImageWidget, LinkWidget, TabWidget, TextWidget, WidgetId, Widgets, Position } from '@core/common/domain/model';
 import { ClassNotFound } from '@core/common/domain/exception/ClassNotFound';
 import { WidgetExtraData } from '@core/common/domain/model/widget/WidgetExtraData';
 import { WidgetCommonData } from '@core/common/domain/model/widget/WidgetCommonData';
@@ -48,23 +35,12 @@ export abstract class Widget implements WidgetCommonData {
       case Widgets.Chart:
         return ChartInfo.fromObject(obj);
       case Widgets.DynamicFilter:
-        return DynamicFilter.fromObject(obj);
+        return InternalFilter.fromObject(obj);
       case Widgets.Tab:
         return TabWidget.fromObject(obj);
-      case Widgets.DynamicFunctionWidget:
-        return DynamicFunctionWidget.fromObject(obj);
-      case Widgets.DynamicConditionWidget:
-        return DynamicConditionWidget.fromObject(obj);
       default:
         throw new ClassNotFound(`fromObject: object with className ${obj.className} not found`);
     }
-  }
-
-  /**
-   * @deprecated: Feature not support in v3
-   */
-  static getChartFamilyType(widget: Widget): string {
-    return '';
   }
 
   /**
@@ -76,6 +52,21 @@ export abstract class Widget implements WidgetCommonData {
 
   setTitle(title: string): void {
     this.name = title;
+  }
+
+  /**
+   * @return [0, 100]
+   */
+  getBackgroundColorOpacity(): number {
+    return 100;
+  }
+
+  getBackgroundColor(): string | undefined {
+    return this.backgroundColor;
+  }
+
+  getOverridePadding(): string | undefined {
+    return void 0;
   }
 
   abstract getDefaultPosition(): Position;

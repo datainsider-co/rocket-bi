@@ -1,4 +1,4 @@
-import { InputType } from '@/shared';
+import { DateHistogramConditionTypes, InputType, NumberConditionTypes, StringConditionTypes } from '@/shared';
 import { FieldDetailInfo } from '@core/common/domain/model/function/FieldDetailInfo';
 
 export abstract class FilterProp {
@@ -8,7 +8,7 @@ export abstract class FilterProp {
 
   abstract getCurrentValues(): string[];
 
-  abstract getCurrentOptionSelected(): string;
+  abstract getSelectedCondition(): DateHistogramConditionTypes | NumberConditionTypes | StringConditionTypes;
 
   abstract getCurrentInputType(): InputType;
 }

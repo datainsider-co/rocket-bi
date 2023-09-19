@@ -1,6 +1,5 @@
 // created from 'create-ts-index'
 
-export * from './dynamic-builder';
 export * from './ConditionBuilder';
 export * from './ConditionBuilderImpl';
 export * from './ConditionResolver';

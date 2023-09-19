@@ -30,6 +30,7 @@
               'modal-title-center': isCenterTitle
             }"
           >
+            <slot name="header-icon"></slot>
             <div>{{ title }}</div>
             <slot name="subtitle"></slot>
           </h6>
@@ -41,14 +42,14 @@
     </template>
     <template #modal-footer="{ ok, cancel}">
       <slot name="modal-footer" :ok="ok" :cancel="cancel">
-        <div class="flex-fill d-flex flex-row flex-nowrap">
-          <DiButton :title="cancelTitle" id="modal-btn-cancel" class="flex-fill w-50 h-42px mr-2" border secondary @click="cancel"></DiButton>
+        <div class="di-custom-modal--footer" :size="buttonSize">
+          <DiButton :title="cancelTitle" id="modal-btn-cancel" class="di-custom-modal--footer--cancel" border secondary @click="cancel"></DiButton>
           <DiButton
             :title="okTitle"
             id="modal-btn-ok"
             :isDisable="isLoading"
             :is-loading="isLoading"
-            class="flex-fill w-50 h-42px"
+            class="di-custom-modal--footer--ok"
             primary
             @click="ok"
           ></DiButton>
@@ -57,6 +58,7 @@
     </template>
     <template #default="{ok, cancel}">
       <slot :ok="ok" :cancel="cancel"></slot>
+      <div v-show="errorMsg" class="di-custom-modal--error">{{ errorMsg }}</div>
     </template>
   </BModal>
 </template>
@@ -74,6 +76,7 @@ import { Log } from '@core/utils';
 })
 export default class DiCustomModal extends Vue {
   private isLoading = false;
+  private errorMsg: string | null = null;
 
   @Prop({ type: String, default: 'custom-modal' })
   private id!: string;
@@ -111,6 +114,9 @@ export default class DiCustomModal extends Vue {
   @Prop({ type: Boolean, required: false, default: false })
   private readonly isCenterTitle!: boolean;
 
+  @Prop({ required: false, type: String, default: 'full' })
+  private readonly buttonSize!: 'small' | 'full';
+
   @Ref()
   private modal!: BModal;
 
@@ -145,6 +151,10 @@ export default class DiCustomModal extends Vue {
 
   setLoading(isLoading: boolean) {
     this.isLoading = isLoading;
+  }
+
+  setError(errorMsg: string | null): void {
+    this.errorMsg = errorMsg;
   }
 }
 </script>
@@ -197,6 +207,55 @@ export default class DiCustomModal extends Vue {
 
   .modal-footer {
     padding: 0 24px 24px 24px !important;
+  }
+}
+
+.di-custom-modal--error {
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 18px;
+  margin-top: 8px;
+  width: 100%;
+  text-align: left;
+  display: -webkit-box;
+  line-clamp: 5;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  overflow: hidden;
+}
+
+.di-custom-modal--footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  //margin-top: 24px;
+  width: 100%;
+
+  &[size='full'] {
+    .di-custom-modal--footer--cancel,
+    .di-custom-modal--footer--ok {
+      flex: 1;
+      height: 40px;
+    }
+  }
+
+  &[size='small'] {
+    .di-custom-modal--footer--cancel {
+      min-width: 83px;
+      height: 40px;
+    }
+
+    .di-custom-modal--footer--ok {
+      min-width: 122px;
+      height: 40px;
+    }
+  }
+
+  //
+  .di-button + .di-button {
+    margin-left: 16px;
   }
 }
 </style>

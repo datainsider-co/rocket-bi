@@ -111,7 +111,7 @@ import { Log } from '@core/utils';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
 import { DateRange, DateTimeConstants, SelectOption } from '@/shared';
 import DiToggle from '@/shared/components/common/DiToggle.vue';
-import { DateTimeFormatter, DateUtils, ListUtils, PopupUtils, StringUtils, TimeoutUtils } from '@/utils';
+import { DateTimeUtils, DateUtils, ListUtils, PopupUtils, StringUtils, TimeoutUtils } from '@/utils';
 import { DIException, MainDateMode, SourceId } from '@core/common/domain';
 import DiCalendar from '@filter/main-date-filter-v2/DiCalendar.vue';
 import { CalendarData } from '@/shared/models';
@@ -123,7 +123,7 @@ import { required } from 'vuelidate/lib/validators';
 export default class TiktokSourceConfig extends Vue {
   private readonly defaultTiktokDBName = 'tiktok_ads';
   private readonly dateMode = MainDateMode.custom;
-  private readonly dateRangeOptions = DateTimeConstants.ListDateRangeModeOptions;
+  private readonly dateRangeOptions = DateTimeConstants.DATE_RANGE_MODE_OPTION_LIST;
 
   private getDateRangeByMode(mode: MainDateMode): DateRange | null {
     return DateUtils.getDateRange(mode);

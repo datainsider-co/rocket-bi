@@ -1,14 +1,13 @@
 <template>
   <DropArea
-    :allowDrop="canDrop"
+    :disabled="disabled"
+    :canDrop="canDrop"
     :isDragging="hasDragging"
     :isOptional="config.isOptional"
-    :placeholder="config.placeholder"
     :showHelpIcon="showHelpIcon"
     :showPlaceHolder="isShowPlaceHolder"
     :showTitle="showTitle"
     :title="config.title"
-    @onClickTooltip="handleClickSuggestTableAndField($event)"
     @onDrop="handleDrop"
   >
     <template #drop-area>
@@ -31,14 +30,12 @@
           v-for="(node, index) in currentFunctions"
           :key="node.id"
           :canInsert="canDrop"
-          :can-replace="canReplace"
+          :canReplace="canReplace"
           :index="index"
           :isItemDragging="isItemDragging"
           class="drag-item"
           @onInsert="insertFunction"
           @onReplace="handleReplaceFunction"
-          @onInsertDynamic="insertFunction"
-          @onReplaceDynamic="handleReplaceFunction"
         >
           <template #default="{ opacity }">
             <DraggableItem
@@ -59,7 +56,7 @@
         <div class="tutorial-drop">
           <div v-once class="unselectable">
             <img alt="drag" src="@/assets/icon/ic-drag.svg" /> {{ config.placeholder }} or
-            <a href="#" style="cursor: pointer;" @click="handleClickSuggestTableAndField($event)">click here</a>
+            <a href="#" style="cursor: pointer;" @click="handleClickHere" ref="clickHereButton">click here</a>
           </div>
         </div>
       </template>

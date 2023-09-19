@@ -4,8 +4,9 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, DefaultSettings, VizSettingType } from '@core/common/domain/model';
-import { DateHistogramConditionTypes } from '@/shared';
+import { ChartOptionData, DefaultSettings, ChartOptionClassName, ValueControlType, ValueControlInfo } from '@core/common/domain/model';
+import { StringUtils } from '@/utils';
+import { isString } from 'lodash';
 
 export interface InputOptionData extends ChartOptionData {
   default?: DefaultSettings;
@@ -15,8 +16,7 @@ export interface InputOptionData extends ChartOptionData {
 }
 
 export class InputFilterOption extends ChartOption<InputOptionData> {
-  chartFamilyType = ChartFamilyType.TabFilter;
-  className = VizSettingType.InputFilterSetting;
+  className = ChartOptionClassName.InputFilterSetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);
@@ -27,33 +27,36 @@ export class InputFilterOption extends ChartOption<InputOptionData> {
   }
 
   static getDefaultChartOption(): InputFilterOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const options: ChartOptionData = {
-      title: {
-        align: 'left',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'left',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle({ fontSize: '14px', align: 'left' }),
+      subtitle: ChartOption.getDefaultSubtitle({ align: 'left' }),
       placeHolder: 'Typing...',
       affectedByFilter: true,
       textColor: textColor,
       background: this.getThemeBackgroundColor()
     };
     return new InputFilterOption(options);
+  }
+
+  isEnableControl(): boolean {
+    return true;
+  }
+
+  public getSupportedControls(): ValueControlInfo[] {
+    return [new ValueControlInfo(ValueControlType.SelectedValue, 'Selected value')];
+  }
+
+  public getDefaultValueAsMap(): Map<ValueControlType, string[]> {
+    const defaultValue = this.options.default?.setting?.value;
+    if (isString(defaultValue) && StringUtils.isNotEmpty(defaultValue)) {
+      return new Map([[ValueControlType.SelectedValue, [defaultValue]]]);
+    } else {
+      return new Map<ValueControlType, string[]>();
+    }
+  }
+
+  getOverridePadding(): string | undefined {
+    return '6px';
   }
 }

@@ -10,6 +10,7 @@ import co.datainsider.caas.user_caas.repository.UserRepository
 import co.datainsider.caas.user_profile.repository._
 import co.datainsider.caas.user_profile.service.verification._
 import co.datainsider.caas.user_profile.service._
+import co.datainsider.license.service.LicenseClientService
 import com.twitter.finatra.mustache.marshalling.MustacheService
 import com.twitter.finatra.mustache.modules.MustacheFactoryModule
 import education.x.commons.I32IdGenerator
@@ -148,7 +149,8 @@ object UserProfileModule extends TwitterModule {
       userRepository: UserRepository,
       adminUserService: AdminUserService,
       client: SSDB,
-      emailChannel: ChannelService
+      emailChannel: ChannelService,
+      licenseClientService: LicenseClientService
   ): OrganizationService = {
     val defaultOrganizationId = ZConfig.getLong("caas.default_organization_id", 0)
     OrganizationServiceImpl(
@@ -158,7 +160,8 @@ object UserProfileModule extends TwitterModule {
       adminUserService,
       client,
       emailChannel,
-      defaultOrganizationId
+      defaultOrganizationId,
+      licenseClientService
     )
   }
 }

@@ -4,7 +4,7 @@
  */
 
 import { DrillThroughHandler } from '@/screens/dashboard-detail/components/drill-through/drill-throguh-handler/DrillThroughHandler';
-import { ChartInfo, DynamicFilter, HeatMapQuerySetting } from '@core/common/domain';
+import { ChartInfo, InternalFilter, HeatMapQuerySetting } from '@core/common/domain';
 import { ListUtils, SchemaUtils } from '@/utils';
 
 export class HeatmapDrillThroughHandler extends DrillThroughHandler {
@@ -12,12 +12,12 @@ export class HeatmapDrillThroughHandler extends DrillThroughHandler {
     super();
   }
 
-  createFilter(metaData: ChartInfo, value: string): DynamicFilter[] {
+  createFilter(metaData: ChartInfo, value: string): InternalFilter[] {
     const { setting } = metaData;
     if (HeatMapQuerySetting.isHeatMapQuerySetting(setting)) {
       const column = setting.xAxis;
       const field = column.function.field;
-      const filter = DynamicFilter.from(field, column.name, SchemaUtils.isNested(field.fieldName));
+      const filter = InternalFilter.from(field, column.name, SchemaUtils.isNested(field.fieldName));
       filter.sqlView = ListUtils.getHead(setting.sqlViews);
       this.configFilterValue(filter, value);
       return [filter];

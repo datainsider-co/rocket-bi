@@ -1,11 +1,18 @@
 import Highcharts, { GradientColorObject, PatternObject, Point } from 'highcharts';
 import { Component, Ref, Watch } from 'vue-property-decorator';
-import { ChartOption, ChartOptionData, GenericChartQuerySetting, VariablepieChartOption, VariablepieQuerySetting } from '@core/common/domain/model';
+import {
+  ChartOption,
+  ChartOptionData,
+  GenericChartQuerySetting,
+  ValueControlType,
+  VariablepieChartOption,
+  VariablepieQuerySetting
+} from '@core/common/domain/model';
 import { get, merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
 import { ClassProfiler } from '@/shared/profiler/Annotation';
 import { DIException } from '@core/common/domain/exception';
-import { GenericChartResponse } from '@core/common/domain/response';
+import { GenericChartResponse, MapItem } from '@core/common/domain/response';
 import { HighchartUtils, MetricNumberMode } from '@/utils';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
@@ -24,7 +31,7 @@ export default class VariablepieChart extends BaseHighChartWidget<GenericChartRe
 
   constructor() {
     super();
-    const selectSeriesItem = this.handleSelectSeriesItem;
+    const selectItem = this.handleSelectItem;
     const drilldownListener = this.createRightClickAsOptions('name');
     const tooltipFormatter = this.tooltipFormatter;
     const dataLabelsFormatter = this.dataLabelsFormatter;
@@ -34,7 +41,8 @@ export default class VariablepieChart extends BaseHighChartWidget<GenericChartRe
       point: {
         events: {
           click: function() {
-            selectSeriesItem(((this as any) as Point).name);
+            const point = (this as any) as Point;
+            selectItem(point.name, point.selected);
           }
         }
       }
@@ -128,10 +136,19 @@ export default class VariablepieChart extends BaseHighChartWidget<GenericChartRe
     this.options = merge({}, ChartOption.CONFIG, VariablepieChartOption.DEFAULT_SETTING, this.options, newOptions);
   }
 
-  handleSelectSeriesItem(value: string) {
+  handleSelectItem(value: string, isSelected: boolean) {
     Log.debug('handleSelectSeriesItem::', value);
     if (this.setting.options.isCrossFilter) {
-      this.$root.$emit(DashboardEvents.ApplyCrossFilter, new CrossFilterData(this.chartInfo.id, value));
+      const valueMap: Map<ValueControlType, string[]> | undefined = this.toValueMap(value, isSelected);
+      this.applyDirectCrossFilter(valueMap);
+    }
+  }
+
+  private toValueMap(value: string, isSelected: boolean): Map<ValueControlType, string[]> | undefined {
+    if (isSelected) {
+      return new Map<ValueControlType, string[]>([[ValueControlType.SelectedValue, [value]]]);
+    } else {
+      return void 0;
     }
   }
 
@@ -180,7 +197,7 @@ export default class VariablepieChart extends BaseHighChartWidget<GenericChartRe
   }
 
   private renderTooltipName(point: Highcharts.TooltipFormatterContextObject) {
-    const color: string | GradientColorObject | PatternObject = point.color;
+    const color: string | GradientColorObject | PatternObject | undefined = point.color;
     const pointName: string = get(point, 'key', '').toString();
     return `<b><span style="color:${color}; margin-right: 5px;">●</span>${pointName}</b>`;
   }
@@ -205,7 +222,7 @@ export default class VariablepieChart extends BaseHighChartWidget<GenericChartRe
   private tooltipFormatter(point: Highcharts.TooltipFormatterContextObject): string {
     Log.debug('tooltipFormatter::', this.currentQuery);
     const textColor = this.setting.options.tooltip?.style?.color ?? '#fff';
-    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     const name = this.renderTooltipName(point);
     const value = this.renderToolTipValue(point);
     const weight = this.renderToolTipWeight(point);

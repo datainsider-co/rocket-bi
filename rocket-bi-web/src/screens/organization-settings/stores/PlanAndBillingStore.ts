@@ -2,16 +2,9 @@ import { Action, getModule, Module, Mutation, VuexModule } from 'vuex-module-dec
 import store from '@/store';
 import { Stores } from '@/shared';
 import { BillingService, PaymentStatus, ProductInfo, ProductSubscriptionInfo } from '@core/billing';
-import { RouterUtils } from '@/utils';
-import { DataManager } from '@core/common/services';
-import { Di } from '@core/common/modules';
 import { PlanType } from '@core/organization/domain/Plan/PlanType';
 import { Inject } from 'typescript-ioc';
-import { Log } from '@core/utils';
-import { DashboardStore } from '@/screens/dashboard-detail/stores';
-import { DIException } from '@core/common/domain';
-import { message } from 'ant-design-vue';
-import { OrganizationModule, OrganizationService } from '@core/organization';
+import { OrganizationService } from '@core/organization';
 import { OrganizationStoreModule } from '@/store/modules/OrganizationStore';
 
 @Module({ namespaced: true, store: store, dynamic: true, name: Stores.PlanAndBillingStore })
@@ -29,7 +22,7 @@ class PlanAndBillingStore extends VuexModule {
   @Inject
   private orgService!: OrganizationService;
 
-  get licenceKey() {
+  get licenceKey(): string {
     return OrganizationStoreModule.organization.licenceKey ?? '';
   }
 
@@ -54,11 +47,11 @@ class PlanAndBillingStore extends VuexModule {
   }
 
   @Action
-  async init() {
+  async init(): Promise<void> {
     try {
       if (!this.isInited && !this.isInitLoading) {
         this.setIsInitLoading(true);
-        await this.getPlan();
+        await this.handleReloadPlanning();
         this.setIsInited(true);
         this.setInitError('');
       }
@@ -79,7 +72,7 @@ class PlanAndBillingStore extends VuexModule {
   }
 
   @Action
-  async getPlan() {
+  async handleReloadPlanning(): Promise<void> {
     const planDetail = await this.billingService.getSubscriptionInfo(this.licenceKey);
     await this.orgService.refreshLicense();
     this.setPlan(planDetail);
@@ -101,6 +94,11 @@ class PlanAndBillingStore extends VuexModule {
   async buyPlan(planType: PlanType) {
     const planDetail = await this.billingService.subscribeProduct(this.licenceKey, planType);
     this.setPlan(planDetail);
+  }
+
+  @Action
+  async redeem(newCode: string): Promise<void> {
+    await this.billingService.redeemCode(this.licenceKey, newCode);
   }
 
   @Mutation

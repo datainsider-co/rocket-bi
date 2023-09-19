@@ -12,9 +12,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { PlotOptions } from '@core/common/domain/model/chart-option/extra-setting/chart-style/PlotOptions';
-import { DashOptions } from '@/shared/settings/common/options/DashOptions';
-import { ListUtils } from '@/utils';
-import { ChartType, SelectOption } from '@/shared';
+import { SelectOption } from '@/shared';
 import { get } from 'lodash';
 import { SettingKey } from '@core/common/domain';
 
@@ -22,13 +20,20 @@ import { SettingKey } from '@core/common/domain';
 export default class LegendNameTab extends Vue {
   @Prop({ required: false, type: Object })
   private readonly setting!: PlotOptions;
-  @Prop({ required: false, type: Array })
-  private readonly seriesOptions?: SelectOption[];
+
+  @Prop({ required: false, type: Array, default: () => [] })
+  private readonly seriesOptions!: SelectOption[];
 
   private selectedLegend = '';
   @Watch('seriesOptions', { immediate: true })
-  onResponseChanged() {
-    this.selectedLegend = get(this.seriesOptions, '[0].id', '');
+  onResponseChanged(seriesOptions: SelectOption[]) {
+    if (!this.selectedLegend || !this.existsOptions(seriesOptions, this.selectedLegend)) {
+      this.selectedLegend = get(this.seriesOptions, '[0].id', '');
+    }
+  }
+
+  protected existsOptions(seriesOptions: SelectOption[], selectedLegend: string): boolean {
+    return seriesOptions?.some(series => series.id === selectedLegend) ?? false;
   }
 
   private get selectedOption(): SelectOption | undefined {
@@ -54,5 +59,3 @@ export default class LegendNameTab extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

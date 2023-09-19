@@ -1,6 +1,6 @@
 <template>
   <div :class="{ 'disabled-setting': disable }" class="setting-container dropdown-setting">
-    <div v-if="enabledRevert || isLabel" class="row label justify-content-between w-100">
+    <div v-if="enabledRevert || isLabel" class="label justify-content-between w-100">
       <div class="d-flex flex-row align-items-center">
         <p v-if="isLabel">{{ label }}</p>
         <span v-if="showHint" class="di-icon-help ml-2" v-b-tooltip.auto="hint"></span>

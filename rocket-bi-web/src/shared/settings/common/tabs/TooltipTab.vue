@@ -42,7 +42,7 @@ import { ChartTooltipSetting } from '@core/common/domain/model/chart-option/extr
 import { Log } from '@core/utils';
 
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
-import { SettingKey } from '@core/common/domain';
+import { ChartOption, SettingKey } from '@core/common/domain';
 
 @Component({ components: { PanelHeader } })
 export default class TooltipTab extends Vue {
@@ -51,7 +51,7 @@ export default class TooltipTab extends Vue {
   private readonly fontOptions = FontFamilyOptions;
   private defaultStyle = {
     color: '#FFFFFF',
-    fontFamily: 'Roboto',
+    fontFamily: ChartOption.getSecondaryFontFamily(),
     backgroundColor: '#333645'
   };
   @Prop({ required: false })

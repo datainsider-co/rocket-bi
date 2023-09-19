@@ -1,6 +1,6 @@
 <template>
   <div class="grid-stack-container">
-    <div ref="temps" class="grid-stack-temps">
+    <div ref="temps" style="display: none">
       <slot></slot>
     </div>
     <div ref="gs" class="grid-stack"></div>
@@ -8,16 +8,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Provide, Ref, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Provide, Ref, Vue, Watch, Inject } from 'vue-property-decorator';
 import { GridStack, GridStackElement, GridStackNode, GridStackWidget } from 'gridstack';
 import { GridItemHTMLElement } from 'gridstack/dist/types';
 // @ts-ignored
 import GridstackOverlapping from './GridstackOverlapping';
 import { CustomGridstack, CustomGridStackOptions } from '@/shared/components/gridstack/CustomGridstack';
 import { ChartUtils } from '@/utils';
-import { Widget, WidgetId } from '@core/common/domain';
-import { Log } from '@core/utils';
-import { Position } from '@core/common/domain/model';
+import { WidgetId } from '@core/common/domain';
+import { EventBus } from '@/event-bus/EventBus';
 
 GridstackOverlapping(GridStack);
 
@@ -40,25 +39,28 @@ export default class DiGridstack extends Vue {
     return `${id}-grid-stack-item`;
   }
 
+  @Inject({ default: () => ChartUtils.isMobile() })
+  protected getIsMobile!: () => boolean;
+
   private get column(): number {
-    return this.options.column ?? 48;
+    return 48;
   }
 
   created() {
-    window.addEventListener('resize', this.resizeGridStack);
+    EventBus.onDashboardResize(this.handleResize);
   }
 
   destroyed() {
-    window.removeEventListener('resize', this.resizeGridStack);
+    EventBus.offDashboardResize(this.handleResize);
   }
 
-  resizeGridStack() {
+  handleResize(isMobile: boolean): void {
     this.$nextTick(() => {
       const grid = this.instance;
       if (!grid) {
         return;
       }
-      if (ChartUtils.isMobile()) {
+      if (isMobile) {
         this.showMobileMode(grid);
       } else {
         this.showDesktopMode(grid, this.options.enableOverlap || false);
@@ -70,8 +72,6 @@ export default class DiGridstack extends Vue {
     this.$nextTick(() => {
       // @ts-ignored
       this.instance = GridStack.customInit(this.options, this.gs) as CustomGridstack;
-      // @ts-ignored
-      window.TEST = this.instance;
 
       this.instance.batchUpdate();
       this.instance.column(this.column);
@@ -93,7 +93,7 @@ export default class DiGridstack extends Vue {
       }
       this.instance.commit();
 
-      this.resizeGridStack();
+      this.handleResize(this.getIsMobile());
     });
   }
 
@@ -210,7 +210,7 @@ export default class DiGridstack extends Vue {
     gridstack.margin(margin);
   }
 
-  private compact(instance: CustomGridstack, enableOverlap: boolean) {
+  compact(instance: CustomGridstack, enableOverlap: boolean) {
     if (!enableOverlap) {
       instance.compact();
     }
@@ -219,9 +219,3 @@ export default class DiGridstack extends Vue {
 </script>
 
 <style lang="scss" src="@/themes/scss/gridstack.scss"></style>
-
-<style lang="scss" scoped>
-.grid-stack-temps {
-  display: none;
-}
-</style>

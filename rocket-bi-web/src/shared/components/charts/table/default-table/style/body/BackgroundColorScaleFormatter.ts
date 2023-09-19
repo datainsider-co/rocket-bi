@@ -37,7 +37,7 @@ export class BackgroundColorScaleFormatter implements BodyStyleFormatter<Abstrac
 
   static createBackgroundColorStyle(
     bodyData:
-      | BodyData<AbstractTableQuerySetting<TableChartOption>, AbstractTableResponse, TableChartOption>
+      | BodyData<AbstractTableQuerySetting, AbstractTableResponse, TableChartOption>
       | BodyData<PivotTableQuerySetting, AbstractTableResponse, PivotTableChartOption>
   ): CustomStyleData {
     const { bodyCellData, vizSetting, tableResponse } = bodyData;

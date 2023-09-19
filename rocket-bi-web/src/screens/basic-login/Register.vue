@@ -9,7 +9,7 @@
               <div class="company-logo-name-component--name unselectable">{{ companyName }}</div>
             </div>
             <div class="register-screen-left-panel-body-form-header">
-              <div class="register-screen-left-panel-body-form-header-title">Register Your Rocket BI Account</div>
+              <div class="register-screen-left-panel-body-form-header-title">Register Your RocketBI Account</div>
               <!--              <div v-if="isShowAccountExample" class="d-none register-screen-left-panel-body-form-header-subtitle">-->
               <!--                You can use test account ({{ usernameExample }}/{{ passwordExample }} to login.-->
               <!--              </div>-->

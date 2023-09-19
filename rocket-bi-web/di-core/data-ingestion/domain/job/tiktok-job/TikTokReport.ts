@@ -1,5 +1,5 @@
 import { DateRange } from '@/shared';
-import { DateTimeFormatter, DateUtils } from '@/utils';
+import { DateTimeUtils, DateUtils } from '@/utils';
 
 export class TikTokReport {
   reportType: string;
@@ -20,8 +20,8 @@ export class TikTokReport {
 
   static getTimeRange(dateRange: DateRange) {
     return {
-      start: DateTimeFormatter.formatDateWithTime(dateRange.start, ''),
-      end: DateTimeFormatter.formatDateWithTime(dateRange.end, '')
+      start: DateTimeUtils.formatDate(dateRange.start),
+      end: DateTimeUtils.formatDate(dateRange.end)
     };
   }
 

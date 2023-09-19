@@ -3,7 +3,7 @@ import { CompareMode } from '@/shared/enums/CompareMode';
 import { MainDateMode } from '@core/common/domain/model/widget/filter/MainDateMode';
 
 export abstract class DateTimeConstants {
-  static readonly ListDateRangeModeOptions: DateModeOption[] = [
+  static readonly DATE_RANGE_MODE_OPTION_LIST: DateModeOption[] = [
     {
       value: MainDateMode.thisDay,
       label: 'Today'
@@ -62,7 +62,7 @@ export abstract class DateTimeConstants {
     }
   ];
 
-  static readonly ListCompareModeOptions: CompareOption[] = [
+  static readonly COMPARE_MODE_OPTION_LIST: CompareOption[] = [
     // {
     //   label: 'None',
     //   value: CompareMode.none
@@ -89,7 +89,7 @@ export abstract class DateTimeConstants {
     }
   ];
 
-  static readonly mapMainDateFilterMode = [
+  static readonly MAIN_DATE_FILTER_MODE_LIST: { mode: MainDateMode; text: string }[] = [
     {
       mode: MainDateMode.thisDay,
       text: 'This Day'

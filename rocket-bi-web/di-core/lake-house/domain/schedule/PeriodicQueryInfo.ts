@@ -14,7 +14,7 @@ import { Priority } from '../query/NotebookInfo';
 import moment from 'moment';
 import { TimeScheduler } from '@/screens/data-ingestion/components/job-scheduler-form/scheduler-time/TimeScheduler';
 import { SchedulerName } from '@/shared/enums/SchedulerName';
-import { DateTimeFormatter, DateUtils } from '@/utils';
+import { DateTimeUtils, DateUtils } from '@/utils';
 import { toNumber } from 'lodash';
 import { SchedulerWeekly } from '@/screens/data-ingestion/components/job-scheduler-form/scheduler-time/SchedulerWeekly';
 import { SchedulerMonthly } from '@/screens/data-ingestion/components/job-scheduler-form/scheduler-time/SchedulerMonthly';
@@ -169,7 +169,7 @@ export class PeriodicQueryInfo {
   }
 
   updateInterval(scheduler: TimeScheduler) {
-    const timeAsMS = DateUtils.HHMMSSToMs(DateTimeFormatter.formatAsHHmmss(moment(scheduler.atTime).toDate()));
+    const timeAsMS = DateUtils.HHMMSSToMs(DateTimeUtils.formatAsHHmmss(moment(scheduler.atTime).toDate()));
     this.interval = toNumber(scheduler.recurEvery);
     switch (scheduler.className) {
       case SchedulerName.None:

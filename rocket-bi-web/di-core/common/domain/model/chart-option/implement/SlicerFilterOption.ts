@@ -4,7 +4,8 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, ChartOptionData, DefaultSettings, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionClassName, ChartOptionData, DefaultSettings, ValueControlInfo, ValueControlType } from '@core/common/domain/model';
+import { isArray } from 'lodash';
 
 export interface SlicerOptionData extends ChartOptionData {
   from?: SlicerConfig;
@@ -24,8 +25,7 @@ export interface SlicerConfig {
 }
 
 export class SlicerFilterOption extends ChartOption<SlicerOptionData> {
-  chartFamilyType = ChartFamilyType.TabFilter;
-  className = VizSettingType.SlicerFilterSetting;
+  className = ChartOptionClassName.SlicerFilterSetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);
@@ -36,28 +36,10 @@ export class SlicerFilterOption extends ChartOption<SlicerOptionData> {
   }
 
   static getDefaultChartOption(): SlicerFilterOption {
-    const textColor = this.getThemeTextColor();
+    const textColor = this.getPrimaryTextColor();
     const options: SlicerOptionData = {
-      title: {
-        align: 'left',
-        enabled: true,
-        text: 'Slicer',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '14px'
-        }
-      },
-      subtitle: {
-        align: 'left',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle({ title: 'Slicer', fontSize: '14px', align: 'left' }),
+      subtitle: ChartOption.getDefaultSubtitle(),
       affectedByFilter: true,
       textColor: textColor,
       activeColor: 'var(--tab-filter-background-active)',
@@ -80,5 +62,29 @@ export class SlicerFilterOption extends ChartOption<SlicerOptionData> {
       }
     };
     return new SlicerFilterOption(options);
+  }
+
+  isEnableControl(): boolean {
+    return true;
+  }
+
+  getSupportedControls(): ValueControlInfo[] {
+    return [new ValueControlInfo(ValueControlType.MinValue, 'Start value'), new ValueControlInfo(ValueControlType.MaxValue, 'End value')];
+  }
+
+  getDefaultValueAsMap(): Map<ValueControlType, string[]> {
+    const defaultValues = this.options.default?.setting?.value;
+    if (isArray(defaultValues) && defaultValues.length === 2) {
+      return new Map([
+        [ValueControlType.MinValue, [defaultValues[0]]],
+        [ValueControlType.MaxValue, [defaultValues[1]]]
+      ]);
+    } else {
+      return new Map<ValueControlType, string[]>();
+    }
+  }
+
+  getOverridePadding(): string | undefined {
+    return '6px';
   }
 }

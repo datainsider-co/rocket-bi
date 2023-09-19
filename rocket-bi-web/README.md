@@ -1,4 +1,4 @@
-### 😍 Rocket.BI project
+### 😍 RocketBI project
 
 - Documents and project standard in [here](./docs)
 

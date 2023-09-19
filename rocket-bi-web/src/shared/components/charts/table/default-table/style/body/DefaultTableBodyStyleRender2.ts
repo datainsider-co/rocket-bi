@@ -32,7 +32,7 @@ export class DefaultTableBodyStyleRender2 implements TableBodyStyleRender {
   constructor(tableResponse: AbstractTableResponse, query: AbstractTableQuerySetting, baseThemeColor: string) {
     this.tableResponse = tableResponse;
     this.querySetting = query;
-    this.vizSetting = query.getChartOption()!;
+    this.vizSetting = query.getChartOption<TableChartOption>()!;
     this.styleFormatters = DefaultTableBodyStyleRender2.getStyleFormatters();
     this.baseThemeColor = baseThemeColor;
   }

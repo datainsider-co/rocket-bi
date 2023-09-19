@@ -6,7 +6,7 @@
 import { Component, Prop, Ref, Watch } from 'vue-property-decorator';
 import NProgress from 'nprogress';
 import { BPagination } from 'bootstrap-vue';
-import { DefaultPaging, DefaultSettingColor, TableSettingClass, TableSettingColor } from '@/shared/enums';
+import { DefaultPaging, DefaultSettingColor } from '@/shared/enums';
 import { AbstractTableQuerySetting, PivotTableOptionData, TableChartOption, TableOptionData } from '@core/common/domain/model';
 import { ClassProfiler } from '@/shared/profiler/Annotation';
 import { HeaderData, Pagination } from '@/shared/models';
@@ -30,7 +30,6 @@ import { DefaultTableBodyStyleRender2 } from '@chart/table/default-table/style/b
 import { DefaultTableHeaderStyleRender } from '@chart/table/default-table/style/header/DefaultTableHeaderStyleRender';
 import { DefaultTableFooterStyleRender } from '@chart/table/default-table/style/footer/DefaultTableFooterStyleRender';
 import { TableStyleUtils } from '@chart/table/TableStyleUtils';
-import { _ThemeStore } from '@/store/modules/ThemeStore';
 import { MouseEventData } from '@chart/BaseChart';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
@@ -102,7 +101,7 @@ export default class DefaultTable extends BaseWidget {
   }
 
   private get vizSetting(): TableChartOption | null {
-    return this.querySetting.getChartOption() ?? null;
+    return this.querySetting.getChartOption<TableChartOption>() ?? null;
   }
 
   private get chartId() {
@@ -134,6 +133,8 @@ export default class DefaultTable extends BaseWidget {
       'font-size': this.vizSetting?.getTitleFontSize(),
       'text-align': this.vizSetting?.getTitleAlign(),
       'font-family': options.title?.style?.fontFamily,
+      'font-weight': options.title?.style?.fontWeight,
+      'font-style': options.title?.style?.fontStyle,
       'background-color': options.title?.backgroundColor,
       'white-space': options.title?.isWordWrap ? 'pre-wrap' : 'nowrap'
     };
@@ -153,6 +154,9 @@ export default class DefaultTable extends BaseWidget {
       'font-size': this.vizSetting?.getSubtitleFontSize(),
       'text-align': this.vizSetting?.getSubtitleAlign(),
       'font-family': options.subtitle?.style?.fontFamily,
+      'font-weight': options.subtitle?.style?.fontWeight,
+      'font-style': options.subtitle?.style?.fontStyle,
+      'text-decoration': options.subtitle?.style?.textDecoration,
       'background-color': options.subtitle?.backgroundColor,
       'white-space': options.subtitle?.isWordWrap ? 'pre-wrap' : 'nowrap'
     };
@@ -169,14 +173,6 @@ export default class DefaultTable extends BaseWidget {
       // '--text-color': this.textColor,
       ...this.getTableSettingStyle(this.vizSetting)
     };
-  }
-
-  get tableChartContainerClass(): any {
-    if (this.backgroundColor) {
-      return `${TableSettingClass.tableChartContainer}`;
-    } else {
-      return `${TableSettingClass.tableChartContainer} ${TableSettingColor.secondaryBackgroundColor}`;
-    }
   }
 
   private get perPageBackgroundColor() {
@@ -418,7 +414,7 @@ export default class DefaultTable extends BaseWidget {
   private getTableSettingStyle(setting?: TableChartOption | null) {
     const currentSetting: TableOptionData = setting?.options ?? {};
     const widgetColor: string | undefined = currentSetting.background;
-    const baseThemeColor: string = this.getBaseThemeColor();
+    const baseThemeColor: string = this.baseThemeColor;
     Log.debug(
       'getTableSettingStyle::',
       currentSetting,
@@ -426,16 +422,16 @@ export default class DefaultTable extends BaseWidget {
       TableStyleUtils.combineColor(baseThemeColor, currentSetting.header?.backgroundColor, widgetColor)
     );
     const cssObject = {
-      '--table-header-color': ColorUtils.parseColor(currentSetting.header?.style?.color),
+      '--table-header-color': currentSetting.header?.style?.color,
       '--header-background-color': TableStyleUtils.combineColor(baseThemeColor, currentSetting.header?.backgroundColor, widgetColor),
       '--header-font-family': currentSetting.header?.style?.fontFamily,
       '--header-font-size': StringUtils.toPx(currentSetting.header?.style?.fontSize),
       '--header-white-space': currentSetting.header?.isWordWrap ? 'pre-wrap' : void 0,
       '--header-text-align': currentSetting.header?.align,
       // row
-      '--row-even-color': ColorUtils.parseColor(currentSetting.value?.color),
+      '--row-even-color': currentSetting.value?.color,
       '--row-even-background-color': ColorUtils.parseColor(currentSetting.value?.backgroundColor),
-      '--row-odd-color': ColorUtils.parseColor(currentSetting.value?.alternateColor),
+      '--row-odd-color': currentSetting.value?.alternateColor,
       '--row-odd-background-color': ColorUtils.parseColor(currentSetting.value?.alternateBackgroundColor),
       '--row-font-family': currentSetting.value?.style?.fontFamily,
       '--row-font-size': StringUtils.toPx(currentSetting.value?.style?.fontSize),
@@ -450,17 +446,17 @@ export default class DefaultTable extends BaseWidget {
       '--tooltip-font-family': currentSetting.tooltip?.fontFamily,
       // toggle icon
       '--toggle-icon-background-color': ColorUtils.parseColor(currentSetting.toggleIcon?.backgroundColor),
-      '--toggle-icon-color': ColorUtils.parseColor(currentSetting.toggleIcon?.color),
+      '--toggle-icon-color': currentSetting.toggleIcon?.color,
       // page
-      '--table-page-active-color': ColorUtils.parseColor(currentSetting.header?.style?.color)
+      '--table-page-active-color': currentSetting.header?.style?.color
     };
     return ObjectUtils.removeKeyIfValueNotExist(cssObject);
   }
 
   private initStyleRender() {
-    this.bodyStyleRender = new DefaultTableBodyStyleRender2(this.internalTableResponse, this.querySetting, this.getBaseThemeColor());
+    this.bodyStyleRender = new DefaultTableBodyStyleRender2(this.internalTableResponse, this.querySetting, this.baseThemeColor);
     this.headerStyleRender = new DefaultTableHeaderStyleRender(this.internalTableResponse, this.querySetting);
-    this.footerStyleRender = new DefaultTableFooterStyleRender(this.internalTableResponse, this.querySetting, this.getBaseThemeColor());
+    this.footerStyleRender = new DefaultTableFooterStyleRender(this.internalTableResponse, this.querySetting, this.baseThemeColor);
   }
 
   private customHeaderCellStyle(cellData: CustomHeaderCellData) {
@@ -471,10 +467,6 @@ export default class DefaultTable extends BaseWidget {
     return this.footerStyleRender.createStyle(cellData);
   }
 
-  private getBaseThemeColor(): string {
-    return _ThemeStore.baseDashboardTheme;
-  }
-
   private showContextMenu(mouseData: MouseEventData<string>): void {
     TableTooltipUtils.hideTooltip();
     Log.debug('table::showContextMenu', mouseData);
@@ -483,5 +475,11 @@ export default class DefaultTable extends BaseWidget {
 
   async export(type: ExportType): Promise<void> {
     await DashboardControllerModule.handleExport({ widgetId: this.chartId, type: type });
+  }
+
+  handleOnRightClick(e: MouseEvent) {
+    Log.debug('DefaultTable::handleOnClick::event::', e);
+    e.preventDefault();
+    this.showContextMenu(new MouseEventData<string>(e, ''));
   }
 }

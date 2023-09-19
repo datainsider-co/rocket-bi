@@ -1,7 +1,7 @@
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
-import { ConditionData, ConditionTreeNode, DataFlavor, DraggableConfig, DropMode, FunctionTreeNode, SortTypes, Status, VisualizationItemData } from '@/shared';
-import { ChartUtils, DomUtils, ListUtils, RandomUtils, SchemaUtils, TimeoutUtils } from '@/utils';
-import { DynamicConditionWidget, ExpressionField, Field, FieldDetailInfo, Id, TabControl, TabControlData } from '@core/common/domain/model';
+import { ConditionData, ConditionTreeNode, DataFlavor, DraggableConfig, DropMode, FunctionData, FunctionTreeNode, SortTypes } from '@/shared';
+import { ChartUtils, HtmlElementRenderUtils, ListUtils, RandomUtils } from '@/utils';
+import { ChartControl, ChartControlField, ExpressionField, Field, FieldDetailInfo, Id } from '@core/common/domain/model';
 import DropArea from '@/shared/components/DropArea.vue';
 import DropItem from '@/shared/components/DropItem.vue';
 import VueContext from 'vue-context';
@@ -16,10 +16,9 @@ import { Accept, CloneWhenDrop, Deny, DragCustomEvent, DropOptions, GroupConfig 
 import { cloneDeep, isNumber, isString } from 'lodash';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
-import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
-import { DropdownData } from '@/shared/components/common/di-dropdown';
 import { FunctionFamilyBuilder } from '@/screens/chart-builder/config-builder/function-builder/FunctionFamilyBuilder';
-import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
+import SelectFieldContext from '@/screens/chart-builder/config-builder/config-panel/SelectFieldContext.vue';
+import { EventBus } from '@/event-bus/EventBus';
 
 @Component({
   components: {
@@ -30,64 +29,54 @@ import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTa
     CollapseTransition,
     DiButton,
     FilterItem,
-    draggable
+    draggable,
+    SelectFieldContext
   }
 })
 export default class FilterDraggable extends Vue {
-  @Ref()
-  btnRef!: any;
+  private readonly clickHereId = 'filter-click-here';
+  private supportedGroupNames: Set<string> = new Set(['group-and-draggable', 'group-or-draggable']);
   private conditions: ConditionTreeNode[][] = [];
-  private dropMode: DropMode = DropMode.None;
   private loaded = false;
   private isItemDragging = false;
   private insertAt?: number;
 
-  private contextStatus = Status.Loading;
-  private errorMessage = '';
-
-  private fieldOptions: DropdownData[] = [];
-
   @Prop({ required: true })
-  private draggableConfig!: DraggableConfig;
+  private readonly draggableConfig!: DraggableConfig;
 
   @Prop({ type: Boolean, default: false })
-  private hasDragging!: boolean;
+  private readonly hasDragging!: boolean;
 
   @Prop({ type: Boolean, default: true })
-  private showTitle!: boolean;
+  private readonly showTitle!: boolean;
 
   @Prop({ type: Boolean, default: true })
   private readonly showChartControlConfig!: boolean;
+
+  @Prop({ required: false, default: false })
+  private readonly isReadOnly!: boolean;
+
+  @Prop({ required: false, type: Boolean, default: false })
+  private readonly disabled!: boolean;
 
   @Ref()
   private readonly menu?: VueContext;
 
   @Ref()
-  private fieldContext!: any;
+  private readonly selectFieldContext!: SelectFieldContext;
 
   @Ref()
-  private dbFieldContext!: any;
-
-  @Prop({ required: false, default: false })
-  private readonly isReadOnly!: boolean;
-  @Prop({ required: false, default: false })
-  private readonly preventTooltip!: boolean;
-
-  private supportedGroupNames: Set<string> = new Set(['group-and-draggable', 'group-or-draggable']);
+  private readonly filterItems!: FilterItem[];
 
   private get defaultConditions(): Map<Id, ConditionData[]> {
     return _ConfigBuilderStore.filterAsMap;
   }
 
-  private get itemSelected(): VisualizationItemData {
-    return _ConfigBuilderStore.itemSelected;
-  }
-
-  private get canShowPlaceHolder(): boolean {
+  protected get canShowPlaceHolder(): boolean {
     return ListUtils.isEmpty(this.conditions);
   }
 
-  private get orGroupConfig(): GroupConfig {
+  protected get orGroupConfig(): GroupConfig {
     return {
       name: 'group-or-draggable',
       revertClone: true,
@@ -96,7 +85,7 @@ export default class FilterDraggable extends Vue {
     };
   }
 
-  private get andGroupConfig(): GroupConfig {
+  protected get andGroupConfig(): GroupConfig {
     return {
       name: 'group-and-draggable',
       revertClone: true,
@@ -105,41 +94,27 @@ export default class FilterDraggable extends Vue {
     };
   }
 
-  static toConditionNode(functionNode: FunctionTreeNode): ConditionTreeNode {
-    return this.createConditionNodeFrom(functionNode as any);
-  }
-
   private static createConditionNodeFrom(data: ConditionTreeNode, isDifferentGroup = false): ConditionTreeNode {
-    const newData = cloneDeep(data) as ConditionTreeNode;
-    newData.id = RandomUtils.nextInt(0, 900000);
+    const newNode = cloneDeep(data) as ConditionTreeNode;
+    newNode.id = RandomUtils.nextInt(0, 900000);
     if (isDifferentGroup) {
-      newData.groupId = RandomUtils.nextInt(0, 900000);
+      newNode.groupId = RandomUtils.nextInt(0, 900000);
     }
-    newData.firstValue = data.firstValue ?? '';
-    newData.secondValue = data.secondValue ?? '';
-    newData.filterCondition = data.filterCondition ?? '';
-    newData.field = ChartUtils.getField(data) as Field;
-    if (!isString(newData.filterFamily)) {
-      newData.filterFamily = ChartUtils.getFilterFamily(newData);
-      newData.filterType = ChartUtils.getFilterType(newData.filterFamily);
+    newNode.firstValue = data.firstValue ?? '';
+    newNode.secondValue = data.secondValue ?? '';
+    newNode.filterCondition = data.filterCondition ?? '';
+    const field: Field = ChartUtils.getField(data)!;
+    if (ChartControlField.isChartControlField(field)) {
+      newNode.field = void 0;
+      newNode.controlId = field.controlData.id;
+    } else {
+      newNode.field = field;
     }
-    return newData;
-  }
-
-  private static mergeConditionNode(group: ConditionTreeNode[], node: ConditionTreeNode, index: number) {
-    const newNode: ConditionTreeNode = FilterDraggable.createConditionNodeFrom(node, true);
-    const currentNode: ConditionTreeNode = group[index];
-
-    return ChartUtils.mergeCondition(currentNode, newNode);
-  }
-
-  private static setTabControlToNode(group: ConditionTreeNode[], node: ConditionTreeNode, index: number): ConditionTreeNode {
-    const tabControlData = (node.data as any) as TabControlData;
-    const currentNode: ConditionTreeNode = group[index];
-    return {
-      ...currentNode,
-      tabControl: tabControlData
-    };
+    if (!isString(newNode.filterFamily)) {
+      newNode.filterFamily = ChartUtils.getFilterFamily(newNode);
+      newNode.filterType = ChartUtils.getFilterType(newNode.filterFamily);
+    }
+    return newNode;
   }
 
   private handlePull(to: any, from: any): Accept | Deny | CloneWhenDrop {
@@ -155,38 +130,68 @@ export default class FilterDraggable extends Vue {
     }
   }
 
-  private handleDropOrGroup(data: DataFlavor<ConditionTreeNode>, enableShowFilter = true) {
-    Log.debug('handleDropOrGroup::', data.node);
-    const isExpressionField: boolean = ExpressionField.isExpressionField(ChartUtils.getField(data.node));
-    const isDashboardControl: boolean = TabControl.isTabControlData(data.node.data);
-    if (data && data.node && !isExpressionField && !isDashboardControl) {
-      const newNode: ConditionTreeNode = FilterDraggable.createConditionNodeFrom(data.node, true);
-      const andGroup = [newNode];
+  protected dropToOrGroup(data: DataFlavor<ConditionTreeNode>, isShowConfig = true) {
+    const newNode: ConditionTreeNode | null = FilterDraggable.createConditionNodeFrom(data.node, true);
+    if (newNode) {
+      const andGroup: ConditionTreeNode[] = [newNode];
       this.conditions.push(andGroup);
+      const newCondition: ConditionData = ChartUtils.toConditionData(newNode);
 
-      this.dropMode = DropMode.DropOr;
-      const conditionData: ConditionData = ChartUtils.toConditionData(newNode);
-      this.handleAddNewCondition(conditionData, enableShowFilter);
+      this.addCondition(DropMode.DropToOr, newCondition, () => this.onAddConditionComplete(newCondition, isShowConfig));
     }
+  }
+
+  private onAddConditionComplete(newCondition: ConditionData, isShowConfig: boolean): void {
+    const filterId: string = this.getFilterConfigId(newCondition.groupId, newCondition.id);
+    if (isShowConfig && !newCondition.field && newCondition.controlId) {
+      this.setupField(filterId);
+      return;
+    }
+    if (isShowConfig && newCondition.field) {
+      this.setupFilterValue(filterId);
+    }
+  }
+
+  private setupField(filterId: string): void {
+    // Wait for animation adding completed
+    this.$nextTick(() => {
+      this.$nextTick(() => {
+        const filterItem = this.filterItems.find(item => item.filterId === filterId);
+        if (filterItem) {
+          filterItem.setupField();
+        }
+      });
+    });
+  }
+
+  protected setupFilterValue(filterId: string): void {
+    // Wait for animation adding completed
+    this.$nextTick(() => {
+      this.$nextTick(() => {
+        const filterItem = this.filterItems.find(item => item.filterId === filterId);
+        if (filterItem) {
+          filterItem.setupFilterValue();
+        }
+      });
+    });
   }
 
   private handleDropAndGroup(andGroup: ConditionTreeNode[], data: DataFlavor<ConditionTreeNode>, event: any): void {
     Log.debug('handleDropAnd::', data.node);
     event.stopPropagation();
     const isExpressionField: boolean = ExpressionField.isExpressionField(ChartUtils.getField(data.node));
-    const isDashboardControl: boolean = TabControl.isTabControlData(data.node.data);
+    const isDashboardControl: boolean = ChartControl.isChartControlData(data.node.data);
     if (data && data.node && !isExpressionField && !isDashboardControl) {
       const newNode: ConditionTreeNode = FilterDraggable.createConditionNodeFrom(data.node);
       newNode.groupId = andGroup[0].groupId;
       andGroup.push(newNode);
 
-      this.dropMode = DropMode.DropAnd;
       const conditionData: ConditionData = ChartUtils.toConditionData(newNode);
-      this.handleAddNewCondition(conditionData);
+      this.addCondition(DropMode.DropToAnd, conditionData, () => this.onAddConditionComplete(conditionData, true));
     }
   }
 
-  private removeItem(groupIndex: number, nodeIndex: number): void {
+  private removeFilterItem(groupIndex: number, nodeIndex: number): void {
     const currentCondition = this.conditions[groupIndex][nodeIndex];
     this.conditions[groupIndex].splice(nodeIndex, 1);
     if (ListUtils.isEmpty(this.conditions[groupIndex])) {
@@ -198,79 +203,65 @@ export default class FilterDraggable extends Vue {
     });
   }
 
-  private updateFilter(selectedNode: ConditionTreeNode): void {
-    const conditionData: ConditionData = ChartUtils.toConditionData(selectedNode);
-    _ConfigBuilderStore.updateFilter(conditionData);
-    this.$emit('onConfigChange');
-  }
-
-  private handleAddNewCondition(conditionData: ConditionData, enableShowFilter = true) {
-    switch (this.dropMode) {
-      case DropMode.DropAnd:
-      case DropMode.DropOr:
-      case DropMode.DropOrAndInsert:
+  private addCondition(dropMode: DropMode, conditionData: ConditionData, onAddCompleted?: () => void) {
+    switch (dropMode) {
+      case DropMode.DropToAnd:
+      case DropMode.DropToOr:
         {
           _ConfigBuilderStore.addFilter({
             data: conditionData,
             index: this.insertAt
           });
-          // ConfigBuilderStoreModule.renderVisualizationPanel();
           this.insertAt = void 0;
-          const filterId: string = this.genFilterId(conditionData.groupId, conditionData.id);
-          if (enableShowFilter) {
-            this.showFilter(filterId);
-          }
         }
         break;
-      case DropMode.DropOrAndReplace:
-        {
-          _ConfigBuilderStore.updateFilter(conditionData);
-          this.$emit('onConfigChange');
-        }
-        break;
+      // case DropMode.ReplaceToOr:
+      //   {
+      //     _ConfigBuilderStore.updateFilter(conditionData);
+      //     this.$emit('onConfigChange');
+      //   }
+      //   break;
+      default: {
+        // do nothing
+      }
     }
+    onAddCompleted?.call(this);
   }
 
   private handleReplaceCondition(group: ConditionTreeNode[], data: [ConditionTreeNode, number]) {
     const [node, index] = data;
-    const isExpressionField: boolean = ExpressionField.isExpressionField(ChartUtils.getField(node));
-    if (node && !isExpressionField) {
-      const clonedNode = FilterDraggable.mergeConditionNode(group, node, index);
-      if (clonedNode.field && ChartUtils.isDifferentFieldType(group[index].field, clonedNode.field)) {
-        ChartUtils.resetNodeData(clonedNode);
-      }
-      this.updateConditionNode(group, clonedNode, index);
-    }
-  }
-
-  private handleInsertDynamicCondition(group: ConditionTreeNode[], data: [ConditionTreeNode, number]) {
-    const [node, index] = data;
+    // const isExpressionField: boolean = ExpressionField.isExpressionField(ChartUtils.getField(node));
     if (node) {
-      Log.debug('handleInsertTabControl::input', node);
-      const conditionWithTabControl = FilterDraggable.setTabControlToNode(group, node, index);
-      Log.debug('handleInsertTabControl::conditionWithTabControl', conditionWithTabControl);
-      this.updateConditionNode(group, conditionWithTabControl, index);
+      const oldNode: ConditionTreeNode = group[index];
+      const newNode: ConditionTreeNode = FilterDraggable.createConditionNodeFrom(node, true);
+      const mergedNode: ConditionTreeNode = ChartUtils.mergeCondition(oldNode, newNode);
+      if (ChartUtils.isDiffFieldType(oldNode.field, mergedNode.field)) {
+        ChartUtils.setDefaultValue(mergedNode);
+      }
+      this.updateConditionNode(group, mergedNode, index, true);
     }
   }
 
-  private updateConditionNode(group: ConditionTreeNode[], conditionTreeNode: ConditionTreeNode, index: number) {
+  private updateConditionNode(group: ConditionTreeNode[], conditionTreeNode: ConditionTreeNode, index: number, reRender: boolean) {
     group.splice(index, 1, conditionTreeNode);
     _ConfigBuilderStore.updateFilter(ChartUtils.toConditionData(conditionTreeNode));
-    this.$emit('onConfigChange');
+    if (reRender) {
+      this.$emit('onConfigChange');
+    }
   }
 
   private handleInsertCondition(group: ConditionTreeNode[], enableShowFilter: boolean, data: [ConditionTreeNode, number]) {
     const [node, index] = data;
-    const isExpressionField: boolean = ExpressionField.isExpressionField(ChartUtils.getField(node));
+    const field: Field | undefined = ChartUtils.getField(node);
+    const isExpressionField: boolean = ExpressionField.isExpressionField(field);
     if (node && !isExpressionField) {
       const clonedNode = FilterDraggable.createConditionNodeFrom(node, true);
       this.insertAt = index;
       clonedNode.groupId = group[0]?.groupId;
       group.splice(index, 0, clonedNode);
 
-      this.dropMode = DropMode.DropOrAndInsert;
       const conditionData: ConditionData = ChartUtils.toConditionData(clonedNode);
-      this.handleAddNewCondition(conditionData, enableShowFilter);
+      this.addCondition(DropMode.DropToOr, conditionData, () => this.onAddConditionComplete(conditionData, enableShowFilter));
     }
   }
 
@@ -279,29 +270,13 @@ export default class FilterDraggable extends Vue {
     this.menu?.open(mouseEvent, menuData);
   }
 
-  private handleOnFilterChanged(data: [ConditionTreeNode[], ConditionTreeNode, number]) {
-    const [group, newNode, index] = data;
-    this.updateConditionNode(group, newNode, index);
-  }
-
-  private handleDeleteFilter(data: [number, number]) {
-    this.removeItem(data[0], data[1]);
+  private handleDeleteFilter(groupIndex: number, nodeIndex: number): void {
+    this.removeFilterItem(groupIndex, nodeIndex);
     this.$emit('onConfigChange');
   }
 
-  private showFilter(filterId: string): void {
-    this.$root.$emit('bv::hide::popover');
-
-    // Wait for animation adding completed
-    this.$nextTick(() => {
-      setTimeout(() => {
-        this.$root.$emit('bv::show::popover', filterId);
-      }, 250);
-    });
-  }
-
   // id pattern: filter-[groupId]-[nodeId]
-  private genFilterId(groupId: number, nodeId: number): string {
+  private getFilterConfigId(groupId: number, nodeId: number): string {
     return IdGenerator.generateFilterId(groupId, nodeId);
   }
 
@@ -317,17 +292,17 @@ export default class FilterDraggable extends Vue {
     // always has one item in listFunctionTreeNode;
     const functionNode: FunctionTreeNode | undefined = ListUtils.getHead(listFunctionTreeNode);
     if (functionNode) {
-      const conditionNode: ConditionTreeNode = FilterDraggable.toConditionNode(functionNode);
-      this.handleDropOrGroup({ node: conditionNode });
+      const conditionNode: ConditionTreeNode = FilterDraggable.createConditionNodeFrom(functionNode as any);
+      this.dropToOrGroup({ node: conditionNode });
     }
   }
 
-  private handleAddNewGroupFromFilterSection(event: DragCustomEvent) {
+  private handleClickNewGroup(event: DragCustomEvent) {
     const { group, groupIndex } = ConfigDataUtils.getFilterGroupInfo(event.from);
     if (group && group.length > 1 && isNumber(groupIndex)) {
       const conditionNode: ConditionTreeNode = group[groupIndex];
-      this.removeItem(groupIndex, groupIndex);
-      this.handleDropOrGroup({ node: conditionNode }, false);
+      this.removeFilterItem(groupIndex, groupIndex);
+      this.dropToOrGroup({ node: conditionNode }, false);
       this.$emit('onConfigChange');
     }
   }
@@ -337,7 +312,7 @@ export default class FilterDraggable extends Vue {
     Log.debug('handleInsertConditionFromOtherSection::', data);
     const { element, newIndex } = data?.added ?? {};
     if (element && isNumber(newIndex)) {
-      const conditionNode: ConditionTreeNode = FilterDraggable.toConditionNode(element);
+      const conditionNode: ConditionTreeNode = FilterDraggable.createConditionNodeFrom(element as any);
       this.handleInsertCondition(group, true, [conditionNode, newIndex]);
     }
   }
@@ -348,7 +323,7 @@ export default class FilterDraggable extends Vue {
     const toIndex = event.newDraggableIndex;
     if (group && isNumber(groupIndex)) {
       const conditionNode: ConditionTreeNode = group[fromIndex];
-      this.removeItem(groupIndex, fromIndex);
+      this.removeFilterItem(groupIndex, fromIndex);
       this.handleInsertCondition(toGroup, false, [conditionNode, toIndex]);
       this.$emit('onConfigChange');
     }
@@ -358,53 +333,28 @@ export default class FilterDraggable extends Vue {
     this.$emit('onItemDragging', isDragging, this.draggableConfig.key);
   }
 
-  private async handleClickTooltip(target: any, event: any): Promise<void> {
-    if (this.preventTooltip) {
-      this.$emit('onClickTooltip');
-    } else {
-      TimeoutUtils.waitAndExec(null, () => this.openContext(target, event), 110);
-      const dbName = _BuilderTableSchemaStore.dbNameSelected;
-      await this.initTablesOptions(dbName);
-    }
+  private async handleClickTooltip(event: MouseEvent): Promise<void> {
+    const eventTarget = HtmlElementRenderUtils.fixMenuOverlapForContextMenu(event, this.clickHereId);
+    this.selectFieldContext.showTableAndFields(eventTarget);
   }
 
-  private async initTablesOptions(dbName: string): Promise<void> {
-    this.contextStatus = Status.Loading;
-    const dbSchema = _BuilderTableSchemaStore.databaseSchema || (await DatabaseSchemaModule.fetchDatabaseInfo(dbName));
-    this.fieldOptions = SchemaUtils.toFieldDetailInfoOptions(cloneDeep(dbSchema));
-    this.contextStatus = Status.Loaded;
-  }
-
-  private openContext(target: VueContext, event: Event): void {
-    this.closeAllContext(target);
-    target.open(event, void 0);
-  }
-
-  private closeAllContext(target: VueContext) {
-    Object.values(this.$refs).map((ref: any) => {
-      if (ref !== target && ref.close) {
-        ref.close();
-      }
-    });
-  }
-
-  private async handleSelectColumn(fieldDetail: FieldDetailInfo) {
-    //build func family & sub function
-    //FieldDetailInfo => FunctionData (field + func family + sub function) => FunctionTreeNode => ConditionTreeNode => ConditionData
-    //handle insert ConditionData to new group
-    const showFilter = true;
+  /**
+   * build func family & sub function
+   * FieldDetailInfo => FunctionData (field + func family + sub function) => FunctionTreeNode => ConditionTreeNode => ConditionData
+   * handle insert ConditionData to new group
+   */
+  private async handleSelectColumn(field: FieldDetailInfo): Promise<void> {
     const newGroup = true;
-    const functionData = this.buildFunctionData(fieldDetail);
+    const functionData: FunctionData = this.toFunctionData(field);
     const functionNode: FunctionTreeNode = FunctionDataUtils.toFunctionTreeNodes([functionData])[0];
     const conditionNode: ConditionTreeNode = FilterDraggable.createConditionNodeFrom(functionNode as any, newGroup);
     const conditionData: ConditionData = ChartUtils.toConditionData(conditionNode);
     const orGroup = [conditionNode];
     this.conditions.push(orGroup);
-    this.dropMode = DropMode.DropOr;
-    return this.handleAddNewCondition(conditionData, showFilter);
+    return this.addCondition(DropMode.DropToOr, conditionData, () => this.onAddConditionComplete(conditionData, true));
   }
 
-  private buildFunctionData(fieldDetail: FieldDetailInfo) {
+  protected toFunctionData(fieldDetail: FieldDetailInfo): FunctionData {
     const { field, name, displayName, isNested } = fieldDetail;
     const { tblName } = field;
     const fnFamily = new FunctionFamilyBuilder()
@@ -423,10 +373,5 @@ export default class FilterDraggable extends Vue {
       columnName: displayName,
       sorting: SortTypes.Unsorted
     };
-  }
-
-  resetCondition() {
-    this.loaded = false;
-    this.conditions = [];
   }
 }

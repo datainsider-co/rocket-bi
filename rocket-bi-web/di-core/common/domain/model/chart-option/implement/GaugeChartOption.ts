@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { AxisSetting, ChartFamilyType, ChartOptionData, VizSettingType } from '@core/common/domain/model';
+import { AxisSetting, ChartOptionData, ChartOptionClassName } from '@core/common/domain/model';
 import { toNumber } from 'lodash';
 import { PlotOptions } from '@core/common/domain/model/chart-option/extra-setting/chart-style/PlotOptions';
 
@@ -25,7 +25,7 @@ export class GaugeChartOption extends ChartOption<GaugeOptionData> {
     },
     pane: {
       center: ['50%', '85%'],
-      size: '100%',
+      size: '150%',
       startAngle: -90,
       endAngle: 90,
       background: {
@@ -74,8 +74,8 @@ export class GaugeChartOption extends ChartOption<GaugeOptionData> {
       }
     }
   };
-  chartFamilyType = ChartFamilyType.Gauge;
-  className = VizSettingType.GaugeSetting;
+
+  className = ChartOptionClassName.GaugeSetting;
 
   constructor(options: ChartOptionData = {}) {
     super({ ...options, yAxis: { ...options.yAxis, min: toNumber(options.yAxis.min) } });
@@ -86,28 +86,10 @@ export class GaugeChartOption extends ChartOption<GaugeOptionData> {
   }
 
   static getDefaultChartOption(): GaugeChartOption {
-    const textColor: string = this.getThemeTextColor();
+    const textColor: string = this.getPrimaryTextColor();
     const options: GaugeOptionData = {
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
-        }
-      },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
       affectedByFilter: true,
       background: this.getThemeBackgroundColor(),
       plotOptions: {
@@ -115,9 +97,8 @@ export class GaugeChartOption extends ChartOption<GaugeOptionData> {
           dataLabels: {
             enabled: true,
             style: {
-              color: textColor,
+              ...ChartOption.getSecondaryStyle(),
               fontSize: '24px',
-              fontFamily: 'Roboto',
               textOutline: 0
             }
           }
@@ -134,8 +115,7 @@ export class GaugeChartOption extends ChartOption<GaugeOptionData> {
         max: 10000,
         labels: {
           style: {
-            color: textColor,
-            fontFamily: 'Roboto',
+            ...ChartOption.getSecondaryStyle(),
             textOutline: 0,
             fontSize: '10px'
           }
@@ -149,10 +129,7 @@ export class GaugeChartOption extends ChartOption<GaugeOptionData> {
       target: 0,
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       }
     };
     return new GaugeChartOption(options);

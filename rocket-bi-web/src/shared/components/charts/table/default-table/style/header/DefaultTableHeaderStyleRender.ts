@@ -3,7 +3,7 @@
  * @created: 6/23/21, 5:36 PM
  */
 
-import { AbstractTableQuerySetting, AbstractTableResponse, FieldFormatter, TableChartOption } from '@core/common/domain';
+import { AbstractTableQuerySetting, AbstractTableResponse, FieldFormatter, PivotTableChartOption, TableChartOption } from '@core/common/domain';
 import { CustomHeaderCellData, CustomStyleData } from '@chart/custom-table/TableData';
 import { ObjectUtils } from '@core/utils';
 import { TableHeaderStyleRender } from '@chart/table/style-render/TableHeaderStyleRender';
@@ -17,7 +17,7 @@ export class DefaultTableHeaderStyleRender implements TableHeaderStyleRender {
   constructor(tableResponse: AbstractTableResponse, query: AbstractTableQuerySetting) {
     this.tableResponse = tableResponse;
     this.querySetting = query;
-    this.vizSetting = query.getChartOption()!;
+    this.vizSetting = query.getChartOption<TableChartOption>()!;
   }
 
   createStyle(cellData: CustomHeaderCellData): CustomStyleData {

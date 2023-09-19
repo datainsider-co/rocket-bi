@@ -114,13 +114,13 @@ export default class TabFilterControlTab extends Vue {
   }
 
   private get displayAs(): string {
-    return this.setting?.displayAs ?? TabFilterDisplay.normal;
+    return this.setting?.displayAs ?? TabFilterDisplay.Normal;
   }
 
   private get activeColor(): string {
     switch (this.displayAs) {
-      case TabFilterDisplay.singleChoice:
-      case TabFilterDisplay.multiChoice:
+      case TabFilterDisplay.SingleChoice:
+      case TabFilterDisplay.MultiChoice:
         return this.setting?.choiceActiveColor ?? this.defaultSetting.activeColor;
       default:
         return this.setting?.activeColor ?? this.defaultSetting.activeColor;
@@ -129,8 +129,8 @@ export default class TabFilterControlTab extends Vue {
 
   private get deactivateColor(): string {
     switch (this.displayAs) {
-      case TabFilterDisplay.singleChoice:
-      case TabFilterDisplay.multiChoice:
+      case TabFilterDisplay.SingleChoice:
+      case TabFilterDisplay.MultiChoice:
         return this.setting?.choiceDeActiveColor ?? this.defaultSetting.deActiveColor;
       default:
         return this.setting?.deactivateColor ?? this.defaultSetting.deActiveColor;
@@ -158,25 +158,25 @@ export default class TabFilterControlTab extends Vue {
     return [
       {
         displayName: 'Button',
-        id: TabFilterDisplay.normal
+        id: TabFilterDisplay.Normal
       },
       {
         displayName: 'Single choice',
-        id: TabFilterDisplay.singleChoice
+        id: TabFilterDisplay.SingleChoice
       },
       {
         displayName: 'Multi choice',
-        id: TabFilterDisplay.multiChoice
+        id: TabFilterDisplay.MultiChoice
       },
       {
         displayName: 'Dropdown',
-        id: TabFilterDisplay.dropDown
+        id: TabFilterDisplay.DropDown
       }
     ];
   }
 
   private get isDropdown(): boolean {
-    return this.displayAs === TabFilterDisplay.dropDown;
+    return this.displayAs === TabFilterDisplay.DropDown;
   }
 
   mounted() {
@@ -193,8 +193,8 @@ export default class TabFilterControlTab extends Vue {
 
   private handleActivateColorChanged(newColor: string) {
     switch (this.displayAs) {
-      case TabFilterDisplay.singleChoice:
-      case TabFilterDisplay.multiChoice:
+      case TabFilterDisplay.SingleChoice:
+      case TabFilterDisplay.MultiChoice:
         return this.$emit('onChanged', 'choiceActiveColor', newColor);
       default:
         return this.$emit('onChanged', 'activeColor', newColor);
@@ -203,8 +203,8 @@ export default class TabFilterControlTab extends Vue {
 
   private handleDeActivateColorChanged(newColor: string) {
     switch (this.displayAs) {
-      case TabFilterDisplay.singleChoice:
-      case TabFilterDisplay.multiChoice:
+      case TabFilterDisplay.SingleChoice:
+      case TabFilterDisplay.MultiChoice:
         return this.$emit('onChanged', 'choiceDeActiveColor', newColor);
       default:
         return this.$emit('onChanged', 'deActiveColor', newColor);

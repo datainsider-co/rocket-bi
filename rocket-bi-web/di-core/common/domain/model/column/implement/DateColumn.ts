@@ -2,7 +2,6 @@ import { Column } from '@core/common/domain/model/column/Column';
 import { ColumnType } from '@core/common/domain/model';
 import { Expression } from '@core/common/domain/model/column/expression/Expression';
 import { toNumber } from 'lodash';
-import { email } from 'vuelidate/lib/validators';
 
 export class DateColumn extends Column {
   className = ColumnType.date;
@@ -41,6 +40,8 @@ export class DateColumn extends Column {
 
   static fromObject(obj: DateColumn): DateColumn {
     const defaultExpression = obj.defaultExpression ? Expression.fromObject(obj.defaultExpression) : void 0;
+    const valueAsNumber = toNumber(obj.defaultValue);
+    const defaultValue = isNaN(valueAsNumber) ? void 0 : valueAsNumber;
     return new DateColumn(
       obj.name,
       obj.displayName,
@@ -49,7 +50,7 @@ export class DateColumn extends Column {
       obj.isEncrypted,
       obj.isPrivate,
       obj.description,
-      obj.defaultValue,
+      defaultValue,
       defaultExpression
     );
   }

@@ -10,16 +10,15 @@ import {
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
-  TableChartOption,
+  QuerySettingClassName,
   TableColumn,
   WidgetId
 } from '@core/common/domain/model';
 import { AbstractTableQuerySetting } from './AbstractTableQuerySetting';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class GroupedTableQuerySetting extends AbstractTableQuerySetting<TableChartOption> implements CrossFilterable {
-  readonly className = QuerySettingType.GroupedTable;
+export class GroupedTableQuerySetting extends AbstractTableQuerySetting implements CrossFilterable {
+  readonly className = QuerySettingClassName.GroupedTable;
 
   constructor(
     columns: TableColumn[],
@@ -46,15 +45,15 @@ export class GroupedTableQuerySetting extends AbstractTableQuerySetting<TableCha
     return this.columns.map(col => col.function);
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     return this.columns;
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.columns = ConfigDataUtils.replaceDynamicFunctions(this.columns, functions);
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.columns[0];
   }
 

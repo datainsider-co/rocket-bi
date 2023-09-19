@@ -1,4 +1,4 @@
-import { DateTimeFormatter, ListUtils } from '@/utils';
+import { DateTimeUtils, ListUtils } from '@/utils';
 import { StringUtils } from '@/utils/StringUtils';
 import { ActivityResourceType } from '@core/organization';
 
@@ -44,9 +44,9 @@ export class UserActivityGroup {
   static fromUserActivities(userActivities: UserActivity[]): UserActivityGroup[] {
     const result: UserActivityGroup[] = [];
     let activities: UserActivity[] = [];
-    let groupName = DateTimeFormatter.formatASMMMDDYYYY(new Date());
+    let groupName = DateTimeUtils.formatASMMMDDYYYY(new Date());
     userActivities.forEach((act, index) => {
-      const name = DateTimeFormatter.formatASMMMDDYYYY(new Date(act.timestamp));
+      const name = DateTimeUtils.formatASMMMDDYYYY(new Date(act.timestamp));
       if (groupName !== name) {
         if (ListUtils.isNotEmpty(activities)) {
           result.push(new UserActivityGroup(groupName, activities));

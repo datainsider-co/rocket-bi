@@ -3,7 +3,6 @@
 export * from './BellCurveQuerySettingHandler';
 export * from './BubbleQuerySettingHandler';
 export * from './BulletQuerySettingHandler';
-export * from './ControlQuerySettingHandler';
 export * from './DateSelectFilterQuerySettingHandler';
 export * from './DrilldownPieQuerySettingHandler';
 export * from './DrilldownQuerySettingHandler';
@@ -12,7 +11,6 @@ export * from './FlattenPivotQuerySettingHandler';
 export * from './FlattenTableQuerySettingHandler';
 export * from './FunnelQuerySettingHandler';
 export * from './GaugeQuerySettingHandler';
-export * from './GroupMeasureControlQuerySettingHandler';
 export * from './HeatMapQuerySettingHandler';
 export * from './HistogramQuerySettingHandler';
 export * from './InputFilterQuerySettingHandler';

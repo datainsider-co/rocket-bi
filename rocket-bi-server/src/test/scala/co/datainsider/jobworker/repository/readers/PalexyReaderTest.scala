@@ -2,7 +2,7 @@ package co.datainsider.jobworker.repository.readers
 
 import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.bi.util.Using
-import co.datainsider.jobscheduler.domain.job.PalexyDateRange
+import co.datainsider.jobscheduler.domain.job.DateRangeInfo
 import co.datainsider.jobworker.client.palexy.MockPalexyClient
 import co.datainsider.jobworker.domain.JobStatus
 import co.datainsider.jobworker.domain.job.PalexyJob
@@ -31,7 +31,7 @@ class PalexyReaderTest extends Test {
     lastSyncedValue = None,
     metrics = Set("visits", "walk_ins", "average_dwell_time"),
     dimensions = Set("store_id", "store_code", "store_name", "day"),
-    dateRange = PalexyDateRange(
+    dateRange = DateRangeInfo(
       fromDate = "2019-01-01",
       toDate = "2019-01-02"
     ),

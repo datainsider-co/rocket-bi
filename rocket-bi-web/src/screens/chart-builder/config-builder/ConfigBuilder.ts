@@ -12,13 +12,12 @@ import draggable from 'vuedraggable';
 import VisualizationItemListing from './chart-selection-panel/VisualizationItemListing.vue';
 import ConfigDraggable from '@/screens/chart-builder/config-builder/config-panel/ConfigDraggable.vue';
 import FilterDraggable from '@/screens/chart-builder/config-builder/filter-panel/FilterDraggable.vue';
-import { QuerySetting } from '@core/common/domain';
+import { ChartInfoType, QuerySetting } from '@core/common/domain';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import { Log } from '@core/utils';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
-
-type ChangeConfigCallBack = (querySetting: QuerySetting | null) => void;
+import { SlTreeNodeModel } from '@/shared/components/builder/treemenu/SlVueTree';
 
 @Component({
   directives: {
@@ -33,6 +32,9 @@ type ChangeConfigCallBack = (querySetting: QuerySetting | null) => void;
   }
 })
 export default class ConfigBuilder extends Vue {
+  private isItemDragging = false;
+  private scrollOptions = VerticalScrollConfigs;
+
   @Prop({ type: Boolean, default: false })
   private isDragging!: boolean;
 
@@ -54,6 +56,9 @@ export default class ConfigBuilder extends Vue {
   @Prop({ required: false, type: Array, default: () => [] })
   private readonly visualizationItems!: VisualizationItemData[];
 
+  @Prop({ required: false, type: String, default: null })
+  private readonly draggingType!: string | null;
+
   private get vizItemsFiltered(): VisualizationItemData[] {
     return this.visualizationItems.filter(vizItem => {
       const isHidden = vizItem.isHidden !== undefined ? vizItem.isHidden : false;
@@ -61,12 +66,6 @@ export default class ConfigBuilder extends Vue {
       return !isHidden && useChartBuilder;
     });
   }
-
-  private isItemDragging = false;
-
-  private scrollOptions = VerticalScrollConfigs;
-
-  private changeConfigCallBack: ChangeConfigCallBack | null = null;
 
   private get hasDragging(): boolean {
     return this.isDragging || this.isItemDragging;
@@ -100,28 +99,43 @@ export default class ConfigBuilder extends Vue {
     return this.itemSelected.extraPanels.find(config => config.key == ConfigType.sorting);
   }
 
-  setOnSettingChanged(changeConfigCallBack: ChangeConfigCallBack): void {
-    this.changeConfigCallBack = changeConfigCallBack;
+  private get disabledDropConfig(): boolean {
+    switch (this.draggingType) {
+      case ChartInfoType.Filter:
+      case ChartInfoType.Normal:
+        return true;
+      case ChartInfoType.FunctionController:
+        return false;
+      default:
+        return false;
+    }
+  }
+
+  private get disabledDropFilter(): boolean {
+    switch (this.draggingType) {
+      case ChartInfoType.FunctionController:
+        return true;
+      case ChartInfoType.Normal:
+      case ChartInfoType.Filter:
+        return false;
+      default:
+        return false;
+    }
   }
 
   handleConfigChange(): void {
     const querySetting: QuerySetting | null = this.getQuerySetting();
-    Log.debug('handleConfigChange::', querySetting);
-    this.emitQuerySettingChanged(querySetting);
+    this.$emit('onQuerySettingChanged', querySetting);
   }
 
-  getQuerySetting(): QuerySetting | null {
-    Log.debug('can build query setting', _ConfigBuilderStore.canBuildQuerySetting());
-    if (_ConfigBuilderStore.canBuildQuerySetting()) {
+  public getQuerySetting(): QuerySetting | null {
+    const hasQuerySetting: boolean = _ConfigBuilderStore.hasQuerySetting();
+    Log.debug('getQuerySetting::hasQuerySetting', hasQuerySetting);
+    if (hasQuerySetting) {
       return _ConfigBuilderStore.getQuerySetting();
     } else {
       return null;
     }
-  }
-
-  @Emit('onQuerySettingChanged')
-  private emitQuerySettingChanged(querySetting: QuerySetting | null) {
-    return querySetting;
   }
 
   @Track(TrackEvents.SelectChartType, { chart_type: (_: ConfigBuilder, args: any) => args[0].type })

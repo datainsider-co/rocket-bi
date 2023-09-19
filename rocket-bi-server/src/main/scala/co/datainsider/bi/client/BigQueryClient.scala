@@ -30,7 +30,7 @@ class BigQueryClient(val bigquery: BigQuery, maxQueryRows: Int = 10000, defaultT
       converter(tableResult)
     } catch {
       case e: Throwable =>
-        throw InternalError(s"execute query error, message: ${e.getMessage}", e)
+        throw InternalError(s"execute query error, message: ${e.getMessage}, sql: $sql", e)
     }
   }
 

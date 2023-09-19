@@ -12,7 +12,7 @@ import {
   ImageWidget,
   Position,
   QueryParameter,
-  TabControl,
+  ChartControl,
   TabWidget,
   Widget,
   WidgetId,
@@ -25,7 +25,7 @@ import { DashboardService } from '@core/common/services';
 import { Stores, WidgetPosition } from '@/shared';
 import { DIException } from '@core/common/domain/exception';
 import { Vue } from 'vue-property-decorator';
-import { ChartUtils, ListUtils, MapUtils, PositionUtils } from '@/utils';
+import { ChartInfoUtils, ChartUtils, ListUtils, MapUtils, PositionUtils } from '@/utils';
 import { TrackingService } from '@core/tracking/service/TrackingService';
 import { QueryRelatedWidget } from '@core/common/domain/model/widget/chart/QueryRelatedWidget';
 import { WidgetAction } from '@core/tracking/domain/TrackingDataType';
@@ -50,9 +50,6 @@ class WidgetStore extends VuexModule {
 
   get allQueryWidgets(): QueryRelatedWidget[] {
     return this.widgets.filter((widget): widget is QueryRelatedWidget => widget.className == Widgets.Chart);
-  }
-  get allTabControls(): TabControl[] {
-    return this.widgets.filter(widget => TabControl.isTabControl(widget) && widget.isControl()) as any;
   }
 
   get currentMaxZIndex(): number {
@@ -99,16 +96,16 @@ class WidgetStore extends VuexModule {
   }
 
   @Mutation
-  setWidgets(widgets: Widget[]) {
-    this.widgets = widgets;
-    const chartFilters: ChartInfo[] = widgets
-      .filter(widget => ChartInfo.isChartInfo(widget) && widget.containChartFilter)
+  setWidgets(widgets: Widget[]): void {
+    const innerFilters: ChartInfo[] = widgets
+      .filter(widget => ChartInfo.isChartInfo(widget) && widget.hasInnerFilter)
       .map(widget => (widget as ChartInfo).chartFilter!);
-    this.widgets.push(...chartFilters);
+
+    this.widgets = widgets.concat(innerFilters);
   }
 
   @Mutation
-  setMapPosition(mapPosition: DIMap<Position>) {
+  setMapPosition(mapPosition: DIMap<Position>): void {
     this.mapPosition = mapPosition;
   }
 
@@ -174,7 +171,6 @@ class WidgetStore extends VuexModule {
           this.trackingService.trackWidget({
             action: WidgetAction.Create,
             widgetType: widget.className,
-            chartFamilyType: Widget.getChartFamilyType(widget) || '',
             chartType: Widget.getChartType(widget) || '',
             widgetId: widget.id,
             widgetName: widget.name,
@@ -189,7 +185,6 @@ class WidgetStore extends VuexModule {
           dashboardId: dashboardId,
           dashboardName: dashboardName,
           widgetType: payload.widget.className,
-          chartFamilyType: Widget.getChartFamilyType(payload.widget) || '',
           chartType: Widget.getChartType(payload.widget) || '',
           widgetId: payload.widget.id,
           widgetName: payload.widget.name,
@@ -297,7 +292,6 @@ class WidgetStore extends VuexModule {
           dashboardId: dashboardId,
           dashboardName: dashboardName,
           widgetType: widget.className,
-          chartFamilyType: Widget.getChartFamilyType(widget) || '',
           chartType: Widget.getChartType(widget) || '',
           widgetId: widget.id,
           widgetName: widget.name,
@@ -310,7 +304,6 @@ class WidgetStore extends VuexModule {
           dashboardId: dashboardId,
           dashboardName: dashboardName,
           widgetType: widget.className,
-          chartFamilyType: Widget.getChartFamilyType(widget) || '',
           chartType: Widget.getChartType(widget) || '',
           widgetId: widget.id,
           widgetName: widget.name,
@@ -351,7 +344,6 @@ class WidgetStore extends VuexModule {
           dashboardId: dashboardId,
           dashboardName: dashboardName,
           widgetType: widget.className,
-          chartFamilyType: Widget.getChartFamilyType(widget) || '',
           chartType: Widget.getChartType(widget) || '',
           widgetId: widget.id,
           widgetName: widget.name,
@@ -364,7 +356,6 @@ class WidgetStore extends VuexModule {
           dashboardId: dashboardId,
           dashboardName: dashboardName,
           widgetType: widget.className,
-          chartFamilyType: Widget.getChartFamilyType(widget) || '',
           chartType: Widget.getChartType(widget) || '',
           widgetId: widget.id,
           widgetName: widget.name,
@@ -390,7 +381,6 @@ class WidgetStore extends VuexModule {
           dashboardId: dashboardId,
           dashboardName: dashboardName,
           widgetType: widget.className,
-          chartFamilyType: Widget.getChartFamilyType(widget) || '',
           chartType: Widget.getChartType(widget) || '',
           widgetId: widget.id,
           widgetName: widget.name,
@@ -404,7 +394,6 @@ class WidgetStore extends VuexModule {
           dashboardId: dashboardId,
           dashboardName: dashboardName,
           widgetType: widget.className,
-          chartFamilyType: Widget.getChartFamilyType(widget) || '',
           chartType: Widget.getChartType(widget) || '',
           widgetId: widget.id,
           widgetName: widget.name,
@@ -432,7 +421,6 @@ class WidgetStore extends VuexModule {
           dashboardId: dashboardId || 0,
           dashboardName: dashboardName,
           widgetType: newWidget.className,
-          chartFamilyType: Widget.getChartFamilyType(newWidget) || '',
           chartType: Widget.getChartType(newWidget) || '',
           widgetId: newWidget.id,
           widgetName: newWidget.name
@@ -510,12 +498,12 @@ class WidgetStore extends VuexModule {
     return result;
   }
 
-  get findTabContainWidget(): (id: WidgetId) => { tabId: WidgetId; tabIndexes: number[] } {
+  get findTabContainWidget(): (id: WidgetId) => { groupId: WidgetId; tabIndexes: number[] } {
     return id => {
       const tabWidgets: TabWidget[] = this.widgets.filter(widget => TabWidget.isTabWidget(widget) && widget.allWidgets.includes(id)) as TabWidget[];
       const widgetId: WidgetId = ListUtils.isNotEmpty(tabWidgets) ? tabWidgets[0].id : -1;
       const tabIndexes: number[] = ListUtils.isNotEmpty(tabWidgets) ? tabWidgets[0].findWidget(id) : [];
-      return { tabId: widgetId, tabIndexes: tabIndexes };
+      return { groupId: widgetId, tabIndexes: tabIndexes };
     };
   }
 

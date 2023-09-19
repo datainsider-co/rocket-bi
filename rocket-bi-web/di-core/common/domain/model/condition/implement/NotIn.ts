@@ -7,7 +7,7 @@ import { ConditionType, Field, FilterMode, ScalarFunction } from '@core/common/d
 import { ValueCondition } from '@core/common/domain/model/condition/ValueCondition';
 import { ConditionUtils, getScalarFunction } from '@core/utils';
 import { FieldRelatedCondition } from '@core/common/domain/model/condition/FieldRelatedCondition';
-import { ConditionData, ConditionFamilyTypes, InputType, NumberConditionTypes, StringConditionTypes } from '@/shared';
+import { ConditionData, ConditionTypes, InputType, NumberConditionTypes, StringConditionTypes } from '@/shared';
 import { ListUtils, RandomUtils, SchemaUtils } from '@/utils';
 import { DIException } from '@core/common/domain';
 
@@ -26,10 +26,6 @@ export class NotIn extends FieldRelatedCondition implements ValueCondition {
     return new NotIn(field, possibleValues, getScalarFunction(obj.scalarFunction));
   }
 
-  assignValue(possibleValues: string[]) {
-    this.possibleValues = possibleValues;
-  }
-
   getValues(): string[] {
     return this.possibleValues;
   }
@@ -38,10 +34,6 @@ export class NotIn extends FieldRelatedCondition implements ValueCondition {
       throw new DIException('Value is require!');
     }
     this.possibleValues = values;
-  }
-  getConditionTypes(): string[] {
-    // const filterType = ChartUtils.getDefaultFilterByColumnType(this.field.fieldType);
-    return [];
   }
 
   toConditionData(groupId: number): ConditionData {
@@ -58,17 +50,17 @@ export class NotIn extends FieldRelatedCondition implements ValueCondition {
       firstValue: ListUtils.getHead(this.getValues()),
       secondValue: this.getValues()[1],
       allValues: this.getValues(),
-      currentInputType: InputType.text,
-      filterModeSelected: FilterMode.selection,
+      currentInputType: InputType.Text,
+      filterModeSelected: FilterMode.Selection,
       currentOptionSelected: this.getSubType(familyType)
     };
   }
 
-  private getSubType(familyType: ConditionFamilyTypes | string): string {
+  private getSubType(familyType: ConditionTypes | string): string {
     switch (familyType) {
-      case ConditionFamilyTypes.number:
+      case ConditionTypes.Number:
         return NumberConditionTypes.notIn;
-      case ConditionFamilyTypes.string:
+      case ConditionTypes.String:
         return StringConditionTypes.notEqual;
       default:
         return '';

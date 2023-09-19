@@ -280,16 +280,12 @@ export default class VisualHeader extends Vue {
         case ChartType.Parliament:
         case ChartType.InputControl:
         case ChartType.InputFilter:
-        case ChartType.SingleChoiceMeasurement:
         case ChartType.SingleChoice:
         case ChartType.SingleChoiceFilter:
         case ChartType.MultiChoice:
-        case ChartType.MultiChoiceMeasurement:
         case ChartType.MultiChoiceFilter:
-        case ChartType.DropDownMeasurement:
         case ChartType.DropDown:
         case ChartType.DropDownFilter:
-        case ChartType.TabMeasurement:
         case ChartType.TabFilter:
         case ChartType.TabInnerFilter:
         case ChartType.DateSelectFilter:
@@ -312,16 +308,12 @@ export default class VisualHeader extends Vue {
         case ChartType.Parliament:
         case ChartType.InputControl:
         case ChartType.InputFilter:
-        case ChartType.SingleChoiceMeasurement:
         case ChartType.SingleChoice:
         case ChartType.SingleChoiceFilter:
         case ChartType.MultiChoice:
-        case ChartType.MultiChoiceMeasurement:
         case ChartType.MultiChoiceFilter:
-        case ChartType.DropDownMeasurement:
         case ChartType.DropDown:
         case ChartType.DropDownFilter:
-        case ChartType.TabMeasurement:
         case ChartType.TabFilter:
         case ChartType.TabInnerFilter:
         case ChartType.DateSelectFilter:

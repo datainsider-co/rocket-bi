@@ -36,18 +36,18 @@
           <div class="sl-vue-tree-gap" v-for="index in level" :key="index"></div>
           <div class="sl-vue-tree-title" @contextmenu="handleRightClick(node, ...arguments)" @click="handleClick(node, ...arguments)">
             <drag
-              v-b-tooltip.hover.ds1000
               :transfer-data="{ node }"
               :draggable="node.isLeaf"
               :image-x-offset="100"
               :image-y-offset="25"
               :title="node.title"
-              @dragstart="handleDragStart"
-              @dragend="handleDragEnd"
+              @dragstart="handleDragStart(node)"
+              @dragend="handleDragEnd(node)"
             >
               <div slot="image" class="drag-image">
                 <div class="drag-move" />
-                <component :is="node.icon" v-if="node.icon"></component>
+                <component v-if="node.icon" :is="node.icon"></component>
+                <img v-else-if="node.iconSrc" :src="node.iconSrc" class="chart-control-icon" alt="icon" />
                 <span>{{ node.title }}</span>
               </div>
               <span class="sl-vue-tree-toggle" v-if="!node.isLeaf">
@@ -58,7 +58,8 @@
                   </span>
                 </slot>
               </span>
-              <component :is="node.icon" v-if="node.icon"></component>
+              <component v-if="node.icon" :is="node.icon"></component>
+              <img v-else-if="node.iconSrc" :src="node.iconSrc" class="chart-control-icon" alt="icon" />
               <span class="sl-vue-tree-toggle-title">
                 <slot name="title" :node="node">{{ node.title }}</slot>
               </span>
@@ -76,7 +77,7 @@
           :value="node.children"
           :level="node.level"
           :parentInd="nodeInd"
-          @onDragstartitem="handleDragStart"
+          @onDragStartItem="handleDragStart"
           @onDragEndItem="handleDragEnd"
           @onRightClick="handleRightClick"
           @clickField="handleClick"

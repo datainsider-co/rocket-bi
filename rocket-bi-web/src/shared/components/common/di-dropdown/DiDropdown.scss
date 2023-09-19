@@ -85,6 +85,25 @@
   &.is-invalid > .relative > span > button {
     border: 1px solid var(--danger);
   }
+
+  &[border] {
+    margin-top: 0;
+    box-shadow: 0 0 0 1px #d6d6d6;
+    border-radius: 4px;
+    margin-right: 1px;
+    margin-left: 1px;
+
+    &:hover,
+    &:focus-within,
+    &:active {
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    > .relative > span > button {
+      border: none;
+      background: white;
+    }
+  }
 }
 
 .select-area-popover {
@@ -107,8 +126,8 @@
   .select-popover {
     margin: 8px auto;
     color: var(--text-color);
-    border: var(--menu-border);
-    box-shadow: var(--menu-shadow);
+    outline: 1px solid #d6d6d6;
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.1);
     background-color: var(--menu-background-color);
     border-radius: 4px;
     width: 100%;
@@ -170,11 +189,15 @@
       }
 
       li.disable {
-        cursor: default !important;
+        cursor: not-allowed !important;
         color: var(--text-color);
         opacity: var(--normal-color);
         font-size: 12px;
         font-weight: 400;
+
+        &:hover {
+          background-color: unset !important;
+        }
       }
 
       li.active:hover {

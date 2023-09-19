@@ -5,7 +5,7 @@ import { cloneDeep, get, merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
 import { MethodProfiler } from '@/shared/profiler/Annotation';
 import { DIException } from '@core/common/domain/exception';
-import { ChartUtils, DateTimeFormatter, HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
+import { ChartUtils, DateTimeUtils, HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
 import { SeriesOneResponse } from '@core/common/domain/response';
 import { CompareMode } from '@core/common/domain/request/query/CompareMode';
 import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
@@ -51,14 +51,14 @@ export default class SeriesChart extends BaseHighChartWidget<SeriesOneResponse, 
         {
           labels: {
             formatter: function() {
-              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return yAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         },
         {
           labels: {
             formatter: function() {
-              return dualYAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return dualYAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         }
@@ -186,7 +186,7 @@ export default class SeriesChart extends BaseHighChartWidget<SeriesOneResponse, 
           labels: {
             useHTML: true,
             formatter: function() {
-              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject<any>);
+              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
             }
           }
         }
@@ -396,21 +396,21 @@ export default class SeriesChart extends BaseHighChartWidget<SeriesOneResponse, 
 
   private tooltipFormatter(point: TooltipFormatterContextObject) {
     const isTimeStampXAxis = ChartUtils.isTimeStampType(this.query.xAxis.function.scalarFunction?.className ?? '');
-    const x = isTimeStampXAxis ? DateTimeFormatter.formatAsDDMMYYYYHms(point.x) : point.x;
+    const x = isTimeStampXAxis ? DateTimeUtils.formatAsDDMMYYYYHms(point.x as number) : point.x;
     const name = point.series.name;
-    const value = this.numberFormatter.format(point.y);
+    const value = this.numberFormatter.format(point.y as number);
     const color = point.color;
     const textColor = this.setting.options.tooltip?.style?.color ?? 'var(--text-color)';
-    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="text-align: left; color: ${textColor}; font-family: ${fontFamily}">
                 <span>${x}</span></br>
                 <span style="color:${color}; padding-right: 5px;">●</span>${name}: <b>${value}</b>
             </div>`;
   }
 
-  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private yAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const yAxisSetting = this.setting.options.yAxis;
-    const value = this.numberFormatter.format(axis.value);
+    const value = this.numberFormatter.format(axis.value as number);
     if (yAxisSetting && yAxisSetting[0]) {
       return this.customAxisLabel(value, yAxisSetting[0].prefix, yAxisSetting[0].postfix);
     } else {
@@ -426,9 +426,9 @@ export default class SeriesChart extends BaseHighChartWidget<SeriesOneResponse, 
       `;
   }
 
-  private dualYAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private dualYAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const yAxisSetting = this.setting.options.yAxis;
-    const value = this.numberFormatter.format(axis.value);
+    const value = this.numberFormatter.format(axis.value as number);
     if (yAxisSetting && yAxisSetting[1]) {
       return this.customAxisLabel(value, yAxisSetting[1].prefix, yAxisSetting[1].postfix);
     } else {
@@ -436,11 +436,11 @@ export default class SeriesChart extends BaseHighChartWidget<SeriesOneResponse, 
     }
   }
 
-  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject<any>) {
+  private xAxisFormatter(axis: Highcharts.AxisLabelsFormatterContextObject) {
     const xAxisSetting = this.setting.options.xAxis;
     const value = axis.value;
     if (xAxisSetting && xAxisSetting[0]) {
-      return this.customAxisLabel(value, xAxisSetting[0].prefix, xAxisSetting[0].postfix);
+      return this.customAxisLabel(value as string, xAxisSetting[0].prefix, xAxisSetting[0].postfix);
     } else {
       return `<div>${value}</div>`;
     }

@@ -1,22 +1,25 @@
-import { ConditionType, Field, NestedCondition, ValueCondition, WidgetId } from '@core/common/domain/model';
+import { ConditionType, Field, NestedCondition, ValueCondition, ValueControlType, WidgetId } from '@core/common/domain/model';
 import { Condition } from '@core/common/domain/model/condition/Condition';
 import { cloneDeep } from 'lodash';
-import { Log } from '@core/utils';
 import { ListUtils } from '@/utils';
+
+export interface DynamicValueExtraData {
+  controlTypes: ValueControlType[];
+}
 
 export class DynamicValueCondition extends Condition implements NestedCondition {
   className: ConditionType = ConditionType.Dynamic;
   baseCondition: Condition;
   finalCondition?: Condition;
   dynamicWidgetId: WidgetId;
-  displayName: string;
+  extraData!: DynamicValueExtraData;
 
-  constructor(condition: Condition, dynamicWidgetId: WidgetId, displayName: string, finalCondition?: Condition) {
+  constructor(condition: Condition, dynamicWidgetId: WidgetId, finalCondition?: Condition, extraData?: DynamicValueExtraData) {
     super();
     this.baseCondition = condition;
     this.dynamicWidgetId = dynamicWidgetId;
-    this.displayName = displayName;
     this.finalCondition = finalCondition;
+    this.extraData = extraData ?? { controlTypes: [] };
   }
 
   getAllFields(): Field[] {
@@ -24,13 +27,13 @@ export class DynamicValueCondition extends Condition implements NestedCondition 
   }
 
   static isDynamicCondition(obj: any & Condition): obj is DynamicValueCondition {
-    return !!obj?.dynamicWidgetId;
+    return obj && obj.className === ConditionType.Dynamic;
   }
 
   static fromObject(obj: any): DynamicValueCondition {
-    const baseCondition = Condition.fromObject(obj.baseCondition);
-    const finalCondition = obj.finalCondition ? Condition.fromObject(obj.finalCondition) : void 0;
-    return new DynamicValueCondition(baseCondition, obj.dynamicWidgetId, obj.displayName, finalCondition);
+    const baseCondition: Condition = Condition.fromObject(obj.baseCondition);
+    const finalCondition: Condition | undefined = obj.finalCondition ? Condition.fromObject(obj.finalCondition) : void 0;
+    return new DynamicValueCondition(baseCondition, obj.dynamicWidgetId, finalCondition, obj.extraData);
   }
 
   getConditions(): Condition[] {

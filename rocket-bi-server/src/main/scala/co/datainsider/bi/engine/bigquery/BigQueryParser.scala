@@ -1,7 +1,7 @@
 package co.datainsider.bi.engine.bigquery
 
-import co.datainsider.bi.domain.SqlRegex.SqlRegex
 import co.datainsider.bi.domain.SqlRegex
+import co.datainsider.bi.domain.SqlRegex.SqlRegex
 import co.datainsider.bi.domain.query.{
   AggregateBetween,
   AggregateBetweenAndIncluding,
@@ -94,7 +94,6 @@ import co.datainsider.bi.domain.query.{
   SelectExpression,
   SelectNull,
   Sum,
-  TableField,
   ToDate,
   ToDateTime,
   ToDayNum,
@@ -117,18 +116,9 @@ import co.datainsider.bi.domain.query.{
   ToYearNum
 }
 import co.datainsider.bi.engine.SqlParser
-import co.datainsider.bi.engine.clickhouse.ClickhouseParser.{toAliasName, toQueryString}
 import co.datainsider.bi.util.Implicits.{ImplicitString, NULL_VALUE}
-import co.datainsider.bi.util.{
-  DayNumFormatter,
-  DayOfWeekFormatter,
-  MonthFormatter,
-  MonthNumFormatter,
-  QuarterFormatter,
-  QuarterNumFormatter,
-  StringUtils,
-  WeekNumFormatter
-}
+import co.datainsider.bi.util._
+import co.datainsider.schema.domain.column.ColType
 import datainsider.client.exception.UnsupportedError
 
 import scala.util.matching.Regex
@@ -183,74 +173,74 @@ object BigQueryParser extends SqlParser {
       case LessThanOrEqual(field, value, scalarFn) =>
         s"${applyScalarFn(field.fullFieldName, scalarFn)} <= ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case MatchRegex(field, value, scalarFn) =>
-        s"match(${applyScalarFn(field.fullFieldName, scalarFn)}, ${toCorrespondingValue(field.fieldType, value, scalarFn)})"
+        s"regexp_contains(${applyScalarFn(field.fullFieldName, scalarFn)}, ${toCorrespondingValue(field.fieldType, value, scalarFn)})"
       case Like(field, value, scalarFn) =>
-        s"like(${applyScalarFn(field.fullFieldName, scalarFn)}, ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"${applyScalarFn(field.fullFieldName, scalarFn)} like ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)}"
       case NotLike(field, value, scalarFn) =>
-        s"notLike(${applyScalarFn(field.fullFieldName, scalarFn)}, ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"${applyScalarFn(field.fullFieldName, scalarFn)} not like ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)}"
       case LikeCaseInsensitive(field, value, scalarFn) =>
-        s"like(lower(${applyScalarFn(field.fullFieldName, scalarFn)}), ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"lower(${applyScalarFn(field.fullFieldName, scalarFn)}) like ${toCorrespondingValue(field.fieldType, s"%${value.toLowerCase}%", scalarFn)}"
       case NotLikeCaseInsensitive(field, value, scalarFn) =>
-        s"notLike(lower(${applyScalarFn(field.fullFieldName, scalarFn)}), ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"lower(${applyScalarFn(field.fullFieldName, scalarFn)}) not like ${toCorrespondingValue(field.fieldType, s"%${value.toLowerCase}%", scalarFn)}"
       case Between(field, min, max, scalarFn) =>
-        s"(${applyScalarFn(field.fullFieldName, scalarFn)} > ${toCorrespondingValue(field.fieldType, min)}) " +
-          s"and (${applyScalarFn(field.fullFieldName, scalarFn)} < ${toCorrespondingValue(field.fieldType, max)})"
+        s"(${applyScalarFn(field.fullFieldName, scalarFn)} > ${toCorrespondingValue(field.fieldType, min, scalarFn)}) " +
+          s"and (${applyScalarFn(field.fullFieldName, scalarFn)} < ${toCorrespondingValue(field.fieldType, max, scalarFn)})"
       case BetweenAndIncluding(field, min, max, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} between ${toCorrespondingValue(field.fieldType, min)} " +
-          s"and ${toCorrespondingValue(field.fieldType, max)}"
+        s"${applyScalarFn(field.fullFieldName, scalarFn)} between ${toCorrespondingValue(field.fieldType, min, scalarFn)} " +
+          s"and ${toCorrespondingValue(field.fieldType, max, scalarFn)}"
 
       case LastNMinute(field, nMinute, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          s"toStartOfMinute(now() - toIntervalMinute($nMinute))",
-          "toStartOfMinute(now())",
+          s"datetime_sub(datetime_trunc(current_datetime, minute), interval $nMinute minute)",
+          "datetime_trunc(current_datetime, minute)",
           field,
           scalarFn,
           intervalFn
         )
       case LastNHour(field, nHour, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          s"toStartOfHour(now() - toIntervalHour($nHour))",
-          "toStartOfHour(now())",
+          s"datetime_sub(datetime_trunc(current_datetime, hour), interval $nHour hour)",
+          "datetime_trunc(current_datetime, hour)",
           field,
           scalarFn,
           intervalFn
         )
       case LastNDay(field, nDay, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          s"today() - toIntervalDay($nDay)",
-          "today()",
+          s"datetime_sub(datetime_trunc(current_datetime, day), interval $nDay day)",
+          "datetime_trunc(current_datetime, day)",
           field,
           scalarFn,
           intervalFn
         )
       case LastNWeek(field, nWeek, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          s"toStartOfWeek(today() - toIntervalWeek($nWeek))", // begin of week is Sunday
-          "toStartOfWeek(today())",
+          s"datetime_sub(datetime_trunc(current_datetime, week), interval $nWeek week)",
+          "datetime_trunc(current_datetime, week)",
           field,
           scalarFn,
           intervalFn
         )
       case LastNMonth(field, nMonth, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          s"toStartOfMonth(today() - toIntervalMonth($nMonth))",
-          "toStartOfMonth(today())",
+          s"datetime_sub(datetime_trunc(current_datetime, month), interval $nMonth month)",
+          "datetime_trunc(current_datetime, month)",
           field,
           scalarFn,
           intervalFn
         )
       case LastNQuarter(field, nQuarter, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          s"toStartOfQuarter(today() - toIntervalQuarter($nQuarter))",
-          "toStartOfQuarter(today())",
+          s"datetime_sub(datetime_trunc(current_datetime, quarter), interval $nQuarter quarter)",
+          "datetime_trunc(current_datetime, quarter)",
           field,
           scalarFn,
           intervalFn
         )
       case LastNYear(field, nYear, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          s"toStartOfYear(today() - toIntervalYear($nYear))",
-          "toStartOfYear(today())",
+          s"datetime_sub(datetime_trunc(current_datetime, year), interval $nYear year)",
+          "datetime_trunc(current_datetime, year)",
           field,
           scalarFn,
           intervalFn
@@ -258,40 +248,40 @@ object BigQueryParser extends SqlParser {
 
       case CurrentDay(field, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          "toStartOfDay(now())",
-          "now()",
+          "datetime_trunc(current_datetime, day)",
+          "current_datetime",
           field,
           scalarFn,
           intervalFn
         )
       case CurrentWeek(field, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          "toStartOfWeek(now())",
-          "now()",
+          "datetime_trunc(current_datetime, week)",
+          "current_datetime",
           field,
           scalarFn,
           intervalFn
         )
       case CurrentMonth(field, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          "toStartOfMonth(now())",
-          "now()",
+          "datetime_trunc(current_datetime, month)",
+          "current_datetime",
           field,
           scalarFn,
           intervalFn
         )
       case CurrentQuarter(field, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          "toStartOfQuarter(now())",
-          "now()",
+          "datetime_trunc(current_datetime, quarter)",
+          "current_datetime",
           field,
           scalarFn,
           intervalFn
         )
       case CurrentYear(field, scalarFn, intervalFn) =>
         toBetweenDateCondition(
-          "toStartOfYear(now())",
-          "now()",
+          "datetime_trunc(current_datetime, year)",
+          "current_datetime",
           field,
           scalarFn,
           intervalFn
@@ -326,25 +316,25 @@ object BigQueryParser extends SqlParser {
   }
 
   private def toInConditionStr(in: In): String = {
+    require(in.possibleValues.nonEmpty, "values list can not be empty")
     val fieldStr: String = applyScalarFn(in.field.fullFieldName, in.scalarFunction)
-    val valuesStr: String = in.possibleValues.filterNot(v => v.isNull).map(escapeString).mkString(",")
+    val valuesStr: String = in.possibleValues
+      .filterNot(value => value.isNull)
+      .map(value => toCorrespondingValue(in.field.fieldType, value, in.scalarFunction))
+      .mkString(",")
 
-    if (in.isIncludeNull) {
-      s"(isNull($fieldStr) or $fieldStr in (null,$valuesStr))"
-    } else {
-      s"$fieldStr in (null,$valuesStr)"
-    }
+    s"$fieldStr in ($valuesStr)"
   }
 
   private def toNotInConditionStr(notIn: NotIn): String = {
+    require(notIn.possibleValues.nonEmpty, "values list can not be empty")
     val fieldStr: String = applyScalarFn(notIn.field.fullFieldName, notIn.scalarFunction)
-    val valuesStr: String = notIn.possibleValues.filterNot(v => v.isNull).map(escapeString).mkString(",")
+    val valuesStr: String = notIn.possibleValues
+      .filterNot(value => value.isNull)
+      .map(value => toCorrespondingValue(notIn.field.fieldType, value, notIn.scalarFunction))
+      .mkString(",")
 
-    if (notIn.isIncludeNull) {
-      s"(isNotNull($fieldStr) and $fieldStr not in (null,$valuesStr))"
-    } else {
-      s"$fieldStr not in (null,$valuesStr)"
-    }
+    s"$fieldStr not in ($valuesStr)"
   }
 
   // TODO: aggregate function not yet support and and or
@@ -460,45 +450,45 @@ object BigQueryParser extends SqlParser {
 
   def toQueryString(scalarFn: ScalarFunction, field: String): String = {
     scalarFn match {
-      case ToYear(_)     => s"EXTRACT(YEAR FROM $field)"
-      case ToQuarter(_)  => s"EXTRACT(QUARTER FROM $field)"
-      case ToMonth(_)    => s"EXTRACT(MONTH FROM $field)"
-      case ToWeek(_)     => s"EXTRACT(WEEK FROM $field)"
-      case ToDate(_)     => s"DATE($field)"
-      case ToDateTime(_) => s"DATETIME($field)"
+      case ToYear(_, _)     => s"EXTRACT(YEAR FROM $field)"
+      case ToQuarter(_, _)  => s"EXTRACT(QUARTER FROM $field)"
+      case ToMonth(_, _)    => s"EXTRACT(MONTH FROM $field)"
+      case ToWeek(_, _)     => s"EXTRACT(WEEK FROM $field)"
+      case ToDate(_, _)     => s"DATE($field)"
+      case ToDateTime(_, _) => s"DATETIME($field)"
 
-      case SecondsToDateTime(_) => s"TIMESTAMP_SECONDS($field)"
-      case MillisToDateTime(_)  => s"TIMESTAMP_MILLIS($field)"
-      case NanosToDateTime(_)   => s"TIMESTAMP_MICROS($field)"
-      case DatetimeToSeconds(_) => s"UNIX_SECONDS(TIMESTAMP($field))"
-      case DatetimeToMillis(_)  => s"UNIX_MILLIS(TIMESTAMP($field))"
-      case DatetimeToNanos(_)   => s"UNIX_MICROS(TIMESTAMP($field))"
+      case SecondsToDateTime(_, _) => s"TIMESTAMP_SECONDS($field)"
+      case MillisToDateTime(_, _)  => s"TIMESTAMP_MILLIS($field)"
+      case NanosToDateTime(_, _)   => s"TIMESTAMP_MICROS($field)"
+      case DatetimeToSeconds(_, _) => s"UNIX_SECONDS(TIMESTAMP($field))"
+      case DatetimeToMillis(_, _)  => s"UNIX_MILLIS(TIMESTAMP($field))"
+      case DatetimeToNanos(_, _)   => s"UNIX_MICROS(TIMESTAMP($field))"
 
-      case ToDayOfYear(_)  => s"EXTRACT(DAYOFYEAR FROM $field)"
-      case ToDayOfMonth(_) => s"EXTRACT(DAY FROM $field)"
-      case ToDayOfWeek(_)  => s"EXTRACT(DAYOFWEEK FROM $field)"
-      case ToHour(_)       => s"EXTRACT(HOUR FROM DATETIME($field))"
-      case ToMinute(_)     => s"EXTRACT(MINUTE FROM DATETIME($field))"
-      case ToSecond(_)     => s"EXTRACT(SECOND FROM DATETIME($field))"
+      case ToDayOfYear(_, _)  => s"EXTRACT(DAYOFYEAR FROM $field)"
+      case ToDayOfMonth(_, _) => s"EXTRACT(DAY FROM $field)"
+      case ToDayOfWeek(_, _)  => s"EXTRACT(DAYOFWEEK FROM $field)"
+      case ToHour(_, _)       => s"EXTRACT(HOUR FROM DATETIME($field))"
+      case ToMinute(_, _)     => s"EXTRACT(MINUTE FROM DATETIME($field))"
+      case ToSecond(_, _)     => s"EXTRACT(SECOND FROM DATETIME($field))"
 
-      case ToYearNum(_)    => s"EXTRACT(YEAR FROM $field)"
-      case ToQuarterNum(_) => s"DATE_DIFF($field, DATE(1970,1,1), QUARTER)"
-      case ToMonthNum(_)   => s"DATE_DIFF($field, DATE(1970,1,1), MONTH)"
-      case ToWeekNum(_)    => s"DATE_DIFF($field, DATE(1970,1,1), WEEK)"
-      case ToDayNum(_)     => s"DATE_DIFF($field, DATE(1970,1,1), DAY)"
-      case ToHourNum(_)    => s"DATETIME_DIFF($field, DATETIME(1970,1,1,0,0,0), HOUR)"
-      case ToMinuteNum(_)  => s"DATETIME_DIFF($field, DATETIME(1970,1,1,0,0,0), MINUTE)"
-      case ToSecondNum(_)  => s"UNIX_SECONDS(TIMESTAMP($field))"
+      case ToYearNum(_, _)    => s"EXTRACT(YEAR FROM $field)"
+      case ToQuarterNum(_, _) => s"DATE_DIFF($field, DATE(1,1,1), QUARTER) + 4"
+      case ToMonthNum(_, _)   => s"DATE_DIFF($field, DATE(1,1,1), MONTH) + 13"
+      case ToWeekNum(_, _)    => s"DATE_DIFF($field, DATE(1970,1,1), WEEK)"
+      case ToDayNum(_, _)     => s"DATE_DIFF($field, DATE(1970,1,1), DAY)"
+      case ToHourNum(_, _)    => s"DATETIME_DIFF($field, DATETIME(1970,1,1,0,0,0), HOUR)"
+      case ToMinuteNum(_, _)  => s"DATETIME_DIFF($field, DATETIME(1970,1,1,0,0,0), MINUTE)"
+      case ToSecondNum(_, _)  => s"UNIX_SECONDS(TIMESTAMP($field))"
 
-      case DateDiff(unit, date, _)   => s"DATE_DIFF($field, DATE('$date'), $unit)"
-      case GetArrayElement(_, index) => ???
-      case Decrypt(_)                => ???
+      case DateDiff(unit, date, _, _) => s"DATE_DIFF($field, DATE('$date'), $unit)"
+      case GetArrayElement(_, _, _)   => ???
+      case Decrypt(_, _)              => ???
 
-      case PastNYear(num, _)    => s"DATE_SUB($field, INTERVAL $num YEAR)"
-      case PastNQuarter(num, _) => s"DATE_SUB($field, INTERVAL $num QUARTER)"
-      case PastNMonth(num, _)   => s"DATE_SUB($field, INTERVAL $num MONTH)"
-      case PastNWeek(num, _)    => s"DATE_SUB($field, INTERVAL $num WEEK)"
-      case PastNDay(num, _)     => s"DATE_SUB($field, INTERVAL $num DAY)"
+      case PastNYear(num, _, _)    => s"DATE_SUB($field, INTERVAL $num YEAR)"
+      case PastNQuarter(num, _, _) => s"DATE_SUB($field, INTERVAL $num QUARTER)"
+      case PastNMonth(num, _, _)   => s"DATE_SUB($field, INTERVAL $num MONTH)"
+      case PastNWeek(num, _, _)    => s"DATE_SUB($field, INTERVAL $num WEEK)"
+      case PastNDay(num, _, _)     => s"DATE_SUB($field, INTERVAL $num DAY)"
 
       case Cast(asType, _) => s"CAST($field AS $asType)"
     }
@@ -545,8 +535,10 @@ object BigQueryParser extends SqlParser {
   def toCorrespondingValue(fieldType: String, value: String, scalarFn: Option[ScalarFunction] = None): String = {
     try {
       scalarFn match {
-        case Some(x) => unapplyScalarFn(x, value).toString
-        case None    => toValueStr(value, fieldType)
+        case Some(fn) =>
+          val originalValue: String = unapplyScalarFn(fn, value).toString
+          toValueStr(originalValue, fn.resultType)
+        case None => toValueStr(value, fieldType)
       }
     } catch {
       case e: Throwable => throw UnsupportedError(s"fail to parse $value to sql", e)
@@ -555,11 +547,11 @@ object BigQueryParser extends SqlParser {
 
   def toValueStr(value: String, fieldType: String): String = {
     fieldType.toLowerCase match {
-      case "string"     => s"${escapeString(value)}"
-      case "date"       => s"toDate('$value')"
-      case "datetime"   => s"toDateTime('$value')"
-      case "datetime64" => s"toDateTime('$value')"
-      case _            => s"$value"
+      case ColType.String     => s"${escapeString(value)}"
+      case ColType.Date       => s"DATE('$value')"
+      case ColType.DateTime   => s"DATETIME('$value')"
+      case ColType.DateTime64 => s"DATETIME('$value')"
+      case _                  => value
     }
   }
 
@@ -572,7 +564,7 @@ object BigQueryParser extends SqlParser {
       case _: ToDayNum     => DayNumFormatter.deformat(value)
       case _: ToQuarter    => QuarterFormatter.deformat(value)
       case _: ToMonth      => MonthFormatter.deformat(value)
-      case _               => s"'$value'"
+      case _               => value
     }
   }
 

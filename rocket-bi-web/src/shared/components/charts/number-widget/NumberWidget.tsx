@@ -1,4 +1,4 @@
-import { Component, Ref, Watch } from 'vue-property-decorator';
+import { Component, Prop, Ref, Watch } from 'vue-property-decorator';
 import { DIException } from '@core/common/domain/exception';
 import { ClassProfiler, MethodProfiler } from '@/shared/profiler/Annotation';
 import { BaseChartWidget, MouseEventData, PropsBaseChart } from '@chart/BaseChart';
@@ -20,11 +20,15 @@ import { KPIRenderer } from '@chart/widget-renderer/number-render/KPIRenderer';
 import { CalendarData } from '@/shared/models';
 import { DashboardControllerModule, QuerySettingModule } from '@/screens/dashboard-detail/stores';
 import { PopupUtils } from '@/utils/PopupUtils';
+import Highcharts from 'highcharts/highcharts';
 
 @Component({ components: { ChartHolder }, props: PropsBaseChart })
 @ClassProfiler({ prefix: 'KPIWidget' })
 export default class NumberWidget extends BaseChartWidget<SeriesOneResponse, NumberChartOption, NumberQuerySetting> {
   private numberFormatter!: NumberFormatter;
+
+  @Prop({ required: false, type: Boolean, default: false })
+  showEditComponent!: boolean;
 
   @Ref()
   private readonly trendLineChartHolder!: ChartHolder;
@@ -83,7 +87,11 @@ export default class NumberWidget extends BaseChartWidget<SeriesOneResponse, Num
       color: title.style?.color,
       'font-size': title.style?.fontSize ?? '20px',
       'font-family': title.style?.fontFamily,
-      'text-align': title.align ?? 'center',
+      'font-weight': title.style?.fontWeight,
+      'line-height': title.style?.lineHeight,
+      'text-decoration': title.style?.textDecoration,
+      'font-style': title.style?.fontStyle,
+      'text-align': title.align ?? 'left',
       'white-space': 'nowrap',
       'text-overflow': 'ellipsis',
       overflow: 'hidden'
@@ -97,7 +105,11 @@ export default class NumberWidget extends BaseChartWidget<SeriesOneResponse, Num
       color: title.style?.color,
       'font-size': title.style?.fontSize ?? '20px',
       'font-family': title.style?.fontFamily,
-      'text-align': title.align ?? 'center',
+      'font-weight': title.style?.fontWeight,
+      'line-height': title.style?.lineHeight,
+      'text-decoration': title.style?.textDecoration,
+      'font-style': title.style?.fontStyle,
+      'text-align': title.align ?? 'left',
       'white-space': 'nowrap',
       'text-overflow': 'ellipsis',
       overflow: 'hidden'
@@ -129,6 +141,9 @@ export default class NumberWidget extends BaseChartWidget<SeriesOneResponse, Num
     return {
       'font-size': style.fontSize ?? '36px',
       'font-family': style.fontFamily,
+      'font-weight': style?.fontWeight,
+      'line-height': style?.lineHeight,
+      'text-align': this.setting.options.align ?? 'left',
       color: style.color
     };
   }
@@ -314,12 +329,12 @@ export default class NumberWidget extends BaseChartWidget<SeriesOneResponse, Num
   }
 
   private getRenderer(): WidgetRenderer<NumberWidget> {
-    if (this.canRenderTrendLine) {
-      return new KPIRenderer();
-    }
-    if (ComparisonUtils.isDataRangeOn(this.setting.options) || ComparisonUtils.isComparisonOn(this.setting.options)) {
-      return new ComparisonNumberRenderer();
-    }
+    // if (this.canRenderTrendLine) {
+    //   return new KPIRenderer();
+    // }
+    // if (ComparisonUtils.isDataRangeOn(this.setting.options) || ComparisonUtils.isComparisonOn(this.setting.options)) {
+    //   return new ComparisonNumberRenderer();
+    // }
     return new NumberRenderer();
   }
 

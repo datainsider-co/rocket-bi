@@ -1,7 +1,6 @@
-import { And, Condition, Equal, FieldRelatedCondition, In, QuerySetting, TableColumn, WidgetId } from '@core/common/domain/model';
+import { Condition, Equal, FieldRelatedCondition, In, QuerySetting, TableColumn, WidgetId } from '@core/common/domain/model';
 import { FilterUtils } from '@/utils';
 import { ConditionUtils } from '@core/utils';
-import { SlicerRange } from '@/shared';
 
 export class FilterRequest {
   filterId!: WidgetId;

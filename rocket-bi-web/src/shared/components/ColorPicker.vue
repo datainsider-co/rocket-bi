@@ -1,16 +1,24 @@
 <template>
   <div>
-    <BPopover :show.sync="isShow" :target="id" placement="top" triggers="blur" custom-class="popover-color-picker" boundary="window">
+    <BPopover :show.sync="isShow" :target="id" placement="top" trigger="blur" custom-class="popover-color-picker" boundary="window">
       <template>
-        <div id="main-picker-area" class="main-picker-area">
-          <Sketch v-model="colors" :presetColors="[]"></Sketch>
+        <div id="main-picker-area" class="main-picker-area" ref="popoverContainer" :class="{ 'gradient-picker': !isSolid }">
+          <Sketch v-if="isSolid" v-model="colors" :presetColors="[]"></Sketch>
+          <VueGpickr v-else v-model="gradient"></VueGpickr>
           <div class="extend-area">
             <div :id="genBtnId('color-picker-reset-default')" class="d-flex flex-row btn-reset btn-ghost align-items-center" @click.prevent="resetToDefault">
               <div class="user-select-none">Reset to default</div>
             </div>
-            <div class="d-flex flex-row justify-content-center button-bar">
-              <DiButton :id="genBtnId('color-picker-cancel')" border class="col-5 mr-auto" title="Cancel" @click="cancelPickColor" />
-              <DiButton :id="genBtnId('color-picker-save')" primary class="col-5 " title="OK" @click.prevent="applyColor" />
+            <div class="d-flex flex-row button-bar" :class="{ 'justify-content-center': isSolid, 'justify-content-between': !isSolid }">
+              <DiButton
+                :id="genBtnId('color-picker-cancel')"
+                border
+                class="col-5"
+                :class="{ 'mr-auto': isSolid }"
+                title="Cancel"
+                @click.stop="cancelPickColor"
+              />
+              <DiButton :id="genBtnId('color-picker-save')" primary class="col-5" title="OK" @click.stop="applyColor" />
             </div>
           </div>
         </div>
@@ -40,9 +48,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 // @ts-ignored
 import { Sketch } from 'vue-color';
+// @ts-ignored
+import { VueGpickr, LinearGradient } from 'vue-gpickr';
 import ClickOutside from 'vue-click-outside';
 import { ColorUtils } from '@/utils/ColorUtils';
 
@@ -63,7 +73,8 @@ export enum PickerType {
 
 @Component({
   components: {
-    Sketch: Sketch
+    Sketch: Sketch,
+    VueGpickr: VueGpickr
   },
   directives: {
     ClickOutside
@@ -71,6 +82,12 @@ export enum PickerType {
 })
 export default class ColorPicker extends Vue {
   private readonly PickerType = PickerType;
+  @Prop({ type: String, default: () => `color-picker-${Date.now()}` })
+  private readonly id!: string;
+
+  @Prop({ required: false, type: String, default: PickerType.InputAndPreview })
+  private readonly pickerType!: PickerType;
+
   @Prop({ type: String, default: '#ffffff' })
   value!: string;
 
@@ -83,6 +100,9 @@ export default class ColorPicker extends Vue {
   @Prop({ type: Boolean, default: false })
   allowWatchValueChange!: boolean;
 
+  @Ref()
+  popoverContainer?: HTMLElement;
+
   private currentColor = '';
 
   private colorInPopover = '';
@@ -91,13 +111,11 @@ export default class ColorPicker extends Vue {
 
   private isShow = false;
 
-  @Prop({ required: true, type: String })
-  private readonly id!: string;
-
-  @Prop({ required: false, type: String, default: PickerType.InputAndPreview })
-  private readonly pickerType!: PickerType;
-
   private popupItem: Element | null = null;
+
+  private get isSolid(): boolean {
+    return !ColorUtils.isGradientColor(this.value);
+  }
 
   private get colors(): ObjectColor {
     if (this.currentColor?.length === 8) {
@@ -118,6 +136,20 @@ export default class ColorPicker extends Vue {
       this.colorInPopover = newColors.hex || '#ffffff';
     } else {
       this.colorInPopover = newColors.hex8 ?? newColors.hex ?? '#ffffff';
+    }
+  }
+
+  private get gradient(): LinearGradient | null {
+    if (!this.isSolid && ColorUtils.isGradientColor(this.colorInPopover)) {
+      return new LinearGradient({ ...ColorUtils.parseGradient(this.colorInPopover) });
+    }
+    return null;
+  }
+
+  private set gradient(gradient: LinearGradient | null) {
+    if (gradient) {
+      const cssValue = gradient.toString();
+      this.colorInPopover = cssValue;
     }
   }
 
@@ -181,12 +213,15 @@ export default class ColorPicker extends Vue {
     this.colorInPopover = this.value;
     this.hidePicker();
   }
+
   private get colorInPopoverAsHex(): string {
     return ColorUtils.getColorFromCssVariable(this.colorInPopover);
   }
+
   private get currentColorAsHex(): string {
     return ColorUtils.getColorFromCssVariable(this.currentColor);
   }
+
   private set currentColorAsHex(newValue: string) {
     this.currentColor = newValue;
   }
@@ -200,7 +235,8 @@ export default class ColorPicker extends Vue {
 .popover-color-picker {
   background-color: transparent;
   padding: 0;
-  max-width: 310px;
+  max-width: 600px;
+  box-shadow: var(--menu-shadow);
 
   ::v-deep {
     .popover-body {
@@ -211,6 +247,13 @@ export default class ColorPicker extends Vue {
         background-color: var(--primary);
         border: solid 0.5px rgba(#ffffff, 0.1);
         border-radius: 4px;
+
+        &.gradient-picker {
+          .vue-gpickr {
+            border-radius: unset;
+            box-shadow: unset;
+          }
+        }
 
         .vc-sketch {
           border: none 0;

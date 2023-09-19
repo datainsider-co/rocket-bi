@@ -1,6 +1,6 @@
 <template>
   <div class="di-table">
-    <StatusWidget :error="errorMsg" :status="status" loading-class="directory-status" @retry="emitRetry">
+    <StatusWidget :error="errorMsg" :status="status" class="directory-status" @retry="emitRetry">
       <template #default>
         <template v-if="isEmpty">
           <slot name="empty"></slot>

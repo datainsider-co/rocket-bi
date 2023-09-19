@@ -47,6 +47,7 @@ export abstract class BaseChartWidget<Response extends VisualizationResponse, Se
   chartInfo!: ChartInfo;
   currentQuery!: Query;
   $alert!: typeof Swal;
+  showEditComponent!: boolean;
 
   get colorStyle() {
     return {
@@ -56,14 +57,9 @@ export abstract class BaseChartWidget<Response extends VisualizationResponse, Se
 
   // fixme: function is not correct
   get chartClass(): string {
-    if (this.backgroundColor) {
-      if (this.isPreview) {
-        return 'h-100 w-100 m-0 p-0 highcharts-container';
-      } else {
-        return 'h-100 w-100 m-0 p-0 highcharts-container';
-      }
-    }
-    return 'h-100 w-100 m-0 p-0 secondary-chart-background-color highcharts-container';
+    return `h-100 w-100 m-0 p-0 highcharts-container ${this.setting.className}`;
+    //todo: check to remove
+    // return 'h-100 w-100 m-0 p-0 secondary-chart-background-color highcharts-container';
   }
 }
 
@@ -136,12 +132,12 @@ export abstract class BaseHighChartWidget<
 
   protected renderSubtitle(): string {
     const subtitleText = this.setting.options.subtitle?.text
-      ? `<p style="${this.setting.options.subtitle?.style}">${this.setting.options.subtitle?.text}</p>`
+      ? `<div style="${this.setting.options.subtitle?.style}">${this.setting.options.subtitle?.text}</div>`
       : '';
     if (this.id && !this.isPreview) {
       const drilldownPaths: DrilldownData[] = DrilldownDataStoreModule.drilldownPaths(+this.id);
       const drilldownPathsAsHTML = this.buildDrilldownPath(drilldownPaths);
-      return `<div class="d-flex flex-column mb-3 align-items-center"">
+      return `<div class="d-flex flex-column align-items-center"">
                 ${subtitleText}
                 <div class="drilldown-path">
                   ${drilldownPathsAsHTML}

@@ -22,7 +22,7 @@ import { DataLabelFormatterMode } from '@chart/PieChart';
 export default class ParliamentChart extends BaseHighChartWidget<SeriesTwoResponse, ParliamentChartOption, ParliamentQuerySetting> {
   private static DISPLAY_AS_CIRCLE_OPTIONS = {
     center: ['50%', '50%'],
-    size: '100%',
+    size: '140%',
     startAngle: 0,
     endAngle: 360
   };
@@ -31,8 +31,8 @@ export default class ParliamentChart extends BaseHighChartWidget<SeriesTwoRespon
     endAngle: null
   };
   private static DISPLAY_AS_PARLIAMENT_OPTIONS = {
-    center: ['50%', '65%'],
-    size: '100%',
+    center: ['50%', '95%'],
+    size: '230%',
     startAngle: -100,
     endAngle: 100
   };
@@ -233,10 +233,10 @@ export default class ParliamentChart extends BaseHighChartWidget<SeriesTwoRespon
     // Log.debug("Parliament::Tooltip::Point:: ", point);
     const x = point.series.name;
     const name = point.key;
-    const value = this.numberFormatter.format(point.y);
+    const value = this.numberFormatter.format(point.y as number);
     const color = point.color;
     const textColor = this.setting.options.tooltip?.style?.color ?? '#fff';
-    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? 'Roboto';
+    const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
     return `<div style="text-align: left; color: ${textColor}; font-family: ${fontFamily}">
                 <span>${x}</span></br>
                 <span style="color:${color}; padding-right: 5px;">●</span>${name}: <b>${value}</b>

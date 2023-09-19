@@ -8,9 +8,11 @@
           <div class="user-information">
             <span v-b-tooltip="fullName" class="full-name">{{ fullName }}</span>
             <div class="mt-1">
+              <span v-b-tooltip="userFullDetailInfo.userGroup" class="email"> {{ userFullDetailInfo.userGroup }}</span>
+              <span> - </span>
               <span v-if="isActive" class="active"> Active </span>
               <span v-else class="suspended"> Suspended </span>
-              <span class="mx-2"> - </span>
+              <span> - </span>
               <span v-b-tooltip="userFullDetailInfo.profile.email" class="email"> {{ userFullDetailInfo.profile.email }}</span>
             </div>
             <span class="created-time"> Created: {{ createdAtFormatted }} </span>

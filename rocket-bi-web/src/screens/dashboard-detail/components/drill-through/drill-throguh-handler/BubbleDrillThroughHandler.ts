@@ -4,14 +4,14 @@
  */
 
 import { DrillThroughHandler } from '@/screens/dashboard-detail/components/drill-through/drill-throguh-handler/DrillThroughHandler';
-import { ChartInfo, DynamicFilter } from '@core/common/domain';
+import { ChartInfo, InternalFilter } from '@core/common/domain';
 
 export class BubbleDrillThroughHandler extends DrillThroughHandler {
   constructor() {
     super();
   }
 
-  createFilter(metaData: ChartInfo, value: string): DynamicFilter[] {
+  createFilter(metaData: ChartInfo, value: string): InternalFilter[] {
     return [];
   }
 }

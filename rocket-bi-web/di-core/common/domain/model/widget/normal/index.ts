@@ -4,4 +4,4 @@ export * from './ImageWidget';
 export * from './LinkWidget';
 export * from './TextWidget';
 export * from './TabWidget';
-export * from './FilterPanel';
+export * from './GroupFilter';

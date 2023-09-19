@@ -116,7 +116,7 @@ import { SelectOption } from '@/shared';
 import { LegendLayoutOptions, VerticalAlignOptions } from '@/shared/settings/common/options/VerticalAlignOptions';
 import { FontFamilyOptions } from '@/shared/settings/common/options/FontFamilyOptions';
 
-import { FontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
+import { SecondaryFontSizeOptions } from '@/shared/settings/common/options/FontSizeOptions';
 import { Log } from '@core/utils';
 import { enableCss } from '@/shared/settings/common/install';
 import { ChartOption, SettingKey } from '@core/common/domain';
@@ -134,9 +134,9 @@ export default class LegendTab extends Vue {
     verticalAlign: 'bottom',
     layout: 'horizontal',
     title: '',
-    fontFamily: 'Roboto',
+    fontFamily: ChartOption.getSecondaryFontFamily(),
     align: 'center',
-    color: ChartOption.getThemeTextColor(),
+    color: ChartOption.getPrimaryTextColor(),
     fontSize: '12px',
     customHeight: false,
     maxHeight: 60,
@@ -187,7 +187,7 @@ export default class LegendTab extends Vue {
   }
 
   private get fontSizeOptions(): SelectOption[] {
-    return FontSizeOptions;
+    return SecondaryFontSizeOptions;
   }
 
   private get legendSettingStyle(): CSSStyleDeclaration {

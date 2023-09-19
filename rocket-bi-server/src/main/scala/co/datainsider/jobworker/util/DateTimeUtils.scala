@@ -1,10 +1,12 @@
 package co.datainsider.jobworker.util
 
+import co.datainsider.bi.util.DateFormatter
 import co.datainsider.jobworker.domain.RangeValue
 import com.twitter.util.logging.Logging
 import datainsider.client.exception.BadRequestError
 
 import java.sql.{Date, Timestamp}
+import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 import scala.collection.mutable.ArrayBuffer
@@ -31,6 +33,14 @@ object DateTimeUtils extends Logging {
     } catch {
       case _: Throwable => throw BadRequestError(s"unable to parse datetime from str: $dataTimeAsStr")
     }
+  }
+
+  /**
+   * Format date to string with pattern
+   */
+  def formatDate(date: Date, pattern: String = "yyyy-MM-dd"): String = {
+    val formatter = new SimpleDateFormat(pattern)
+    formatter.format(date)
   }
 
   /**
@@ -100,5 +110,10 @@ object DateTimeUtils extends Logging {
   def getToday(): Date = {
     val today: LocalDate = new Date(System.currentTimeMillis()).toLocalDate
     Date.valueOf(today)
+  }
+
+  def getNextDay(date: Date): Date = {
+    val nextDay: LocalDate = date.toLocalDate.plusDays(1)
+    Date.valueOf(nextDay)
   }
 }

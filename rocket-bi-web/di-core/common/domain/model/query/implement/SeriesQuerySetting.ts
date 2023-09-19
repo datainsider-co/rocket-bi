@@ -8,27 +8,24 @@ import {
   CrossFilterable,
   Equal,
   FieldRelatedFunction,
-  Filterable,
   Function,
   getFiltersAndSorts,
   InlineSqlView,
   OrderBy,
-  QuerySettingType,
-  SeriesChartOption,
+  QuerySettingClassName,
   TableColumn,
   WidgetId,
   Zoomable
 } from '@core/common/domain/model';
-import { clone, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { QuerySetting } from '../QuerySetting';
 import { ZoomData } from '@/shared';
 import { Drilldownable, DrilldownData } from '@core/common/domain/model/query/features/Drilldownable';
-import { ConditionUtils, Log } from '@core/utils';
-import { ListUtils } from '@/utils';
+import { ConditionUtils } from '@core/utils';
 import { ConfigDataUtils } from '@/screens/chart-builder/config-builder/config-panel/ConfigDataUtils';
 
-export class SeriesQuerySetting extends QuerySetting<SeriesChartOption> implements Zoomable, Drilldownable, CrossFilterable {
-  readonly className = QuerySettingType.Series;
+export class SeriesQuerySetting extends QuerySetting implements Zoomable, Drilldownable, CrossFilterable {
+  readonly className = QuerySettingClassName.Series;
 
   constructor(
     public xAxis: TableColumn,
@@ -66,7 +63,7 @@ export class SeriesQuerySetting extends QuerySetting<SeriesChartOption> implemen
     }
   }
 
-  getAllTableColumn(): TableColumn[] {
+  getAllTableColumns(): TableColumn[] {
     if (this.legend) {
       return [this.xAxis, ...this.yAxis, this.legend];
     } else {
@@ -113,7 +110,7 @@ export class SeriesQuerySetting extends QuerySetting<SeriesChartOption> implemen
     return this.xAxis;
   }
 
-  setDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
+  applyDynamicFunctions(functions: Map<WidgetId, TableColumn[]>): void {
     this.xAxis = ConfigDataUtils.replaceDynamicFunction(this.xAxis, functions);
     this.yAxis = ConfigDataUtils.replaceDynamicFunctions(this.yAxis, functions);
     if (this.legend) {
@@ -121,7 +118,7 @@ export class SeriesQuerySetting extends QuerySetting<SeriesChartOption> implemen
     }
   }
 
-  getFilter(): TableColumn {
+  getFilterColumn(): TableColumn {
     return this.xAxis;
   }
 

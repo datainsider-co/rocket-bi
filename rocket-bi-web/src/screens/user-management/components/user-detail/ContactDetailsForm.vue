@@ -29,6 +29,19 @@
       />
 
       <div class="gender editable-form-input">
+        <label class="editable-form-input-label">Role</label>
+        <DiDropdown
+          :id="genDropdownId('user-profile-role')"
+          :appendAtRoot="true"
+          :data="userGroupOptions"
+          class="swm-select editable-form-input-input"
+          v-model="role"
+          value-props="id"
+          label-props="displayName"
+        />
+      </div>
+
+      <div class="gender editable-form-input">
         <label class="editable-form-input-label">Gender</label>
         <DiDropdown
           :id="genDropdownId('user-profile-gender')"
@@ -41,7 +54,7 @@
       </div>
       <div class="date-of-birth editable-form-input">
         <label class="editable-form-input-label">Date of Birth</label>
-        <DiDatePicker :date.sync="dob" @input="handleChangeDateOfBirth" class="date-picker editable-form-input-input pr-2"> </DiDatePicker>
+        <DiDatePicker :date.sync="dob" @input="handleChangeDateOfBirth" class="date-picker editable-form-input-input pr-2"></DiDatePicker>
       </div>
       <EditableColumnFormInput
         :item="fixedColumn[4]"
@@ -85,7 +98,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import vuescroll from 'vuescroll';
 import EditableColumnFormInput from '@/shared/components/EditableColumnFormInput.vue';
 import { GenericColumn } from '@core/common/domain/model/column/implement/GenericColumn';
@@ -103,9 +116,9 @@ import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
 import { EditUserPropertyRequest } from '@core/admin/domain/request/EditUserPropertyRequest';
-import AddNewFieldModal from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
-import { Track } from '@/shared/anotation';
 import { Modals } from '@/utils/Modals';
+import { SelectOption } from '@/shared';
+import { UserGroup } from '@core/common/domain/model/user/UserGroup';
 
 @Component({
   components: {
@@ -165,6 +178,23 @@ export default class ContactDetailsForm extends Vue {
         value: genderItem[1]
       };
     });
+  }
+
+  private get userGroupOptions(): SelectOption[] {
+    return [
+      {
+        id: UserGroup.Editor,
+        displayName: 'Editor'
+      },
+      {
+        id: UserGroup.Viewer,
+        displayName: 'Viewer'
+      }
+      // {
+      //   id: UserGroup.Editor,
+      //   displayName: 'Editor'
+      // }
+    ];
   }
 
   private get userFullDetailInfo() {
@@ -383,6 +413,17 @@ export default class ContactDetailsForm extends Vue {
   // private handleAddNewField() {
   //   this.addNewFieldModal.show();
   // }
+
+  private get role(): UserGroup {
+    return this.userFullDetailInfo?.userGroup ?? UserGroup.None;
+  }
+
+  private set role(role: UserGroup) {
+    const username = this.userFullDetailInfo?.user.username ?? '';
+    UserDetailModule.updateRole({ username: username, role: role }).catch(ex => {
+      PopupUtils.showError(ex.message);
+    });
+  }
 }
 </script>
 
@@ -447,11 +488,13 @@ export default class ContactDetailsForm extends Vue {
       align-items: center;
       $padding-x: 16px;
       padding: #{10px $padding-x};
+
       & > .input-group,
       & > input {
         width: calc(100% + #{$padding-x * 2});
         margin: 0 #{-$padding-x};
       }
+
       & > input {
         padding-left: $padding-x;
         background: transparent;
@@ -460,6 +503,7 @@ export default class ContactDetailsForm extends Vue {
           box-shadow: none;
         }
       }
+
       span {
         margin-left: 0;
         font-size: 14px;
@@ -518,9 +562,11 @@ export default class ContactDetailsForm extends Vue {
 
 .date-picker {
   cursor: pointer;
+
   ::v-deep {
     .input-container {
       width: 100%;
+
       .input-calendar {
         padding-left: 0;
         margin-right: -12px;

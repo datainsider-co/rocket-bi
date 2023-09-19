@@ -69,7 +69,7 @@ import { Job } from '@core/data-ingestion/domain/job/Job';
 import { JobModule } from '@/screens/data-ingestion/store/JobStore';
 import { FormMode } from '@core/data-ingestion/domain/job/FormMode';
 import { DatabaseCreateRequest, DIException } from '@core/common/domain';
-import { AtomicAction } from '@/shared/anotation/AtomicAction';
+import { AtomicAction } from '@core/common/misc';
 import { JobType } from '@core/data-ingestion';
 import 'vuescroll/dist/vuescroll.css';
 import { ApiExceptions, Status, VerticalScrollConfigs } from '@/shared';
@@ -210,6 +210,7 @@ export default class JobConfigModal extends Vue {
     EventBus.offDestDatabaseNameChange(this.handleDestinationDbChanged);
   }
 
+  @AtomicAction()
   private async handleClickOk(e: BvEvent) {
     try {
       e.preventDefault();

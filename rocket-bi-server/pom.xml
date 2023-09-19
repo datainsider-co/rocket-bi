@@ -386,6 +386,13 @@
             <version>v4-rev612-1.25.0</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-searchconsole -->
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-searchconsole</artifactId>
+            <version>v1-rev20230701-2.0.0</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.amazon.redshift/redshift-jdbc42-no-awssdk -->
         <dependency>
             <groupId>com.amazon.redshift</groupId>

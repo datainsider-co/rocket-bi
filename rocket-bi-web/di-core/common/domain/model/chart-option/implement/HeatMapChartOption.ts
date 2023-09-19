@@ -4,7 +4,7 @@
  */
 
 import { ChartOption } from '@core/common/domain/model/chart-option/ChartOption';
-import { ChartFamilyType, SeriesOptionData, ChartOptionData, VizSettingType } from '@core/common/domain/model';
+import { ChartOptionClassName, ChartOptionData, SeriesOptionData } from '@core/common/domain/model';
 
 export class HeatMapChartOption extends ChartOption<SeriesOptionData> {
   static readonly DEFAULT_SETTING = {
@@ -26,8 +26,8 @@ export class HeatMapChartOption extends ChartOption<SeriesOptionData> {
       tickLength: 0
     }
   };
-  chartFamilyType = ChartFamilyType.HeatMap;
-  className = VizSettingType.HeatMapSetting;
+
+  className = ChartOptionClassName.HeatMapSetting;
 
   constructor(options: ChartOptionData = {}) {
     super(options);
@@ -38,48 +38,30 @@ export class HeatMapChartOption extends ChartOption<SeriesOptionData> {
   }
 
   static getDefaultChartOption(): HeatMapChartOption {
-    const textColor: string = this.getThemeTextColor();
+    const textColor: string = this.getPrimaryTextColor();
     const options: SeriesOptionData = {
       legend: {
         enabled: true,
         verticalAlign: 'bottom',
         layout: 'horizontal',
-        itemStyle: {
-          color: textColor
-        },
         title: {
           text: '',
-          enabled: true,
-          style: {
-            color: textColor
-          }
+          enabled: true
         }
       },
       colorAxis: {
-        minColor: '#F2E8D6',
-        maxColor: '#FFAC05',
-        noneColor: '#F2E8D6'
-      },
-      title: {
-        align: 'center',
-        enabled: true,
-        text: 'Untitled chart',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '20px'
+        minColor: '#D4DDFD',
+        maxColor: '#4E73F8',
+        noneColor: '#F2E8D6',
+        labels: {
+          style: {
+            color: '#808491',
+            fontSize: '14px'
+          }
         }
       },
-      subtitle: {
-        align: 'center',
-        enabled: true,
-        text: '',
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto',
-          fontSize: '11px'
-        }
-      },
+      title: ChartOption.getDefaultTitle({ align: 'left', fontSize: '16px' }),
+      subtitle: ChartOption.getDefaultSubtitle({ align: 'left', fontSize: '14px' }),
       affectedByFilter: true,
       background: this.getThemeBackgroundColor(),
       plotOptions: {
@@ -89,34 +71,37 @@ export class HeatMapChartOption extends ChartOption<SeriesOptionData> {
           // marker: {
           //   enabled: true
           // },
+          pointPadding: 1,
+          borderRadius: 3,
+          borderWidth: 0,
           dataLabels: {
             enabled: false,
             style: {
-              color: textColor,
-              fontSize: '11px',
-              fontFamily: 'Roboto'
+              ...ChartOption.getSecondaryStyle(),
+              fontSize: '11px'
             }
           }
         }
       },
       tooltip: {
         backgroundColor: this.getTooltipBackgroundColor(),
-        style: {
-          color: textColor,
-          fontFamily: 'Roboto'
-        }
+        style: ChartOption.getSecondaryStyle()
       },
       xAxis: [
         {
           visible: true,
+          lineColor: 'transparent',
+          gridLineColor: 'transparent',
           labels: {
             style: {
-              color: textColor
+              color: '#808491',
+              fontSize: '14px'
             }
           },
           title: {
             style: {
-              color: textColor
+              color: textColor,
+              fontSize: '14px'
             },
             text: '',
             enabled: true
@@ -126,9 +111,11 @@ export class HeatMapChartOption extends ChartOption<SeriesOptionData> {
       yAxis: [
         {
           visible: true,
+          gridLineColor: 'transparent',
           labels: {
             style: {
-              color: textColor
+              color: '#808491',
+              fontSize: '14px'
             }
           },
           title: {
