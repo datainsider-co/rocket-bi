@@ -69,7 +69,7 @@ class Server extends HttpServer {
 
   override def modules: Seq[Module] =
     Seq(
-      LicenseClientModule,
+      MockLicenseClientModule,
       // bi-service modules
       BIServiceModule,
       ShareModule,

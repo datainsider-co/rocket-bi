@@ -73,8 +73,8 @@ class MockLicenseRepository extends LicenseRepository {
           PermissionKeys.GoogleOAuth -> GoogleOAuthPermission(isActive = true, saasDefaultTimeRange),
           PermissionKeys.LogoAndCompanyName -> LogoAndCompanyNamePermission(isActive = true, saasDefaultTimeRange),
           PermissionKeys.DashboardPassword -> DashboardPasswordPermission(isActive = true, saasDefaultTimeRange),
-          PermissionKeys.NumViewers -> NumViewersPermission(maxNumViewers = 10, validTimeRange = saasDefaultTimeRange),
-          PermissionKeys.NumEditors -> NumEditorsPermission(maxNumEditors = 10, validTimeRange = saasDefaultTimeRange),
+          PermissionKeys.NumViewers -> NumViewersPermission(maxNumViewers = 100, validTimeRange = saasDefaultTimeRange),
+          PermissionKeys.NumEditors -> NumEditorsPermission(maxNumEditors = 100, validTimeRange = saasDefaultTimeRange),
           PermissionKeys.Saas -> SaasPermission(isActive = true, validTimeRange = saasDefaultTimeRange)
         ),
         licenseType = LicenseType.Saas,
