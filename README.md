@@ -146,7 +146,7 @@ For contribution guidelines, see [contributing](/contributing.md).
 
 ### Questions? Problems? Suggestions?
 
-* To report a bug or request a feature, create a
+* To report a bug or request a feature, create an
   [Issue](https://github.com/datainsider-co/rocket-bi/issues/new). Please make it easy for people to reproduce your
   issue.
 
