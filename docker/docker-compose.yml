@@ -16,7 +16,7 @@ services:
     restart: always
 
   rocket-bi-server:
-    image: datainsiderco/rocket-bi-server:main
+    image: datainsiderco/rocket-bi-server:latest
     container_name: rocket-bi-server
     restart: always
     environment:
@@ -30,7 +30,7 @@ services:
       - ssdb
 
   rocket-bi-web:
-    image: datainsiderco/rocket-bi-web:main
+    image: datainsiderco/rocket-bi-web:latest
     container_name: rocket-bi-web
     restart: always
 
