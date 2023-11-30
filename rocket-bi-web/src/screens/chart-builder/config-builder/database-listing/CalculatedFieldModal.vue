@@ -97,7 +97,7 @@
           </div>
         </template>
       </div>
-      <div class="col-3 syntax-detail">
+      <div class="col-3 syntax-detail di-scroll-bar">
         <template v-if="currentFunction">
           <div class="title">
             <h3 class="mt-2">
@@ -105,15 +105,14 @@
             </h3>
           </div>
           <div class="mt-2 syntax-description">
-            <vuescroll>
-              <h5>
-                {{ currentFunction.description }}
-              </h5>
-              <template v-if="currentFunction.example">
-                <h4>Example:</h4>
-                <code class="example">{{ currentFunction.example }}</code>
-              </template>
-            </vuescroll>
+            <h5 v-if="currentFunction.description">
+              {{ currentFunction.description }}
+            </h5>
+            <h5 v-else><i>No information available</i></h5>
+            <template v-if="currentFunction.example">
+              <h4>Example:</h4>
+              <code class="example">{{ currentFunction.example }}</code>
+            </template>
           </div>
         </template>
       </div>
@@ -134,7 +133,7 @@ import DataListing from '@/screens/dashboard-detail/components/widget-container/
 import { FormulaSuggestionModule, FunctionInfo } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
 import FormulaCompletionInput from '@/shared/components/formula-completion-input/FormulaCompletionInput.vue';
 import { Log } from '@core/utils';
-import { FormulaController } from '@/shared/fomula/FormulaController';
+import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
 import { CalculatedFieldController } from '@/shared/fomula/CalculatedFieldController';
 import { CalculatedFieldModalMode, CreateFieldData, EditFieldData } from '@/screens/chart-builder/config-builder/database-listing/CalculatedFieldData';
 import { AtomicAction } from '@core/common/misc';
@@ -147,7 +146,8 @@ import { DataManager } from '@core/common/services';
 import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
 import { ConnectorType } from '@core/connector-config';
 import { Di } from '@core/common/modules';
-import { FormulaControllerResolver } from '@/shared/fomula/builder/FormulaControllerResolver';
+import { FormulaControllerFactoryResolver } from '@/shared/fomula/builder/FormulaControllerFactoryResolver';
+import { FormulaControllerFactory } from '@/shared/fomula/builder/FormulaControllerFactory';
 
 @Component({
   components: {
@@ -161,38 +161,38 @@ import { FormulaControllerResolver } from '@/shared/fomula/builder/FormulaContro
   }
 })
 export default class CalculatedFieldModal extends Vue {
-  private readonly ALL_SUPPORTED_FUNCTION = 'All';
-  private isModalShowing = false;
-  private tableSchema!: TableSchema;
-  private displayName = '';
-  private formula = '';
-  private editingColumn?: Column;
-  private isLoading = false;
+  protected readonly ALL_SUPPORTED_FUNCTION = 'All';
+  protected isModalShowing = false;
+  protected tableSchema!: TableSchema;
+  protected displayName = '';
+  protected formula = '';
+  protected editingColumn?: Column;
+  protected isLoading = false;
 
-  private messageError = '';
-  private supportedFunctionSelected = this.ALL_SUPPORTED_FUNCTION;
-  private currentFunction: FunctionInfo | null = null;
-  private formulaController: FormulaController | null = null;
+  protected messageError = '';
+  protected supportedFunctionSelected = this.ALL_SUPPORTED_FUNCTION;
+  protected currentFunction: FunctionInfo | null = null;
+  protected formulaController: MonacoFormulaController | null = null;
 
-  private mode = CalculatedFieldModalMode.Create;
+  protected mode = CalculatedFieldModalMode.Create;
 
-  private isCalculatedField = true;
-
-  @Ref()
-  private readonly formulaInput?: HTMLInputElement;
+  protected isCalculatedField = true;
 
   @Ref()
-  private readonly displayNameInput?: HTMLInputElement;
+  protected readonly formulaInput?: HTMLInputElement;
 
-  private get isEditMode(): boolean {
+  @Ref()
+  protected readonly displayNameInput?: HTMLInputElement;
+
+  protected get isEditMode(): boolean {
     return this.mode == CalculatedFieldModalMode.Edit;
   }
 
-  private get isCreateMode(): boolean {
+  protected get isCreateMode(): boolean {
     return this.mode == CalculatedFieldModalMode.Create;
   }
 
-  private get supportedFunctions(): SelectOption[] {
+  protected get supportedFunctions(): SelectOption[] {
     const supportedFunctions = FormulaSuggestionModule.supportedFunctionNames
       .map((name, index) => {
         return { id: index, displayName: name, data: name };
@@ -202,7 +202,7 @@ export default class CalculatedFieldModal extends Vue {
     return [allFunctions, ...supportedFunctions];
   }
 
-  private get listingFunctions(): FunctionInfo[] {
+  protected get listingFunctions(): FunctionInfo[] {
     if (this.supportedFunctionSelected === this.ALL_SUPPORTED_FUNCTION) {
       return FormulaSuggestionModule.allFunctions;
     } else {
@@ -210,7 +210,7 @@ export default class CalculatedFieldModal extends Vue {
     }
   }
 
-  private get hasError(): boolean {
+  protected get hasError(): boolean {
     return !!this.messageError;
   }
 
@@ -250,7 +250,7 @@ export default class CalculatedFieldModal extends Vue {
     this.isModalShowing = false;
   }
 
-  private initFormula(tableSchema: TableSchema, column: Column, isCalculatedField: boolean) {
+  protected initFormula(tableSchema: TableSchema, column: Column, isCalculatedField: boolean) {
     if (isCalculatedField) {
       this.formula = this.parseFormula(tableSchema, column);
       this.displayName = column.displayName;
@@ -262,7 +262,7 @@ export default class CalculatedFieldModal extends Vue {
     }
   }
 
-  private parseFormula(tableSchema: TableSchema, column: Column): string {
+  protected parseFormula(tableSchema: TableSchema, column: Column): string {
     try {
       const expression: string = column.defaultExpression?.expr ?? '';
       return ExpressionParser.bindDisplayNameOfSchema(tableSchema, expression);
@@ -272,24 +272,17 @@ export default class CalculatedFieldModal extends Vue {
     }
   }
 
-  private initSuggestion(tableSchema: TableSchema, isCalculatedField: boolean) {
-    const sourceType: ConnectorType = ConnectionModule.source?.className ?? ConnectorType.Clickhouse;
-    const syntax = Di.get(FormulaControllerResolver).getSyntax(sourceType);
-    const ignoredFunctions: string[] = this.isCalculatedField ? ['Keyword'] : [];
-    FormulaSuggestionModule.initSuggestFunction({
-      fileNames: [syntax],
-      ignoreFunctions: ignoredFunctions
+  protected initSuggestion(tableSchema: TableSchema, isCalculatedField: boolean) {
+    const factory: FormulaControllerFactory = Di.get(FormulaControllerFactoryResolver).resolve(ConnectionModule.sourceType);
+    FormulaSuggestionModule.loadSuggestions({
+      supportedFunctionInfo: factory.getSupportedFunctionInfo(),
+      ignoreFunctions: this.isCalculatedField ? ['Keyword'] : []
     });
     FormulaSuggestionModule.setTableSchema(tableSchema);
-    const formulaHandler = Di.get(FormulaControllerResolver);
     if (isCalculatedField) {
-      this.formulaController = formulaHandler.createCalculatedFieldController(
-        sourceType,
-        FormulaSuggestionModule.allFunctions,
-        FormulaSuggestionModule.columns
-      );
+      this.formulaController = factory.createCalculatedFieldController(FormulaSuggestionModule.allFunctions, FormulaSuggestionModule.columns);
     } else {
-      this.formulaController = formulaHandler.createMeasurementController(sourceType, FormulaSuggestionModule.allFunctions, tableSchema);
+      this.formulaController = factory.createMeasureFieldController(FormulaSuggestionModule.allFunctions, tableSchema);
     }
 
     this.$nextTick(() => {
@@ -298,7 +291,7 @@ export default class CalculatedFieldModal extends Vue {
     });
   }
 
-  private resetData(): void {
+  protected resetData(): void {
     this.displayName = '';
     this.editingColumn = void 0;
     this.formula = '';
@@ -307,7 +300,7 @@ export default class CalculatedFieldModal extends Vue {
     this.$v.$reset();
   }
 
-  private isValidField(): boolean {
+  protected isValidField(): boolean {
     this.$v.$touch();
     return !this.$v.$error;
   }
@@ -319,7 +312,7 @@ export default class CalculatedFieldModal extends Vue {
     expression: (_: CalculatedFieldModal) => ExpressionParser.parse(new RawExpressionData(_.formula, _.tableSchema))
   })
   @AtomicAction()
-  private async createCalculatedField(): Promise<void> {
+  protected async createCalculatedField(): Promise<void> {
     Log.debug('createCalculatedField::');
     if (!this.isLoading && this.isValidField()) {
       try {
@@ -348,7 +341,7 @@ export default class CalculatedFieldModal extends Vue {
     expression: (_: CalculatedFieldModal) => ExpressionParser.parse(new RawExpressionData(_.formula, _.tableSchema))
   })
   @AtomicAction()
-  private async editCalculatedField(): Promise<void> {
+  protected async editCalculatedField(): Promise<void> {
     if (!this.isLoading && this.isValidField() && this.editingColumn) {
       try {
         this.showLoading(true);
@@ -369,7 +362,7 @@ export default class CalculatedFieldModal extends Vue {
     }
   }
 
-  private handleException(ex: any): void {
+  protected handleException(ex: any): void {
     this.showLoading(false);
     Log.debug('handleException::', ex);
     // be careful: instanceof not working!!
@@ -380,23 +373,23 @@ export default class CalculatedFieldModal extends Vue {
     }
   }
 
-  private showFormulaError(ex: FormulaException) {
+  protected showFormulaError(ex: FormulaException) {
     this.messageError = ex.message;
   }
 
-  private showNormalError(ex: DIException) {
+  protected showNormalError(ex: DIException) {
     this.messageError = ex.message ?? 'Something went wrong';
   }
 
-  private showDescription(functionInfo: FunctionInfo): void {
+  protected showDescription(functionInfo: FunctionInfo): void {
     this.currentFunction = functionInfo;
   }
 
-  private showLoading(isLoading: boolean) {
+  protected showLoading(isLoading: boolean) {
     this.isLoading = isLoading;
   }
 
-  private handleSelectKeyword(keyword: string): void {
+  protected handleSelectKeyword(keyword: string): void {
     const isDiffFunction = this.currentFunction?.title !== keyword;
     if (isDiffFunction) {
       const functionInfo: FunctionInfo | undefined = FormulaSuggestionModule.getFunctionInfo(keyword);
@@ -407,7 +400,7 @@ export default class CalculatedFieldModal extends Vue {
   }
 
   @AtomicAction()
-  private async createMeasurementField(): Promise<void> {
+  protected async createMeasurementField(): Promise<void> {
     Log.debug('createMeasurementField::');
     if (!this.isLoading && this.isValidField()) {
       try {
@@ -430,7 +423,7 @@ export default class CalculatedFieldModal extends Vue {
   }
 
   @AtomicAction()
-  private async editMeasurementField(): Promise<void> {
+  protected async editMeasurementField(): Promise<void> {
     if (!this.isLoading && this.isValidField() && this.editingColumn) {
       try {
         this.showLoading(true);
@@ -452,7 +445,7 @@ export default class CalculatedFieldModal extends Vue {
     }
   }
 
-  private get isTestAccount(): boolean {
+  protected get isTestAccount(): boolean {
     return DataManager.isTestAccount();
   }
 }
@@ -507,6 +500,8 @@ export default class CalculatedFieldModal extends Vue {
       display: flex;
       flex-direction: column;
       background-color: var(--editor-color);
+      // don't use overflow in here, cause suggestion popup will be hidden
+      //overflow: hidden;
 
       .padding-top {
         background-color: var(--editor-color);
@@ -575,8 +570,20 @@ export default class CalculatedFieldModal extends Vue {
     }
 
     .syntax-detail {
+      max-height: 550px;
+      overflow: auto;
+      //overflow: hidden;
+
+      @media (max-width: 1199.98px) {
+        max-height: 390px;
+      }
+
+      @media (min-width: 1200px) and (max-width: 1600px) {
+        height: 450px;
+      }
+
       .title {
-        height: 40px;
+        //height: 40px;
 
         h3 {
           @include bold-text();
@@ -586,17 +593,6 @@ export default class CalculatedFieldModal extends Vue {
       }
 
       .syntax-description {
-        max-height: 510px;
-
-        overflow: scroll;
-
-        @media (max-width: 1199.98px) {
-          max-height: 350px;
-        }
-
-        @media (min-width: 1200px) and (max-width: 1600px) {
-          height: 410px;
-        }
         @include regular-text-14();
 
         h4 {

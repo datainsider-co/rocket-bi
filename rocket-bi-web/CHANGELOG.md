@@ -1,5 +1,67 @@
 # CHANGELOG
 
+### v23.11.30 2023-11-30
+
+#### Bug Fixes
+
+- KPI not show comparison
+- Number Chart with previous day and today comparison incorrect
+
+### v23.11.17 2023-11-17
+
+#### New Features
+
+- [Ingestion] Support ingest data from mixpanel
+- Add menu icon in dashboard, mydata
+
+#### Enhancements
+
+- [Ingestion] Support ingest data from google search console
+- [Dashboard] Support interactive chart in edit mode
+- [Ingestion] Upgrade version google ads api
+- [DataCook] Add Track Activities In Controller
+
+#### Bug Fixes
+
+- [Ingestion] Ga4 Bug cannot refresh access token
+- [Ingestion] Shopify connector error cause upgrade api version
+- [Ingestion] Add Data source: Oracle pop-up overlap outer content
+- [Relationship] show confirm popup within saved
+- [ChartBuilder] Right-click change date function not showing up within enable change date function.
+- [Dashboard] Chart filter not working for specific tab
+
+### v23.10.20 2023-10-20
+
+#### Enhancements
+
+- [Ingestion] Add error message when test connection failure
+
+#### Bug Fixes
+
+- [User Management] Add missing permission for Ingestion, DataCook
+- [ChartBuilder] Wrong hint placeholder for prefix, suffix input
+- [Query Analysis] Cannot suggestion syntax for mysql, vertica
+- [Data Warehouse] Bug when add column in create table
+- [Query Analysis] Incorrect format of date in custom params
+
+### v23.10.06 2023-10-06
+
+#### Enhancements
+
+- [DataSource Config] Update UX Add Custom Properties
+- [Ingestion] Remove config `GOOGLE_API_KEY` in client
+
+#### Bug Fixes
+
+- [Ingestion] Incorrect date format of google ads, google analytics
+
+### v23.09.28 2023-09-28
+
+#### New Features
+
+- [DataSource] Allow skip config data source
+- [Dashboard] Support auto refresh dashboard with interval time
+
 ### v23.09.18 2023-09-18
 
 #### New Features

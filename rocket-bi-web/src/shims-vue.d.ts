@@ -2,7 +2,6 @@ declare module '*.vue' {
   import Vue from 'vue';
   export default Vue;
 }
-declare module 'vue-responsive';
 declare module 'v-click-outside';
 declare module 'nprogress';
 declare module 'vue2-highcharts';

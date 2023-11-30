@@ -82,7 +82,7 @@
             <div v-if="!isMobile" class="d-flex align-items-center">
               <template v-if="isRLSViewMode">
                 <div class="rls-actions d-flex align-items-center">
-                  <DiButton title="Edit RLS" @click="changeViewMode(7)">
+                  <DiButton title="Edit RLS" @click="switchViewMode(7)">
                     <i class="di-icon-edit"></i>
                   </DiButton>
                   <DiIconTextButton id="schema-action" title="Action" @click="showActionMenu">
@@ -105,7 +105,7 @@
                   :id="genBtnId('edit-mode')"
                   class="mr-2 d-none d-sm-flex"
                   title="Edit"
-                  @click="changeViewMode(2)"
+                  @click="switchViewMode(2)"
                 >
                   <i class="di-icon-edit icon-title"></i>
                 </DiIconTextButton>

@@ -5,3 +5,4 @@ export * from './csv';
 export * from './ClientBuilder';
 export * from './CsvExporter';
 export * from './QueryResponseConverter';
+export * from './RecurringMethodExecutor';

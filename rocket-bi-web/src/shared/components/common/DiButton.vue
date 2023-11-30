@@ -16,28 +16,28 @@ import { AtomicAction } from '@core/common/misc';
 @Component
 export default class DiButton extends Vue {
   @Prop({ default: '', type: String })
-  private readonly title?: string;
+  protected readonly title?: string;
 
   @Prop({ default: '', type: String })
-  private readonly placeholder!: string;
+  protected readonly placeholder!: string;
 
   @Prop({ default: '', type: String })
-  private readonly textStyle?: string;
+  protected readonly textStyle?: string;
 
   @Prop({ default: false, type: Boolean })
-  private readonly isDisable!: boolean;
+  protected readonly isDisable!: boolean;
 
   @Prop({ required: false, type: String })
-  private readonly id!: string;
+  protected readonly id!: string;
 
   @Prop({ required: false, type: Boolean })
-  private readonly isLoading!: boolean;
+  protected readonly isLoading!: boolean;
 
   /**
    * align text in button (left, center, right)
    */
   @Prop({ required: false, type: String, default: 'center' })
-  private readonly align!: string;
+  protected readonly align!: string;
 
   protected get justifyContentClass(): string {
     switch (this.align) {
@@ -54,7 +54,7 @@ export default class DiButton extends Vue {
     return !this.textStyle ? 'regular-text-14 flex-shrink-1 ' : 'flex-shrink-1 ' + this.textStyle;
   }
 
-  private get btnStyle(): CSSStyleDeclaration {
+  protected get btnStyle(): CSSStyleDeclaration {
     if (this.isDisable) {
       return {
         opacity: 0.5,
@@ -161,6 +161,10 @@ export default class DiButton extends Vue {
 
   &[border-accent] {
     border: solid var(--accent) 1px !important;
+    color: var(--accent) !important;
+  }
+
+  &[text-accent] {
     color: var(--accent) !important;
   }
 }

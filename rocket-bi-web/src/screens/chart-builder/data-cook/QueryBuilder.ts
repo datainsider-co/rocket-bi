@@ -3,27 +3,28 @@
  * @created: 6/3/21, 5:16 PM
  */
 
-import { Component, Emit, Prop, Provide, Ref, Vue, Watch } from 'vue-property-decorator';
+import { Component, Emit, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
 import BuilderComponents from '@/shared/components/builder';
 import DatabaseListing from '@/screens/chart-builder/config-builder/database-listing/DatabaseListing.vue';
 import { DatabaseInfo, Field, TableSchema } from '@core/common/domain/model';
 import QueryComponent from '@/screens/data-management/components/QueryComponent.vue';
 import QueryComponentCtrl from '@/screens/data-management/components/QueryComponent.ts';
-import { FormulaController } from '@/shared/fomula/FormulaController';
-import { FormulaSuggestionModule } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
-import { EtlQueryFormulaController } from '@/shared/fomula/EtlQueryFormulaController';
+import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
+import { FormulaSuggestionModule, SupportedFunctionInfo } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
 import { StringUtils } from '@/utils/StringUtils';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 import { FormulaUtils } from '@/shared/fomula/FormulaUtils';
 import { EditorController } from '@/shared/fomula/EditorController';
 import { DatabaseListingMode } from '@/screens/chart-builder/config-builder/database-listing/DatabaseListing';
 import { EtlQueryLanguages } from '@core/data-cook';
-import DiButtonGroup, { ButtonInfo } from '@/shared/components/common/DiButtonGroup.vue';
-import Swal from 'sweetalert2';
+import DiButtonGroup from '@/shared/components/common/DiButtonGroup.vue';
 import { PythonFormulaController } from '@/shared/fomula/python/PythonFormulaController';
 import { Log } from '@core/utils';
-import { ListUtils } from '@/utils';
+import { PopupUtils } from '@/utils';
+import { Di } from '@core/common/modules';
+import { FormulaControllerFactoryResolver } from '@/shared/fomula/builder/FormulaControllerFactoryResolver';
+import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
 
 Vue.use(BuilderComponents);
 @Component({
@@ -34,29 +35,29 @@ Vue.use(BuilderComponents);
   }
 })
 export default class QueryBuilder extends Vue {
-  private isDragging = false;
-  private controller: FormulaController | null = null;
-  private defaultQuery = '';
-  private readonly DatabaseListingMode = DatabaseListingMode;
+  protected isDragging = false;
+  protected controller: MonacoFormulaController | null = null;
+  protected defaultQuery = '';
+  protected readonly DatabaseListingMode = DatabaseListingMode;
 
-  private readonly editorController = new EditorController();
+  protected readonly editorController = new EditorController();
 
   @Prop({ required: true, type: Object })
-  private readonly databaseSchema!: DatabaseInfo;
+  protected readonly databaseSchema!: DatabaseInfo;
 
   @Prop({ required: false, type: String, default: '' })
-  private readonly query?: string;
-  @Prop({ required: false, type: String, default: EtlQueryLanguages.ClickHouse })
-  private readonly queryLanguage!: EtlQueryLanguages;
+  protected readonly query?: string;
+  @Prop({ required: false, type: String, default: EtlQueryLanguages.SQL })
+  protected readonly queryLanguage!: EtlQueryLanguages;
 
   @Prop({ required: false, type: Boolean, default: true })
-  private readonly showParameter!: boolean;
+  protected readonly showParameter!: boolean;
 
   @Ref()
-  private readonly queryComponent!: QueryComponentCtrl;
+  protected readonly queryComponent!: QueryComponentCtrl;
 
   @Ref()
-  private readonly buttonGroup!: DiButtonGroup;
+  protected readonly buttonGroup!: DiButtonGroup;
 
   created() {
     this.initFormulaController(this.databaseSchema, this.queryLanguage);
@@ -76,7 +77,7 @@ export default class QueryBuilder extends Vue {
     this.defaultQuery = this.removeDatabase(this.query ?? '', this.databaseSchema.name);
   }
 
-  private removeDatabase(query: string, dbName: string): string {
+  protected removeDatabase(query: string, dbName: string): string {
     const newQuery: string = query.replaceAll(new RegExp(`(?:\\b${dbName}.\\b)|(?:\`${dbName}\`.)`, 'gm'), '');
     return newQuery;
   }
@@ -85,47 +86,50 @@ export default class QueryBuilder extends Vue {
     DatabaseSchemaModule.removeDatabaseInfo(this.databaseSchema.name);
   }
 
-  private autoSelectTable(): void {
+  protected autoSelectTable(): void {
     _BuilderTableSchemaStore.setDbNameSelected(this.databaseSchema.name);
     _BuilderTableSchemaStore.setDatabaseSchema(this.databaseSchema);
     _BuilderTableSchemaStore.expandFirstTable();
   }
 
   @Emit('onCancel')
-  private async handleCancel() {
+  protected async handleCancel() {
     return true;
   }
 
-  private initFormulaController(database: DatabaseInfo, queryLanguage: EtlQueryLanguages): void {
-    const syntaxPathFile: string = this.getSyntaxPath(queryLanguage);
-    FormulaSuggestionModule.initSuggestFunction({
-      fileNames: StringUtils.isNotEmpty(syntaxPathFile) ? [syntaxPathFile] : []
+  protected initFormulaController(database: DatabaseInfo, queryLanguage: EtlQueryLanguages): void {
+    switch (queryLanguage) {
+      case EtlQueryLanguages.SQL:
+        this.initSqlFormulaController(database);
+        break;
+      case EtlQueryLanguages.Python:
+        this.initPythonFormulaController(database);
+        break;
+      default:
+        Log.error('Not support query language');
+        PopupUtils.showError(`Not support query language ${queryLanguage}`);
+    }
+  }
+
+  protected initSqlFormulaController(database: DatabaseInfo): void {
+    const factory = Di.get(FormulaControllerFactoryResolver).resolve(ConnectionModule.sourceType);
+    FormulaSuggestionModule.loadSuggestions({
+      supportedFunctionInfo: factory.getSupportedFunctionInfo()
     });
-    this.controller = this.getFormulaController(queryLanguage, [database]);
+    this.controller = factory.createFormulaController(FormulaSuggestionModule.allFunctions, [database]);
   }
 
-  private getFormulaController(queryLanguage: EtlQueryLanguages, databases: DatabaseInfo[]): FormulaController {
-    switch (queryLanguage) {
-      case EtlQueryLanguages.ClickHouse:
-        return new EtlQueryFormulaController(FormulaSuggestionModule.allFunctions, databases);
-      case EtlQueryLanguages.Python:
-        return new PythonFormulaController(databases);
-    }
-  }
-
-  private getSyntaxPath(queryLanguage: EtlQueryLanguages): string {
-    switch (queryLanguage) {
-      case EtlQueryLanguages.ClickHouse:
-        return 'clickhouse-syntax.json';
-      case EtlQueryLanguages.Python:
-        return '';
-    }
+  protected initPythonFormulaController(database: DatabaseInfo): void {
+    FormulaSuggestionModule.loadSuggestions({
+      supportedFunctionInfo: SupportedFunctionInfo.empty()
+    });
+    this.controller = new PythonFormulaController([database]);
   }
 
   /**
    * add database name to query if not exist
    */
-  private convertQuery(query: string): string {
+  protected convertQuery(query: string): string {
     let newQuery = query ?? '';
     this.databaseSchema.tables.forEach(table => {
       newQuery = FormulaUtils.toETLQuery(newQuery, table.dbName, table.name);
@@ -137,19 +141,19 @@ export default class QueryBuilder extends Vue {
     return this.queryComponent.currentQuery;
   }
 
-  private handleClickField(field: Field) {
+  protected handleClickField(field: Field) {
     const query = FormulaUtils.toQuery(field.fieldName);
     this.editorController.appendText(query);
   }
 
-  private handleClickTable(table: TableSchema) {
+  protected handleClickTable(table: TableSchema) {
     const query = FormulaUtils.toQuery(table.dbName, table.name);
     this.editorController.appendText(query);
   }
 
-  private getDisplayName(language: EtlQueryLanguages): string {
+  protected getDisplayName(language: EtlQueryLanguages): string {
     switch (language) {
-      case EtlQueryLanguages.ClickHouse:
+      case EtlQueryLanguages.SQL:
         return 'Query';
       case EtlQueryLanguages.Python:
         return 'Python';

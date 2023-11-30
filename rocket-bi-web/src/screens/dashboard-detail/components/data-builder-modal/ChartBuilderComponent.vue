@@ -36,21 +36,21 @@ import { cloneDeep } from 'lodash';
   }
 })
 export default class ChartBuilderComponent extends Vue {
-  private showChartTypeSelectionModal = false;
+  protected showChartTypeSelectionModal = false;
   ///Sử dụng khi add một Inner Filter cho 1 Widget
-  private parentChartInfo: ChartInfo | null = null;
+  protected parentChartInfo: ChartInfo | null = null;
   @Ref()
-  private readonly chartBuilderModal?: ChartBuilderModal;
+  protected readonly chartBuilderModal?: ChartBuilderModal;
 
-  private visualizationItems: VisualizationItemData[] = [];
+  protected visualizationItems: VisualizationItemData[] = [];
 
-  private callBack: ((chartInfo: ChartInfo) => Promise<void>) | null = null;
+  protected callBack: ((chartInfo: ChartInfo) => Promise<void>) | null = null;
 
-  private cancelCallBack: (() => void) | null = null;
+  protected cancelCallBack: (() => void) | null = null;
 
-  private options: TChartBuilderOptions | null = null;
+  protected options: TChartBuilderOptions | null = null;
 
-  private get filterItems(): VisualizationItemData[] {
+  protected get filterItems(): VisualizationItemData[] {
     return [...DataBuilderConstantsV35.ALL_INNER_FILTERS].filter(item => !item.isHidden);
   }
 
@@ -135,7 +135,7 @@ export default class ChartBuilderComponent extends Vue {
   }
 
   @Track(TrackEvents.SelectChartType, { chart_type: (_: ChartBuilderComponent, args: any) => args[0].type })
-  private onChartTypeChanged(visualizationItemData: VisualizationItemData) {
+  protected onChartTypeChanged(visualizationItemData: VisualizationItemData) {
     this.showChartTypeSelectionModal = false;
     Log.debug('onChartTypeChanged::', visualizationItemData);
     _ConfigBuilderStore.setItemSelected(visualizationItemData);
@@ -150,18 +150,16 @@ export default class ChartBuilderComponent extends Vue {
         ///Execute Call back
         if (this.callBack) {
           return this.callBack(widget);
-        } else {
-          return this.handleAddChart(widget);
         }
       }, this.options);
     }
   }
 
-  private async handleAddChart(chartInfo: ChartInfo): Promise<void> {
-    await DashboardModule.addNewChart({ chartInfo: chartInfo });
-  }
+  // protected async handleAddChart(chartInfo: ChartInfo): Promise<void> {
+  //   await DashboardModule.addNewChart({ chartInfo: chartInfo });
+  // }
 
-  private async handleAddInnerFilter(innerFilter: ChartInfo): Promise<void> {
+  protected async handleAddInnerFilter(innerFilter: ChartInfo): Promise<void> {
     if (this.parentChartInfo) {
       ///Id hiện tại của Inner Filter = -1 (created)
       this.parentChartInfo.chartFilter = innerFilter;
@@ -174,7 +172,7 @@ export default class ChartBuilderComponent extends Vue {
     }
   }
 
-  private async handleUpdateInnerFilter(innerFilter: ChartInfo): Promise<void> {
+  protected async handleUpdateInnerFilter(innerFilter: ChartInfo): Promise<void> {
     if (this.parentChartInfo) {
       this.parentChartInfo.chartFilter = innerFilter;
       const chartFilter = this.parentChartInfo.chartFilter;
@@ -184,17 +182,17 @@ export default class ChartBuilderComponent extends Vue {
     }
   }
 
-  private async onUpdateChart(chartInfo: ChartInfo) {
+  protected async onUpdateChart(chartInfo: ChartInfo) {
     await WidgetModule.handleUpdateWidget(chartInfo);
     WidgetModule.setWidget({ widgetId: chartInfo.id, widget: chartInfo });
-    ZoomModule.registerZoomData({ id: chartInfo.id, setting: chartInfo.setting });
+    ZoomModule.registerZoomDataById({ id: chartInfo.id, query: chartInfo.setting });
     FilterModule.setAffectFilterWidget(chartInfo);
     QuerySettingModule.setQuerySetting({ id: chartInfo.id, query: chartInfo.setting });
     await FilterModule.addFilterWidget(chartInfo);
     await DashboardControllerModule.renderChart({ id: chartInfo.id });
   }
 
-  private handleHiddenChartBuilder() {
+  protected handleHiddenChartBuilder() {
     this.parentChartInfo = null;
     WidgetModule.handleDeleteSnapWidget();
     this.showChartTypeSelectionModal = false;
@@ -203,7 +201,7 @@ export default class ChartBuilderComponent extends Vue {
     this.cancelCallBack ? this.cancelCallBack() : void 0;
   }
 
-  private setVisualizationItem(items: VisualizationItemData[]) {
+  protected setVisualizationItem(items: VisualizationItemData[]) {
     this.visualizationItems = items;
   }
 }

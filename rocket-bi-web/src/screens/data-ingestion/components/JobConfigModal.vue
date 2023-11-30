@@ -46,7 +46,7 @@
 
           <div :class="testConnectionClass" class="ml-auto">
             <div class="test-connection">
-              <div v-if="isTestConnection" class="w-100 p-0">
+              <div v-if="isConnectionTesting" class="w-100 p-0">
                 <BSpinner v-if="isTestConnectionLoading" small></BSpinner>
                 <div v-else :class="statusClass">{{ statusMessage }}</div>
               </div>
@@ -63,7 +63,6 @@ import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import DiCustomCenterModal from '@/screens/data-ingestion/components/DiCustomCenterModal.vue';
 import { JobFormRender } from '@/screens/data-ingestion/form-builder/JobFormRender';
 import { JobConfigForm } from '@/screens/data-ingestion/components/data-source-config-form/JobConfigForm';
-import TestConnection, { ConnectionStatus } from '@/screens/data-ingestion/components/TestConnection.vue';
 import { Log } from '@core/utils';
 import { Job } from '@core/data-ingestion/domain/job/Job';
 import { JobModule } from '@/screens/data-ingestion/store/JobStore';
@@ -78,52 +77,53 @@ import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchem
 import { Inject } from 'typescript-ioc';
 import { SchemaService } from '@core/schema/service/SchemaService';
 import { EventBus } from '@/event-bus/EventBus';
+import { ConnectionStatus } from './TestConnection';
 
 @Component({
-  components: { TestConnection, DiCustomCenterModal, JobConfigForm }
+  components: { DiCustomCenterModal, JobConfigForm }
 })
 export default class JobConfigModal extends Vue {
-  private readonly verticalScrollConfig = VerticalScrollConfigs;
-  private connectionStatus: ConnectionStatus = ConnectionStatus.Failed;
-  private isTestConnection = false;
-  private submitCallback: ((job: Job) => void) | null = null;
+  protected readonly verticalScrollConfig = VerticalScrollConfigs;
+  protected connectionStatus: ConnectionStatus = ConnectionStatus.Failed;
+  protected isConnectionTesting = false;
+  protected submitCallback: ((job: Job) => void) | null = null;
 
-  private status = Status.Loaded;
-  private errorMessage = '';
-  private isCreateDestDb = false;
-  private newDbName = '';
+  protected status = Status.Loaded;
+  protected errorMessage = '';
+  protected isCreateDestDb = false;
+  protected newDbName = '';
 
   @Ref()
-  private modal!: BModal;
+  protected modal!: BModal;
 
   @Inject
-  private schemaService!: SchemaService;
+  protected schemaService!: SchemaService;
 
   @Prop({ required: true })
-  private jobConfigFormRender!: JobFormRender;
+  protected jobConfigFormRender!: JobFormRender;
 
-  private get isLoading() {
+  protected get isLoading() {
     return this.status === Status.Loading;
   }
 
-  private get isError() {
+  protected get isError() {
     return this.status === Status.Error;
   }
 
-  private showLoading() {
+  protected showLoading() {
     this.status = Status.Loading;
   }
 
-  private showLoaded() {
+  protected showLoaded() {
     this.status = Status.Loaded;
   }
 
-  private showError(ex: DIException) {
+  protected showError(ex: DIException) {
     this.status = Status.Error;
     this.errorMessage = ex.getPrettyMessage();
   }
 
-  private get okTitle(): string {
+  protected get okTitle(): string {
     const job: Job = this.jobConfigFormRender.createJob();
     const mode: FormMode = Job.getJobFormConfigMode(job);
     switch (mode) {
@@ -136,7 +136,7 @@ export default class JobConfigModal extends Vue {
     }
   }
 
-  private get title(): string {
+  protected get title(): string {
     const job: Job = this.jobConfigFormRender.createJob();
     const mode: FormMode = Job.getJobFormConfigMode(job);
     switch (mode) {
@@ -149,14 +149,14 @@ export default class JobConfigModal extends Vue {
     }
   }
 
-  private get testConnectionClass() {
+  protected get testConnectionClass() {
     return {
       'd-none': this.isHideTestConnection,
       'd-flex': !this.isHideTestConnection
     };
   }
 
-  private get isHideTestConnection() {
+  protected get isHideTestConnection() {
     const jobType: JobType = this.jobConfigFormRender.createJob().jobType;
     Log.debug('JobConfigFormModal::isHideTestConnection::jobType::', this.jobConfigFormRender.createJob());
     switch (jobType) {
@@ -167,29 +167,29 @@ export default class JobConfigModal extends Vue {
     }
   }
 
-  private get isSuccessConnection(): boolean {
+  protected get isSuccessConnection(): boolean {
     return this.connectionStatus === ConnectionStatus.Success;
   }
 
-  private get statusClass() {
+  protected get statusClass() {
     return {
       'status-error': this.connectionStatus === ConnectionStatus.Failed,
       'status-success': this.connectionStatus === ConnectionStatus.Success
     };
   }
 
-  private get statusMessage(): string {
+  protected get statusMessage(): string {
     switch (this.connectionStatus) {
       case ConnectionStatus.Success:
-        return TestConnection.CONNECTION_SUCCESS;
+        return 'Connection success';
       case ConnectionStatus.Failed:
-        return TestConnection.CONNECTION_FAILED;
+        return 'Connection failed';
       default:
-        return TestConnection.CONNECTION_FAILED;
+        return 'Connection failed';
     }
   }
 
-  private get isTestConnectionLoading(): boolean {
+  protected get isTestConnectionLoading(): boolean {
     return this.connectionStatus === ConnectionStatus.Loading;
     // return true
   }
@@ -204,14 +204,14 @@ export default class JobConfigModal extends Vue {
     this.modal.hide();
   }
 
-  private onHide() {
+  protected onHide() {
     this.submitCallback = null;
-    this.isTestConnection = false;
+    this.isConnectionTesting = false;
     EventBus.offDestDatabaseNameChange(this.handleDestinationDbChanged);
   }
 
   @AtomicAction()
-  private async handleClickOk(e: BvEvent) {
+  protected async handleClickOk(e: BvEvent) {
     try {
       e.preventDefault();
       this.showLoading();
@@ -227,13 +227,13 @@ export default class JobConfigModal extends Vue {
     }
   }
 
-  private handleDestinationDbChanged(name: string, isCreateNew: boolean) {
+  protected handleDestinationDbChanged(name: string, isCreateNew: boolean) {
     Log.debug('JobConfigModal::handleDestinationDbChanged::dbName::', name, isCreateNew);
     this.isCreateDestDb = isCreateNew;
     this.newDbName = name;
   }
 
-  private async handleCreateDestDatabase(job: Job, name: string) {
+  protected async handleCreateDestDatabase(job: Job, name: string) {
     try {
       const databaseInfo = DatabaseSchemaModule.databaseInfos.find(db => db.name === name);
       if (this.isCreateDestDb && !databaseInfo) {
@@ -253,15 +253,13 @@ export default class JobConfigModal extends Vue {
   }
 
   @AtomicAction()
-  private async handleTestConnection() {
+  protected async handleTestConnection(): Promise<void> {
     try {
-      this.isTestConnection = true;
-      const job: Job = this.jobConfigFormRender.createJob();
-      // const refreshToken = await DataSourceModule.getRefreshToken(authorizeResponse.code);
-      Log.debug('JobConfigModal::handleTestConnection::request::', job);
+      this.isConnectionTesting = true;
       this.connectionStatus = ConnectionStatus.Loading;
+      const job: Job = this.jobConfigFormRender.createJob();
       const isSuccess = await JobModule.testJobConnection(job);
-      this.updateConnectionStatus(isSuccess);
+      this.connectionStatus = isSuccess ? ConnectionStatus.Success : ConnectionStatus.Failed;
     } catch (ex) {
       const exception = DIException.fromObject(ex);
       this.connectionStatus = ConnectionStatus.Failed;
@@ -269,19 +267,11 @@ export default class JobConfigModal extends Vue {
     }
   }
 
-  private updateConnectionStatus(isSuccess: boolean) {
-    if (isSuccess) {
-      this.connectionStatus = ConnectionStatus.Success;
-    } else {
-      this.connectionStatus = ConnectionStatus.Failed;
-    }
-  }
-
-  private onShowModal() {
+  protected onShowModal() {
     this.reset();
   }
 
-  private reset() {
+  protected reset() {
     this.connectionStatus = ConnectionStatus.Failed;
   }
 }

@@ -117,7 +117,7 @@
             <!-- Create -->
             <tr v-for="(column, index) in tempColumns" :key="index">
               <td class="cell-20">
-                <DiInput :id="genInputId('column-name')" :maxLength="255" :value.sync="column.name" placeholder="Input name" />
+                <DiInput :id="genInputId('column-name')" ref="inputNames" :maxLength="255" :value.sync="column.name" placeholder="Input name" />
               </td>
               <td>
                 <DiInput :id="genInputId('column-display-name')" :maxLength="255" :value.sync="column.displayName" placeholder="Input column display name" />
@@ -184,12 +184,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import { DataSchemaModel, ViewMode } from '@/screens/data-management/views/data-schema/model';
 import { BoolColumn, ColumnType, DIException, StringColumn, TableSchema } from '@core/common/domain';
 import { cloneDeep, get, isEqual } from 'lodash';
 import { BoolOptions, ColumnTypeOptions } from '@/screens/data-management/views/data-schema/DataSchema.options';
-import { ChartUtils, DateTimeUtils, ListUtils } from '@/utils';
+import { ChartUtils, DateTimeUtils, ListUtils, TimeoutUtils } from '@/utils';
 import { SelectOption, Status } from '@/shared';
 import moment from 'moment';
 import InputSetting from '@/shared/settings/common/InputSetting.vue';
@@ -202,6 +202,7 @@ import { Track } from '@/shared/anotation/TrackingAnotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
+import DiInput from '@/shared/components/common/DiInput.vue';
 
 @Component({
   components: {
@@ -212,27 +213,32 @@ import StatusWidget from '@/shared/components/StatusWidget.vue';
   }
 })
 export default class FieldManagement extends Vue {
-  @Prop({ type: Object, required: false })
-  private readonly model?: DataSchemaModel;
+  @Prop({ type: Object, required: false, default: () => null })
+  protected readonly model!: DataSchemaModel | null;
+
   @Prop({ type: Number, required: false, default: ViewMode.ViewSchema })
-  private readonly viewMode!: ViewMode;
+  protected readonly viewMode!: ViewMode;
+
   @Prop({ type: String, required: false, default: '' })
-  private readonly keyword!: string;
+  protected readonly keyword!: string;
 
   @Prop({ required: true })
-  private readonly status!: Status;
+  protected readonly status!: Status;
 
-  private readonly boolOptions = BoolOptions;
+  @Ref()
+  protected readonly inputNames?: DiInput[];
 
-  private readonly typeOptions = ColumnTypeOptions;
+  protected readonly boolOptions = BoolOptions;
 
-  private cloneTable: TableSchema | null = null;
+  protected readonly typeOptions = ColumnTypeOptions;
 
-  private tempColumns: Column[] = [];
+  protected cloneTable: TableSchema = TableSchema.empty();
 
-  private deleteColumns: Set<string> = new Set<string>();
+  protected tempColumns: Column[] = [];
 
-  private get searchColumns(): Column[] {
+  protected deleteColumns: Set<string> = new Set<string>();
+
+  protected get searchColumns(): Column[] {
     return (
       this.model?.table?.columns?.filter(column => {
         if (this.keyword) {
@@ -244,11 +250,11 @@ export default class FieldManagement extends Vue {
     );
   }
 
-  private get columnSize(): number {
+  protected get columnSize(): number {
     return this.model?.table?.columns?.length ?? 0;
   }
 
-  private get isSchemaMode() {
+  protected get isSchemaMode() {
     return this.viewMode === ViewMode.ViewSchema;
   }
 
@@ -260,18 +266,19 @@ export default class FieldManagement extends Vue {
     return this.cloneTable && this.model?.table && (!isEqual(this.cloneTable, this.model.table) || ListUtils.isNotEmpty(this.tempColumns));
   }
 
-  addColumn() {
+  async addColumn(): Promise<void> {
     const newColumn = StringColumn.empty();
     this.tempColumns.push(newColumn);
+    await TimeoutUtils.sleep(180);
+    const input: DiInput | undefined = ListUtils.getLast(this.inputNames ?? []);
+    input?.focus();
   }
 
   async getEditedTable(): Promise<TableSchema | undefined> {
     const newColumns: Column[] = this.tempColumns.filter(column => StringUtils.isNotEmpty(column.name));
-    const newTable: TableSchema | null = cloneDeep(this.cloneTable);
-    if (newTable) {
-      newTable.removeColumns(this.deleteColumns);
-      newTable.addColumns(newColumns);
-    }
+    const newTable: TableSchema = cloneDeep(this.cloneTable) ?? cloneDeep(this.model?.table) ?? TableSchema.empty();
+    newTable.removeColumns(this.deleteColumns);
+    newTable.addColumns(newColumns);
     this.ensureTable(this.model?.table, newTable);
     const isConfirm = await this.confirmEdit(this.model!.table!, newTable!);
     if (isConfirm) {
@@ -284,7 +291,7 @@ export default class FieldManagement extends Vue {
   }
 
   @Watch('model', { deep: true })
-  private onModelChanged() {
+  protected onModelChanged() {
     Log.debug('FieldManagement::onModelChanged::', this.model);
     switch (this.viewMode) {
       case ViewMode.EditSchema:
@@ -300,7 +307,7 @@ export default class FieldManagement extends Vue {
   }
 
   @Watch('viewMode')
-  private onViewModeChanged() {
+  protected onViewModeChanged() {
     Log.debug('FieldManagement::onViewModeChanged::', this.viewMode);
     switch (this.viewMode) {
       case ViewMode.ViewSchema:
@@ -315,7 +322,7 @@ export default class FieldManagement extends Vue {
     }
   }
 
-  private createCloneTable(table?: TableSchema) {
+  protected createCloneTable(table?: TableSchema): void {
     if (table) {
       this.cloneTable = cloneDeep(table);
       this.tempColumns = [];
@@ -325,12 +332,12 @@ export default class FieldManagement extends Vue {
     }
   }
 
-  private resetTableSchema() {
-    this.cloneTable = null;
+  protected resetTableSchema() {
+    this.cloneTable = TableSchema.empty();
     this.tempColumns = [];
   }
 
-  private getDefaultValue(column: Column): string {
+  protected getDefaultValue(column: Column): string {
     switch (column.className) {
       case ColumnType.bool:
         return (column as BoolColumn).defaultValue !== undefined ? `${(column as BoolColumn).defaultValue}` : '--';
@@ -360,15 +367,15 @@ export default class FieldManagement extends Vue {
     }
   }
 
-  private isTextColumn(className: ColumnType) {
+  protected isTextColumn(className: ColumnType) {
     return ChartUtils.isTextType(className) || ChartUtils.isNumberType(className);
   }
 
-  private isBoolColumn(className: ColumnType) {
+  protected isBoolColumn(className: ColumnType) {
     return className === ColumnType.bool;
   }
 
-  private isDateColumn(className: ColumnType) {
+  protected isDateColumn(className: ColumnType) {
     return ChartUtils.isDateType(className);
   }
 
@@ -377,7 +384,7 @@ export default class FieldManagement extends Vue {
     column_old_type: (_: FieldManagement, args: any) => args[0].className,
     column_new_type: (_: FieldManagement, args: any) => args[1].id
   })
-  private changeType(column: Column, option: SelectOption, isUpdate: boolean) {
+  protected changeType(column: Column, option: SelectOption, isUpdate: boolean) {
     const { id } = option;
     if (isUpdate && this.cloneTable) {
       const index = this.cloneTable?.columns.findIndex(columnToFind => columnToFind.name === column.name);
@@ -404,7 +411,7 @@ export default class FieldManagement extends Vue {
     }
   }
 
-  private changeBoolDefaultValue(column: Column, option: SelectOption) {
+  protected changeBoolDefaultValue(column: Column, option: SelectOption) {
     TrackingUtils.track(TrackEvents.ColumnChangeDefaultValue, {
       column_name: column.name,
       column_type: column.className,
@@ -413,7 +420,7 @@ export default class FieldManagement extends Vue {
     });
   }
 
-  private getDate(date: number | undefined): Date | undefined {
+  protected getDate(date: number | undefined): Date | undefined {
     return date ? moment(date).toDate() : void 0;
   }
 
@@ -423,7 +430,7 @@ export default class FieldManagement extends Vue {
     column_old_default_value: (_: FieldManagement, args: any) => args[0].defaultValue,
     column_new_default_value: (_: FieldManagement, args: any) => args[1].getTime()
   })
-  private changeDate(column: Column, date: Date, isUpdate: boolean) {
+  protected changeDate(column: Column, date: Date, isUpdate: boolean) {
     if (isUpdate && this.cloneTable) {
       const index = this.cloneTable?.columns.findIndex(columnToFind => columnToFind.name === column.name);
       const existColumn = index !== -1;
@@ -443,11 +450,11 @@ export default class FieldManagement extends Vue {
     }
   }
 
-  private replaceDisplayNameEmpty(columns: Column[]): void {
+  protected replaceDisplayNameEmpty(columns: Column[]): void {
     columns.filter(column => StringUtils.isEmpty(column.displayName)).forEach(column => (column.displayName = column.name));
   }
 
-  private ensureTable(oldTable?: TableSchema | null, tableToUpdate?: TableSchema | null): void {
+  protected ensureTable(oldTable?: TableSchema | null, tableToUpdate?: TableSchema | null): void {
     if (!tableToUpdate || !oldTable) {
       throw new DIException(`Table not found!`);
     }
@@ -459,7 +466,7 @@ export default class FieldManagement extends Vue {
     }
   }
 
-  private async confirmEdit(oldTable: TableSchema, newTable: TableSchema): Promise<boolean> {
+  protected async confirmEdit(oldTable: TableSchema, newTable: TableSchema): Promise<boolean> {
     ///Check warning
     let confirmMsg = '';
     let isChangedEncrypt = false;
@@ -505,7 +512,7 @@ export default class FieldManagement extends Vue {
     return Promise.resolve(true);
   }
 
-  private async showEnsureModal(title: string, html: string, confirmButtonText?: string, cancelButtonText?: string) {
+  protected async showEnsureModal(title: string, html: string, confirmButtonText?: string, cancelButtonText?: string) {
     //@ts-ignore
     return this.$alert.fire({
       icon: 'warning',
@@ -529,14 +536,14 @@ export default class FieldManagement extends Vue {
     }
   }
 
-  private isDeleteColumn(column: Column) {
+  protected isDeleteColumn(column: Column) {
     return this.deleteColumns.has(column.name);
   }
-  private isStringColumn(columnType: ColumnType) {
+  protected isStringColumn(columnType: ColumnType) {
     return ChartUtils.isTextType(columnType);
   }
 
-  private handleToggleEncrypt(column: Column, enable: boolean) {
+  protected handleToggleEncrypt(column: Column, enable: boolean) {
     if (enable) {
       TrackingUtils.track(TrackEvents.ColumnEnableEncryption, { column_name: column.name, column_type: column.className });
     } else {

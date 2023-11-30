@@ -62,8 +62,9 @@ export class DataSourceServiceImpl extends DataSourceService {
     super();
   }
 
-  testConnection(dataSourceInfo: DataSourceInfo): Promise<boolean> {
-    return this.dataSourceRepository.testConnection(dataSourceInfo).then(response => response.success);
+  async testConnection(dataSourceInfo: DataSourceInfo): Promise<boolean> {
+    const response = await this.dataSourceRepository.testConnection(dataSourceInfo);
+    return response.success;
   }
 
   create(dataSourceInfo: DataSourceInfo): Promise<DataSourceInfo> {

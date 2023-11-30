@@ -3,6 +3,9 @@
  * @created: 8/6/21, 4:08 PM
  */
 
+import { ChartType, DateRange } from '@/shared';
+import { CompareMode as CompareModeEnum } from '@/shared/enums/CompareMode';
+import { DateUtils } from '@/utils';
 import {
   CompareMode,
   CompareRequest,
@@ -27,18 +30,17 @@ import {
   SortDirection,
   TableColumn
 } from '@core/common/domain';
-import { ConditionUtils } from '@core/utils/ConditionUtils';
-import { ChartType, DateRange } from '@/shared';
-import { DateHistogramFunctionBuilder } from '@core/common/services';
-import { Log } from '@core/utils/Log';
-import { DateUtils } from '@/utils';
-import { CompareMode as CompareModeEnum } from '@/shared/enums/CompareMode';
 import { DateRelatedCondition } from '@core/common/domain/model/condition/DateRelatedCondition';
+import { DateHistogramFunctionBuilder } from '@core/common/services';
+import { ConditionUtils } from '@core/utils/ConditionUtils';
+import { Log } from '@core/utils/Log';
 
 export class ComparisonUtils {
   static getDateFilterRequests(compareOption: ComparisonOptionData): FilterRequest[] {
     const dataRange = compareOption.dataRange;
-    if (dataRange && ComparisonUtils.isDataRangeOn(compareOption) && !ComparisonUtils.isComparisonOn(compareOption)) {
+    const isDataRangeOn = ComparisonUtils.isDataRangeOn(compareOption);
+    const isComparisonOff = !ComparisonUtils.isComparisonOn(compareOption);
+    if (dataRange && isDataRangeOn && isComparisonOff) {
       return [FilterRequest.fromCondition(ConditionUtils.buildDateCondition(dataRange.dateField!, dataRange.dateRange))];
     } else {
       return [];
@@ -46,7 +48,7 @@ export class ComparisonUtils {
   }
 
   static toCompareRequest(compareOption: ComparisonOptionData, compareMode: CompareMode): CompareRequest | undefined {
-    Log.debug('getCompareRequest::', ComparisonUtils.isComparisonOn(compareOption), compareOption);
+    Log.debug('ComparisonUtils::getCompareRequest::isComparisonOn', ComparisonUtils.isComparisonOn(compareOption));
     if (ComparisonUtils.isComparisonOn(compareOption)) {
       const firstRange: DataRange = compareOption.dataRange!;
       const firstCondition: FieldRelatedCondition | undefined = ConditionUtils.buildDateFilterCondition(
@@ -75,7 +77,11 @@ export class ComparisonUtils {
 
   private static buildSecondCondition(firstRange: DataRange, comparison: Comparison): Condition | undefined {
     const field: Field = Field.fromObject(firstRange.dateField!);
-    const compareMode: CompareModeEnum = comparison.mode as any;
+    const compareMode: CompareModeEnum = (comparison.mode as any) as CompareModeEnum;
+    if (compareMode === CompareModeEnum.custom) {
+      return ConditionUtils.buildBetweenConditionByDateRange(field, comparison.dateRange!);
+    }
+
     switch (firstRange.mode) {
       case MainDateMode.custom: {
         const firstDateRange: DateRange = firstRange.dateRange ?? DateUtils.getAllTime();

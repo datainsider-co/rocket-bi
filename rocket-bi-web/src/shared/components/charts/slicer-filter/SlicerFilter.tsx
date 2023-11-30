@@ -274,8 +274,8 @@ export default class SlicerFilter extends BaseWidget {
   private getValueFromRange(range: SlicerRange): string[] {
     const values: string[] = [];
     if (range.to.value !== this.max || range.from.value !== this.min) {
-      const fromValueAsString = this.slicerDisplay === SlicerDisplay.date ? DateTimeUtils.formatDate(range.from.value) : `${range.from.value}`;
-      const toValueAsString = this.slicerDisplay === SlicerDisplay.date ? DateTimeUtils.formatDate(range.to.value) : `${range.to.value}`;
+      const fromValueAsString = this.slicerDisplay === SlicerDisplay.date ? DateTimeUtils.formatDateTime(range.from.value) : `${range.from.value}`;
+      const toValueAsString = this.slicerDisplay === SlicerDisplay.date ? DateTimeUtils.formatDateTime(range.to.value) : `${range.to.value}`;
       values.push(fromValueAsString, toValueAsString);
     }
     return values;

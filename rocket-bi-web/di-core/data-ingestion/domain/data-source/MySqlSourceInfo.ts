@@ -5,20 +5,21 @@ import { DataSources } from '@core/data-ingestion/domain/data-source/DataSources
 import { JdbcSource } from '@core/data-ingestion/domain/response/JdbcSource';
 import { SourceId } from '@core/common/domain';
 import { StringUtils } from '@/utils';
-import { NewFieldData } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
-import { Log } from '@core/utils';
-export abstract class SourceWithExtraField {
+import { CustomPropertyInfo } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
+
+export abstract class SupportCustomProperty {
   abstract extraFields: Record<string, string>;
 
-  abstract setField(fielData: NewFieldData): void;
+  abstract setProperty(newProperty: CustomPropertyInfo): void;
 
-  abstract isExistField(fieldName: string): boolean;
+  abstract isExistsProperty(propertyName: string): boolean;
 
-  static isSourceExtraField(source: DataSourceInfo | SourceWithExtraField): source is SourceWithExtraField {
-    return !!(source as SourceWithExtraField).setField;
+  static isSupportCustomProperty(source: any): source is SupportCustomProperty {
+    const customProperties: SupportCustomProperty = source as SupportCustomProperty;
+    return customProperties && !!customProperties.setProperty && !!customProperties.isExistsProperty;
   }
 }
-export class MySqlSourceInfo implements DataSourceInfo, SourceWithExtraField {
+export class MySqlSourceInfo implements DataSourceInfo, SupportCustomProperty {
   className = DataSources.JdbcSource;
   sourceType = DataSourceType.MySql;
   id: SourceId;
@@ -78,8 +79,7 @@ export class MySqlSourceInfo implements DataSourceInfo, SourceWithExtraField {
   toDataSource(): DataSource {
     const extraFields = this.extraFieldsAsString?.length === 0 ? '' : `?${this.extraFieldsAsString}`;
     const jdbcUrl = `jdbc:mysql://${this.host}:${this.port}${extraFields}`;
-    const request = new JdbcSource(this.id, this.orgId, this.sourceType, this.displayName, jdbcUrl, this.username, this.password, this.lastModify);
-    return request;
+    return new JdbcSource(this.id, this.orgId, this.sourceType, this.displayName, jdbcUrl, this.username, this.password, this.lastModify);
   }
 
   private static getExtraFields(text: string | undefined): Record<string, string> {
@@ -108,10 +108,10 @@ export class MySqlSourceInfo implements DataSourceInfo, SourceWithExtraField {
     return this.displayName;
   }
 
-  setField(fielData: NewFieldData): void {
-    this.extraFields[fielData.fieldName] = fielData.fieldValue;
+  setProperty(propertyInfo: CustomPropertyInfo): void {
+    this.extraFields[propertyInfo.fieldName] = propertyInfo.fieldValue;
   }
-  isExistField(fieldName: string): boolean {
+  isExistsProperty(fieldName: string): boolean {
     return this.extraFields[fieldName] !== undefined;
   }
 }

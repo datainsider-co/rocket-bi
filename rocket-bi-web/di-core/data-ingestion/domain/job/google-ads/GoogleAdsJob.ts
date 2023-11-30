@@ -34,6 +34,7 @@ export class GoogleAdsJob implements Job {
   lastSyncedValue: string;
   incrementalColumn?: string;
   extraSegments?: string[];
+  startDate?: string;
   constructor(
     orgId: string,
     jobId: JobId,
@@ -54,7 +55,8 @@ export class GoogleAdsJob implements Job {
     resourceName: string,
     lastSyncedValue: string,
     incrementalColumn?: string,
-    extraSegments?: string[]
+    extraSegments?: string[],
+    startDate?: string
   ) {
     this.orgId = orgId;
     this.jobId = jobId;
@@ -76,6 +78,7 @@ export class GoogleAdsJob implements Job {
     this.lastSyncedValue = lastSyncedValue;
     this.incrementalColumn = incrementalColumn;
     this.extraSegments = extraSegments;
+    this.startDate = startDate;
   }
 
   static fromObject(obj: any): GoogleAdsJob {
@@ -99,7 +102,8 @@ export class GoogleAdsJob implements Job {
       obj.resourceName,
       obj.lastSyncedValue,
       obj.incrementalColumn,
-      obj.extraSegments
+      obj.extraSegments,
+      obj.startDate
     );
   }
   //
@@ -124,7 +128,8 @@ export class GoogleAdsJob implements Job {
       '',
       '',
       void 0,
-      []
+      [],
+      void 0
     );
   }
 
@@ -184,11 +189,6 @@ export class GoogleAdsJob implements Job {
   }
   withIncrementalColumn(columnName: string): GoogleAdsJob {
     this.incrementalColumn = columnName;
-    return this;
-  }
-
-  withLastSyncValue(value: string): GoogleAdsJob {
-    this.lastSyncedValue = value;
     return this;
   }
 }

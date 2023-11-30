@@ -29,7 +29,7 @@ export class DefaultTabFilter implements WidgetRenderer<TabFilter> {
         <div class={widget.containerClass} style={widget.containerStyle}>
           {title}
           {search}
-          <vuescroll className={['tab-filter-scroller', scrollClass]} style="position: unset">
+          <vuescroll class={['tab-filter-scroller', scrollClass]} style="position: unset">
             {tab}
           </vuescroll>
         </div>

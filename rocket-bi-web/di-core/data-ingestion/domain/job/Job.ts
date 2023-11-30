@@ -4,13 +4,14 @@ import {
   GoogleAdsJob,
   GoogleAdsSourceInfo,
   GoogleSearchConsoleJob,
+  HubspotJob,
+  JobName,
   PalexyJob,
   S3Job,
   TiktokAdsJob
 } from '@core/data-ingestion';
 import { GoogleAnalyticJob } from '@core/data-ingestion/domain/job/google-analytic/GoogleAnalyticJob';
 
-import { JobName } from '@core/data-ingestion/domain/job/JobName';
 import { JobId, SourceId } from '@core/common/domain';
 import { TimeScheduler } from '@/screens/data-ingestion/components/job-scheduler-form/scheduler-time/TimeScheduler';
 import { GoogleSheetJob } from '@core/data-ingestion/domain/job/GoogleSheetJob';
@@ -29,6 +30,7 @@ import { MongoJob } from '@core/data-ingestion/domain/job/MongoJob';
 import { ShopifyJob } from '@core/data-ingestion/domain/job/ShopifyJob';
 import { GA4Job } from '@core/data-ingestion/domain/job/ga4/GA4Job';
 import { GASourceInfo } from '@core/data-ingestion/domain/data-source/GASourceInfo';
+import { MixpanelJob } from './mixpanel';
 
 export enum SyncMode {
   FullSync = 'FullSync',
@@ -103,6 +105,10 @@ export abstract class Job {
         return PalexyJob.fromObject(obj);
       case JobName.GoogleSearchConsoleJob:
         return GoogleSearchConsoleJob.fromObject(obj);
+      case JobName.Hubspot:
+        return HubspotJob.fromObject(obj);
+      case JobName.Mixpanel:
+        return MixpanelJob.fromObject(obj);
       default:
         return UnsupportedJob.fromObject(obj);
     }
@@ -141,6 +147,12 @@ export abstract class Job {
         return TiktokAdsJob.default();
       case DataSourceType.Palexy:
         return PalexyJob.default(dataSource);
+      case DataSourceType.GoogleSearchConsole:
+        return GoogleSearchConsoleJob.default(dataSource);
+      case DataSourceType.Hubspot:
+        return HubspotJob.default(dataSource);
+      case DataSourceType.Mixpanel:
+        return MixpanelJob.default(dataSource);
       default:
         return UnsupportedJob.default(dataSource);
     }
@@ -180,6 +192,7 @@ export abstract class Job {
       case JobName.GoogleAnalyticJob:
         return 'ic_ga_small.png';
       case JobName.Jdbc:
+      case JobName.Hubspot:
         return DataSourceInfo.dataSourceIcon(rowData.sourceType);
       case JobName.BigQueryJob:
         return 'ic_big_query_small.png';
@@ -201,6 +214,8 @@ export abstract class Job {
         return 'ic_palexy_small.svg';
       case JobName.GoogleSearchConsoleJob:
         return 'ic_google_search_console_small.svg';
+      case JobName.Mixpanel:
+        return 'ic_mixpanel_small.svg';
       default:
         return 'ic_default.svg';
     }
@@ -267,9 +282,26 @@ export abstract class Job {
     return job.className === JobName.PalexyJob;
   }
 
+  static isHubspotJob(job: Job): boolean {
+    return job.className === JobName.Hubspot;
+  }
+
   withDisplayName(displayName: string): Job {
     this.displayName = displayName;
     return this;
+  }
+
+  static getMultiJob(job: Job): Job[] {
+    switch (job.className) {
+      case JobName.GoogleSearchConsoleJob:
+        return (job as GoogleSearchConsoleJob).getMultiJob();
+      case JobName.Hubspot:
+        return (job as HubspotJob).getMultiJob();
+      case JobName.Mixpanel:
+        return (job as MixpanelJob).getMultiJob();
+      default:
+        return [];
+    }
   }
 }
 
@@ -306,6 +338,8 @@ export class JobInfo {
       case JobName.GA4Job:
       case JobName.PalexyJob:
       case JobName.GoogleSearchConsoleJob:
+      case JobName.Hubspot:
+      case JobName.Mixpanel:
         return DataSourceInfo.fromDataSource(obj.source);
       case JobName.GoogleAdsJob:
         return GoogleAdsSourceInfo.default();

@@ -31,7 +31,7 @@ import {
 } from '@core/data-relationship';
 import { SchemaService } from '@core/schema/service/SchemaService';
 import { Field } from '@core/common/domain/model/function/Field';
-import { TimeoutUtils } from '@/utils';
+import { ListUtils, TimeoutUtils } from '@/utils';
 import { cloneDeep, isEqual } from 'lodash';
 import { StringUtils } from '@/utils/StringUtils';
 import { RelationshipHandler, RelationshipType } from '@/screens/dashboard-detail/components/relationship/relationship-handler/RelationshipHandler';
@@ -494,6 +494,7 @@ export default class RelationshipEditor extends Mixins(SplitPanelMixin) {
       this.oldTables = cloneDeep(this.addedTables);
       this.oldTablePositions = this.relationshipInfo.extraData.tablePositions;
       this.errorMessage = '';
+      this.deletedConnections = {};
       this.$emit('saved');
       this.diagramPanel?.autoResize();
     } catch (e) {

@@ -50,7 +50,7 @@ export class MainDateValueController implements ValueController {
    */
   private toDateRange(data: MainDateData): string[] {
     if (data.chosenDateRange && data.chosenDateRange.start && data.chosenDateRange.end) {
-      return [DateTimeUtils.formatDate(data.chosenDateRange.start), DateTimeUtils.formatDate(data.chosenDateRange.end, true)];
+      return [DateTimeUtils.formatDateTime(data.chosenDateRange.start), DateTimeUtils.formatDateTime(data.chosenDateRange.end, true)];
     } else {
       return [];
     }

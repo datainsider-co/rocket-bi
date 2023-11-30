@@ -3,30 +3,33 @@
  * @created: 5/5/21, 2:57 PM
  */
 
-import { FormulaSuggestionModule, FunctionInfo } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
-import { Column, TableSchema } from '@core/common/domain/model';
-import { FormulaController } from '@/shared/fomula/FormulaController';
-import { Log } from '@core/utils';
+import { FunctionInfo } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
+import { TableSchema } from '@core/common/domain/model';
+import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
 import { FormulaUtils } from '@/shared/fomula/FormulaUtils';
+import { IDisposable, languages } from 'monaco-editor';
+import IMonarchLanguage = languages.IMonarchLanguage;
 
-export class MeasureController implements FormulaController {
-  private languageRegister: any | null = null;
-  private tokensProvider: any | null = null;
+export class MeasureController implements MonacoFormulaController {
+  private languageRegister: IDisposable | null = null;
+  private tokensProvider: IDisposable | null = null;
 
-  private readonly allFunctions: FunctionInfo[];
+  private readonly functionInfos: FunctionInfo[];
   private readonly tableSchema: TableSchema;
+  private readonly monarchLanguage: IMonarchLanguage;
 
-  constructor(allFunctions: FunctionInfo[], tableSchema: TableSchema) {
-    this.allFunctions = allFunctions;
+  constructor(allFunctions: FunctionInfo[], tableSchema: TableSchema, monarchLanguage: IMonarchLanguage) {
+    this.functionInfos = allFunctions;
     this.tableSchema = tableSchema;
+    this.monarchLanguage = monarchLanguage;
   }
 
   formulaName(): string {
     return 'measure-field';
   }
 
-  getTheme(themeType: 'light' | 'dark' | 'custom'): string {
-    return `formula-theme-${themeType}`;
+  getTheme(): string {
+    return `formula-theme-light`;
   }
 
   init(monaco: any): void {
@@ -37,7 +40,7 @@ export class MeasureController implements FormulaController {
     this.languageRegister = monaco.languages.registerCompletionItemProvider(this.formulaName(), {
       triggerCharacters: [',', '('],
       provideCompletionItems: () => {
-        const suggestionFunctions = FormulaUtils.createSuggestKeywords(this.allFunctions);
+        const suggestionFunctions = FormulaUtils.createSuggestKeywords(this.functionInfos);
         const suggestionFields = FormulaUtils.createSuggestionColumnData(this.tableSchema.columns, this.tableSchema.dbName, this.tableSchema.name);
         return { suggestions: suggestionFunctions.concat(suggestionFields) };
       }
@@ -53,50 +56,14 @@ export class MeasureController implements FormulaController {
   private initTokenProvider(monaco: any): any {
     // register color
     return monaco.languages.setMonarchTokensProvider(this.formulaName(), {
-      keywords: this.allFunctions.map(_ => _.name),
-      fields: this.fieldNames(),
-      operators: [
-        '=',
-        '>',
-        '<',
-        '!',
-        '~',
-        '?',
-        ':',
-        '==',
-        '<=',
-        '>=',
-        '!=',
-        '&&',
-        '||',
-        '++',
-        '--',
-        '+',
-        '-',
-        '*',
-        '/',
-        '&',
-        '|',
-        '^',
-        '%',
-        '<<',
-        '>>',
-        '>>>',
-        '+=',
-        '-=',
-        '*=',
-        '/=',
-        '&=',
-        '|=',
-        '^=',
-        '%=',
-        '<<=',
-        '>>=',
-        '>>>='
-      ],
-      symbols: /[=><!~?:&|+\-*/^%]+/,
+      ...this.monarchLanguage,
+      keywords: this.functionInfos.map(_ => _.name),
+      fields: this.tableSchema.columns.map(col => col.displayName),
+      columns: this.tableSchema.columns.map(col => col.displayName),
       tokenizer: {
+        ...this.monarchLanguage.tokenizer,
         root: [
+          ...this.monarchLanguage.tokenizer.root,
           [
             /[0-9a-z_$][\w$]*/,
             {
@@ -106,21 +73,9 @@ export class MeasureController implements FormulaController {
               }
             }
           ],
-          [/\[.*?]/, 'field'],
-
-          // numbers
-          [/\d*\.\d+([eE][-+]?\d+)?\b/, 'number.float'],
-          [/0[xX][0-9a-fA-F]+/, 'number.hex'],
-          [/\d+\b/, 'number'],
-
-          // delimiter: after number because of .\d floats
-          [/[;,.]/, 'delimiter']
+          [/\[.*?]/, 'field']
         ]
       }
-    });
-  }
-
-  private fieldNames(): string[] {
-    return this.tableSchema.columns.map(col => col.displayName);
+    } as any);
   }
 }

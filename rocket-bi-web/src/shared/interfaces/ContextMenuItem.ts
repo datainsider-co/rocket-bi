@@ -18,4 +18,7 @@ export interface ContextMenuItem {
   click?: (event: MouseEvent) => void;
   id?: string;
   hidden?: boolean;
+  children?: ContextMenuItem[];
+  // show checked icon, refer render children than checked if both are provided
+  active?: boolean;
 }

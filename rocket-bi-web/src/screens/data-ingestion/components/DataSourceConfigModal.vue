@@ -7,100 +7,105 @@
     centered
     size="lg"
     :hide-header="true"
+    modal-class="data-source-modal"
+    footer-class="data-source-modal--footer"
+    body-class="data-source-modal--body"
+    dialog-class="data-source-modal--dialog"
     @ok="handleSubmit"
     @cancel="handleTestConnection"
-    @hide="onHide"
     @hidden="onHidden"
-    @show="onShowModal"
   >
     <img class="btn-close btn-ghost position-absolute" src="@/assets/icon/ic_close.svg" alt="" @click="closeModal" />
     <div class="modal-title text-center">DataSource Config</div>
     <div class="modal-sub-title text-center">Config information of DataSource</div>
 
     <div class="d-flex flex-column justify-content-center">
-      <DataSourceConfigForm :form-render="dataSourceRender"></DataSourceConfigForm>
-      <div :class="{ 'd-none': isHideTestConnection, 'd-flex': !isHideTestConnection }" class="form-item w-100 justify-content-center align-items-center">
-        <div class="title"></div>
-        <div class="input test-connection d-flex justify-content-between">
-          <!--          <TestConnection :status="connectionStatus" @handleTestConnection="handleTestConnection"></TestConnection>-->
-          <div v-if="isTestConnection" class="p-0 text-center">
-            <BSpinner v-if="isTestConnectionLoading" small class="text-center"></BSpinner>
-            <div v-else :class="statusClass" class="text-right">{{ getStatusMessage() }}</div>
+      <DataSourceConfigForm :form-render="sourceRender"></DataSourceConfigForm>
+      <div class="source-form-status">
+        <div
+          class="source-form-status--test-connection"
+          :class="{
+            'test-connection-show': connectionStatus == ConnectionStatus.Failed || connectionStatus == ConnectionStatus.Success
+          }"
+        >
+          <div v-if="connectionStatus == ConnectionStatus.Success" class="source-form-status--test-connection--success">
+            <i class="di-icon-check-circle"></i>
+            <span>Connection Success</span>
           </div>
-          <div v-if="errorMsg" class="p-0 text-center">
-            <div class="text-right text-danger">{{ errorMsg }}</div>
+          <div v-if="connectionStatus == ConnectionStatus.Failed" :title="connectionErrorMsg" class="source-form-status--test-connection--error">
+            <i class="di-icon-error"></i>
+            <span>{{ connectionErrorMsg }}</span>
           </div>
         </div>
+        <div class="source-form-status--validate" v-if="errorMsg">{{ errorMsg }}</div>
       </div>
     </div>
     <template #modal-footer>
-      <div class="custom-footer d-flex col-12 p-0 m-0 mr-1">
-        <DiButton
-          id="button-add-field"
-          :class="{ 'd-none': !isShowReAuthenButton }"
-          class="button-test btn-ghost"
-          title="Re-Connect"
-          @click="handleReAuthentication(dataSourceRender.createDataSourceInfo())"
-        >
-          <img id="ic_google" src="@/assets/icon/ic_google.svg" />
-        </DiButton>
-        <DiButton
-          id="button-add-field"
-          :class="{ 'd-none': isHideAddField }"
-          class="button-test btn-ghost ml-auto"
-          title="Add Connection Properties"
-          @click="handleAddProperty"
-        >
-          <i class="di-icon-add ic-16" />
-        </DiButton>
-        <DiButton
-          id="button-test-connection"
-          :class="{ 'd-none': isHideTestConnection }"
-          class="button-test btn-ghost ml-auto mr-2"
-          title="Test Connection"
-          @click="handleTestConnection"
-        >
-          <img src="@/assets/icon/data_ingestion/ic_connect.svg" class="ic-16" alt="" />
-        </DiButton>
-        <DiButton
-          :class="{ 'ml-auto': isHideTestConnection && isHideAddField }"
-          id="button-submit"
-          class="button-add btn-primary"
-          :title="okTitle"
-          @click="handleSubmit"
-        ></DiButton>
-      </div>
+      <DiButton
+        text-accent
+        id="re-authen-btn"
+        title="Re-Connect"
+        :class="{ 'd-none': !isShowReAuthenButton }"
+        @click="handleReAuthentication(sourceRender.createDataSourceInfo())"
+      >
+        <img id="ic_google" src="@/assets/icon/ic_google.svg" alt="" />
+      </DiButton>
+      <DiButton
+        text-accent
+        id="button-add-field"
+        :class="{ 'd-none': isHiddenAddPropertyBtn }"
+        class="mr-auto"
+        title="Add Properties"
+        @click="handleAddProperty"
+      >
+        <i class="di-icon-add ic-16" />
+      </DiButton>
+      <DiButton
+        text-accent
+        id="button-test-connection"
+        :class="{ 'd-none': isHiddenTestConnectionBtn }"
+        class="ml-auto mr-2"
+        title="Test Connection"
+        @click="handleTestConnection"
+        :is-loading="connectionStatus == ConnectionStatus.Loading"
+      >
+        <i v-if="connectionStatus != ConnectionStatus.Loading" class="di-icon-connect" />
+      </DiButton>
+      <DiButton
+        id="button-submit"
+        primary
+        :class="{ 'ml-auto': isHiddenTestConnectionBtn && isHiddenAddPropertyBtn }"
+        :title="okTitle"
+        style="width: 100px"
+        @click="handleSubmit"
+      ></DiButton>
     </template>
     <ManagePropertyModal ref="managePropertyModal" />
   </BModal>
 </template>
 
 <script lang="ts">
-import { Component, Prop, PropSync, Ref, Vue } from 'vue-property-decorator';
+import { Component, PropSync, Ref, Vue } from 'vue-property-decorator';
 import DiCustomModal from '@/shared/components/DiCustomModal.vue';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import MessageContainer from '@/shared/components/MessageContainer.vue';
 import { Log } from '@core/utils';
 import { DataSourceConfigForm } from '@/screens/data-ingestion/components/data-source-config-form/DataSourceConfigForm';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
-import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
-import TestConnection, { ConnectionStatus } from '@/screens/data-ingestion/components/TestConnection.vue';
 import { DIException } from '@core/common/domain';
 import { AtomicAction } from '@core/common/misc';
-import { DataSourceType, MySqlSourceInfo, SourceWithExtraField } from '@core/data-ingestion';
+import { DataSourceType, SupportCustomProperty } from '@core/data-ingestion';
 import TSLForm from '@/screens/data-cook/components/save-to-database/TSLForm.vue';
-import { Track } from '@/shared/anotation';
-import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import DiDropdown from '@/shared/components/common/di-dropdown/DiDropdown.vue';
-import { NewFieldData } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
+import { CustomPropertyInfo } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
 import ManagePropertyModal from '@/screens/data-ingestion/form-builder/render-impl/ManagePropertyModal.vue';
 import { cloneDeep } from 'lodash';
-import { MySqlDataSourceFormRender } from '../form-builder/render-impl/source-form-render/MySqlDataSourceFormRender';
+import { ConnectionStatus } from './TestConnection';
+import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
 
 @Component({
   components: {
-    TestConnection,
     MessageContainer,
     DiButton,
     DiCustomModal,
@@ -111,36 +116,31 @@ import { MySqlDataSourceFormRender } from '../form-builder/render-impl/source-fo
   }
 })
 export default class DataSourceConfigModal extends Vue {
-  private static readonly DEFAULT_ID = -1;
-  private connectionStatus: ConnectionStatus = ConnectionStatus.Failed;
-  private isTestConnection = false;
-  private errorMsg = '';
+  protected static readonly DEFAULT_ID = -1;
+  protected ConnectionStatus = ConnectionStatus;
+  protected connectionStatus: ConnectionStatus = ConnectionStatus.None;
+  // protected isTestConnection = true;
+  protected connectionErrorMsg = '';
+  protected errorMsg = '';
 
   @PropSync('isShow', { type: Boolean })
-  isShowSync!: boolean;
+  protected isShowSync!: boolean;
 
-  @Prop({ required: true })
-  private dataSourceRender!: DataSourceFormRender;
+  @PropSync('dataSourceRender', { required: true, type: Object })
+  protected sourceRender!: DataSourceFormRender;
 
   @Ref()
-  private readonly managePropertyModal!: ManagePropertyModal;
+  protected readonly managePropertyModal!: ManagePropertyModal;
 
-  private closeModal() {
+  protected closeModal() {
     this.isShowSync = false;
   }
 
-  private get statusClass() {
-    return {
-      'status-error': this.connectionStatus === ConnectionStatus.Failed,
-      'status-success': this.connectionStatus === ConnectionStatus.Success
-    };
-  }
-
-  private get isShowReAuthenButton() {
-    if (this.dataSourceRender.createDataSourceInfo().id < 0) {
+  protected get isShowReAuthenButton(): boolean {
+    if (!this.isEditMode) {
       return false;
     } else {
-      switch (this.dataSourceRender.createDataSourceInfo().sourceType) {
+      switch (this.sourceRender.createDataSourceInfo().sourceType) {
         case DataSourceType.GA4:
         case DataSourceType.GA:
         case DataSourceType.GoogleAds:
@@ -152,83 +152,54 @@ export default class DataSourceConfigModal extends Vue {
     }
   }
 
-  private getStatusMessage(): string {
-    switch (this.connectionStatus) {
-      case ConnectionStatus.Success:
-        return TestConnection.CONNECTION_SUCCESS;
-      case ConnectionStatus.Failed:
-        return TestConnection.CONNECTION_FAILED;
-      default:
-        return TestConnection.CONNECTION_FAILED;
-    }
+  protected get isEditMode(): boolean {
+    return this.sourceRender.createDataSourceInfo().id !== DataSourceConfigModal.DEFAULT_ID;
   }
 
-  private get isTestConnectionLoading(): boolean {
-    return this.connectionStatus === ConnectionStatus.Loading;
-  }
-
-  private get isEditMode() {
-    return this.dataSourceRender.createDataSourceInfo().id !== DataSourceConfigModal.DEFAULT_ID;
-  }
-
-  private get isDisableSubmitButton() {
-    if (this.isHideTestConnection || this.isSuccessConnection) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  private get isSuccessConnection(): boolean {
-    return this.connectionStatus === ConnectionStatus.Success;
-  }
-
-  private get okTitle() {
+  protected get okTitle(): string {
     return this.isEditMode ? 'Update' : 'Add';
   }
 
-  private get isHideTestConnection() {
-    const sourceType: DataSourceType = this.dataSourceRender.createDataSourceInfo().sourceType;
-    Log.debug('JobConfigFormModal::isHideTestConnection::jobType::', this.dataSourceRender.createDataSourceInfo());
+  protected get isHiddenTestConnectionBtn(): boolean {
+    const sourceType: DataSourceType = this.sourceRender.createDataSourceInfo().sourceType;
     switch (sourceType) {
-      // case DataSourceType.GoogleSheet:
+      // case DataSourceType.GoogleAds:
       //   return true;
-      case DataSourceType.GoogleAds:
-        return true;
       default:
         return false;
     }
   }
 
-  private get isHideAddField() {
-    const sourceInfo: DataSourceInfo = this.dataSourceRender.createDataSourceInfo();
-    return !SourceWithExtraField.isSourceExtraField(sourceInfo);
+  protected get isHiddenAddPropertyBtn(): boolean {
+    const sourceInfo: DataSourceInfo = this.sourceRender.createDataSourceInfo();
+    return !SupportCustomProperty.isSupportCustomProperty(sourceInfo);
   }
 
-  private handleAddProperty() {
-    const emptyField: NewFieldData = NewFieldData.empty();
+  protected handleAddProperty(): void {
+    const emptyField: CustomPropertyInfo = CustomPropertyInfo.empty();
     this.managePropertyModal.show(emptyField, async updateField => {
-      const sourceInfo: SourceWithExtraField = (this.dataSourceRender.createDataSourceInfo() as unknown) as SourceWithExtraField;
-      if (sourceInfo.isExistField(updateField.fieldName)) {
+      const sourceInfo: SupportCustomProperty = (this.sourceRender.createDataSourceInfo() as unknown) as SupportCustomProperty;
+      if (sourceInfo.isExistsProperty(updateField.fieldName)) {
         throw new DIException('Field is exist!');
       }
-      sourceInfo.setField(updateField);
-      Log.debug('handleAddField::sourceInfo', sourceInfo);
-      this.dataSourceRender = cloneDeep(this.dataSourceRender);
+      sourceInfo.setProperty(updateField);
+      this.sourceRender = cloneDeep(this.sourceRender);
     });
   }
 
-  private handleReAuthentication(sourceInfo: DataSourceInfo) {
+  protected handleReAuthentication(sourceInfo: DataSourceInfo) {
     this.$emit('reAuthen', sourceInfo);
   }
 
-  public async handleSubmit() {
+  public async handleSubmit(): Promise<void> {
     try {
       // event.preventDefault();
       this.errorMsg = '';
-      const source = this.dataSourceRender.createDataSourceInfo();
+      this.connectionErrorMsg = '';
+      this.connectionStatus = ConnectionStatus.None;
+      const source = this.sourceRender.createDataSourceInfo();
       Log.debug('handleSubmit::', source);
-      this.dataSourceRender.validSource(source);
+      this.sourceRender.validSource(source);
       this.$emit('onClickOk', source);
     } catch (ex) {
       Log.error('handleSubmit', ex);
@@ -236,52 +207,34 @@ export default class DataSourceConfigModal extends Vue {
     }
   }
 
-  private onHide() {
-    this.isTestConnection = false;
-  }
-
-  private onHidden() {
+  protected onHidden() {
     this.$emit('reset');
+    this.reset();
   }
 
-  @Track(TrackEvents.DataSourceTestConnection, {
-    source_id: (_: DataSourceConfigModal, args: any) => _.dataSourceRender.createDataSourceInfo().id,
-    source_type: (_: DataSourceConfigModal, args: any) => _.dataSourceRender.createDataSourceInfo().sourceType,
-    source_name: (_: DataSourceConfigModal, args: any) => _.dataSourceRender.createDataSourceInfo().getDisplayName()
-  })
   @AtomicAction()
-  private async handleTestConnection(e: Event) {
+  protected async handleTestConnection(e: Event): Promise<void> {
     try {
       e.preventDefault();
+      // this.isTestConnection = true;
       this.errorMsg = '';
-      this.isTestConnection = true;
-      const dataSourceInfo: DataSourceInfo = this.dataSourceRender.createDataSourceInfo();
-      Log.debug('DataConfigModal::handleTestConnection::request::', dataSourceInfo);
+      this.connectionErrorMsg = '';
       this.connectionStatus = ConnectionStatus.Loading;
-      const isSuccess = await DataSourceModule.testDataSourceConnection(dataSourceInfo);
-      this.updateConnectionStatus(isSuccess);
+      const dataSourceInfo: DataSourceInfo = this.sourceRender.createDataSourceInfo();
+      const isSuccess = await DataSourceModule.testConnection(dataSourceInfo);
+      this.connectionStatus = isSuccess ? ConnectionStatus.Success : ConnectionStatus.Failed;
     } catch (ex) {
       const exception = DIException.fromObject(ex);
       this.connectionStatus = ConnectionStatus.Failed;
+      this.connectionErrorMsg = exception.getPrettyMessage();
       Log.error('DataSourceConfigModal::handleTestConnection::exception', exception.message);
     }
   }
 
-  private updateConnectionStatus(isSuccess: boolean) {
-    if (isSuccess) {
-      this.connectionStatus = ConnectionStatus.Success;
-    } else {
-      this.connectionStatus = ConnectionStatus.Failed;
-    }
-  }
-
-  private onShowModal() {
-    this.reset();
-  }
-
-  private reset() {
+  protected reset() {
     this.errorMsg = '';
-    this.connectionStatus = ConnectionStatus.Failed;
+    this.connectionErrorMsg = '';
+    this.connectionStatus = ConnectionStatus.None;
   }
 }
 </script>
@@ -315,10 +268,6 @@ export default class DataSourceConfigModal extends Vue {
   }
 }
 
-.test-connection {
-  height: 21px;
-}
-
 .form-item {
   display: flex;
   justify-content: center;
@@ -339,60 +288,87 @@ export default class DataSourceConfigModal extends Vue {
       cursor: text !important;
     }
   }
-
-  .text-connection {
-    color: var(--accent);
-  }
-}
-
-.status-error {
-  color: var(--warning);
-}
-
-.status-success {
-  color: var(--success);
 }
 
 .form-item + .form-item {
   margin-top: 8px;
 }
+</style>
 
-::v-deep {
-  .modal-dialog {
-    max-width: fit-content;
+<style lang="scss">
+.data-source-modal {
+  &--dialog {
+    max-width: 509px;
   }
 
-  .modal-body {
+  &--body {
     padding: 24px 24px 8px;
   }
 
-  .modal-footer {
-    width: 100%;
-    padding: 8px 24px 24px 24px;
-    margin-left: auto;
+  &--footer {
+    padding: 8px 20px 20px 20px;
     display: flex;
-    @media (max-width: 500px) {
-      width: 100%;
-    }
+    flex-direction: row;
+    align-items: flex-end;
+  }
 
-    .button-test {
-      justify-content: center;
-      height: 42px;
+  .source-form-status {
+    &--test-connection {
+      margin-top: 12px;
+      transition: opacity 0.5s ease-in-out;
+      opacity: 0;
 
-      .title {
-        width: fit-content;
-        color: var(--accent);
+      &--error {
+        display: flex;
+        align-items: flex-start;
+        justify-items: flex-start;
+        color: var(--danger);
+
+        i {
+          margin-top: 3px;
+          font-size: 14px;
+          margin-right: 8px;
+        }
+        span {
+          font-size: 14px;
+          line-height: 1.4;
+          letter-spacing: 0.4px;
+          text-align: left;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
       }
 
-      i {
-        color: var(--accent);
+      &--success {
+        display: flex;
+        align-items: center;
+        justify-items: center;
+        color: var(--success);
+
+        i {
+          font-size: 14px;
+          margin-right: 8px;
+        }
+      }
+
+      &.test-connection-show {
+        opacity: 1;
       }
     }
 
-    .button-add {
-      height: 42px;
-      width: 100px;
-      margin-left: 6px;
+    &--validate {
+      margin-top: 12px;
+      color: var(--danger);
+      font-size: 14px;
+      line-height: 1.4;
+      letter-spacing: 0.4px;
+      text-align: left;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
   }
 }

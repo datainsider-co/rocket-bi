@@ -1,13 +1,12 @@
 import { Action, getModule, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import store from '@/store';
 import { Stores } from '@/shared';
-import { ConnectorService, Connector, ConnectorType, RefreshSchemaHistory, SSHPublicKeyResponse } from '@core/connector-config';
+import { Connector, ConnectorService, ConnectorType, RefreshSchemaHistory } from '@core/connector-config';
 import { Inject } from 'typescript-ioc';
 import { DIException } from '@core/common/domain';
-import { DataManager } from '@core/common/services';
 import { PermissionAdminService } from '@core/admin/service/PermissionAdminService';
 import { IsPermittedPermissionRequest } from '@core/admin/domain/request/IsPermittedPermissionRequest';
-import { AuthenticationModule, AuthenticationStore } from '@/store/modules/AuthenticationStore';
+import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { Mutex } from 'async-mutex';
 
 export interface SourceResponse {
@@ -31,6 +30,10 @@ export class ConnectionStore extends VuexModule {
 
   @Inject
   private readonly permissionAdminService!: PermissionAdminService;
+
+  get sourceType(): ConnectorType {
+    return this.source?.className ?? ConnectorType.Clickhouse;
+  }
 
   get isSetUpStep(): boolean {
     if (this.isExistedSource && this.status.isFirstRun && this.status.isRunning) {

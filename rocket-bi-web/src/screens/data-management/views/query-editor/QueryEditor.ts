@@ -1,7 +1,7 @@
 import { Component, Inject, Mixins, Ref, Vue, Watch } from 'vue-property-decorator';
 import { DatabaseSchemaModule, SchemaReloadMode } from '@/store/modules/data-builder/DatabaseSchemaStore';
 import DiButton from '@/shared/components/common/DiButton.vue';
-import { FormulaController } from '@/shared/fomula/FormulaController';
+import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
 import TableCreationFromQueryModal from '@/screens/data-management/components/TableCreationFromQueryModal.vue';
 import DataComponents from '@/screens/data-management/components/DataComponents';
 import { FormulaSuggestionModule } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
@@ -67,8 +67,9 @@ import { NumberParamToChartHandler } from '@/screens/data-management/components/
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
 import { ConnectorType } from '@core/connector-config';
-import { FormulaControllerResolver } from '@/shared/fomula/builder/FormulaControllerResolver';
+import { FormulaControllerFactoryResolver } from '@/shared/fomula/builder/FormulaControllerFactoryResolver';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
+import { FormulaControllerFactory } from '@/shared/fomula/builder/FormulaControllerFactory';
 
 Vue.use(DataComponents);
 
@@ -95,7 +96,7 @@ type ModalComponentType = {
 })
 export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPanelMixin) implements RouterLeavingHook {
   private static readonly intervalTime = 5000; //ms
-  private formulaController: FormulaController | null = null;
+  private formulaController: MonacoFormulaController | null = null;
   private editorController = new EditorController();
   private currentQuery = '';
   private loading = false;
@@ -178,17 +179,11 @@ export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPa
   }
 
   private initFormulaController() {
-    Log.debug('initFormulaController::', ConnectionModule.source, DatabaseSchemaModule.databaseInfos.length);
-    const sourceType: ConnectorType = ConnectionModule.source?.className ?? ConnectorType.Clickhouse;
-    const syntax = Di.get(FormulaControllerResolver).getSyntax(sourceType);
-    FormulaSuggestionModule.initSuggestFunction({
-      fileNames: [syntax]
+    const factory: FormulaControllerFactory = Di.get(FormulaControllerFactoryResolver).resolve(ConnectionModule.sourceType);
+    FormulaSuggestionModule.loadSuggestions({
+      supportedFunctionInfo: factory.getSupportedFunctionInfo()
     });
-    this.formulaController = Di.get(FormulaControllerResolver).createController(
-      sourceType,
-      FormulaSuggestionModule.allFunctions,
-      DatabaseSchemaModule.databaseInfos
-    );
+    this.formulaController = factory.createFormulaController(FormulaSuggestionModule.allFunctions, DatabaseSchemaModule.databaseInfos);
   }
 
   private get databaseName(): string {

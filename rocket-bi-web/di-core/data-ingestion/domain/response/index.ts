@@ -11,3 +11,5 @@ export * from './TokenResponse';
 export * from './TiktokAccessTokenResponse';
 export * from './TiktokAccessTokenResponse';
 export * from './TiktokSource';
+export * from './HubspotSource';
+export * from './MixpanelSource';

@@ -30,14 +30,18 @@
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import EtlModal from '../../../etl-modal/EtlModal.vue';
-import { ExpressionFieldConfiguration, FieldConfiguration, ManageFieldOperator, NormalFieldConfiguration } from '@core/data-cook';
+import { ExpressionFieldConfiguration, FieldConfiguration, ManageFieldOperator } from '@core/data-cook';
 import { TableSchema } from '@core/common/domain';
 import { FormulaSuggestionModule } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
-import { CalculatedFieldController } from '@/shared/fomula/CalculatedFieldController';
 import FormulaCompletionInput from '@/shared/components/formula-completion-input/FormulaCompletionInput.vue';
 import { ExpressionParser, RawExpressionData } from '@core/schema/service/ExpressionParser';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
+import { FormulaControllerFactory } from '@/shared/fomula/builder/FormulaControllerFactory';
+import { Di } from '@core/common/modules';
+import { FormulaControllerFactoryResolver } from '@/shared/fomula/builder/FormulaControllerFactoryResolver';
+import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
+import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
 
 enum VIEW_MODE {
   Add = 'Add',
@@ -51,27 +55,27 @@ enum VIEW_MODE {
   }
 })
 export default class ManageExpressionField extends Vue {
-  private viewMode: VIEW_MODE = VIEW_MODE.Add;
-  private target: ExpressionFieldConfiguration | null = null;
-  private displayName = '';
-  private formula = '';
-  private formulaController: CalculatedFieldController | null = null;
-  private tableSchema: TableSchema | null = null;
-  private displayNameError = '';
-  private formulaError = '';
+  protected viewMode: VIEW_MODE = VIEW_MODE.Add;
+  protected target: ExpressionFieldConfiguration | null = null;
+  protected displayName = '';
+  protected formula = '';
+  protected formulaController: MonacoFormulaController | null = null;
+  protected tableSchema: TableSchema | null = null;
+  protected displayNameError = '';
+  protected formulaError = '';
 
   @Ref()
-  private modal!: EtlModal;
+  protected modal!: EtlModal;
 
   @Prop({ type: ManageFieldOperator, default: () => null })
-  private readonly data: ManageFieldOperator | null = null;
+  protected readonly data: ManageFieldOperator | null = null;
 
-  private get actionName() {
+  protected get actionName() {
     if (this.viewMode === VIEW_MODE.Add) return 'Add';
     else return 'Save';
   }
 
-  private resetModel() {
+  protected resetModel() {
     this.target = null;
     this.displayName = '';
     this.formula = '';
@@ -162,23 +166,14 @@ export default class ManageExpressionField extends Vue {
     this.hide();
   }
 
-  private initFormulaSuggestion(tableSchema: TableSchema) {
-    FormulaSuggestionModule.initSuggestFunction({
-      fileNames: ['clickhouse-syntax.json'],
+  protected initFormulaSuggestion(tableSchema: TableSchema) {
+    const factory: FormulaControllerFactory = Di.get(FormulaControllerFactoryResolver).resolve(ConnectionModule.sourceType);
+    FormulaSuggestionModule.loadSuggestions({
+      supportedFunctionInfo: factory.getSupportedFunctionInfo(),
       ignoreFunctions: ['Keyword']
     });
     FormulaSuggestionModule.setTableSchema(tableSchema);
-    this.formulaController = new CalculatedFieldController(FormulaSuggestionModule.allFunctions, FormulaSuggestionModule.columns);
-  }
-
-  private handleSelectKeyword(keyword: string): void {
-    // const isDiffFunction = this.currentFunction?.title !== keyword;
-    // if (isDiffFunction) {
-    //   const functionInfo: FunctionInfo | undefined = FormulaSuggestionModule.getFunctionInfo(keyword);
-    //   if (functionInfo) {
-    //     this.showDescription(functionInfo);
-    //   }
-    // }
+    this.formulaController = factory.createCalculatedFieldController(FormulaSuggestionModule.allFunctions, FormulaSuggestionModule.columns);
   }
 }
 </script>

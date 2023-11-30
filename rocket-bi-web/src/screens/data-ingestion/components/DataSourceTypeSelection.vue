@@ -3,7 +3,7 @@
     :isShow.sync="isShowSync"
     title="Add DataSource"
     sub-title="Select DataSource Type"
-    :all-items="allItems"
+    :all-items="dataSourceList"
     :no-close-on-esc="false"
     :no-close-on-backdrop="false"
     class="visualization-panel mb-3"
@@ -29,9 +29,9 @@ export default class DataSourceTypeSelection extends Vue {
   @PropSync('isShow', { type: Boolean })
   isShowSync!: boolean;
 
-  private readonly allItems: ItemData[] = ALL_DATASOURCE;
+  readonly dataSourceList: ItemData[] = ALL_DATASOURCE;
 
-  private handleItemSelected(selectedDataSource: VisualizationItemData) {
+  handleItemSelected(selectedDataSource: VisualizationItemData) {
     this.$emit('onDataSourceTypeSelected', selectedDataSource);
   }
 }

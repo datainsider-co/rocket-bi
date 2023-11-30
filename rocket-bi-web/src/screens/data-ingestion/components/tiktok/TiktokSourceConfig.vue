@@ -103,19 +103,18 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator';
-import { FacebookAdsJob, FormMode, Job, TiktokAdsJob, TikTokReport } from '@core/data-ingestion';
-import { Inject } from 'typescript-ioc';
-import { DataSourceService } from '@core/common/services/DataSourceService';
-import { Log } from '@core/utils';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
-import { DateRange, DateTimeConstants, SelectOption } from '@/shared';
+import { DateRange, DateTimeConstants } from '@/shared';
 import DiToggle from '@/shared/components/common/DiToggle.vue';
-import { DateTimeUtils, DateUtils, ListUtils, PopupUtils, StringUtils, TimeoutUtils } from '@/utils';
-import { DIException, MainDateMode, SourceId } from '@core/common/domain';
-import DiCalendar from '@filter/main-date-filter-v2/DiCalendar.vue';
 import { CalendarData } from '@/shared/models';
-import { required } from 'vuelidate/lib/validators';
+import { DateUtils, ListUtils, PopupUtils, StringUtils } from '@/utils';
+import { DIException, MainDateMode, SourceId } from '@core/common/domain';
+import { DataSourceService } from '@core/common/services/DataSourceService';
+import { TikTokReport, TiktokAdsJob } from '@core/data-ingestion';
+import { Log } from '@core/utils';
+import DiCalendar from '@filter/main-date-filter-v2/DiCalendar.vue';
+import { Inject } from 'typescript-ioc';
+import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator';
 
 @Component({
   components: { DiToggle, DiCalendar }

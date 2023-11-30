@@ -84,7 +84,7 @@ export default class DateSelectFilter2 extends Vue {
       default:
         {
           if (calendarData.chosenDateRange) {
-            dates.push(DateTimeUtils.formatDate(calendarData.chosenDateRange.start), DateTimeUtils.formatDate(calendarData.chosenDateRange.end, true));
+            dates.push(DateTimeUtils.formatDateTime(calendarData.chosenDateRange.start), DateTimeUtils.formatDateTime(calendarData.chosenDateRange.end, true));
           }
         }
         break;

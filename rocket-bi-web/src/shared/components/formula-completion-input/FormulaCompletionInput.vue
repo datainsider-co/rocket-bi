@@ -14,35 +14,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, PropSync, Ref, Vue, Model, Watch } from 'vue-property-decorator';
+import { Component, Emit, Model, Prop, Ref, Vue } from 'vue-property-decorator';
 import MonacoEditor, { monaco } from 'monaco-editor-vue';
-import {
-  EtlQueryThemeLight,
-  FormulaThemeDark,
-  FormulaThemeLight,
-  QueryThemeDark,
-  QueryThemeLight,
-  SparkQueryThemeLight
-} from '@/shared/constants/CustomEditorTheme';
-import { FormulaController } from '@/shared/fomula/FormulaController';
+import { EtlQueryThemeLight, FormulaThemeLight, QueryThemeLight, SparkQueryThemeLight } from '@/shared/constants/CustomEditorTheme';
+import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
 import { DebounceAction } from '@/shared/anotation/DebounceAction';
 import { FormulaUtils } from '@/shared/fomula/FormulaUtils';
-import { _ThemeStore } from '@/store/modules/ThemeStore';
 import { Log } from '@core/utils';
 import { EditorController } from '@/shared/fomula/EditorController';
-import { DomUtils, ListUtils } from '@/utils';
 import { StringUtils } from '@/utils/StringUtils';
 import { editor } from 'monaco-editor';
 import IModelContentChangedEvent = editor.IModelContentChangedEvent;
 
-monaco.editor.defineTheme('formula-theme-dark', FormulaThemeDark);
 monaco.editor.defineTheme('formula-theme-light', FormulaThemeLight);
-monaco.editor.defineTheme('query-theme-dark', QueryThemeDark);
 monaco.editor.defineTheme('query-theme-light', QueryThemeLight);
 monaco.editor.defineTheme('spark-theme-light', SparkQueryThemeLight);
 
 monaco.editor.defineTheme('etl-query-theme-light', EtlQueryThemeLight);
-monaco.editor.defineTheme('etl-query-theme-dark', EtlQueryThemeLight);
 
 @Component({
   components: { MonacoEditor }
@@ -52,37 +40,37 @@ monaco.editor.defineTheme('etl-query-theme-dark', EtlQueryThemeLight);
  */
 export default class FormulaCompletionInput extends Vue {
   @Model('input', { required: true, type: String, default: '' })
-  private readonly value!: string;
+  protected readonly value!: string;
 
   @Prop({ required: true, type: Object })
-  private readonly formulaController!: FormulaController;
+  protected readonly formulaController!: MonacoFormulaController;
 
   @Prop({ required: false, type: Object, default: () => new EditorController() })
-  private readonly editorController!: EditorController;
+  protected readonly editorController!: EditorController;
 
   @Prop({ type: Boolean, default: false })
-  private readonly fixedOverflowWidgets!: boolean;
+  protected readonly fixedOverflowWidgets!: boolean;
 
   @Prop({ required: false, type: String, default: 'Enter your query here...' })
-  private readonly placeholder!: string;
+  protected readonly placeholder!: string;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly isReadOnly!: boolean;
+  protected readonly isReadOnly!: boolean;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly isFixedScroll!: boolean;
+  protected readonly isFixedScroll!: boolean;
   @Ref()
-  private monacoEditor?: any;
+  protected monacoEditor?: any;
 
-  private get isShowPlaceholder(): boolean {
+  protected get isShowPlaceholder(): boolean {
     return StringUtils.isEmpty(this.value);
   }
 
-  private cursorChangeListener?: any;
+  protected cursorChangeListener?: any;
 
-  private blurEditorWidgetListener?: any;
+  protected blurEditorWidgetListener?: any;
 
-  private readonly editorOptions: any = {
+  protected readonly editorOptions: any = {
     minimap: {
       enabled: false
     },
@@ -105,15 +93,11 @@ export default class FormulaCompletionInput extends Vue {
     fixedOverflowWidgets: this.fixedOverflowWidgets
   };
 
-  private get themeName() {
-    return _ThemeStore.currentThemeName;
+  protected get formulaTheme(): string {
+    return this.formulaController.getTheme();
   }
 
-  private get formulaTheme(): string {
-    return this.formulaController.getTheme(this.themeName);
-  }
-
-  private get formulaName(): string {
+  protected get formulaName(): string {
     return this.formulaController.formulaName();
   }
 
@@ -145,15 +129,15 @@ export default class FormulaCompletionInput extends Vue {
     this.blurEditorWidgetListener?.dispose();
   }
 
-  private setReadOnly(readOnly: boolean) {
+  protected setReadOnly(readOnly: boolean) {
     this.monacoEditor.editor.updateOptions({ readOnly: readOnly });
   }
 
-  private setSuggestSelection(suggestSelection: string) {
+  protected setSuggestSelection(suggestSelection: string) {
     this.monacoEditor.editor.updateOptions({ suggestSelection: suggestSelection });
   }
 
-  private setFixedScroll(enabled: boolean) {
+  protected setFixedScroll(enabled: boolean) {
     this.monacoEditor.editor.updateOptions({ scrollbar: { handleMouseWheel: !enabled } });
   }
 
@@ -167,19 +151,19 @@ export default class FormulaCompletionInput extends Vue {
   }
 
   @DebounceAction({ timeDebounce: 100 })
-  private handleOnCursorChanged(payload: { position: any }) {
+  protected handleOnCursorChanged(payload: { position: any }) {
     const keyword: string | undefined = FormulaUtils.findNearestKeyword(this.value, payload.position, '\\b\\w+(?=\\()');
     if (keyword) {
       this.emitChangeKeyword(keyword);
     }
   }
 
-  private onCodeChange(newCode: string): void {
+  protected onCodeChange(newCode: string): void {
     this.$emit('input', newCode);
   }
 
   @Emit('onSelectKeyword')
-  private emitChangeKeyword(keyword: string): string {
+  protected emitChangeKeyword(keyword: string): string {
     return keyword;
   }
 
@@ -191,7 +175,7 @@ export default class FormulaCompletionInput extends Vue {
     });
   }
 
-  private handleOnBlurEditorWidget(e: any) {
+  protected handleOnBlurEditorWidget(e: any) {
     // if(St this.formulaData)
     this.$emit('blur', e);
   }

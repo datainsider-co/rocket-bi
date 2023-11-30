@@ -1,6 +1,6 @@
 {
   "name": "rocketbi",
-  "version": "v23.09.18",
+  "version": "v23.11.30",
   "private": true,
   "description": "RocketBI project",
   "scripts": {
@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@johmun/vue-tags-input": "^2.1.0",
-    "@types/jquery": "^3.5.16",
     "@vue/composition-api": "^1.7.1",
     "ant-design-vue": "^1.7.2",
     "axios": "^0.19.2",
@@ -43,7 +42,6 @@
     "nprogress": "^0.2.0",
     "path": "^0.12.7",
     "sweetalert2": "^11.0.18",
-    "tinycolor2": "^1.6.0",
     "tui-image-editor": "3.15.2",
     "typescript-ioc": "^3.2.2",
     "v-calendar": "^1.0.8",
@@ -60,7 +58,6 @@
     "vue-gpickr": "0.4.2",
     "vue-property-decorator": "8.2.2",
     "vue-recaptcha": "^2.0.3",
-    "vue-responsive": "^1.1.0",
     "vue-router": "^3.4.3",
     "vue-select": "^3.10.8",
     "vue-split-panel": "^1.0.4",
@@ -89,6 +86,7 @@
     "@types/gapi.client.drive": "^3.0.13",
     "@types/gapi.client.sheets": "^4.0.20201029",
     "@types/gapi.client.webmasters": "^3.0.2",
+    "@types/jquery": "^3.5.16",
     "@types/lodash": "^4.14.157",
     "@types/mocha": "^5.2.4",
     "@types/rx": "^4.1.2",

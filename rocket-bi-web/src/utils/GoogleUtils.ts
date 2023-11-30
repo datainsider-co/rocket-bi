@@ -4,17 +4,13 @@ import { Ga4Dimension } from '@core/data-ingestion/domain/job/ga4/Ga4Dimension';
 import { Log } from '@core/utils';
 
 export abstract class GoogleUtils {
-  static setupGoogleDriveClient(apiKey: string, accessToken: string) {
-    // eslint-disable-next-line @typescript-eslint/camelcase
+  static setupGoogleDriveClient(accessToken: string): Promise<void> {
     gapi.client.setToken({ access_token: accessToken });
-    gapi.client.setApiKey(apiKey);
     return gapi.client.load('https://content.googleapis.com/discovery/v1/apis/drive/v3/rest', 'v3');
   }
 
-  static setupGoogleSheetClient(apiKey: string, accessToken: string) {
-    // eslint-disable-next-line @typescript-eslint/camelcase
+  static setupGoogleSheetClient(accessToken: string) {
     gapi.client.setToken({ access_token: accessToken });
-    gapi.client.setApiKey(apiKey);
     return gapi.client.load('https://sheets.googleapis.com/$discovery/rest?version=v4', 'v4');
   }
 
@@ -28,13 +24,10 @@ export abstract class GoogleUtils {
         // @ts-ignore
         window.gapi.auth2.authorize(
           {
-            // eslint-disable-next-line
             client_id: clientId,
             scope: scope,
             // fixme: migrate to new api https://developers.google.com/identity/gsi/web/guides/migration
-            // eslint-disable-next-line @typescript-eslint/camelcase
             plugin_name: 'App used in google developer console API',
-            // eslint-disable-next-line
             response_type: 'id_token code permission',
             prompt: 'consent'
           } as any,
@@ -78,11 +71,7 @@ export abstract class GoogleUtils {
   }
 
   static getSheetRecords(spreadsheetId: string, ranges: string): Promise<gapi.client.Response<gapi.client.sheets.BatchGetValuesResponse>> {
-    return gapi.client.sheets.spreadsheets.values
-      .batchGet({ spreadsheetId: spreadsheetId, ranges: ranges })
-      .then((response: gapi.client.Response<gapi.client.sheets.BatchGetValuesResponse>) => {
-        return response;
-      });
+    return gapi.client.sheets.spreadsheets.values.batchGet({ spreadsheetId: spreadsheetId, ranges: ranges });
   }
 
   static getUserProfile(accessToken: string) {
@@ -95,10 +84,8 @@ export abstract class GoogleUtils {
     });
   }
 
-  static loadGoogleAnalyticClient(apiKey: string, accessToken: string) {
-    // eslint-disable-next-line @typescript-eslint/camelcase
+  static loadGoogleAnalyticClient(accessToken: string) {
     gapi.client.setToken({ access_token: accessToken });
-    gapi.client.setApiKey(apiKey);
     return gapi.client.load('https://content.googleapis.com/discovery/v1/apis/analytics/v3/rest', 'v3');
   }
 
@@ -108,10 +95,8 @@ export abstract class GoogleUtils {
     });
   }
 
-  static async loadGA4Client(apiKey: string, accessToken: string) {
-    // eslint-disable-next-line @typescript-eslint/camelcase
+  static async loadGA4Client(accessToken: string) {
     gapi.client.setToken({ access_token: accessToken });
-    gapi.client.setApiKey(apiKey);
     await Promise.all([
       gapi.client.load('https://analyticsreporting.googleapis.com/$discovery/rest?version=v4', 'v4'),
       gapi.client.load('https://analyticsdata.googleapis.com/$discovery/rest', ''),
@@ -133,8 +118,7 @@ export abstract class GoogleUtils {
   }
 
   //require load google analytic client before
-  static getGA4AccountSummarizes() {
-    // eslint-disable-next-line @typescript-eslint/camelcase
+  static getGA4AccountSummarizes(): gapi.client.Request<gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaListAccountSummariesResponse> {
     return gapi.client.analyticsadmin.accountSummaries.list({});
   }
 
@@ -158,9 +142,8 @@ export abstract class GoogleUtils {
     });
   }
 
-  static loadGoogleSearchConsoleClient(apiKey: string, accessToken: string) {
+  static loadGoogleSearchConsoleClient(accessToken: string): Promise<void> {
     gapi.client.setToken({ access_token: accessToken });
-    // gapi.client.setApiKey(apiKey);
     return gapi.client.load('https://content.googleapis.com/discovery/v1/apis/searchconsole/v1/rest', 'v1beta');
   }
 

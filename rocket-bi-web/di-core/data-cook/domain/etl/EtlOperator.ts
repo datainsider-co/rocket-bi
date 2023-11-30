@@ -519,7 +519,7 @@ export class PivotTableOperator extends EtlOperator {
 }
 
 export enum EtlQueryLanguages {
-  ClickHouse = 'ClickHouse',
+  SQL = 'SQL',
   Python = 'Python3'
 }
 
@@ -538,7 +538,7 @@ export abstract class QueryOperator extends EtlOperator {
 }
 
 export class SQLQueryOperator extends QueryOperator {
-  language: EtlQueryLanguages = EtlQueryLanguages.ClickHouse;
+  language: EtlQueryLanguages = EtlQueryLanguages.SQL;
 
   requireProcessQuery(): boolean {
     return false;

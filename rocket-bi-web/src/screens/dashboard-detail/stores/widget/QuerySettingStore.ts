@@ -18,6 +18,7 @@ import { QueryRelatedWidget } from '@core/common/domain/model/widget/chart/Query
 import { DIException } from '@core/common/domain/exception';
 import { SortDirection } from '@core/common/domain/request';
 import { Sortable } from '@core/common/domain/model/query/features/Sortable';
+import { Log } from '@core/utils';
 
 const toFlattenPivotIfPossible = (querySetting: QuerySetting): QuerySetting => {
   if (PivotTableQuerySetting.isPivotChartSetting(querySetting)) {
@@ -150,6 +151,7 @@ export class QuerySettingStore extends VuexModule {
       this.allDynamicValuesMap.delete(id);
     }
     this.querySettingMap.forEach((querySetting, widgetId) => {
+      Log.debug('QuerySettingStore.setDynamicValues', 'widgetId', widgetId, 'id', id);
       if (id !== widgetId && querySetting.canApplyValueControl(id)) {
         // apply current dynamic values to other query
         const newDynamicValueMap = new Map([[id, this.allDynamicValuesMap.get(id) ?? new Map()]]);

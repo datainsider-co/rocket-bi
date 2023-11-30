@@ -23,7 +23,6 @@ enum DataManagerKeys {
   // MainDatabase = 'db_highest_used',
   DashboardSetting = 'dashboard_setting',
   LoginType = 'login_type',
-  Dashboard = 'dashboard',
   SelectedColumns = 'selected_columns',
   Organization = 'organization',
   RecentIcons = 'recent_icons'
@@ -180,19 +179,6 @@ export class DataManager {
     const key = this.buildKey([DataManagerKeys.DashboardSetting, id]);
     const settingAsString = JSON.stringify(setting);
     localStorage.setItem(key, settingAsString);
-  }
-
-  // save current dashboard to sessionStorage storage
-  static saveCurrentDashboard(dashboard: Dashboard): void {
-    const dashboardAsString = JSON.stringify(dashboard);
-    sessionStorage.setItem(DataManagerKeys.Dashboard, dashboardAsString);
-  }
-
-  static getCurrentDashboard(): Dashboard | undefined {
-    const dashboardAsString: string | null = sessionStorage.getItem(DataManagerKeys.Dashboard);
-    if (dashboardAsString) {
-      return Dashboard.fromObject(JSON.parse(dashboardAsString));
-    }
   }
 
   // Input is array ['key1', 'key2', 'key3']

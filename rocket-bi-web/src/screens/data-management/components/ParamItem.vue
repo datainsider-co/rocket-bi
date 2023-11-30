@@ -156,7 +156,7 @@ export default class ParamItem extends Vue {
       case ParamValueType.number:
         return `${this.tempValue}`;
       case ParamValueType.date:
-        return DateTimeUtils.formatDate(this.tempValue);
+        return DateTimeUtils.formatDateTime(this.tempValue);
       default:
         return '';
     }

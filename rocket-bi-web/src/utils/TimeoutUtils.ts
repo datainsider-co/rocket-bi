@@ -10,6 +10,12 @@ export abstract class TimeoutUtils {
     }
   }
 
+  public static clear(oldId?: number | null): void {
+    if (oldId) {
+      clearTimeout(oldId);
+    }
+  }
+
   /**
    * Function for testing
    */

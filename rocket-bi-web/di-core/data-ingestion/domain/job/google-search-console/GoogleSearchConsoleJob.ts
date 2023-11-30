@@ -2,6 +2,7 @@ import {
   DataDestination,
   DataSourceInfo,
   GoogleSearchConsoleType,
+  HubspotObjectType,
   Job,
   JobStatus,
   JobType,
@@ -39,9 +40,6 @@ export class GoogleSearchConsoleJob implements Job {
   syncMode: SyncMode;
   lastSyncedValue: string;
 
-  propertyId: string;
-  accountId: string;
-
   dateRange: PalexyDateRange;
   siteUrl: string;
   tableType: GoogleSearchConsoleType;
@@ -62,9 +60,6 @@ export class GoogleSearchConsoleJob implements Job {
     nextRunTime: number,
     lastSyncStatus: JobStatus,
     currentSyncStatus: JobStatus,
-
-    propertyId: string,
-    accountId: string,
     dateRange: PalexyDateRange,
     siteUrl: string,
     tableType: GoogleSearchConsoleType,
@@ -86,8 +81,6 @@ export class GoogleSearchConsoleJob implements Job {
     this.lastSyncStatus = lastSyncStatus;
     this.currentSyncStatus = currentSyncStatus;
 
-    this.propertyId = propertyId;
-    this.accountId = accountId;
     this.dateRange = dateRange;
 
     this.siteUrl = siteUrl;
@@ -113,8 +106,6 @@ export class GoogleSearchConsoleJob implements Job {
       obj.nextRunTime,
       obj.lastSyncStatus,
       obj.currentSyncStatus,
-      obj.propertyId,
-      obj.accountId,
       PalexyDateRange.fromObject(obj.dateRange),
       obj.siteUrl,
       obj.tableType,
@@ -123,12 +114,12 @@ export class GoogleSearchConsoleJob implements Job {
     );
   }
   //
-  static default(source?: GoogleSearchConsoleSourceInfo): GoogleSearchConsoleJob {
+  static default(source?: DataSourceInfo): GoogleSearchConsoleJob {
     return new GoogleSearchConsoleJob(
       Job.DEFAULT_ID,
       '-1',
       source?.id ?? -1,
-      '',
+      'Google Search Console job',
       '',
       '',
       [DataDestination.Clickhouse],
@@ -139,8 +130,6 @@ export class GoogleSearchConsoleJob implements Job {
       0,
       JobStatus.Initialized,
       JobStatus.Initialized,
-      '',
-      '',
       PalexyDateRange.default(),
       '',
       GoogleSearchConsoleType.SearchAnalytics,
@@ -206,10 +195,13 @@ export class GoogleSearchConsoleJob implements Job {
     return this;
   }
 
-  createSingleJob() {
-    const clonedJob: GoogleSearchConsoleJob = cloneDeep(this);
-    clonedJob.displayName = `${clonedJob.displayName} (table name: ${clonedJob.tableType})`;
-    clonedJob.destTableName = clonedJob.tableType;
-    return clonedJob;
+  getMultiJob(): Job[] {
+    return Object.values(GoogleSearchConsoleType).map(tableType => {
+      const job = cloneDeep(this);
+      job.displayName = `${job.displayName} (table name: ${tableType})`;
+      job.tableType = tableType;
+      job.destTableName = tableType;
+      return job;
+    });
   }
 }

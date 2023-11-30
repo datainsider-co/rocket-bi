@@ -243,10 +243,13 @@ export default class ChartHolder extends Vue {
    */
   @Provide()
   async applyFilterRequest(data: { filterRequest?: FilterRequest; filterValueMap?: Map<ValueControlType, string[]> }): Promise<void> {
+    Log.debug('applyFilterRequest::data', data);
     const { filterRequest, filterValueMap } = data;
     const affectedByFilterIds: WidgetId[] = filterRequest ? this.addFilter(filterRequest) : this.removeFilter(this.currentChartInfo.id);
     const affectedByCrossFilterIds: WidgetId[] = await this.addFilterValue(this.currentChartInfo.id, filterValueMap);
     const affectedIds: WidgetId[] = ListUtils.distinct([...affectedByFilterIds, ...affectedByCrossFilterIds]);
+    Log.debug('applyFilterRequest::affectedIds', affectedIds, affectedByCrossFilterIds);
+
     await this.requestRender(affectedIds);
     // remove ignore apply filter for current chart avoid reload current chart
     if (ListUtils.isNotEmpty(affectedByFilterIds)) {
@@ -289,8 +292,8 @@ export default class ChartHolder extends Vue {
   }
 
   protected async addFilterValue(requestId: WidgetId, valueMap?: Map<ValueControlType, string[]>): Promise<WidgetId[]> {
-    const { groupId } = WidgetModule.findTabContainWidget(requestId);
-    if (groupId > -1) {
+    if (WidgetModule.isInGroupFilter(requestId)) {
+      const { groupId } = WidgetModule.findTabContainWidget(requestId);
       FilterModule.pushFilterValueToGroup({ groupId: groupId, widgetId: requestId, valueMap: valueMap });
       return [];
     } else {
@@ -374,7 +377,6 @@ export default class ChartHolder extends Vue {
     const dashboard = DashboardModule.currentDashboard;
     if (dashboard) {
       DataManager.saveCurrentDashboardId(dashboard.id.toString());
-      DataManager.saveCurrentDashboard(dashboard);
       DataManager.saveCurrentWidget(this.currentChartInfo);
       // RouteUtils.navigateToDataBuilder(this.$route, FilterModule.routerFilters);
       this.$root.$emit(DashboardEvents.UpdateChart, this.currentChartInfo);
@@ -388,7 +390,6 @@ export default class ChartHolder extends Vue {
     const dashboard = DashboardModule.currentDashboard;
     if (dashboard) {
       DataManager.saveCurrentDashboardId(dashboard.id.toString());
-      DataManager.saveCurrentDashboard(dashboard);
       // RouteUtils.navigateToDataBuilder(this.$route, FilterModule.routerFilters);
       this.$root.$emit(DashboardEvents.AddInnerFilter, this.currentChartInfo);
     }
@@ -401,7 +402,6 @@ export default class ChartHolder extends Vue {
     const dashboard = DashboardModule.currentDashboard;
     if (dashboard) {
       DataManager.saveCurrentDashboardId(dashboard.id.toString());
-      DataManager.saveCurrentDashboard(dashboard);
       DataManager.saveCurrentWidget(this.currentChartInfo.chartFilter!);
       // RouteUtils.navigateToDataBuilder(this.$route, FilterModule.routerFilters);
       this.$root.$emit(DashboardEvents.UpdateInnerFilter, this.currentChartInfo);
@@ -436,7 +436,7 @@ export default class ChartHolder extends Vue {
     const newWidget: Widget = await WidgetModule.handleDuplicateWidget(this.currentChartInfo);
     if (QueryRelatedWidget.isQueryRelatedWidget(newWidget)) {
       const clonedChart = cloneDeep(newWidget);
-      ZoomModule.registerZoomData({ id: clonedChart.id, setting: clonedChart.setting });
+      ZoomModule.registerZoomDataById({ id: clonedChart.id, query: clonedChart.setting });
       FilterModule.setAffectFilterWidget(newWidget);
       QuerySettingModule.setQuerySetting({ id: newWidget.id, query: newWidget.setting });
       await DashboardControllerModule.renderChart({ id: newWidget.id, forceFetch: true });
@@ -496,7 +496,7 @@ export default class ChartHolder extends Vue {
     if (isFunction(this.retry)) {
       this.retry();
     } else {
-      ZoomModule.registerZoomData({ id: this.currentChartInfo.id, setting: this.currentChartInfo.setting });
+      ZoomModule.registerZoomDataById({ id: this.currentChartInfo.id, query: this.currentChartInfo.setting });
       FilterModule.setAffectFilterWidget(this.currentChartInfo);
       DashboardControllerModule.renderChart({ id: this.currentChartInfo.id, forceFetch: true });
     }

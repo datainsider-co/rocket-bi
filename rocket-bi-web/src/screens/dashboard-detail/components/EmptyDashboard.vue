@@ -26,7 +26,6 @@ export default class EmptyDashboard extends Vue {
     const dashboard = DashboardModule.currentDashboard;
     if (this.isCreator && dashboard) {
       DataManager.saveCurrentDashboardId(dashboard.id.toString());
-      DataManager.saveCurrentDashboard(dashboard);
       this.$root.$emit(DashboardEvents.AddChart);
       // RouteUtils.navigateToDataBuilder(this.$route, FilterModule.routerFilters);
     } else {

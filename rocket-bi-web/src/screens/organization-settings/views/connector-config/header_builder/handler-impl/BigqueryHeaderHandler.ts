@@ -4,7 +4,7 @@ import { CustomCell, HeaderData } from '@/shared/models';
 import { HtmlElementRenderUtils } from '@/utils';
 
 export class BigqueryHeaderHandler extends DataSourceHeaderHandler<BigqueryConnector> {
-  private readonly locations = require('@/screens/organization-settings/views/connector-config/connector-form/connector-form-impl/locations.json');
+  private readonly locations = require('@/screens/organization-settings/views/connector-config/components/connector-form/connector-form-impl/locations.json');
 
   buildHeader(source: BigqueryConnector): HeaderData[] {
     return [

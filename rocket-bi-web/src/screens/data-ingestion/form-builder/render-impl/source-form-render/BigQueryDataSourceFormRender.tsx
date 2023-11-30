@@ -2,9 +2,7 @@ import '@/screens/data-ingestion/components/data-source-config-form/scss/Form.sc
 import { BFormInput, BFormTextarea } from 'bootstrap-vue';
 import { DataSourceFormRender } from '@/screens/data-ingestion/form-builder/DataSourceFormRender';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
-import { BigQuerySourceInfo } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfo';
 import { BigQuerySourceInfoV2 } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfoV2';
-import { DataSourceType } from '@core/data-ingestion';
 import { DIException } from '@core/common/domain';
 import { StringUtils } from '@/utils';
 

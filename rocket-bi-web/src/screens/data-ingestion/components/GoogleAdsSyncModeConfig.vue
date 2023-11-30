@@ -21,16 +21,17 @@ import DiInputComponent from '@/shared/components/DiInputComponent.vue';
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
 import { DateTimeUtils } from '@/utils';
 import { Log } from '@core/utils';
+import moment from 'moment';
 
 @Component({
   components: { DiDatePicker, DiInputComponent, DynamicSuggestionInput }
 })
 export default class GoogleAdsSyncModeConfig extends Vue {
-  private readonly syncMode = SyncMode;
-  private readonly MIN_LAST_SYNC_VALUE: Date = new Date(2019, 0, 1);
-  private static readonly DEFAULT_LAST_SYNC_VALUE: string = DateTimeUtils.formatDate(new Date(2019, 0, 1));
-  private static readonly DEFAULT_COLUMN_SYNC_VALUE: string = 'segments.date';
-  private incrementalValueError = '';
+  protected readonly syncMode = SyncMode;
+  protected readonly MIN_LAST_SYNC_VALUE: Date = new Date(2019, 0, 1);
+  protected static readonly DEFAULT_LAST_SYNC_VALUE: string = DateTimeUtils.formatDate(new Date(2019, 0, 1));
+  protected static readonly DEFAULT_COLUMN_SYNC_VALUE: string = 'segments.date';
+  protected incrementalValueError = '';
 
   @PropSync('job')
   syncJob!: GoogleAdsJob;
@@ -39,7 +40,7 @@ export default class GoogleAdsSyncModeConfig extends Vue {
   isValidate!: boolean;
 
   mounted() {
-    this.syncJob.withLastSyncValue(this.syncJob.lastSyncedValue || GoogleAdsSyncModeConfig.DEFAULT_LAST_SYNC_VALUE);
+    this.syncJob.startDate = this.syncJob.startDate || GoogleAdsSyncModeConfig.DEFAULT_LAST_SYNC_VALUE;
   }
 
   @Watch('syncJob.syncMode')
@@ -57,20 +58,19 @@ export default class GoogleAdsSyncModeConfig extends Vue {
   }
 
   public validSyncMode(): boolean {
-    if (!this.syncJob.lastSyncedValue) {
+    if (!this.syncJob.startDate) {
       this.incrementalValueError = 'Incremental Date is required!';
       return false;
     }
     return true;
   }
 
-  private get lastSyncValueAsDate(): Date {
-    Log.debug('lastSyncValueAsDate::get::', this.syncJob.lastSyncedValue);
-    return new Date(this.syncJob.lastSyncedValue);
+  protected get lastSyncValueAsDate(): Date {
+    return this.syncJob.startDate ? moment(this.syncJob.startDate).toDate() : this.MIN_LAST_SYNC_VALUE;
   }
 
-  private set lastSyncValueAsDate(date: Date) {
-    this.syncJob.lastSyncedValue = DateTimeUtils.formatDate(date);
+  protected set lastSyncValueAsDate(date: Date) {
+    this.syncJob.startDate = DateTimeUtils.formatDate(date);
   }
 }
 </script>

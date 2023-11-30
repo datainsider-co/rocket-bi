@@ -107,6 +107,7 @@ import {
   GoogleAnalyticJob,
   GoogleSearchConsoleJob,
   GoogleSearchConsoleType,
+  HubspotJob,
   JdbcJob,
   JobService,
   JobStatus,
@@ -377,7 +378,7 @@ export default class JobScreen extends Vue {
   @Track(TrackEvents.JobCreate)
   private openNewJobConfigModal() {
     // this.isShowDataSourceSelectionModal = true;
-    const job = JdbcJob.default(DataSourceInfo.default(DataSourceType.MySql));
+    const job = JdbcJob.default(DataSourceInfo.createDefault(DataSourceType.MySql));
     // this.jobCreationModal.show(job);
     this.multiJobCreationModal.show(
       job,
@@ -435,13 +436,11 @@ export default class JobScreen extends Vue {
         await this.jobService.multiCreateV2(listGAJob);
         break;
       }
-      case JobType.GoogleSearchConsole: {
-        const newJob = job as GoogleSearchConsoleJob;
-        const searchAnalyticJob = cloneDeep(newJob);
-        const searchAppearanceJob = cloneDeep(newJob);
-        searchAppearanceJob.tableType = GoogleSearchConsoleType.SearchAppearance;
-        searchAnalyticJob.tableType = GoogleSearchConsoleType.SearchAnalytics;
-        await JobModule.multiCreateV2({ jobs: [searchAnalyticJob.createSingleJob(), searchAppearanceJob.createSingleJob()] });
+      //todo: new flow create multi job
+      case JobType.GoogleSearchConsole:
+      case JobType.Hubspot:
+      case JobType.Mixpanel: {
+        await JobModule.multiCreateV2({ jobs: Job.getMultiJob(job) });
         break;
       }
       default: {
@@ -521,6 +520,8 @@ export default class JobScreen extends Vue {
       case JobType.GA4:
       case JobType.Palexy:
       case JobType.GoogleSearchConsole:
+      case JobType.Hubspot:
+      case JobType.Mixpanel:
         this.jobCreationModal.show(jobInfo.job);
         break;
       case JobType.Facebook:
@@ -911,8 +912,10 @@ export default class JobScreen extends Vue {
         case JobType.Tiktok:
           this.jobCreationModal.show(job);
           break;
-        case JobType.Unsupported:
+        case JobType.Unsupported: {
+          PopupUtils.showError('Unsupported edit job, try to delete and create new one.');
           break;
+        }
         default: {
           const source: DataSourceInfo = DataSourceInfo.fromObject(rowData);
           const jobInfo: JobInfo = new JobInfo(job, source);

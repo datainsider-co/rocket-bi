@@ -352,7 +352,7 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
     isMultiChoice ? this.handleMultiDynamicFunctionSelect(item) : this.handleSingleChoiceSelect(item);
     ///Reactive
     this.selected = new Set(this.selected);
-    Log.debug('updateSelected::', this.selected);
+    Log.debug('updateDynamicFunctionSelected::', this.selected);
   }
 
   private saveTempSelectedValue(value: DefaultFilterValue) {

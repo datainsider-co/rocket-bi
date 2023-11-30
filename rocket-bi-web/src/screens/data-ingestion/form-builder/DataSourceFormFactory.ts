@@ -10,7 +10,16 @@ import { PostgreSqlDataSourceFormRender } from '@/screens/data-ingestion/form-bu
 import { RedshiftDataSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/RedshiftDataSourceFormRender';
 import { S3SourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/S3SourceFormRender';
 import { ShopifySourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/ShopifySourceFormRender';
-import { DataSourceType, FacebookAdsSourceInfo, GoogleAdsSourceInfo, MongoDBSourceInfo, S3SourceInfo, TiktokSourceInfo } from '@core/data-ingestion';
+import {
+  DataSourceType,
+  FacebookAdsSourceInfo,
+  GoogleAdsSourceInfo,
+  HubspotSourceInfo,
+  MixpanelSourceInfo,
+  MongoDBSourceInfo,
+  S3SourceInfo,
+  TiktokSourceInfo
+} from '@core/data-ingestion';
 import { BigQuerySourceInfoV2 } from '@core/data-ingestion/domain/data-source/BigQuerySourceInfoV2';
 import { DataSourceInfo } from '@core/data-ingestion/domain/data-source/DataSourceInfo';
 import { JdbcUrlSourceInfo } from '@core/data-ingestion/domain/data-source/JdbcUrlSourceInfo';
@@ -30,6 +39,8 @@ import { PalexySourceFormRender } from '@/screens/data-ingestion/form-builder/re
 import { PalexySourceInfo } from '@core/data-ingestion/domain/data-source/PalexySourceInfo';
 import { GoogleSearchConsoleSourceFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/GoogleSearchConsoleSourceFormRender';
 import { GoogleSearchConsoleSourceInfo } from '@core/data-ingestion/domain/data-source/GoogleSearchConsoleSourceInfo';
+import { HubspotFormRender } from '@/screens/data-ingestion/form-builder/render-impl/source-form-render/HubspotFormRender';
+import { MixpanelFormRender } from './render-impl/source-form-render/MixpanelFormRender';
 
 export class DataSourceFormFactory {
   createRender(dataSource: DataSourceInfo, onSubmit?: () => void): DataSourceFormRender {
@@ -75,6 +86,10 @@ export class DataSourceFormFactory {
         return new PalexySourceFormRender(dataSource as PalexySourceInfo, onSubmit);
       case DataSourceType.GoogleSearchConsole:
         return new GoogleSearchConsoleSourceFormRender(dataSource as GoogleSearchConsoleSourceInfo, onSubmit);
+      case DataSourceType.Hubspot:
+        return new HubspotFormRender(dataSource as HubspotSourceInfo, onSubmit);
+      case DataSourceType.Mixpanel:
+        return new MixpanelFormRender(dataSource as MixpanelSourceInfo, onSubmit);
       default:
         throw new UnsupportedException(`Unsupported data source type ${dataSource.sourceType}`);
     }

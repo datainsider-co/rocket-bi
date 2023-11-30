@@ -141,6 +141,7 @@ export default class DiCustomModal extends Vue {
   @Emit('hidden')
   private handleHidden(bvModalEvt: BvModalEvent) {
     this.isLoading = false;
+    this.errorMsg = null;
     return bvModalEvt;
   }
 

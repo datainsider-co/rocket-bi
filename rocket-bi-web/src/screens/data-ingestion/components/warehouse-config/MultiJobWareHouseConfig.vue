@@ -1,12 +1,6 @@
 <template>
   <div>
-    <DiToggle
-      class="export-form"
-      :id="genToggleId('sync-to-data-warehouse')"
-      :value="isEnableSyncToDataWarehouse"
-      @update:value="handleClickSyncToDataWareHouseOption"
-      label="Sync To Data Warehouse"
-    ></DiToggle>
+    <label class="mb-0">Sync To Data Warehouse</label>
     <div class="input">
       <b-collapse id="data-warehouse-config" :visible="isEnableSyncToDataWarehouse">
         <DestOnlyDatabaseSuggestion

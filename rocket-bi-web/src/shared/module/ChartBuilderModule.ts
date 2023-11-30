@@ -83,13 +83,13 @@ import { DateConditionBuilder, DateHistogramConditionCreator } from '@chart/date
 import { TreeFilterQuerySettingHandler } from '@/shared/resolver/query-setting-resolver/query-setting-handler/TreeFilterQuerySettingHandler';
 import { FormulaControllerResolverBuilder } from '@/shared/fomula/builder/FormulaControllerBuilder';
 import { ConnectorType } from '@core/connector-config';
-import { BigqueryFormulaHandler } from '@/shared/fomula/builder/impl/BigqueryFormulaHandler';
-import { ClickhouseFormulaHandler } from '@/shared/fomula/builder/impl/ClickhouseFormulaHandler';
-import { FormulaControllerResolver } from '@/shared/fomula/builder/FormulaControllerResolver';
-import { MySQLFormulaHandler } from '@/shared/fomula/builder/impl/MySQLFormulaHandler';
-import { PostgreSQLFormulaHandler } from '@/shared/fomula/builder/impl/PostgreSQLFormulaHandler';
-import { RedshiftFormulaController } from '@/shared/fomula/redshift/RedshiftFormulaController';
-import { RedshiftFormulaHandler } from '@/shared/fomula/builder/impl/RedshiftFormulaHandler';
+import { BigqueryFormulaHandler } from '@/shared/fomula/builder/impl/bigquery/BigqueryFormulaHandler';
+import { ClickhouseFormulaHandler } from '@/shared/fomula/builder/impl/clickhouse/ClickhouseFormulaHandler';
+import { FormulaControllerFactoryResolver } from '@/shared/fomula/builder/FormulaControllerFactoryResolver';
+import { MySQLFormulaHandler } from '@/shared/fomula/builder/impl/mysql/MySQLFormulaHandler';
+import { PostgreSQLFormulaHandler } from '@/shared/fomula/builder/impl/postgresql/PostgreSQLFormulaHandler';
+import { RedshiftFormulaHandler } from '@/shared/fomula/builder/impl/redshift/RedshiftFormulaHandler';
+import { VerticaFormulaHandler } from '@/shared/fomula/builder/impl/vertica/VerticaFormulaHandler';
 
 export class ChartBuilderModule implements BaseModule {
   configuration(): void {
@@ -270,16 +270,17 @@ export class ChartBuilderModule implements BaseModule {
   }
 
   private bindQueryFormulaBuilder() {
-    const creator: FormulaControllerResolver = new FormulaControllerResolverBuilder()
+    const creator: FormulaControllerFactoryResolver = new FormulaControllerResolverBuilder()
       .add(ConnectorType.Clickhouse, new ClickhouseFormulaHandler())
       .add(ConnectorType.Bigquery, new BigqueryFormulaHandler())
       .add(ConnectorType.MySQL, new MySQLFormulaHandler())
       .add(ConnectorType.PostgreSQL, new PostgreSQLFormulaHandler())
       .add(ConnectorType.Redshift, new RedshiftFormulaHandler())
+      .add(ConnectorType.Vertica, new VerticaFormulaHandler())
       // .add(DataSourceType.Vertica, new BigqueryFormulaHandler())
-      .addDefault(new ClickhouseFormulaHandler())
-      .build();
-    Container.bind(FormulaControllerResolver)
+      .build(new ClickhouseFormulaHandler());
+
+    Container.bind(FormulaControllerFactoryResolver)
       .factory(() => creator)
       .scope(Scope.Singleton);
   }

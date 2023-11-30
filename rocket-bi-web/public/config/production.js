@@ -17,7 +17,7 @@ const productionConfig = {
   VUE_APP_FACEBOOK_APP_ID: '',
   VUE_APP_FACEBOOK_APP_SECRET: '',
   VUE_APP_FACEBOOK_SCOPE: 'ads_management,ads_read',
-  VUE_APP_TIKTOK_REDIRECT_URL: 'https://rocketbi.cf/third-party-auth/tik-tok',
+  VUE_APP_TIKTOK_REDIRECT_URL: '',
   VUE_APP_TIKTOK_ID: '',
 
   VUE_APP_IS_DISABLE_LAKE_HOUSE: true,
@@ -43,7 +43,6 @@ const productionConfig = {
 
   //Third party ingestion config
   GOOGLE_CLIENT_ID: '',
-  GOOGLE_API_KEY: '',
   GOOGLE_ROOT_ORIGIN: 'http://localhost:5050',
   GOOGLE_SHEET_URL: 'http://localhost:5050/third-party-auth/google-sheet',
   GA_URL: 'http://localhost:5050/third-party-auth/google-analytic',

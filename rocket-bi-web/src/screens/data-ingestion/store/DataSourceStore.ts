@@ -50,8 +50,8 @@ class DataSourceStore extends VuexModule {
   }
 
   @Action
-  testDataSourceConnection(request: DataSourceInfo): Promise<boolean> {
-    return this.dataSourceService.testConnection(request);
+  testConnection(source: DataSourceInfo): Promise<boolean> {
+    return this.dataSourceService.testConnection(source);
   }
 
   @Action

@@ -4,8 +4,8 @@ import { DataSourceType } from '@core/data-ingestion/domain/data-source/DataSour
 import { DataSources } from '@core/data-ingestion/domain/data-source/DataSources';
 import { JdbcSource } from '@core/data-ingestion/domain/response/JdbcSource';
 import { SourceId } from '@core/common/domain';
-import { SourceWithExtraField } from '@core/data-ingestion';
-import { NewFieldData } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
+import { SupportCustomProperty } from '@core/data-ingestion';
+import { CustomPropertyInfo } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
 import { StringUtils } from '@/utils';
 import { Log } from '@core/utils';
 
@@ -14,7 +14,7 @@ export enum TNSNames {
   ServiceName = 'service_name'
 }
 
-export class OracleSourceInfo implements DataSourceInfo, SourceWithExtraField {
+export class OracleSourceInfo implements DataSourceInfo, SupportCustomProperty {
   className = DataSources.JdbcSource;
   sourceType = DataSourceType.Oracle;
   id: SourceId;
@@ -123,10 +123,10 @@ export class OracleSourceInfo implements DataSourceInfo, SourceWithExtraField {
   getDisplayName(): string {
     return this.displayName;
   }
-  setField(fielData: NewFieldData): void {
-    this.extraFields[fielData.fieldName] = fielData.fieldValue;
+  setProperty(propertyInfo: CustomPropertyInfo): void {
+    this.extraFields[propertyInfo.fieldName] = propertyInfo.fieldValue;
   }
-  isExistField(fieldName: string): boolean {
+  isExistsProperty(fieldName: string): boolean {
     return this.extraFields[fieldName] !== undefined;
   }
 }

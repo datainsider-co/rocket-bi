@@ -1,16 +1,5 @@
 <template>
-  <BModal
-    id="source-selection"
-    centered
-    class="rounded"
-    size="xl"
-    cancel-disabled
-    :no-close-on-backdrop="!allowClickBackDrop"
-    :no-close-on-esc="!allowClickBackDrop"
-    hide-footer
-    hide-header
-    v-model="isShow"
-  >
+  <BModal id="source-selection" centered class="rounded" size="xl" cancel-disabled hide-header v-model="isShow">
     <template #default>
       <div class="header">
         <div class="title">Setup <span>DataSource</span></div>
@@ -20,24 +9,29 @@
         </div>
       </div>
       <div class="body">
-        <div class="data-source-item" @click="handleClickSource(DataSourceTypes.Bigquery)">
+        <div class="data-source-item" title="Bigquery" @click="handleClickSource(DataSourceTypes.Bigquery)">
           <img src="@/assets/icon/data_ingestion/datasource/source_selection_modal/bigquery_source.svg" alt="" />
         </div>
-        <div class="data-source-item" @click="handleClickSource(DataSourceTypes.Clickhouse)">
+        <div class="data-source-item" title="Clickhouse" @click="handleClickSource(DataSourceTypes.Clickhouse)">
           <img src="@/assets/icon/data_ingestion/datasource/source_selection_modal/clickhouse_source.svg" style="width: 98px!important;" alt="" />
         </div>
-        <div class="data-source-item" @click="handleClickSource(DataSourceTypes.MySQL)">
+        <div class="data-source-item" title="MySQL" @click="handleClickSource(DataSourceTypes.MySQL)">
           <img src="@/assets/icon/data_ingestion/datasource/source_selection_modal/mysql_source.svg" style="width: 98px!important;" alt="" />
         </div>
-        <div class="data-source-item" @click="handleClickSource(DataSourceTypes.Vertica)">
+        <div class="data-source-item" title="Vertica" @click="handleClickSource(DataSourceTypes.Vertica)">
           <img src="@/assets/icon/data_ingestion/datasource/source_selection_modal/vertica_source.svg" alt="" />
         </div>
-        <div class="data-source-item" @click="handleClickSource(DataSourceTypes.PostgreSQL)">
+        <div class="data-source-item" title="PostgreSQL" @click="handleClickSource(DataSourceTypes.PostgreSQL)">
           <img src="@/assets/icon/data_ingestion/datasource/source_selection_modal/postgresql_source.svg" style="width: 58px!important;" alt="" />
         </div>
-        <div class="data-source-item" @click="handleClickSource(DataSourceTypes.Redshift)">
+        <div class="data-source-item" title="Redshift" @click="handleClickSource(DataSourceTypes.Redshift)">
           <img src="@/assets/icon/data_ingestion/datasource/source_selection_modal/redshift.svg" alt="" style="width: 98px!important;" />
         </div>
+      </div>
+    </template>
+    <template #modal-footer>
+      <div class="source-selection--footer">
+        <DiButton border white class="source-selection--footer--skip" @click="hide" title="Skip" />
       </div>
     </template>
   </BModal>
@@ -47,20 +41,19 @@ import { Vue, Component } from 'vue-property-decorator';
 import VisualizationItem from '@/screens/chart-builder/config-builder/chart-selection-panel/VisualizationItem.vue';
 import { Connector, ConnectorType } from '@core/connector-config';
 import { Log } from '@core/utils';
+import DisplayTab from '@/shared/settings/series-chart/DisplayTab.vue';
 
 @Component({
-  components: { VisualizationItem }
+  components: { DisplayTab, VisualizationItem }
 })
 export default class ConnectorSelectionModal extends Vue {
-  private readonly DataSourceTypes = ConnectorType;
-  private isShow = false;
-  private allowClickBackDrop = false;
-  private callback: ((source: Connector) => void) | null = null;
+  protected readonly DataSourceTypes = ConnectorType;
+  protected isShow = false;
+  protected callback: ((source: Connector) => void) | null = null;
 
-  show(onClick: (source: Connector) => void, allowClickBackDrop?: boolean) {
+  show(onClick: (source: Connector) => void) {
     this.reset();
     this.init(onClick);
-    this.allowClickBackDrop = allowClickBackDrop || false;
     this.isShow = true;
   }
 
@@ -69,16 +62,15 @@ export default class ConnectorSelectionModal extends Vue {
     this.reset();
   }
 
-  private reset() {
+  protected reset() {
     this.callback = null;
-    this.allowClickBackDrop = false;
   }
 
-  private init(onClick: (source: Connector) => void) {
+  protected init(onClick: (source: Connector) => void) {
     this.callback = onClick;
   }
 
-  private handleClickSource(type: ConnectorType) {
+  protected handleClickSource(type: ConnectorType) {
     const defaultSource = Connector.default(type);
     Log.debug('handleClickSource', defaultSource);
     this.callback ? this.callback(defaultSource) : null;
@@ -92,9 +84,9 @@ export default class ConnectorSelectionModal extends Vue {
 
 #source-selection {
   .modal-body {
-    padding: 82px 61px;
-    background-color: #e5f4ff;
+    padding: 82px 61px 0;
     border-radius: 4px;
+    background-color: #e5f4ff;
   }
 
   .modal-dialog {
@@ -161,6 +153,21 @@ export default class ConnectorSelectionModal extends Vue {
         //border: 1px solid #e3edff;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
         border-radius: 4px;
+      }
+    }
+  }
+
+  .modal-footer {
+    background-color: #e5f4ff;
+    .source-selection--footer {
+      margin-top: 32px;
+      margin-right: 24px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: flex-end;
+
+      &--skip {
+        width: 120px;
       }
     }
   }

@@ -10,9 +10,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import { isFunction } from 'lodash';
-import { Log } from '@core/utils';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 
 export interface ButtonInfo {
   displayName: string;
@@ -35,20 +34,20 @@ export default class DiButtonGroup extends Vue {
   @Prop({ required: false, type: Boolean, default: false })
   private readonly isMultiSelect!: boolean;
 
-  private _buttons: ButtonInfo[] = [];
+  // private _buttons: ButtonInfo[] = [];
 
-  @Watch('buttons')
-  onButtonInfosChanged(newButtons: ButtonInfo[]) {
-    this._buttons = newButtons;
-  }
+  // @Watch('buttons')
+  // onButtonInfosChanged(newButtons: ButtonInfo[]) {
+  //   this._buttons = newButtons;
+  // }
 
   private isHiddenButton(button: ButtonInfo) {
     return button?.isHidden ?? false;
   }
 
-  mounted() {
-    this._buttons = this.buttons;
-  }
+  // mounted() {
+  //   this._buttons = this.buttons;
+  // }
 
   onClick(targetBtn: ButtonInfo, event: MouseEvent) {
     if (this.isMultiSelect) {
@@ -60,7 +59,7 @@ export default class DiButtonGroup extends Vue {
 
   protected selectButton(targetBtn: ButtonInfo, event: MouseEvent): void {
     if (!targetBtn.isActive) {
-      this._buttons.forEach(button => (button.isActive = false));
+      this.buttons.forEach(button => (button.isActive = false));
       targetBtn.isActive = true;
       if (isFunction(targetBtn.onClick)) {
         targetBtn.onClick(event, true);

@@ -10,3 +10,4 @@ export * from './BackgroundInfo';
 export * from './TextStyleSetting';
 export * from './WidgetSetting';
 export * from './TextAlign';
+export * from './AutoRefreshSetting';

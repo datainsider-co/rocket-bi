@@ -1,15 +1,15 @@
 <template>
   <div class="field-creation-container">
-    <div class="data-schema-header justify-content-between">
+    <div class="data-schema-header justify-content-between" v-if="model">
       <div>
         <i class="fa fa-database text-muted"> </i>
         <span class="data-schema-header--dbname cursor-pointer" @click="handleCancel">
-          <span v-if="model.database.displayName"> {{ model.database.displayName }} </span>
-          <em v-else> {{ model.database.name }} </em>
+          <span v-if="model.database && model.database.displayName"> {{ model.database.displayName }} </span>
+          <em v-else-if="model.database"> {{ model.database.name }} </em>
         </span>
         <i class="fa fa-angle-right text-muted"> </i>
-        <span v-if="model.table.displayName" class="data-schema-header--tblname"> {{ model.table.displayName }} </span>
-        <em v-else class="data-schema-header--tblname"> {{ model.table.name }} </em>
+        <span v-if="model.table && model.table.displayName" class="data-schema-header--tblname"> {{ model.table.displayName }} </span>
+        <em v-else-if="model.table" class="data-schema-header--tblname"> {{ model.table.name }} </em>
       </div>
       <div class="d-flex">
         <DiIconTextButton :id="genBtnId('add-column')" class="" title="Add column" @click="fieldManagement.addColumn()">
@@ -17,11 +17,12 @@
         </DiIconTextButton>
         <DiIconTextButton :id="genBtnId('cancel')" class="mr-2" title="Cancel" @click="handleCancel" />
         <DiIconTextButton :id="genBtnId('save')" title="Create" @click="handleSave">
-          <i class="di-icon-save icon-title"></i>
+          <i v-if="status == Status.Updating" class="fa fa-spin fa-spinner icon-title"></i>
+          <i v-else class="di-icon-save icon-title"></i>
         </DiIconTextButton>
       </div>
     </div>
-    <FieldManagement :status="status.Loaded" ref="fieldManagement" :model="model" :view-mode="viewMode" />
+    <FieldManagement :status="status" ref="fieldManagement" :model="model" :view-mode="viewMode" />
   </div>
 </template>
 
@@ -33,12 +34,13 @@ import InputSetting from '@/shared/settings/common/InputSetting.vue';
 import DiDatePicker from '@/shared/components/DiDatePicker.vue';
 import Swal from 'sweetalert2';
 import FieldManagement from '@/screens/data-management/views/data-schema/FieldManagement.vue';
-import { cloneDeep } from 'lodash';
 import { DataManagementModule } from '@/screens/data-management/store/DataManagementStore';
 import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchemaStore';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { Status } from '@/shared';
+import { DIException, TableSchema } from '@core/common/domain';
+import { AtomicAction } from '@core/common/misc';
 
 @Component({
   components: {
@@ -48,18 +50,19 @@ import { Status } from '@/shared';
   }
 })
 export default class FieldCreationManagement extends Vue {
-  private readonly status = Status;
+  protected Status = Status;
+  protected status = Status.Loaded;
 
-  @Prop({ type: Object, required: false })
-  private readonly model?: DataSchemaModel;
+  @Prop({ type: Object, required: false, default: () => null })
+  protected readonly model!: DataSchemaModel | null;
 
   @Prop({ type: Number, required: false, default: ViewMode.ViewSchema })
-  private readonly viewMode!: ViewMode;
+  protected readonly viewMode!: ViewMode;
 
   @Ref()
-  private readonly fieldManagement!: FieldManagement;
+  protected readonly fieldManagement!: FieldManagement;
 
-  private async handleCancel() {
+  protected async handleCancel() {
     try {
       const { isConfirmed } = await this.showEnsureModal(
         'It looks like you have been editing something',
@@ -75,7 +78,7 @@ export default class FieldCreationManagement extends Vue {
     }
   }
 
-  private async showEnsureModal(title: string, html: string, confirmButtonText?: string, cancelButtonText?: string) {
+  protected async showEnsureModal(title: string, html: string, confirmButtonText?: string, cancelButtonText?: string) {
     //@ts-ignore
     return this.$alert.fire({
       icon: 'warning',
@@ -86,18 +89,20 @@ export default class FieldCreationManagement extends Vue {
       cancelButtonText: cancelButtonText ?? 'No'
     });
   }
-  @Track(TrackEvents.TableSubmitCreate, {
-    table_name: (_: FieldCreationManagement) => _.model?.table?.displayName,
-    database_name: (_: FieldCreationManagement) => _.model?.database?.name
-  })
-  private async handleSave() {
+  @AtomicAction()
+  protected async handleSave(): Promise<void> {
+    if (this.status == Status.Updating) {
+      return;
+    }
     try {
-      const tableToEdit = await this.fieldManagement.getEditedTable();
-      if (tableToEdit) {
-        ///Create
-        const tableCreated = await DataManagementModule.createTable(tableToEdit);
-        await DatabaseSchemaModule.reload(tableCreated.dbName);
-        this.$emit('created', tableCreated);
+      this.status = Status.Updating;
+      const newTable: TableSchema | undefined = await this.fieldManagement.getEditedTable();
+      if (newTable) {
+        const createdTable = await DataManagementModule.createTable(newTable);
+        await DatabaseSchemaModule.reload(createdTable.dbName);
+        this.$emit('created', createdTable);
+      } else {
+        throw new DIException('Cannot create table at this time, please try again later');
       }
     } catch (e) {
       Log.error(e);
@@ -106,6 +111,8 @@ export default class FieldCreationManagement extends Vue {
         title: 'Create Table Error',
         html: e.message
       });
+    } finally {
+      this.status = Status.Loaded;
     }
   }
 }

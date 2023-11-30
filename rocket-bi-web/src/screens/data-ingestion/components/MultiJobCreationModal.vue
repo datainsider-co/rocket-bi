@@ -31,7 +31,7 @@
           </div>
           <div class="job-section">
             <div class="input">
-              <DataSourceConfig :isDisabledSelectSource="isDisabledSelectSource" :job.sync="jdbcJob" @selected="handleSelectDataSource" />
+              <DataSourceConfig :isDisabledSelectSource="isDisabledSelectSource" :job.sync="jdbcJob" @selected="item => handleSelectDataSource(item.source)" />
               <BigQueryExtraForm
                 v-if="isBigQueryJob"
                 :big-query-job.sync="jdbcJob"
@@ -154,7 +154,26 @@
           <div v-if="isPalexyJob" class="job-section export-form">
             <PalexySourceConfig ref="palexySourceConfig" :job.sync="jdbcJob"></PalexySourceConfig>
           </div>
-
+          <div v-if="isHubspotJob" class="job-section export-form">
+            <HubspotConfig
+              ref="hubspotConfig"
+              :single-table.sync="isSingleTable"
+              :hide-sync-all-table-option="false"
+              :job.sync="jdbcJob"
+              @selectDatabase="fromDatabaseChanged"
+              @selectTable="fromTableChanged"
+            ></HubspotConfig>
+          </div>
+          <div v-if="isMixpanelJob" class="job-section export-form">
+            <MixpanelConfig
+              ref="mixpanelConfig"
+              :single-table.sync="isSingleTable"
+              :hide-sync-all-table-option="false"
+              :job.sync="jdbcJob"
+              @selectDatabase="fromDatabaseChanged"
+              @selectTable="fromTableChanged"
+            />
+          </div>
           <template>
             <JobWareHouseConfig
               class="job-section export-form"
@@ -198,7 +217,7 @@
   </EtlModal>
 </template>
 <script lang="ts">
-import { Component, Ref, Vue, Watch, Prop } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import EtlModal from '@/screens/data-cook/components/etl-modal/EtlModal.vue';
 import {
   DataDestination,
@@ -211,10 +230,14 @@ import {
   GoogleAdsSourceInfo,
   GoogleAnalyticJob,
   GoogleSearchConsoleJob,
+  HubspotJob,
+  HubspotSourceInfo,
   JdbcJob,
   Job,
   JobName,
   JobType,
+  MixpanelJob,
+  MixpanelSourceInfo,
   PalexyJob,
   SyncMode,
   TiktokSourceInfo
@@ -229,7 +252,6 @@ import DynamicSuggestionInput from '@/screens/data-ingestion/components/DynamicS
 import SchedulerSettingV2 from '@/screens/data-ingestion/components/job-scheduler-form/SchedulerSettingV2.vue';
 import SingleChoiceItem from '@/shared/components/filters/SingleChoiceItem.vue';
 import { AtomicAction } from '@core/common/misc';
-import { JobModule } from '@/screens/data-ingestion/store/JobStore';
 import { minValue, required } from 'vuelidate/lib/validators';
 import { ApiExceptions, Status, VerticalScrollConfigs } from '@/shared';
 import { PopupUtils } from '@/utils/PopupUtils';
@@ -254,8 +276,6 @@ import MultiJdbcFromDatabaseSuggestion from './MultiJdbcFromDatabaseSuggestion.v
 import MultiJobWareHouseConfig from '@/screens/data-ingestion/components/warehouse-config/MultiJobWareHouseConfig.vue';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
-import { cloneDeep } from 'lodash';
-import { TimeScheduler } from '@/screens/data-ingestion/components/job-scheduler-form/scheduler-time/TimeScheduler';
 import MultiShopifyFromDatabaseSuggestion from '@/screens/data-ingestion/components/MultiShopifyFromDatabaseSuggestion.vue';
 import { ShopifyJob } from '@core/data-ingestion/domain/job/ShopifyJob';
 import S3DataSourceConfig from './s3-csv/S3DataSourceConfig.vue';
@@ -271,6 +291,8 @@ import { PalexySourceInfo } from '@core/data-ingestion/domain/data-source/Palexy
 import PalexySourceConfig from '@/screens/data-ingestion/components/palexy/PalexySourceConfig.vue';
 import GoogleSearchConsoleConfig from '@/screens/data-ingestion/components/google-search-console/GoogleSearchConsoleConfig.vue';
 import { GoogleSearchConsoleSourceInfo } from '@core/data-ingestion/domain/data-source/GoogleSearchConsoleSourceInfo';
+import HubspotConfig from '@/screens/data-ingestion/components/HubspotConfig.vue';
+import MixpanelConfig from '@/screens/data-ingestion/components/mixpanel/MixpanelConfig.vue';
 
 type IngestionJobCallback = (job: Job, isSingleTable: boolean) => void;
 
@@ -304,7 +326,9 @@ type IngestionJobCallback = (job: Job, isSingleTable: boolean) => void;
     GoogleAnalyticConfig,
     TiktokSourceConfig,
     GoogleAnalytic4Config,
-    GoogleSearchConsoleConfig
+    GoogleSearchConsoleConfig,
+    HubspotConfig,
+    MixpanelConfig
   },
   validations: {
     jdbcJob: {
@@ -318,7 +342,7 @@ export default class MultiJobCreationModal extends Vue {
   private readonly jobName = JobName;
   private readonly ggAds = require('./google-ads-resources.json');
 
-  private jdbcJob: Job = JdbcJob.default(DataSourceInfo.default(DataSourceType.MySql));
+  private jdbcJob: Job = JdbcJob.default(DataSourceInfo.createDefault(DataSourceType.MySql));
   private isShowModal = false;
   private status = Status.Loaded;
   private errorMessage = '';
@@ -384,6 +408,12 @@ export default class MultiJobCreationModal extends Vue {
 
   @Ref()
   private readonly palexySourceConfig?: PalexySourceConfig;
+
+  @Ref()
+  private readonly hubspotConfig?: HubspotConfig;
+
+  @Ref()
+  private readonly mixpanelConfig?: MixpanelConfig;
 
   @Ref()
   private readonly googleSearchConsoleConfig?: GoogleSearchConsoleConfig;
@@ -466,6 +496,14 @@ export default class MultiJobCreationModal extends Vue {
     return Job.isPalexyJob(this.jdbcJob);
   }
 
+  private get isHubspotJob(): boolean {
+    return Job.isHubspotJob(this.jdbcJob);
+  }
+
+  private get isMixpanelJob(): boolean {
+    return this.jdbcJob.className === JobName.Mixpanel;
+  }
+
   private get isGgAdsJob(): boolean {
     return this.jdbcJob.className === JobName.GoogleAdsJob;
   }
@@ -543,6 +581,8 @@ export default class MultiJobCreationModal extends Vue {
             case JobType.Palexy:
             case JobType.S3:
             case JobType.GoogleSearchConsole:
+            case JobType.Hubspot:
+            case JobType.Mixpanel:
               ///Nothing to do
               break;
             case JobType.Tiktok:
@@ -573,7 +613,7 @@ export default class MultiJobCreationModal extends Vue {
   }
 
   handleHidden() {
-    this.jdbcJob = JdbcJob.default(DataSourceInfo.default(DataSourceType.MySql));
+    this.jdbcJob = JdbcJob.default(DataSourceInfo.createDefault(DataSourceType.MySql));
     this.isShowModal = false;
     this.hideLoading();
     this.$v.$reset();
@@ -625,6 +665,8 @@ export default class MultiJobCreationModal extends Vue {
           this.submitCallback(job, this.isSingleTable);
         }
         this.hide();
+      } else {
+        throw new DIException('Job is invalid, please check again');
       }
       this.hideLoading();
     } catch (e) {
@@ -683,57 +725,63 @@ export default class MultiJobCreationModal extends Vue {
     source_type: (_: MultiJobCreationModal, args: any) => args[0].source.sourceType,
     source_name: (_: MultiJobCreationModal, args: any) => args[0].source.getDisplayName()
   })
-  async handleSelectDataSource(item: any) {
+  async handleSelectDataSource(source: any | DataSourceInfo) {
     try {
-      if (item.source) {
-        Log.debug('handleSelectSource::', item.source);
-        switch (item.source.className as DataSources) {
+      if (source) {
+        Log.debug('handleSelectSource::', source);
+        switch (source.className as DataSources) {
           case DataSources.GoogleServiceAccountSource:
-            await this.handleSelectGoogleServiceAccountSource(item.source);
+            await this.handleSelectGoogleServiceAccountSource(source);
             break;
           case DataSources.MongoDbSource:
-            await this.handleSelectMongoSource(item.source);
+            await this.handleSelectMongoSource(source);
             break;
           case DataSources.ShopifySource:
-            await this.handleSelectShopifySource(item.source);
+            await this.handleSelectShopifySource(source);
             break;
           case DataSources.JdbcSource: {
-            if (item.source.sourceType === DataSourceType.GenericJdbc) {
-              await this.handleSelectGenericJdbcSource(item.source);
+            if (source.sourceType === DataSourceType.GenericJdbc) {
+              await this.handleSelectGenericJdbcSource(source);
             } else {
-              await this.handleSelectJdbcSource(item.source);
+              await this.handleSelectJdbcSource(source);
             }
             break;
           }
           case DataSources.S3Source: {
-            this.jdbcJob = this.getJobFromS3Source(item.source);
+            this.jdbcJob = this.getJobFromS3Source(source);
             break;
           }
           case DataSources.GoogleAdsSource: {
-            await this.handleSelectGoogleAdsSource(item.source);
+            await this.handleSelectGoogleAdsSource(source);
             break;
           }
           case DataSources.FacebookAds: {
-            await this.handleSelectFacebookAdsSource(item.source);
+            await this.handleSelectFacebookAdsSource(source);
             break;
           }
           case DataSources.GASource:
-            await this.handleSelectGASource(item.source);
+            await this.handleSelectGASource(source);
             break;
           case DataSources.TiktokAds:
-            await this.handleSelectTiktokSource(item.source);
+            await this.handleSelectTiktokSource(source);
             break;
           case DataSources.GA4Source:
-            await this.handleSelectGA4Source(item.source);
+            await this.handleSelectGA4Source(source);
             break;
           case DataSources.Palexy:
-            await this.handleSelectPalexy(item.source);
+            await this.handleSelectPalexy(source);
             break;
           case DataSources.GoogleSearchConsole:
-            await this.handleSelectGoogleSearchConsole(item.source);
+            await this.handleSelectGoogleSearchConsole(source);
+            break;
+          case DataSources.Hubspot:
+            await this.handleSelectHubspot(source);
+            break;
+          case DataSources.Mixpanel:
+            await this.handleSelectMixpanel(source);
             break;
           default:
-            await this.handleSelectJdbcSource(item.source);
+            await this.handleSelectJdbcSource(source);
         }
       }
     } catch (e) {
@@ -859,6 +907,30 @@ export default class MultiJobCreationModal extends Vue {
     });
   }
 
+  public async handleSelectHubspot(source: DataSourceInfo) {
+    this.jdbcJob = this.getJobFromHubspotSource(source as HubspotSourceInfo);
+    this.$nextTick(async () => {
+      this.jobWareHouseConfig.setDatabaseName(this.jdbcJob.destDatabaseName);
+      this.jobWareHouseConfig.setTableName(this.jdbcJob.destTableName);
+    });
+  }
+
+  public async handleSelectMixpanel(source: DataSourceInfo) {
+    this.jdbcJob = this.getJobFromMixpanelSource(source as MixpanelSourceInfo);
+    this.$nextTick(async () => {
+      this.jobWareHouseConfig.setDatabaseName(this.jdbcJob.destDatabaseName);
+      this.jobWareHouseConfig.setTableName(this.jdbcJob.destTableName);
+    });
+  }
+
+  private getJobFromMixpanelSource(source: MixpanelSourceInfo) {
+    const job = MixpanelJob.default();
+    job.jobId = this.jdbcJob.jobId;
+    job.displayName = this.jdbcJob.displayName;
+    job.sourceId = source.id;
+    return job;
+  }
+
   private getJobFromGA4Source(gaSourceInfo: GA4SourceInfo) {
     const jdbcJob = GA4Job.default();
     jdbcJob.jobId = this.jdbcJob.jobId;
@@ -877,6 +949,14 @@ export default class MultiJobCreationModal extends Vue {
 
   private getJobFromGoogleSearchConsoleSource(source: GoogleSearchConsoleSourceInfo) {
     const jdbcJob = GoogleSearchConsoleJob.default();
+    jdbcJob.jobId = this.jdbcJob.jobId;
+    jdbcJob.displayName = this.jdbcJob.displayName;
+    jdbcJob.sourceId = source.id;
+    return jdbcJob;
+  }
+
+  private getJobFromHubspotSource(source: HubspotSourceInfo) {
+    const jdbcJob = HubspotJob.default();
     jdbcJob.jobId = this.jdbcJob.jobId;
     jdbcJob.displayName = this.jdbcJob.displayName;
     jdbcJob.sourceId = source.id;
@@ -942,6 +1022,10 @@ export default class MultiJobCreationModal extends Vue {
         return this.googleSearchConsoleConfig?.isValidSource();
       case JobType.Palexy:
         return this.palexySourceConfig?.isValidSource();
+      case JobType.Hubspot:
+        return this.hubspotConfig?.isValidSource();
+      case JobType.Mixpanel:
+        return this.mixpanelConfig?.isValidSource();
       default:
         return this.jdbcFromDatabaseSuggestion.isValidDatabaseSuggestion();
     }
