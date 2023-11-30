@@ -133,4 +133,9 @@ abstract class Column {
       defaultExpression: Option[DefaultExpression] = this.defaultExpression,
       isEncrypted: Boolean = this.isEncrypted
   ): Column
+
+  @JsonIgnore
+  def getColumnType: String = {
+    Column.getCustomClassName(this)
+  }
 }

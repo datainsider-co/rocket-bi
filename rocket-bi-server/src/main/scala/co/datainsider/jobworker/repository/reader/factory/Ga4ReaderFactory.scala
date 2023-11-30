@@ -13,9 +13,8 @@ class Ga4ReaderFactory(clientId: String, clientSecret: String, batchSize: Int = 
 
   override def create(source: Ga4Source, job: Ga4Job): Reader = {
     ensureSourceExisted(source)
-    val credentials = UserCredentials
+    val credentials: UserCredentials = UserCredentials
       .newBuilder()
-      .setAccessToken(new AccessToken(source.accessToken, null))
       .setClientId(clientId)
       .setClientSecret(clientSecret)
       .setRefreshToken(source.refreshToken)

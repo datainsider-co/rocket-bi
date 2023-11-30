@@ -3,19 +3,18 @@ package co.datainsider.bi.engine.redshift
 import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.bi.client.{HikariClient, JdbcClient}
 import co.datainsider.bi.engine.clickhouse.DataTable
-import co.datainsider.bi.engine.mysql.MysqlConnection
 import co.datainsider.bi.engine.{ClientManager, DataStream, Engine, SqlParser}
 import co.datainsider.bi.repository.FileStorage
 import co.datainsider.bi.repository.FileStorage.FileType.FileType
+import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.bi.util.{Implicits, Using}
-import co.datainsider.datacook.pipeline.ExecutorResolver
-import co.datainsider.datacook.pipeline.operator.OperatorService
 import co.datainsider.jobworker.repository.writer.DataWriter
 import co.datainsider.schema.domain.TableSchema
 import co.datainsider.schema.domain.column._
-import co.datainsider.schema.repository.{DDLExecutor, DataRepository}
-import com.twitter.inject.{Injector, Logging}
+import co.datainsider.schema.repository.DDLExecutor
+import com.twitter.inject.Logging
 import com.twitter.util.Future
+import datainsider.client.domain.Implicits.async
 import datainsider.client.exception.DbExecuteError
 
 import java.sql.{ResultSet, ResultSetMetaData}
@@ -35,8 +34,9 @@ class RedshiftEngine(
     timeoutMs: Int = 30000
 ) extends Engine[RedshiftConnection]
     with Logging {
+  private lazy val clazz = getClass.getSimpleName
 
-  implicit def createClient(source: RedshiftConnection, poolSize: Int = 10): JdbcClient = {
+  def createClient(source: RedshiftConnection, poolSize: Int = 10): JdbcClient = {
     val properties = new Properties()
     properties.putAll(source.properties.asJava)
     val driverClassName = Some("com.amazon.redshift.jdbc42.Driver")
@@ -56,25 +56,36 @@ class RedshiftEngine(
   }
 
   override def execute(source: RedshiftConnection, sql: String, doFormatValues: Boolean): Future[DataTable] =
-    Future {
-      getClient(source)
-        .executeQuery(sql)(rs => {
-          val (colNames, colTypes) = getColMetaData(rs)
-          val records = ArrayBuffer[Array[Object]]()
+    Profiler(s"[Engine] $clazz::execute") {
+      async {
+        getClient(source)
+          .executeQuery(sql)(rs => {
+            val (colNames, colTypes) = getColMetaData(rs)
+            val records = ArrayBuffer[Array[Object]]()
 
-          while (rs.next()) {
-            val record = ArrayBuffer[Object]()
-            colNames.foreach(colName => record += rs.getObject(colName))
-            records += record.toArray
-          }
+            while (rs.next()) {
+              val record = ArrayBuffer[Object]()
+              colNames.foreach(colName => record += rs.getObject(colName))
+              records += record.toArray
+            }
 
-          DataTable(colNames, colTypes, records.toArray)
-        })
+            DataTable(colNames, colTypes, records.toArray)
+          })
+      }
     }
 
-  override def executeHistogramQuery(source: RedshiftConnection, histogramSql: String): Future[DataTable] = {
-    execute(source, histogramSql)
-  }
+  override def executeHistogramQuery(source: RedshiftConnection, histogramSql: String): Future[DataTable] =
+    Profiler(s"[Engine] $clazz::executeHistogramQuery") {
+      execute(source, histogramSql)
+    }
+
+  override def executeAsDataStream[T](source: RedshiftConnection, query: String)(fn: DataStream => T): T =
+    Profiler(s"$clazz::executeAsDataStream") {
+      getClient(source).executeQuery(query)((result: ResultSet) => {
+        val dataStream: DataStream = toStream(result)
+        fn(dataStream)
+      })
+    }
 
   override def getDDLExecutor(source: RedshiftConnection): DDLExecutor = {
     val client: JdbcClient = getClient(source)
@@ -87,9 +98,12 @@ class RedshiftEngine(
       destPath: String,
       fileType: FileType
   ): Future[String] =
-    Future {
-      getClient(source)
-        .executeQuery(sql)(rs => FileStorage.exportToFile(toStream(rs), fileType, destPath))
+    Profiler(s"[Engine] $clazz::exportToFile") {
+      async {
+        executeAsDataStream(source, sql)((stream: DataStream) => {
+          FileStorage.exportToFile(stream, fileType, destPath)
+        })
+      }
     }
 
   override def testConnection(source: RedshiftConnection): Future[Boolean] =
@@ -146,16 +160,6 @@ class RedshiftEngine(
   }
 
   override def createWriter(source: RedshiftConnection): DataWriter = ???
-
-  override def getPreviewExecutorResolver(source: RedshiftConnection, operatorService: OperatorService)(
-      injector: Injector
-  ): ExecutorResolver = ???
-
-  override def getExecutorResolver(source: RedshiftConnection, operatorService: OperatorService)(
-      injector: Injector
-  ): ExecutorResolver = ???
-
-  override def getDataRepository(source: RedshiftConnection): DataRepository = ???
 
   override def write(source: RedshiftConnection, schema: TableSchema, records: Seq[Record]): Future[Int] =
     Implicits.async {

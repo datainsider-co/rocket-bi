@@ -70,6 +70,15 @@ class MySqlEngine(
       execute(source, histogramSql)
     }
 
+  override def executeAsDataStream[T](source: MysqlConnection, query: String)(fn: DataStream => T): T = {
+    Profiler(s"[Engine] $clazz::executeAsDataStream") {
+      getClient(source).executeQuery(query)(rs => {
+        val stream = toStream(rs)
+        fn(stream)
+      })
+    }
+  }
+
   override def getDDLExecutor(source: MysqlConnection): DDLExecutor = {
     val client: JdbcClient = getClient(source)
     new MysqlDDLExecutor(client)
@@ -83,9 +92,7 @@ class MySqlEngine(
   ): Future[String] =
     Profiler(s"[Engine] $clazz::exportToFile") {
       async {
-        val client: JdbcClient = getClient(source)
-        client.executeQuery(sql)(rs => {
-          val stream = toStream(rs)
+        executeAsDataStream(source, sql)((stream: DataStream) => {
           FileStorage.exportToFile(stream, fileType, destPath)
         })
       }

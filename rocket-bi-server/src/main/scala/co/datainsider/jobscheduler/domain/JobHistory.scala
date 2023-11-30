@@ -3,6 +3,7 @@ package co.datainsider.jobscheduler.domain
 import co.datainsider.jobscheduler.domain.Ids.{JobId, SyncId}
 import co.datainsider.jobscheduler.domain.job.JobStatus.JobStatus
 import co.datainsider.jobscheduler.domain.job.JobStatusRef
+import co.datainsider.jobworker.domain.HubspotProgress
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
@@ -48,6 +49,8 @@ case class JobHistory(
     new Type(value = classOf[LazadaJobProgress], name = "lazada_job_progress"),
     new Type(value = classOf[PalexyJobProgress], name = "palexy_job_progress"),
     new Type(value = classOf[GoogleJobProgress], name = "google_job_progress"),
+    new Type(value = classOf[HubspotProgress], name = "hubspot_progress"),
+    new Type(value = classOf[JobProgressImpl], name = "job_progress_impl"),
   )
 )
 trait JobProgress {
@@ -348,6 +351,20 @@ case class PalexyJobProgress(
 }
 
 case class GoogleJobProgress(
+    orgId: Long,
+    syncId: SyncId,
+    jobId: JobId,
+    updatedTime: Long,
+    jobStatus: JobStatus,
+    totalSyncRecord: Long,
+    totalExecutionTime: Long,
+    lastSyncedValue: Option[String] = None,
+    message: Option[String] = None
+) extends JobProgress {
+  override def progressData: Map[String, Any] = Map("last_synced_value" -> lastSyncedValue.getOrElse(""))
+}
+
+case class JobProgressImpl(
     orgId: Long,
     syncId: SyncId,
     jobId: JobId,

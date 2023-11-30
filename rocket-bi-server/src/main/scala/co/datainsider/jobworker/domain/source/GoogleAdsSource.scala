@@ -8,9 +8,9 @@ case class GoogleAdsSource(
     orgId: Long = -1,
     id: SourceId,
     displayName: String,
-    creatorId: String,
-    lastModify: Long,
-    refreshToken: String
+    refreshToken: String,
+    creatorId: String = "",
+    lastModify: Long = System.currentTimeMillis(),
 ) extends DataSource {
   override def getId: SourceId = id
 

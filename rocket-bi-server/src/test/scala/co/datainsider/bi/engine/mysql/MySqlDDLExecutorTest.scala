@@ -251,21 +251,21 @@ class MySqlDDLExecutorTest extends Test {
   }
 
   test("[View Table] drop table") {
-    val isSuccess: Boolean = await(ddlExecutor.dropTable(dbName, viewTblName))
+    val isSuccess: Boolean = await(ddlExecutor.dropTable(dbName, viewTblName, TableType.View))
     assert(isSuccess)
     val isTableExisted: Boolean = await(ddlExecutor.existTableSchema(dbName, viewTblName))
     assert(!isTableExisted)
   }
 
   test("[Default Table] drop table") {
-    val isSuccess: Boolean = await(ddlExecutor.dropTable(dbName, tableName))
+    val isSuccess: Boolean = await(ddlExecutor.dropTable(dbName, tableName, TableType.Default))
     assert(isSuccess)
     val isTableExisted: Boolean = await(ddlExecutor.existTableSchema(dbName, tableName))
     assert(!isTableExisted)
   }
 
   test("Drop table not exists") {
-    val isSuccess: Boolean = await(ddlExecutor.dropTable(dbName, "not_exists"))
+    val isSuccess: Boolean = await(ddlExecutor.dropTable(dbName, "not_exists", TableType.Default))
     assert(isSuccess)
   }
 

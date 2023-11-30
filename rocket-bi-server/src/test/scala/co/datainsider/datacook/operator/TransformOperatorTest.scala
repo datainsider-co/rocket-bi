@@ -18,7 +18,7 @@ class TransformOperatorTest extends AbstractOperatorTest with ClickhouseIntegrat
   override protected val jobId: EtlJobId = 2606
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
     .register(TransformOperatorExecutor(operatorService))
 
   test("Table with select 3 columns ") {

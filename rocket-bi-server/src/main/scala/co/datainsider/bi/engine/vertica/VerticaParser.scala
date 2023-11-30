@@ -393,7 +393,21 @@ object VerticaParser extends SqlParser {
       case PastNWeek(unit, _, _)    => s"$field - INTERVAL '$unit WEEK'"
       case PastNDay(unit, _, _)     => s"$field - INTERVAL '$unit DAY'"
 
-      case Cast(asType, _) => s"$field::$asType"
+      case Cast(asType, _)          => s"$field::$asType"
+      case ToInt8OrNull(_, _)       => s"$field::!BIGINT"
+      case ToInt16OrNull(_, _)      => s"$field::!BIGINT"
+      case ToInt32OrNull(_, _)      => s"$field::!BIGINT"
+      case ToInt64OrNull(_, _)      => s"$field::!BIGINT"
+      case ToUInt8OrNull(_, _)      => s"$field::!BIGINT"
+      case ToUInt16OrNull(_, _)     => s"$field::!BIGINT"
+      case ToUInt32OrNull(_, _)     => s"$field::!BIGINT"
+      case ToUInt64OrNull(_, _)     => s"$field::!BIGINT"
+      case ToFloatOrNull(_, _)      => s"$field::!FLOAT"
+      case ToDoubleOrNull(_, _)     => s"$field::!FLOAT"
+      case ToDateOrNull(_, _)       => s"$field::!DATE"
+      case ToDateTimeOrNull(_, _)   => s"$field::!TIMESTAMP"
+      case ToDateTime64OrNull(_, _) => s"$field::!TIMESTAMP"
+      case ToStringOrNull(_, _)     => s"$field::!VARCHAR(65000)"
     }
   }
 

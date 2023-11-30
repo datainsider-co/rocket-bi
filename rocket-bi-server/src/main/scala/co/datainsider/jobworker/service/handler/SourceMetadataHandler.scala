@@ -6,6 +6,7 @@ import co.datainsider.jobworker.client.palexy.{PalexyClient, PalexyClientImpl}
 import co.datainsider.jobworker.domain.source._
 import co.datainsider.jobworker.domain.{DataSource, DatabaseType, JdbcJob, Job}
 import co.datainsider.jobworker.repository.JdbcReader
+import co.datainsider.jobworker.service.hubspot.client.APIKeyHubspotClient
 import co.datainsider.jobworker.service.worker.AmazonS3Client
 import co.datainsider.jobworker.util.GoogleOAuthConfig
 import com.amazonaws.services.s3.AmazonS3
@@ -49,24 +50,10 @@ object SourceMetadataHandler extends Logging {
           appSecret = ZConfig.getString("tiktok_ads.app_secret")
         )
       case source: GaSource => {
-        val googleOAuthConfig = GoogleOAuthConfig(
-          clientId = ZConfig.getString("google.gg_client_id"),
-          clientSecret = ZConfig.getString("google.gg_client_secret"),
-          redirectUri = ZConfig.getString("google.redirect_uri"),
-          serverEncodedUrl = ZConfig.getString("google.server_encoded_url")
-        )
-
-        new GaSourceMetadataHandler(source, googleOAuthConfig)
+        new GaSourceMetadataHandler(source, getGoogleOAuthConfig())
       }
       case source: Ga4Source => {
-        val googleOAuthConfig = GoogleOAuthConfig(
-          clientId = ZConfig.getString("google.gg_client_id"),
-          clientSecret = ZConfig.getString("google.gg_client_secret"),
-          redirectUri = ZConfig.getString("google.redirect_uri"),
-          serverEncodedUrl = ZConfig.getString("google.server_encoded_url")
-        )
-
-        new Ga4SourceMetadataHandler(source, googleOAuthConfig)
+        new Ga4SourceMetadataHandler(source, getGoogleOAuthConfig())
       }
       case source: PalexySource => {
         val palexyApiUrl = ZConfig.getString("palexy.base_url", "https://ica.palexy.com")
@@ -75,8 +62,27 @@ object SourceMetadataHandler extends Logging {
           source = source
         )
       }
+      case hubspotSource: HubspotSource => {
+        val client = new APIKeyHubspotClient(hubspotSource.apiKey)
+        new HubspotMetaDataHandler(client)
+      }
+      case ggSearchConsoleSource: GoogleSearchConsoleSource => {
+        new GoogleSearchMetadataHandler(ggSearchConsoleSource, getGoogleOAuthConfig())
+      }
+      case source: MixpanelSource => {
+        new MixpanelMetadataHandler(source)
+      }
       case _ => throw BadRequestError(s"data source $source not yet supported")
     }
+  }
+
+  private def getGoogleOAuthConfig(): GoogleOAuthConfig = {
+    GoogleOAuthConfig(
+      clientId = ZConfig.getString("google.gg_client_id"),
+      clientSecret = ZConfig.getString("google.gg_client_secret"),
+      redirectUri = ZConfig.getString("google.redirect_uri"),
+      serverEncodedUrl = ZConfig.getString("google.server_encoded_url")
+    )
   }
 
   private def createJdbcMetadataHandler(jdbcSource: JdbcSource): SourceMetadataHandler = {

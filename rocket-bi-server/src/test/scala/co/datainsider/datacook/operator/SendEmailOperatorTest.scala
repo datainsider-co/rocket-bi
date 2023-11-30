@@ -18,17 +18,18 @@ class SendEmailOperatorTest extends AbstractOperatorTest with ClickhouseIntegrat
   override protected val jobId: EtlJobId = 3215
   private val emailService = injector.instance[EmailService]
 
+  private val groupEmailExecutor = SendGroupEmailOperatorExecutor(
+    getEngineResolver(),
+    getConnectionService(),
+    emailService,
+    "./tmp/email"
+  )
+
+
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
-    .register(
-      SendEmailOperatorExecutor(
-        // todo: don't known why localhost is not working but 127.0.0.1 is working
-        source.copy(host = "127.0.0.1"),
-        emailService,
-        "./tmp/email"
-      )
-    )
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
+    .register(SendEmailOperatorExecutor(groupEmailExecutor))
 
   val tripTable: TableSchema = TableSchema(
     organizationId = orgId,
@@ -212,7 +213,7 @@ class SendEmailOperatorTest extends AbstractOperatorTest with ClickhouseIntegrat
     val getOperator = GetOperator(1, tripTable, DestTableConfig("tbl_6", "ETL", "ETL"))
     val emailOperator =
       SendEmailOperator(2, Array("meomeocf98@gmail.com"), fileName = "daily user", subject = "Daily order records")
-    resolver.register(GetOperatorExecutor(client, operatorService, None))
+    resolver.register(GetOperatorExecutor(operatorService, None))
     val pipeline = Pipeline
       .builder()
       .setJobId(jobId)

@@ -7,6 +7,8 @@ import co.datainsider.jobworker.domain.JobStatus.JobStatus
 import co.datainsider.jobworker.domain.JobType.JobType
 import co.datainsider.jobworker.domain.SyncMode.SyncMode
 import co.datainsider.jobworker.util.JsonUtils
+import com.fasterxml.jackson.core.`type`.TypeReference
+import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
 
 /**
   * Created by phg on 7/4/21.
@@ -14,8 +16,8 @@ import co.datainsider.jobworker.util.JsonUtils
 case class HubspotJob(
     orgId: Long,
     jobId: Int = 0,
-    jobType: JobType = JobType.Hubspot,
     syncMode: SyncMode,
+    @JsonScalaEnumeration(classOf[HubspotObjectTypeRef])
     subType: HubspotObjectType = HubspotObjectType.Contact,
     sourceId: SourceId,
     lastSuccessfulSync: Long,
@@ -26,6 +28,8 @@ case class HubspotJob(
     destTableName: String,
     destinations: Seq[DataDestination]
 ) extends Job {
+
+  val jobType: JobType = JobType.Hubspot
 
   /** *
     *
@@ -56,7 +60,6 @@ case class HubspotJob(
     this.copy(
       orgId = orgId,
       jobId = jobId,
-      jobType = jobType,
       syncMode = syncMode,
       sourceId = sourceId,
       lastSuccessfulSync = lastSuccessfulSync,
@@ -72,7 +75,11 @@ case class HubspotJob(
 
 object HubspotObjectType extends Enumeration {
   type HubspotObjectType = Value
-  val Contact: HubspotObjectType = Value("contacts")
-  val Company: HubspotObjectType = Value("companies")
-  val Deal: HubspotObjectType = Value("deals")
+  val Contact: HubspotObjectType = Value("contact")
+  val Engagement: HubspotObjectType = Value("engagement")
+  val Company: HubspotObjectType = Value("company")
+  val Deal: HubspotObjectType = Value("deal")
+  val Unknown: HubspotObjectType = Value("unknown")
 }
+
+class HubspotObjectTypeRef extends TypeReference[HubspotObjectType.type]

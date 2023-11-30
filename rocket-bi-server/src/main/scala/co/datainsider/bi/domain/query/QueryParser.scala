@@ -77,7 +77,7 @@ final class QueryParserImpl @Inject() (@Assisted sqlParser: SqlParser) extends Q
   private def toViewSqlStr(view: QueryView): String = {
     view match {
       case sqlView: SqlView     => toInlineSqlView(sqlView)
-      case tableView: TableView => s"${tableView.dbName}.${tableView.tblName} ${view.aliasName}"
+      case tableView: TableView => s"${sqlParser.toTableViewFullName(tableView)} ${view.aliasName}"
     }
   }
 

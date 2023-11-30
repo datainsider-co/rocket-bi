@@ -24,7 +24,7 @@ object MysqlUtils {
     val columns = ArrayBuffer[Column]()
     val columnCount: Int = metaData.getColumnCount
     for (i <- 1 to columnCount) {
-      val columnName: String = metaData.getColumnName(i)
+      val columnName: String = metaData.getColumnLabel(i)
       val columnType: MysqlType = MysqlType.getByJdbcType(metaData.getColumnType(i))
       val isNullable: Boolean = metaData.isNullable(i) == ResultSetMetaData.columnNullable
       columns += toColumn(columnName, columnType, isNullable)

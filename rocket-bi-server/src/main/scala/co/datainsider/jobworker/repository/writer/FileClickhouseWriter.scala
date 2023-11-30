@@ -41,12 +41,11 @@ class FileClickhouseWriter(
           try {
             processFile(filePath)
           } catch {
-            case ex: Throwable => {
+            case ex: Throwable =>
               exceptions.append(ex)
               logger.error(s"${this.getClass.getSimpleName}::consume to clickhouse failed: $ex")
-            }
           } finally {
-//            deleteFile(filePath)
+            deleteFile(filePath)
           }
         case None =>
           Thread.sleep(sleepIntervalMs)

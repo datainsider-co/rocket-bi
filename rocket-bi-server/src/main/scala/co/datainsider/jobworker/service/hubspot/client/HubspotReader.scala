@@ -21,7 +21,7 @@ class HubspotReader(privateAppKey: String, job: HubspotJob)
   def getSchema: TableSchema = {
     val resp = getProperties(job.subType)
     if (resp.isSuccess) {
-      toTableSchema(resp.data.get)
+      toTableSchema(resp.data.get, job.subType.toString)
     } else throw InternalError(s"Fail to get hubspot properties schema. Code: ${resp.code}, reason: ${resp.error}")
   }
 
@@ -56,7 +56,7 @@ class HubspotReader(privateAppKey: String, job: HubspotJob)
     }.toArray
   }
 
-  private def toTableSchema(pageResp: HsPageResponse[HsPropertyInfo]): TableSchema = {
+  private def toTableSchema(pageResp: HsPageResponse[HsPropertyInfo], objectName: String): TableSchema = {
     val columns: Seq[Column] = pageResp.results.map(col => {
       col.`type` match {
         case "number"   => DoubleColumn(col.name, col.label)
@@ -69,8 +69,8 @@ class HubspotReader(privateAppKey: String, job: HubspotJob)
     TableSchema(
       organizationId = job.orgId,
       dbName = job.destDatabaseName,
-      name = "contacts",
-      displayName = "contacts",
+      name = objectName,
+      displayName = objectName,
       columns = columns
     )
   }

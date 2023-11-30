@@ -39,6 +39,7 @@ import datainsider.client.domain.scheduler.ScheduleTime
     new Type(value = classOf[LazadaJob], name = "lazada_job"),
     new Type(value = classOf[PalexyJob], name = "palexy_job"),
     new Type(value = classOf[GoogleSearchConsoleJob], name = "google_search_console_job"),
+    new Type(value = classOf[MixpanelJob], name = "mixpanel_job"),
   )
 )
 trait Job {
@@ -154,7 +155,9 @@ trait Job {
   def destinations: Seq[String]
 
   @deprecated("use multiCreate in JobService instead of")
-  def toMultiJob(orgId: Long, creatorId: String, tableNames: Seq[String]): Seq[Job]
+  def toMultiJob(orgId: Long, creatorId: String, tableNames: Seq[String]): Seq[Job] = {
+    throw new InternalError(s"not support multi create ${this.jobType}")
+  }
 }
 
 object JobStatus extends Enumeration {
@@ -194,6 +197,8 @@ object JobType extends Enumeration {
   val Lazada: JobType.Value = Value("Lazada")
   val Palexy: JobType.Value = Value("Palexy")
   val GoogleSearchConsole: JobType.Value = Value("GoogleSearchConsole")
+  val Mixpanel: JobType.Value = Value("Mixpanel")
+
   val Other: JobType.Value = Value("Others")
 }
 

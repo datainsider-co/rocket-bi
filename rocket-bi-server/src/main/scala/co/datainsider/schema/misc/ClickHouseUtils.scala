@@ -180,7 +180,7 @@ object ClickHouseUtils {
   }
 
   def normalizeString(str: String): String = {
-    toUnsignVietNamese(str).trim.replaceAll("[^a-zA-Z0-9-]+", "_").replaceAll("_+", "_")
+    toUnsignVietNamese(str).trim.replaceAll("[^a-zA-Z0-9]+", "_").replaceAll("_+", "_")
   }
 
   def toUnsignVietNamese(str: String): String = {

@@ -1,6 +1,6 @@
 package co.datainsider.datacook.domain.operator
 
-import co.datainsider.bi.domain.query.{Cast, ExpressionField, Function, ObjectQuery, Query, ScalarFunction, Select, SelectExpr, SelectExpression, TableField}
+import co.datainsider.bi.domain.query._
 import co.datainsider.datacook.domain.Ids.OperatorId
 import co.datainsider.datacook.domain.InvalidOperatorError
 import co.datainsider.datacook.domain.operator.FieldType.{FieldType, applyCastScalarFunction}
@@ -61,21 +61,21 @@ object FieldType extends Enumeration {
   ): Option[ScalarFunction] =
     Option {
       columnType match {
-        case Int8       => Cast(innerFn = innerScalarFn, asType = "Nullable(Int8)")
-        case Int16      => Cast(innerFn = innerScalarFn, asType = "Nullable(Int16)")
-        case Int32      => Cast(innerFn = innerScalarFn, asType = "Nullable(Int32)")
-        case Int64      => Cast(innerFn = innerScalarFn, asType = "Nullable(Int64)")
-        case UInt8      => Cast(innerFn = innerScalarFn, asType = "Nullable(UInt8)")
-        case UInt16     => Cast(innerFn = innerScalarFn, asType = "Nullable(UInt16)")
-        case UInt32     => Cast(innerFn = innerScalarFn, asType = "Nullable(UInt32)")
-        case UInt64     => Cast(innerFn = innerScalarFn, asType = "Nullable(UInt64)")
-        case Float      => Cast(innerFn = innerScalarFn, asType = "Nullable(Float32)")
-        case Double     => Cast(innerFn = innerScalarFn, asType = "Nullable(Float64)")
-        case Date       => Cast(innerFn = innerScalarFn, asType = "Nullable(Date)")
-        case DateTime   => Cast(innerFn = innerScalarFn, asType = "Nullable(DateTime)")
-        case DateTime64 => Cast(innerFn = innerScalarFn, asType = "Nullable(DateTime)")
-        case String     => Cast(innerFn = innerScalarFn, asType = "Nullable(String)")
-        case Timestamp  => Cast(innerFn = innerScalarFn, asType = "Nullable(timestamp)")
+        case Int8       => ToInt8OrNull(innerScalarFn)
+        case Int16      => ToInt16OrNull(innerScalarFn)
+        case Int32      => ToInt32OrNull(innerScalarFn)
+        case Int64      => ToInt64OrNull(innerScalarFn)
+        case UInt8      => ToUInt8OrNull(innerScalarFn)
+        case UInt16     => ToUInt16OrNull(innerScalarFn)
+        case UInt32     => ToUInt32OrNull(innerScalarFn)
+        case UInt64     => ToUInt64OrNull(innerScalarFn)
+        case Float      => ToFloatOrNull(innerScalarFn)
+        case Double     => ToDoubleOrNull(innerScalarFn)
+        case Date       => ToDateOrNull(innerScalarFn)
+        case DateTime   => ToDateTimeOrNull(innerScalarFn)
+        case DateTime64 => ToDateTime64OrNull(innerScalarFn)
+        case Timestamp  => ToDateTime64OrNull(innerScalarFn)
+        case String     => ToStringOrNull(innerScalarFn)
         case _          => innerScalarFn.orNull
       }
     }

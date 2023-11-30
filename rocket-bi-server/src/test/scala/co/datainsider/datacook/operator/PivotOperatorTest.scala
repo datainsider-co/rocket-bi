@@ -18,7 +18,7 @@ class PivotOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTes
   override protected val jobId: EtlJobId = 4104
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
     .register(PivotOperatorExecutor(operatorService))
 
   override def setupSampleTables(): Unit = {

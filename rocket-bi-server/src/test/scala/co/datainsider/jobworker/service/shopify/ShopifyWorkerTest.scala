@@ -1,9 +1,16 @@
 package co.datainsider.jobworker.service.shopify
 
-import co.datainsider.bi.module.TestContainerModule
+import co.datainsider.bi.domain.{ClickhouseConnection, Connection}
+import co.datainsider.bi.engine.{ClientManager, Engine}
+import co.datainsider.bi.engine.clickhouse.ClickhouseEngine
+import co.datainsider.bi.module.{TestContainerModule, TestModule}
 import co.datainsider.bi.util.ZConfig
+import co.datainsider.caas.user_caas.module.MockCaasModule
+import co.datainsider.caas.user_profile.module.MockCaasClientModule
 import co.datainsider.jobworker.domain.JobProgress
+import co.datainsider.jobworker.domain.source.ShopifySource
 import co.datainsider.jobworker.module.JobWorkerTestModule
+import co.datainsider.jobworker.service.worker.ShopifyWorker
 import co.datainsider.jobworker.util.ClickhouseDbTestUtils
 import co.datainsider.schema.client.{MockSchemaClientService, SchemaClientService}
 import co.datainsider.schema.domain.TableSchema
@@ -21,11 +28,13 @@ import org.scalatest.{BeforeAndAfterAll, Ignore}
 @Ignore
 abstract class ShopifyWorkerTest extends IntegrationTest with BeforeAndAfterAll {
   override protected val injector: Injector = TestInjector(
+    TestModule,
     JobWorkerTestModule,
     MockHadoopFileClientModule,
     MockLakeClientModule,
     MockSchemaClientModule,
-    TestContainerModule
+    TestContainerModule,
+    MockCaasClientModule,
   ).newInstance()
   val schemaService: SchemaClientService = injector.instance[MockSchemaClientService]
   val ssdbClient: SSDB = injector.instance[SSDB]
@@ -40,6 +49,8 @@ abstract class ShopifyWorkerTest extends IntegrationTest with BeforeAndAfterAll 
   val password: String = ZConfig.getString("test_db.clickhouse.password")
   val dbTestUtils: ClickhouseDbTestUtils = new ClickhouseDbTestUtils(jdbcUrl, username, password)
   val dbName = ZConfig.getString("fake_data.database.default.name")
+
+  val engine = new ClickhouseEngine(new ClientManager()).asInstanceOf[Engine[Connection]]
 
   override def beforeAll(): Unit = {
     dbTestUtils.createDatabase(dbName)
@@ -102,4 +113,14 @@ abstract class ShopifyWorkerTest extends IntegrationTest with BeforeAndAfterAll 
     * create table schema before run testcase
     */
   protected def ensureTableSchema()
+
+  protected def createWorker(source: ShopifySource): ShopifyWorker = {
+    new ShopifyWorker(
+      source = source,
+      schemaService = schemaService,
+      kvs = ssdbKVS,
+      engine = engine,
+      connection = injector.instance[ClickhouseConnection],
+    )
+  }
 }

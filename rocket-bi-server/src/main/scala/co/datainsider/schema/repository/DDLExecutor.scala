@@ -118,6 +118,8 @@ trait DDLExecutor {
       encryptedColumnNames: Seq[String],
       decryptedColumns: Seq[String]
   ): Future[Boolean]
+
+  def truncate(dbName: String, tblName: String): Future[Boolean] = ???
 }
 
 /**

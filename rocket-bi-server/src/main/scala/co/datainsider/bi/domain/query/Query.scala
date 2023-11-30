@@ -27,6 +27,8 @@ trait Query {
   val expressions: Map[String, String]
   val parameters: Map[String, String]
 
+  def addCondition(condition: Condition): Query = addConditions(Seq(condition))
+
   def addConditions(conditions: Seq[Condition]): Query
 
   def setLimit(limit: Option[Limit]): Query

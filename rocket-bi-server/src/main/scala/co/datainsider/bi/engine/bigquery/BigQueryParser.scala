@@ -2,119 +2,7 @@ package co.datainsider.bi.engine.bigquery
 
 import co.datainsider.bi.domain.SqlRegex
 import co.datainsider.bi.domain.SqlRegex.SqlRegex
-import co.datainsider.bi.domain.query.{
-  AggregateBetween,
-  AggregateBetweenAndIncluding,
-  AggregateCondition,
-  AggregateEqual,
-  AggregateGreaterThan,
-  AggregateGreaterThanOrEqual,
-  AggregateLessThan,
-  AggregateLessThanOrEqual,
-  AggregateNotEqual,
-  AlwaysFalse,
-  AlwaysTrue,
-  And,
-  Avg,
-  Between,
-  BetweenAndIncluding,
-  Cast,
-  Condition,
-  ControlFunction,
-  Count,
-  CountAll,
-  CountDistinct,
-  CurrentDay,
-  CurrentMonth,
-  CurrentQuarter,
-  CurrentWeek,
-  CurrentYear,
-  DateDiff,
-  DatetimeToMillis,
-  DatetimeToNanos,
-  DatetimeToSeconds,
-  Decrypt,
-  DynamicCondition,
-  DynamicFunction,
-  Empty,
-  Equal,
-  EqualField,
-  Field,
-  FieldRelatedFunction,
-  First,
-  Function,
-  GetArrayElement,
-  GreaterOrEqualField,
-  GreaterThan,
-  GreaterThanField,
-  GreaterThanOrEqual,
-  GroupBy,
-  In,
-  Last,
-  LastNDay,
-  LastNHour,
-  LastNMinute,
-  LastNMonth,
-  LastNQuarter,
-  LastNWeek,
-  LastNYear,
-  LessOrEqualField,
-  LessThan,
-  LessThanField,
-  LessThanOrEqual,
-  Like,
-  LikeCaseInsensitive,
-  Limit,
-  MatchRegex,
-  Max,
-  MillisToDateTime,
-  Min,
-  NanosToDateTime,
-  NotEmpty,
-  NotEqual,
-  NotEqualField,
-  NotIn,
-  NotLike,
-  NotLikeCaseInsensitive,
-  NotNull,
-  Null,
-  Or,
-  OrderBy,
-  PastNDay,
-  PastNMonth,
-  PastNQuarter,
-  PastNWeek,
-  PastNYear,
-  ScalarFunction,
-  SecondsToDateTime,
-  Select,
-  SelectAll,
-  SelectDistinct,
-  SelectExpr,
-  SelectExpression,
-  SelectNull,
-  Sum,
-  ToDate,
-  ToDateTime,
-  ToDayNum,
-  ToDayOfMonth,
-  ToDayOfWeek,
-  ToDayOfYear,
-  ToHour,
-  ToHourNum,
-  ToMinute,
-  ToMinuteNum,
-  ToMonth,
-  ToMonthNum,
-  ToQuarter,
-  ToQuarterNum,
-  ToSecond,
-  ToSecondNum,
-  ToWeek,
-  ToWeekNum,
-  ToYear,
-  ToYearNum
-}
+import co.datainsider.bi.domain.query._
 import co.datainsider.bi.engine.SqlParser
 import co.datainsider.bi.util.Implicits.{ImplicitString, NULL_VALUE}
 import co.datainsider.bi.util._
@@ -490,7 +378,21 @@ object BigQueryParser extends SqlParser {
       case PastNWeek(num, _, _)    => s"DATE_SUB($field, INTERVAL $num WEEK)"
       case PastNDay(num, _, _)     => s"DATE_SUB($field, INTERVAL $num DAY)"
 
-      case Cast(asType, _) => s"CAST($field AS $asType)"
+      case Cast(asType, _)       => s"CAST($field AS $asType)"
+      case ToInt8OrNull(_, _)       => s"SAFE_CAST($field AS INT64)"
+      case ToInt16OrNull(_, _)      => s"SAFE_CAST($field AS INT64)"
+      case ToInt32OrNull(_, _)      => s"SAFE_CAST($field AS INT64)"
+      case ToInt64OrNull(_, _)      => s"SAFE_CAST($field AS INT64)"
+      case ToUInt8OrNull(_, _)      => s"SAFE_CAST($field AS INT64)"
+      case ToUInt16OrNull(_, _)     => s"SAFE_CAST($field AS INT64)"
+      case ToUInt32OrNull(_, _)     => s"SAFE_CAST($field AS INT64)"
+      case ToUInt64OrNull(_, _)     => s"SAFE_CAST($field AS NUMERIC)"
+      case ToFloatOrNull(_, _)      => s"SAFE_CAST($field AS FLOAT64)"
+      case ToDoubleOrNull(_, _)     => s"SAFE_CAST($field AS FLOAT64)"
+      case ToDateOrNull(_, _)       => s"SAFE_CAST($field AS DATE)"
+      case ToDateTimeOrNull(_, _)   => s"SAFE_CAST($field AS DATETIME)"
+      case ToDateTime64OrNull(_, _) => s"SAFE_CAST($field AS DATETIME)"
+      case ToStringOrNull(_, _)     => s"SAFE_CAST($field AS STRING)"
     }
   }
 

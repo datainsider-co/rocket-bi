@@ -1,11 +1,12 @@
 package co.datainsider.datacook.pipeline.operator.persist.writer
 
-import com.twitter.util.logging.Logging
-import datainsider.client.exception.UnsupportedError
 import co.datainsider.bi.client.JdbcClient
+import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.datacook.pipeline.exception.{CreateTableException, DropTableException}
 import co.datainsider.schema.domain.TableSchema
 import co.datainsider.schema.domain.column._
+import com.twitter.util.logging.Logging
+import datainsider.client.exception.UnsupportedError
 
 class OracleWriter(protected val client: JdbcClient) extends JDBCWriter with Logging {
 
@@ -82,7 +83,7 @@ class OracleWriter(protected val client: JdbcClient) extends JDBCWriter with Log
     * @param records      : records will write
     * @return number of row write success
     */
-  override def write(dbName: String, tableName: String, columns: Seq[Column], records: Seq[Seq[Any]]): Int = {
+  override def write(dbName: String, tableName: String, columns: Seq[Column], records: Seq[Record]): Int = {
     val insertQuery = toInsertSQL(dbName, tableName, columns)
     client.executeBatchUpdate(insertQuery, records.map(_.toArray).toArray)
   }

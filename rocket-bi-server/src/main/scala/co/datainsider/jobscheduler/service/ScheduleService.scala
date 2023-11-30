@@ -204,6 +204,8 @@ class SimpleScheduleService @Inject() (
               job.copy(currentSyncStatus = JobStatus.Init, nextRunTime = atTime)
             case job: GoogleSearchConsoleJob =>
               job.copy(currentSyncStatus = JobStatus.Init, nextRunTime = atTime)
+            case job: MixpanelJob =>
+              job.copy(currentSyncStatus = JobStatus.Init, nextRunTime = atTime)
             case _ => throw BadRequestError("job type not supported")
           }
           jobRepository.update(job.orgId, newJob)

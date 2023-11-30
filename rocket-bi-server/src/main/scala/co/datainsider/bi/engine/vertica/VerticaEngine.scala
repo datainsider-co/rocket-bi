@@ -1,18 +1,19 @@
 package co.datainsider.bi.engine.vertica
 
 import co.datainsider.bi.client.JdbcClient.Record
-import co.datainsider.bi.client.{HikariClient, JdbcClient, NativeJdbcClientWithProperties}
-import co.datainsider.bi.engine.{ClientManager, _}
+import co.datainsider.bi.client.{HikariClient, JdbcClient}
 import co.datainsider.bi.engine.clickhouse.DataTable
+import co.datainsider.bi.engine._
 import co.datainsider.bi.repository.FileStorage
 import co.datainsider.bi.repository.FileStorage.FileType.FileType
-import co.datainsider.bi.util.{Implicits, Using}
+import co.datainsider.bi.util.Using
 import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.schema.domain.TableSchema
 import co.datainsider.schema.domain.column.Column.getCustomClassName
 import co.datainsider.schema.domain.column._
 import co.datainsider.schema.repository.DDLExecutor
 import com.twitter.util.Future
+import datainsider.client.domain.Implicits.async
 import datainsider.client.exception.DbExecuteError
 
 import java.sql.ResultSet
@@ -44,7 +45,7 @@ class VerticaEngine(
 
   override def execute(source: VerticaConnection, sql: String, doFormatValues: Boolean): Future[DataTable] =
     Profiler(s"[Engine] $clazz::execute") {
-      Future {
+      async {
         getClient(source)
           .executeQuery(sql)(rs => {
             val columns: Array[Column] = VerticaUtils.parseColumns(rs.getMetaData).toArray
@@ -62,7 +63,17 @@ class VerticaEngine(
     }
 
   override def executeHistogramQuery(source: VerticaConnection, histogramSql: String): Future[DataTable] =
-    execute(source, histogramSql)
+    Profiler(s"[Engine] $clazz::executeHistogramQuery") {
+      execute(source, histogramSql)
+    }
+
+  override def executeAsDataStream[T](source: VerticaConnection, query: String)(fn: DataStream => T): T =
+    Profiler(s"[Engine] $clazz::executeAsDataStream") {
+      getClient(source).executeQuery(query)((rs: ResultSet) => {
+        val dataStream: DataStream = toStream(rs)
+        fn(dataStream)
+      })
+    }
 
   override def getDDLExecutor(source: VerticaConnection): DDLExecutor = {
     val client: JdbcClient = getClient(source)
@@ -75,10 +86,9 @@ class VerticaEngine(
       destPath: String,
       fileType: FileType
   ): Future[String] =
-    Implicits.async {
-      Profiler(s"[Engine] $clazz::exportToFile") {
-        getClient(source).executeQuery(sql)((rs: ResultSet) => {
-          val stream = toStream(rs)
+    Profiler(s"[Engine] $clazz::exportToFile") {
+      async {
+        executeAsDataStream(source, sql)((stream: DataStream) => {
           FileStorage.exportToFile(stream, fileType, destPath)
         })
       }

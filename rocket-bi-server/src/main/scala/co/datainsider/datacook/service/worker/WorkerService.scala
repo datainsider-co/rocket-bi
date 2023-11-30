@@ -1,12 +1,10 @@
 package co.datainsider.datacook.service.worker
 
-import co.datainsider.bi.domain.Connection
-import co.datainsider.bi.engine.Engine
 import co.datainsider.bi.engine.factory.EngineResolver
 import co.datainsider.bi.service.ConnectionService
 import co.datainsider.datacook.domain.Ids.EtlJobId
 import co.datainsider.datacook.domain.response.JobStatusResponse
-import co.datainsider.datacook.domain.{ETLStatus, EtlJob, EtlJobProgress, JobInfo}
+import co.datainsider.datacook.domain.{ETLStatus, EtlJobProgress}
 import co.datainsider.datacook.pipeline.ExecutorResolver
 import co.datainsider.datacook.pipeline.operator.OperatorService
 import co.datainsider.datacook.service.scheduler.ScheduleService
@@ -38,6 +36,7 @@ trait WorkerService {
 }
 
 class WorkerServiceImpl @Inject() (
+    resolver: ExecutorResolver,
     scheduleService: ScheduleService,
     removeDataWorker: RemoveEtlDataWorker,
     runningJobMap: KVS[EtlJobId, Boolean],
@@ -101,9 +100,7 @@ class WorkerServiceImpl @Inject() (
             try {
               info(s"job consumer take job: ${jobInfo.job}")
               runningJobMap.add(jobInfo.job.id, true)
-              val resolver: ExecutorResolver = getExecutorResolver(jobInfo)
-              val worker: Runnable =
-                new DataCookWorker(jobInfo, operatorService, reportProgress, runningJobMap, resolver)
+              val worker: Runnable = new DataCookWorker(jobInfo, operatorService, reportProgress, runningJobMap, resolver)
               threadPool.execute(worker)
             } catch {
               case ex: Throwable =>
@@ -129,12 +126,6 @@ class WorkerServiceImpl @Inject() (
       }
     })
     executeJobThread.start()
-  }
-
-  private def getExecutorResolver(jobInfo: JobInfo[EtlJob]): ExecutorResolver = {
-    val dataSource: Connection = connectionService.getTunnelConnection(jobInfo.job.organizationId).syncGet()
-    val engine: Engine[Connection] = engineResolver.resolve(dataSource.getClass).asInstanceOf[Engine[Connection]]
-    engine.getExecutorResolver(dataSource, operatorService)(injector)
   }
 
   private def reportProgress(jobProgress: EtlJobProgress): Future[Unit] = {

@@ -17,7 +17,7 @@ class ManageFieldOperatorTest extends AbstractOperatorTest with ClickhouseIntegr
   override protected val jobId: EtlJobId = 1501
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
     .register(ManageFieldOperatorExecutor(operatorService))
 
   test("pipeline manage field show 1 column") {

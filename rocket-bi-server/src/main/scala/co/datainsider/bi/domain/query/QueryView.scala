@@ -26,7 +26,5 @@ abstract class QueryView {
 case class SqlView(aliasName: String, query: Query) extends QueryView
 
 case class TableView(dbName: String, tblName: String, aliasViewName: Option[String] = None) extends QueryView {
-  val fullName: String = s"$dbName.$tblName"
-
-  override val aliasName: String = aliasViewName.getOrElse("tbl_" + StringUtils.shortMd5(fullName))
+  override val aliasName: String = aliasViewName.getOrElse("tbl_" + StringUtils.shortMd5(s"$dbName.$tblName"))
 }

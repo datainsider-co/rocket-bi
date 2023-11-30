@@ -20,7 +20,7 @@ class ExecutorResolverTest extends Test {
   }
 
   test("resolve executor for GetOperatorExecutor") {
-    executorResolver.register(GetOperatorExecutor(null, null, null))
+    executorResolver.register(GetOperatorExecutor(null, null))
     val getOperator = GetOperator(0, null, DestTableConfig("table name", "test_table", "test_table"))
     val executor: Executor[GetOperator] = executorResolver.getExecutor(getOperator)
     assert(executor != null)
@@ -35,7 +35,7 @@ class ExecutorResolverTest extends Test {
   }
 
   test("resolve executor for SaveDwhExecutor") {
-    executorResolver.register(SaveDwhOperatorExecutor(null, null))
+    executorResolver.register(SaveDwhOperatorExecutor(null, null, null))
     val saveDwhOperator = SaveDwhOperator(0, "test", "123", PersistentType.Append)
     val executor: Executor[SaveDwhOperator] = executorResolver.getExecutor(saveDwhOperator)
     assert(executor != null)

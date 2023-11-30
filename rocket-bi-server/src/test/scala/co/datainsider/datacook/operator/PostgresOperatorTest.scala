@@ -22,8 +22,8 @@ class PostgresOperatorTest extends AbstractOperatorTest with ClickhouseIntegrate
   override protected val jobId: EtlJobId = 1442
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
-    .register(classOf[PostgresPersistOperator], JdbcPersistOperatorExecutor(client))
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
+    .register(classOf[PostgresPersistOperator], JdbcPersistOperatorExecutor(getEngineResolver(), getConnectionService()))
     .register(SQLOperatorExecutor(operatorService))
 
   val samplePostgresOperator = TestContainerModule.providesPostgresPersistOperator()

@@ -390,6 +390,21 @@ object ClickhouseParser extends SqlParser {
       case PastNDay(unit, _, _)     => s"$field - toIntervalDay($unit)"
 
       case Cast(asType, _) => s"cast($field as ${asType})"
+
+      case ToInt8OrNull(_, _)       => s"cast($field as Nullable(Int8))"
+      case ToInt16OrNull(_, _)      => s"cast($field as Nullable(Int16))"
+      case ToInt32OrNull(_, _)      => s"cast($field as Nullable(Int32))"
+      case ToInt64OrNull(_, _)      => s"cast($field as Nullable(Int64))"
+      case ToUInt8OrNull(_, _)      => s"cast($field as Nullable(UInt8))"
+      case ToUInt16OrNull(_, _)     => s"cast($field as Nullable(UInt16))"
+      case ToUInt32OrNull(_, _)     => s"cast($field as Nullable(UInt32))"
+      case ToUInt64OrNull(_, _)     => s"cast($field as Nullable(UInt64))"
+      case ToFloatOrNull(_, _)      => s"cast($field as Nullable(Float32))"
+      case ToDoubleOrNull(_, _)     => s"cast($field as Nullable(Float64))"
+      case ToDateOrNull(_, _)       => s"cast($field as Nullable(Date))"
+      case ToDateTimeOrNull(_, _)   => s"cast($field as Nullable(DateTime))"
+      case ToDateTime64OrNull(_, _) => s"cast($field as Nullable(DateTime))"
+      case ToStringOrNull(_, _)     => s"cast($field as Nullable(String))"
     }
   }
 
@@ -553,10 +568,10 @@ object ClickhouseParser extends SqlParser {
 
   def addLimit(sql: String, limit: Limit): String = {
     s"""
-       |select * 
+       |select *
        |from (
        |  $sql
-       |) as v 
+       |) as v
        |limit ${limit.size} offset ${limit.offset}
        |""".stripMargin
   }
@@ -633,7 +648,7 @@ object ClickhouseParser extends SqlParser {
 
   def toCountSql(sql: String): String = {
     s"""
-       |select count(1) 
+       |select count(1)
        |from (
        |  ${dropLimitClause(sql)}
        |) as v

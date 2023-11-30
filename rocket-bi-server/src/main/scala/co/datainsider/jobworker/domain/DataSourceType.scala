@@ -8,7 +8,7 @@ object DataSourceType extends Enumeration {
   val Service: DataSourceType = Value("Service")
   val File: DataSourceType = Value("File")
   val BigQuery: DataSourceType = Value("BigQuery")
-  val Hubspot: DataSourceType = Value("hubspot")
+  val Hubspot: DataSourceType = Value("Hubspot")
   val MongoDb: DataSourceType = Value("mongoDb")
   val Solana: DataSourceType = Value("Solana")
   val GoogleTokenCredential: DataSourceType = Value("GoogleTokenCredential")
@@ -25,6 +25,7 @@ object DataSourceType extends Enumeration {
   val Lazada: DataSourceType = Value("Lazada")
   val Palexy: DataSourceType = Value("Palexy")
   val GoogleSearchConsole: DataSourceType = Value("GoogleSourceConsole")
+  val Mixpanel: DataSourceType = Value("Mixpanel")
 }
 
 class DataSourceTypeRef extends TypeReference[DataSourceType.type]

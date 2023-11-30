@@ -37,7 +37,7 @@ case class TransformOperatorExecutor(operatorService: OperatorService) extends E
       val tableChartSetting: ChartSetting = operator.getTableChartSetting()
       val result: Future[TableResult] = for {
         tableSchema <- operatorService.createTable(context.orgId, context.jobId, tableChartSetting, operator.destTableConfiguration)
-        _ <- operatorService.ingestIfTableEmpty(tableSchema, tableChartSetting)
+        _ <- operatorService.ingestIfTableEmpty(tableChartSetting, tableSchema)
       } yield TableResult(operator.id, tableSchema)
       result
         .transform {

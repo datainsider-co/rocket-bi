@@ -10,7 +10,7 @@ import co.datainsider.jobworker.domain.response.SyncInfo
 import co.datainsider.jobworker.domain.source._
 import co.datainsider.jobworker.exception.CreateWorkerException
 import co.datainsider.jobworker.service.hubspot.HubspotWorker
-import co.datainsider.jobworker.service.jobprogress.{JobProgressFactory, JobProgressFactoryResolver}
+import co.datainsider.jobworker.service.jobprogress.{DefaultProgressFactory, JobProgressFactory, JobProgressFactoryResolver}
 import co.datainsider.jobworker.service.worker._
 import co.datainsider.jobworker.service.worker2.{JobWorker2, JobWorkerProgress}
 import co.datainsider.schema.client.SchemaClientService
@@ -42,6 +42,7 @@ class RunnableJobFactoryImpl @Inject() (
     injector: Injector
 ) extends RunnableJobFactory
     with Logging {
+  private val fallbackProgressFactory = new DefaultProgressFactory()
 
   override def create(syncInfo: SyncInfo, reportProgress: (JobProgress) => Future[Unit]): Runnable = {
     jobInQueue.add(syncInfo.syncId, true).asTwitter.syncGet()
@@ -459,12 +460,12 @@ class RunnableJobFactoryImpl @Inject() (
     * adapter from JobWorkerProgress to JobProgress
     */
   private def toJobProgress(syncInfo: SyncInfo, progress: JobWorkerProgress): JobProgress = {
-    val factory: JobProgressFactory[Job] = jobProgressResolver.resolve(syncInfo.job)
+    val factory: JobProgressFactory[Job] = jobProgressResolver.resolve(syncInfo.job).getOrElse(fallbackProgressFactory)
     val jobProgress: JobProgress = factory.create(syncInfo.syncId, syncInfo.job, progress)
     jobProgress
   }
 
-  @throws[InterruptedException]("neu sync bi cancel")
+  @throws[InterruptedException]("when sync is canceled")
   private def ensureRunning(syncId: Long): Future[Unit] = {
     jobInQueue.get(syncId).asTwitter.transform {
       case Return(Some(true))  => Future.Done

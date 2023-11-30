@@ -5,7 +5,7 @@ import co.datainsider.datacook.domain.Ids.EtlJobId
 import co.datainsider.datacook.domain.operator.DestTableConfig
 import co.datainsider.datacook.domain.persist.PersistentType
 import co.datainsider.datacook.engine.{AbstractOperatorTest, ClickhouseIntegrateTest}
-import co.datainsider.datacook.pipeline.operator.{GetOperator, GetOperatorExecutor, RootOperator, RootOperatorExecutor, SQLOperatorExecutor, SaveDwhOperator, SaveDwhOperatorExecutor, SaveDwhResult}
+import co.datainsider.datacook.pipeline.operator._
 import co.datainsider.datacook.pipeline.{ExecutorResolver, ExecutorResolverImpl, Pipeline, PipelineResult}
 
 import scala.util.Try
@@ -18,8 +18,8 @@ class SaveDwhOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateT
   //  private lazy val persistHandler = injector.instance[ActionHandler[DwhPersistConfiguration, PersistResult]]
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
-    .register(SaveDwhOperatorExecutor(client, operatorService))
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
+    .register(SaveDwhOperatorExecutor(getEngineResolver(), getConnectionService(), schemaService))
 
   override protected val jobId: EtlJobId = 1233
   private val destDbName = "test_persist_db"
@@ -62,7 +62,7 @@ class SaveDwhOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateT
 
     assert(saveDwhResult != null)
     assert(saveDwhResult.totalRows == saveDwhResult.insertedRows)
-    assert(saveDwhResult.totalRows == 1)
+    assert(saveDwhResult.totalRows == 200)
 
     assertTableSize(destDbNameNotExist, tblName, 200, false)
     await(schemaService.deleteDatabase(orgId, destDbNameNotExist))
@@ -96,7 +96,7 @@ class SaveDwhOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateT
 
     assert(saveDwhResult != null)
     assert(saveDwhResult.totalRows == saveDwhResult.insertedRows)
-    assert(saveDwhResult.totalRows == 1)
+    assert(saveDwhResult.totalRows == 200)
 
     assertTableSize(destDbNameNotExist, tblName, 200, false)
     await(schemaService.deleteDatabase(orgId, destDbNameNotExist))
@@ -130,7 +130,7 @@ class SaveDwhOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateT
 
     assert(saveDwhResult != null)
     assert(saveDwhResult.totalRows == saveDwhResult.insertedRows)
-    assert(saveDwhResult.totalRows == 1)
+    assert(saveDwhResult.totalRows == 200)
     assertTableSize(destDbName, tblName, 200, false)
 
   }
@@ -163,7 +163,7 @@ class SaveDwhOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateT
 
     assert(saveDwhResult != null)
     assert(saveDwhResult.totalRows == saveDwhResult.insertedRows)
-    assert(saveDwhResult.totalRows == 1)
+    assert(saveDwhResult.totalRows == 200)
 
     assertTableSize(destDbName, tblName2, 200, false)
   }
@@ -196,7 +196,7 @@ class SaveDwhOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateT
 
     assert(saveDwhResult != null)
     assert(saveDwhResult.totalRows == saveDwhResult.insertedRows)
-    assert(saveDwhResult.totalRows == 1)
+    assert(saveDwhResult.totalRows == 200)
 
     assertTableSize(destDbName, tblName, 200, false)
   }
@@ -229,7 +229,7 @@ class SaveDwhOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateT
 
     assert(saveDwhResult != null)
     assert(saveDwhResult.totalRows == saveDwhResult.insertedRows)
-    assert(saveDwhResult.totalRows == 1)
+    assert(saveDwhResult.totalRows == 200)
 
     assertTableSize(destDbName, tblName2, 400, false)
 

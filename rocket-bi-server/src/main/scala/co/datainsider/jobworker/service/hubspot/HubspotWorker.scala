@@ -8,7 +8,7 @@ import co.datainsider.jobworker.domain.JobStatus.JobStatus
 import co.datainsider.jobworker.domain.source.HubspotSource
 import co.datainsider.jobworker.domain.{HubspotJob, HubspotProgress, JobProgress, JobStatus}
 import co.datainsider.jobworker.service.hubspot.client.HubspotReader
-import co.datainsider.jobworker.service.worker.{DepotAssistant, JobWorker, SingleDepotAssistant}
+import co.datainsider.jobworker.service.worker.{JobWorker, MultiDepotAssistant}
 import co.datainsider.schema.client.SchemaClientService
 import co.datainsider.schema.domain.TableSchema
 import com.twitter.inject.Logging
@@ -43,11 +43,10 @@ case class HubspotWorker(
         message = msg
       )
     }
+    val schema: TableSchema = reader.getSchema
+    val depotAssistant: MultiDepotAssistant = MultiDepotAssistant(schemaService, schema, Seq(engine), Seq(connection))
 
     try {
-      val schema: TableSchema = reader.getSchema
-      val depotAssistant: DepotAssistant = SingleDepotAssistant(schemaService, schema, engine, connection)
-
       do {
         try {
           val records: Seq[Record] = reader.next(schema.columns)
@@ -64,6 +63,8 @@ case class HubspotWorker(
       case NonFatal(throwable) =>
         error(throwable)
         process(JobStatus.Error, Some(throwable.getLocalizedMessage))
+    } finally {
+      depotAssistant.close()
     }
   }
 

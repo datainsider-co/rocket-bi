@@ -24,6 +24,7 @@ object JobType extends Enumeration {
   val Lazada: JobType.Value = Value("Lazada")
   val Palexy: JobType.Value = Value("Palexy")
   val GoogleSearchConsole: JobType.Value = Value("GoogleSearchConsole")
+  val Mixpanel: JobType.Value = Value("Mixpanel")
 }
 
 class JobTypeRef extends TypeReference[JobType.type]

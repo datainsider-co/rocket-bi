@@ -3,9 +3,11 @@ package co.datainsider.datacook.pipeline.operator
 import co.datainsider.bi.domain.Connection
 import co.datainsider.bi.domain.query._
 import co.datainsider.bi.engine.Engine
+import co.datainsider.bi.engine.factory.EngineResolver
 import co.datainsider.bi.repository.FileStorage
 import co.datainsider.bi.repository.FileStorage.FileType
 import co.datainsider.bi.repository.FileStorage.FileType.FileType
+import co.datainsider.bi.service.ConnectionService
 import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.datacook.domain.persist.EmailConfiguration
 import co.datainsider.datacook.pipeline.exception.{InputInvalid, OperatorException}
@@ -45,8 +47,8 @@ case class SendGroupEmailResult(id: OperatorId, attachmentSize: Long, response: 
 }
 
 case class SendGroupEmailOperatorExecutor(
-    engine: Engine[_ <: Connection],
-    connection: Connection,
+    engineResolver: EngineResolver,
+    connectionService: ConnectionService,
     emailService: EmailService,
     baseDir: String,
     rateLimitRetry: Int = 20,
@@ -64,7 +66,7 @@ case class SendGroupEmailOperatorExecutor(
       val folderPath: String = Paths.get(baseDir, context.orgId.toString, System.currentTimeMillis().toString).toAbsolutePath.toString
       try {
         ensureCreatedFolder(folderPath)
-        val files: Seq[File] = writeDataToFiles(folderPath, sourceTables, operator.isZip, operator.fileType)
+        val files: Seq[File] = writeDataToFiles(context.orgId, folderPath, sourceTables, operator.isZip, operator.fileType)
         val mediaType: String = toMediaType(operator)
         val emailConfig = EmailConfiguration(operator.receivers, operator.cc, operator.bcc, operator.subject, "", operator.content)
         val mailResponse: EmailResponse = emailService.send(emailConfig, files.map(_.getPath), mediaType).syncGet()
@@ -121,17 +123,20 @@ case class SendGroupEmailOperatorExecutor(
 
   @throws[OperatorException]
   private def writeDataToFiles(
+      orgId: Long,
       folderPath: String,
       sourceTables: Seq[TableSchema],
       isZip: Boolean,
       fileType: FileType
   ): Seq[File] = {
+    val connection: Connection = connectionService.getTunnelConnection(orgId).syncGet()
+    val engine: Engine[Connection] = engineResolver.resolve(connection.getClass).asInstanceOf[Engine[Connection]]
     val parser = new QueryParserImpl(engine.getSqlParser())
 
     val files: Seq[File] = sourceTables.map(tableSchema => {
       val query: String = parser.parse(toObjectQuery(tableSchema))
       val tmpFile: File = prepareFile(folderPath, tableSchema, fileType)
-      val finalPath = engine.asInstanceOf[Engine[Connection]].exportToFile(connection, query, tmpFile.getPath, fileType).syncGet()
+      val finalPath = engine.exportToFile(connection, query, tmpFile.getPath, fileType).syncGet()
       val file: File = new File(finalPath)
       ensureFileReady(file)
       file

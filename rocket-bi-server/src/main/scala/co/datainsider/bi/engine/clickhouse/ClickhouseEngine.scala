@@ -1,25 +1,20 @@
 package co.datainsider.bi.engine.clickhouse
 
 import co.datainsider.bi.client.JdbcClient.Record
-import co.datainsider.bi.client.{HikariClient, JdbcClient, NativeJdbcClientWithProperties}
-import co.datainsider.bi.domain.{ClickhouseConnection, Connection}
-import co.datainsider.bi.domain.query.Limit
-import co.datainsider.bi.engine.{ClientManager, DataStream, Engine, ExpressionUtils, SqlParser}
-import co.datainsider.bi.repository.FileStorage
+import co.datainsider.bi.client.{HikariClient, JdbcClient}
+import co.datainsider.bi.domain.ClickhouseConnection
+import co.datainsider.bi.engine._
 import co.datainsider.bi.repository.FileStorage.FileType
 import co.datainsider.bi.repository.FileStorage.FileType.FileType
 import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.bi.util.{DateTimeFormatter, DoubleFormatter, Using, ZConfig}
-import co.datainsider.datacook.pipeline.operator._
-import co.datainsider.datacook.pipeline.operator.persist._
-import co.datainsider.datacook.pipeline.{ExecutorResolver, ExecutorResolverImpl}
-import co.datainsider.datacook.service.EmailService
 import co.datainsider.jobworker.repository.writer.{DataWriter, FileClickhouseWriter, LocalFileWriterConfig}
 import co.datainsider.schema.domain.TableSchema
-import co.datainsider.schema.domain.column.Column
-import co.datainsider.schema.misc.{ClickHouseDDLConverter, ClickHouseUtils}
+import co.datainsider.schema.domain.column._
+import co.datainsider.schema.misc.ColumnDetector.RawColumnData
+import co.datainsider.schema.misc.{ClickHouseDDLConverter, ClickHouseUtils, ColumnDetector}
 import co.datainsider.schema.repository._
-import com.twitter.inject.{Injector, Logging}
+import com.twitter.inject.Logging
 import com.twitter.util.Future
 import datainsider.client.domain.Implicits.async
 import datainsider.client.exception.{DbExecuteError, InternalError}
@@ -30,7 +25,6 @@ import java.io.FileOutputStream
 import java.sql.{ResultSet, ResultSetMetaData, SQLException}
 import java.util.Properties
 import scala.collection.mutable.ArrayBuffer
-import scala.io.Source
 import scala.jdk.CollectionConverters.mapAsJavaMapConverter
 import scala.sys.process.{Process, ProcessLogger}
 
@@ -51,7 +45,7 @@ final class ClickhouseEngine(
     with Logging {
 
   def createClient(source: ClickhouseConnection, poolSize: Int = 10): HikariClient =
-    Profiler(s"${clazz}.createClient") {
+    Profiler(s"[Engine] ${clazz}.createClient") {
       val properties = new Properties()
       properties.putAll(source.properties.asJava)
       HikariClient(source.toJdbcUrl, source.username, source.password, Some(poolSize), Some(properties))
@@ -69,7 +63,7 @@ final class ClickhouseEngine(
     * The rest are row data from sql (array[1][_]...array[n][_])
     */
   override def execute(source: ClickhouseConnection, sql: String, doFormatValues: Boolean = true): Future[DataTable] =
-    Profiler(s"$clazz::execute") {
+    Profiler(s"[Engine] $clazz::execute") {
       async {
         try {
           getClient(source)
@@ -82,17 +76,20 @@ final class ClickhouseEngine(
                 val row = ArrayBuffer[Object]()
                 colNames.zip(colTypes).foreach {
                   case (colName, colType) =>
-                    """Array\(\w*\)""".r.findFirstMatchIn(colType) match {
-                      case Some(_) =>
+                    if (colType.startsWith("Array")) {
+                      if (colType.contains("Tuple")) {
+                        row += rs.getObject(colName, classOf[java.util.List[String]])
+                      } else {
                         row += rs.getString(colName)
-                      case None =>
-                        val rawValue = rs.getObject(colName)
+                      }
+                    } else {
+                      val rawValue = rs.getObject(colName)
 
-                        val finalValue = if (doFormatValues) {
-                          formatValue(rawValue, colType)
-                        } else rawValue
+                      val finalValue = if (doFormatValues) {
+                        formatValue(rawValue, colType)
+                      } else rawValue
 
-                        row += finalValue
+                      row += finalValue
                     }
                   case _ =>
                 }
@@ -109,34 +106,106 @@ final class ClickhouseEngine(
       }
     }
 
-  override def executeHistogramQuery(source: ClickhouseConnection, histogramSql: String): Future[DataTable] =
-    async {
-      try {
-        getClient(source)
-          .executeQuery(histogramSql)(rs => {
-            val colNames = Array("lower_bound", "upper_bound", "value")
-            val colTypes = Array("Float64", "Float64", "Float64")
-            val rows = ArrayBuffer[Array[Object]]()
-            while (rs.next()) {
-              val histogramArr = rs.getArray(1).getArray.asInstanceOf[Array[Object]]
+  override def executeAsDataStream[T](source: ClickhouseConnection, query: String)(fn: DataStream => T): T = Profiler(s"[Engine] $clazz::executeAsDataStream") {
+    getClient(source).executeQuery(query)(rs => {
+      val columns: Seq[Column] = parseColumns(rs.getMetaData)
 
-              histogramArr.foreach(arr => {
-                val javaList = arr.asInstanceOf[java.util.ArrayList[Double]]
+      val it = new Iterator[Record] {
+        override def hasNext: Boolean = rs.next()
 
-                val lower = javaList.get(0).asInstanceOf[Object]
-                val upper = javaList.get(1).asInstanceOf[Object]
-                val value = javaList.get(2).asInstanceOf[Object]
-
-                rows += Array(lower, upper, value)
-              })
-            }
-            DataTable(colNames, colTypes, rows.toArray)
-          })
-      } catch {
-        case _: DbExecuteError => throw DbExecuteError(s"fail to execute histogram query")
+        override def next(): Record = {
+          columns
+            .map(col => {
+              try {
+                col match {
+                  case c: BoolColumn => rs.getBoolean(c.name)
+                  case c if isInt(c) => rs.getInt(c.name)
+                  case c if isLong(c) => rs.getLong(c.name)
+                  case c if isDouble(c) => rs.getDouble(c.name)
+                  case c if isDate(c) => rs.getDate(c.name)
+                  case c if isDateTime(c) => rs.getTimestamp(c.name)
+                  case c: StringColumn => rs.getString(c.name)
+                  case _@c => rs.getString(c.name)
+                }
+              } catch {
+                case e: Throwable => null
+              }
+            })
+            .toArray
+        }
       }
-    }.rescue {
-      case e: Throwable => throw e
+      fn(DataStream(columns, it))
+    })
+  }
+
+  private def isInt(column: Column): Boolean = {
+    column.isInstanceOf[Int8Column] || column.isInstanceOf[Int16Column] || column.isInstanceOf[Int32Column] ||
+      column.isInstanceOf[UInt8Column] || column.isInstanceOf[UInt16Column] || column.isInstanceOf[UInt32Column]
+  }
+
+  private def isLong(column: Column): Boolean = {
+    column.isInstanceOf[Int64Column] || column.isInstanceOf[UInt64Column]
+  }
+
+  private def isDouble(column: Column): Boolean = {
+    column.isInstanceOf[DoubleColumn] || column.isInstanceOf[FloatColumn]
+  }
+
+  private def isDate(column: Column): Boolean = {
+    column.isInstanceOf[DateColumn]
+  }
+
+  private def isDateTime(column: Column): Boolean = {
+    column.isInstanceOf[DateTimeColumn] || column.isInstanceOf[DateTime64Column]
+  }
+
+  private def parseColumns(metaData: ResultSetMetaData): Seq[Column] = {
+    val columns = ArrayBuffer[Column]()
+    val columnCount: Int = metaData.getColumnCount
+    for (i <- 1 to columnCount) {
+      val columnName: String = metaData.getColumnName(i)
+      val isNullable: Boolean = metaData.isNullable(i) == ResultSetMetaData.columnNullable
+      val columnData = RawColumnData(
+        name = columnName,
+        displayName = columnName,
+        idType = metaData.getColumnType(i),
+        isNullable = isNullable
+      )
+      columns += ColumnDetector.createColumn(columnData);
+    }
+    columns
+  }
+
+  override def executeHistogramQuery(source: ClickhouseConnection, histogramSql: String): Future[DataTable] =
+    Profiler(s"[Engine] $clazz::executeHistogramQuery") {
+      async {
+        try {
+          getClient(source)
+            .executeQuery(histogramSql)(rs => {
+              val colNames = Array("lower_bound", "upper_bound", "value")
+              val colTypes = Array("Float64", "Float64", "Float64")
+              val rows = ArrayBuffer[Array[Object]]()
+              while (rs.next()) {
+                val histogramArr = rs.getArray(1).getArray.asInstanceOf[Array[Object]]
+
+                histogramArr.foreach(arr => {
+                  val javaList = arr.asInstanceOf[java.util.ArrayList[Double]]
+
+                  val lower = javaList.get(0).asInstanceOf[Object]
+                  val upper = javaList.get(1).asInstanceOf[Object]
+                  val value = javaList.get(2).asInstanceOf[Object]
+
+                  rows += Array(lower, upper, value)
+                })
+              }
+              DataTable(colNames, colTypes, rows.toArray)
+            })
+        } catch {
+          case _: DbExecuteError => throw DbExecuteError(s"fail to execute histogram query")
+        }
+      }.rescue {
+        case e: Throwable => throw e
+      }
     }
 
   override def getDDLExecutor(source: ClickhouseConnection): DDLExecutor = {
@@ -238,8 +307,8 @@ final class ClickhouseEngine(
       getClient(source)
         .executeQuery(sql)(converter = rs => {
           val (colNames, colTypes) = getColMetaData(rs)
-          Using(new SXSSFWorkbook()) {
-            workbook => {
+          Using(new SXSSFWorkbook()) { workbook =>
+            {
               val sheet: SXSSFSheet = workbook.createSheet()
               val header: SXSSFRow = sheet.createRow(0)
               val creationHelper: CreationHelper = workbook.getCreationHelper
@@ -385,97 +454,6 @@ final class ClickhouseEngine(
       maxFileSizeInBytes = ZConfig.getBytes("clickhouse_engine.local_file_writer.max_file_size")
     )
     new FileClickhouseWriter(source, writerConfig, sleepInterval)
-  }
-
-  override def getPreviewExecutorResolver(source: ClickhouseConnection, operatorService: OperatorService)(
-      injector: Injector
-  ): ExecutorResolver = {
-    val client: JdbcClient = getClient(source)
-    val limit = Some(Limit(0, 1000))
-    new ExecutorResolverImpl()
-      .register(RootOperatorExecutor())
-      .register(GetOperatorExecutor(client, operatorService, limit))
-      .register(JoinOperatorExecutor(operatorService, limit))
-      .register(ManageFieldOperatorExecutor(operatorService))
-      .register(TransformOperatorExecutor(operatorService))
-      .register(PivotOperatorExecutor(operatorService))
-      .register(SQLOperatorExecutor(operatorService))
-      .register(MockSaveDwhOperatorExecutor())
-      .register(classOf[OraclePersistOperator], MockJdbcPersistOperatorExecutor())
-      .register(classOf[MySQLPersistOperator], MockJdbcPersistOperatorExecutor())
-      .register(classOf[MsSQLPersistOperator], MockJdbcPersistOperatorExecutor())
-      .register(classOf[PostgresPersistOperator], MockJdbcPersistOperatorExecutor())
-      .register(classOf[VerticaPersistOperator], MockJdbcPersistOperatorExecutor())
-      .register(classOf[PythonOperator], createPythonExecutor(source, operatorService))
-      .register(classOf[SendEmailOperator], MockSendEmailExecutor())
-      .register(classOf[SendGroupEmailOperator], MockGroupSendEmailExecutor())
-  }
-
-  override def getExecutorResolver(source: ClickhouseConnection, operatorService: OperatorService)(
-      injector: Injector
-  ): ExecutorResolver = {
-    val client: JdbcClient = getClient(source)
-    val batchSize = ZConfig.getInt("data_cook.insert_batch_size", 100000)
-    val executionTimeout = ZConfig.getInt("data_cook.python_execute_timeout", 3600)
-    val emailService = injector.instance[EmailService]
-    new ExecutorResolverImpl()
-      .register(RootOperatorExecutor())
-      .register(GetOperatorExecutor(client, operatorService))
-      .register(JoinOperatorExecutor(operatorService))
-      .register(ManageFieldOperatorExecutor(operatorService))
-      .register(TransformOperatorExecutor(operatorService))
-      .register(PivotOperatorExecutor(operatorService))
-      .register(SQLOperatorExecutor(operatorService))
-      .register(SaveDwhOperatorExecutor(client, operatorService))
-      .register(classOf[OraclePersistOperator], JdbcPersistOperatorExecutor(client, batchSize))
-      .register(classOf[MySQLPersistOperator], JdbcPersistOperatorExecutor(client, batchSize))
-      .register(classOf[MsSQLPersistOperator], JdbcPersistOperatorExecutor(client, batchSize))
-      .register(classOf[PostgresPersistOperator], JdbcPersistOperatorExecutor(client, batchSize))
-      .register(classOf[VerticaPersistOperator], JdbcPersistOperatorExecutor(client, batchSize))
-      .register(classOf[SendEmailOperator], createSendEmailExecutor(source, emailService))
-      .register(classOf[SendGroupEmailOperator], createSendGroupEmailExecutor(source, emailService))
-      .register(classOf[PythonOperator], createPythonExecutor(source, operatorService, executionTimeout))
-  }
-
-  private def createPythonExecutor(
-      source: ClickhouseConnection,
-      tableService: OperatorService,
-      executeTimeoutMs: Long = 60000
-  ): Executor[PythonOperator] = {
-    val templatePath: String = ZConfig.getString("data_cook.templates.python", "templates/main.py.template")
-    val template: String = Using(Source.fromInputStream(getClass.getClassLoader.getResourceAsStream(templatePath)))(
-      _.getLines().mkString("\n")
-    )
-    val tmpDir: String = ZConfig.getString("data_cook.tmp_dir")
-
-    PythonOperatorExecutor(
-      source = source,
-      tableService,
-      template,
-      baseDir = tmpDir,
-      executeTimeoutMs = executeTimeoutMs
-    )
-  }
-
-  private def createSendGroupEmailExecutor(
-      source: ClickhouseConnection,
-      emailService: EmailService
-  ): Executor[SendGroupEmailOperator] = {
-    val baseDir: String = ZConfig.getString("data_cook.mail_dir")
-    SendGroupEmailOperatorExecutor(this, source, emailService, baseDir)
-  }
-
-  private def createSendEmailExecutor(
-      source: ClickhouseConnection,
-      emailService: EmailService
-  ): Executor[SendEmailOperator] = {
-    val baseDir: String = ZConfig.getString("data_cook.mail_dir")
-    SendEmailOperatorExecutor(source, emailService, baseDir)
-  }
-
-  override def getDataRepository(source: ClickhouseConnection): DataRepository = {
-    val client: JdbcClient = getClient(source)
-    new ClickHouseDataRepository(client)
   }
 
   override def write(source: ClickhouseConnection, schema: TableSchema, records: Seq[Record]): Future[Int] = {

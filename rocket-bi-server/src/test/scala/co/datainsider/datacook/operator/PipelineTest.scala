@@ -13,11 +13,11 @@ class PipelineTest extends AbstractOperatorTest with ClickhouseIntegrateTest {
 
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
     .register(SQLOperatorExecutor(operatorService))
     .register(TransformOperatorExecutor(operatorService))
     .register(PivotOperatorExecutor(operatorService))
-    .register(SaveDwhOperatorExecutor(client, operatorService))
+    .register(SaveDwhOperatorExecutor(getEngineResolver(), getConnectionService(), schemaService))
     .register(JoinOperatorExecutor(operatorService))
 
 

@@ -65,10 +65,9 @@ trait ETLPreviewService {
 class ETLPreviewServiceImpl @Inject()(
     @Named("preview_operator_service")
     operatorService: OperatorService,
-    engineResolver: EngineResolver,
-    connectionService: ConnectionService,
+    @Named("preview_executor_resolver")
+    executorResolver: ExecutorResolver,
     queryExecutor: QueryExecutor,
-    injector: Injector
 ) extends ETLPreviewService
     with Logging {
 
@@ -113,10 +112,7 @@ class ETLPreviewServiceImpl @Inject()(
       if (request.force) {
         clearPreviewData(organizationId, request.id, operators = request.operators).syncGet()
       }
-      val connection: Connection = connectionService.getTunnelConnection(organizationId).syncGet()
-      val engine: Engine[Connection] = engineResolver.resolve(connection.getClass).asInstanceOf[Engine[Connection]]
-      val resolver: ExecutorResolver =  engine.getPreviewExecutorResolver(connection, operatorService)(injector)
-      val result: PreviewETLResponse = executePreview(organizationId, request.toPreviewJob(), resolver)
+      val result: PreviewETLResponse = executePreview(organizationId, request.toPreviewJob(), executorResolver)
       result
     }
 
