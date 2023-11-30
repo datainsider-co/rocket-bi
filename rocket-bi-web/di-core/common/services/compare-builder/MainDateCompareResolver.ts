@@ -43,8 +43,8 @@ export class MainDateCompareResolver implements CompareResolver {
 
   private formatDateRange(range: DateRange): DateRange {
     return {
-      start: DateTimeUtils.formatDate(range.start),
-      end: DateTimeUtils.formatDate(range.end, true)
+      start: DateTimeUtils.formatDateTime(range.start),
+      end: DateTimeUtils.formatDateTime(range.end, true)
     };
   }
 

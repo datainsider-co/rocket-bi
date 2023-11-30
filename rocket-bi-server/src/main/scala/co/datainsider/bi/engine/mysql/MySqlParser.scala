@@ -13,9 +13,10 @@ object MySqlParser extends SqlParser {
     * *****************************************************
     */
 
-  /**
-    * parse condition object to clickhouse query syntax in where clause
-    */
+  override def toTableViewFullName(view: TableView): String = {
+    s"`${view.dbName}`.`${view.tblName}`"
+  }
+
   def toQueryString(condition: Condition): String = {
     condition match {
       case and: And                           => toAndConditionStr(and)
@@ -26,50 +27,50 @@ object MySqlParser extends SqlParser {
       case notIn: NotIn => toNotInConditionStr(notIn)
 
       case EqualField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} = ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} = ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
       case NotEqualField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} != ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} != ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
       case GreaterThanField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} > ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} > ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
       case LessThanField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} < ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} < ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
       case GreaterOrEqualField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} >= ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} >= ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
       case LessOrEqualField(leftField, rightField, leftScalarFn, rightScalarFn) =>
-        s"${applyScalarFn(leftField.fullFieldName, leftScalarFn)} <= ${applyScalarFn(rightField.fullFieldName, rightScalarFn)}"
+        s"${applyScalarFn(leftField.fullFieldNameWithEscape, leftScalarFn)} <= ${applyScalarFn(rightField.fullFieldNameWithEscape, rightScalarFn)}"
 
-      case Null(field, scalarFn)     => s"${applyScalarFn(field.fullFieldName, scalarFn)} is null"
-      case NotNull(field, scalarFn)  => s"${applyScalarFn(field.fullFieldName, scalarFn)} is not null"
-      case Empty(field, scalarFn)    => s"${applyScalarFn(field.fullFieldName, scalarFn)} = ''"
-      case NotEmpty(field, scalarFn) => s"${applyScalarFn(field.fullFieldName, scalarFn)} != ''"
+      case Null(field, scalarFn)     => s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} is null"
+      case NotNull(field, scalarFn)  => s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} is not null"
+      case Empty(field, scalarFn)    => s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} = ''"
+      case NotEmpty(field, scalarFn) => s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} != ''"
 
       case Equal(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} = ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} = ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case NotEqual(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} != ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} != ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case GreaterThan(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} > ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} > ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case GreaterThanOrEqual(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} >= ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} >= ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case LessThan(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} < ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} < ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case LessThanOrEqual(field, value, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} <= ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} <= ${toCorrespondingValue(field.fieldType, value, scalarFn)}"
       case MatchRegex(field, value, scalarFn) =>
-        s"match(${applyScalarFn(field.fullFieldName, scalarFn)}, ${toCorrespondingValue(field.fieldType, value, scalarFn)})"
+        s"match(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)}, ${toCorrespondingValue(field.fieldType, value, scalarFn)})"
       case Like(field, value, scalarFn) =>
-        s"like(${applyScalarFn(field.fullFieldName, scalarFn)}, ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"like(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)}, ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
       case NotLike(field, value, scalarFn) =>
-        s"not like(${applyScalarFn(field.fullFieldName, scalarFn)}, ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"not like(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)}, ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
       case LikeCaseInsensitive(field, value, scalarFn) =>
-        s"like(lower(${applyScalarFn(field.fullFieldName, scalarFn)}), ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"like(lower(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)}), ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
       case NotLikeCaseInsensitive(field, value, scalarFn) =>
-        s"not like(lower(${applyScalarFn(field.fullFieldName, scalarFn)}), ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
+        s"not like(lower(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)}), ${toCorrespondingValue(field.fieldType, s"%$value%", scalarFn)})"
       case Between(field, min, max, scalarFn) =>
-        s"(${applyScalarFn(field.fullFieldName, scalarFn)} > ${toCorrespondingValue(field.fieldType, min)}) " +
-          s"and (${applyScalarFn(field.fullFieldName, scalarFn)} < ${toCorrespondingValue(field.fieldType, max)})"
+        s"(${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} > ${toCorrespondingValue(field.fieldType, min)}) " +
+          s"and (${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} < ${toCorrespondingValue(field.fieldType, max)})"
       case BetweenAndIncluding(field, min, max, scalarFn) =>
-        s"${applyScalarFn(field.fullFieldName, scalarFn)} between ${toCorrespondingValue(field.fieldType, min)} " +
+        s"${applyScalarFn(field.fullFieldNameWithEscape, scalarFn)} between ${toCorrespondingValue(field.fieldType, min)} " +
           s"and ${toCorrespondingValue(field.fieldType, max)}"
 
       case LastNMinute(field, nMinute, scalarFn, intervalFn) =>
@@ -180,22 +181,22 @@ object MySqlParser extends SqlParser {
   override def toHistogramSql(fieldName: String, baseSql: String, numBins: Int): String = {
     require(numBins > 1, "Bin number should be greater than 1.")
     s"""
-       |select 
-       |  min_value + bin_num * bin_size as lower_bound, 
-       |  least(max_value, min_value + (bin_num + 1) * bin_size) as upper_bound, 
-       |  count 
+       |select
+       |  min_value + bin_num * bin_size as lower_bound,
+       |  least(max_value, min_value + (bin_num + 1) * bin_size) as upper_bound,
+       |  count
        |from (
-       |  select 
-       |    floor(($fieldName - min_value) / bin_size) as bin_num, 
-       |    count(1) as count, 
-       |    min(bin_size) as bin_size, 
+       |  select
+       |    floor(($fieldName - min_value) / bin_size) as bin_num,
+       |    count(1) as count,
+       |    min(bin_size) as bin_size,
        |    min(min_value) as min_value,
        |    max(max_value) as max_value
        |  from ($baseSql) base_data
        |  join (
-       |      select 
-       |      ceil((max($fieldName) - min($fieldName)) / $numBins) as bin_size, 
-       |      min($fieldName) as min_value, 
+       |      select
+       |      ceil((max($fieldName) - min($fieldName)) / $numBins) as bin_size,
+       |      min($fieldName) as min_value,
        |      max($fieldName) as max_value
        |    from ($baseSql) base_data
        |  ) bin_size_data
@@ -227,7 +228,7 @@ object MySqlParser extends SqlParser {
   }
 
   private def toInConditionStr(in: In): String = {
-    val fieldStr: String = applyScalarFn(in.field.fullFieldName, in.scalarFunction)
+    val fieldStr: String = applyScalarFn(in.field.fullFieldNameWithEscape, in.scalarFunction)
     val valuesStr: String = in.possibleValues.filterNot(v => v.isNull).map(escapeString).mkString(",")
 
     if (in.isIncludeNull) {
@@ -238,7 +239,7 @@ object MySqlParser extends SqlParser {
   }
 
   private def toNotInConditionStr(notIn: NotIn): String = {
-    val fieldStr: String = applyScalarFn(notIn.field.fullFieldName, notIn.scalarFunction)
+    val fieldStr: String = applyScalarFn(notIn.field.fullFieldNameWithEscape, notIn.scalarFunction)
     val valuesStr: String = notIn.possibleValues.filterNot(v => v.isNull).map(escapeString).mkString(",")
 
     if (notIn.isIncludeNull) {
@@ -274,7 +275,7 @@ object MySqlParser extends SqlParser {
     * parse function object to clickhouse query syntax in select clause
     */
   def toQueryString(function: FieldRelatedFunction): String = {
-    val fieldName = s"${function.field.fullFieldName}"
+    val fieldName = s"${function.field.fullFieldNameWithEscape}"
     function match {
       case f: Select           => applyScalarFn(fieldName, f.scalarFunction)
       case f: SelectDistinct   => applyScalarFn(fieldName, f.scalarFunction)
@@ -402,13 +403,28 @@ object MySqlParser extends SqlParser {
       case PastNDay(unit, _, _)     => s"DATE_SUB($field, INTERVAL $unit DAY)"
 
       case Cast(asType, _) => s"CONVERT($field, $asType)"
+
+      case ToInt8OrNull(_, _)       => s"CONVERT($field, DECIMAL)"
+      case ToInt16OrNull(_, _)      => s"CONVERT($field, DECIMAL)"
+      case ToInt32OrNull(_, _)      => s"CONVERT($field, DECIMAL)"
+      case ToInt64OrNull(_, _)      => s"CONVERT($field, DECIMAL)"
+      case ToUInt8OrNull(_, _)      => s"CONVERT($field, DECIMAL)"
+      case ToUInt16OrNull(_, _)     => s"CONVERT($field, DECIMAL)"
+      case ToUInt32OrNull(_, _)     => s"CONVERT($field, DECIMAL)"
+      case ToUInt64OrNull(_, _)     => s"CONVERT($field, DECIMAL)"
+      case ToFloatOrNull(_, _)      => s"CONVERT($field, DECIMAL)"
+      case ToDoubleOrNull(_, _)     => s"CONVERT($field, DECIMAL)"
+      case ToDateOrNull(_, _)       => s"CONVERT($field, DATE)"
+      case ToDateTimeOrNull(_, _)   => s"CONVERT($field, DATETIME)"
+      case ToDateTime64OrNull(_, _) => s"CONVERT($field, DATETIME)"
+      case ToStringOrNull(_, _)     => s"CONVERT($field, NCHAR)"
     }
   }
 
   def applyScalarFunctionToField(scalarFn: ScalarFunction, field: Field): String = {
     scalarFn.innerFn match {
       case Some(innerFn) => toQueryString(scalarFn, applyScalarFunctionToField(innerFn, field))
-      case _             => toQueryString(scalarFn, field.fullFieldName)
+      case _             => toQueryString(scalarFn, field.fullFieldNameWithEscape)
     }
   }
 
@@ -464,7 +480,7 @@ object MySqlParser extends SqlParser {
       scalarFunction: Option[ScalarFunction],
       intervalFunction: Option[ScalarFunction]
   ): String = {
-    val date: String = applyScalarFn(dateField.fullFieldName, scalarFunction)
+    val date: String = applyScalarFn(dateField.fullFieldNameWithEscape, scalarFunction)
     val startDate: String = applyScalarFn(startDateExpr, intervalFunction)
     val endDate: String = applyScalarFn(endDateExpr, intervalFunction)
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="di-input-component" :border="border" :class="{ 'di-input-component--disabled': disabled }">
+  <div class="di-input-component" :border="border" :class="{ 'di-input-component--error': isError, 'di-input-component--disabled': disabled }">
     <div class="di-input-component--label" v-if="label">
       <div class="di-input-component--label-left" v-if="label">{{ label }}</div>
       <slot name="subtitle">
@@ -45,38 +45,41 @@ import { AtomicAction } from '@core/common/misc';
   inheritAttrs: true
 })
 export default class DiInputComponent extends Vue {
-  private isShowPassword = false;
+  protected isShowPassword = false;
 
   @Prop({ required: false, type: String })
-  private readonly label!: string;
+  protected readonly label!: string;
 
   @Prop({ required: false, type: String })
-  private readonly subtitle!: string;
+  protected readonly subtitle!: string;
 
   @Prop({ required: false, type: String })
-  private readonly type!: string;
+  protected readonly type!: string;
 
   @Prop({ required: false, type: String, default: 'off' })
-  private readonly autocomplete!: string;
+  protected readonly autocomplete!: string;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly disabled!: boolean;
+  protected readonly disabled!: boolean;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly readonly!: boolean;
+  protected readonly readonly!: boolean;
 
   @Prop({ required: false, type: Boolean, default: false })
-  private readonly border!: boolean;
+  protected readonly border!: boolean;
 
-  private get currentType(): string {
+  @Prop({ required: false, type: Boolean, default: false })
+  protected readonly isError!: boolean;
+
+  protected get currentType(): string {
     return this.isShowPassword ? 'text' : this.type;
   }
 
-  private get isPassword(): boolean {
+  protected get isPassword(): boolean {
     return this.type === 'password';
   }
 
-  private toggleShowPassword() {
+  protected toggleShowPassword() {
     this.isShowPassword = !this.isShowPassword;
   }
 
@@ -97,7 +100,7 @@ export default class DiInputComponent extends Vue {
     this.$emit('enter', event);
   }
 
-  private handleClickInput() {
+  protected handleClickInput() {
     if (!this.disabled) {
       this.focus();
     }
@@ -195,6 +198,12 @@ export default class DiInputComponent extends Vue {
       &:active,
       &:hover {
         box-shadow: 0 0 0 1px var(--accent);
+      }
+    }
+
+    &.di-input-component--error {
+      .di-input-component--input {
+        box-shadow: 0 0 0 1px var(--danger);
       }
     }
 

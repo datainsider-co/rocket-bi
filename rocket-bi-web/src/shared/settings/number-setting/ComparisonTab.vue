@@ -181,7 +181,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
+import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import PanelHeader from '@/screens/chart-builder/setting-modal/PanelHeader.vue';
 import { ComparisonOptionData, Dashboard, DataRange, Field, KPITheme, MainDateMode, NumberChartOption, SettingKey, TrendIcon } from '@core/common/domain';
 import { DropdownData } from '@/shared/components/common/di-dropdown';
@@ -402,9 +402,7 @@ export default class ComparisonTab extends Vue {
   }
 
   private getDefaultCompareOption(): ComparisonOptionData {
-    const mainDateFilterField = this.getMainDateFilterField();
     const firstDateField = this.getFirstDateField();
-    const sameDatabase = mainDateFilterField?.dbName === firstDateField?.dbName;
     const dateData: MainDateData | undefined = this.getDateData();
     return {
       comparison: {
@@ -421,15 +419,10 @@ export default class ComparisonTab extends Vue {
       dataRange: {
         enabled: false,
         dateRange: dateData?.chosenDateRange || DateUtils.getLast30Days(),
-        dateField: sameDatabase ? mainDateFilterField : firstDateField,
+        dateField: firstDateField,
         mode: dateData?.mode || MainDateMode.last30Days
       }
-    } as any;
-  }
-
-  private getMainDateFilterField(): Field | undefined {
-    const dashboard: Dashboard | undefined = DataManager.getCurrentDashboard();
-    return dashboard?.mainDateFilter?.affectedField;
+    } as ComparisonOptionData;
   }
 
   private getDateData(): MainDateData | undefined {

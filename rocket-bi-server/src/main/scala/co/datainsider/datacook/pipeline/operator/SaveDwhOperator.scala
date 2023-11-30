@@ -1,15 +1,22 @@
 package co.datainsider.datacook.pipeline.operator
 
-import co.datainsider.bi.client.JdbcClient
+import co.datainsider.bi.client.JdbcClient.Record
+import co.datainsider.bi.domain.Connection
+import co.datainsider.bi.domain.query.{ObjectQueryBuilder, QueryParserImpl, Select, TableField}
+import co.datainsider.bi.engine.factory.EngineResolver
+import co.datainsider.bi.engine.{DataStream, Engine}
+import co.datainsider.bi.service.ConnectionService
 import co.datainsider.bi.util.Implicits.ImplicitString
+import co.datainsider.bi.util.Using
 import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.datacook.domain.Ids.OrganizationId
 import co.datainsider.datacook.domain.persist.PersistentType.PersistentType
 import co.datainsider.datacook.domain.persist.{PersistentType, PersistentTypeRef}
 import co.datainsider.datacook.pipeline.exception.InputInvalid
 import co.datainsider.datacook.pipeline.operator.Operator.OperatorId
+import co.datainsider.datacook.pipeline.operator.persist.InsertResult
+import co.datainsider.schema.domain.column.Column
 import co.datainsider.schema.domain.{TableSchema, TableType}
-import co.datainsider.schema.misc.ClickHouseDDLConverter
 import co.datainsider.schema.service.SchemaService
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
 import com.twitter.util.logging.Logging
@@ -17,6 +24,7 @@ import datainsider.client.domain.Implicits.FutureEnhanceLike
 import org.testcontainers.shaded.org.bouncycastle.operator.OperatorException
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 case class SaveDwhOperator(
     id: OperatorId,
@@ -36,23 +44,23 @@ case class SaveDwhResult(id: OperatorId, insertedRows: Long, totalRows: Long) ex
 }
 
 case class SaveDwhOperatorExecutor(
-    client: JdbcClient,
-    operatorService: OperatorService
+    engineResolver: EngineResolver,
+    connectionService: ConnectionService,
+    schemaService: SchemaService,
+    batchSize: Int = 100000
 ) extends Executor[SaveDwhOperator]
     with Logging {
-
-  private def getSchemaService(): SchemaService = operatorService.getSchemaService()
 
   override def execute(operator: SaveDwhOperator, context: ExecutorContext): OperatorResult =
     Profiler(s"[Executor] ${getClass.getSimpleName}.process") {
 
       ensureInput(operator, context.mapResults)
       val tableSchema: TableSchema = context.mapResults(operator.parentIds.head).getData[TableSchema]().get
-      val insertedRows: Long = operator.`type` match {
+      val insertResult: InsertResult = operator.`type` match {
         case PersistentType.Replace => replaceTableData(context.orgId, tableSchema, operator)
         case PersistentType.Append => {
           val isTableExisted: Boolean =
-            getSchemaService.isTableExists(context.orgId, operator.dbName, operator.tblName).syncGet()
+            schemaService.isTableExists(context.orgId, operator.dbName, operator.tblName).syncGet()
           if (isTableExisted) {
             appendTableData(context.orgId, tableSchema, operator)
           } else {
@@ -60,7 +68,7 @@ case class SaveDwhOperatorExecutor(
           }
         }
       }
-      SaveDwhResult(operator.id, insertedRows, totalRows = insertedRows)
+      SaveDwhResult(id = operator.id, insertedRows = insertResult.insertedRows, totalRows = insertResult.totalRows)
     }
 
   @throws[InputInvalid]
@@ -83,7 +91,7 @@ case class SaveDwhOperatorExecutor(
       tblName: String
   ): Unit = {
     try {
-      getSchemaService
+      schemaService
         .renameTableSchema(organizationId, dbName, tblName, TableSchema.buildOldTblName(tblName))
         .syncGet()
     } catch {
@@ -98,7 +106,7 @@ case class SaveDwhOperatorExecutor(
       organizationId: OrganizationId,
       fromTable: TableSchema,
       operator: SaveDwhOperator
-  ): Long = {
+  ): InsertResult = {
     val destTable: TableSchema = fromTable.copy(
       dbName = operator.dbName,
       name = operator.tblName,
@@ -110,9 +118,9 @@ case class SaveDwhOperatorExecutor(
     val tempTable: TableSchema = destTable.copy(name = TableSchema.buildTemporaryTblName(operator.tblName))
     try {
       ensureTableCreated(organizationId, tempTable)
-      val totalInsertedRows: Long = writeData(fromTable, tempTable)
+      val result: InsertResult = writeToTable(organizationId, fromTable, tempTable)
       markDestTable(organizationId, tempTable, destTable)
-      totalInsertedRows
+      result
     } catch {
       case ex: Throwable => {
         // clean up temporary table if any exception happened
@@ -122,15 +130,38 @@ case class SaveDwhOperatorExecutor(
     }
   }
 
+  private def writeToTable(
+      organizationId: OrganizationId,
+      fromTable: TableSchema,
+      destTable: TableSchema
+  ): InsertResult = {
+    val connection: Connection = connectionService.getTunnelConnection(organizationId).syncGet()
+    val engine: Engine[Connection] = engineResolver.resolve(connection.getClass).asInstanceOf[Engine[Connection]]
+    var insertedRows: Long = 0L
+    val totalRows = Using(engine.createWriter(connection))(writer => {
+      getData(
+        connection = connection,
+        engine = engine,
+        fromTable = fromTable,
+        destTable = destTable,
+        batchSize = batchSize,
+        resultFn = (records: Seq[Record]) => {
+          insertedRows += writer.insertBatch(records, destTable)
+        }
+      )
+    })
+    InsertResult(totalRows = totalRows, insertedRows = insertedRows)
+  }
+
   private def ensureTableCreated(organizationId: OrganizationId, tableSchema: TableSchema): Unit = {
-    getSchemaService
+    schemaService
       .ensureDatabaseCreated(
         organizationId = organizationId,
         name = tableSchema.dbName,
         displayName = Some(tableSchema.dbName.asPrettyDisplayName)
       )
       .syncGet()
-    getSchemaService.createTableSchema(tableSchema).syncGet()
+    schemaService.createTableSchema(tableSchema).syncGet()
   }
 
   private def markDestTable(
@@ -139,7 +170,7 @@ case class SaveDwhOperatorExecutor(
       destTable: TableSchema
   ): Unit = {
     moveToTrash(organizationId, destTable.dbName, destTable.name)
-    getSchemaService
+    schemaService
       .renameTableSchema(
         organizationId = organizationId,
         dbName = temporaryTable.dbName,
@@ -155,11 +186,11 @@ case class SaveDwhOperatorExecutor(
       organizationId: OrganizationId,
       sourceTable: TableSchema,
       operator: SaveDwhOperator
-  ): Long = {
+  ): InsertResult = {
     try {
-      val destTable: TableSchema = getSchemaService.getTableSchema(operator.dbName, operator.tblName).syncGet()
+      val destTable: TableSchema = schemaService.getTableSchema(operator.dbName, operator.tblName).syncGet()
       ensureCompatibleSchema(sourceTable, destTable)
-      writeData(sourceTable, destTable)
+      writeToTable(organizationId, sourceTable, destTable)
     } catch {
       case ex: Throwable => throw new OperatorException(s"exception when append data ${ex.getMessage}", ex)
     }
@@ -177,20 +208,65 @@ case class SaveDwhOperatorExecutor(
     }
   }
 
-  /**
-    * write data from source table to destination table
-    */
-  private def writeData(fromTable: TableSchema, destTable: TableSchema): Long = {
-    val insertQuery: String = ClickHouseDDLConverter.toInsertFromTable(
-      fromTable.dbName,
-      fromTable.name,
-      destTable.dbName,
-      destTable.name,
-      fromTable.columns
-    )
-    client.executeUpdate(insertQuery)
+  private def getData(
+      engine: Engine[Connection],
+      connection: Connection,
+      fromTable: TableSchema,
+      destTable: TableSchema,
+      batchSize: Int,
+      resultFn: (Seq[Record]) => Unit
+  ): Long = {
+    var totalRows: Long = 0
+    val selectQuery: String = parseToQuery(engine, fromTable)
+    engine.executeAsDataStream(connection, selectQuery)((dataStream: DataStream) => {
+      val destIndexes: Array[Int] = indexedColumns(destTable, dataStream.columns)
+
+      var buffers = ArrayBuffer.empty[Record]
+      while (dataStream.stream.hasNext) {
+        val record: Record = dataStream.stream.next()
+        val newRecord = destIndexes.map(index => record.lift(index).orNull)
+        buffers += newRecord
+        if (buffers.size > batchSize) {
+          resultFn(buffers)
+          totalRows += buffers.size
+          buffers = ArrayBuffer.empty[Record]
+        }
+      }
+      // empty
+      if (buffers.nonEmpty) {
+        resultFn(buffers)
+        totalRows += buffers.size
+      }
+    })
+    totalRows
   }
 
+  private def parseToQuery(engine: Engine[Connection], table: TableSchema): String = {
+    val queryParser = new QueryParserImpl(engine.getSqlParser())
+    val builder = new ObjectQueryBuilder()
+    table.columns.foreach(col => {
+      builder.addFunction(
+        Select(
+          field = new TableField(
+            dbName = table.dbName,
+            tblName = table.name,
+            fieldName = col.name,
+            fieldType = col.getColumnType
+          ),
+          aliasName = Some(col.name)
+        )
+      )
+    })
+    queryParser.parse(builder.build())
+  }
+
+  /**
+    * indexed destination columns in source table, if not found, return -1
+    */
+  private def indexedColumns(destTable: TableSchema, fromColumns: Seq[Column]): Array[Int] = {
+    val fromColumnIndexMap: Map[String, Int] = fromColumns.map(_.name).zipWithIndex.toMap
+    destTable.columns.map(column => fromColumnIndexMap.getOrElse(column.name, -1)).toArray
+  }
 }
 case class MockSaveDwhOperatorExecutor() extends Executor[SaveDwhOperator] {
 

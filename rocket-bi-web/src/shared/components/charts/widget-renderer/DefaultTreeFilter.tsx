@@ -21,7 +21,7 @@ export class DefaultTreeFilter implements WidgetRenderer<TreeFilter> {
     return (
       <div class={widget.containerClass} style={widget.containerStyle}>
         <div class={widget.infoClass}>{title}</div>
-        <vuescroll class={['tab-filter-scroller', scrollClass]} style="position: unset">
+        <vuescroll class={`tab-filter-scroller ${scrollClass}`} style="position: unset">
           <div id={widget.nprocessParentId} class="h-100">
             {this.renderFilter(widget, h)}
           </div>

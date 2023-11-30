@@ -7,6 +7,7 @@ import { GA4Metric } from '@core/data-ingestion/domain/job/ga4/GA4Mertric';
 import { Ga4Dimension } from '@core/data-ingestion/domain/job/ga4/Ga4Dimension';
 import { GaDate } from '@core/data-ingestion/domain/job/google-analytic/GaDate';
 import { SchedulerName } from '@/shared';
+import { DateTimeUtils, DateUtils } from '@/utils';
 
 export class GA4Job implements Job {
   className = JobName.GA4Job;
@@ -129,7 +130,7 @@ export class GA4Job implements Job {
       JobStatus.Initialized,
       '',
       '',
-      [{ startDate: new Date(), endDate: GaDate.Today }],
+      [{ startDate: DateTimeUtils.formatDate(DateUtils.getLast30Days().start), endDate: GaDate.Today }],
       [],
       [],
       SyncMode.FullSync

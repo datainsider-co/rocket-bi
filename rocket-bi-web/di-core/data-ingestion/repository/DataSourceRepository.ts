@@ -297,6 +297,6 @@ export class DataSourceRepositoryMock extends DataSourceRepository {
   }
 
   get(id: number): Promise<DataSourceInfo> {
-    return Promise.resolve(DataSourceInfo.default(DataSourceType.GA));
+    return Promise.resolve(DataSourceInfo.createDefault(DataSourceType.GA));
   }
 }

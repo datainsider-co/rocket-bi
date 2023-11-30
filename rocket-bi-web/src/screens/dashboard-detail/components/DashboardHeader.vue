@@ -187,8 +187,8 @@ export default class DashboardHeader extends Vue {
 
   private toValueMap(chosenDateRange: DateRange): Map<ValueControlType, string[]> {
     return new Map([
-      [ValueControlType.MinValue, [DateTimeUtils.formatDate(chosenDateRange.start)]],
-      [ValueControlType.MaxValue, [DateTimeUtils.formatDate(chosenDateRange.end, true)]]
+      [ValueControlType.MinValue, [DateTimeUtils.formatDateTime(chosenDateRange.start)]],
+      [ValueControlType.MaxValue, [DateTimeUtils.formatDateTime(chosenDateRange.end, true)]]
     ]);
   }
 

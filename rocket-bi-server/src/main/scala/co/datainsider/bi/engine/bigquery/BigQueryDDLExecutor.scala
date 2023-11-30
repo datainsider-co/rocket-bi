@@ -5,7 +5,7 @@ import co.datainsider.schema.domain.TableType.TableType
 import co.datainsider.schema.domain.column.Column
 import co.datainsider.schema.domain.{TableSchema, TableType}
 import co.datainsider.schema.repository.DDLExecutor
-import com.google.cloud.bigquery.BigQuery.{DatasetDeleteOption, TableOption}
+import com.google.cloud.bigquery.BigQuery.DatasetDeleteOption
 import com.google.cloud.bigquery._
 import com.twitter.util.Future
 import com.twitter.util.logging.Logging

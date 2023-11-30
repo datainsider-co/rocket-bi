@@ -5,12 +5,11 @@
 
 import { CancellationToken, editor, languages, Position } from 'monaco-editor';
 import { FormulaUtils } from '@/shared/fomula/FormulaUtils';
-import { KeywordType, TokenInfo } from '@/shared/fomula/clickhouse/ClickHouseCompletionItemProvider';
+import { KeywordType, TokenInfo } from '@/shared/fomula/TokenInfo';
 import { Log } from '@core/utils';
+import { TableSchema } from '@core/common/domain';
 import CompletionItemProvider = languages.CompletionItemProvider;
 import CompletionItemKind = languages.CompletionItemKind;
-import { StringUtils } from '@/utils/StringUtils';
-import { TableSchema } from '@core/common/domain';
 
 export class PythonCompletionItemProvider implements CompletionItemProvider {
   public triggerCharacters?: string[];

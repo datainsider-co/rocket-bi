@@ -1,6 +1,6 @@
 package co.datainsider.jobscheduler.domain
 
-import co.datainsider.jobscheduler.domain.source.DataSourceType.DataSourceType
+import co.datainsider.jobscheduler.domain.source.DataSourceType.{DataSourceType, Hubspot}
 import co.datainsider.jobscheduler.domain.source._
 import co.datainsider.jobscheduler.util.JsonUtils
 import com.fasterxml.jackson.databind.JsonNode
@@ -52,6 +52,8 @@ case class DataSourceFactoryImpl() extends DataSourceFactory {
       case DataSourceType.Palexy          => buildPalexySource(orgId, id, displayName, creatorId, lastModify, config)
       case DataSourceType.GoogleSearchConsole =>
         buildGoogleSearchConsoleSource(orgId, id, displayName, creatorId, lastModify, config)
+      case DataSourceType.Hubspot         => buildHubspotSource(orgId, id, displayName, creatorId, lastModify, config)
+      case DataSourceType.Mixpanel        => buildMixpanelSource(orgId, id, displayName, creatorId, lastModify, config)
       case _ => throw new UnsupportedOperationException(s"No support for dataSourceType=$dataSourceType, id=$id")
     }
   }
@@ -421,6 +423,47 @@ case class DataSourceFactoryImpl() extends DataSourceFactory {
       lastModify = lastModify,
       accessToken = config.at("/access_token").asText(),
       refreshToken = config.at("/refresh_token").asText()
+    )
+  }
+
+
+  private def buildHubspotSource(
+      orgId: Long,
+      id: Long,
+      displayName: String,
+      creatorId: String,
+      lastModify: Long,
+      config: JsonNode
+  ) = {
+    HubspotSource(
+      orgId = orgId,
+      id = id,
+      displayName = displayName,
+      creatorId = creatorId,
+      lastModify = lastModify,
+      apiKey = config.at("/api_key").asText()
+    )
+  }
+
+  private def buildMixpanelSource(
+      orgId: Long,
+      id: Long,
+      displayName: String,
+      creatorId: String,
+      lastModify: Long,
+      config: JsonNode
+  ) = {
+    MixpanelSource(
+      orgId = orgId,
+      id = id,
+      displayName = displayName,
+      creatorId = creatorId,
+      lastModify = lastModify,
+      accountUsername = config.at("/account_username").asText(),
+      accountSecret = config.at("/account_secret").asText(),
+      projectId = config.at("/project_id").asText(),
+      region = MixpanelRegion.withName(config.at("/region").asText()),
+      timezone = config.at("/timezone").asText()
     )
   }
 }

@@ -38,7 +38,7 @@
         class="mb-3"
         :label="`${configSetting['legend.title.text'].label}`"
         :hint="`${configSetting['legend.title.text'].hint}`"
-        :placeholder="`${configSetting['legend.title.text'].hint}`"
+        :placeholder="`${configSetting['legend.title.text'].placeHolder}`"
         size="full"
         @onChanged="handleTitleSaved"
       />

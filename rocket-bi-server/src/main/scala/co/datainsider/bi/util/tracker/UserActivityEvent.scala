@@ -64,7 +64,7 @@ object ResourceType extends Enumeration {
   val Table: ResourceType = Value("Table")
   val Source: ResourceType = Value("Source")
   val Job: ResourceType = Value("Job")
-  val Etl: ResourceType = Value("Etl")
+  val DataCook: ResourceType = Value("DataCook")
   val User: ResourceType = Value("User")
   val Connection: ResourceType = Value("Connection")
   val Other: ResourceType = Value("Other")

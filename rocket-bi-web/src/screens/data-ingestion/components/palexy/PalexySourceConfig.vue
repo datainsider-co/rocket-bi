@@ -30,17 +30,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, PropSync, Vue } from 'vue-property-decorator';
-import { PalexyDateRange, PalexyJob, PalexyTime } from '@core/data-ingestion';
-import { Inject } from 'typescript-ioc';
-import { DataSourceService } from '@core/common/services/DataSourceService';
 import { DataSourceModule } from '@/screens/data-ingestion/store/DataSourceStore';
 import DiToggle from '@/shared/components/common/DiToggle.vue';
-import DiCalendar from '@filter/main-date-filter-v2/DiCalendar.vue';
-import { DropdownData } from '@/shared/components/common/di-dropdown';
+import { DataSourceService } from '@core/common/services/DataSourceService';
+import { PalexyJob } from '@core/data-ingestion';
 import { Log } from '@core/utils';
-import { StringUtils } from '@/utils';
-import { DIException } from '@core/common/domain';
+import DiCalendar from '@filter/main-date-filter-v2/DiCalendar.vue';
+import { Inject } from 'typescript-ioc';
+import { Component, Prop, PropSync, Vue } from 'vue-property-decorator';
 
 @Component({
   components: { DiToggle, DiCalendar }

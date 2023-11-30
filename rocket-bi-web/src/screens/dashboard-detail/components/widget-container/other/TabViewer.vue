@@ -218,15 +218,15 @@ export default class TabViewer extends Vue {
   protected clickSelectTab(mouseEvent: MouseEvent) {
     PopupUtils.hideAllPopup();
     const buttonConfigWidget = GenIdMethods.genBtnId(`select-tab-${this.widget.id}`);
-    const buttonEvent = HtmlElementRenderUtils.fixMenuOverlap(mouseEvent, buttonConfigWidget, 0, 0);
-    this.$root.$emit(DashboardEvents.ShowContextMenu, mouseEvent, this.tabSelectOptions());
+    const buttonEvent = HtmlElementRenderUtils.fixMenuOverlap(mouseEvent, buttonConfigWidget, 0, 4);
+    this.$root.$emit(DashboardEvents.ShowContextMenu, buttonEvent, this.tabSelectOptions());
   }
 
   protected clickConfigWidget(mouseEvent: MouseEvent) {
     PopupUtils.hideAllPopup();
     const buttonConfigWidget = GenIdMethods.genBtnId(`config-widget-${this.widget.id}`);
-    const buttonEvent = HtmlElementRenderUtils.fixMenuOverlap(mouseEvent, buttonConfigWidget, 0, 0);
-    this.$root.$emit(DashboardEvents.ShowContextMenu, mouseEvent, this.widgetConfigOptions);
+    const buttonEvent = HtmlElementRenderUtils.fixMenuOverlap(mouseEvent, buttonConfigWidget, 0, 4);
+    this.$root.$emit(DashboardEvents.ShowContextMenu, buttonEvent, this.widgetConfigOptions);
   }
 
   protected clickConfigTab(mouseEvent: MouseEvent, tabIndex: number) {
@@ -323,20 +323,24 @@ export default class TabViewer extends Vue {
     return [
       {
         text: 'Add tab',
-        click: this.handleAddTab
+        click: this.handleAddTab,
+        icon: 'di-icon-add-tab'
       },
       {
         text: 'Sort orders',
         click: this.handleSortTab,
-        disabled: this.widget.tabItems.length === 0
+        disabled: this.widget.tabItems.length === 0,
+        icon: 'di-icon-funnel-analysis'
       },
       {
         text: 'Config tab',
-        click: this.handleConfigTab
+        click: this.handleConfigTab,
+        icon: 'di-icon-config'
       },
       {
         text: 'Delete widget',
-        click: this.handleDeleteWidget
+        click: this.handleDeleteWidget,
+        icon: 'di-icon-delete'
       }
     ];
   }
@@ -346,7 +350,8 @@ export default class TabViewer extends Vue {
       return {
         id: `${index}-${tab}`,
         text: tab.name,
-        click: () => this.selectTab(index)
+        click: () => this.selectTab(index),
+        active: index === this.tabIndex
       };
     });
   }
@@ -360,19 +365,23 @@ export default class TabViewer extends Vue {
     return [
       {
         text: 'Edit title',
-        click: () => this.openRenameModal(this.widget.tabItems[tabIndex].name, tabIndex)
+        click: () => this.openRenameModal(this.widget.tabItems[tabIndex].name, tabIndex),
+        icon: 'di-icon-under-text'
       },
       {
         text: 'Add chart',
-        click: () => this.handleAddChartToTab(tabIndex)
+        click: () => this.handleAddChartToTab(tabIndex),
+        icon: 'di-icon-add-chart'
       },
       {
         text: 'Remove chart',
-        click: () => this.handleDeleteChart(tabIndex)
+        click: () => this.handleDeleteChart(tabIndex),
+        icon: 'di-icon-close'
       },
       {
         text: 'Delete tab',
-        click: () => this.handleDeleteTab(tabIndex)
+        click: () => this.handleDeleteTab(tabIndex),
+        icon: 'di-icon-delete'
       }
     ];
   }

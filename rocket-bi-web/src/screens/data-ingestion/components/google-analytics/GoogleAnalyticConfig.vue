@@ -202,7 +202,7 @@ export default class GoogleAnalyticConfig extends Vue {
       if (sourceResponse) {
         const gaSource = sourceResponse.dataSource as GASourceInfo;
         const tokenResponse: TokenResponse = await this.sourcesService.refreshGoogleToken(new TokenRequest(gaSource.accessToken, gaSource.refreshToken));
-        await GoogleUtils.loadGoogleAnalyticClient(window.appConfig.GOOGLE_API_KEY, tokenResponse.accessToken);
+        await GoogleUtils.loadGoogleAnalyticClient(tokenResponse.accessToken);
         const propertyResponse = await GoogleUtils.getGoogleAnalyticProperty('~all');
         Log.debug('response::', propertyResponse);
         await this.processProperty(propertyResponse);

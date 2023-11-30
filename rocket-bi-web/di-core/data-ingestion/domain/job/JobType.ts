@@ -18,5 +18,7 @@ export enum JobType {
   Facebook = 'FacebookAds',
   Tiktok = 'TikTokAds',
   Palexy = 'Palexy',
+  Hubspot = 'Hubspot',
+  Mixpanel = 'Mixpanel',
   Unsupported = 'Others'
 }

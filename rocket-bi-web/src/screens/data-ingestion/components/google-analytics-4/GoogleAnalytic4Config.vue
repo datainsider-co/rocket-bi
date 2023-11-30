@@ -119,18 +119,18 @@ interface PropertyItem {
   components: { DiInputComponent, DiToggle, DiCalendar }
 })
 export default class GoogleAnalytic4Config extends Vue {
-  private propertyStatus: Status = Status.Loaded;
-  private readonly gaTables = GoogleAnalytic4Tables;
+  protected propertyStatus: Status = Status.Loaded;
+  protected readonly gaTables = GoogleAnalytic4Tables;
 
-  private accountSummaries: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary[] = [];
-  private property = '';
+  protected accountSummaries: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary[] = [];
+  protected property = '';
 
-  private tableError = '';
-  private accountIdError = '';
-  private propertyError = '';
+  protected tableError = '';
+  protected accountIdError = '';
+  protected propertyError = '';
 
   @Inject
-  private readonly sourcesService!: DataSourceService;
+  protected readonly sourcesService!: DataSourceService;
   @PropSync('job')
   syncedJob!: GA4Job;
 
@@ -140,7 +140,7 @@ export default class GoogleAnalytic4Config extends Vue {
   @Prop({ required: false, default: false, type: Boolean })
   hideSyncAllTableOption!: boolean;
 
-  private get propertySummaries(): gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaPropertySummary[] {
+  protected get propertySummaries(): gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaPropertySummary[] {
     const selectedAccountSummarize = this.accountSummaries.find(accountSummarize => accountSummarize.account === this.syncedJob.accountId);
     return selectedAccountSummarize ? selectedAccountSummarize?.propertySummaries ?? [] : [];
   }
@@ -153,7 +153,7 @@ export default class GoogleAnalytic4Config extends Vue {
     Log.debug('GoogleAnalyticConfig::mounted');
   }
 
-  private get sources(): DataSourceResponse[] {
+  protected get sources(): DataSourceResponse[] {
     return DataSourceModule.dataSources;
   }
 
@@ -171,7 +171,7 @@ export default class GoogleAnalytic4Config extends Vue {
     this.syncedJob.propertyId = this.getPropertyId(property);
   }
 
-  private async loadAccountSummarizes() {
+  protected async loadAccountSummarizes() {
     const accountSummarizeResponse = await GoogleUtils.getGA4AccountSummarizes();
     Log.debug('GA4JobFormRender::loadAccountSummarizes::accountSummarizes::', accountSummarizeResponse.result.accountSummaries);
     if (accountSummarizeResponse?.result?.accountSummaries) {
@@ -186,17 +186,17 @@ export default class GoogleAnalytic4Config extends Vue {
     }
   }
 
-  private async handleSelectAccountSummarize(item: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary) {
+  protected async handleSelectAccountSummarize(item: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary) {
     if (StringUtils.isEmpty(this.syncedJob.propertyId)) {
       this.syncedJob.propertyId = ListUtils.getHead(this.propertySummaries)?.property ?? '';
     }
   }
 
-  private getPropertyId(property: string): string {
+  protected getPropertyId(property: string): string {
     return property.split('/')[1]!;
   }
 
-  private handleSelectGATable(table: { id: string; name: string; metrics: GA4Metric[]; dimensions: Ga4Dimension[] }) {
+  protected handleSelectGATable(table: { id: string; name: string; metrics: GA4Metric[]; dimensions: Ga4Dimension[] }) {
     this.syncedJob.metrics = table.metrics;
     this.syncedJob.dimensions = table.dimensions;
 
@@ -204,7 +204,7 @@ export default class GoogleAnalytic4Config extends Vue {
     this.selectTable(table.id);
   }
 
-  private selectDatabase() {
+  protected selectDatabase() {
     const selectedAccountSummarize = this.accountSummaries.find(accountSummarize => accountSummarize.account === this.syncedJob.accountId);
     const foundProperty = this.propertySummaries.find(prop => prop.property === this.property);
     if (StringUtils.isEmpty(this.syncedJob.destDatabaseName) && foundProperty) {
@@ -219,7 +219,7 @@ export default class GoogleAnalytic4Config extends Vue {
     }
   }
 
-  private selectTable(tblName: string) {
+  protected selectTable(tblName: string) {
     if (StringUtils.isEmpty(this.syncedJob.destTableName) && this.isSingleTable) {
       this.$emit('selectTable', tblName);
     }
@@ -240,7 +240,7 @@ export default class GoogleAnalytic4Config extends Vue {
       if (sourceResponse) {
         const gaSource = sourceResponse.dataSource as GASourceInfo;
         const tokenResponse: TokenResponse = await this.sourcesService.refreshGoogleToken(new TokenRequest(gaSource.accessToken, gaSource.refreshToken));
-        await GoogleUtils.loadGA4Client(window.appConfig.GOOGLE_API_KEY, tokenResponse.accessToken);
+        await GoogleUtils.loadGA4Client(tokenResponse.accessToken);
         await this.loadAccountSummarizes();
       }
       this.hidePropertyLoading();
@@ -251,15 +251,15 @@ export default class GoogleAnalytic4Config extends Vue {
     }
   }
 
-  private get isPropertyLoading() {
+  protected get isPropertyLoading() {
     return this.propertyStatus === Status.Loading;
   }
 
-  private showPropertyLoading() {
+  protected showPropertyLoading() {
     this.propertyStatus = Status.Loading;
   }
 
-  private hidePropertyLoading() {
+  protected hidePropertyLoading() {
     this.propertyStatus = Status.Loaded;
   }
 
@@ -295,13 +295,13 @@ export default class GoogleAnalytic4Config extends Vue {
       throw new DIException('');
     }
   }
-  private resetTableError() {
+  protected resetTableError() {
     this.tableError = '';
   }
-  private resetAccountIdError() {
+  protected resetAccountIdError() {
     this.accountIdError = '';
   }
-  private resetPropertyError() {
+  protected resetPropertyError() {
     this.propertyError = '';
   }
 }

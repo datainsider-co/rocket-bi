@@ -130,6 +130,9 @@
           <div v-if="isPalexyJob" class="job-section export-form">
             <PalexySourceConfig ref="palexySourceConfig" :job.sync="jdbcJob"></PalexySourceConfig>
           </div>
+          <div v-if="isMixpanelJob" class="job-section export-form">
+            <MixpanelConfig ref="mixpanelSourceConfig" :single-table="true" hideSyncAllTableOption :job.sync="jdbcJob" />
+          </div>
           <div v-if="isMongoJob" class="job-section export-form">
             <MongoDepthConfig :mongo-job.sync="jdbcJob"></MongoDepthConfig>
           </div>
@@ -167,6 +170,8 @@ import {
   JdbcJob,
   Job,
   JobType,
+  MixpanelJob,
+  MixpanelSourceInfo,
   PalexyJob,
   SyncMode,
   TiktokSourceInfo
@@ -222,6 +227,7 @@ import PalexySourceConfig from '@/screens/data-ingestion/components/palexy/Palex
 import { PalexySourceInfo } from '@core/data-ingestion/domain/data-source/PalexySourceInfo';
 import { GoogleSearchConsoleSourceInfo } from '@core/data-ingestion/domain/data-source/GoogleSearchConsoleSourceInfo';
 import GoogleSearchConsoleConfig from '@/screens/data-ingestion/components/google-search-console/GoogleSearchConsoleConfig.vue';
+import MixpanelConfig from '@/screens/data-ingestion/components/mixpanel/MixpanelConfig.vue';
 
 @Component({
   components: {
@@ -252,7 +258,8 @@ import GoogleSearchConsoleConfig from '@/screens/data-ingestion/components/googl
     TiktokAdsFromDatabaseSuggestion,
     TiktokSourceConfig,
     GoogleAnalytic4Config,
-    GoogleSearchConsoleConfig
+    GoogleSearchConsoleConfig,
+    MixpanelConfig
   },
   validations: {
     jdbcJob: {
@@ -264,7 +271,7 @@ import GoogleSearchConsoleConfig from '@/screens/data-ingestion/components/googl
 export default class JobCreationModal extends Vue {
   private readonly jobName = JobName;
   private scrollOption = VerticalScrollConfigs;
-  private jdbcJob: Job = JdbcJob.default(DataSourceInfo.default(DataSourceType.MySql));
+  private jdbcJob: Job = JdbcJob.default(DataSourceInfo.createDefault(DataSourceType.MySql));
   private isShowModal = false;
   private status = Status.Loaded;
   private errorMessage = '';
@@ -308,6 +315,9 @@ export default class JobCreationModal extends Vue {
 
   @Ref()
   private readonly googleSearchConsoleConfig!: GoogleSearchConsoleConfig;
+
+  @Ref()
+  private readonly mixpanelSourceConfig!: MixpanelConfig;
 
   @Ref()
   //@ts-ignore
@@ -399,6 +409,10 @@ export default class JobCreationModal extends Vue {
     return Job.isPalexyJob(this.jdbcJob);
   }
 
+  private get isMixpanelJob(): boolean {
+    return this.jdbcJob.className === JobName.Mixpanel;
+  }
+
   private get isGenericJdbcJob(): boolean {
     return Job.isGenericJdbcJob(this.jdbcJob);
   }
@@ -453,6 +467,7 @@ export default class JobCreationModal extends Vue {
             case JobType.GA4:
             case JobType.Palexy:
             case JobType.GoogleSearchConsole:
+            case JobType.Mixpanel:
               ///Nothing to do
               break;
             case JobType.Tiktok:
@@ -477,7 +492,7 @@ export default class JobCreationModal extends Vue {
   }
 
   handleHidden() {
-    this.jdbcJob = JdbcJob.default(DataSourceInfo.default(DataSourceType.MySql));
+    this.jdbcJob = JdbcJob.default(DataSourceInfo.createDefault(DataSourceType.MySql));
     this.isShowModal = false;
     this.hideLoading();
     this.$v.$reset();
@@ -629,6 +644,9 @@ export default class JobCreationModal extends Vue {
           case DataSources.GoogleSearchConsole:
             await this.handleSelectGoogleSearchConsole(item.source);
             break;
+          case DataSources.Mixpanel:
+            await this.handleSelectMixpanel(item.source);
+            break;
           default:
             await this.handleSelectJdbcSource(item.source);
         }
@@ -779,6 +797,18 @@ export default class JobCreationModal extends Vue {
     this.jdbcJob = this.getJobFromPalexySource(source as PalexySourceInfo);
   }
 
+  public async handleSelectMixpanel(source: DataSourceInfo) {
+    this.jdbcJob = this.getJobFromMixpanelSource(source as MixpanelSourceInfo);
+  }
+
+  private getJobFromMixpanelSource(source: MixpanelSourceInfo) {
+    const job = MixpanelJob.default(source);
+    job.jobId = this.jdbcJob.jobId;
+    job.displayName = this.jdbcJob.displayName;
+    job.sourceId = source.id;
+    return job;
+  }
+
   private getJobFromPalexySource(source: PalexySourceInfo) {
     const jdbcJob = PalexyJob.default(source);
     jdbcJob.jobId = this.jdbcJob.jobId;
@@ -810,6 +840,8 @@ export default class JobCreationModal extends Vue {
         return this.palexySourceConfig?.isValidSource();
       case JobType.GoogleSearchConsole:
         return this.googleSearchConsoleConfig?.isValidSource();
+      case JobType.Mixpanel:
+        return this.mixpanelSourceConfig?.isValidSource();
       default:
         return this.jdbcFromDatabaseSuggestion.isValidDatabaseSuggestion();
     }

@@ -5,18 +5,18 @@ import co.datainsider.bi.util.ZConfig
 import co.datainsider.jobworker.client.{HttpClient, HttpClientImpl}
 import co.datainsider.jobworker.domain.job._
 import co.datainsider.jobworker.domain.source._
-import co.datainsider.jobworker.module.JobWorkerModule.{bindSingleton, createSearchConsoleReaderFactory}
 import co.datainsider.jobworker.repository.reader.facebook_ads.FacebookAdsFactory
 import co.datainsider.jobworker.repository.reader.factory._
 import co.datainsider.jobworker.repository.reader.googlesearchconsole.SearchConsoleReaderFactory
 import co.datainsider.jobworker.repository.reader.lazada.LazadaReaderFactory
+import co.datainsider.jobworker.repository.reader.mixpanel.MixpanelReaderFactory
 import co.datainsider.jobworker.repository.reader.palexy.PalexyReaderFactory
 import co.datainsider.jobworker.repository.reader.shopee.ShopeeReaderFactory
 import co.datainsider.jobworker.repository.{DataSourceRepository, HttpScheduleRepository, MockHttpSourceRepository, ScheduleRepository}
-import co.datainsider.jobworker.service.jobprogress._
-import co.datainsider.jobworker.service.worker2.{FullSyncJobWorker, JobWorker2, JobWorker2Impl}
 import co.datainsider.jobworker.service._
+import co.datainsider.jobworker.service.jobprogress._
 import co.datainsider.jobworker.service.worker.{VersioningWorker, VersioningWorkerImpl}
+import co.datainsider.jobworker.service.worker2.{FullSyncJobWorker, JobWorker2, JobWorker2Impl}
 import co.datainsider.jobworker.util.{GoogleOAuthConfig, InsertMockData}
 import co.datainsider.schema.client.SchemaClientService
 import com.amazonaws.services.s3.{AmazonS3, AmazonS3ClientBuilder}
@@ -152,6 +152,7 @@ object JobWorkerTestModule extends TwitterModule {
       .add(classOf[LazadaSource], classOf[LazadaJob], new LazadaReaderFactory)
       .add(classOf[PalexySource], classOf[PalexyJob], new PalexyReaderFactory(palexyApiUrl))
       .add(classOf[GoogleSearchConsoleSource], classOf[GoogleSearchConsoleJob], createSearchConsoleReaderFactory())
+      .add(classOf[MixpanelSource], classOf[MixpanelJob], new MixpanelReaderFactory())
       .build()
   }
 

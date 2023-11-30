@@ -67,7 +67,7 @@ class ScheduleController @Inject() (scheduleService: ScheduleService, permission
     }
 
   filter[MustLoggedInFilter]
-    .filter(permissionFilter.requireAll("ingestion_job:kill:[id], LicensePermission.EditData"))
+    .filter(permissionFilter.requireAll("ingestion_job:kill:[id]", LicensePermission.EditData))
     .put("/schedule/job/:id/kill") { request: Request =>
       Profiler("/schedule/job/:id/kill") {
         val jobId = request.getLongParam("id")

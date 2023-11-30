@@ -228,7 +228,7 @@ export default class GoogleSearchConsoleConfig extends Vue {
     let count = 0;
     try {
       this.isSiteUrlLoading = true;
-      await GoogleUtils.loadGoogleSearchConsoleClient(window.appConfig.GOOGLE_API_KEY, accessToken);
+      await GoogleUtils.loadGoogleSearchConsoleClient(accessToken);
       const response: { siteUrl: string }[] = await GoogleUtils.listSiteUrls();
       this.siteUrls = response.map(item => {
         return {

@@ -6,14 +6,12 @@ import co.datainsider.bi.engine.clickhouse.DataTable
 import co.datainsider.bi.engine.{ClientManager, DataStream, Engine, SqlParser}
 import co.datainsider.bi.repository.FileStorage
 import co.datainsider.bi.repository.FileStorage.FileType.FileType
+import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.bi.util.{Implicits, Using}
-import co.datainsider.datacook.pipeline.ExecutorResolver
-import co.datainsider.datacook.pipeline.operator.OperatorService
-import co.datainsider.jobworker.repository.writer.DataWriter
 import co.datainsider.schema.domain.TableSchema
 import co.datainsider.schema.domain.column._
-import co.datainsider.schema.repository.{DDLExecutor, DataRepository}
-import com.twitter.inject.{Injector, Logging}
+import co.datainsider.schema.repository.DDLExecutor
+import com.twitter.inject.Logging
 import com.twitter.util.Future
 import datainsider.client.exception.DbExecuteError
 
@@ -21,6 +19,7 @@ import java.sql.{ResultSet, ResultSetMetaData}
 import java.util.Properties
 import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters.mapAsJavaMapConverter
+import datainsider.client.domain.Implicits.async
 
 /**
   * created 2023-06-27 2:13 PM
@@ -30,6 +29,8 @@ import scala.jdk.CollectionConverters.mapAsJavaMapConverter
 class PostgreSqlEngine(client: ClientManager, maxQueryRows: Int = 10000, poolSize: Int = 10, timeoutMs: Int = 30000)
     extends Engine[PostgreSqlConnection]
     with Logging {
+
+  private lazy val clazz = getClass.getSimpleName
 
   def createClient(source: PostgreSqlConnection, poolSize: Int = 10): JdbcClient = {
     val properties = new Properties()
@@ -48,25 +49,36 @@ class PostgreSqlEngine(client: ClientManager, maxQueryRows: Int = 10000, poolSiz
 
   def getClient(source: PostgreSqlConnection): JdbcClient = client.get(source)(() => createClient(source, poolSize))
 
-  override def execute(source: PostgreSqlConnection, sql: String, doFormatValues: Boolean): Future[DataTable] =
-    Future {
-      getClient(source)
-        .executeQuery(sql)(rs => {
-          val (colNames, colTypes) = getColMetaData(rs)
-          val records = ArrayBuffer[Array[Object]]()
+  override def execute(source: PostgreSqlConnection, sql: String, doFormatValues: Boolean): Future[DataTable] = {
+    Profiler(s"[Engine] $clazz::execute") {
+      async {
+        getClient(source)
+          .executeQuery(sql)(rs => {
+            val (colNames, colTypes) = getColMetaData(rs)
+            val records = ArrayBuffer[Array[Object]]()
 
-          while (rs.next()) {
-            val record = ArrayBuffer[Object]()
-            colNames.foreach(colName => record += rs.getObject(colName))
-            records += record.toArray
-          }
+            while (rs.next()) {
+              val record = ArrayBuffer[Object]()
+              colNames.foreach(colName => record += rs.getObject(colName))
+              records += record.toArray
+            }
 
-          DataTable(colNames, colTypes, records.toArray)
-        })
+            DataTable(colNames, colTypes, records.toArray)
+          })
+      }
     }
+  }
 
-  override def executeHistogramQuery(source: PostgreSqlConnection, histogramSql: String): Future[DataTable] = {
+  override def executeHistogramQuery(source: PostgreSqlConnection, histogramSql: String): Future[DataTable] = Profiler(s"[Engine] $clazz::executeHistogramQuery") {
     execute(source, histogramSql)
+  }
+
+  override def executeAsDataStream[T](source: PostgreSqlConnection, query: String)(fn: DataStream => T): T = Profiler(s"[Engine] $clazz::executeAsDataStream") {
+    val client: JdbcClient = getClient(source)
+    client.executeQuery(query)(rs => {
+      val stream = toStream(rs)
+      fn(stream)
+    })
   }
 
   override def getDDLExecutor(source: PostgreSqlConnection): DDLExecutor = {
@@ -79,10 +91,13 @@ class PostgreSqlEngine(client: ClientManager, maxQueryRows: Int = 10000, poolSiz
       sql: String,
       destPath: String,
       fileType: FileType
-  ): Future[String] =
-    Future {
-      getClient(source).executeQuery(sql)(rs => FileStorage.exportToFile(toStream(rs), fileType, destPath))
+  ): Future[String] = Profiler(s"[Engine] $clazz::exportToFile") {
+    async {
+      executeAsDataStream(source, sql)((stream: DataStream) => {
+        FileStorage.exportToFile(stream, fileType, destPath)
+      })
     }
+  }
 
   override def testConnection(source: PostgreSqlConnection): Future[Boolean] =
     Future {

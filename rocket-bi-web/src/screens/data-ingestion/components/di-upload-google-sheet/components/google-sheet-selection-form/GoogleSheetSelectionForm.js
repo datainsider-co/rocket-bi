@@ -44,7 +44,7 @@ export default {
         if (StringUtils.isEmpty(this.value.refreshToken)) {
           await this.loadRefreshToken();
         }
-        await GoogleUtils.setupGoogleDriveClient(window.appConfig.GOOGLE_API_KEY, this.value.accessToken);
+        await GoogleUtils.setupGoogleDriveClient(this.value.accessToken);
         const response = await GoogleUtils.listSpreadsheetResponse();
         this.hideSpreadsheetLoading();
         //todo: check valid files response
@@ -73,7 +73,7 @@ export default {
     loadListSheet: async function() {
       try {
         this.showSheetLoading();
-        await GoogleUtils.setupGoogleSheetClient(window.appConfig.GOOGLE_API_KEY, this.value.accessToken);
+        await GoogleUtils.setupGoogleSheetClient(this.value.accessToken);
         const sheetResponse = await GoogleUtils.listSheetResponse(this.value.spreadsheetId);
         await this.processSheetResponse(sheetResponse);
         this.hideSheetLoading();

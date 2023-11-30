@@ -17,11 +17,8 @@
 
 .tab-filter-scroller {
   height: unset !important;
-
-  &.scroll-row {
-    //height: 43px !important;
-    //padding-top: 7px;
-  }
+  //flex-shrink: 3;
+  //flex-grow: 3;
 
   .__view {
     min-height: unset !important;

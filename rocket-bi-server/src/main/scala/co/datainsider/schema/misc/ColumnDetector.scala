@@ -47,7 +47,7 @@ object ColumnDetector {
     }
   }
 
-  private def detectAppropriateColumn(name: String, displayName: String, value: String, isNullable: Boolean): Column = {
+  def detectAppropriateColumn(name: String, displayName: String, value: String, isNullable: Boolean): Column = {
     val converters = Seq[(String, String, String) => Option[Column]](
       convertAsDateTimeColumn,
       convertAsDateColumn
@@ -194,6 +194,10 @@ object ColumnDetector {
       case Types.TIME => DateTimeColumn(columnData.name, columnData.displayName, isNullable = columnData.isNullable)
       case Types.TIMESTAMP =>
         DateTimeColumn(columnData.name, columnData.displayName, isNullable = columnData.isNullable)
+      case Types.TIME_WITH_TIMEZONE =>
+        DateTimeColumn(columnData.name, columnData.displayName, isNullable = columnData.isNullable)
+      case Types.TIMESTAMP_WITH_TIMEZONE =>
+        DateTimeColumn(columnData.name, columnData.displayName, isNullable = columnData.isNullable)
 
       case Types.NVARCHAR => StringColumn(columnData.name, columnData.displayName, isNullable = columnData.isNullable)
       case Types.LONGNVARCHAR =>
@@ -205,7 +209,7 @@ object ColumnDetector {
       case Types.NCHAR => StringColumn(columnData.name, columnData.displayName, isNullable = columnData.isNullable)
       case Types.ARRAY => StringColumn(columnData.name, columnData.displayName, isNullable = columnData.isNullable)
 
-      case _ => throw new UnsupportedOperationException(s"column id: ${columnData.idType} unsupported")
+      case _ => StringColumn(columnData.name, columnData.displayName, isNullable = columnData.isNullable)
     }
   }
 

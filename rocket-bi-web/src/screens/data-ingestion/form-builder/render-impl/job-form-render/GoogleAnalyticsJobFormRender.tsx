@@ -29,6 +29,9 @@ import { Inject } from 'typescript-ioc';
 import { SchemaService } from '@core/schema/service/SchemaService';
 import { EventBus } from '@/event-bus/EventBus';
 import { GaDate } from '@core/data-ingestion/domain/job/google-analytic/GaDate';
+import { DataSourceResponse } from '@core/data-ingestion/domain/response/DataSourceResponse';
+import { GASourceInfo } from '@core/data-ingestion/domain/data-source/GASourceInfo';
+import { TokenRequest, TokenResponse } from '@core/data-ingestion';
 
 enum GaDateMode {
   Today = 'Today',
@@ -143,11 +146,15 @@ export class GoogleAnalyticsJobFormRender implements JobFormRender {
     try {
       this.showPropertyLoading();
       this.showViewLoading();
-      await this.loadRefreshToken();
-      await GoogleUtils.loadGoogleAnalyticClient(window.appConfig.GOOGLE_API_KEY, '');
-      const propertyResponse = await GoogleUtils.getGoogleAnalyticProperty('~all');
-      Log.debug('response::', propertyResponse);
-      await this.processProperty(propertyResponse);
+      const response: DataSourceResponse | undefined = DataSourceModule.dataSources.find(source => source.dataSource.id === this.gaJob.sourceId);
+      if (response) {
+        const gaSource = response.dataSource as GASourceInfo;
+        const tokenResponse: TokenResponse = await DataSourceModule.refreshGoogleToken(new TokenRequest(gaSource.accessToken, gaSource.refreshToken));
+        await GoogleUtils.loadGoogleAnalyticClient(tokenResponse.accessToken);
+        const propertyResponse = await GoogleUtils.getGoogleAnalyticProperty('~all');
+        Log.debug('response::', propertyResponse);
+        await this.processProperty(propertyResponse);
+      }
     } catch (e) {
       this.propertyStatus = Status.Error;
       this.viewStatus = Status.Error;

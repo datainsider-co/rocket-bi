@@ -9,7 +9,7 @@ class ObjectQueryBuilder {
   val orders: ArrayBuffer[OrderBy] = ArrayBuffer.empty
   val joinConditions: ArrayBuffer[JoinCondition] = ArrayBuffer.empty
   val queryViews: ArrayBuffer[QueryView] = ArrayBuffer.empty
-  val limit: Option[Limit] = None
+  var limit: Option[Limit] = None
 
   def addFunction(func: Function): Unit = functions += func
 
@@ -28,6 +28,8 @@ class ObjectQueryBuilder {
   def addTableView(view: TableView): Unit = queryViews += view
 
   def addJoinConditions(joinCondition: Array[JoinCondition]): Unit = joinConditions ++= joinCondition
+
+  def setLimit(newLimit: Option[Limit]): Unit = limit = newLimit
 
   def addAggregateConditions(aggregateCondition: Array[AggregateCondition]): Unit =
     aggregateConditions ++= aggregateCondition

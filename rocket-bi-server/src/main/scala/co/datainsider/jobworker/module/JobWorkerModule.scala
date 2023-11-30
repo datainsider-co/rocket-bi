@@ -9,6 +9,7 @@ import co.datainsider.jobworker.repository.reader.facebook_ads.FacebookAdsFactor
 import co.datainsider.jobworker.repository.reader.factory._
 import co.datainsider.jobworker.repository.reader.googlesearchconsole.SearchConsoleReaderFactory
 import co.datainsider.jobworker.repository.reader.lazada.LazadaReaderFactory
+import co.datainsider.jobworker.repository.reader.mixpanel.MixpanelReaderFactory
 import co.datainsider.jobworker.repository.reader.palexy.PalexyReaderFactory
 import co.datainsider.jobworker.repository.reader.shopee.ShopeeReaderFactory
 import co.datainsider.jobworker.repository.{DataSourceRepository, HttpScheduleRepository, HttpSourceRepository, ScheduleRepository}
@@ -98,6 +99,7 @@ object JobWorkerModule extends TwitterModule {
       .add(classOf[LazadaSource], classOf[LazadaJob], new LazadaReaderFactory)
       .add(classOf[PalexySource], classOf[PalexyJob], new PalexyReaderFactory(palexyApiUrl, palexyWindowDays, palexyRetryTimes, palexyRetryIntervalMs))
       .add(classOf[GoogleSearchConsoleSource], classOf[GoogleSearchConsoleJob], createSearchConsoleReaderFactory())
+      .add(classOf[MixpanelSource], classOf[MixpanelJob], new MixpanelReaderFactory())
       .build()
   }
 

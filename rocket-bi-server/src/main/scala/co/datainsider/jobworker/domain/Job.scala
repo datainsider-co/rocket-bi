@@ -1,14 +1,14 @@
 package co.datainsider.jobworker.domain
 
-import co.datainsider.jobworker.domain.job.{AmazonS3Job, BigQueryStorageJob, CoinMarketCapJob, FacebookAdsJob, Ga4Job, GaJob, GenericJdbcJob, GoogleAdsJob, GoogleSearchConsoleJob, GoogleSheetJob, LazadaJob, MongoJob, PalexyJob, ShopeeJob, ShopifyJob, SolanaJob, TikTokAdsJob}
+import co.datainsider.jobworker.domain.DataDestination.DataDestination
+import co.datainsider.jobworker.domain.Ids.SourceId
+import co.datainsider.jobworker.domain.JobStatus.JobStatus
+import co.datainsider.jobworker.domain.JobType.JobType
+import co.datainsider.jobworker.domain.SyncMode.SyncMode
+import co.datainsider.jobworker.domain.job._
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
-import DataDestination.DataDestination
-import Ids.SourceId
-import JobStatus.JobStatus
-import JobType.JobType
-import SyncMode.SyncMode
 
 @JsonTypeInfo(
   use = JsonTypeInfo.Id.NAME,
@@ -19,6 +19,7 @@ import SyncMode.SyncMode
   Array(
     new Type(value = classOf[JdbcJob], name = "jdbc_job"),
     new Type(value = classOf[GaJob], name = "ga_job"),
+    new Type(value = classOf[HubspotJob], name = "hubspot_job"),
     new Type(value = classOf[GoogleSheetJob], name = "google_sheets_job"),
     new Type(value = classOf[MongoJob], name = "mongo_db_job"),
     new Type(value = classOf[BigQueryStorageJob], name = "bigquery_storage_job"),
@@ -34,13 +35,13 @@ import SyncMode.SyncMode
     new Type(value = classOf[ShopeeJob], name = "shopee_job"),
     new Type(value = classOf[LazadaJob], name = "lazada_job"),
     new Type(value = classOf[PalexyJob], name = "palexy_job"),
-    new Type(value = classOf[GoogleSearchConsoleJob], name = "google_search_console_job")
+    new Type(value = classOf[GoogleSearchConsoleJob], name = "google_search_console_job"),
+    new Type(value = classOf[MixpanelJob], name = "mixpanel_job"),
   )
 )
 trait Job {
 
   /**
-    *
     * @return organization id
     */
 
@@ -60,7 +61,6 @@ trait Job {
   def jobType: JobType
 
   /**
-    *
     * @return job's sync mechanism
     */
   @JsonScalaEnumeration(classOf[SyncModeRef])
@@ -101,7 +101,7 @@ trait Job {
   @JsonScalaEnumeration(classOf[JobStatusRef])
   def currentSyncStatus: JobStatus
 
-  /***
+  /** *
     * @return data for this job to execute by JobWorker
     */
   def jobData: String

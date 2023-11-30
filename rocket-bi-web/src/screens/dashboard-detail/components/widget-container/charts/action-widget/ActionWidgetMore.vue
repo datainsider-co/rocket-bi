@@ -9,16 +9,17 @@
             </div>
           </div>
           <b-popover :custom-class="getPopoverClass()" :show.sync="isShowMenu" :target="id" placement="BottomLeft" triggers="click blur">
-            <div class="action-more regular-icon-16 text-left">
+            <div class="action-more regular-icon-16">
               <template v-for="(item, index) in menuOptions">
                 <DiButton
+                  align="left"
                   :id="genBtnId(`action-${item.text}`, index)"
                   :key="genBtnId(`action-${item.text}`, index)"
                   :is-disable="item.disabled"
                   :title="item.text"
                   @click="event => onClickItem(event, item)"
                 >
-                  <img v-if="hasIcon(item.icon)" :src="require(`@/assets/icon/${item.icon}`)" alt="" />
+                  <i v-if="hasIcon(item.icon)" style="font-size: 16px; width: 16px; height: 16px" :class="item.icon" />
                 </DiButton>
               </template>
             </div>
@@ -139,45 +140,53 @@ export default class ActionWidgetMore extends Vue {
       {
         text: DashboardOptions.EDIT_TITLE,
         click: this.handleEditTitle,
-        disabled: !DashboardModeModule.canEdit
+        disabled: !DashboardModeModule.canEdit,
+        icon: 'di-icon-under-text'
       },
       {
         text: DashboardOptions.CONFIG_CHART,
         click: this.handleEditChart,
-        disabled: !DashboardModeModule.canEdit
+        disabled: !DashboardModeModule.canEdit,
+        icon: 'di-icon-add-chart'
       },
       {
         text: 'Copy chart',
         click: this.copyChart,
-        disabled: !DashboardModeModule.canDuplicate
+        disabled: !DashboardModeModule.canDuplicate,
+        icon: 'di-icon-copy-2'
       },
       {
         text: DashboardOptions.ADD_FILTER_WIDGET,
         click: this.handleAddInnerFilter,
         disabled: !DashboardModeModule.canEdit,
-        hidden: this.metaData.hasInnerFilter
+        hidden: this.metaData.hasInnerFilter,
+        icon: 'di-icon-filter-panel'
       },
       {
         text: DashboardOptions.UPDATE_FILTER_WIDGET,
         click: this.handleUpdateInnerFilter,
         disabled: !DashboardModeModule.canEdit,
-        hidden: !this.metaData.hasInnerFilter
+        hidden: !this.metaData.hasInnerFilter,
+        icon: 'di-icon-filter-panel'
       },
       {
         text: DashboardOptions.DELETE_FILTER_WIDGET,
         click: this.handleDeleteInnerFilter,
         disabled: !DashboardModeModule.canEdit,
-        hidden: !this.metaData.hasInnerFilter
+        hidden: !this.metaData.hasInnerFilter,
+        icon: 'di-icon-delete'
       },
       {
         text: DashboardOptions.DUPLICATE_CHART,
         click: this.duplicateChart,
-        disabled: !DashboardModeModule.canDuplicate
+        disabled: !DashboardModeModule.canDuplicate,
+        icon: 'di-icon-duplicate'
       },
       {
         text: DashboardOptions.DELETE,
         click: this.deleteChart,
-        disabled: !DashboardModeModule.canDelete
+        disabled: !DashboardModeModule.canDelete,
+        icon: 'di-icon-delete'
       }
     ].filter(option => !(option.hidden ?? false));
   }
@@ -370,7 +379,7 @@ export default class ActionWidgetMore extends Vue {
   max-width: unset;
   padding: 0;
   text-align: left;
-  width: 145px;
+  width: 210px;
 
   ::v-deep {
     .arrow {

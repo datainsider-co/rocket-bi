@@ -92,7 +92,7 @@ export default class SelectionInput extends Vue {
 
   protected set selectedDate(newDate: Date | null) {
     if (newDate) {
-      this.singleValue = DateTimeUtils.formatDate(newDate);
+      this.singleValue = DateTimeUtils.formatDateTime(newDate);
     } else {
       this.singleValue = '';
     }
@@ -171,7 +171,10 @@ export default class SelectionInput extends Vue {
         break;
       default:
         if (calendarData.chosenDateRange) {
-          this.valuesProp = [DateTimeUtils.formatDate(calendarData.chosenDateRange.start), DateTimeUtils.formatDate(calendarData.chosenDateRange.end, true)];
+          this.valuesProp = [
+            DateTimeUtils.formatDateTime(calendarData.chosenDateRange.start),
+            DateTimeUtils.formatDateTime(calendarData.chosenDateRange.end, true)
+          ];
         } else {
           this.valuesProp = [];
         }

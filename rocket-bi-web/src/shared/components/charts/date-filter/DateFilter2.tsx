@@ -157,8 +157,8 @@ export default class DateFilter2 extends BaseWidget {
     if (date.length < 2) {
       return [];
     } else {
-      const startDate = DateTimeUtils.formatDate(date[0]);
-      const endDate = DateTimeUtils.formatDate(date[1], true);
+      const startDate = DateTimeUtils.formatDateTime(date[0]);
+      const endDate = DateTimeUtils.formatDateTime(date[1], true);
       return [startDate, endDate];
     }
   }

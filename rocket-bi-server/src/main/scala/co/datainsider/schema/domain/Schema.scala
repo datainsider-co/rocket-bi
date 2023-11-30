@@ -239,11 +239,6 @@ case class TableSchema(
   def getColumnNames: Seq[String] = {
     columns.map(_.name)
   }
-
-  @JsonIgnore
-  def getColumnDisplayNames: Seq[String] = {
-    columns.map(_.displayName)
-  }
 }
 
 @SerialVersionUID(20200715L)

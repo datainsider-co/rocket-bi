@@ -1,10 +1,10 @@
 package co.datainsider.jobworker.domain
 
-import co.datainsider.jobworker.domain.source.{AmazonS3Source, FacebookAdsSource, Ga4Source, GaSource, GoogleAdsSource, GoogleSearchConsoleSource, GoogleServiceAccountSource, JdbcSource, LazadaSource, MongoSource, PalexySource, ShopeeSource, ShopifySource, SolanaSource, TikTokAdsSource}
+import co.datainsider.jobworker.domain.DataSourceType.DataSourceType
+import co.datainsider.jobworker.domain.Ids.SourceId
+import co.datainsider.jobworker.domain.source._
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
-import DataSourceType.DataSourceType
-import Ids.SourceId
 
 @JsonTypeInfo(
   use = JsonTypeInfo.Id.NAME,
@@ -28,6 +28,8 @@ import Ids.SourceId
     new Type(value = classOf[LazadaSource], name = "lazada_source"),
     new Type(value = classOf[PalexySource], name = "palexy_source"),
     new Type(value = classOf[GoogleSearchConsoleSource], name = "google_search_console_source"),
+    new Type(value = classOf[HubspotSource], name = "hubspot_source"),
+    new Type(value = classOf[MixpanelSource], name = "mixpanel_source"),
   )
 )
 trait DataSource {

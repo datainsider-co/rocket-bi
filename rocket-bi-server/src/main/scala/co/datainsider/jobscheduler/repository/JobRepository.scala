@@ -196,6 +196,7 @@ class MySqlJobRepository @Inject() (
         case JobType.Lazada              => LazadaJob.fromResultSet(rs)
         case JobType.Palexy              => PalexyJob.fromResultSet(rs)
         case JobType.GoogleSearchConsole => GoogleSearchConsoleJob.fromResultSet(rs)
+        case JobType.Mixpanel            => MixpanelJob.fromResultSet(rs)
         case _                           => throw new UnsupportedOperationException
       }
       jobs += job

@@ -1,10 +1,13 @@
 package co.datainsider.datacook.module
 
 import co.datainsider.bi.client.JdbcClient
-import co.datainsider.bi.service.{QueryExecutor, QueryExecutorImpl}
-import co.datainsider.bi.util.ZConfig
+import co.datainsider.bi.domain.query.Limit
+import co.datainsider.bi.service.{ConnectionService, QueryExecutor, QueryExecutorImpl}
+import co.datainsider.bi.util.{Using, ZConfig}
 import co.datainsider.datacook.domain.Ids.EtlJobId
-import co.datainsider.datacook.pipeline.operator.OperatorService
+import co.datainsider.datacook.pipeline.operator._
+import co.datainsider.datacook.pipeline.operator.persist._
+import co.datainsider.datacook.pipeline.{ExecutorResolver, ExecutorResolverImpl}
 import co.datainsider.datacook.repository._
 import co.datainsider.datacook.service._
 import co.datainsider.datacook.service.scheduler.{ScheduleService, ScheduleServiceImpl}
@@ -17,6 +20,7 @@ import education.x.commons.{I32IdGenerator, KVS, SsdbKVS}
 import org.nutz.ssdb4j.spi.SSDB
 
 import javax.inject.{Named, Singleton}
+import scala.io.Source
 
 /**
   * @author tvc12 - Thien Vi
@@ -105,7 +109,7 @@ object TestDataCookModule extends TwitterModule {
     val dbPrefix: String = ZConfig.getString("data_cook.prefix_db_name", "etl")
     val querySize = ZConfig.getInt("data_cook.query_size", 10000)
     val batchSize = ZConfig.getInt("data_cook.insert_batch_size", 100000)
-    new OperatorService(
+    new OperatorServiceImpl(
       schemaService = schemaService,
       queryExecutor = queryExecutor,
       ingestionService = ingestionService,
@@ -126,13 +130,60 @@ object TestDataCookModule extends TwitterModule {
     val dbPrefix: String = ZConfig.getString("data_cook.preview_prefix_db_name", "preview_etl")
     val querySize = ZConfig.getInt("data_cook.query_size", 10000)
     val batchSize = ZConfig.getInt("data_cook.insert_batch_size", 100000)
-    new OperatorService(
+    new OperatorServiceImpl(
       schemaService = schemaService,
       queryExecutor = queryExecutor,
       ingestionService = ingestionService,
       dbPrefix = dbPrefix,
       querySize = querySize,
       batchSize = batchSize
+    )
+  }
+
+  @Singleton
+  @Provides
+  @Named("preview_executor_resolver")
+  def providesPreviewExecutorResolver(
+      connectionService: ConnectionService,
+      @Named("preview_operator_service") operatorService: OperatorService
+  ): ExecutorResolver = {
+    val limit = Some(Limit(0, 1000))
+    new ExecutorResolverImpl()
+      .register(RootOperatorExecutor())
+      .register(GetOperatorExecutor(operatorService, limit))
+      .register(JoinOperatorExecutor(operatorService, limit))
+      .register(ManageFieldOperatorExecutor(operatorService))
+      .register(TransformOperatorExecutor(operatorService))
+      .register(PivotOperatorExecutor(operatorService))
+      .register(SQLOperatorExecutor(operatorService))
+      .register(MockSaveDwhOperatorExecutor())
+      .register(classOf[OraclePersistOperator], MockJdbcPersistOperatorExecutor())
+      .register(classOf[MySQLPersistOperator], MockJdbcPersistOperatorExecutor())
+      .register(classOf[MsSQLPersistOperator], MockJdbcPersistOperatorExecutor())
+      .register(classOf[PostgresPersistOperator], MockJdbcPersistOperatorExecutor())
+      .register(classOf[VerticaPersistOperator], MockJdbcPersistOperatorExecutor())
+      .register(classOf[PythonOperator], createPythonExecutor(connectionService, operatorService))
+      .register(classOf[SendEmailOperator], MockSendEmailExecutor())
+      .register(classOf[SendGroupEmailOperator], MockGroupSendEmailExecutor())
+  }
+
+  private def createPythonExecutor(
+      connectionService: ConnectionService,
+      operatorService: OperatorService,
+      executeTimeoutMs: Long = 60000
+  ): Executor[PythonOperator] = {
+    val templatePath: String = ZConfig.getString("data_cook.templates.python", "templates/main.py.template")
+    val template: String = Using(Source.fromInputStream(getClass.getClassLoader.getResourceAsStream(templatePath)))(
+      _.getLines().mkString("\n")
+    )
+    val tmpDir: String = ZConfig.getString("data_cook.tmp_dir")
+
+    PythonOperatorExecutor(
+      connectionService = connectionService,
+      operatorService,
+      template,
+      baseDir = tmpDir,
+      executeTimeoutMs = executeTimeoutMs
     )
   }
 

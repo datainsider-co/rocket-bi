@@ -23,12 +23,11 @@ class SendGroupEmailOperatorTest extends AbstractOperatorTest with ClickhouseInt
 
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
     .register(
       SendGroupEmailOperatorExecutor(
-        engine,
-        // todo: don't known why localhost is not working but 127.0.0.1 is working
-        source.copy(host = "127.0.0.1"),
+        getEngineResolver(),
+        getConnectionService(),
         emailService,
         "./tmp/email"
       )
@@ -209,7 +208,7 @@ class SendGroupEmailOperatorTest extends AbstractOperatorTest with ClickhouseInt
 //      subject = "Daily order records",
 //      content = Some("Sample Sales")
 //    )
-//    resolver.register(GetOperatorExecutor(client, operatorService, None))
+//    resolver.register(GetOperatorExecutor(operatorService, None))
 //
 //    val pipeline = Pipeline
 //      .builder()

@@ -1,5 +1,6 @@
 package co.datainsider.datacook.pipeline.operator.persist.writer
 
+import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.datacook.pipeline.exception.{CreateDatabaseException, CreateTableException, DropTableException}
 import co.datainsider.schema.domain.TableSchema
 import co.datainsider.schema.domain.column.Column
@@ -13,7 +14,7 @@ trait JDBCWriter {
     * Wirte danh sach records vao destination voi danh sach columns cho truoc.
     * @return so luong record da duoc write
     */
-  def write(dbName: String, tableName: String, columns: Seq[Column], records: Seq[Seq[Any]]): Int
+  def write(dbName: String, tableName: String, columns: Seq[Column], records: Seq[Record]): Int
 
   /**
     * Kiem tra xem table co ton tai hay chua, neu gap exception se tra ve false

@@ -5,17 +5,11 @@ import { ChartInfo, QueryRelatedWidget, ScalarFunctionType, WidgetId, Zoomable }
 import { QuerySetting } from '@core/common/domain/model/query/QuerySetting';
 import { Log } from '@core/utils';
 
-export interface ZoomState {
-  zoomLevels: ZoomLevelNode[][];
-  zoomLevelsAsMap: Map<string, number>;
-  zoomDataAsMap: Map<WidgetId, ZoomData>;
-}
-
 @Module({ dynamic: true, namespaced: true, store: store, name: Stores.ZoomStore })
 export class ZoomStore extends VuexModule {
-  zoomNodes: ZoomState['zoomLevels'] = [];
-  zoomLevelsAsMap: ZoomState['zoomLevelsAsMap'] = new Map<string, number>();
-  zoomDataAsMap: ZoomState['zoomDataAsMap'] = new Map<WidgetId, ZoomData>();
+  zoomNodes: ZoomLevelNode[][] = [];
+  zoomLevelsAsMap: Map<string, number> = new Map<string, number>();
+  zoomDataAsMap: Map<WidgetId, ZoomData> = new Map<WidgetId, ZoomData>();
 
   @Mutation
   multiRegisterZoomData(widgets: { id: WidgetId; setting: QuerySetting }[]): void {
@@ -25,15 +19,7 @@ export class ZoomStore extends VuexModule {
         this.zoomDataAsMap.set(widget.id, widget.setting.zoomData);
       }
     });
-  }
-
-  @Mutation
-  registerZoomData(payload: { id: WidgetId; setting: QuerySetting }): void {
-    const { id, setting } = payload;
-    const isEnableZoom: boolean = setting.getChartOption()?.isEnableZoom() ?? false;
-    if (isEnableZoom && Zoomable.isZoomable(setting)) {
-      this.zoomDataAsMap.set(id, setting.zoomData);
-    }
+    this.zoomDataAsMap = new Map(this.zoomDataAsMap);
   }
 
   @Mutation
@@ -41,6 +27,7 @@ export class ZoomStore extends VuexModule {
     const isEnableZoom: boolean = payload.query.getChartOption()?.isEnableZoom() ?? false;
     if (isEnableZoom && Zoomable.isZoomable(payload.query)) {
       this.zoomDataAsMap.set(payload.id, payload.query.zoomData);
+      this.zoomDataAsMap = new Map(this.zoomDataAsMap);
     }
   }
 
@@ -101,15 +88,8 @@ export class ZoomStore extends VuexModule {
   @Mutation
   reset() {
     this.zoomNodes = [];
-    this.zoomLevelsAsMap.clear();
-    this.zoomDataAsMap.clear();
-  }
-
-  get zoomLevelData(): { levels: string[][]; levelsAsMap: Map<string, number> } {
-    return {
-      levels: this.zoomNodes.map(node => node.map(item => item.level)),
-      levelsAsMap: this.zoomLevelsAsMap
-    };
+    this.zoomLevelsAsMap = new Map<string, number>();
+    this.zoomDataAsMap = new Map<WidgetId, ZoomData>();
   }
 
   get canZoom(): (id: WidgetId) => boolean {

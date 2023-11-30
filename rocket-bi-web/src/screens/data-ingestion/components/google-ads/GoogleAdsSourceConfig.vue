@@ -79,15 +79,15 @@ import { DIException, SourceId } from '@core/common/domain';
 
 @Component({ components: { DiToggle } })
 export default class GoogleAdsSourceConfig extends Vue {
-  private loading = false;
-  private customerIds: string[] = [];
-  private customerIdError = '';
-  private isInputCustomerId = false;
-  private loadingResource = false;
-  private resources: string[] = [];
-  private resourceNameError = '';
+  protected loading = false;
+  protected customerIds: string[] = [];
+  protected customerIdError = '';
+  protected isInputCustomerId = false;
+  protected loadingResource = false;
+  protected resources: string[] = [];
+  protected resourceNameError = '';
   @Inject
-  private readonly sourcesService!: DataSourceService;
+  protected readonly sourcesService!: DataSourceService;
   @PropSync('job')
   syncedJob!: GoogleAdsJob;
 
@@ -103,7 +103,7 @@ export default class GoogleAdsSourceConfig extends Vue {
     DataSourceModule.setTableNames([]);
   }
 
-  private get isUsingExtraSegment(): boolean {
+  protected get isUsingExtraSegment(): boolean {
     return ListUtils.isNotEmpty(this.syncedJob.extraSegments);
   }
   async init(id: SourceId): Promise<void> {
@@ -118,7 +118,7 @@ export default class GoogleAdsSourceConfig extends Vue {
     }
   }
 
-  private get allResources(): SelectOption[] {
+  protected get allResources(): SelectOption[] {
     return this.resources
       .map(resource => {
         return {
@@ -129,7 +129,7 @@ export default class GoogleAdsSourceConfig extends Vue {
       .sort((a, b) => StringUtils.compare(a.displayName, b.displayName));
   }
 
-  private get customerIdsAsSelectOption(): SelectOption[] {
+  protected get customerIdsAsSelectOption(): SelectOption[] {
     return this.customerIds.map(id => {
       return {
         id: id,
@@ -149,7 +149,7 @@ export default class GoogleAdsSourceConfig extends Vue {
     }
   }
 
-  private async initResourceNames(sourceId: SourceId, customerId: string) {
+  protected async initResourceNames(sourceId: SourceId, customerId: string) {
     if (StringUtils.isNotEmpty(customerId)) {
       this.loadingResource = true;
       const allTables: string[] = await this.sourcesService.listTableName(sourceId, customerId, '', '');
@@ -161,7 +161,7 @@ export default class GoogleAdsSourceConfig extends Vue {
     }
   }
 
-  private async initCustomerIds(id: SourceId) {
+  protected async initCustomerIds(id: SourceId) {
     this.loading = true;
     this.customerIds = await this.sourcesService.listDatabaseName(id, '', '');
     if (ListUtils.hasOnlyOneItem(this.customerIds)) {
@@ -182,24 +182,24 @@ export default class GoogleAdsSourceConfig extends Vue {
     return true;
   }
 
-  private selectInputCustomerId(callback: Function) {
+  protected selectInputCustomerId(callback: Function) {
     this.isInputCustomerId = true;
     this.syncedJob.customerId = '';
     this.customerIdError = '';
     callback();
   }
 
-  private selectCustomerId(id: string) {
+  protected selectCustomerId(id: string) {
     this.isInputCustomerId = false;
     this.syncedJob.customerId = id;
     this.customerIdError = '';
   }
 
-  private resetCustomerIdError() {
+  protected resetCustomerIdError() {
     this.customerIdError = '';
   }
 
-  private get isCreateNew(): boolean {
+  protected get isCreateNew(): boolean {
     return Job.getJobFormConfigMode(this.syncedJob) === FormMode.Create;
   }
 }

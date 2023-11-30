@@ -9,7 +9,7 @@ import { isString } from 'lodash';
 import { editor, languages, Position, Token } from 'monaco-editor';
 import { StringUtils } from '@/utils/StringUtils';
 import CompletionItem = languages.CompletionItem;
-import { TokenInfo } from '@/shared/fomula/clickhouse/ClickHouseCompletionItemProvider';
+import { TokenInfo } from '@/shared/fomula/TokenInfo';
 import { Log } from '@core/utils';
 import { IdGenerator } from '@/utils/IdGenerator';
 

@@ -3,7 +3,7 @@
  * @created: 11/17/21, 1:52 PM
  */
 
-import { FormulaController } from '@/shared/fomula/FormulaController';
+import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
 import { languages } from 'monaco-editor';
 import IMonarchLanguage = languages.IMonarchLanguage;
 import { Log } from '@core/utils';
@@ -11,7 +11,7 @@ import { PythonCompletionItemProvider } from '@/shared/fomula/python/PythonCompl
 import { PythonLanguage, PythonLanguageConfig } from '@/shared/fomula/python/PythonLanguageTokenizer';
 import { Column, DatabaseInfo, TableSchema } from '@core/common/domain';
 
-export class PythonFormulaController implements FormulaController {
+export class PythonFormulaController implements MonacoFormulaController {
   protected languageRegister: any | null = null;
   protected tokensProvider: any | null = null;
   private readonly databaseSchemas: DatabaseInfo[];
@@ -37,8 +37,8 @@ export class PythonFormulaController implements FormulaController {
     return 'python';
   }
 
-  getTheme(themeType: 'light' | 'dark' | 'custom'): string {
-    return `spark-theme-${themeType}`;
+  getTheme(): string {
+    return `spark-theme-light`;
   }
 
   init(monaco: any): void {

@@ -48,20 +48,18 @@
 import DiCustomModal from '@/shared/components/DiCustomModal.vue';
 import { Component, Ref, Vue } from 'vue-property-decorator';
 import { required } from 'vuelidate/lib/validators';
-import { EditUserProfileRequest } from '@core/admin/domain/request/EditUserProfileRequest';
 import { UserDetailModule } from '@/screens/user-management/store/UserDetailStore';
 import { DIException } from '@core/common/domain/exception';
-import { PopupUtils } from '@/utils/PopupUtils';
 import { Status } from '@/shared';
 import { Log } from '@core/utils';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { EditUserPropertyRequest } from '@core/admin/domain/request/EditUserPropertyRequest';
 
-export class NewFieldData {
+export class CustomPropertyInfo {
   constructor(public fieldName: string, public fieldValue: string) {}
-  static empty(): NewFieldData {
-    return new NewFieldData('', '');
+  static empty(): CustomPropertyInfo {
+    return new CustomPropertyInfo('', '');
   }
 }
 
@@ -77,7 +75,7 @@ export class NewFieldData {
   }
 })
 export default class AddNewFieldModal extends Vue {
-  private newFieldData: NewFieldData = NewFieldData.empty();
+  private newFieldData: CustomPropertyInfo = CustomPropertyInfo.empty();
   errorMessage = '';
   private status = Status.Loaded;
 
@@ -136,7 +134,7 @@ export default class AddNewFieldModal extends Vue {
     }
   }
 
-  private handleSaveNewField(newFieldData: NewFieldData): Promise<boolean> {
+  private handleSaveNewField(newFieldData: CustomPropertyInfo): Promise<boolean> {
     Log.debug('Contact::handleAddNewField::newFieldData::', newFieldData);
     const request: EditUserPropertyRequest = new EditUserPropertyRequest(
       this.userFullDetailInfo?.profile?.username!,
@@ -165,7 +163,7 @@ export default class AddNewFieldModal extends Vue {
   }
 
   private resetData() {
-    this.newFieldData = NewFieldData.empty();
+    this.newFieldData = CustomPropertyInfo.empty();
     this.errorMessage = '';
     this.$v.$reset();
     this.status = Status.Loaded;

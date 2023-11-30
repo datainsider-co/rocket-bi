@@ -24,5 +24,7 @@ export enum DataSourceType {
   S3 = 'S3',
   Facebook = 'Facebook',
   Palexy = 'Palexy',
-  GoogleSearchConsole = 'GoogleSearchConsole'
+  GoogleSearchConsole = 'GoogleSearchConsole',
+  Hubspot = 'Hubspot',
+  Mixpanel = 'Mixpanel'
 }

@@ -19,7 +19,7 @@ class GetOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTest 
   override protected val jobId: EtlJobId = 1200
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
 
   override def setupSampleTables(): Unit = {
     loadData(getClass.getClassLoader.getResource("datasets/customers.csv").getPath, customerTable)
@@ -141,10 +141,10 @@ class GetOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTest 
     val maxValue: String = pipelineResult.config.get.getIncrementalConfig(getOperator1.destTableConfiguration).get.value
     assertQueryCount(
       s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where id <= '${minValue}'",
-      0
+      1
     )
     assertQueryCount(
-      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where id > '${maxValue}'",
+      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where id >= '${maxValue}'",
       0
     )
 
@@ -243,11 +243,11 @@ class GetOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTest 
     )
     val maxValue: String = pipelineResult.config.get.getIncrementalConfig(getOperator1.destTableConfiguration).get.value
     assertQueryCount(
-      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where id <='${minValue}'",
+      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where id < '${minValue}'",
       0
     )
     assertQueryCount(
-      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where id >  '${maxValue}'",
+      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where id >= '${maxValue}'",
       0
     )
   }
@@ -335,7 +335,7 @@ class GetOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTest 
     )
     val maxValue: String = pipelineResult.config.get.getIncrementalConfig(getOperator1.destTableConfiguration).get.value
     assertQueryCount(
-      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where id >  '${maxValue}'",
+      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where id > '${maxValue}'",
       0
     )
   }
@@ -386,7 +386,7 @@ class GetOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTest 
     )
     val maxValue: String = pipelineResult.config.get.getIncrementalConfig(getOperator1.destTableConfiguration).get.value
     assertQueryCount(
-      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where created_date <='${minValue}'",
+      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where created_date < '${minValue}'",
       0
     )
     assertQueryCount(
@@ -478,7 +478,7 @@ class GetOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTest 
     )
     val maxValue: String = pipelineResult.config.get.getIncrementalConfig(getOperator1.destTableConfiguration).get.value
     assertQueryCount(
-      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where created_date >  '${maxValue}'",
+      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where created_date > '${maxValue}'",
       0
     )
   }
@@ -535,7 +535,7 @@ class GetOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTest 
     )
     val maxValue: String = pipelineResult.config.get.getIncrementalConfig(getOperator1.destTableConfiguration).get.value
     assertQueryCount(
-      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where created_date_time <='${minValue}'",
+      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where created_date_time < '${minValue}'",
       0
     )
     assertQueryCount(
@@ -633,11 +633,11 @@ class GetOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTest 
     )
     val maxValue: String = pipelineResult.config.get.getIncrementalConfig(getOperator1.destTableConfiguration).get.value
     assertQueryCount(
-      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where created_date_time <='${minValue}'",
+      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where created_date_time <'${minValue}'",
       0
     )
     assertQueryCount(
-      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where created_date_time >  '${maxValue}'",
+      s"select count(*) from `${tableSchema1.dbName}`.`${tableSchema1.name}` where created_date_time > '${maxValue}'",
       0
     )
   }

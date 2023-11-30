@@ -56,7 +56,7 @@
     </div>
     <DataSourceConfigModal
       ref="dataSourceConfigModal"
-      :data-source-render="dataSourceFormRender"
+      :data-source-render.sync="dataSourceFormRender"
       :isShow.sync="isShowDataSourceConfigModal"
       @onClickOk="handleSubmitDataSource"
       @reAuthen="handleReAuthen"
@@ -113,9 +113,7 @@ import {
   DataSourceType,
   FormMode,
   GoogleAdsSourceInfo,
-  GoogleSearchConsoleType,
   Job,
-  JobService,
   S3Job,
   S3SourceInfo,
   SortRequest,
@@ -171,9 +169,9 @@ import { GoogleSearchConsoleJob } from '@core/data-ingestion/domain/job/google-s
   }
 })
 export default class DataSourceScreen extends Vue {
-  private readonly trackEvents = TrackEvents;
-  private readonly animationDuration = 600;
-  private readonly delay = 20;
+  protected readonly trackEvents = TrackEvents;
+  protected readonly animationDuration = 600;
+  protected readonly delay = 20;
   @Ref()
   dataSourceTypeSelectionModal?: DataSourceTypeSelection;
   @Ref()
@@ -192,41 +190,40 @@ export default class DataSourceScreen extends Vue {
   s3PreviewModal!: S3PreviewTableModal;
 
   @Ref()
-  private jobConfigModal!: JobConfigModal;
+  protected jobConfigModal!: JobConfigModal;
 
   @Ref()
-  private jobCreationModal!: JobCreationModal;
+  protected jobCreationModal!: JobCreationModal;
 
   @Ref()
-  private multiJobCreationModal!: MultiJobCreationModal;
+  protected multiJobCreationModal!: MultiJobCreationModal;
 
   @Ref()
-  private dataSourceConfigModal!: DataSourceConfigModal;
+  protected dataSourceConfigModal!: DataSourceConfigModal;
 
   @Inject
-  private readonly dataSourceService!: DataSourceService;
+  protected readonly dataSourceService!: DataSourceService;
 
-  private readonly allItems: ItemData[] = ALL_DATASOURCE;
-  private from = 0;
-  private size = DefaultPaging.DefaultPageSize;
-  private sortName = 'last_modified';
-  private sortMode: SortDirection = SortDirection.Desc;
-  private searchValue = '';
-  private isShowDatabaseSelectionModal = false;
-  private isShowDataSourceConfigModal = false;
-  private jobFormRenderer: JobFormRender = JobFormRender.default();
-  private tableErrorMessage = '';
-  private tableStatus: Status = Status.Loading;
-  private dataSourceFormRender: DataSourceFormRender = this.defaultDataSourceFormRender();
+  protected readonly allItems: ItemData[] = ALL_DATASOURCE;
+  protected from = 0;
+  protected size = DefaultPaging.DefaultPageSize;
+  protected sortName = 'last_modified';
+  protected sortMode: SortDirection = SortDirection.Desc;
+  protected searchValue = '';
+  protected isShowDatabaseSelectionModal = false;
+  protected isShowDataSourceConfigModal = false;
+  protected jobFormRenderer: JobFormRender = JobFormRender.default();
+  protected tableErrorMessage = '';
+  protected tableStatus: Status = Status.Loading;
+  protected dataSourceFormRender: DataSourceFormRender = new DataSourceFormFactory().createRender(
+    DataSourceInfo.createDefault(DataSourceType.MySql),
+    this.handleSubmitDataSource
+  );
   defaultDatasourceIcon = require('@/assets/icon/data_ingestion/datasource/ic_default.svg');
-  private checkboxController = new CheckBoxHeaderController();
+  protected checkboxController = new CheckBoxHeaderController();
   selectedIndexAsSet = new Set<SourceId>();
   enableMultiAction = false;
-  private readonly cellWidth = 180;
-
-  private defaultDataSourceFormRender() {
-    return new DataSourceFormFactory().createRender(DataSourceInfo.default(DataSourceType.MySql), this.handleSubmitDataSource);
-  }
+  protected readonly cellWidth = 180;
 
   onSelectedIndexChanged() {
     Log.debug('onSelectedIndexChanged', this.selectedIndexAsSet.size > 0);
@@ -237,7 +234,7 @@ export default class DataSourceScreen extends Vue {
     this.checkboxController.reset();
     this.onSelectedIndexChanged();
   }
-  private get dataSourceHeaders(): HeaderData[] {
+  protected get dataSourceHeaders(): HeaderData[] {
     return [
       new CheckBoxHeaderData(
         this.selectedIndexAsSet,
@@ -297,29 +294,29 @@ export default class DataSourceScreen extends Vue {
     ];
   }
 
-  private get record(): number {
+  protected get record(): number {
     return DataSourceModule.totalRecord;
   }
 
-  private get isActiveSearch() {
+  protected get isActiveSearch() {
     return StringUtils.isNotEmpty(this.searchValue);
   }
 
-  private get dataSources(): DataSourceResponse[] {
+  protected get dataSources(): DataSourceResponse[] {
     Log.debug('dataSources::', DataSourceModule.dataSources);
     return DataSourceModule.dataSources;
     // return []
   }
-  private get isLoaded() {
+  protected get isLoaded() {
     return this.tableStatus === Status.Loaded;
   }
 
-  private get isEmptyData(): boolean {
+  protected get isEmptyData(): boolean {
     return ListUtils.isEmpty(this.dataSources);
     // return true
   }
 
-  private get dataSourceListing(): RowData[] {
+  protected get dataSourceListing(): RowData[] {
     // return []
     return this.dataSources.map(dataSource => {
       Log.debug('DataSourceScreen::dataSourceListing::source::', dataSource.dataSource);
@@ -351,7 +348,7 @@ export default class DataSourceScreen extends Vue {
     this.isShowDatabaseSelectionModal = true;
   }
 
-  private renderDataSourceAction(rowData: RowData, rowIndex: number, header: IndexedHeaderData, columnIndex: number): HTMLElement {
+  protected renderDataSourceAction(rowData: RowData, rowIndex: number, header: IndexedHeaderData, columnIndex: number): HTMLElement {
     Log.debug('renderRowData::', rowData);
     const dataSource = DataSourceResponse.fromObject(rowData).dataSource;
     const buttonDelete = HtmlElementRenderUtils.renderIcon('di-icon-delete btn-icon-border icon-action', (e: MouseEvent) =>
@@ -379,7 +376,7 @@ export default class DataSourceScreen extends Vue {
     source_type: (_: DataSourceScreen, args: any) => args[1].sourceType,
     source_name: (_: DataSourceScreen, args: any) => args[1].getDisplayName()
   })
-  private handleConfirmDeleteDataSource(e: MouseEvent, dataSource: DataSourceInfo) {
+  protected handleConfirmDeleteDataSource(e: MouseEvent, dataSource: DataSourceInfo) {
     e.stopPropagation();
     Log.debug('onClickDeleteInRow::', dataSource.id, dataSource.sourceType);
     Modals.showConfirmationModal(`Are you sure to delete data source '${dataSource.getDisplayName()}'?`, {
@@ -387,7 +384,7 @@ export default class DataSourceScreen extends Vue {
     });
   }
 
-  private handleConfirmDeleteMultiDataSource() {
+  protected handleConfirmDeleteMultiDataSource() {
     const dataSourceText: string = this.selectedIndexAsSet.size > 1 ? 'data sources' : 'data source';
     Modals.showConfirmationModal(`Are you sure to delete ${this.selectedIndexAsSet.size} ${dataSourceText}?`, {
       onOk: () => this.handleDeleteMultiDataSource(this.selectedIndexAsSet)
@@ -399,7 +396,7 @@ export default class DataSourceScreen extends Vue {
     source_type: (_: DataSourceScreen, args: any) => args[0].sourceType,
     source_name: (_: DataSourceScreen, args: any) => args[0].getDisplayName()
   })
-  private async handleDeleteDataSource(dataSource: DataSourceInfo) {
+  protected async handleDeleteDataSource(dataSource: DataSourceInfo) {
     try {
       this.showLoading();
       await DataSourceModule.deleteDataSource(dataSource.id);
@@ -412,7 +409,7 @@ export default class DataSourceScreen extends Vue {
       this.showLoaded();
     }
   }
-  private async handleDeleteMultiDataSource(indexs: Set<SourceId>) {
+  protected async handleDeleteMultiDataSource(indexs: Set<SourceId>) {
     try {
       this.showLoading();
       await DataSourceModule.deleteMultiDataSource(indexs);
@@ -428,12 +425,12 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private openDataSourceForm(dataSource: DataSourceInfo) {
+  protected openDataSourceForm(dataSource: DataSourceInfo) {
     this.isShowDataSourceConfigModal = true;
     this.dataSourceFormRender = new DataSourceFormFactory().createRender(dataSource, this.dataSourceConfigModal.handleSubmit);
   }
 
-  private closeDatabaseSelection() {
+  protected closeDatabaseSelection() {
     this.isShowDatabaseSelectionModal = false;
   }
 
@@ -442,7 +439,7 @@ export default class DataSourceScreen extends Vue {
     source_type: (_: DataSourceScreen, args: any) => args[0]?.dataSource?.sourceType,
     source_name: (_: DataSourceScreen, args: any) => args[0]?.dataSource?.getDisplayName()
   })
-  private onClickRow(rowData: RowData) {
+  protected onClickRow(rowData: RowData) {
     try {
       const dataSource = DataSourceResponse.fromObject(rowData).dataSource;
       if (dataSource.className === DataSources.S3Source) {
@@ -461,7 +458,7 @@ export default class DataSourceScreen extends Vue {
     source_type: (_: DataSourceScreen, args: any) => args[1]?.sourceType,
     source_name: (_: DataSourceScreen, args: any) => args[1]?.getDisplayName()
   })
-  private handleEditDataSource(event: Event, dataSource: DataSourceInfo) {
+  protected handleEditDataSource(event: Event, dataSource: DataSourceInfo) {
     event.stopPropagation();
     this.openDataSourceForm(dataSource);
     Log.debug('onClickEditInRow::', dataSource);
@@ -470,7 +467,7 @@ export default class DataSourceScreen extends Vue {
   @Track(TrackEvents.DataSourceSelectType, {
     source_type: (_: DataSourceScreen, args: any) => args[0].type
   })
-  private async handleSelectDataSource(selectedItem: VisualizationItemData) {
+  protected async handleSelectDataSource(selectedItem: VisualizationItemData) {
     try {
       this.closeDatabaseSelection();
       await TimeoutUtils.sleep(150);
@@ -482,7 +479,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private async handleOpenThirdPartyWindow(type: DataSourceType | string) {
+  protected async handleOpenThirdPartyWindow(type: DataSourceType | string) {
     try {
       switch (type) {
         case 'csv': {
@@ -526,13 +523,11 @@ export default class DataSourceScreen extends Vue {
           await this.handleSelectGoogleSourceType(
             `${window.appConfig.FACEBOOK_ADS_URL}?redirect=${window.location.origin}&scope=${window.appConfig.VUE_APP_FACEBOOK_SCOPE}`
           );
-          // await this.loginFacebook(this.handleFacebookLogin);
           break;
         }
         case DataSourceType.Tiktok: {
           Log.debug('link::', `${window.appConfig.TIKTOK_ADS_URL}&redirect=${window.location.origin}`);
           await this.handleSelectGoogleSourceType(`${window.appConfig.TIKTOK_ADS_URL}?redirect=${window.location.origin}`);
-          // await this.loginFacebook(this.handleFacebookLogin);
           break;
         }
         //TODO: Add here
@@ -545,9 +540,9 @@ export default class DataSourceScreen extends Vue {
           break;
         }
         default: {
-          const defaultDataSource = DataSourceInfo.default(type as DataSourceType);
-          Log.debug('handleSelected::faultDataSource::', defaultDataSource);
-          this.openDataSourceForm(defaultDataSource);
+          const dataSource = DataSourceInfo.createDefault(type as DataSourceType);
+          Log.debug('handleSelected::faultDataSource::', dataSource);
+          this.openDataSourceForm(dataSource);
         }
       }
     } catch (e) {
@@ -556,11 +551,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  async loginFacebook(callback: (response: any) => void) {
-    (window as any).FB.login(callback, { scope: window.appConfig.VUE_APP_FACEBOOK_SCOPE, return_scopes: true });
-  }
-
-  private async handleFacebookLogin(response: FacebookResponse) {
+  protected async handleFacebookLogin(response: FacebookResponse) {
     try {
       validFacebookResponse(response, window.appConfig.VUE_APP_FACEBOOK_SCOPE);
       this.showUpdating();
@@ -578,7 +569,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private openCreateS3SourceConfig(sourceInfo: S3SourceInfo, job: S3Job) {
+  protected openCreateS3SourceConfig(sourceInfo: S3SourceInfo, job: S3Job) {
     this.s3SourceModal.show(sourceInfo, {
       onCompleted: source => {
         job.sourceId = source.id;
@@ -587,7 +578,7 @@ export default class DataSourceScreen extends Vue {
     });
   }
 
-  private openEditS3SourceConfig(sourceInfo: S3SourceInfo) {
+  protected openEditS3SourceConfig(sourceInfo: S3SourceInfo) {
     this.s3SourceModal.show(sourceInfo, {
       action: FormMode.Edit,
       onCompleted: source => {
@@ -596,11 +587,11 @@ export default class DataSourceScreen extends Vue {
     });
   }
 
-  private openS3ConfigJob(sourceInfo: S3SourceInfo, job: S3Job) {
+  protected openS3ConfigJob(sourceInfo: S3SourceInfo, job: S3Job) {
     this.s3JobConfigModal.show(job, updateJob => this.openS3PreviewModal(sourceInfo, updateJob));
   }
 
-  private openS3PreviewModal(sourceInfo: S3SourceInfo, job: S3Job) {
+  protected openS3PreviewModal(sourceInfo: S3SourceInfo, job: S3Job) {
     this.s3PreviewModal.show(sourceInfo, job, {
       onCompleted: (source, job) => {
         try {
@@ -616,16 +607,16 @@ export default class DataSourceScreen extends Vue {
     });
   }
 
-  private async redirectToJobScreen() {
+  protected async redirectToJobScreen() {
     await this.$router.push({ name: Routers.Job });
   }
 
-  private openDocumentForm(source: DataSourceType) {
+  protected openDocumentForm(source: DataSourceType) {
     this.documentModal.show(source);
   }
 
   @AtomicAction()
-  private async handleSubmitDataSource() {
+  protected async handleSubmitDataSource() {
     try {
       this.isShowDataSourceConfigModal = false;
       this.showLoading();
@@ -642,52 +633,48 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private handleAfterCreateSource(source: DataSourceInfo) {
-    switch (source.sourceType) {
-      case DataSourceType.Palexy: {
-        const job = Job.default(source);
-        job.displayName = 'Palexy job';
-        this.jobCreationModal.show(Job.default(source));
-        this.jobCreationModal.handleSelectPalexy(source);
-        break;
+  protected handleAfterCreateSource(source: DataSourceInfo) {
+    try {
+      switch (source.sourceType) {
+        case DataSourceType.Palexy: {
+          const job = Job.default(source);
+          job.displayName = 'Palexy job';
+          this.jobCreationModal.show(Job.default(source));
+          this.jobCreationModal.handleSelectPalexy(source);
+          break;
+        }
+        case DataSourceType.GoogleSearchConsole:
+        case DataSourceType.Hubspot:
+        case DataSourceType.Mixpanel: {
+          const job = Job.default(source);
+          this.multiJobCreationModal.show(job, (job: Job, isSingleTable: boolean) => this.handleCreateJob(job, isSingleTable), this.multiJobCreationModal.hide);
+          this.multiJobCreationModal.handleSelectDataSource(source);
+          break;
+        }
       }
-      case DataSourceType.GoogleSearchConsole: {
-        const job = Job.default(source);
-        job.displayName = 'Google search console job';
-        this.multiJobCreationModal.show(
-          job,
-          (job: Job, isSingleTable: boolean) => this.handleCreateGoogleConsoleJob(job, isSingleTable),
-          this.multiJobCreationModal.hide
-        );
-        this.multiJobCreationModal.handleSelectGoogleSearchConsole(source);
-        break;
-      }
+    } catch (e) {
+      Log.error('DataSourceScreen::handleAfterCreateSource::error::', e);
     }
   }
 
-  private async handleCreateGoogleConsoleJob(job: Job, isSingleTable: boolean) {
+  protected async handleCreateJob(job: Job, isSingleTable: boolean) {
     if (isSingleTable) {
       await JobModule.create(job);
     } else {
-      const newJob = job as GoogleSearchConsoleJob;
-      const searchAnalyticJob = cloneDeep(newJob);
-      const searchAppearanceJob = cloneDeep(newJob);
-      searchAppearanceJob.tableType = GoogleSearchConsoleType.SearchAppearance;
-      searchAnalyticJob.tableType = GoogleSearchConsoleType.SearchAnalytics;
-      await JobModule.multiCreateV2({ jobs: [searchAnalyticJob.createSingleJob(), searchAppearanceJob.createSingleJob()] });
+      await JobModule.multiCreateV2({ jobs: Job.getMultiJob(job) });
     }
     await this.redirectToJobScreen();
   }
 
-  private async handleReAuthen(sourceInfo: DataSourceInfo) {
+  protected async handleReAuthen(sourceInfo: DataSourceInfo) {
     await this.handleOpenThirdPartyWindow(sourceInfo.sourceType);
   }
 
-  private handleResetDataSourceFormRender() {
-    this.dataSourceFormRender = this.defaultDataSourceFormRender();
+  protected handleResetDataSourceFormRender() {
+    this.dataSourceFormRender = new DataSourceFormFactory().createRender(DataSourceInfo.createDefault(DataSourceType.MySql), this.handleSubmitDataSource);
   }
 
-  private async submitDataSource(sourceInfo: DataSourceInfo) {
+  protected async submitDataSource(sourceInfo: DataSourceInfo) {
     const action = this.getDataSourceConfigMode(sourceInfo);
     switch (action) {
       case FormMode.Edit: {
@@ -714,7 +701,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private getDataSourceConfigMode(dataSource: DataSourceInfo): FormMode {
+  protected getDataSourceConfigMode(dataSource: DataSourceInfo): FormMode {
     switch (dataSource.id) {
       case DataSourceInfo.DEFAULT_ID:
         return FormMode.Create;
@@ -723,7 +710,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private async loadDataSourceTable() {
+  protected async loadDataSourceTable() {
     try {
       this.showLoading();
       await this.reloadDataSources();
@@ -736,7 +723,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private async handleRefresh() {
+  protected async handleRefresh() {
     try {
       this.showUpdating();
       await this.reloadDataSources();
@@ -749,7 +736,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private async reloadDataSources() {
+  protected async reloadDataSources() {
     await DataSourceModule.loadDataSources({
       from: this.from,
       size: this.size,
@@ -758,7 +745,7 @@ export default class DataSourceScreen extends Vue {
     });
   }
 
-  private showLoading() {
+  protected showLoading() {
     if (ListUtils.isEmpty(DataSourceModule.dataSources)) {
       this.tableStatus = Status.Loading;
     } else {
@@ -766,20 +753,20 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private showUpdating() {
+  protected showUpdating() {
     this.tableStatus = Status.Updating;
   }
 
-  private showLoaded() {
+  protected showLoaded() {
     this.tableStatus = Status.Loaded;
   }
 
-  private showError(message: string) {
+  protected showError(message: string) {
     this.tableStatus = Status.Error;
     this.tableErrorMessage = message;
   }
 
-  private async handlePageChange(pagination: Pagination) {
+  protected async handlePageChange(pagination: Pagination) {
     try {
       this.showLoading();
       this.from = (pagination.page - 1) * pagination.rowsPerPage;
@@ -794,7 +781,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private openWindow(url: string) {
+  protected openWindow(url: string) {
     const width = 500;
     const height = 550;
     const left = screen.width / 2 - width / 2;
@@ -805,15 +792,15 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private addMessageEvent() {
+  protected addMessageEvent() {
     window.addEventListener('message', this.handleCatchAuthResponse);
   }
 
-  private removeMessageEvent() {
+  protected removeMessageEvent() {
     window.removeEventListener('message', this.handleCatchAuthResponse);
   }
 
-  private async handleCatchAuthResponse(event: MessageEvent) {
+  protected async handleCatchAuthResponse(event: MessageEvent) {
     try {
       this.verifyMessage(event);
       Log.debug('DataSourceScreen::handleCatchAuthResponse::event::', event);
@@ -824,7 +811,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private verifyMessage(event: MessageEvent) {
+  protected verifyMessage(event: MessageEvent) {
     Log.debug('verifyMessage::', event);
     const origin = event.origin;
     const error = event.data?.error ?? null;
@@ -836,7 +823,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private async handleThirdPartyAuthMessage(event: MessageEvent) {
+  protected async handleThirdPartyAuthMessage(event: MessageEvent) {
     Log.debug('handleThirdPartyAuthMessage::', event);
     const thirdPartyType = event.data?.responseType ?? ThirdPartyType.NotFound;
     const authorizeResponse: any | null = event.data?.authResponse ?? null;
@@ -879,18 +866,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private handleSelectFacebookSource(windowUrl: string) {
-    Log.debug('handleSelectFacebookSource', windowUrl);
-    try {
-      this.addMessageEvent();
-      this.openWindow(windowUrl);
-    } catch (err) {
-      PopupUtils.showError(err.message);
-      Log.error('DataSourceScreen::handleSelectFacebookSource::error::', err);
-    }
-  }
-
-  private async handleSelectGoogleSourceType(windowUrl: string) {
+  protected async handleSelectGoogleSourceType(windowUrl: string) {
     try {
       this.addMessageEvent();
       this.openWindow(windowUrl);
@@ -900,7 +876,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private async handleGoogleAnalyticMessage(accessToken: string, authorizationCode: string) {
+  protected async handleGoogleAnalyticMessage(accessToken: string, authorizationCode: string) {
     try {
       ///handle loading here
       Log.debug('DateSourceScreen::handleGoogleAnalyticMessage::', this.dataSourceFormRender.createDataSourceInfo());
@@ -915,15 +891,15 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private get renderSource() {
+  protected get renderSource() {
     return this.dataSourceFormRender.createDataSourceInfo();
   }
 
-  private get isDefaultSource() {
+  protected get isDefaultSource() {
     return this.renderSource.id === DataSourceInfo.DEFAULT_ID;
   }
 
-  private async handleGA4Message(accessToken: string, authorizationCode: string) {
+  protected async handleGA4Message(accessToken: string, authorizationCode: string) {
     try {
       ///handle loading here
       const gaSourceInfo: GA4SourceInfo = this.isDefaultSource ? GA4SourceInfo.default() : (this.renderSource as GA4SourceInfo);
@@ -938,7 +914,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private async handleGoogleSearchConsoleMessage(accessToken: string, authorizationCode: string) {
+  protected async handleGoogleSearchConsoleMessage(accessToken: string, authorizationCode: string) {
     try {
       ///handle loading here
       const consoleSourceInfo: GoogleSearchConsoleSourceInfo = this.isDefaultSource
@@ -955,26 +931,26 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private handleGoogleSheetMessage(accessToken: string, authorizationCode: string) {
+  protected handleGoogleSheetMessage(accessToken: string, authorizationCode: string) {
     Log.debug('DataSourceScreen::handleGoogleSheetMessage::', accessToken, authorizationCode);
     DiUploadGoogleSheetActions.showUploadGoogleSheet();
     DiUploadGoogleSheetActions.setAccessToken(accessToken);
     DiUploadGoogleSheetActions.setAuthorizationCode(authorizationCode);
   }
 
-  private async handleGoogleAdsMessage(accessToken: string, authorizationCode: string) {
-    const refreshToken = authorizationCode ? await DataSourceModule.getRefreshToken(authorizationCode) : '';
-    const source: GoogleAdsSourceInfo = GoogleAdsSourceInfo.default()
-      .setAccessToken(accessToken)
-      .setRefreshToken(refreshToken);
-    this.openDataSourceForm(source);
-    // const job = GoogleAdsJob.default()
-    //   .setAccessToken(accessToken)
-    //   .setAuthorizationCode(authorizationCode);
-    // this.openMultiJobConfigModal(job);
+  protected async handleGoogleAdsMessage(accessToken: string, authorizationCode: string) {
+    try {
+      const refreshToken = authorizationCode ? await DataSourceModule.getRefreshToken(authorizationCode) : '';
+      const source: GoogleAdsSourceInfo = this.isDefaultSource ? GoogleAdsSourceInfo.default() : (this.renderSource as GoogleAdsSourceInfo);
+      source.setAccessToken(accessToken);
+      source.setRefreshToken(refreshToken);
+      this.openDataSourceForm(source);
+    } catch (e) {
+      PopupUtils.showError(e.message);
+    }
   }
 
-  private async handleTiktokMessage(authCode: string) {
+  protected async handleTiktokMessage(authCode: string) {
     this.showUpdating();
     const tokenResponse: TiktokAccessTokenResponse = await this.dataSourceService.getTiktokAccessToken(authCode);
     Log.debug('handleTiktokMessage', tokenResponse);
@@ -984,7 +960,7 @@ export default class DataSourceScreen extends Vue {
   }
 
   @AtomicAction()
-  private async handleSubmitJob() {
+  protected async handleSubmitJob() {
     try {
       const job: Job = this.jobFormRenderer.createJob();
       Log.debug('Submit Job', job);
@@ -1003,7 +979,7 @@ export default class DataSourceScreen extends Vue {
   }
 
   @AtomicAction()
-  private async submitJob(job: Job) {
+  protected async submitJob(job: Job) {
     const clonedJob = cloneDeep(job);
     clonedJob.scheduleTime = TimeScheduler.toSchedulerV2(job.scheduleTime!);
     await JobModule.create(clonedJob);
@@ -1015,7 +991,7 @@ export default class DataSourceScreen extends Vue {
     });
   }
 
-  private async handleKeywordChange(newKeyword: string) {
+  protected async handleKeywordChange(newKeyword: string) {
     try {
       this.searchValue = newKeyword;
       this.checkboxController.reset();
@@ -1030,7 +1006,7 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private async handleSortChange(column: HeaderData) {
+  protected async handleSortChange(column: HeaderData) {
     try {
       Log.debug('handleSortChange::', this.sortName, this.sortMode);
       this.updateSortMode(column);
@@ -1046,13 +1022,13 @@ export default class DataSourceScreen extends Vue {
     }
   }
 
-  private updateSortColumn(column: HeaderData) {
+  protected updateSortColumn(column: HeaderData) {
     const { key } = column;
     const field = StringUtils.toSnakeCase(key);
     this.sortName = field;
   }
 
-  private updateSortMode(column: HeaderData) {
+  protected updateSortMode(column: HeaderData) {
     const { key } = column;
     const field = StringUtils.toSnakeCase(key);
     if (this.sortName === field) {

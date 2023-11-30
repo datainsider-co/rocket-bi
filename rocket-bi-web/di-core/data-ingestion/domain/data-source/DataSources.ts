@@ -17,5 +17,7 @@ export enum DataSources {
   FacebookAds = 'facebook_ads_source',
   TiktokAds = 'tik_tok_ads_source',
   Palexy = 'palexy_source',
-  GoogleSearchConsole = 'google_search_console_source'
+  GoogleSearchConsole = 'google_search_console_source',
+  Hubspot = 'hubspot_source',
+  Mixpanel = 'mixpanel_source'
 }

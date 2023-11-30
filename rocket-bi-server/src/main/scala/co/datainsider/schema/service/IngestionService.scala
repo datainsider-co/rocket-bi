@@ -11,7 +11,6 @@ import co.datainsider.schema.domain.responses.IngestResponse
 import co.datainsider.schema.domain.{SparkWriteMode, TableSchema}
 import co.datainsider.schema.misc.ColumnDetector
 import co.datainsider.schema.misc.parser.{ClickHouseDataParser, DataParser}
-import co.datainsider.schema.repository.DataRepository
 import com.twitter.inject.Logging
 import com.twitter.util.Future
 import datainsider.client.exception.DbNotFoundError
@@ -23,6 +22,7 @@ import javax.inject.Inject
   * @since 7/21/20
   */
 trait IngestionService {
+  @deprecated("unsupported method use ingest with records instead")
   def ingest(request: IngestRequest): Future[IngestResponse]
 
   def ensureSchema(request: EnsureSparkSchemaRequest): Future[Boolean]
@@ -32,16 +32,6 @@ trait IngestionService {
   def ingest(dbName: String, tblName: String, records: Seq[Record]): Future[IngestResponse]
 
   def clearTable(request: ClearTableRequest): Future[Boolean]
-
-  /*
-   * Get Total Row of table
-   */
-  def getTotalRow(orgId: Long, dbName: String, tblName: String): Future[Long]
-
-  /**
-    * Check table is empty or has data
-    */
-  def isEmpty(orgId: Long, dbName: String, tblName: String): Future[Boolean]
 }
 
 case class IngestionServiceImpl(
@@ -51,15 +41,6 @@ case class IngestionServiceImpl(
     batchSize: Int = 1000
 ) extends IngestionService
     with Logging {
-
-  private def getDataRepository(orgId: Long): Future[DataRepository] = {
-    connectionService
-      .getTunnelConnection(orgId)
-      .map(source => {
-        val dataSource: Engine[Connection] = engineResolver.resolve(source.getClass).asInstanceOf[Engine[Connection]]
-        dataSource.getDataRepository(source)
-      })
-  }
 
   override def ingest(request: IngestRequest): Future[IngestResponse] = {
     for {
@@ -125,27 +106,15 @@ case class IngestionServiceImpl(
 
   override def clearTable(request: ClearTableRequest): Future[Boolean] = {
     for {
-      dataRepository <- getDataRepository(request.organizationId)
       isExisted <- schemaService.isTableExists(request.organizationId, request.getDatabaseName(), request.tblName)
+      connection <- connectionService.getTunnelConnection(request.organizationId)
+      engine = engineResolver.resolve(connection.getClass).asInstanceOf[Engine[Connection]]
       result <- isExisted match {
-        case true  => dataRepository.clearTable(request.getDatabaseName(), request.tblName)
+        case true  => engine.getDDLExecutor(connection).truncate(request.getDatabaseName(), request.tblName)
         case false => Future.True
       }
     } yield result
   }
-
-  override def getTotalRow(orgId: Long, dbName: String, tblName: String): Future[Long] = {
-    for {
-      dataRepository <- getDataRepository(orgId)
-      totalRow <- dataRepository.getTotalRow(dbName, tblName)
-    } yield totalRow
-  }
-
-  /**
-    * Check table is empty or has data
-    */
-  override def isEmpty(orgId: Long, dbName: String, tblName: String): Future[Boolean] =
-    getTotalRow(orgId, dbName, tblName).map(totalRow => totalRow == 0)
 
   override def ensureSchema(request: EnsureSparkSchemaRequest): Future[Boolean] = {
     for {
@@ -197,13 +166,6 @@ case class MockIngestionService @Inject() () extends IngestionService {
     )
     Future.value(response)
   }
-
-  override def getTotalRow(orgId: Long, dbName: String, tblName: String): Future[Long] = Future.value(1)
-
-  /**
-    * Check table is empty or has data
-    */
-  override def isEmpty(orgId: Long, dbName: String, tblName: String): Future[Boolean] = Future.False
 
   override def ensureSchema(request: EnsureSparkSchemaRequest): Future[Boolean] = Future.True
 }

@@ -30,6 +30,8 @@ import { GA4Metric } from '@core/data-ingestion/domain/job/ga4/GA4Mertric';
 import { Ga4Dimension } from '@core/data-ingestion/domain/job/ga4/Ga4Dimension';
 import { GA4SourceInfo } from '@core/data-ingestion/domain/data-source/GA4SourceInfo';
 import { DropdownData } from '@/shared/components/common/di-dropdown';
+import { DataSourceResponse } from '@core/data-ingestion/domain/response/DataSourceResponse';
+import { TokenRequest, TokenResponse } from '@core/data-ingestion';
 
 enum GaDateMode {
   Today = 'Today',
@@ -38,25 +40,25 @@ enum GaDateMode {
 }
 
 export class GA4JobFormRender implements JobFormRender {
-  private gaJob: GA4Job;
-  private propertyStatus: Status = Status.Loaded;
-  private dimensionMetricStatus: Status = Status.Loaded;
-  private accountSummaries: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary[] = [];
-  private selectedAccountSummarize: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary | null = null;
-  private account = '';
-  private property = '';
-  private gaEndDateMode = GaDateMode.Today;
+  protected gaJob: GA4Job;
+  protected propertyStatus: Status = Status.Loaded;
+  protected dimensionMetricStatus: Status = Status.Loaded;
+  protected accountSummaries: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary[] = [];
+  protected selectedAccountSummarize: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary | null = null;
+  protected account = '';
+  protected property = '';
+  protected gaEndDateMode = GaDateMode.Today;
 
-  private isCreateDestDb = false;
+  protected isCreateDestDb = false;
 
-  private suggestedMetrics: GA4Metric[] = [];
+  protected suggestedMetrics: GA4Metric[] = [];
 
-  private suggestedDimensions: Ga4Dimension[] = [];
+  protected suggestedDimensions: Ga4Dimension[] = [];
 
-  private source: GA4SourceInfo | null = null;
+  protected source: GA4SourceInfo | null = null;
 
   @Inject
-  private schemaService!: SchemaService;
+  protected schemaService!: SchemaService;
 
   constructor(gaJob: GA4Job) {
     Log.debug('GA4JobFormRender::constructor::googleCredentialJob::', gaJob);
@@ -65,7 +67,7 @@ export class GA4JobFormRender implements JobFormRender {
     this.handleLoadSuggestData();
   }
 
-  private initEndDateMode() {
+  protected initEndDateMode() {
     switch (this.endDate as GaDate) {
       case GaDate.Today: {
         this.gaEndDateMode = GaDateMode.Today;
@@ -87,17 +89,7 @@ export class GA4JobFormRender implements JobFormRender {
     return this.gaJob;
   }
 
-  private async loadSource(refreshToken: string, accessToken: string) {
-    const source = new GA4SourceInfo(-1, '-1', 'ga4 source', refreshToken, accessToken, 0);
-    if (this.isCreateMode && !this.source) {
-      this.source = (await DataSourceModule.createDataSource(source)) as GA4SourceInfo;
-      this.gaJob.setOrgId(this.source);
-    } else {
-      //handle get source here
-    }
-  }
-
-  private get endDateOptions() {
+  protected get endDateOptions() {
     return [
       {
         label: 'Today',
@@ -114,52 +106,56 @@ export class GA4JobFormRender implements JobFormRender {
     ];
   }
 
-  private get isCreateMode() {
+  protected get isCreateMode() {
     return this.gaJob.jobId === Job.DEFAULT_ID;
   }
 
-  private get displayName() {
+  protected get displayName() {
     return this.gaJob.displayName;
   }
 
-  private set displayName(value: string) {
+  protected set displayName(value: string) {
     this.gaJob.displayName = value;
   }
 
-  private get destDatabase() {
+  protected get destDatabase() {
     return this.gaJob.destDatabaseName;
   }
 
-  private set destDatabase(value: string) {
+  protected set destDatabase(value: string) {
     this.gaJob.destDatabaseName = value;
   }
 
-  private get destTable() {
+  protected get destTable() {
     return this.gaJob.destTableName;
   }
 
-  private set destTable(value: string) {
+  protected set destTable(value: string) {
     this.gaJob.destTableName = value;
   }
 
-  private get isLoadedProperty() {
+  protected get isLoadedProperty() {
     return this.propertyStatus === Status.Loaded;
   }
-  private get isPropertyLoading() {
+  protected get isPropertyLoading() {
     return this.propertyStatus === Status.Loading;
   }
 
-  private get isDimensionMetricLoading() {
+  protected get isDimensionMetricLoading() {
     return this.dimensionMetricStatus === Status.Loading;
   }
 
-  private async handleLoadSuggestData() {
+  protected async handleLoadSuggestData() {
     try {
       this.showPropertyLoading();
       this.showDimensionMetricLoading();
-      await this.loadRefreshToken();
-      // await GoogleUtils.loadGA4Client(this.googleConfig.apiKey, this.gaJob.accessToken);
-      // await Promise.all([this.loadSource(this.gaJob.refreshToken, this.gaJob.accessToken), this.loadAccountSummarizes()]);
+      const response: DataSourceResponse | undefined = DataSourceModule.dataSources.find(source => source.dataSource.id === this.gaJob.sourceId);
+      if (response) {
+        const gaSource = response.dataSource as GA4SourceInfo;
+        const tokenResponse: TokenResponse = await DataSourceModule.refreshGoogleToken(new TokenRequest(gaSource.accessToken, gaSource.refreshToken));
+        await GoogleUtils.loadGA4Client(tokenResponse.accessToken);
+        await this.loadAccountSummarizes();
+      }
       await this.loadAllMetricsAndDimensions(this.property);
       this.hidePropertyLoading();
       this.showDimensionMetricLoading();
@@ -173,7 +169,7 @@ export class GA4JobFormRender implements JobFormRender {
     }
   }
 
-  private async loadAccountSummarizes() {
+  protected async loadAccountSummarizes() {
     const accountSummarizeResponse = await GoogleUtils.getGA4AccountSummarizes();
     Log.debug('GA4JobFormRender::loadAccountSummarizes::accountSummarizes::', accountSummarizeResponse.result.accountSummaries);
     if (accountSummarizeResponse?.result?.accountSummaries) {
@@ -184,7 +180,7 @@ export class GA4JobFormRender implements JobFormRender {
     }
   }
 
-  private updateAccountSummarize(accountSummary: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary) {
+  protected updateAccountSummarize(accountSummary: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary) {
     this.selectedAccountSummarize = accountSummary;
     if (ListUtils.isNotEmpty(accountSummary.propertySummaries)) {
       Log.debug('GA4JobFormRender::updateAccountSummarize::updatePropertySummarize');
@@ -192,16 +188,16 @@ export class GA4JobFormRender implements JobFormRender {
     }
   }
 
-  private updatePropertySummarize(propertySummary: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaPropertySummary) {
+  protected updatePropertySummarize(propertySummary: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaPropertySummary) {
     this.updateProperty(propertySummary!.property!);
     Log.debug('GA4JobFormRender::updatePropertySummarize::property::', this.property);
   }
 
-  private getPropertyId(property: string): string {
+  protected getPropertyId(property: string): string {
     return property.split('/')[1]!;
   }
 
-  private async loadAllMetricsAndDimensions(property: string) {
+  protected async loadAllMetricsAndDimensions(property: string) {
     this.showDimensionMetricLoading();
     const dimensionsAndMetrics: gapi.client.Response<gapi.client.analyticsdata.Metadata> = await GoogleUtils.getDimensionsAndMetrics(property);
     if (dimensionsAndMetrics?.result) {
@@ -212,19 +208,19 @@ export class GA4JobFormRender implements JobFormRender {
     this.hideDimensionMetricLoading();
   }
 
-  private updateSuggestedDimensions(dimensionMetadata: gapi.client.analyticsdata.DimensionMetadata[]) {
+  protected updateSuggestedDimensions(dimensionMetadata: gapi.client.analyticsdata.DimensionMetadata[]) {
     const dimensionNames: Set<string> = new Set(this.dimensions.map(item => item.name));
     this.suggestedDimensions = dimensionMetadata.filter(item => !dimensionNames.has(item.apiName!)).map(dimension => new Ga4Dimension(dimension.apiName!));
   }
 
-  private updateSuggestedMetrics(metricMetadata: gapi.client.analyticsdata.MetricMetadata[]) {
+  protected updateSuggestedMetrics(metricMetadata: gapi.client.analyticsdata.MetricMetadata[]) {
     const metricNames: Set<string> = new Set(this.metrics.map(item => item.name));
     this.suggestedMetrics = metricMetadata
       .filter(item => !metricNames.has(item.apiName!))
       .map(metric => new GA4Metric(metric.apiName!, this.getMetricType(metric.type!)));
   }
 
-  private getMetricType(metricMetadataType: string): string {
+  protected getMetricType(metricMetadataType: string): string {
     switch (metricMetadataType) {
       case 'TYPE_INTEGER':
         return 'int64';
@@ -233,7 +229,7 @@ export class GA4JobFormRender implements JobFormRender {
     }
   }
 
-  private async handleLoadCompatibleDimensionsAndMetrics(property: string, dimensions: Ga4Dimension[], metrics: GA4Metric[]) {
+  protected async handleLoadCompatibleDimensionsAndMetrics(property: string, dimensions: Ga4Dimension[], metrics: GA4Metric[]) {
     try {
       this.showDimensionMetricLoading();
       const response = await GoogleUtils.compatibleDimensionsAndMetrics(property, dimensions, metrics);
@@ -250,38 +246,33 @@ export class GA4JobFormRender implements JobFormRender {
     }
   }
 
-  private getCompatibleMetrics(metricCompatibilities: gapi.client.analyticsdata.MetricCompatibility[]): gapi.client.analyticsdata.MetricMetadata[] {
+  protected getCompatibleMetrics(metricCompatibilities: gapi.client.analyticsdata.MetricCompatibility[]): gapi.client.analyticsdata.MetricMetadata[] {
     return metricCompatibilities.filter(metric => metric.compatibility === 'COMPATIBLE').map(data => data.metricMetadata!);
   }
 
-  private getCompatibleDimensions(dimensionCompatibilities: gapi.client.analyticsdata.DimensionCompatibility[]): gapi.client.analyticsdata.DimensionMetadata[] {
+  protected getCompatibleDimensions(
+    dimensionCompatibilities: gapi.client.analyticsdata.DimensionCompatibility[]
+  ): gapi.client.analyticsdata.DimensionMetadata[] {
     return dimensionCompatibilities.filter(dimension => dimension.compatibility === 'COMPATIBLE').map(dimension => dimension.dimensionMetadata!);
   }
 
-  private async loadRefreshToken() {
-    if (this.isCreateMode) {
-      // const refreshToken = await DataSourceModule.getRefreshToken(this.gaJob.authorizationCode);
-      // this.gaJob.refreshToken = refreshToken;
-    }
-  }
-
-  private showPropertyLoading() {
+  protected showPropertyLoading() {
     this.propertyStatus = Status.Loading;
   }
 
-  private showDimensionMetricLoading() {
+  protected showDimensionMetricLoading() {
     this.dimensionMetricStatus = Status.Loading;
   }
 
-  private hidePropertyLoading() {
+  protected hidePropertyLoading() {
     this.propertyStatus = Status.Loaded;
   }
 
-  private hideDimensionMetricLoading() {
+  protected hideDimensionMetricLoading() {
     this.dimensionMetricStatus = Status.Loaded;
   }
 
-  private validResponse(response: any) {
+  protected validResponse(response: any) {
     if (response && response.result && !response.result.error) {
       return true;
     } else {
@@ -289,11 +280,11 @@ export class GA4JobFormRender implements JobFormRender {
     }
   }
 
-  private async handleSelectAccountSummarize(item: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary) {
+  protected async handleSelectAccountSummarize(item: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaAccountSummary) {
     this.updateAccountSummarize(item);
   }
 
-  private async handlePropertySelected(item: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaPropertySummary) {
+  protected async handlePropertySelected(item: gapi.client.analyticsadmin.GoogleAnalyticsAdminV1betaPropertySummary) {
     try {
       this.updateProperty(item.property!);
     } catch (e) {
@@ -302,13 +293,13 @@ export class GA4JobFormRender implements JobFormRender {
     }
   }
 
-  private updateProperty(property: string) {
+  protected updateProperty(property: string) {
     this.property = property!;
     this.propertyId = this.getPropertyId(this.property);
     this.loadAllMetricsAndDimensions(property);
   }
 
-  private handleSelectEndDateOptions(dateMode: GaDateMode) {
+  protected handleSelectEndDateOptions(dateMode: GaDateMode) {
     this.gaEndDateMode = dateMode;
     switch (dateMode) {
       case GaDateMode.Date: {
@@ -329,61 +320,61 @@ export class GA4JobFormRender implements JobFormRender {
   @Track(TrackEvents.SelectGAView, {
     view_name: (_: GA4JobFormRender, args: any) => args[0].name
   })
-  private handleGrantSelected(item: DropdownData) {
+  protected handleGrantSelected(item: DropdownData) {
     Log.debug('grant slected::', item);
     this.gaJob.propertyId = item.id;
   }
 
-  private get syncIntervalInMn(): number {
+  protected get syncIntervalInMn(): number {
     return this.gaJob.syncIntervalInMn;
   }
 
-  private set syncIntervalInMn(value: number) {
+  protected set syncIntervalInMn(value: number) {
     this.gaJob.syncIntervalInMn = value;
   }
 
-  private get startDate(): GaDate | Date | string {
+  protected get startDate(): GaDate | Date | string {
     return this.gaJob.dateRanges[0].startDate;
   }
 
-  private set startDate(value: GaDate | Date | string) {
+  protected set startDate(value: GaDate | Date | string) {
     Log.debug('startDAteChange::', value);
     this.gaJob.dateRanges[0].startDate = value;
   }
 
-  private get endDate(): GaDate | Date | string {
+  protected get endDate(): GaDate | Date | string {
     return this.gaJob.dateRanges[0].endDate;
   }
 
-  private set endDate(value: GaDate | Date | string) {
+  protected set endDate(value: GaDate | Date | string) {
     this.gaJob.dateRanges[0].endDate = value;
   }
 
-  private get propertyId(): string {
+  protected get propertyId(): string {
     return this.gaJob.propertyId;
   }
 
-  private set propertyId(value: string) {
+  protected set propertyId(value: string) {
     this.gaJob.propertyId = value;
   }
 
-  private get metrics(): GA4Metric[] {
+  protected get metrics(): GA4Metric[] {
     return this.gaJob.metrics;
   }
 
-  private set metrics(value: GA4Metric[]) {
+  protected set metrics(value: GA4Metric[]) {
     this.gaJob.metrics = value;
   }
 
-  private get dimensions(): Ga4Dimension[] {
+  protected get dimensions(): Ga4Dimension[] {
     return this.gaJob.dimensions;
   }
 
-  private set dimensions(value: Ga4Dimension[]) {
+  protected set dimensions(value: Ga4Dimension[]) {
     this.gaJob.dimensions = value;
   }
 
-  // private sortTags(): { name: string }[] {
+  // protected sortTags(): { name: string }[] {
   //   return this.gaJob.sorts.map(sort => {
   //     return { name: sort };
   //   });
@@ -399,19 +390,19 @@ export class GA4JobFormRender implements JobFormRender {
     return new GA4Metric(name, dataType);
   }
 
-  private get suggestSorts(): Ga4Dimension[] {
+  protected get suggestSorts(): Ga4Dimension[] {
     const metricsConvertToDimensions: Ga4Dimension[] = this.metrics.map(data => {
       return new Ga4Dimension(data.name);
     });
     return this.dimensions.concat(metricsConvertToDimensions);
   }
 
-  private get timeScheduler(): TimeScheduler {
+  protected get timeScheduler(): TimeScheduler {
     Log.debug('getSchedulerTime::', this.gaJob.scheduleTime);
     return this.gaJob.scheduleTime;
   }
 
-  private set timeScheduler(value: TimeScheduler) {
+  protected set timeScheduler(value: TimeScheduler) {
     this.gaJob.scheduleTime = value;
   }
 
@@ -421,7 +412,7 @@ export class GA4JobFormRender implements JobFormRender {
     };
   }
 
-  private handleDestinationDbChanged(name: string, isCreateNew: boolean) {
+  protected handleDestinationDbChanged(name: string, isCreateNew: boolean) {
     const dbName = isCreateNew ? StringUtils.normalizeDatabaseName(name) : name;
     this.destDatabase = dbName;
     this.isCreateDestDb = isCreateNew;

@@ -6,7 +6,10 @@ import co.datainsider.jobscheduler.domain.job.JobStatus.JobStatus
 import co.datainsider.jobscheduler.domain.job.JobType.JobType
 import co.datainsider.jobscheduler.domain.job.SyncMode.SyncMode
 import co.datainsider.jobscheduler.util.JsonUtils
+import co.datainsider.jobworker.domain.{HubspotObjectType, HubspotObjectTypeRef}
+import co.datainsider.jobworker.domain.HubspotObjectType.HubspotObjectType
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
 import com.twitter.finatra.validation.constraints.NotEmpty
 import datainsider.client.domain.scheduler.{NoneSchedule, ScheduleMinutely, ScheduleTime}
 
@@ -14,7 +17,7 @@ import java.sql.ResultSet
 
 /**
   * Created by phg on 7/4/21.
- **/
+  */
 case class HubspotJob(
     orgId: Long,
     jobId: JobId = 0,
@@ -23,7 +26,8 @@ case class HubspotJob(
     creatorId: String = "",
     lastModified: Long = System.currentTimeMillis(),
     syncMode: SyncMode = SyncMode.IncrementalSync,
-    subType: HubspotSubJobType.Type = HubspotSubJobType.Contact,
+    @JsonScalaEnumeration(classOf[HubspotObjectTypeRef])
+    subType: HubspotObjectType = HubspotObjectType.Contact,
     sourceId: SourceId,
     lastSuccessfulSync: Long,
     syncIntervalInMn: Int,
@@ -42,8 +46,9 @@ case class HubspotJob(
     */
   override def jobData: Map[String, Any] =
     Map(
-      "schedule_time" -> JsonUtils.toJson(scheduleTime),
-      "destinations" -> JsonUtils.toJson(destinations)
+      "schedule_time" -> JsonUtils.toJson(scheduleTime, false),
+      "destinations" -> JsonUtils.toJson(destinations, false),
+      "sub_type" -> subType.toString
     )
 
   override def customCopy(lastSyncStatus: JobStatus, currentSyncStatus: JobStatus, lastSuccessfulSync: Long): Job = {
@@ -102,7 +107,7 @@ object HubspotJob {
       creatorId = rs.getString("creator_id"),
       lastModified = rs.getLong("last_modified"),
       syncMode = SyncMode.withName(rs.getString("sync_mode")),
-      subType = HubspotSubJobType.withName(jobData.get("sub_type").asText(HubspotSubJobType.Unknown.toString)),
+      subType = HubspotObjectType.withName(jobData.get("sub_type").asText(HubspotObjectType.Unknown.toString)),
       sourceId = rs.getLong("source_id"),
       lastSuccessfulSync = rs.getLong("last_successful_sync"),
       syncIntervalInMn = rs.getInt("sync_interval_in_mn"),
@@ -114,13 +119,4 @@ object HubspotJob {
       destinations = dataDestinations
     )
   }
-}
-
-object HubspotSubJobType extends Enumeration {
-  type Type = Value
-  val Contact: Type = Value("contact")
-  val Engagement: Type = Value("engagement")
-  val Company: Type = Value("company")
-  val Deal: Type = Value("deal")
-  val Unknown: Type = Value("unknown")
 }

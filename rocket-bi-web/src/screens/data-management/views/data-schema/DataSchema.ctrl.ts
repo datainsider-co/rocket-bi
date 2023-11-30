@@ -48,6 +48,7 @@ import ManageRLSPolicy from '@/screens/data-management/views/data-schema/row-lev
 import { StringUtils } from '@/utils/StringUtils';
 import CalculatedFieldManagement from '@/screens/data-management/views/data-schema/CalculatedFieldManagement.vue';
 import DiSearchInput from '@/shared/components/DiSearchInput.vue';
+import { AtomicAction } from '@core/common/misc';
 
 enum SwitchMode {
   SelectDatabase,
@@ -77,50 +78,50 @@ enum SwitchMode {
   }
 })
 export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPanelMixin) {
-  private error = '';
-  private model: DataSchemaModel | null = null;
-  private tableData: ChartInfo | null = null;
-  private loadingTableData = false;
-  private viewMode: number = ViewMode.ViewDatabase;
-  private listIgnoreClassForContextMenu = ['btn-icon-text'];
-  private renameModalTitle = 'Rename';
-  private columnKeyword = '';
+  protected error = '';
+  protected model: DataSchemaModel | null = null;
+  protected tableData: ChartInfo | null = null;
+  protected loadingTableData = false;
+  protected viewMode: number = ViewMode.ViewDatabase;
+  protected listIgnoreClassForContextMenu = ['btn-icon-text'];
+  protected renameModalTitle = 'Rename';
+  protected columnKeyword = '';
 
-  private fieldManagementStatus: Status = Status.Loaded;
+  protected fieldManagementStatus: Status = Status.Loaded;
 
-  private refreshTable?: number | undefined;
+  protected refreshTable?: number | undefined;
 
-  private isRLSLoading = false;
+  protected isRLSLoading = false;
   @Ref()
-  private readonly contextMenu!: ContextMenu;
-
-  @Ref()
-  private readonly renameModal!: DiRenameModal;
+  protected readonly contextMenu!: ContextMenu;
 
   @Ref()
-  private readonly fieldManagement!: FieldManagement;
+  protected readonly renameModal!: DiRenameModal;
 
   @Ref()
-  private readonly databaseTree!: DatabaseTreeViewCtrl;
+  protected readonly fieldManagement!: FieldManagement;
 
   @Ref()
-  private manageRLSPolicy?: ManageRLSPolicy;
+  protected readonly databaseTree!: DatabaseTreeViewCtrl;
 
   @Ref()
-  private measureFieldManagement?: MeasureFieldManagement;
+  protected manageRLSPolicy?: ManageRLSPolicy;
 
   @Ref()
-  private calculatedFieldManagement?: CalculatedFieldManagement;
+  protected measureFieldManagement?: MeasureFieldManagement;
 
   @Ref()
-  private readonly searchInput!: DiSearchInput;
+  protected calculatedFieldManagement?: CalculatedFieldManagement;
+
+  @Ref()
+  protected readonly searchInput!: DiSearchInput;
 
   // key is database name, value is loading status
-  private get dbLoadingMap(): { [_: string]: boolean } {
+  protected get dbLoadingMap(): { [_: string]: boolean } {
     return DatabaseSchemaModule.databaseLoadingMap;
   }
 
-  private get panelSize() {
+  protected get panelSize() {
     return this.getPanelSizeHorizontal();
   }
 
@@ -128,32 +129,32 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     this.init();
   }
 
-  private async init() {
+  protected async init() {
     if (this.loadShortDatabaseInfos) {
       await this.loadShortDatabaseInfos();
     }
     await this.initSelectDatabase();
   }
 
-  private get isViewSchema() {
+  protected get isViewSchema() {
     return this.viewMode === ViewMode.ViewSchema;
   }
 
   /**
    * Tra ve database name, khong co database name tra ve empty string
    */
-  private get databaseName(): string {
+  protected get databaseName(): string {
     return (this.$route.query?.database || '') as string;
   }
 
   /**
    * Tra ve table name, khong co table name tra ve empty string
    */
-  private get tableName(): string {
+  protected get tableName(): string {
     return (this.$route.query?.table || '') as string;
   }
 
-  private clearSearch() {
+  protected clearSearch() {
     this.columnKeyword = '';
   }
 
@@ -164,7 +165,7 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     return setting;
   }
 
-  private showNotFoundError(databaseName: string, tblName: string): void {
+  protected showNotFoundError(databaseName: string, tblName: string): void {
     if (databaseName && tblName) {
       this.error = `table ${databaseName}/${tblName} NOT FOUND!`;
     } else if (databaseName) {
@@ -174,7 +175,7 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     }
   }
 
-  private async initSelectDatabase(): Promise<void> {
+  protected async initSelectDatabase(): Promise<void> {
     const firstDatabase: DatabaseInfo | undefined = ListUtils.getHead(this.databaseSchemas ?? []);
     const dbName: string = this.databaseName || firstDatabase?.name || '';
     const tblName: string = this.tableName || '';
@@ -188,33 +189,33 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     }
   }
 
-  private isSelectedTable(database: DatabaseInfo, table: TableSchema) {
+  protected isSelectedTable(database: DatabaseInfo, table: TableSchema) {
     return this.model?.database === database && this.model?.table === table;
   }
 
-  private updateDatabaseSchema(dbSchema: DatabaseInfo) {
+  protected updateDatabaseSchema(dbSchema: DatabaseInfo) {
     this.model = { database: dbSchema };
   }
 
-  private handleSubmitTableName(database: DatabaseInfo, displayName: string) {
+  protected handleSubmitTableName(database: DatabaseInfo, displayName: string) {
     const tempTable = TableSchema.empty();
     tempTable.displayName = displayName;
     tempTable.dbName = database.name;
     this.model = { database: database, table: tempTable };
     this.$nextTick(() => {
-      this.changeViewMode(ViewMode.CreateTable);
+      this.switchViewMode(ViewMode.CreateTable);
     });
   }
 
   /**
    * Kiem tra hien tai data schema dang trong mode editing hay khong, neu co se hien confirm khi route change
    */
-  private isEditingMode(): boolean {
+  protected isEditingMode(): boolean {
     const isEditingSchema: boolean = (this.viewMode === ViewMode.EditSchema && this.fieldManagement.isEditing()) ?? false;
     return isEditingSchema;
   }
 
-  private async ensureViewMode(): Promise<void> {
+  protected async ensureViewMode(): Promise<void> {
     if (this.isEditingMode()) {
       const { isConfirmed } = await this.showEnsureModal(
         'It looks like you have been editing something',
@@ -229,7 +230,7 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     return Promise.resolve();
   }
 
-  private getSwitchMode(dbName?: string, tblName?: string): SwitchMode {
+  protected getSwitchMode(dbName?: string, tblName?: string): SwitchMode {
     const currentDbName: string = this.model?.database?.name || '';
     const currentTblName: string = this.model?.table?.name || '';
     if (dbName === currentDbName && tblName === currentTblName) {
@@ -250,7 +251,7 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     return SwitchMode.SelectEmpty;
   }
 
-  private async switchPage(
+  protected async switchPage(
     database?: DatabaseInfo,
     table?: TableSchema,
     onSelectComplete?: (database: DatabaseInfo, table?: TableSchema) => void
@@ -307,7 +308,7 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     }
   }
 
-  private async selectTable(database?: DatabaseInfo, table?: TableSchema, onSelectComplete?: (database: DatabaseInfo, table?: TableSchema) => void) {
+  protected async selectTable(database?: DatabaseInfo, table?: TableSchema, onSelectComplete?: (database: DatabaseInfo, table?: TableSchema) => void) {
     try {
       await this.ensureViewMode();
       this.clearSearch();
@@ -317,7 +318,7 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     }
   }
 
-  private async queryTableData(table: TableSchema) {
+  protected async queryTableData(table: TableSchema) {
     try {
       this.tableData = null;
       this.error = '';
@@ -342,44 +343,14 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     return new ChartInfo(commonSetting, query);
   }
 
-  private changeViewMode(modeId: number) {
+  protected switchViewMode(newMode: ViewMode): void {
     this.clearSearch();
-    this.viewMode = modeId;
-    this.trackViewMode(modeId);
+    this.viewMode = newMode;
     this.$nextTick(() => {
       if (this.searchInput) {
         this.searchInput.focus();
       }
     });
-  }
-
-  private trackViewMode(viewMode: number) {
-    switch (viewMode as ViewMode) {
-      case ViewMode.EditSchema:
-        TrackingUtils.track(TrackEvents.DataSchemaEditSchema, {
-          database_name: this.model?.database.name,
-          table_name: this.model?.table?.name
-        });
-        break;
-      case ViewMode.CreateTable:
-        TrackingUtils.track(TrackEvents.DataSchemaCreateSchema, {
-          database_name: this.model?.database.name,
-          table_name: this.model?.table?.displayName
-        });
-        break;
-      case ViewMode.ViewData:
-        TrackingUtils.track(TrackEvents.DataSchemaViewData, {
-          database_name: this.model?.database.name,
-          table_name: this.model?.table?.name
-        });
-        break;
-      case ViewMode.ViewSchema:
-        TrackingUtils.track(TrackEvents.DataSchemaViewData, {
-          database_name: this.model?.database.name,
-          table_name: this.model?.table?.name
-        });
-        break;
-    }
   }
 
   protected async onDropDatabase(dbName: string): Promise<void> {
@@ -418,7 +389,7 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
   }
 
   @Watch('$route.query')
-  private watchRouteQuery() {
+  protected watchRouteQuery() {
     Log.debug('Route query change', this.$route.query);
   }
 
@@ -428,13 +399,13 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     }
   }
 
-  private showActionMenu(event: MouseEvent) {
+  protected showActionMenu(event: MouseEvent) {
     const actions = this.getMenuAction(this.model!);
     const buttonEvent = HtmlElementRenderUtils.fixMenuOverlap(event, 'schema-action', 80);
     this.contextMenu.show(buttonEvent, actions);
   }
 
-  private getMenuAction(model: DataSchemaModel): ContextMenuItem[] {
+  protected getMenuAction(model: DataSchemaModel): ContextMenuItem[] {
     const actions = [
       {
         text: `Query table`,
@@ -512,13 +483,13 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     return ListUtils.remove(actions, action => action.hidden ?? false);
   }
 
-  private get isShowUpdateTableByQuery() {
+  protected get isShowUpdateTableByQuery() {
     return (
       this.model?.database && this.model?.table && (this.model.table.tableType === TableType.View || this.model.table.tableType === TableType.Materialized)
     );
   }
 
-  private get editingSchema(): boolean {
+  protected get editingSchema(): boolean {
     return this.viewMode === ViewMode.EditSchema;
   }
 
@@ -526,48 +497,45 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     return this.viewMode === ViewMode.EditRLS;
   }
 
-  private get isCalculatedFieldEditMode(): boolean {
+  protected get isCalculatedFieldEditMode(): boolean {
     return this.viewMode === ViewMode.EditCalculatedField;
   }
 
-  private get isMeasureView(): boolean {
+  protected get isMeasureView(): boolean {
     return this.viewMode === ViewMode.ViewMeasure;
   }
 
-  private get isRLSViewMode(): boolean {
+  protected get isRLSViewMode(): boolean {
     return this.viewMode === ViewMode.ViewRLS;
   }
 
-  private get viewingSchema(): boolean {
+  protected get viewingSchema(): boolean {
     return this.viewMode === ViewMode.ViewSchema || this.viewMode === ViewMode.EditSchema;
   }
 
-  private get viewingMeasure(): boolean {
+  protected get viewingMeasure(): boolean {
     return this.viewMode === ViewMode.ViewMeasure;
   }
 
-  private get creatingSchema(): boolean {
+  protected get creatingSchema(): boolean {
     return this.viewMode === ViewMode.CreateTable && this.model?.table !== undefined;
   }
 
-  private get viewingDatabase(): boolean {
+  protected get viewingDatabase(): boolean {
     return this.viewMode === ViewMode.ViewDatabase && this.model?.database !== undefined;
   }
 
-  private get isMobile() {
+  protected get isMobile() {
     return ChartUtils.isMobile();
   }
 
-  @Track(TrackEvents.TableSubmitSchema, {
-    table_name: (_: DataSchema) => _.model?.table?.name,
-    database_name: (_: DataSchema) => _.model?.database?.name
-  })
-  private async handleSave(): Promise<void> {
+  @AtomicAction()
+  protected async handleSave(): Promise<void> {
     try {
       this.fieldManagementStatus = Status.Loading;
       const newTable: TableSchema | undefined = await this.fieldManagement.getEditedTable();
       if (newTable && this.model?.database) {
-        this.changeViewMode(ViewMode.ViewSchema);
+        this.switchViewMode(ViewMode.ViewSchema);
         await DatabaseSchemaModule.updateTableSchema(newTable);
         const database: DatabaseInfo = await DatabaseSchemaModule.reload(this.model.database.name);
         const newTableSchema: TableSchema | undefined = await DatabaseSchemaModule.loadTableSchema({ dbName: newTable.dbName, tableName: newTable.name });
@@ -597,7 +565,7 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     }
   }
 
-  private autoRefreshTable() {
+  protected autoRefreshTable() {
     ///Current not have interval
     if (!this.refreshTable) {
       this.refreshTable = setInterval(async () => {
@@ -607,7 +575,7 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     }
   }
 
-  private clearRefreshTable() {
+  protected clearRefreshTable() {
     if (this.refreshTable) {
       clearInterval(this.refreshTable);
       this.refreshTable = void 0;
@@ -615,7 +583,7 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
   }
 
   @Track(TrackEvents.DataSchemaCancel)
-  private async handleCancel() {
+  protected async handleCancel() {
     try {
       if (this.model?.table && this.fieldManagement.isEditing()) {
         const { isConfirmed } = await this.showEnsureModal(
@@ -625,18 +593,18 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
           'Cancel'
         );
         if (isConfirmed) {
-          this.changeViewMode(ViewMode.ViewSchema);
+          this.switchViewMode(ViewMode.ViewSchema);
           TrackingUtils.track(TrackEvents.DataSchemaSubmitCancel, {});
         }
       } else {
-        this.changeViewMode(ViewMode.ViewSchema);
+        this.switchViewMode(ViewMode.ViewSchema);
       }
     } catch (ex) {
       Log.error(ex);
     }
   }
 
-  private async showEnsureModal(title: string, html: string, confirmButtonText?: string, cancelButtonText?: string) {
+  protected async showEnsureModal(title: string, html: string, confirmButtonText?: string, cancelButtonText?: string) {
     //@ts-ignore
     return this.$alert.fire({
       icon: 'warning',
@@ -648,18 +616,18 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     });
   }
 
-  private get buttonInfos(): ButtonInfo[] {
+  protected get buttonInfos(): ButtonInfo[] {
     return [
       {
         displayName: this.isMobile ? 'Schema' : 'Table Schema',
         isActive: this.viewingSchema,
-        onClick: () => this.changeViewMode(ViewMode.ViewSchema)
+        onClick: () => this.switchViewMode(ViewMode.ViewSchema)
       },
       {
         displayName: this.isMobile ? 'Data' : 'Table Data',
         isActive: this.viewMode === ViewMode.ViewData,
         onClick: () => {
-          this.changeViewMode(ViewMode.ViewData);
+          this.switchViewMode(ViewMode.ViewData);
           this.queryTableData(this.model!.table!);
         }
       },
@@ -667,24 +635,24 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
         displayName: 'Measure Schema',
         isHidden: this.isMobile,
         isActive: this.viewMode === ViewMode.ViewMeasure,
-        onClick: () => this.changeViewMode(ViewMode.ViewMeasure)
+        onClick: () => this.switchViewMode(ViewMode.ViewMeasure)
       },
       {
         displayName: 'Calculated Field',
         isHidden: this.isMobile,
         isActive: this.viewMode === ViewMode.EditCalculatedField,
-        onClick: () => this.changeViewMode(ViewMode.EditCalculatedField)
+        onClick: () => this.switchViewMode(ViewMode.EditCalculatedField)
       },
       {
         displayName: 'RLS',
         isActive: this.viewMode === ViewMode.ViewRLS || this.viewMode === ViewMode.EditRLS,
-        onClick: () => this.changeViewMode(ViewMode.ViewRLS)
+        onClick: () => this.switchViewMode(ViewMode.ViewRLS)
       }
       // { displayName: 'Python', onClick: this.handleSelectPythonRunner }
     ];
   }
 
-  private get isReadonlyTable(): boolean {
+  protected get isReadonlyTable(): boolean {
     return this.model?.table?.tableType ? ChartUtils.isReadonlyTable(this.model?.table?.tableType) : true;
   }
 
@@ -699,29 +667,25 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     table_name: (_: DataSchema) => _.model?.table?.name,
     database_name: (_: DataSchema) => _.model?.table?.dbName
   })
-  private handleAddColumn() {
+  protected handleAddColumn() {
     this.fieldManagement.addColumn();
   }
 
-  private handleCreatedTable(table: TableSchema) {
-    const newTableExisted: boolean =
-      this.model?.database !== undefined && this.model.database.tables.find(tableToFind => tableToFind.name === table.name) !== undefined;
-    if (!newTableExisted) {
-      this.model?.database.tables.push(table);
-      this.selectTable(this.model!.database, table);
-    }
+  protected async handleCreatedTable(table: TableSchema): Promise<void> {
+    const database = await this.findSchema(table.dbName, table.name);
+    await this.selectTable(database.database, database.table);
   }
 
-  private get isProcessing(): boolean {
+  protected get isProcessing(): boolean {
     return this.model?.table?.tableStatus === TableStatus.Processing;
   }
 
-  private editMeasureField(column: Column) {
+  protected editMeasureField(column: Column) {
     // @ts-ignore
     this.databaseTree?.handleConfigColumn(this.model?.table!, column, this.databaseTree.measureFieldOptions[0]);
   }
 
-  private editCalculatedField(column: Column) {
+  protected editCalculatedField(column: Column) {
     // Log.debug('editCalculatedField', this.databaseTree.fieldOptions);
     // @ts-ignore
     this.databaseTree?.handleConfigColumn(this.model?.table!, column, this.databaseTree.getFieldOptions()[0]);
@@ -737,12 +701,12 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     this.databaseTree?.handleConfigColumn(this.model?.table!, column, this.databaseTree.fieldOptions[1]);
   }
 
-  private handleCancelRLSChanged() {
+  protected handleCancelRLSChanged() {
     this.manageRLSPolicy?.cancelRLS();
-    this.changeViewMode(ViewMode.ViewRLS);
+    this.switchViewMode(ViewMode.ViewRLS);
   }
 
-  private async handleSaveRLS() {
+  protected async handleSaveRLS() {
     try {
       this.isRLSLoading = false;
       await this.manageRLSPolicy?.handleSavePolicies();
@@ -753,15 +717,15 @@ export default class DataSchema extends Mixins(AbstractSchemaComponent, SplitPan
     }
   }
 
-  private handleAddRLS() {
+  protected handleAddRLS() {
     this.manageRLSPolicy?.addRLSPolicy();
   }
 
-  private addMeasureFunction() {
+  protected addMeasureFunction() {
     this.measureFieldManagement?.addMeasureField();
   }
 
-  private addCalculatedField() {
+  protected addCalculatedField() {
     this.calculatedFieldManagement?.addCalculatedField();
   }
 }

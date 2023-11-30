@@ -34,10 +34,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, PropSync, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, PropSync, Vue, Watch, Ref } from 'vue-property-decorator';
 import { InputType } from '@/shared/settings/common/InputSetting.vue';
 import { ListUtils } from '@/utils';
 import { Log } from '@core/utils';
+import { BFormInput } from 'bootstrap-vue';
 
 @Component
 export default class DiInput extends Vue {
@@ -66,6 +67,9 @@ export default class DiInput extends Vue {
   private readonly applyFormatNumber!: boolean;
 
   private isShowSuggestList = false;
+
+  @Ref()
+  private readonly input!: BFormInput;
 
   // if use format for number, input must be a text
   private get currentType(): string {
@@ -108,6 +112,10 @@ export default class DiInput extends Vue {
 
   private handleSelectSuggest(text: string) {
     this.syncValue = text;
+  }
+
+  focus() {
+    this.input.focus();
   }
 }
 </script>

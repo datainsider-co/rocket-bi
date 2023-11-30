@@ -4,6 +4,7 @@ import co.datainsider.bi.util.profiler.Profiler
 import com.twitter.util.logging.Logging
 import datainsider.client.exception.{DbExecuteError, UnsupportedError}
 import co.datainsider.bi.client.JdbcClient
+import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.datacook.pipeline.exception.{CreateDatabaseException, DropTableException}
 import co.datainsider.schema.domain.TableSchema
 import co.datainsider.schema.domain.column._
@@ -14,7 +15,7 @@ import co.datainsider.schema.domain.column._
   */
 class VerticaWriter(protected val client: JdbcClient) extends JDBCWriter with Logging {
 
-  override def write(dbName: String, tableName: String, columns: Seq[Column], records: Seq[Seq[Any]]): Int =
+  override def write(dbName: String, tableName: String, columns: Seq[Column], records: Seq[Record]): Int =
     Profiler("[Writer] VerticaWriter::write") {
       val queryInsertData = toInsertSQL(dbName, tableName, columns)
       logger.debug(s"VerticaWriter::writer::queryInsertData ${queryInsertData}")

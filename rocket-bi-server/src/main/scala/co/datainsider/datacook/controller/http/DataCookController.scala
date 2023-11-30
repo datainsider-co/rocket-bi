@@ -1,6 +1,7 @@
 package co.datainsider.datacook.controller.http
 
 import co.datainsider.bi.util.profiler.Profiler
+import co.datainsider.bi.util.tracker.{ActionType, ResourceType, UserActivityTracker}
 import co.datainsider.caas.user_profile.controller.http.filter.PermissionFilter
 import co.datainsider.caas.user_profile.controller.http.filter.parser.UserContext.UserContextSyntax
 import co.datainsider.datacook.domain.Ids.{EtlJobId, OrganizationId}
@@ -74,42 +75,90 @@ class DataCookController @Inject() (
 
   filter(permissionFilter.requireAll("etl:view:[id]", LicensePermission.ViewData))
     .get("/data_cook/:id") { request: GetEtlJobRequest =>
-      Profiler("/data_cook/:id GET") {
+      Profiler("/data_cook/:id GET")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.View,
+        resourceType = ResourceType.DataCook,
+        resourceId = String.valueOf(request.id),
+        description = s"view data cook ${request.id}"
+      ) {
         etlService.get(request.getOrganizationId(), request.id)
       }
     }
 
   filter(permissionFilter.requireAll("etl:create:*", LicensePermission.EditData))
     .post("/data_cook/create") { request: CreateEtlJobRequest =>
-      Profiler("/data_cook/create") {
+      Profiler("/data_cook/create")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Create,
+        resourceType = ResourceType.DataCook,
+        resourceId = null,
+        description = s"create data cook '${request.displayName}'"
+      ) {
         etlService.create(request.getOrganizationId(), request)
       }
     }
 
   filter(permissionFilter.requireAll("etl:edit:[id]", LicensePermission.EditData))
     .put("/data_cook/:id") { request: UpdateEtlJobRequest =>
-      Profiler("/data_cook/:id PUT") {
+      Profiler("/data_cook/:id PUT")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Update,
+        resourceType = ResourceType.DataCook,
+        resourceId = String.valueOf(request.id),
+        description = s"edit data cook ${request.id}"
+      ) {
         etlService.update(request.getOrganizationId(), request)
       }
     }
 
   filter(permissionFilter.requireAll("etl:delete:[id]", LicensePermission.EditData))
     .delete("/data_cook/:id") { request: DeleteEtlJobRequest =>
-      Profiler("/data_cook/:id DELETE") {
+      Profiler("/data_cook/:id DELETE")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Delete,
+        resourceType = ResourceType.DataCook,
+        resourceId = String.valueOf(request.id),
+        description = s"move data cook ${request.id} to trash"
+      ) {
         etlService.softDelete(request.getOrganizationId(), request.id)
       }
     }
 
   filter(permissionFilter.requireAll("etl:delete:[id]", LicensePermission.EditData))
     .delete("/data_cook/trash/:id") { request: DeleteEtlJobRequest =>
-      Profiler("/data_cook/trash/:id DELETE") {
+      Profiler("/data_cook/trash/:id DELETE")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Delete,
+        resourceType = ResourceType.DataCook,
+        resourceId = String.valueOf(request.id),
+        description = s"delete data cook ${request.id}"
+      ) {
         trashService.hardDelete(request.getOrganizationId(), request.id)
       }
     }
 
   filter(permissionFilter.requireAll("etl:delete:[id]", LicensePermission.EditData))
     .post("/data_cook/trash/:id/restore") { request: RestoreEtlJobRequest =>
-      Profiler("/data_cook/trash/:id/restore") {
+      Profiler("/data_cook/trash/:id/restore")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Update,
+        resourceType = ResourceType.DataCook,
+        resourceId = String.valueOf(request.id),
+        description = s"restore data cook ${request.id}"
+      ) {
         trashService.restore(request.getOrganizationId(), request.id)
       }
     }
@@ -174,14 +223,32 @@ class DataCookController @Inject() (
     .put("/data_cook/:id/kill") { request: Request =>
       Profiler("/data_cook/:id/kill") {
         val jobId: EtlJobId = request.getLongParam("id")
-        val ordId: OrganizationId = request.getOrganizationId()
-        scheduleService.killJob(ordId, jobId).map(_ => Map("success" -> true))
+
+        UserActivityTracker(
+          request = request.request,
+          actionName = request.getClass.getSimpleName,
+          actionType = ActionType.Update,
+          resourceType = ResourceType.DataCook,
+          resourceId = String.valueOf(jobId),
+          description = s"kill data cook job ${jobId}"
+        ) {
+          val ordId: OrganizationId = request.getOrganizationId()
+          scheduleService.killJob(ordId, jobId).map(_ => Map("success" -> true))
+        }
       }
     }
 
   filter(permissionFilter.requireAll("etl:force_run:[id]", LicensePermission.EditData))
     .put("/data_cook/:id/force_run") { request: ForceRunRequest =>
-      Profiler("/data_cook/:id/force_run") {
+      Profiler("/data_cook/:id/force_run")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Update,
+        resourceType = ResourceType.DataCook,
+        resourceId = String.valueOf(request.id),
+        description = s"force run data cook job ${request.id}"
+      ) {
         scheduleService
           .forceRun(request.getOrganizationId(), request.id, request.atTime)
           .map(_ => Map("success" -> true))

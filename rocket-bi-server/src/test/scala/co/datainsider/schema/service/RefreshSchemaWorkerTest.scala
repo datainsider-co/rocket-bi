@@ -29,7 +29,7 @@ class RefreshSchemaWorkerTest extends IntegrationTest {
 
   test("test run with failure") {
     val orgId = 1L
-    var finalStage: RefreshSchemaStage = null
+    var finalStage: RefreshSchemaStage = RefreshSchemaStage(orgId, name = "")
     worker.run(
       orgId,
       (_) => Future.value(source.copy(host = "fake-host")),
@@ -44,7 +44,7 @@ class RefreshSchemaWorkerTest extends IntegrationTest {
 
   test("[Clickhouse] test run with success") {
     val orgId = 0
-    var finalStage: RefreshSchemaStage = null
+    var finalStage: RefreshSchemaStage = RefreshSchemaStage(orgId, name = "")
     worker.run(
       orgId,
       (_) => Future.value(source),
@@ -59,7 +59,7 @@ class RefreshSchemaWorkerTest extends IntegrationTest {
 
   test("[Clickhouse] test run 2 with success") {
     val orgId = 0
-    var finalStage: RefreshSchemaStage = null
+    var finalStage: RefreshSchemaStage = RefreshSchemaStage(orgId, name = "")
     worker.run(
       orgId,
       (_) => Future.value(source),
@@ -74,7 +74,7 @@ class RefreshSchemaWorkerTest extends IntegrationTest {
 
   test("[BigQuery] test run with success") {
     val orgId = 2L
-    var finalStage: RefreshSchemaStage = null
+    var finalStage: RefreshSchemaStage = RefreshSchemaStage(orgId, name = "")
     worker.run(
       orgId,
       (_) => Future.value(bigQuerySource.copy(projectId = "di-insider")),
@@ -99,7 +99,7 @@ class RefreshSchemaWorkerTest extends IntegrationTest {
   test("test wait stop with worker running in thread") {
     val orgId = 1L
     val startTime = System.currentTimeMillis()
-    var finalStage: RefreshSchemaStage = null
+    var finalStage: RefreshSchemaStage = RefreshSchemaStage(orgId, name = "")
     new Thread(() => {
       worker.run(
         orgId,

@@ -7,16 +7,15 @@ import co.datainsider.bi.engine._
 import co.datainsider.bi.engine.clickhouse.DataTable
 import co.datainsider.bi.repository.FileStorage
 import co.datainsider.bi.repository.FileStorage.FileType.FileType
+import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.bi.util.{Using, ZConfig}
-import co.datainsider.datacook.pipeline.ExecutorResolver
-import co.datainsider.datacook.pipeline.operator.OperatorService
 import co.datainsider.jobworker.repository.writer.{DataWriter, LocalFileWriterConfig}
 import co.datainsider.schema.domain.TableSchema
 import co.datainsider.schema.domain.column._
-import co.datainsider.schema.repository.{DDLExecutor, DataRepository}
+import co.datainsider.schema.repository.DDLExecutor
 import com.google.auth.oauth2.ServiceAccountCredentials
-import com.google.cloud.bigquery.{BigQuery, BigQueryOptions, FieldValueList, TableResult}
-import com.twitter.inject.{Injector, Logging}
+import com.google.cloud.bigquery._
+import com.twitter.inject.Logging
 import com.twitter.util.Future
 import datainsider.client.domain.Implicits.async
 import datainsider.client.exception.{DbExecuteError, InternalError}
@@ -24,6 +23,7 @@ import org.nutz.lang.stream.StringInputStream
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
+import java.time.{ZoneId, ZonedDateTime}
 import java.util
 import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters.iterableAsScalaIterableConverter
@@ -32,7 +32,9 @@ class BigQueryEngine(clientManager: ClientManager, maxQueryRows: Int = 10000, de
     extends Engine[BigQueryConnection]
     with Logging {
 
-  private val dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+  lazy val clazz = getClass.getSimpleName
+
+  private val isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
 
   def createClient(source: BigQueryConnection): BigQueryClient = {
     val client: BigQuery = Using(new StringInputStream(source.credentials))(credentialStream => {
@@ -52,21 +54,31 @@ class BigQueryEngine(clientManager: ClientManager, maxQueryRows: Int = 10000, de
     clientManager.get(source)(() => createClient(source))
 
   override def execute(source: BigQueryConnection, sql: String, doFormatValues: Boolean): Future[DataTable] =
-    async {
-      getClient(source)
-        .query(sql)(tableResult => {
-          val columns: Seq[Column] = BigQueryUtils.parseColumns(tableResult.getSchema)
-          val rows = ArrayBuffer[Array[Object]]()
+    Profiler(s"$clazz::execute") {
+      async {
+        getClient(source)
+          .query(sql)(tableResult => {
+            val columns: Seq[Column] = BigQueryUtils.parseColumns(tableResult.getSchema)
+            val rows = ArrayBuffer[Array[Object]]()
 
-          tableResult
-            .iterateAll()
-            .forEach(fieldValueList => {
-              val row = toRecord(columns, fieldValueList).map(_.asInstanceOf[Object])
-              rows += row
-            })
+            tableResult
+              .iterateAll()
+              .forEach(fieldValueList => {
+                val row = toRecord(columns, fieldValueList).map(_.asInstanceOf[Object])
+                rows += row
+              })
 
-          DataTable(columns.map(_.name).toArray, columns.map(_.getClass.getSimpleName).toArray, rows.toArray)
-        })
+            DataTable(columns.map(_.name).toArray, columns.map(_.getClass.getSimpleName).toArray, rows.toArray)
+          })
+      }
+    }
+
+  override def executeAsDataStream[T](source: BigQueryConnection, query: String)(fn: DataStream => T): T =
+    Profiler(s"$clazz::executeAsDataStream") {
+      getClient(source).query(query)((result: TableResult) => {
+        val dataStream: DataStream = toStream(result)
+        fn(dataStream)
+      })
     }
 
   override def executeHistogramQuery(source: BigQueryConnection, histogramSql: String): Future[DataTable] = {
@@ -84,10 +96,12 @@ class BigQueryEngine(clientManager: ClientManager, maxQueryRows: Int = 10000, de
       destPath: String,
       fileType: FileType
   ): Future[String] =
-    async {
-      val stream: DataStream = getClient(source).query(sql)(toStream)
-
-      FileStorage.exportToFile(stream, fileType, destPath)
+    Profiler(s"$clazz::exportToFile") {
+      async {
+        executeAsDataStream(source, sql)((stream: DataStream) => {
+          FileStorage.exportToFile(stream, fileType, destPath)
+        })
+      }
     }
 
   override def testConnection(source: BigQueryConnection): Future[Boolean] =
@@ -174,16 +188,6 @@ class BigQueryEngine(clientManager: ClientManager, maxQueryRows: Int = 10000, de
     new BigqueryWriter(client, writerConfig, sleepIntervalMs)
   }
 
-  override def getPreviewExecutorResolver(source: BigQueryConnection, operatorService: OperatorService)(
-      injector: Injector
-  ): ExecutorResolver = ???
-
-  override def getExecutorResolver(source: BigQueryConnection, operatorService: OperatorService)(
-      injector: Injector
-  ): ExecutorResolver = ???
-
-  override def getDataRepository(source: BigQueryConnection): DataRepository = ???
-
   override def write(source: BigQueryConnection, schema: TableSchema, records: Seq[Record]): Future[Int] =
     Future {
       val client: BigQueryClient = getClient(source)
@@ -215,8 +219,8 @@ class BigQueryEngine(clientManager: ClientManager, maxQueryRows: Int = 10000, de
             case c: Int32Column    => fieldValueList.get(col.name).getStringValue.toInt
             case c: Int64Column    => fieldValueList.get(col.name).getLongValue
             case c: DoubleColumn   => fieldValueList.get(col.name).getDoubleValue
-            case c: DateColumn     => parseDateTime(fieldValueList.get(col.name).getStringValue)
-            case c: DateTimeColumn => parseDateTime(fieldValueList.get(col.name).getStringValue)
+            case c: DateColumn     => parseDateTime(fieldValueList.get(col.name))
+            case c: DateTimeColumn => parseDateTime(fieldValueList.get(col.name))
             case _                 => fieldValueList.get(col.name).getStringValue
           }
         } catch {
@@ -226,12 +230,33 @@ class BigQueryEngine(clientManager: ClientManager, maxQueryRows: Int = 10000, de
       .toArray
   }
 
-  private def parseDateTime(dateStr: String): Timestamp = {
+  private def parseDateTime(fieldValue: FieldValue): Timestamp = {
     try {
-      val time: Long = dateFormat.parse(dateStr).getTime
-      new Timestamp(time)
+      if (isTimestamp(fieldValue)) {
+        val zonedDateTime: ZonedDateTime = fieldValue.getTimestampInstant.atZone(ZoneId.of("UTC"))
+        Timestamp.valueOf(zonedDateTime.toLocalDateTime)
+      } else if (isIsoFormat(fieldValue.getStringValue)) {
+        val time: Long = isoDateFormat.parse(fieldValue.getStringValue).getTime
+        new Timestamp(time)
+      } else {
+        throw new Exception(s"Parse datetime error, not supported format.")
+      }
     } catch {
-      case e: Throwable => null
+      case e: Throwable =>
+        logger.error(s"${this.getClass.getSimpleName} - parse datetime error, value: $fieldValue", e)
+        null
+    }
+  }
+
+  private def isIsoFormat(dateStr: String): Boolean = {
+    dateStr.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}") // yyyy-MM-ddTHH:mm:ss
+  }
+
+  private def isTimestamp(fieldValue: FieldValue): Boolean = {
+    try {
+      fieldValue.getTimestampInstant != null
+    } catch {
+      case e: Throwable => false
     }
   }
 

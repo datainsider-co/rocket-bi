@@ -1,7 +1,14 @@
 package co.datainsider.datacook.pipeline.operator.persist
 
+import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.bi.client.{JdbcClient, NativeJdbcClientWithProperties}
+import co.datainsider.bi.domain.Connection
+import co.datainsider.bi.domain.query.{ObjectQueryBuilder, QueryParserImpl, Select, TableField}
+import co.datainsider.bi.engine.factory.EngineResolver
+import co.datainsider.bi.engine.{DataStream, Engine}
+import co.datainsider.bi.service.ConnectionService
 import co.datainsider.bi.util.profiler.Profiler
+import co.datainsider.caas.user_profile.domain.Implicits.FutureEnhanceLike
 import co.datainsider.datacook.domain.Ids.OrganizationId
 import co.datainsider.datacook.domain.persist.PersistentType
 import co.datainsider.datacook.pipeline.exception.{InputInvalid, UnsupportedJDBCWriterException}
@@ -9,14 +16,18 @@ import co.datainsider.datacook.pipeline.operator.Operator.OperatorId
 import co.datainsider.datacook.pipeline.operator.persist.writer._
 import co.datainsider.datacook.pipeline.operator.{Executor, ExecutorContext, OperatorResult}
 import co.datainsider.schema.domain.TableSchema
+import co.datainsider.schema.domain.column.Column
 import com.twitter.util.logging.Logging
 
 import java.sql.ResultSet
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-case class JdbcPersistOperatorExecutor(client: JdbcClient, insertBatchSize: Int = 100000)
-    extends Executor[JdbcPersistOperator]
+case class JdbcPersistOperatorExecutor(
+    engineResolver: EngineResolver,
+    connectionService: ConnectionService,
+    insertBatchSize: Int = 100000
+) extends Executor[JdbcPersistOperator]
     with Logging {
 
   @throws[InputInvalid]
@@ -63,9 +74,11 @@ case class JdbcPersistOperatorExecutor(client: JdbcClient, insertBatchSize: Int 
       destTable: TableSchema
   ): InsertResult = {
     var insertedRows = 0
-    val totalRows = read(
-      fromTable,
-      insertBatchSize,
+    val totalRows: Long = getData(
+      orgId = organizationId,
+      fromTable = fromTable,
+      destTable = destTable,
+      insertBatchSize = insertBatchSize,
       resultFn = (records) => {
         insertedRows += writer.write(destTable.dbName, destTable.name, destTable.columns, records)
       }
@@ -73,46 +86,65 @@ case class JdbcPersistOperatorExecutor(client: JdbcClient, insertBatchSize: Int 
     InsertResult(totalRows, insertedRows)
   }
 
-  private def toClickhouseSelectQuery(table: TableSchema): String = {
-    val columnNames = table.columns.map(column => s"`${column.name}`")
-    s"SELECT ${columnNames.mkString(", ")} FROM `${table.dbName}`.`${table.name}`"
-  }
-
-  private def read(table: TableSchema, insertBatchSize: Int, resultFn: (Seq[Seq[Any]]) => Unit): Long = {
-    val selectQuery = toClickhouseSelectQuery(table)
-    getData(selectQuery, table.columns.map(_.name).toArray, insertBatchSize, resultFn)
-  }
-
-  private def getValues(rs: ResultSet, columnNames: Array[String]): Seq[Any] = {
-    columnNames.map(columnName => rs.getObject(columnName))
-  }
-
   private def getData(
-      query: String,
-      columnNames: Array[String],
+      orgId: Long,
+      fromTable: TableSchema,
+      destTable: TableSchema,
       insertBatchSize: Int,
-      resultFn: (Seq[Seq[Any]]) => Unit
+      resultFn: (Seq[Record]) => Unit
   ): Long = {
+    val connection: Connection = connectionService.getTunnelConnection(orgId).syncGet()
+    val engine: Engine[Connection] = engineResolver.resolve(connection.getClass).asInstanceOf[Engine[Connection]]
     var totalRows: Long = 0
-    client.executeQuery(query)(rs => {
-      var records = ArrayBuffer.empty[Seq[Any]]
-      while (rs.next()) {
-        try {
-          records += getValues(rs, columnNames)
-          if (records.size > insertBatchSize) {
-            totalRows += records.size
-            resultFn(records.toSeq)
-            records = ArrayBuffer.empty[Seq[Any]]
-          }
+    val selectQuery: String = parseToQuery(engine, fromTable)
+    engine.executeAsDataStream(connection, selectQuery)((dataStream: DataStream) => {
+      val destIndexes: Array[Int] = indexedColumns(destTable, dataStream.columns)
+
+      var buffers = ArrayBuffer.empty[Record]
+      while (dataStream.stream.hasNext) {
+        val record: Record = dataStream.stream.next()
+        val newRecord = destIndexes.map(index => record.lift(index).orNull)
+        buffers += newRecord
+        if (buffers.size > insertBatchSize) {
+          resultFn(buffers)
+          totalRows += buffers.size
+          buffers = ArrayBuffer.empty[Record]
         }
       }
       // empty
-      if (records.nonEmpty) {
-        totalRows += records.size
-        resultFn(records.toSeq)
+      if (buffers.nonEmpty) {
+        resultFn(buffers)
+        totalRows += buffers.size
       }
     })
     totalRows
+  }
+
+  /**
+    * indexed destination columns in source table, if not found, return -1
+    */
+  private def indexedColumns(destTable: TableSchema, fromColumns: Seq[Column]): Array[Int] = {
+    val fromColumnIndexMap: Map[String, Int] = fromColumns.map(_.name).zipWithIndex.toMap
+    destTable.columns.map(column => fromColumnIndexMap.getOrElse(column.name, -1)).toArray
+  }
+
+  private def parseToQuery(engine: Engine[Connection], table: TableSchema): String = {
+    val queryParser = new QueryParserImpl(engine.getSqlParser())
+    val builder = new ObjectQueryBuilder()
+    table.columns.foreach(col => {
+      builder.addFunction(
+        Select(field =
+          new TableField(
+            dbName = table.dbName,
+            tblName = table.name,
+            fieldName = col.name,
+            fieldType = col.getColumnType,
+          ),
+          aliasName = Some(col.name)
+        )
+      )
+    })
+    queryParser.parse(builder.build())
   }
 
   private def appendData(

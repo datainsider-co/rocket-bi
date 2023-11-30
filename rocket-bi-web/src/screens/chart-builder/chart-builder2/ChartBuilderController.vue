@@ -66,7 +66,7 @@
             </div>
             <div v-show="!isSettingConfig" class="setting-panel">
               <StatusWidget :status="databaseStatus" class="chart-setting-status">
-                <vuescroll :ops="scrollOptions" class="chart-setting-area">
+                <vuescroll :ops="scrollOptions" class="chart-setting-area" :key="currentCompoentKey">
                   <!-- Nếu không có setting phù hợp thì render default -->
                   <template v-if="toSettingComponent">
                     <component :is="toSettingComponent" :chartInfo="currentChartInfo" class="setting-component" @onChartInfoChanged="onChartInfoChanged" />
@@ -100,7 +100,7 @@
     </div>
 
     <MatchingLocationModal ref="matchingLocationModal" :current-chart-info="currentChartInfo" @onApplyMatching="handleApplyMatching" />
-    <VizSettingModal ref="settingModal"></VizSettingModal>
+    <!-- <VizSettingModal ref="settingModal"></VizSettingModal> -->
   </div>
 </template>
 

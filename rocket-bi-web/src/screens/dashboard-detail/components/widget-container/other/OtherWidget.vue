@@ -19,13 +19,15 @@
           <div :id="actionMoreButtonId" class="action-more regular-icon-16 text-left">
             <template v-for="(item, index) in menuItems">
               <DiButton
-                style="width: 137px"
+                style="width: 180px"
+                align="left"
                 :id="genBtnId(`action-${item.text}`, index)"
                 :key="genBtnId(`action-${item.text}`, index)"
                 :is-disable="item.disabled"
                 :title="item.text"
                 @click="item.click"
               >
+                <i :class="item.icon" style="font-size: 16px" v-if="item.icon"></i>
               </DiButton>
             </template>
           </div>
@@ -114,17 +116,20 @@ export default class OtherWidget extends Vue {
       {
         text: DashboardOptions.REPLACE_IMAGE,
         click: this.replaceImage,
-        disabled: !DashboardModeModule.canEdit
+        disabled: !DashboardModeModule.canEdit,
+        icon: 'di-icon-image'
       },
       {
         text: DashboardOptions.DUPLICATE,
         click: this.duplicateWidget,
-        disabled: !DashboardModeModule.canDuplicate
+        disabled: !DashboardModeModule.canDuplicate,
+        icon: 'di-icon-duplicate'
       },
       {
         text: DashboardOptions.DELETE,
         click: this.deleteWidget,
-        disabled: !DashboardModeModule.canDelete
+        disabled: !DashboardModeModule.canDelete,
+        icon: 'di-icon-delete'
       }
     ];
   }
@@ -134,22 +139,26 @@ export default class OtherWidget extends Vue {
       {
         text: 'Copy widget',
         click: this.copyWidget,
-        disabled: !DashboardModeModule.canDuplicate
+        disabled: !DashboardModeModule.canDuplicate,
+        icon: 'di-icon-copy-2'
       },
       {
         text: DashboardOptions.EDIT_TEXT,
         click: this.editText,
-        disabled: !DashboardModeModule.canEdit
+        disabled: !DashboardModeModule.canEdit,
+        icon: 'di-icon-under-text'
       },
       {
         text: DashboardOptions.DUPLICATE,
         click: this.duplicateWidget,
-        disabled: !DashboardModeModule.canDuplicate
+        disabled: !DashboardModeModule.canDuplicate,
+        icon: 'di-icon-duplicate'
       },
       {
         text: DashboardOptions.DELETE,
         click: this.deleteWidget,
-        disabled: !DashboardModeModule.canDelete
+        disabled: !DashboardModeModule.canDelete,
+        icon: 'di-icon-delete'
       }
     ];
   }

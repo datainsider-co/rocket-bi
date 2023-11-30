@@ -17,7 +17,7 @@ class JoinOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTest
   override protected val jobId: EtlJobId = 1300
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
     .register(JoinOperatorExecutor(operatorService, Some(Limit(0, 500))))
 
   test("run pipeline has join operator using JoinType.Inner") {

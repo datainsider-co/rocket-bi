@@ -95,28 +95,28 @@ export default class GoogleAnalyticSyncModeConfig extends Vue {
   @Watch('startDate')
   onStartDateChange(date: Date) {
     if (ListUtils.isNotEmpty(this.syncedJob.dateRanges)) {
-      this.syncedJob.dateRanges[0].startDate = this.getStringDate(this.startDateMode, date);
+      this.syncedJob.dateRanges[0].startDate = this.toDateAsString(this.startDateMode, date);
     }
   }
 
   @Watch('endDateMode')
   onEndDateModeChange(dateMode: GADateMode) {
     if (ListUtils.isNotEmpty(this.syncedJob.dateRanges)) {
-      this.syncedJob.dateRanges[0].endDate = this.getStringDate(dateMode, this.endDate);
+      this.syncedJob.dateRanges[0].endDate = this.toDateAsString(dateMode, this.endDate);
     }
   }
 
   @Watch('startDateMode')
   onStartDateModeChange(dateMode: GADateMode) {
     if (ListUtils.isNotEmpty(this.syncedJob.dateRanges)) {
-      this.syncedJob.dateRanges[0].startDate = this.getStringDate(dateMode, this.startDate);
+      this.syncedJob.dateRanges[0].startDate = this.toDateAsString(dateMode, this.startDate);
     }
   }
 
   @Watch('endDate')
   onEndDateChange(date: Date) {
     if (ListUtils.isNotEmpty(this.syncedJob.dateRanges)) {
-      this.syncedJob.dateRanges[0].endDate = this.getStringDate(this.endDateMode, date);
+      this.syncedJob.dateRanges[0].endDate = this.toDateAsString(this.endDateMode, date);
     }
   }
 
@@ -166,7 +166,7 @@ export default class GoogleAnalyticSyncModeConfig extends Vue {
     }
   }
 
-  getStringDate(dateMode: GADateMode, date: Date): string {
+  toDateAsString(dateMode: GADateMode, date: Date): string {
     switch (dateMode) {
       case GADateMode.Yesterday:
       case GADateMode.Today:
@@ -179,12 +179,12 @@ export default class GoogleAnalyticSyncModeConfig extends Vue {
   }
 
   public validSyncMode() {
-    if (DateUtils.laterThan(new Date('2015-1-1'), this.getDate(this.startDateMode, this.startDate))) {
+    if (DateUtils.laterThan(new Date('2015-1-1'), this.parseDate(this.startDateMode, this.startDate))) {
       this.startDateError = 'The start date can not before 01/01/2015.';
       throw new DIException('');
     }
     if (this.startDateMode === this.endDateMode) {
-      if (DateUtils.laterThan(this.getDate(this.startDateMode, this.startDate), this.getDate(this.endDateMode, this.endDate))) {
+      if (DateUtils.laterThan(this.parseDate(this.startDateMode, this.startDate), this.parseDate(this.endDateMode, this.endDate))) {
         this.startDateError = 'The end date can not before the start date.';
         throw new DIException('');
       }
@@ -192,7 +192,7 @@ export default class GoogleAnalyticSyncModeConfig extends Vue {
     return true;
   }
 
-  private getDate(dateMode: GADateMode, date: Date) {
+  private parseDate(dateMode: GADateMode, date: Date): Date {
     switch (dateMode) {
       case GADateMode.Custom:
         return date;

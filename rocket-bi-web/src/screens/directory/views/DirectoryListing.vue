@@ -2,21 +2,13 @@
   <LayoutWrapper ref="layoutWrapper">
     <LayoutSidebar :items="navItems">
       <template v-slot:top>
-        <PopoverV2 class="dropdown" auto-hide placement="bottom-start">
-          <DiShadowButton id="create-directory" class="create-directory mb-0" title="New" :event="trackEvents.MyDataCreate">
-            <i class="di-icon-add"></i>
-          </DiShadowButton>
-          <template v-slot:menu>
-            <div class="dropdown-menu">
-              <a @click.prevent="showCreateDirectoryModal(parentId)" class="dropdown-item" href="#">Folder</a>
-              <a @click.prevent="showCreateDashboardModal(parentId)" class="dropdown-item" href="#">Dashboard</a>
-            </div>
-          </template>
-        </PopoverV2>
+        <DiShadowButton id="create-directory" class="create-directory mb-0" title="New" @click="e => showMenuCreateDirectory('create-directory')">
+          <i class="di-icon-add"></i>
+        </DiShadowButton>
       </template>
     </LayoutSidebar>
     <router-view ref="myData" class="my-data-listing"></router-view>
-    <ContextMenu ref="diContextMenu" :ignoreOutsideClass="listIgnoreClassForContextMenu" minWidth="250px" textColor="var(--text-color)" />
+    <ContextMenu ref="diContextMenu" :ignoreOutsideClass="listIgnoreClassForContextMenu" minWidth="210px" textColor="var(--text-color)" />
     <DiRenameModal ref="createDirectoryModal" title="Create Folder" label="Folder name" placeholder="Type folder name" action-name="Create" />
     <DiRenameModal ref="createDashboardModal" title="Create Dashboard" label="Dashboard name" placeholder="Type dashboard name" action-name="Create" />
     <DirectoryRename ref="mdRenameDirectory" />
@@ -179,14 +171,11 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
     this.$root.$off(DirectoryListingEvents.ShowMenuSettingDirectory, this.showMenuSettingDirectory);
   }
 
-  showContextMenu(items: ContextMenuItem[], target: string, event: Event) {
-    const newEvent = HtmlElementRenderUtils.fixMenuOverlap(event, target, 0, 8);
-    this.diContextMenu.show(newEvent, items);
-  }
-
-  showMenuCreateDirectory(event: MouseEvent) {
+  showMenuCreateDirectory(id: string) {
     const items = this.getCreateMenuItem(this.parentId);
-    this.showContextMenu(items, 'create-directory', event);
+    this.diContextMenu.showAt(id, items, {
+      paddingTop: 8
+    });
   }
 
   showMenuSettingDirectory(item: Directory, routerName: Routers) {
@@ -278,35 +267,40 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
         text: DirectoryMenuItem.Rename,
         click: () => {
           this.showRenameModal(directory);
-        }
+        },
+        icon: 'di-icon-rename'
       },
       {
         text: DirectoryMenuItem.Duplicate,
         click: () => {
           this.duplicate(directory);
         },
-        hidden: directory.directoryType === DirectoryType.Directory
+        hidden: directory.directoryType === DirectoryType.Directory,
+        icon: 'di-icon-duplicate'
       },
       {
         text: DirectoryMenuItem.Copy,
         click: (event: MouseEvent) => {
           this.copyDashboardPicker.show(event, [directory.id], directory);
         },
-        hidden: directory.directoryType === DirectoryType.Directory
+        hidden: directory.directoryType === DirectoryType.Directory,
+        icon: 'di-icon-copy-2'
       },
       {
         text: DirectoryMenuItem.MoveTo,
         hidden: routerName !== Routers.AllData,
         click: (e: Event) => {
           this.showMoveModal(e, directory);
-        }
+        },
+        icon: 'di-icon-move-folder'
       },
       this.getStarMenuItem(directory),
       {
         text: DirectoryMenuItem.Remove,
         click: () => {
           this.confirmDeleteDirectory(directory);
-        }
+        },
+        icon: 'di-icon-delete'
       }
     ];
   }
@@ -318,7 +312,8 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
         click: () => {
           this.diContextMenu.hide();
           this.removeStar(directory);
-        }
+        },
+        icon: 'di-icon-add-to-star-converted'
       };
     } else {
       return {
@@ -326,7 +321,8 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
         click: () => {
           this.diContextMenu.hide();
           this.star(directory);
-        }
+        },
+        icon: 'di-icon-add-to-star-converted'
       };
     }
   }
@@ -403,13 +399,15 @@ export default class DirectoryListing extends Vue implements RouterEnteringHook 
         text: CreateDirectoryMenuItem.Folder,
         click: () => {
           this.showCreateDirectoryModal(parentId);
-        }
+        },
+        icon: 'di-icon-add-folder'
       },
       {
         text: CreateDirectoryMenuItem.Dashboard,
         click: () => {
           this.showCreateDashboardModal(parentId);
-        }
+        },
+        icon: 'di-icon-dashboard'
       }
     ];
   }

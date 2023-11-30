@@ -38,7 +38,7 @@ import { HeaderData, RowData } from '@/shared/models';
 import EmptyDirectory from '@/screens/dashboard-detail/components/EmptyDirectory.vue';
 import DiTable from '@/shared/components/common/di-table/DiTable.vue';
 import { DefaultDirectoryId } from '@/screens/directory/views/mydata/DefaultDirectoryId';
-import { DirectoryNameCell, IconActionCell, DateCell, UserAvatarCell } from '@/shared/components/common/di-table/custom-cell';
+import { DirectoryNameCell, IconActionCell, DateCell, UserAvatarCell, DateTimeCell } from '@/shared/components/common/di-table/custom-cell';
 import { StringUtils } from '@/utils/StringUtils';
 import BreadcrumbComponent from '@/screens/directory/components/BreadcrumbComponent.vue';
 import { ChartUtils, ListUtils } from '@/utils';
@@ -121,7 +121,7 @@ export default class MyData extends Vue {
         label: 'Last Modified',
         disableSort: true,
         hiddenInMobile: true,
-        customRenderBodyCell: new DateCell()
+        customRenderBodyCell: new DateTimeCell()
       },
       {
         key: 'action',
@@ -271,11 +271,13 @@ export default class MyData extends Vue {
     return new IconActionCell([
       {
         icon: 'di-icon-share d-none d-sm-block',
-        click: (row: RowData) => this.$root.$emit(DirectoryListingEvents.ShowShareModal, row)
+        click: (row: RowData) => this.$root.$emit(DirectoryListingEvents.ShowShareModal, row),
+        placeholder: 'Share'
       },
       {
         icon: 'di-icon-setting',
-        click: (row: RowData) => this.$root.$emit(DirectoryListingEvents.ShowMenuSettingDirectory, row, this.handler.getRootName())
+        click: (row: RowData) => this.$root.$emit(DirectoryListingEvents.ShowMenuSettingDirectory, row, this.handler.getRootName()),
+        placeholder: 'Setting'
       }
     ]);
   }
@@ -284,11 +286,13 @@ export default class MyData extends Vue {
     return new IconActionCell([
       {
         icon: 'di-icon-restore',
-        click: (row: any) => this.restore(row)
+        click: (row: any) => this.restore(row),
+        placeholder: 'Restore'
       },
       {
         icon: 'di-icon-delete',
-        click: (row: any) => this.deleteDirectory(row)
+        click: (row: any) => this.deleteDirectory(row),
+        placeholder: 'Delete'
       }
     ]);
   }

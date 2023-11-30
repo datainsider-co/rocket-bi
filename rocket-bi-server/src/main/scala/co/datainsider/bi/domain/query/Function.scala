@@ -243,7 +243,21 @@ case class DynamicFunction(
     new Type(value = classOf[PastNMonth], name = "past_n_month"),
     new Type(value = classOf[PastNWeek], name = "past_n_week"),
     new Type(value = classOf[PastNDay], name = "past_n_day"),
-    new Type(value = classOf[Cast], name = "cast")
+    new Type(value = classOf[Cast], name = "cast"),
+    new Type(value = classOf[ToInt8OrNull], name = "to_int8_or_null"),
+    new Type(value = classOf[ToInt16OrNull], name = "to_int16_or_null"),
+    new Type(value = classOf[ToInt32OrNull], name = "to_int32_or_null"),
+    new Type(value = classOf[ToInt64OrNull], name = "to_int64_or_null"),
+    new Type(value = classOf[ToUInt8OrNull], name = "to_uint8_or_null"),
+    new Type(value = classOf[ToUInt16OrNull], name = "to_uint16_or_null"),
+    new Type(value = classOf[ToUInt32OrNull], name = "to_uint32_or_null"),
+    new Type(value = classOf[ToUInt64OrNull], name = "to_uint64_or_null"),
+    new Type(value = classOf[ToFloatOrNull], name = "to_float_or_null"),
+    new Type(value = classOf[ToDoubleOrNull], name = "to_double_or_null"),
+    new Type(value = classOf[ToDateOrNull], name = "to_date_or_null"),
+    new Type(value = classOf[ToDateTimeOrNull], name = "to_date_time_or_null"),
+    new Type(value = classOf[ToDateTime64OrNull], name = "to_date_time64_or_null"),
+    new Type(value = classOf[ToStringOrNull], name = "to_string_or_null"),
   )
 )
 abstract class ScalarFunction {
@@ -386,3 +400,18 @@ case class PastNDay(nDay: Int, innerFn: Option[ScalarFunction] = None, resultTyp
 case class Cast(asType: String, innerFn: Option[ScalarFunction] = None) extends ScalarFunction {
   override val resultType: String = asType
 }
+
+case class ToInt8OrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int8) extends ScalarFunction
+case class ToInt16OrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int16) extends ScalarFunction
+case class ToInt32OrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int32) extends ScalarFunction
+case class ToInt64OrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Int64) extends ScalarFunction
+case class ToUInt8OrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.UInt8) extends ScalarFunction
+case class ToUInt16OrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.UInt16) extends ScalarFunction
+case class ToUInt32OrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.UInt32) extends ScalarFunction
+case class ToUInt64OrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.UInt64) extends ScalarFunction
+case class ToFloatOrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Float) extends ScalarFunction
+case class ToDoubleOrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Double) extends ScalarFunction
+case class ToDateOrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.Date) extends ScalarFunction
+case class ToDateTimeOrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.DateTime) extends ScalarFunction
+case class ToDateTime64OrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.DateTime64) extends ScalarFunction
+case class ToStringOrNull(innerFn: Option[ScalarFunction] = None, resultType: String = ColType.String) extends ScalarFunction

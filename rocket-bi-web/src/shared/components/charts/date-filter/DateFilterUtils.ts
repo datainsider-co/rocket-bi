@@ -23,6 +23,6 @@ export abstract class DateFilterUtils {
       return data.dates;
     }
     const dateRange = DateUtils.getDateRange(data.mode);
-    return dateRange ? [DateTimeUtils.formatDate(dateRange.start), DateTimeUtils.formatDate(dateRange.end, true)] : [];
+    return dateRange ? [DateTimeUtils.formatDateTime(dateRange.start), DateTimeUtils.formatDateTime(dateRange.end, true)] : [];
   }
 }

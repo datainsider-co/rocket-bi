@@ -12,19 +12,15 @@ import scala.collection.mutable
   */
 
 /**
- * Class ho tro tao ra reader tuong ung voi tung loai datasource va job
+ * Create job progress factory by job
  */
 trait JobProgressFactoryResolver {
 
   /**
-   * create a reader by job and source. source & job must be not null
-   *
-   * neu job khong co source, co the truyen vao MockDataSource.
-   *
-   * throw CreateReaderException neu khong the tao reader
+   * create a reader by job and source. source & job must be not null,
+   * if not found factory for job, return none
    */
-  @throws[CreateJobProgressException]("if can not create factory")
-  def resolve[J <: Job](job: J): JobProgressFactory[J]
+  def resolve[J <: Job](job: J): Option[JobProgressFactory[J]]
 }
 
 private case class JobProgressFactoryResolverImpl private (factoryAsMap: Map[(Class[_]), JobProgressFactory[_]])
@@ -33,13 +29,8 @@ private case class JobProgressFactoryResolverImpl private (factoryAsMap: Map[(Cl
   /**
     * resolve reader by sync info
     */
-  override def resolve[J <: Job](job: J): JobProgressFactory[J] = {
-    val factory: Option[JobProgressFactory[J]] = factoryAsMap.get((job.getClass)).asInstanceOf[Option[JobProgressFactory[J]]]
-    factory match {
-      case Some(factory) => factory
-      case None =>
-        throw CreateReaderException(s"Can not resolve job progress factory for ${job.getClass.getSimpleName}")
-    }
+  override def resolve[J <: Job](job: J): Option[JobProgressFactory[J]] = {
+    factoryAsMap.get((job.getClass)).asInstanceOf[Option[JobProgressFactory[J]]]
   }
 }
 
@@ -54,6 +45,5 @@ class JobProgressResolverBuilder {
     factoryAsMap.put(jobCls, factory)
     this
   }
-
   def build(): JobProgressFactoryResolver = JobProgressFactoryResolverImpl(factoryAsMap.toMap)
 }

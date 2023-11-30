@@ -13,5 +13,7 @@ export enum JobName {
   TiktokAdsJob = 'tik_tok_ads_job',
   PalexyJob = 'palexy_job',
   GoogleSearchConsoleJob = 'google_search_console_job',
-  UnsupportedJob = 'unsupported_job'
+  Hubspot = 'hubspot_job',
+  UnsupportedJob = 'unsupported_job',
+  Mixpanel = 'mixpanel_job'
 }

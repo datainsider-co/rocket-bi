@@ -6,8 +6,8 @@ import co.datainsider.bi.util.ZConfig
 import co.datainsider.schema.domain.TableSchema
 import co.datainsider.schema.domain.TableType.TableType
 import co.datainsider.schema.domain.column.Column
-import co.datainsider.schema.misc.{ClickHouseDDLConverter, ColumnDetector}
 import co.datainsider.schema.misc.ColumnDetector.RawColumnData
+import co.datainsider.schema.misc.{ClickHouseDDLConverter, ColumnDetector}
 import com.twitter.inject.Logging
 import com.twitter.util.Future
 

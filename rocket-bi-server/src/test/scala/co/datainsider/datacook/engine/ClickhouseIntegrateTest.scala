@@ -4,7 +4,9 @@ import co.datainsider.bi.client.JdbcClient
 import co.datainsider.bi.domain.ClickhouseConnection
 import co.datainsider.bi.engine.ClientManager
 import co.datainsider.bi.engine.clickhouse.ClickhouseEngine
+import co.datainsider.bi.engine.factory.{EngineResolver, EngineResolverImpl}
 import co.datainsider.bi.module.TestModule
+import co.datainsider.bi.service.{ConnectionService, MockConnectionService}
 import co.datainsider.schema.domain.TableSchema
 import co.datainsider.schema.misc.ClickHouseUtils
 import com.twitter.inject.IntegrationTest
@@ -16,15 +18,30 @@ import com.twitter.inject.IntegrationTest
   */
 
 trait EngineIntegrateTest extends IntegrationTest {
+
+  def getEngineResolver(): EngineResolver
+
+  def getConnectionService(): ConnectionService
+
   def assertQueryCount(countQuery: String, expectedTotal: Int): Unit
 
   def insertData(tableSchema: TableSchema, rows: Seq[Array[Any]]): Unit
 }
 
 trait ClickhouseIntegrateTest extends EngineIntegrateTest {
-  val engine = new ClickhouseEngine(new ClientManager())
-  val source: ClickhouseConnection = injector.instance[ClickhouseConnection]
-  val client: JdbcClient = engine.createClient(source)
+  protected val engine = new ClickhouseEngine(new ClientManager())
+  protected val source: ClickhouseConnection = injector.instance[ClickhouseConnection]
+  protected val client: JdbcClient = engine.createClient(source)
+
+  override def getEngineResolver(): EngineResolver = {
+    val engineResolver = new EngineResolverImpl()
+    engineResolver.register(engine)
+    engineResolver
+  }
+
+  override def getConnectionService(): ConnectionService = {
+    new MockConnectionService(source)
+  }
 
   override def afterAll(): Unit = {
     super.afterAll()

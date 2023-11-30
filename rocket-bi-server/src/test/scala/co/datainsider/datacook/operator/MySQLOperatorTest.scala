@@ -21,8 +21,8 @@ class MySQLOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTes
   override protected val jobId: EtlJobId = 1443
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
-    .register(classOf[MySQLPersistOperator], JdbcPersistOperatorExecutor(client))
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
+    .register(classOf[MySQLPersistOperator], JdbcPersistOperatorExecutor(getEngineResolver(), getConnectionService()))
     .register(SQLOperatorExecutor(operatorService))
 
   private val mysqlSource: MysqlConnection = injector.instance[MysqlConnection]

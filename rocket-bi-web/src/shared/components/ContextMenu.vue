@@ -1,5 +1,5 @@
 <template>
-  <div v-click-outside="vcoConfig" class="di-context-menu-container">
+  <div v-click-outside="vcoConfig" class="di-context-menu-container" @mouseleave="handleOnLeaveMenu" @mouseover="handleOnOverMenu">
     <ul
       ref="contextMenu"
       v-show="isShowMenu"
@@ -13,17 +13,20 @@
     >
       <slot></slot>
       <li
-        v-for="(menuItem, index) in items"
-        :id="genBtnId('context-menu', index)"
-        v-bind:key="index"
+        v-for="(menuItem, menuIndex) in items"
+        :key="menuIndex"
+        :id="genBtnId('context-menu', menuIndex)"
         :class="{
-          disabled: menuItem.disabled
+          disabled: menuItem.disabled,
+          'di-context-menu-item-selected': hoverItem === menuItem && !menuItem.disabled && menuItem.children && menuItem.children.length !== 0
         }"
+        ref="menuItems"
         :style="{
           borderBottom: menuItem.divider,
           cursor: menuItem.cursor || 'pointer'
         }"
         @click="event => onClickItem(event, menuItem)"
+        v-b-hover="isHover => onHoverItem(menuItem, menuIndex, isHover)"
       >
         <div v-if="menuItem.icon || menuItem.iconSrc" class="menu-icon-item">
           <i
@@ -38,18 +41,61 @@
         <span class="unselectable" :style="{ cursor: menuItem.cursor || 'pointer' }">
           {{ menuItem.text }}
         </span>
+        <template v-if="menuItem.children && menuItem.children.length !== 0">
+          <div class="menu-icon-children" style="rotate: 180deg">
+            <i class=" di-icon-arrow-left-large"></i>
+          </div>
+        </template>
+        <template v-else-if="menuItem.active">
+          <div class="menu-icon-children menu-icon-children-active">
+            <i class="di-icon-check"></i>
+          </div>
+        </template>
       </li>
     </ul>
+    <context-menu
+      v-if="isRenderSubMenu"
+      ref="subContextMenu"
+      :background-color="backgroundColor"
+      :icon-color="iconColor"
+      :ignore-outside-class="ignoreOutsideClass"
+      :max-height="maxHeight"
+      :min-width="minWidth"
+      :text-color="textColor"
+      :z-index="zIndex + 1"
+      @selectItem="
+        (event, item) => {
+          hide();
+          $emit('selectItem', event, item);
+        }
+      "
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Ref, Vue } from 'vue-property-decorator';
 import { ContextMenuItem } from '@/shared';
-import { Log } from '@core/utils';
+import { ListUtils, TimeoutUtils } from '@/utils';
+import { isFunction } from 'lodash';
+
+type MenuPlacement = 'bottom' | 'right';
 
 @Component
 export default class ContextMenu extends Vue {
+  protected isRenderSubMenu = false;
+
+  protected isShowMenu = false;
+  protected items: ContextMenuItem[] = [];
+  protected hoverItem: ContextMenuItem | null = null;
+  protected mouseLeaveTimerId: number | null = null;
+
+  protected vcoConfig: any = {
+    handler: this.handler,
+    middleware: this.middleware,
+    events: ['click']
+  };
+
   @Prop({ type: String, default: '' })
   protected readonly minWidth?: string;
 
@@ -74,25 +120,22 @@ export default class ContextMenu extends Vue {
   @Ref()
   private readonly contextMenu!: HTMLElement;
 
-  isShowMenu = false;
-  items: ContextMenuItem[] = [];
+  @Ref()
+  private readonly subContextMenu!: ContextMenu;
 
-  vcoConfig: any = {
-    handler: this.handler,
-    middleware: this.middleware,
-    events: ['click']
-  };
+  @Ref()
+  private readonly menuItems!: HTMLElement[];
 
   show(event: any, items: ContextMenuItem[]): void {
-    this.items = this.parseInputDataToContextMenuItem(items);
+    this.items = this.parseToMenuItem(items);
     this.renderMenuAt({
       targetX: event.pageX,
       targetY: event.pageY
     });
   }
 
-  showAt(target: string | HTMLElement, items: ContextMenuItem[], paddingTop = 8): void {
-    this.items = this.parseInputDataToContextMenuItem(items);
+  showAt(target: string | HTMLElement, items: ContextMenuItem[], config: { paddingTop?: number; placement?: MenuPlacement } = {}): void {
+    this.items = this.parseToMenuItem(items);
     const targetElement: HTMLElement | null = typeof target === 'string' ? document.getElementById(target) : target;
     if (targetElement) {
       const domRect = targetElement.getBoundingClientRect();
@@ -103,34 +146,73 @@ export default class ContextMenu extends Vue {
         targetY: offsetTop,
         width: domRect.width,
         height: domRect.height,
-        paddingTop
+        ...config
       });
     }
+  }
+
+  protected onHoverItem(item: ContextMenuItem, menuIndex: number, isHover: boolean): void {
+    // always select item for apply hover style
+    if (this.hoverItem !== item) {
+      this.isRenderSubMenu = false;
+    }
+    this.hoverItem = item;
+
+    if (item.disabled) {
+      return;
+    }
+
+    if (isHover && ListUtils.isNotEmpty(item.children)) {
+      this.isRenderSubMenu = true;
+      this.$nextTick(() => {
+        this.subContextMenu.showAt(this.menuItems[menuIndex], item.children!, {
+          paddingTop: 0,
+          placement: 'right'
+        });
+      });
+      return;
+    }
+  }
+
+  protected handleOnLeaveMenu(): void {
+    this.mouseLeaveTimerId = TimeoutUtils.waitAndExec(
+      this.mouseLeaveTimerId,
+      () => {
+        this.hoverItem = null;
+        this.isRenderSubMenu = false;
+      },
+      500
+    );
+  }
+
+  protected handleOnOverMenu(): void {
+    TimeoutUtils.clear(this.mouseLeaveTimerId);
+    this.mouseLeaveTimerId = null;
   }
 
   /**
    * calculate position of context menu
    *
    */
-  private renderMenuAt(target: { targetX: number; targetY: number; width?: number; height?: number; paddingTop?: number }): void {
-    const { targetX, targetY, width, height, paddingTop } = target;
+  private renderMenuAt(target: { targetX: number; targetY: number; width?: number; height?: number; paddingTop?: number; placement?: MenuPlacement }): void {
+    const { targetX, targetY, width, height, paddingTop, placement } = target;
     this.$nextTick(() => {
       this.$nextTick(() => {
-        const menuElement: HTMLElement | null = this.contextMenu;
-        if (menuElement) {
-          let menuHeight = menuElement.offsetHeight;
-          let menuWidth = menuElement.offsetWidth;
+        const contextMenu: HTMLElement | null = this.contextMenu;
+        if (contextMenu) {
+          let menuHeight = contextMenu.offsetHeight;
+          let menuWidth = contextMenu.offsetWidth;
 
           if (menuHeight < 1 || menuWidth < 1) {
-            menuElement.style.display = 'block';
-            menuHeight = menuElement.offsetHeight;
-            menuWidth = menuElement.offsetWidth;
+            contextMenu.style.display = 'block';
+            menuHeight = contextMenu.offsetHeight;
+            menuWidth = contextMenu.offsetWidth;
           }
-          const calculatedTop = this.calculatedTop(menuHeight, targetY, height, paddingTop);
-          const calculatedLeft = this.calculatedLeft(menuWidth, targetX, width);
+          const calculatedTop = this.calculatedTop(menuHeight, targetY, height, paddingTop, placement);
+          const calculatedLeft = this.calculatedLeft(menuWidth, targetX, width, placement);
 
-          menuElement.style.top = calculatedTop + 'px';
-          menuElement.style.left = calculatedLeft + 'px';
+          contextMenu.style.top = calculatedTop + 'px';
+          contextMenu.style.left = calculatedLeft + 'px';
           this.isShowMenu = true;
         }
       });
@@ -139,9 +221,10 @@ export default class ContextMenu extends Vue {
 
   public hide() {
     this.isShowMenu = false;
+    this.hoverItem = null;
   }
 
-  private parseInputDataToContextMenuItem(items: ContextMenuItem[]) {
+  private parseToMenuItem(items: ContextMenuItem[]) {
     for (const i in items) {
       items[i].textColor = this.textColor;
       if (typeof items[i].click !== 'function') {
@@ -183,13 +266,19 @@ export default class ContextMenu extends Vue {
   /**
    * calculate left position of context menu.
    */
-  private calculatedLeft(menuWidth: number, targetX: number, targetWidth?: number): number {
+  private calculatedLeft(menuWidth: number, targetX: number, targetWidth?: number, placement?: MenuPlacement): number {
     const currentPageX = targetX - window.scrollX;
-    if (currentPageX + menuWidth >= window.innerWidth) {
-      // reverse position to left
-      return targetX + (targetWidth ?? 0) - menuWidth;
-    } else {
-      return targetX;
+    const targetWidthValue: number = targetWidth ?? 0;
+    switch (placement) {
+      case 'right': {
+        const isRevert = currentPageX + menuWidth + targetWidthValue >= window.innerWidth;
+        return isRevert ? targetX - menuWidth : targetX + targetWidthValue;
+      }
+      case 'bottom':
+      default: {
+        const isRevert = currentPageX + menuWidth >= window.innerWidth;
+        return isRevert ? targetX + targetWidthValue - menuWidth : targetX;
+      }
     }
   }
 
@@ -197,23 +286,36 @@ export default class ContextMenu extends Vue {
    * calculate top position of context menu in window.
    * if menu height + target height + target top > window height => reverse position to top
    */
-  private calculatedTop(menuHeight: number, targetY: number, targetHeight?: number, paddingTop?: number): number {
+  private calculatedTop(menuHeight: number, targetY: number, targetHeight?: number, paddingTop?: number, placement?: MenuPlacement): number {
     const paddingTopValue: number = paddingTop ?? 0;
-    const heightValue: number = targetHeight ?? 0;
-    const currentPageY: number = targetY + heightValue - window.scrollY;
-    if (menuHeight + currentPageY >= window.innerHeight) {
-      // reverse position to top
-      return targetY - menuHeight - paddingTopValue;
-    } else {
-      return targetY + heightValue + paddingTopValue;
+    const targetHeightValue: number = targetHeight ?? 0;
+    switch (placement) {
+      case 'right': {
+        const currentY = targetY - window.scrollY;
+        const isRevert = currentY + menuHeight + paddingTopValue >= window.innerHeight;
+        return isRevert ? targetY - menuHeight - paddingTopValue : targetY + paddingTopValue;
+      }
+      case 'bottom':
+      default: {
+        const startTop: number = targetY + targetHeightValue - window.scrollY;
+        const isRevert = startTop + menuHeight + paddingTopValue >= window.innerHeight;
+        return isRevert ? targetY - menuHeight - paddingTopValue : targetY + targetHeightValue + paddingTopValue;
+      }
     }
   }
 
   protected onClickItem(event: MouseEvent, item: ContextMenuItem): void {
-    this.hide();
-    this.$nextTick(() => {
-      item?.click?.call(item, event);
-    });
+    this.hoverItem = item;
+    // force hide context menu if item item has no children or has click event
+    if (ListUtils.isEmpty(item.children)) {
+      this.hide();
+      this.$emit('selectItem', item, event);
+      this.$nextTick(() => {
+        item?.click?.call(item, event);
+      });
+    } else {
+      event.stopPropagation();
+    }
   }
 }
 </script>
@@ -237,13 +339,17 @@ export default class ContextMenu extends Vue {
     position: fixed;
 
     li {
-      padding: 10px 16px 10px 16px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
 
       .menu-icon-item {
         display: inline-flex;
         justify-content: center;
-        width: 14px;
-        height: 14px;
+        width: 18px;
+        height: 18px;
+        font-size: 16px;
         margin-right: 8px;
         vertical-align: middle;
       }
@@ -259,12 +365,29 @@ export default class ContextMenu extends Vue {
         cursor: default;
         font-size: 14px;
         vertical-align: middle;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .menu-icon-children {
+        display: inline-flex;
+        justify-content: center;
+        width: 14px;
+        height: 14px;
+        margin-left: 8px;
+        vertical-align: middle;
+
+        &.menu-icon-children-active {
+          color: var(--accent);
+        }
       }
 
       &.disabled {
         opacity: var(--normal-opacity);
       }
 
+      &.di-context-menu-item-selected,
       &:hover {
         background-color: var(--hover-color--root);
         cursor: context-menu;

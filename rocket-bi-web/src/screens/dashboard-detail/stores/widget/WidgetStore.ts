@@ -16,7 +16,8 @@ import {
   TabWidget,
   Widget,
   WidgetId,
-  Widgets
+  Widgets,
+  GroupFilter
 } from '@core/common/domain/model';
 import store from '@/store';
 import { DashboardModule } from '@/screens/dashboard-detail/stores/dashboard/DashboardStore';
@@ -504,6 +505,12 @@ class WidgetStore extends VuexModule {
       const widgetId: WidgetId = ListUtils.isNotEmpty(tabWidgets) ? tabWidgets[0].id : -1;
       const tabIndexes: number[] = ListUtils.isNotEmpty(tabWidgets) ? tabWidgets[0].findWidget(id) : [];
       return { groupId: widgetId, tabIndexes: tabIndexes };
+    };
+  }
+
+  get isInGroupFilter(): (id: WidgetId) => boolean {
+    return id => {
+      return this.widgets.some(widget => GroupFilter.isGroupFilter(widget) && widget.allWidgets.some(widgetId => widgetId == id));
     };
   }
 

@@ -141,7 +141,14 @@ class MysqlDDLExecutor(val client: JdbcClient) extends DDLExecutor with Logging 
       client.executeUpdate(query) >= 0
     }
 
-  override def dropTable(dbName: String, tblName: String, tableType: TableType): Future[Boolean] = dropTable(dbName, tblName)
+  override def dropTable(dbName: String, tblName: String, tableType: TableType): Future[Boolean] =
+    Future {
+      val dropTblQuery = tableType match {
+        case TableType.View | TableType.EtlView => s"DROP VIEW IF EXISTS `${dbName}`.`${tblName}`"
+        case _                                  => s"DROP TABLE IF EXISTS `${dbName}`.`${tblName}`"
+      }
+      client.executeUpdate(dropTblQuery) >= 0
+    }
 
   override def getColumnNames(dbName: String, tblName: String): Future[Set[String]] =
     Future {

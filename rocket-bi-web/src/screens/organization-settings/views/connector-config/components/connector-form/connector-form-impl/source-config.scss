@@ -1,0 +1,23 @@
+@import '~@/themes/scss/mixin.scss';
+
+.source-config {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: left;
+
+  .ssh-tunnel {
+    margin-top: 24px;
+  }
+
+  .source-config-form {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: auto auto;
+    width: 100%;
+  }
+
+  .mt-17px {
+    margin-top: 17px;
+  }
+}

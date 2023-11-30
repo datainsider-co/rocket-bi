@@ -68,8 +68,8 @@ import { Log } from '@core/utils';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 import { BModal } from 'bootstrap-vue';
 import { FormulaSuggestionModule } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
-import { QueryFormulaController } from '@/shared/fomula/QueryFormulaController';
-import { FormulaController } from '@/shared/fomula/FormulaController';
+import { MonacoFormulaControllerImpl } from '@/shared/fomula/MonacoFormulaControllerImpl';
+import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
 import { EditorController } from '@/shared/fomula/EditorController';
 import { FormulaUtils } from '@/shared/fomula/FormulaUtils';
 import { DatabaseSchemaModule, SchemaReloadMode } from '@/store/modules/data-builder/DatabaseSchemaStore';
@@ -81,7 +81,8 @@ import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
 import { ConnectorType } from '@core/connector-config';
 import { Di } from '@core/common/modules';
-import { FormulaControllerResolver } from '@/shared/fomula/builder/FormulaControllerResolver';
+import { FormulaControllerFactoryResolver } from '@/shared/fomula/builder/FormulaControllerFactoryResolver';
+import { FormulaControllerFactory } from '@/shared/fomula/builder/FormulaControllerFactory';
 // import QueryComponentCtrl from '@/screens/data-management/components/QueryComponent.ts';
 
 const QueryComponent = () => import('@/screens/data-management/components/QueryComponent.vue');
@@ -94,22 +95,22 @@ const QueryComponent = () => import('@/screens/data-management/components/QueryC
   }
 })
 export default class UpdateTableByQueryModal extends Vue {
-  private readonly databaseTreeViewMode = DatabaseTreeViewMode;
-  private tableSchema: TableSchema | null = null;
-  private query = '';
-  private formulaController: FormulaController | null = null;
-  private editorController = new EditorController();
-  private isLoading = false;
-  private loadingDatabaseSchemas = false;
+  protected readonly databaseTreeViewMode = DatabaseTreeViewMode;
+  protected tableSchema: TableSchema | null = null;
+  protected query = '';
+  protected formulaController: MonacoFormulaController | null = null;
+  protected editorController = new EditorController();
+  protected isLoading = false;
+  protected loadingDatabaseSchemas = false;
 
   @Ref()
-  private readonly modal!: BModal;
+  protected readonly modal!: BModal;
 
   @Ref()
-  private readonly queryComponent!: any;
+  protected readonly queryComponent!: any;
 
   @Ref()
-  private databaseTree!: DatabaseTreeView;
+  protected databaseTree!: DatabaseTreeView;
 
   protected resetModel(): void {
     this.tableSchema = null;
@@ -117,24 +118,19 @@ export default class UpdateTableByQueryModal extends Vue {
     this.isLoading = false;
   }
 
-  private get databaseSchemas(): DatabaseInfo[] {
+  protected get databaseSchemas(): DatabaseInfo[] {
     return DatabaseSchemaModule.databaseInfos;
   }
 
-  private initFormulaController() {
-    const sourceType: ConnectorType = ConnectionModule.source?.className ?? ConnectorType.Clickhouse;
-    const syntax = Di.get(FormulaControllerResolver).getSyntax(sourceType);
-    FormulaSuggestionModule.initSuggestFunction({
-      fileNames: [syntax]
+  protected initFormulaController(): void {
+    const factory: FormulaControllerFactory = Di.get(FormulaControllerFactoryResolver).resolve(ConnectionModule.sourceType);
+    FormulaSuggestionModule.loadSuggestions({
+      supportedFunctionInfo: factory.getSupportedFunctionInfo()
     });
-    this.formulaController = Di.get(FormulaControllerResolver).createController(
-      sourceType,
-      FormulaSuggestionModule.allFunctions,
-      DatabaseSchemaModule.databaseInfos
-    );
+    this.formulaController = factory.createFormulaController(FormulaSuggestionModule.allFunctions, DatabaseSchemaModule.databaseInfos);
   }
 
-  private async initDatabase() {
+  protected async initDatabase() {
     try {
       this.loadingDatabaseSchemas = true;
       await DatabaseSchemaModule.loadShortDatabaseInfos(false);
@@ -145,7 +141,7 @@ export default class UpdateTableByQueryModal extends Vue {
     }
   }
 
-  private async reloadDatabaseSchemas() {
+  protected async reloadDatabaseSchemas() {
     try {
       this.loadingDatabaseSchemas = true;
       await DatabaseSchemaModule.reloadDatabaseInfos(SchemaReloadMode.OnlyDatabaseHasTable);
@@ -173,12 +169,12 @@ export default class UpdateTableByQueryModal extends Vue {
     this.initData();
   }
 
-  private handleClickField(field: Field) {
+  protected handleClickField(field: Field) {
     const query = FormulaUtils.toQuery(field.fieldName);
     this.editorController.appendText(query);
   }
 
-  private handleClickTable(table: TableSchema) {
+  protected handleClickTable(table: TableSchema) {
     const query = FormulaUtils.toQuery(table.dbName, table.name);
     this.editorController.appendText(query);
   }
@@ -192,7 +188,7 @@ export default class UpdateTableByQueryModal extends Vue {
     table_name: (_: UpdateTableByQueryModal) => _.tableSchema?.name,
     query: (_: UpdateTableByQueryModal) => _.getQuery()
   })
-  private async handleUpdateTableSchema() {
+  protected async handleUpdateTableSchema() {
     try {
       this.isLoading = true;
       const tableSchema = await DataManagementModule.createTableFromQuery({

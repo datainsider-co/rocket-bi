@@ -1,5 +1,6 @@
 package co.datainsider.jobworker.client
 
+import co.datainsider.caas.user_profile.util.JsonParser
 import co.datainsider.jobworker.domain._
 import co.datainsider.jobworker.service.hubspot.client.{
   APIKeyHubspotClient,
@@ -17,7 +18,6 @@ class HubspotClientTest extends FunSuite {
   val job = HubspotJob(
     orgId = 0,
     syncMode = SyncMode.FullSync,
-    jobType = JobType.Hubspot,
     subType = HubspotObjectType.Contact,
     sourceId = 0,
     lastSuccessfulSync = 0,
@@ -42,11 +42,12 @@ class HubspotClientTest extends FunSuite {
   }
 
   test("test contact reader") {
-    val reader = new HubspotReader(apiKey, job)
+    val jobFromJson = JsonParser.fromJson[Job](JsonParser.toJson(job))
+    val reader = new HubspotReader(apiKey, jobFromJson.asInstanceOf[HubspotJob])
     val tableSchema = reader.getSchema
     val columns = tableSchema.columns
 
     val records = reader.next(columns)
-    records.foreach(r => println(r.mkString(", ")))
+    records.foreach(r => println(JsonParser.toJson(r)))
   }
 }

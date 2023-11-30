@@ -3,31 +3,33 @@
  * @created: 5/5/21, 2:57 PM
  */
 
-import { FormulaSuggestionModule, FunctionInfo } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
+import { FunctionInfo } from '@/screens/chart-builder/config-builder/database-listing/FormulaSuggestionStore';
 import { Column } from '@core/common/domain/model';
-import { FormulaController } from '@/shared/fomula/FormulaController';
-import { Log } from '@core/utils';
+import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
 import { FormulaUtils } from '@/shared/fomula/FormulaUtils';
+import { languages } from 'monaco-editor';
+import IMonarchLanguage = languages.IMonarchLanguage;
 
-export class CalculatedFieldController implements FormulaController {
+export class CalculatedFieldController implements MonacoFormulaController {
   private languageRegister: any | null = null;
   private tokensProvider: any | null = null;
 
   private readonly allFunctions: FunctionInfo[];
   private readonly columns: Column[];
+  private readonly monarchLanguage: IMonarchLanguage;
 
-  constructor(allFunctions: FunctionInfo[], columns: Column[]) {
-    Log.debug('ClickhouseFormulaController::', columns);
+  constructor(allFunctions: FunctionInfo[], columns: Column[], monarchLanguage: IMonarchLanguage) {
     this.allFunctions = allFunctions;
     this.columns = columns;
+    this.monarchLanguage = monarchLanguage;
   }
 
   formulaName(): string {
     return 'calculated-field';
   }
 
-  getTheme(themeType: 'light' | 'dark' | 'custom'): string {
-    return `formula-theme-${themeType}`;
+  getTheme(): string {
+    return `formula-theme-light`;
   }
 
   init(monaco: any): void {
@@ -39,7 +41,7 @@ export class CalculatedFieldController implements FormulaController {
       triggerCharacters: [',', '('],
       provideCompletionItems: () => {
         const suggestionFunctions = FormulaUtils.createSuggestKeywords(this.allFunctions);
-        const suggestionFields = FormulaUtils.createSuggestCalculatedFields(this.fieldNames());
+        const suggestionFields = FormulaUtils.createSuggestCalculatedFields(this.getFieldNames());
         return { suggestions: suggestionFunctions.concat(suggestionFields) };
       }
     });
@@ -54,50 +56,14 @@ export class CalculatedFieldController implements FormulaController {
   private initTokenProvider(monaco: any): any {
     // register color
     return monaco.languages.setMonarchTokensProvider(this.formulaName(), {
+      ...this.monarchLanguage,
       keywords: this.allFunctions.map(_ => _.name),
-      fields: this.fieldNames(),
-      operators: [
-        '=',
-        '>',
-        '<',
-        '!',
-        '~',
-        '?',
-        ':',
-        '==',
-        '<=',
-        '>=',
-        '!=',
-        '&&',
-        '||',
-        '++',
-        '--',
-        '+',
-        '-',
-        '*',
-        '/',
-        '&',
-        '|',
-        '^',
-        '%',
-        '<<',
-        '>>',
-        '>>>',
-        '+=',
-        '-=',
-        '*=',
-        '/=',
-        '&=',
-        '|=',
-        '^=',
-        '%=',
-        '<<=',
-        '>>=',
-        '>>>='
-      ],
-      symbols: /[=><!~?:&|+\-*/^%]+/,
+      fields: this.getFieldNames(),
+      columns: this.getFieldNames(),
       tokenizer: {
+        ...this.monarchLanguage.tokenizer,
         root: [
+          ...this.monarchLanguage.tokenizer.root,
           [
             /[0-9a-z_$][\w$]*/,
             {
@@ -107,21 +73,13 @@ export class CalculatedFieldController implements FormulaController {
               }
             }
           ],
-          [/\[.*?]/, 'field'],
-
-          // numbers
-          [/\d*\.\d+([eE][-+]?\d+)?\b/, 'number.float'],
-          [/0[xX][0-9a-fA-F]+/, 'number.hex'],
-          [/\d+\b/, 'number'],
-
-          // delimiter: after number because of .\d floats
-          [/[;,.]/, 'delimiter']
+          [/\[.*?]/, 'field']
         ]
       }
-    });
+    } as any);
   }
 
-  private fieldNames(): string[] {
+  private getFieldNames(): string[] {
     return this.columns.map(col => col.displayName);
   }
 }

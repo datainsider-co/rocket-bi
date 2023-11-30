@@ -35,7 +35,7 @@ import ConfigBuilder from '@/screens/chart-builder/config-builder/ConfigBuilder.
 import ConfigBuilderController from '@/screens/chart-builder/config-builder/ConfigBuilder';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import { cloneDeep } from 'lodash';
-import { ListUtils } from '@/utils';
+import { ListUtils, TimeoutUtils } from '@/utils';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 import { TChartBuilderOptions } from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderModal.vue';
 import { ChartBuilderConfig, DefaultChartBuilderConfig } from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderConfig';
@@ -50,7 +50,7 @@ Vue.use(Settings);
     DatabaseListing,
     ConfigBuilder,
     VizPanel,
-    VizSettingModal,
+    // VizSettingModal,
     MatchingLocationModal,
     SlideXLeftTransition,
     DefaultSetting
@@ -65,6 +65,9 @@ export default class ChartBuilderController extends Vue {
   private databaseErrorMsg = '';
   private config: ChartBuilderConfig = DefaultChartBuilderConfig;
   private isSettingConfig = true;
+  // key force render setting component if config change
+  private settingComponentKey = 0;
+  private currentCompoentKey = 0;
 
   @Prop({ required: false, type: String, default: BuilderMode.Create })
   private readonly builderMode!: BuilderMode;
@@ -79,8 +82,8 @@ export default class ChartBuilderController extends Vue {
   @Ref()
   private readonly vizPanel!: VizPanel;
 
-  @Ref()
-  private readonly settingModal!: VizSettingModal;
+  // @Ref()
+  // private readonly settingModal!: VizSettingModal;
 
   @Ref()
   private readonly matchingLocationModal!: MatchingLocationModal;
@@ -124,9 +127,14 @@ export default class ChartBuilderController extends Vue {
     return void 0;
   }
 
-  private updateBuilderConfig(value: boolean) {
-    this.isSettingConfig = value;
-    // this.vizPanel.resize();
+  private async updateBuilderConfig(isSettingConfig: boolean) {
+    this.isSettingConfig = isSettingConfig;
+    if (!isSettingConfig && this.currentCompoentKey !== this.settingComponentKey) {
+      this.databaseStatus = Status.Loading;
+      await TimeoutUtils.sleep(5);
+      this.currentCompoentKey = this.settingComponentKey;
+      this.databaseStatus = Status.Loaded;
+    }
   }
 
   private onChartInfoChanged(chartInfo: ChartInfo, reRender = false) {
@@ -202,8 +210,11 @@ export default class ChartBuilderController extends Vue {
     if (!this.isPreventChangeQuery) {
       const chartInfo: ChartInfo | null = this.createChartInfo(querySetting);
       this.currentChartInfo = chartInfo;
-      // Log.debug('onQuerySettingChanged::', chartInfo?.setting.options.options);
-      this.$nextTick(() => this.vizPanel.renderChart(chartInfo));
+
+      this.$nextTick(() => {
+        this.settingComponentKey++;
+        this.vizPanel.renderChart(chartInfo);
+      });
     }
   }
 
@@ -308,7 +319,8 @@ export default class ChartBuilderController extends Vue {
   }
 
   private onSettingButtonClicked() {
-    this.settingModal.show(this.currentChartInfo!, this.onSave, this.onCancel);
+    Log.debug('ChartBuilderContainer::onSettingButtonClicked');
+    // this.settingModal.show(this.currentChartInfo!, this.onSave, this.onCancel);
   }
 
   private onCancel() {

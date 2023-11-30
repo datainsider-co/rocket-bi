@@ -92,22 +92,19 @@ export abstract class ConditionUtils {
   }
 
   static buildBetweenConditionByDateRange(field: Field, range: DateRange): FieldRelatedCondition {
-    return new BetweenAndIncluding(field, DateTimeUtils.formatDate(range.start), DateTimeUtils.formatDate(range.end, true));
+    return new BetweenAndIncluding(field, DateTimeUtils.formatDateTime(range.start), DateTimeUtils.formatDateTime(range.end, true));
   }
 
   static buildDateCondition(field: Field, currentRange: DateRange | null | undefined): FieldRelatedCondition {
-    const dateRange = ConditionUtils.formatDateRange(currentRange);
-    const condition = new BetweenAndIncluding(field, dateRange.start, dateRange.end);
-    if (SchemaUtils.isNested(field.tblName)) {
-      condition.setScalarFunction(new GetArrayElement());
-    }
+    const finalDateRange = currentRange || DateUtils.getDefaultDateRange();
+    const condition = this.buildBetweenConditionByDateRange(field, finalDateRange);
     return condition;
   }
 
   static formatDateRange(currentRange: DateRange | null | undefined): { start: string; end: string } {
     return {
-      start: DateTimeUtils.formatDate(currentRange?.start || DateUtils.DefaultMinDate),
-      end: DateTimeUtils.formatDate(currentRange?.end || DateUtils.DefaultMaxDate, true)
+      start: DateTimeUtils.formatDateTime(currentRange?.start || DateUtils.DefaultMinDate),
+      end: DateTimeUtils.formatDateTime(currentRange?.end || DateUtils.DefaultMaxDate, true)
     };
   }
 

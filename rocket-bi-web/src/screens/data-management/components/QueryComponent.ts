@@ -1,6 +1,6 @@
 import { Component, Emit, Inject, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import FormulaCompletionInput from '@/shared/components/formula-completion-input/FormulaCompletionInput.vue';
-import { FormulaController } from '@/shared/fomula/FormulaController';
+import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
 import {
   ChartInfo,
   DashboardId,
@@ -130,7 +130,7 @@ export default class QueryComponent extends Vue {
   protected readonly showCreateTableButton!: boolean;
 
   @Prop({ required: false, type: Object })
-  protected readonly formulaController!: FormulaController;
+  protected readonly formulaController!: MonacoFormulaController;
 
   @Prop({ required: true, type: Object })
   protected readonly editorController!: EditorController;

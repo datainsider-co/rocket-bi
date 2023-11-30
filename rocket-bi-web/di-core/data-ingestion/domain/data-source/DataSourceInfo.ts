@@ -7,7 +7,9 @@ import {
   DataSources,
   FacebookAdsSourceInfo,
   GoogleAdsSourceInfo,
+  HubspotSourceInfo,
   JdbcSource,
+  MixpanelSourceInfo,
   MongoDBSource,
   MongoDBSourceInfo,
   S3Source,
@@ -83,6 +85,10 @@ export abstract class DataSourceInfo {
         return PalexySourceInfo.fromObject(obj);
       case DataSourceType.GoogleSearchConsole:
         return GoogleSearchConsoleSourceInfo.fromObject(obj);
+      case DataSourceType.Hubspot:
+        return HubspotSourceInfo.fromObject(obj);
+      case DataSourceType.Mixpanel:
+        return MixpanelSourceInfo.fromObject(obj);
       default:
         return UnsupportedSourceInfo.fromObject(obj);
     }
@@ -115,11 +121,12 @@ export abstract class DataSourceInfo {
         return TiktokSourceInfo.fromObject(obj);
       case DataSources.Palexy:
         return PalexySourceInfo.fromObject(obj);
-      case DataSources.GoogleSearchConsole: {
-        const source = GoogleSearchConsoleSourceInfo.fromObject(obj);
-        Log.debug('DataSourceInfo::fromDataSource::obj::', source);
-        return source;
-      }
+      case DataSources.GoogleSearchConsole:
+        return GoogleSearchConsoleSourceInfo.fromObject(obj);
+      case DataSources.Hubspot:
+        return HubspotSourceInfo.fromObject(obj);
+      case DataSources.Mixpanel:
+        return MixpanelSourceInfo.fromObject(obj);
       default:
         return UnsupportedSourceInfo.fromObject(obj);
     }
@@ -157,7 +164,7 @@ export abstract class DataSourceInfo {
     }
   }
 
-  static default(type: DataSourceType): DataSourceInfo {
+  static createDefault(type: DataSourceType): DataSourceInfo {
     return DataSourceInfo.fromObject({ sourceType: type as DataSourceType, id: DataSourceInfo.DEFAULT_ID });
   }
 
@@ -197,6 +204,10 @@ export abstract class DataSourceInfo {
         return 'ic_palexy_small.svg';
       case DataSourceType.GoogleSearchConsole:
         return 'ic_google_search_console_small.svg';
+      case DataSourceType.Hubspot:
+        return 'ic_hubspot_small.svg';
+      case DataSourceType.Mixpanel:
+        return 'ic_mixpanel_small.svg';
       default:
         return 'ic_default.svg';
     }

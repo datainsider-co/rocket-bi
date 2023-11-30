@@ -115,29 +115,35 @@ export default class DashboardControlBar extends Vue {
   private get items(): ContextMenuItem[] {
     return [
       {
-        text: DashboardOptions.ADD_CHART,
-        click: this.handleAddChart
+        text: 'Add chart',
+        click: this.handleAddChart,
+        icon: 'di-icon-add-chart'
       },
       {
-        text: DashboardOptions.ADD_TAB,
-        click: this.handleAddTab
+        text: 'Add tab',
+        click: this.handleAddTab,
+        icon: 'di-icon-add-tab'
       },
       {
-        text: DashboardOptions.ADD_GROUP_FILTER,
-        click: this.handleAddFilterPanel
+        text: 'Add panel filters',
+        click: this.handleAddFilterPanel,
+        icon: 'di-icon-filter-panel'
       },
       {
-        text: DashboardOptions.ADD_TEXT,
-        click: this.showAddText
+        text: 'Add text',
+        click: this.showAddText,
+        icon: 'di-icon-add-text'
       },
       {
-        text: DashboardOptions.ADD_IMAGE,
-        click: this.addImage
+        text: 'Add image',
+        click: this.addImage,
+        icon: 'di-icon-add-image'
       },
       {
         text: 'Paste chart',
         click: this.handlePasteChart,
-        disabled: this.disabledPasteChart
+        disabled: this.disabledPasteChart,
+        icon: 'di-icon-paste-chart'
       }
     ];
   }
@@ -354,7 +360,6 @@ export default class DashboardControlBar extends Vue {
     const dashboard = DashboardModule.currentDashboard;
     if (dashboard) {
       DataManager.saveCurrentDashboardId(dashboard.id.toString());
-      DataManager.saveCurrentDashboard(dashboard);
     }
     // RouteUtils.navigateToDataBuilder(this.$route, FilterModule.routerFilters);
     this.$root.$emit(DashboardEvents.AddChart);

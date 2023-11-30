@@ -98,7 +98,7 @@ export default class FacebookAdsSyncModeConfig extends Vue {
   }
 
   private get defaultDateRange(): DateRange {
-    return DateUtils.getCurrentDate(DateTypes.week)!;
+    return DateUtils.getThisWeek();
   }
 
   private selectCustomDateRange(callback: Function) {

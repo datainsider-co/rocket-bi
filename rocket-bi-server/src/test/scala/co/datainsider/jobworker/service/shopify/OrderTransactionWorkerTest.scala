@@ -61,7 +61,7 @@
 //
 //    val syncId = 12
 //    await(ssdbKVS.add(syncId, true).asTwitter)
-//    val worker = new ShopifyWorker(source, schemaService, kvs = ssdbKVS)
+//    val worker: ShopifyWorker = createWorker(source)
 //    var finishedProgress: ShopifyJobProgress = null
 //    try {
 //      finishedProgress = worker.run(job, syncId, reportJob);
@@ -95,7 +95,7 @@
 //
 //    val syncId = 13
 //    await(ssdbKVS.add(syncId, true).asTwitter)
-//    val worker = new ShopifyWorker(source, schemaService, kvs = ssdbKVS)
+//    val worker: ShopifyWorker = createWorker(source)
 //    var finishedProgress: ShopifyJobProgress = null
 //    try {
 //      finishedProgress = worker.run(job.copy(lastSyncedValue = lastSyncedValue), syncId, reportJob);
@@ -127,7 +127,7 @@
 //
 //    val syncId = 13
 //    await(ssdbKVS.add(syncId, true).asTwitter)
-//    val worker = new ShopifyWorker(source, schemaService, kvs = ssdbKVS)
+//    val worker: ShopifyWorker = createWorker(source)
 //    var finishedProgress: ShopifyJobProgress = null
 //    try {
 //      finishedProgress = worker.run(job2, syncId, reportJob);

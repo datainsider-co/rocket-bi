@@ -3,7 +3,6 @@ import store from '@/store';
 import { Stores } from '@/shared';
 import { Column, TableSchema } from '@core/common/domain/model';
 import { ListUtils } from '@/utils';
-import { ConnectorType } from '@core/connector-config';
 
 /* eslint @typescript-eslint/camelcase: 0 */
 
@@ -23,7 +22,7 @@ export abstract class SupportedFunctionInfo {
 
   [key: string]: FunctionInfo[];
 
-  static empty() {
+  static empty(): SupportedFunctionInfo {
     return { useFunctions: [] };
   }
 }
@@ -63,28 +62,25 @@ export class FormulaSuggestionStore extends VuexModule {
   }
 
   /**
-   * Init suggestion with fileNames, file must in folder model
-   * @param payload.fileNames file in  @/shared/data
-   * @param payload.useFunctions Chi dinh ra cac loai function se dung, mac dinh la su dung tat ca
-   * @param payload.ignoreFunctions Chi dinh ra cac loai function se bi ignore, mac dinh khong ignore function nao
+   * Init supported function with functionList
+   * @param payload.functionList all function supported
+   * @param payload.useFunctions if not empty, only use these functions. Otherwise, use all keys
+   * @param payload.ignoreFunctions if not empty, ignore these functions. Otherwise, ignore nothing
    */
   @Mutation
-  initSuggestFunction(payload: { fileNames: string[]; useFunctions?: string[]; ignoreFunctions?: string[] }): void {
-    const { fileNames, useFunctions, ignoreFunctions } = payload;
+  loadSuggestions(payload: { supportedFunctionInfo: SupportedFunctionInfo; useFunctions?: string[]; ignoreFunctions?: string[] }): void {
+    const { supportedFunctionInfo, useFunctions, ignoreFunctions } = payload;
+    const finalFunctionInfo: SupportedFunctionInfo = SupportedFunctionInfo.empty();
+    Object.assign(finalFunctionInfo, supportedFunctionInfo);
 
-    const functionsList: SupportedFunctionInfo[] = fileNames.map(fileName => require('@/shared/data/' + fileName));
-    const functionInfoList = SupportedFunctionInfo.empty();
-    functionsList.forEach(supportedInfo => Object.assign(functionInfoList, supportedInfo));
-
-    // tu dong lay useFunctions, neu khong co thi lay all keys -> useFunctions
-    const supportedFunctions: string[] = ListUtils.isNotEmpty(useFunctions) ? useFunctions! : Object.keys(functionInfoList);
+    const supportedFunctions: string[] = ListUtils.isNotEmpty(useFunctions) ? useFunctions! : Object.keys(finalFunctionInfo);
     // always ignore useFunctions keys
     const ignoreFunctionAsSet: Set<string> = new Set((ignoreFunctions ?? []).concat('useFunctions'));
     const finalSupportedFunctions: string[] = ListUtils.remove(supportedFunctions, item => ignoreFunctionAsSet.has(item));
 
-    Object.assign(functionInfoList, { useFunctions: finalSupportedFunctions });
+    Object.assign(finalFunctionInfo, { useFunctions: finalSupportedFunctions });
 
-    this.supportedFunctionInfo = functionInfoList;
+    this.supportedFunctionInfo = finalFunctionInfo;
   }
 
   @Mutation

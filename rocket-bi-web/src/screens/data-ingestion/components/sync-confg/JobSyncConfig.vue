@@ -58,6 +58,8 @@
       :job.sync="syncJob"
       :single-table="singleTable"
     />
+    <HubspotSyncModeConfig v-if="isHubspotJob" class="mb-3" :job.sync="syncJob" :single-table="singleTable" />
+    <MixpanelSyncModeConfig v-if="isMixpanelJob" class="mb-3" :job.sync="syncJob" :single-table="singleTable" />
   </div>
 </template>
 
@@ -77,9 +79,12 @@ import GoogleAnalyticSyncModeConfig from '@/screens/data-ingestion/components/go
 import TiktokAdsSyncModeConfig from '@/screens/data-ingestion/components/tiktok/TiktokAdsSyncModeConfig.vue';
 import GoogleAnalytic4SyncModeConfig from '@/screens/data-ingestion/components/google-analytics-4/GoogleAnalytic4SyncModeConfig.vue';
 import PalexySyncModeConfig from '@/screens/data-ingestion/components/palexy/PalexySyncModeConfig.vue';
+import HubspotSyncModeConfig from '@/screens/data-ingestion/components/HubspotSyncModeConfig.vue';
+import MixpanelSyncModeConfig from '@/screens/data-ingestion/components/mixpanel/MixpanelSyncModeConfig.vue';
 
 @Component({
   components: {
+    HubspotSyncModeConfig,
     TiktokAdsSyncModeConfig,
     ShopifySyncModeConfig,
     S3SyncModeConfig,
@@ -91,7 +96,8 @@ import PalexySyncModeConfig from '@/screens/data-ingestion/components/palexy/Pal
     FacebookAdsSyncModeConfig,
     GoogleAnalyticSyncModeConfig,
     GoogleAnalytic4SyncModeConfig,
-    PalexySyncModeConfig
+    PalexySyncModeConfig,
+    MixpanelSyncModeConfig
   }
 })
 export default class JobSyncConfig extends Vue {
@@ -180,6 +186,14 @@ export default class JobSyncConfig extends Vue {
 
   private get isPalexyJob(): boolean {
     return this.syncJob.className === JobName.PalexyJob;
+  }
+
+  private get isHubspotJob(): boolean {
+    return this.syncJob.className === JobName.Hubspot;
+  }
+
+  private get isMixpanelJob(): boolean {
+    return this.syncJob.className === JobName.Mixpanel;
   }
 
   private get isGoogleSearchConsoleJob(): boolean {

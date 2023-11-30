@@ -3,7 +3,18 @@
  * @created: 6/1/21, 2:16 PM
  */
 
-import { DataSources, DataSourceType, FacebookAdsSource, GoogleAdsSource, JdbcSource, MongoDBSource, S3Source, TiktokSource } from '@core/data-ingestion';
+import {
+  DataSources,
+  DataSourceType,
+  FacebookAdsSource,
+  GoogleAdsSource,
+  JdbcSource,
+  MongoDBSource,
+  S3Source,
+  TiktokSource,
+  HubspotSource,
+  MixpanelSource
+} from '@core/data-ingestion';
 import { GoogleServiceAccountSource } from '@core/data-ingestion/domain/response/GoogleServiceAccountSource';
 import { ShopifySource } from '@core/data-ingestion/domain/response/ShopifySource';
 import { UnsupportedSource } from '@core/data-ingestion/domain/response/UnsupportedSource';
@@ -44,6 +55,10 @@ export abstract class DataSource {
         return PalexySource.fromObject(obj);
       case DataSources.GoogleSearchConsole:
         return GoogleSearchConsoleSource.fromObject(obj);
+      case DataSources.Hubspot:
+        return HubspotSource.fromObject(obj);
+      case DataSources.Mixpanel:
+        return MixpanelSource.fromObject(obj);
       default:
         return UnsupportedSource.fromObject(obj);
     }

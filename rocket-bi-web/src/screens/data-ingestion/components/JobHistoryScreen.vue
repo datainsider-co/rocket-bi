@@ -67,19 +67,17 @@ import { Log } from '@core/utils';
 import {
   DataSourceInfo,
   DataSourceType,
-  JdbcJob,
-  SortRequest,
-  S3Job,
-  S3SourceInfo,
-  Job,
-  JobType,
-  GoogleAnalyticJob,
-  JobService,
+  Ga4Dimension,
   GA4Job,
   GA4Metric,
-  Ga4Dimension,
-  GoogleSearchConsoleJob,
-  GoogleSearchConsoleType
+  GoogleAnalyticJob,
+  JdbcJob,
+  Job,
+  JobService,
+  JobType,
+  S3Job,
+  S3SourceInfo,
+  SortRequest
 } from '@core/data-ingestion';
 import { JobHistoryModule } from '@/screens/data-ingestion/store/JobHistoryStore';
 import { DIException, SortDirection } from '@core/common/domain';
@@ -200,7 +198,7 @@ export default class JobHistoryScreen extends Vue {
   @Track(TrackEvents.JobCreate)
   private openNewJobConfigModal() {
     // this.isShowDataSourceSelectionModal = true;
-    const job = JdbcJob.default(DataSourceInfo.default(DataSourceType.MySql));
+    const job = JdbcJob.default(DataSourceInfo.createDefault(DataSourceType.MySql));
     // this.jobCreationModal.show(job);
     this.multiJobCreationModal.show(
       job,
@@ -242,13 +240,10 @@ export default class JobHistoryScreen extends Vue {
         await this.jobService.multiCreateV2(listGAJob);
         break;
       }
-      case JobType.GoogleSearchConsole: {
-        const newJob = job as GoogleSearchConsoleJob;
-        const searchAnalyticJob = cloneDeep(newJob);
-        const searchAppearanceJob = cloneDeep(newJob);
-        searchAppearanceJob.tableType = GoogleSearchConsoleType.SearchAppearance;
-        searchAnalyticJob.tableType = GoogleSearchConsoleType.SearchAnalytics;
-        await JobModule.multiCreateV2({ jobs: [searchAnalyticJob.createSingleJob(), searchAppearanceJob.createSingleJob()] });
+      case JobType.GoogleSearchConsole:
+      case JobType.Hubspot:
+      case JobType.Mixpanel: {
+        await JobModule.multiCreateV2({ jobs: Job.getMultiJob(job) });
         break;
       }
       default: {

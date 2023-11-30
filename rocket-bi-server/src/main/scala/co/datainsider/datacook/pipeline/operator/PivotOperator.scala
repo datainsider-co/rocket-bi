@@ -24,7 +24,7 @@ case class PivotOperatorExecutor(operatorService: OperatorService) extends Execu
       val result: Future[TableResult] = for {
         tableSchema <-
           operatorService.createTable(context.orgId, context.jobId, operator.query, operator.destTableConfiguration)
-        _ <- operatorService.ingestIfTableEmpty(tableSchema, operator.query)
+        _ <- operatorService.ingestIfTableEmpty(operator.query, tableSchema)
       } yield TableResult(operator.id, tableSchema)
       result
         .transform {

@@ -9,10 +9,8 @@ export abstract class DashboardOptions {
   static readonly DUPLICATE_CHART = 'Duplicate chart';
   static readonly DUPLICATE = 'Duplicate';
   static readonly DELETE = 'Delete';
-  static readonly ADD_CHART = 'Add chart';
   static readonly ADD_CONTROL = 'Add control';
   static readonly ADD_RULER = 'Add ruler';
-  static readonly ADD_TEXT = 'Add text';
   static readonly ADD_LINK = 'Add link';
   static readonly ADD_IMAGE = 'Add image';
   static readonly ZOOM = 'Zoom';
@@ -20,8 +18,6 @@ export abstract class DashboardOptions {
   static readonly ADD_FILTER_WIDGET = 'Add chart filter';
   static readonly UPDATE_FILTER_WIDGET = 'Update chart filter';
   static readonly DELETE_FILTER_WIDGET = 'Delete chart filter';
-  static readonly ADD_TAB = 'Add tab';
-  static readonly ADD_GROUP_FILTER = 'Add panel filters';
 }
 
 export const DefaultSize: [number, number] = [16, 10];

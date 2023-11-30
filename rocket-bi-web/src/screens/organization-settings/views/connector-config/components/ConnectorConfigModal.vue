@@ -4,16 +4,17 @@
     centered
     class="rounded"
     size="lg"
-    v-model="isShow"
     lazy
+    ok-title="Apply"
+    v-model="isShow"
     :ok-disabled="loading"
     :cancel-disabled="loading"
-    ok-title="Apply"
     :cancel-title="cancelTitle"
-    @ok="event => submitSource(model, event)"
-    @cancel="cancel"
     :no-close-on-backdrop="!enableBack"
     :no-close-on-esc="!enableBack"
+    @cancel="cancel"
+    @hidden="reset"
+    @ok="event => submitSource(model, event)"
   >
     <template #modal-header>
       <div>
@@ -24,7 +25,7 @@
       </div>
     </template>
     <!--    <vuescroll :ops="scrollOptions">-->
-    <component :is="toComponent" :model.sync="model" ref="sourceConfig" @loadPublicKeyError="handleLoadPublicKeyError" />
+    <component :is="toComponent" :model.sync="model" ref="connectorForm" @loadPublicKeyError="handleLoadPublicKeyError" />
 
     <DiIconTextButton id="test-connection-btn" title="Test connection" @click="testConnection(model)">
       <BSpinner v-if="isTestConnectionLoading" small></BSpinner>
@@ -37,57 +38,45 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Ref } from 'vue-property-decorator';
-import { ConnectorService, Connector, ConnectorType } from '@core/connector-config';
+import { Component, Ref, Vue } from 'vue-property-decorator';
+import { Connector, ConnectorService, ConnectorType } from '@core/connector-config';
 import { Inject } from 'typescript-ioc';
 import { Log } from '@core/utils';
-import { VerticalScrollConfigs } from '@/shared';
 import { DIException, InvalidDataException } from '@core/common/domain';
 import { cloneDeep } from 'lodash';
 import ErrorMessage from '@/screens/organization-settings/views/connector-config/ErrorMessage.vue';
 import SuccessMessage from '@/screens/organization-settings/views/connector-config/SuccessMessage.vue';
-import RedshiftConnectorForm from '@/screens/organization-settings/views/connector-config/connector-form/connector-form-impl/RedshiftConnectorForm.vue';
+import { AbstractConnectorForm } from '@/screens/organization-settings/views/connector-config/components/connector-form/AbstractConnectorForm';
 
-const BigqueryConnectorForm = () =>
-  import('@/screens/organization-settings/views/connector-config/connector-form/connector-form-impl/BigQueryConnectorForm.vue');
-const ClickhouseConnectorForm = () =>
-  import('@/screens/organization-settings/views/connector-config/connector-form/connector-form-impl/ClickhouseConnectorForm.vue');
-
-const MySQLConnectorForm = () =>
-  import('@/screens/organization-settings/views/connector-config/connector-form/connector-form-impl/my_sql/MySQLConnectorForm.vue');
-const VerticaConnectorForm = () =>
-  import('@/screens/organization-settings/views/connector-config/connector-form/connector-form-impl/vertica/VerticaConnectorForm.vue');
-const PostgreSQLConnectorForm = () =>
-  import('@/screens/organization-settings/views/connector-config/connector-form/connector-form-impl/PostgreSQLConnectorForm.vue');
 @Component({
   components: { ErrorMessage, SuccessMessage }
 })
 export default class ConnectorConfigModal extends Vue {
-  private scrollOptions = VerticalScrollConfigs;
   static readonly components = new Map<string, Function>([
-    [ConnectorType.Bigquery, BigqueryConnectorForm],
-    [ConnectorType.Clickhouse, ClickhouseConnectorForm],
-    [ConnectorType.MySQL, MySQLConnectorForm],
-    [ConnectorType.Vertica, VerticaConnectorForm],
-    [ConnectorType.PostgreSQL, PostgreSQLConnectorForm],
-    [ConnectorType.Redshift, RedshiftConnectorForm]
+    [ConnectorType.Bigquery, () => import('./connector-form/connector-form-impl/BigQueryConnectorForm.vue')],
+    [ConnectorType.Clickhouse, () => import('./connector-form/connector-form-impl/ClickhouseConnectorForm.vue')],
+    [ConnectorType.MySQL, () => import('./connector-form/connector-form-impl/MySQLConnectorForm.vue')],
+    [ConnectorType.Vertica, () => import('./connector-form/connector-form-impl/VerticaConnectorForm.vue')],
+    [ConnectorType.PostgreSQL, () => import('./connector-form/connector-form-impl/PostgreSQLConnectorForm.vue')],
+    [ConnectorType.Redshift, () => import('./connector-form/connector-form-impl/RedshiftConnectorForm.vue')]
   ]);
-  private model: Connector | null = null;
-  private callback: ((source: Connector) => void) | null = null;
-  private onBack: (() => void) | null = null;
-  private loading = false;
-  private enableBack = false;
-  private isShowConnectionStatus = false;
-  private isTestConnectionLoading = false;
-  private isTestConnectionSuccess = false;
-  private isShow = false;
-  private testErrorMessage = '';
-  private cancelTitle = 'Back';
+  protected model: Connector | null = null;
+  protected callback: ((source: Connector) => void) | null = null;
+  protected onBack: (() => void) | null = null;
+  protected loading = false;
+  protected enableBack = false;
+  protected isShowConnectionStatus = false;
+  protected isTestConnectionLoading = false;
+  protected isTestConnectionSuccess = false;
+  protected isShow = false;
+  protected testErrorMessage = '';
+  protected cancelTitle = 'Back';
+
   @Ref()
-  private sourceConfig: any;
+  protected readonly connectorForm!: AbstractConnectorForm<Connector>;
 
   @Inject
-  private clickhouseConfigService!: ConnectorService;
+  protected connectorService!: ConnectorService;
 
   show(source: Connector, enableBack: boolean, cancelTitle: string, callback: (source: Connector) => void, onBack: () => void) {
     Log.debug('DataSourceConfigModal::show::source::', this.model);
@@ -102,6 +91,9 @@ export default class ConnectorConfigModal extends Vue {
 
   hide() {
     this.isShow = false;
+  }
+
+  protected reset(): void {
     this.model = null;
     this.isShowConnectionStatus = false;
     this.enableBack = false;
@@ -110,14 +102,14 @@ export default class ConnectorConfigModal extends Vue {
     this.cancelTitle = 'Back';
   }
 
-  private get toComponent(): Function | undefined {
+  protected get toComponent(): Function | undefined {
     if (this.model) {
       return ConnectorConfigModal.components.get(this.model.className);
     }
     return void 0;
   }
 
-  private async testConnection(source: Connector | null) {
+  protected async testConnection(source: Connector | null) {
     if (!source) {
       return;
     }
@@ -126,12 +118,12 @@ export default class ConnectorConfigModal extends Vue {
     this.isShowConnectionStatus = false;
     this.testErrorMessage = '';
     try {
-      this.sourceConfig.valid();
+      this.connectorForm.valid();
       const clonedSource = cloneDeep(source);
       if (clonedSource.tunnelConfig) {
         clonedSource.tunnelConfig.timeoutMs = 30000;
       }
-      this.isTestConnectionSuccess = await this.clickhouseConfigService.testConnection(clonedSource!);
+      this.isTestConnectionSuccess = await this.connectorService.testConnection(clonedSource!);
       this.isShowConnectionStatus = true;
     } catch (ex) {
       if (InvalidDataException.isInvalidDataException(ex)) {
@@ -146,7 +138,7 @@ export default class ConnectorConfigModal extends Vue {
     }
   }
 
-  private async submitSource(source: Connector | null, event?: MouseEvent) {
+  protected async submitSource(source: Connector | null, event?: MouseEvent) {
     event?.preventDefault();
     if (!source) {
       return;
@@ -154,8 +146,8 @@ export default class ConnectorConfigModal extends Vue {
     try {
       this.loading = true;
       this.testErrorMessage = '';
-      this.sourceConfig.valid();
-      const createdSource: Connector = await this.clickhouseConfigService.setSource(source!);
+      this.connectorForm.valid();
+      const createdSource: Connector = await this.connectorService.setSource(source!);
       this.callback ? this.callback(createdSource) : null;
       this.hide();
     } catch (ex) {
@@ -178,7 +170,7 @@ export default class ConnectorConfigModal extends Vue {
     return this.model?.displayName ?? '';
   }
 
-  private handleLoadPublicKeyError(ex: DIException) {
+  protected handleLoadPublicKeyError(ex: DIException) {
     this.testErrorMessage = ex.message;
   }
 }

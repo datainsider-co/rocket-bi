@@ -2,17 +2,14 @@ package co.datainsider.bi.engine
 
 import co.datainsider.bi.client.JdbcClient.Record
 import co.datainsider.bi.domain.Connection
-import co.datainsider.bi.domain.query.{AggregateCondition, Condition, Function, ScalarFunction}
+import co.datainsider.bi.domain.query.{AggregateCondition, Condition, Function, ScalarFunction, TableView}
 import co.datainsider.bi.engine.clickhouse.DataTable
 import co.datainsider.bi.repository.FileStorage.FileType.FileType
 import co.datainsider.caas.user_profile.domain.Implicits.FutureEnhanceLike
-import co.datainsider.datacook.pipeline.ExecutorResolver
-import co.datainsider.datacook.pipeline.operator.OperatorService
 import co.datainsider.jobworker.repository.writer.DataWriter
 import co.datainsider.schema.domain.TableSchema
 import co.datainsider.schema.domain.column.Column
-import co.datainsider.schema.repository.{DDLExecutor, DataRepository}
-import com.twitter.inject.Injector
+import co.datainsider.schema.repository.DDLExecutor
 import com.twitter.util.Future
 import datainsider.client.exception.DbExecuteError
 
@@ -28,6 +25,13 @@ trait Engine[Source <: Connection] {
   @throws[DbExecuteError]("when sql execute error like syntax error")
   @throws[InternalError]("execute error like cannot format value")
   def execute(source: Source, sql: String, doFormatValues: Boolean = true): Future[DataTable]
+
+  /**
+    * execute sql query as stream, stream data will be passed to fn and auto close after fn finish
+    */
+  @throws[DbExecuteError]("when sql execute error like syntax error")
+  @throws[InternalError]("execute error occur")
+  def executeAsDataStream[T](source: Source, query: String)(fn: DataStream => T): T
 
   def executeHistogramQuery(source: Source, histogramSql: String): Future[DataTable]
 
@@ -84,18 +88,6 @@ trait Engine[Source <: Connection] {
       override def close(): Unit = Unit
     }
   }
-
-  @deprecated("Unsupported implement this method", "v3.0.0")
-  def getPreviewExecutorResolver(source: Source, operatorService: OperatorService)(
-      injector: Injector
-  ): ExecutorResolver = ???
-
-  @deprecated("Unsupported implement this method", "v3.0.0")
-  def getExecutorResolver(source: Source, operatorService: OperatorService)(injector: Injector): ExecutorResolver = ???
-
-  @deprecated("Unsupported implement this method", "v3.0.0")
-  def getDataRepository(source: Source): DataRepository = ???
-
   def write(source: Source, schema: TableSchema, records: Seq[Record]): Future[Int]
 }
 
@@ -117,6 +109,10 @@ trait SqlParser {
   def toSelectField(function: Function, useAliasName: Boolean): String
 
   def toHistogramSql(fieldName: String, baseSql: String, numBins: Int): String
+
+  def toTableViewFullName(view: TableView): String = {
+    s"${view.dbName}.${view.tblName}"
+  }
 }
 
 case class DataStream(columns: Seq[Column], stream: Iterator[Record])

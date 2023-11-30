@@ -16,7 +16,7 @@ class SQLOperatorTest extends AbstractOperatorTest with ClickhouseIntegrateTest 
   override protected val jobId: EtlJobId = 1402
   implicit val resolver: ExecutorResolver = new ExecutorResolverImpl()
     .register(RootOperatorExecutor())
-    .register(GetOperatorExecutor(client, operatorService, Some(Limit(0, 500))))
+    .register(GetOperatorExecutor(operatorService, Some(Limit(0, 500))))
     .register(SQLOperatorExecutor(operatorService))
 
   test("Sql operator on customer table") {

@@ -5,7 +5,7 @@ import { DataSources } from '@core/data-ingestion/domain/data-source/DataSources
 import { JdbcSource } from '@core/data-ingestion/domain/response/JdbcSource';
 import { SourceId } from '@core/common/domain';
 import { StringUtils } from '@/utils';
-import { NewFieldData } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
+import { CustomPropertyInfo } from '@/screens/user-management/components/user-detail/AddNewFieldModal.vue';
 import { Log } from '@core/utils';
 import { PalexySource } from '@core/data-ingestion/domain/response/PalexySource';
 

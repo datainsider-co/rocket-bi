@@ -11,7 +11,7 @@
         />
       </template>
       <BreadcrumbComponent :breadcrumbs="breadcrumbs"></BreadcrumbComponent>
-      <div class="ml-auto d-flex align-items-center">
+      <div class="ml-auto d-flex align-items-center" v-if="!isEmptyData">
         <DiIconTextButton class="mr-2" title="Update Schema" @click="handleUpdateSchema">
           <i v-if="isRefreshSchemaLoading" class="fa fa-spin fa-spinner"></i>
           <i v-else class="di-icon-sync datasource-action-icon"></i>
@@ -24,13 +24,13 @@
     </LayoutHeader>
     <div class="connector-config" :style="{ height: `calc(100% - ${headerHeight}px)` }">
       <StatusWidget class="position-relative" :status="status" :error="errorMessage" @retry="handleLoadConfig">
-        <template v-if="isEmptyData">
-          <div class="h-100 d-flex flex-column bg-white align-items-center justify-content-center">
-            <DiButton border title="Create Source" @click="createNewDataSource">
-              <i class="di-icon-add"></i>
-            </DiButton>
+        <LayoutNoData v-if="isEmptyData" class="h-100" icon="di-icon-datasource">
+          <div class="font-weight-semi-bold">No DataSource yet</div>
+          <div class="text-muted">
+            <a href="#" @click.stop="setupConnection">Click here</a>
+            to setup DataSource
           </div>
-        </template>
+        </LayoutNoData>
         <!--        <div class="h-100" >-->
         <DiTable2
           v-else
@@ -42,7 +42,7 @@
           :status="status"
           class="clickhouse-config-table"
           :isShowPagination="false"
-          @onClickRow="response => editDataSource(response.source)"
+          @onClickRow="response => editConnection(response.source)"
           :total="1"
           @onRetry="handleLoadConfig"
         />
@@ -56,7 +56,7 @@
 </template>
 <script lang="ts">
 import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
-import { LayoutContent, LayoutHeader } from '@/shared/components/layout-wrapper';
+import { LayoutContent, LayoutHeader, LayoutNoData } from '@/shared/components/layout-wrapper';
 import { Status } from '@/shared';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import { DIException } from '@core/common/domain';
@@ -86,6 +86,7 @@ import { PostgreSQLHeaderHandler } from '@/screens/organization-settings/views/c
 
 @Component({
   components: {
+    LayoutNoData,
     BreadcrumbComponent,
     DiButton,
     EmptyDirectory,
@@ -99,42 +100,42 @@ import { PostgreSQLHeaderHandler } from '@/screens/organization-settings/views/c
   }
 })
 export default class ConnectorConfig extends Vue {
-  private status: Status = Status.Loaded;
-  private errorMessage = '';
-  private headerHeight = 0;
+  protected status: Status = Status.Loaded;
+  protected errorMessage = '';
+  protected headerHeight = 0;
 
-  private isRefreshSchemaLoading = false;
-  private isRefreshStatusLoading = false;
-
-  @Ref()
-  private layoutHeader!: LayoutHeader;
+  protected isRefreshSchemaLoading = false;
+  protected isRefreshStatusLoading = false;
 
   @Ref()
-  private progressModal!: ConnectorSetupProgressModal;
+  protected layoutHeader!: LayoutHeader;
 
   @Ref()
-  private connectorSelectionModal!: ConnectorSelectionModal;
+  protected progressModal!: ConnectorSetupProgressModal;
 
   @Ref()
-  private connectorConfigModal!: ConnectorConfigModal;
+  protected connectorSelectionModal!: ConnectorSelectionModal;
 
-  private get isEmptyData() {
+  @Ref()
+  protected connectorConfigModal!: ConnectorConfigModal;
+
+  protected get isEmptyData() {
     return ListUtils.isEmpty(this.sources);
   }
 
-  private get source() {
+  protected get source() {
     return ConnectionModule.source;
   }
 
-  private get sources() {
+  protected get sources() {
     return this.source ? [ConnectionModule.sourceResponse] : [];
   }
 
-  private get isExistedSource() {
+  protected get isExistedSource() {
     return this.source ? !ConnectionModule.isConfigStep : false;
   }
 
-  private get headers(): HeaderData[] {
+  protected get headers(): HeaderData[] {
     const sourceHeaders = this.isExistedSource ? this.headerResolver.buildHeader(this.source!) : [];
     return [
       ...sourceHeaders,
@@ -184,7 +185,7 @@ export default class ConnectorConfig extends Vue {
             'Change',
             event => {
               event.stopPropagation();
-              return source ? this.changeDataSource(source) : null;
+              return source ? this.changeConnection(source) : null;
             },
             '80px',
             '34px'
@@ -194,7 +195,7 @@ export default class ConnectorConfig extends Vue {
             'Edit',
             event => {
               event.stopPropagation();
-              return source ? this.editDataSource(source) : null;
+              return source ? this.editConnection(source) : null;
             },
             '90px',
             '34px'
@@ -230,38 +231,38 @@ export default class ConnectorConfig extends Vue {
     ];
   }
 
-  private get isLoading() {
+  protected get isLoading() {
     return this.status === Status.Loading || this.status === Status.Updating;
   }
 
-  private showLoading() {
+  protected showLoading() {
     this.status = Status.Loading;
   }
 
-  private showUpdating() {
+  protected showUpdating() {
     this.status = Status.Updating;
   }
 
-  private showLoaded() {
+  protected showLoaded() {
     this.status = Status.Loaded;
   }
 
-  private showError(ex: DIException) {
+  protected showError(ex: DIException) {
     this.status = Status.Error;
     this.errorMessage = ex.getPrettyMessage();
     Log.error(`UserActivityLog::showError::error::`, this.errorMessage);
   }
 
-  private showSetupProgressModal() {
+  protected showSetupProgressModal() {
     this.progressModal.show({
       backCallback: async () => {
-        await this.showDataSourceConfigModal(this.source!);
+        await this.showSetupConnectionModal(this.source!);
       }
     });
   }
 
-  private showDataSourceConfigModal(dataSource: Connector, onBack?: () => void, cancelTitle = 'Back') {
-    const source = Connector.fromObject(dataSource);
+  protected showSetupConnectionModal(connection: Connector, onBack?: () => void, cancelTitle = 'Back') {
+    const source = Connector.fromObject(connection);
 
     this.connectorConfigModal.show(
       source,
@@ -272,10 +273,11 @@ export default class ConnectorConfig extends Vue {
         this.showSetupProgressModal();
       },
       () => {
+        Log.debug('showDataSourceConfigModal::onBack::', onBack);
         if (onBack) {
           return onBack();
         } else {
-          this.createNewDataSource();
+          this.setupConnection();
         }
       }
     );
@@ -285,7 +287,7 @@ export default class ConnectorConfig extends Vue {
     await this.handleInitData();
   }
 
-  private get isInitialLoading() {
+  protected get isInitialLoading() {
     return ConnectionModule.isInitialLoading;
   }
 
@@ -300,18 +302,18 @@ export default class ConnectorConfig extends Vue {
     }
   }
 
-  private get isPermitted() {
+  protected get isPermitted() {
     return ConnectionModule.isPermitted;
   }
 
-  private async handleInitData() {
+  protected async handleInitData() {
     try {
       if (!this.isInitialLoading && ConnectionModule.isPermitted) {
         this.showLoading();
         if (!ConnectionModule.isExistedSource) {
-          this.createNewDataSource();
+          this.setupConnection();
         } else if (ConnectionModule.isConfigStep) {
-          this.editDataSource(this.source!);
+          this.editConnection(this.source!);
         } else if (ConnectionModule.isSetUpStep) {
           this.showSetupProgressModal();
         }
@@ -323,27 +325,20 @@ export default class ConnectorConfig extends Vue {
     }
   }
 
-  private createNewDataSource() {
-    const allowClickBackDrop = !!this.source;
-    this.connectorSelectionModal.show(source => this.showDataSourceConfigModal(source), allowClickBackDrop);
+  protected setupConnection() {
+    this.connectorSelectionModal.show(source => this.showSetupConnectionModal(source));
   }
 
-  private changeDataSource(currentSource: Connector) {
-    const allowClickBackDrop = !!this.source;
-    this.connectorSelectionModal.show(
-      source =>
-        this.showDataSourceConfigModal(source, () => {
-          //Nothing to do, just close modal
-        }),
-      allowClickBackDrop
-    );
+  protected changeConnection(oldConnection: Connector) {
+    this.connectorSelectionModal.show(source => this.showSetupConnectionModal(source));
   }
 
-  private editDataSource(currentSource: Connector) {
+  protected editConnection(currentSource: Connector): void {
     if (currentSource.className === ConnectorType.Unknown) {
+      PopupUtils.showError('Unknown datasource type, cannot edit');
       return;
     }
-    this.showDataSourceConfigModal(
+    this.showSetupConnectionModal(
       currentSource,
       () => {
         //Nothing to do, just close modal
@@ -352,7 +347,7 @@ export default class ConnectorConfig extends Vue {
     );
   }
 
-  private async handleLoadConfig() {
+  protected async handleLoadConfig(): Promise<void> {
     try {
       this.showLoading();
       await ConnectionModule.loadSource();
@@ -365,7 +360,7 @@ export default class ConnectorConfig extends Vue {
     }
   }
 
-  private async handleUpdateSchema() {
+  protected async handleUpdateSchema() {
     try {
       this.isRefreshSchemaLoading = true;
       await ConnectionModule.refreshSchema();
@@ -378,7 +373,7 @@ export default class ConnectorConfig extends Vue {
     }
   }
 
-  private async handleRefreshStatus() {
+  protected async handleRefreshStatus() {
     try {
       this.isRefreshStatusLoading = true;
       await ConnectionModule.loadStatus();
@@ -391,7 +386,7 @@ export default class ConnectorConfig extends Vue {
     }
   }
 
-  private get breadcrumbs(): Breadcrumbs[] {
+  protected get breadcrumbs(): Breadcrumbs[] {
     if (this.isExistedSource) {
       return [
         new Breadcrumbs({
@@ -403,7 +398,7 @@ export default class ConnectorConfig extends Vue {
     return [];
   }
 
-  private get headerResolver(): HeaderResolver {
+  protected get headerResolver(): HeaderResolver {
     return new HeaderResolverBuilder()
       .add(ConnectorType.Clickhouse, new ClickhouseHeaderHandler())
       .add(ConnectorType.Bigquery, new BigqueryHeaderHandler())

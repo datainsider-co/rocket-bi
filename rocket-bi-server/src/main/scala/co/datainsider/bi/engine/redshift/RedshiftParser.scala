@@ -180,22 +180,22 @@ object RedshiftParser extends SqlParser {
   override def toHistogramSql(fieldName: String, baseSql: String, numBins: Int): String = {
     require(numBins > 1, "Bin number should be greater than 1.")
     s"""
-       |select 
-       |  min_value + bin_num * bin_size as lower_bound, 
-       |  min_value + (bin_num + 1) * bin_size as upper_bound, 
-       |  count 
+       |select
+       |  min_value + bin_num * bin_size as lower_bound,
+       |  min_value + (bin_num + 1) * bin_size as upper_bound,
+       |  count
        |from (
-       |  select 
-       |    floor(($fieldName - min_value) / bin_size) as bin_num, 
-       |    count(1) as count, 
-       |    min(bin_size) as bin_size, 
+       |  select
+       |    floor(($fieldName - min_value) / bin_size) as bin_num,
+       |    count(1) as count,
+       |    min(bin_size) as bin_size,
        |    min(min_value) as min_value,
        |    max(max_value) as max_value
        |  from ($baseSql) base_data
        |  join (
-       |      select 
-       |      ceil((max($fieldName) - min($fieldName)) / $numBins) as bin_size, 
-       |      min($fieldName) as min_value, 
+       |      select
+       |      ceil((max($fieldName) - min($fieldName)) / $numBins) as bin_size,
+       |      min($fieldName) as min_value,
        |      max($fieldName) as max_value
        |    from ($baseSql) base_data
        |  ) bin_size_data on true
@@ -402,6 +402,21 @@ object RedshiftParser extends SqlParser {
       case PastNDay(unit, _, _)     => s"$field - INTERVAL '$unit days'"
 
       case Cast(asType, _) => s"CAST($field AS $asType)"
+
+      case ToInt8OrNull(_, _)       => s"CAST($field as smallint)"
+      case ToInt16OrNull(_, _)      => s"CAST($field as integer)"
+      case ToInt32OrNull(_, _)      => s"CAST($field as integer)"
+      case ToInt64OrNull(_, _)      => s"CAST($field as bigint)"
+      case ToUInt8OrNull(_, _)      => s"CAST($field as smallint)"
+      case ToUInt16OrNull(_, _)     => s"CAST($field as integer)"
+      case ToUInt32OrNull(_, _)     => s"CAST($field as integer)"
+      case ToUInt64OrNull(_, _)     => s"CAST($field as bigint)"
+      case ToFloatOrNull(_, _)      => s"CAST($field as float)"
+      case ToDoubleOrNull(_, _)     => s"CAST($field as double precision)"
+      case ToDateOrNull(_, _)       => s"CAST($field as date)"
+      case ToDateTimeOrNull(_, _)   => s"CAST($field as timestamp)"
+      case ToDateTime64OrNull(_, _) => s"CAST($field as timestamp)"
+      case ToStringOrNull(_, _)     => s"CAST($field as text)"
     }
   }
 

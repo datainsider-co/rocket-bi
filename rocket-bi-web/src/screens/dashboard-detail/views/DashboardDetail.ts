@@ -535,10 +535,7 @@ export default class DashboardDetail extends Vue {
       const chartInfo = ChartInfo.fromObject(obj.widget);
       const position = Position.fromObject(obj.position);
       position.resetRowColumn();
-      await DashboardModule.addNewChart({
-        chartInfo: chartInfo,
-        position: position
-      });
+      await this.addChart(chartInfo, position);
     } catch (ex) {
       Log.error('handlePasteChart::error', ex);
       PopupUtils.showError('Failed to paste chart');
@@ -573,6 +570,7 @@ export default class DashboardDetail extends Vue {
         async () => {
           await FilterModule.init();
           await DashboardControllerModule.init();
+          DashboardControllerModule.applyAutoRefresh(this.dashboardSetting.autoRefreshSetting);
         },
         () => {
           _ConfigBuilderStore.setAllowBack(true);
@@ -622,8 +620,15 @@ export default class DashboardDetail extends Vue {
   }
 
   protected onAddChart() {
+    DashboardControllerModule.stopAutoRefresh();
     this.chartBuilderComponent.showModal({
-      onCompleted: this.addChart,
+      onCompleted: async newChart => {
+        DashboardControllerModule.applyAutoRefresh(this.dashboardSetting.autoRefreshSetting);
+        await this.addChart(newChart);
+      },
+      onCancel: () => {
+        DashboardControllerModule.applyAutoRefresh(this.dashboardSetting.autoRefreshSetting);
+      },
       chartControls: DashboardModule.chartControls
     });
   }
@@ -799,12 +804,13 @@ export default class DashboardDetail extends Vue {
   }
 
   //Method xử lí khi 1 chart được add vào dashboard
-  async addChart(chartInfo: ChartInfo): Promise<void> {
-    const position: Position = chartInfo.getDefaultPosition();
+  async addChart(chartInfo: ChartInfo, curPosition?: Position): Promise<void> {
+    const position: Position = curPosition ?? chartInfo.getDefaultPosition();
     const newChartInfo = (await WidgetModule.handleCreateNewWidget({
       widget: chartInfo,
       position: position
     })) as ChartInfo;
+    ZoomModule.registerZoomDataById({ id: newChartInfo.id, query: newChartInfo.setting });
     switch (newChartInfo.getChartInfoType()) {
       case ChartInfoType.Normal: {
         if (newChartInfo.setting.hasDynamicFunction()) {
@@ -850,7 +856,7 @@ export default class DashboardDetail extends Vue {
     await FilterModule.addFilterWidget(chartInfo);
     await WidgetModule.handleUpdateWidget(chartInfo);
     WidgetModule.setWidget({ widgetId: chartInfo.id, widget: chartInfo });
-    ZoomModule.registerZoomData({ id: chartInfo.id, setting: chartInfo.setting });
+    ZoomModule.registerZoomDataById({ id: chartInfo.id, query: chartInfo.setting });
     switch (chartInfo.getChartInfoType()) {
       case ChartInfoType.Normal: {
         chartInfo.setting = chartInfo.setting.hasDynamicFunction()
@@ -950,6 +956,8 @@ export default class DashboardDetail extends Vue {
   protected async onClickDashboardSetting(event: MouseEvent): Promise<void> {
     // event.stopPropagation();
     await TimeoutUtils.sleep(100);
+    const isAutoRefresh = this.dashboardSetting.autoRefreshSetting.isAutoRefresh;
+    const refreshIntervalMs = this.dashboardSetting.autoRefreshSetting.refreshIntervalMs;
     if (this.settingButton) {
       this.contextMenu.showAt(this.settingButton, [
         {
@@ -987,9 +995,52 @@ export default class DashboardDetail extends Vue {
               }
             });
           }
+        },
+        {
+          icon: 'di-icon-refresh',
+          text: 'Auto Refresh Data',
+          children: [
+            {
+              text: '15 Seconds',
+              active: isAutoRefresh && refreshIntervalMs === 15000,
+              click: () => this.selectRefreshInterval(15000)
+            },
+            {
+              text: '30 Seconds',
+              active: isAutoRefresh && refreshIntervalMs === 30000,
+              click: () => this.selectRefreshInterval(30000)
+            },
+            {
+              text: '60 Seconds',
+              active: isAutoRefresh && refreshIntervalMs === 60000,
+              click: () => this.selectRefreshInterval(60000)
+            },
+            {
+              text: '3 Minutes',
+              active: isAutoRefresh && refreshIntervalMs === 180000,
+              click: () => this.selectRefreshInterval(180000)
+            },
+            {
+              text: '5 Minutes',
+              active: isAutoRefresh && refreshIntervalMs === 300000,
+              click: () => this.selectRefreshInterval(300000)
+            },
+            {
+              text: 'Off',
+              active: !isAutoRefresh,
+              click: () => this.selectRefreshInterval(0)
+            }
+          ]
         }
       ]);
     }
+  }
+
+  protected async selectRefreshInterval(refreshIntervalMs: number): Promise<void> {
+    const newSetting: DashboardSetting = cloneDeep(this.dashboardSetting);
+    newSetting.autoRefreshSetting.setRefreshIntervalMs(refreshIntervalMs);
+    await DashboardModule.saveSetting(newSetting);
+    DashboardControllerModule.applyAutoRefresh(newSetting.autoRefreshSetting);
   }
 
   protected onUpdateSettingCompleted(newSetting: DashboardSetting, oldSetting: DashboardSetting) {

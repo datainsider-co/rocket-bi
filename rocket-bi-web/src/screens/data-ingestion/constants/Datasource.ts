@@ -38,7 +38,7 @@ export const ALL_DATASOURCE: ItemData[] = [
     type: DataSourceType.BigQueryV2
   },
   {
-    title: 'PostgreSql',
+    title: 'PostgreSQL',
     src: 'ic_postgresql.png',
     type: DataSourceType.PostgreSql
   },
@@ -56,6 +56,11 @@ export const ALL_DATASOURCE: ItemData[] = [
     title: 'Google Ads',
     src: 'ic_gg_ads.png',
     type: DataSourceType.GoogleAds
+  },
+  {
+    title: 'Google Search Console',
+    src: 'ic_google_search_console.svg',
+    type: DataSourceType.GoogleSearchConsole
   },
   {
     title: 'Csv',
@@ -93,9 +98,14 @@ export const ALL_DATASOURCE: ItemData[] = [
     type: DataSourceType.Palexy
   },
   {
-    title: 'Google Search Console',
-    src: 'ic_google_search_console.svg',
-    type: DataSourceType.GoogleSearchConsole
+    title: 'Hubspot',
+    src: 'ic_hubspot.svg',
+    type: DataSourceType.Hubspot
+  },
+  {
+    title: 'Mixpanel',
+    src: 'ic_mixpanel.svg',
+    type: DataSourceType.Mixpanel
   }
   // {
   //   title: 'iOS',

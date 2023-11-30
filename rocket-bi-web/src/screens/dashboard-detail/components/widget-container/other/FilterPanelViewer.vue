@@ -19,7 +19,7 @@
                   :id="genBtnId(`config-widget-${widget.id}`)"
                 >
                   <div :style="headerStyle">
-                    <i class="di-icon-setting icon-title regular-icon-16" />
+                    <i class="di-icon-setting icon-title regular-icon-16 cursor-pointer" />
                   </div>
                 </b-nav-item>
               </transition>
@@ -278,23 +278,28 @@ export default class FilterPanelViewer extends Vue {
     return [
       {
         text: 'Edit title',
-        click: () => this.openRenameModal(this.widget.tabItems[FilterPanelViewer.TAB_INDEX].name, FilterPanelViewer.TAB_INDEX)
+        click: () => this.openRenameModal(this.widget.tabItems[FilterPanelViewer.TAB_INDEX].name, FilterPanelViewer.TAB_INDEX),
+        icon: 'di-icon-under-text'
       },
       {
         text: 'Add filter',
-        click: this.handleAddFilter
+        click: this.handleAddFilter,
+        icon: 'di-icon-add'
       },
       {
         text: 'Remove filter',
-        click: this.handleDeleteFilter
+        click: this.handleDeleteFilter,
+        icon: 'di-icon-delete'
       },
       {
         text: 'Config widget',
-        click: this.handleConfigTab
+        click: this.handleConfigTab,
+        icon: 'di-icon-setting'
       },
       {
         text: 'Delete widget',
-        click: this.handleDeleteWidget
+        click: this.handleDeleteWidget,
+        icon: 'di-icon-delete'
       }
     ];
   }

@@ -14,6 +14,7 @@ import { SizeInfo } from './SizeInfo';
 import { BackgroundImageInfo } from './BackgroundImageInfo';
 import { BackgroundInfo } from './BackgroundInfo';
 import { WidgetSetting } from './WidgetSetting';
+import { AutoRefreshSetting } from './AutoRefreshSetting';
 
 export class DashboardSetting implements Version {
   version: string;
@@ -26,6 +27,7 @@ export class DashboardSetting implements Version {
   backgroundImage: BackgroundImageInfo;
   background: BackgroundInfo;
   widgetSetting: WidgetSetting;
+  autoRefreshSetting: AutoRefreshSetting;
 
   constructor(data: {
     version?: string;
@@ -37,6 +39,7 @@ export class DashboardSetting implements Version {
     backgroundImage?: BackgroundImageInfo;
     background?: BackgroundInfo;
     widgetSetting?: WidgetSetting;
+    autoRefreshSetting?: AutoRefreshSetting;
   }) {
     this.version = data.version ?? DashboardSettingVersionResolver.CURRENT_VERSION;
     this.enableOverlap = data.enableOverlap ?? false;
@@ -47,6 +50,7 @@ export class DashboardSetting implements Version {
     this.backgroundImage = data.backgroundImage ? BackgroundImageInfo.fromObject(data.backgroundImage) : BackgroundImageInfo.default();
     this.background = data.background ? BackgroundInfo.fromObject(data.background) : BackgroundInfo.default();
     this.widgetSetting = data.widgetSetting ? WidgetSetting.fromObject(data.widgetSetting) : WidgetSetting.default();
+    this.autoRefreshSetting = data.autoRefreshSetting ? AutoRefreshSetting.fromObject(data.autoRefreshSetting) : AutoRefreshSetting.default();
   }
 
   static default(): DashboardSetting {
@@ -56,7 +60,8 @@ export class DashboardSetting implements Version {
       size: SizeInfo.default(),
       backgroundImage: BackgroundImageInfo.default(),
       background: BackgroundInfo.default(),
-      widgetSetting: WidgetSetting.default()
+      widgetSetting: WidgetSetting.default(),
+      autoRefreshSetting: AutoRefreshSetting.default()
     });
   }
 

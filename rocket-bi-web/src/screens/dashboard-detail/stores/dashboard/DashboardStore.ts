@@ -435,22 +435,6 @@ export class DashboardStore extends VuexModule {
     }
   }
 
-  @Action
-  async addNewChart(payload: { chartInfo: ChartInfo; position?: Position }) {
-    const { chartInfo, position } = payload;
-    const currentPosition: Position = position || chartInfo.getDefaultPosition();
-    const newChartInfo = (await WidgetModule.handleCreateNewWidget({
-      widget: chartInfo,
-      position: currentPosition
-    })) as ChartInfo;
-    WidgetModule.handleDeleteSnapWidget();
-    WidgetModule.addWidget({ widget: newChartInfo, position: currentPosition });
-    QuerySettingModule.setQuerySetting({ id: newChartInfo.id, query: newChartInfo.setting });
-    FilterModule.initAffectFilterWidgets([newChartInfo]);
-    await FilterModule.addFilterWidget(chartInfo);
-    await DashboardControllerModule.renderChart({ id: newChartInfo.id, forceFetch: true });
-  }
-
   @Mutation
   setCopiedData(copiedData: CopiedData | null) {
     if (copiedData) {

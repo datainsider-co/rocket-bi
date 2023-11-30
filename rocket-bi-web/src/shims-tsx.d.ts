@@ -75,7 +75,6 @@ declare global {
 
     //third party ingestion config
     GOOGLE_CLIENT_ID: string;
-    GOOGLE_API_KEY: string;
     GOOGLE_ROOT_ORIGIN: string;
 
     GOOGLE_SHEET_URL: string;

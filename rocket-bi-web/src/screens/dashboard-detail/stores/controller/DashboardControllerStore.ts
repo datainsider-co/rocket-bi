@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /*
  * @author: tvc12 - Thien Vi
  * @created: 5/25/21, 5:00 PM
@@ -6,6 +7,7 @@
 import {
   AbstractTableResponse,
   And,
+  AutoRefreshSetting,
   ChartInfo,
   Condition,
   ExportType,
@@ -36,12 +38,15 @@ import { FilterStoreUtils } from '@/screens/dashboard-detail/stores/widget/Filte
 import { Semaphore } from 'async-mutex';
 import Swal from 'sweetalert2';
 import FileSaver from 'file-saver';
+import { RecurringMethodExecutor } from '@core/common/misc';
 
 const CONCURRENCY_REQUEST_SIZE = 7;
 const semaphore = new Semaphore(CONCURRENCY_REQUEST_SIZE);
 
 @Module({ dynamic: true, namespaced: true, store: store, name: Stores.DashboardControllerStore })
 export class DashboardControllerStore extends VuexModule {
+  protected methodExecutor: RecurringMethodExecutor | null = null;
+
   /**
    * Save all dynamic function of of widget.
    * @type {Map<WidgetId, TableColumn[]>}
@@ -72,6 +77,24 @@ export class DashboardControllerStore extends VuexModule {
     return id => {
       return this.dynamicFunctionMap.get(id) ?? [];
     };
+  }
+
+  @Mutation
+  applyAutoRefresh(setting: AutoRefreshSetting): void {
+    if (this.methodExecutor) {
+      this.methodExecutor.stop();
+    }
+    if (setting.isAutoRefresh && setting.refreshIntervalMs > 0) {
+      this.methodExecutor = new RecurringMethodExecutor(() => DashboardControllerModule.init(false));
+      this.methodExecutor.start(setting.refreshIntervalMs);
+    }
+  }
+
+  @Mutation
+  stopAutoRefresh(): void {
+    if (this.methodExecutor) {
+      this.methodExecutor.stop();
+    }
   }
 
   @Action
@@ -153,6 +176,10 @@ export class DashboardControllerStore extends VuexModule {
   @Mutation
   reset() {
     this.dynamicFunctionMap.clear();
+    if (this.methodExecutor) {
+      this.methodExecutor.stop();
+      this.methodExecutor = null;
+    }
   }
 
   @Action
@@ -345,6 +372,7 @@ export class DashboardControllerStore extends VuexModule {
 
   @Action
   async applyDynamicValues(payload: { id: WidgetId; valueMap: Map<ValueControlType, string[]> | undefined; ignoreReRender?: boolean }): Promise<WidgetId[]> {
+    Log.debug('DashboardControllerStore::applyDynamicValues::payload', payload);
     QuerySettingModule.setDynamicValues(payload);
     const effectedIds: WidgetId[] = QuerySettingModule.getAffectedIdByControlId(payload.id);
     if (!payload.ignoreReRender && ListUtils.isNotEmpty(effectedIds)) {

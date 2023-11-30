@@ -1,7 +1,9 @@
 package co.datainsider.datacook.pipeline.operator
 
-import co.datainsider.bi.domain.ClickhouseConnection
+import co.datainsider.bi.domain.{ClickhouseConnection, Connection}
 import co.datainsider.bi.domain.query.SqlQuery
+import co.datainsider.bi.engine.factory.EngineResolver
+import co.datainsider.bi.service.ConnectionService
 import co.datainsider.bi.util.profiler.Profiler
 import co.datainsider.datacook.domain.operator.DestTableConfig
 import co.datainsider.datacook.pipeline.exception.{InputInvalid, OperatorException}
@@ -25,7 +27,7 @@ case class PythonOperator(
 ) extends TableResultOperator
 
 case class PythonOperatorExecutor(
-    source: ClickhouseConnection,
+    connectionService: ConnectionService,
     operatorService: OperatorService,
     pythonTemplate: String,
     baseDir: String,
@@ -43,9 +45,11 @@ case class PythonOperatorExecutor(
       var pythonFile: File = null
       try {
         ensureInput(operator, context.mapResults)
+        val connection: Connection = connectionService.getTunnelConnection(context.orgId).syncGet()
+        require(connection.isInstanceOf[ClickhouseConnection], "Python operator only support clickhouse connection in current version")
         val parentSchema: TableSchema = getParentTableSchema(operator, context.mapResults).get
         val tmpTblName: String = TableSchema.buildTemporaryTblName(operator.destTableConfiguration.tblName)
-        pythonFile = preparePythonFile(parentSchema, operator.code, tmpTblName)
+        pythonFile = preparePythonFile(connection.asInstanceOf[ClickhouseConnection], parentSchema, operator.code, tmpTblName)
         executePython(pythonFile)
         val tableSchema: TableSchema =
           createView(context.orgId, context.jobId, parentSchema.dbName, tmpTblName, operator.destTableConfiguration)
@@ -82,7 +86,7 @@ case class PythonOperatorExecutor(
     }
   }
 
-  private def preparePythonFile(parentTableSchema: TableSchema, processFunction: String, tempTblName: String): File = {
+  private def preparePythonFile(source: ClickhouseConnection, parentTableSchema: TableSchema, processFunction: String, tempTblName: String): File = {
     val dbName: String = parentTableSchema.dbName
     val tblName: String = parentTableSchema.name
 

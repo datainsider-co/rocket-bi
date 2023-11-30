@@ -1,9 +1,10 @@
+/* eslint-disable prettier/prettier */
 import moment from 'moment';
 import { CompareMode, DateRange, DateTypes } from '@/shared';
 import { MainDateMode } from '@core/common/domain/model';
 import { StringUtils } from '@/utils/StringUtils';
-// import { TimeUnit } from '@core/lake-house/domain';
 import { DaysOfWeek } from '@/shared/enums/DayOfWeeks';
+import { DIException } from '@core/common/domain';
 
 enum DisplayFormatType {
   SameYear,
@@ -17,7 +18,7 @@ export class DateTimeUtils {
    * if (isEndOfDay) => format: yyyy-MM-dd 23:59:59
    * otherwise => format: yyyy-MM-dd 00:00:00
    */
-  static formatDate(currentData: Date | string | number, isEndOfDay = false): string {
+  static formatDateTime(currentData: Date | string | number, isEndOfDay = false): string {
     const date = moment(currentData).toDate();
     let day = date.getDate().toString();
     let month = (date.getMonth() + 1).toString();
@@ -29,6 +30,13 @@ export class DateTimeUtils {
     } else {
       return `${year}-${month}-${day} 00:00:00`;
     }
+  }
+
+  /**
+   * format with format: yyyy-MM-dd using moment
+   */
+  static formatDate(currentData: Date | string | number): string {
+    return moment(currentData).format('YYYY-MM-DD');
   }
 
   /**
@@ -244,16 +252,11 @@ export class DateUtils {
     return moment(date, format).toDate();
   }
 
-  static getThisMinute(): DateRange {
-    const weekStart = moment().startOf('minute');
-    const result: DateRange = { start: weekStart.toDate(), end: moment().toDate() };
-    return result;
-  }
-
-  static getThisHour(): DateRange {
-    const weekStart = moment().startOf('hour');
-    const result: DateRange = { start: weekStart.toDate(), end: moment().toDate() };
-    return result;
+  static getDefaultDateRange(): DateRange {
+    return {
+      start: DateUtils.DefaultMinDate,
+      end: DateUtils.DefaultMaxDate
+    };
   }
 
   static getThisWeek(): DateRange {
@@ -281,9 +284,7 @@ export class DateUtils {
   }
 
   static getLastDay(): DateRange {
-    const lastDay = moment().add(-1, 'd');
-    const result: DateRange = { start: lastDay.toDate(), end: lastDay.toDate() };
-    return result;
+    return DateUtils.getLastNDays(1);
   }
 
   static getLastWeek(): DateRange {
@@ -334,15 +335,11 @@ export class DateUtils {
   }
 
   static getLast7Day(): DateRange {
-    const last7Day = moment().add(-7, 'd');
-    const result: DateRange = { start: last7Day.toDate(), end: moment().toDate() };
-    return result;
+    return DateUtils.getLastNDays(7);
   }
 
   static getLast30Days(): DateRange {
-    const last30Day = moment().add(-30, 'd');
-    const result: DateRange = { start: last30Day.toDate(), end: moment().toDate() };
-    return result;
+    return DateUtils.getLastNDays(30);
   }
 
   static compareToPreviousPeriod(currentStartDate: Date | string | null | undefined, currentEndDate: Date | string | null | undefined): DateRange {
@@ -378,8 +375,8 @@ export class DateUtils {
     return { start: DateUtils.DefaultMinDate, end: DateUtils.DefaultMaxDate };
   }
 
-  static getThisDay() {
-    return { start: new Date(), end: new Date() };
+  static getThisDay(): DateRange {
+    return { start: moment().toDate(), end: moment().toDate() };
   }
 
   /**
@@ -390,8 +387,10 @@ export class DateUtils {
     switch (mode) {
       case MainDateMode.thisDay:
         return DateUtils.getThisDay();
+
       case MainDateMode.thisWeek:
         return DateUtils.getThisWeek();
+
       case MainDateMode.thisMonth:
         return DateUtils.getThisMonth();
 
@@ -473,135 +472,16 @@ export class DateUtils {
     };
   }
 
-  static getLastNDays(n: number): DateRange | undefined {
-    if (n < 0) {
-      return void 0;
-    } else {
-      const today = moment();
-      const lastNDays = moment().subtract(n, 'days');
-      return { start: lastNDays.toDate(), end: today.toDate() };
+  /**
+   * @throws DiException if nDays < 0
+   */
+  static getLastNDays(nDays: number): DateRange {
+    if (nDays < 0) {
+      throw new DIException('nDays must be greater than or equal 0');
     }
-  }
-
-  static getLastNWeeks(n: number): DateRange | undefined {
-    if (n < 0) {
-      return void 0;
-    } else {
-      const today = moment();
-      const lastNWeeks = moment().subtract(n, 'weeks');
-      return { start: lastNWeeks.toDate(), end: today.toDate() };
-    }
-  }
-
-  static getLastNMonths(n: number): DateRange | undefined {
-    if (n < 0) {
-      return void 0;
-    } else {
-      const today = moment();
-      const lastNMonths = moment().subtract(n, 'months');
-      return { start: lastNMonths.toDate(), end: today.toDate() };
-    }
-  }
-
-  static getLastNQuarters(n: number): DateRange | undefined {
-    if (n < 0) {
-      return void 0;
-    } else {
-      const today = moment();
-      const lastNQuarters = moment().subtract(n, 'quarters');
-      return { start: lastNQuarters.toDate(), end: today.toDate() };
-    }
-  }
-
-  static getLastNYears(n: number): DateRange | undefined {
-    if (n < 0) {
-      return void 0;
-    } else {
-      const today = moment();
-      const lastNYears = moment().subtract(n, 'years');
-      return { start: lastNYears.toDate(), end: today.toDate() };
-    }
-  }
-
-  static getLastNMinutes(n: number): DateRange | undefined {
-    if (n < 0) {
-      return void 0;
-    } else {
-      const today = moment();
-      const lastNMinutes = moment().subtract(n, 'minutes');
-      return { start: lastNMinutes.toDate(), end: today.toDate() };
-    }
-  }
-
-  static getLastNHours(n: number): DateRange | undefined {
-    if (n < 0) {
-      return void 0;
-    } else {
-      const today = moment();
-      const lastNHours = moment().subtract(n, 'hours');
-      return { start: lastNHours.toDate(), end: today.toDate() };
-    }
-  }
-
-  static getLastNDate(date: DateTypes, n: number): DateRange | undefined {
-    switch (date) {
-      case DateTypes.minute:
-        return this.getLastNMinutes(n);
-      case DateTypes.hour:
-        return DateUtils.getLastNHours(n);
-      case DateTypes.day:
-        return DateUtils.getLastNDays(n);
-      case DateTypes.week:
-        return DateUtils.getLastNWeeks(n);
-      case DateTypes.month:
-        return DateUtils.getLastNMonths(n);
-      case DateTypes.quarter:
-        return DateUtils.getLastNQuarters(n);
-      case DateTypes.year:
-        return DateUtils.getLastNYears(n);
-    }
-  }
-
-  // static getNextNDate(date: TimeUnit, n: number): number {
-  //   if (n < 0) {
-  //     return 0;
-  //   } else {
-  //     switch (date) {
-  //       case TimeUnit.SECOND:
-  //         return n * 1000;
-  //       case TimeUnit.MINUTE:
-  //         return n * 60 * 1000;
-  //       case TimeUnit.HOUR:
-  //         return n * 60 * 60 * 1000;
-  //       case TimeUnit.DAY:
-  //         return n * 24 * 60 * 60 * 1000;
-  //       case TimeUnit.WEEK:
-  //         return n * 7 * 24 * 60 * 60 * 1000;
-  //       case TimeUnit.MONTH:
-  //         return n * 30 * 24 * 60 * 60 * 1000;
-  //       case TimeUnit.YEAR:
-  //         return n * 12 * 30 * 24 * 60 * 60 * 1000;
-  //     }
-  //   }
-  // }
-
-  static getCurrentDate(date: DateTypes): DateRange | undefined {
-    switch (date) {
-      case DateTypes.minute:
-        return this.getThisMinute();
-      case DateTypes.hour:
-        return DateUtils.getThisHour();
-      case DateTypes.day:
-        return DateUtils.getThisDay();
-      case DateTypes.week:
-        return DateUtils.getThisWeek();
-      case DateTypes.month:
-        return DateUtils.getThisMonth();
-      case DateTypes.quarter:
-        return DateUtils.getThisQuarter();
-      case DateTypes.year:
-        return DateUtils.getThisYear();
-    }
+    const yeaterday = moment().add(-1, 'd');
+    const lastNDays = moment().add(-nDays, 'd');
+    return { start: lastNDays.toDate(), end: yeaterday.toDate() };
   }
 
   static HHMMSSToMs(time: string) {

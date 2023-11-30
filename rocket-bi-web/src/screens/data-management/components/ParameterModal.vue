@@ -104,7 +104,7 @@ export default class ParameterModal extends Vue {
       case ParamValueType.number:
         return 0;
       case ParamValueType.date:
-        return DateTimeUtils.formatDate(moment().toDate());
+        return DateTimeUtils.formatDateTime(moment().toDate());
     }
   }
 

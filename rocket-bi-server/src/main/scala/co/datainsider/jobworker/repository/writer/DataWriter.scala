@@ -11,7 +11,7 @@ import co.datainsider.jobworker.domain.DataDestination.DataDestination
 import co.datainsider.jobworker.exception.DataWriterException
 import co.datainsider.schema.domain.TableSchema
 
-trait DataWriter {
+trait DataWriter extends AutoCloseable {
 
   /** *
     * persist data to a jdbc source

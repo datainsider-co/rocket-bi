@@ -38,7 +38,9 @@ case class JobHistory(
     new Type(value = classOf[ShopeeJobProgress], name = "shopee_job_progress"),
     new Type(value = classOf[LazadaJobProgress], name = "lazada_job_progress"),
     new Type(value = classOf[PalexyJobProgress], name = "palexy_job_progress"),
-    new Type(value = classOf[GoogleJobProgress], name = "google_job_progress")
+    new Type(value = classOf[GoogleJobProgress], name = "google_job_progress"),
+    new Type(value = classOf[HubspotProgress], name = "hubspot_progress"),
+    new Type(value = classOf[JobProgressImpl], name = "job_progress_impl"),
   )
 )
 trait JobProgress {
@@ -430,6 +432,23 @@ case class GoogleJobProgress(
     message: Option[String] = None
 ) extends JobProgress {
   override def progressData: Map[String, Any] = Map("last_synced_value" -> lastSyncedValue)
+
+  override def customCopy(jobStatus: JobStatus): JobProgress = {
+    this.copy(jobStatus = jobStatus)
+  }
+}
+case class JobProgressImpl(
+    orgId: Long,
+    syncId: SyncId,
+    jobId: JobId,
+    updatedTime: Long,
+    jobStatus: JobStatus,
+    totalSyncRecord: Long,
+    totalExecutionTime: Long,
+    lastSyncedValue: Option[String] = None,
+    message: Option[String] = None
+) extends JobProgress {
+  override def progressData: Map[String, Any] = Map("last_synced_value" -> lastSyncedValue.orNull)
 
   override def customCopy(jobStatus: JobStatus): JobProgress = {
     this.copy(jobStatus = jobStatus)
