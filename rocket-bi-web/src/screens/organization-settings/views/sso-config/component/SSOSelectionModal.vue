@@ -72,6 +72,13 @@ export default class SSOSelectionModal extends Vue {
 </template>
 
 <style lang="scss">
+.sso-container {
+  .datasource-item {
+    img {
+      object-fit: unset;
+    }
+  }
+}
 .sso-container.sso-inactive {
   position: relative;
   pointer-events: none;
