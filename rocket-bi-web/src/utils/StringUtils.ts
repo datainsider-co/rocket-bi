@@ -266,4 +266,8 @@ export abstract class StringUtils {
   static isCamelCase(text: string): boolean {
     return camelCase(text) === text;
   }
+
+  static capitalizeFirstLetter(text: string) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
 }
