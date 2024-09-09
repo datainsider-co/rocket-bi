@@ -52,6 +52,9 @@ import { HttpPermissionRepository, PermissionRepository } from '../repositories/
 import { PermissionService, PermissionServiceImpl } from '../services/PermissionService';
 import { ImageService, ImageServiceImpl } from '@core/common/services/ImageService';
 import { ImageRepository, ImageRepositoryImpl } from '@core/common/repositories/ImageRepository';
+import { ChatbotController, OpenAiController } from '@/shared/components/chat/controller/ChatbotController';
+import { SummarizeFunction } from '@/shared/components/chat/controller/functions/SummarizeFunction';
+import { SortedFunction } from '@/shared/components/chat/controller/functions/SortedFunction';
 
 export class DevModule extends BaseModule {
   configuration(): void {
@@ -136,6 +139,13 @@ export class DevModule extends BaseModule {
     Container.bind(ImageService)
       .to(ImageServiceImpl)
       .scope(Scope.Singleton);
+
+    Container.bind(ChatbotController)
+      .to(() => new OpenAiController())
+      .scope(Scope.Singleton);
+
+    this.buildSortedFunction();
+    this.buildSummarizeFunction();
   }
 
   buildProfiler(): Profiler {
@@ -157,6 +167,21 @@ export class DevModule extends BaseModule {
     const caasClient = Di.get<BaseClient>(DIKeys.CaasClient);
     const authenticationRepository = new HttpAuthenticationRepository(caasClient);
     return new AuthenticationServiceImpl(authenticationRepository);
+  }
+
+  buildSummarizeFunction() {
+    const chatbotController = Di.get(ChatbotController);
+    const fnc = new SummarizeFunction(chatbotController);
+    Container.bind(SummarizeFunction)
+      .factory(() => fnc)
+      .scope(Scope.Singleton);
+  }
+
+  buildSortedFunction() {
+    const chatbotController = Di.get(ChatbotController);
+    Container.bind(SortedFunction)
+      .factory(() => new SortedFunction(chatbotController))
+      .scope(Scope.Singleton);
   }
 
   private bindQueryService() {
