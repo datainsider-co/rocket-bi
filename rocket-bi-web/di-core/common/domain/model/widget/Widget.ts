@@ -54,6 +54,10 @@ export abstract class Widget implements WidgetCommonData {
     this.name = title;
   }
 
+  setDescription(description: string): void {
+    this.description = description;
+  }
+
   /**
    * @return [0, 100]
    */

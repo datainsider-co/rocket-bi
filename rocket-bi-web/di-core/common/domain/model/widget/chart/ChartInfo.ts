@@ -184,4 +184,8 @@ export class ChartInfo implements QueryRelatedWidget, ChartControl {
   getOverridePadding(): string | undefined {
     return this.setting.getChartOption()?.getOverridePadding();
   }
+
+  setDescription(description: string): void {
+    this.description = description;
+  }
 }

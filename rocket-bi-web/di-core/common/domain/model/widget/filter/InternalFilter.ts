@@ -164,4 +164,8 @@ export class InternalFilter implements FilterWidget {
   getOverridePadding(): string | undefined {
     return void 0;
   }
+
+  setDescription(description: string): void {
+    this.description = description;
+  }
 }
