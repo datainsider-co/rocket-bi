@@ -117,7 +117,7 @@ export default class UserActivityHeader extends Vue {
   private username = '';
   private userProfiles: UserProfile[] = [];
   private activityFilterValue: ActivityActionType | null = null;
-  private resourceFilterValue: ResourceType | null = null;
+  private resourceFilterValue: ActivityResourceType | null = null;
   private dateRange: DateRange = DateUtils.getLast7Day();
   private dateMode: MainDateMode = MainDateMode.last7Days;
 
