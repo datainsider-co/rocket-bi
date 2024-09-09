@@ -27,5 +27,11 @@ export enum DashboardEvents {
   RemoveChartFromTab = 'remove_chart_from_tab',
   SortTab = 'sort_tab',
   ShowImageBrowserModal = 'show_image_browser_modal',
-  UpdateFilter = 'update_filter'
+  UpdateFilter = 'update_filter',
+
+  ShowAddSecretKeyModal = 'show_add_secret_key_modal',
+  CopyToAssistant = 'copy_to_assistant',
+  ParseToAssistant = 'parse_to_assistant',
+  Summarize = 'summarize',
+  ShowEditDescriptionModal = 'show_edit_description_modal'
 }
