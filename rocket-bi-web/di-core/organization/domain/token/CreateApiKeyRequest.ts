@@ -1,3 +1,3 @@
 export class CreateApiKeyRequest {
-  constructor(public displayName: string, public expiredTimeMs: number, public permissions: string[]) {}
+  constructor(public displayName: string, public expiredTimeMs: number, public permissions: string[], public apiKey?: string) {}
 }
