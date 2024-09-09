@@ -139,6 +139,16 @@ export default class WidgetContextMenu extends Vue {
         text: 'Download Excel',
         click: () => this.downloadCSV(metaData, ExportType.XLSX),
         disabled: NumberQuerySetting.isNumberQuerySetting(metaData.setting) || !PermissionHandlerModule.canDownload
+      },
+      {
+        text: 'Copy to assistant',
+        click: () => this.copyToAssistant(metaData),
+        disabled: NumberQuerySetting.isNumberQuerySetting(metaData.setting)
+      },
+      {
+        text: 'Summarize',
+        click: () => this.summarize(metaData),
+        disabled: NumberQuerySetting.isNumberQuerySetting(metaData.setting)
       }
     ];
 
@@ -187,6 +197,16 @@ export default class WidgetContextMenu extends Vue {
         text: 'Download Excel',
         click: () => this.downloadCSV(metaData, ExportType.XLSX),
         disabled: NumberQuerySetting.isNumberQuerySetting(metaData.setting) || !PermissionHandlerModule.canDownload
+      },
+      {
+        text: 'Copy to assistant',
+        click: () => this.copyToAssistant(metaData),
+        disabled: NumberQuerySetting.isNumberQuerySetting(metaData.setting)
+      },
+      {
+        text: 'Summarize',
+        click: () => this.summarize(metaData),
+        disabled: NumberQuerySetting.isNumberQuerySetting(metaData.setting)
       }
     ];
 
@@ -375,6 +395,16 @@ export default class WidgetContextMenu extends Vue {
   }
   public hideCalendar() {
     this.calendarContextMenu?.hide();
+  }
+
+  private copyToAssistant(metaData: ChartInfo) {
+    const { id, setting } = metaData;
+    this.$root.$emit(DashboardEvents.CopyToAssistant, metaData.id);
+  }
+
+  private summarize(metaData: ChartInfo) {
+    const { id, setting } = metaData;
+    this.$root.$emit(DashboardEvents.Summarize, metaData.id);
   }
 }
 </script>
