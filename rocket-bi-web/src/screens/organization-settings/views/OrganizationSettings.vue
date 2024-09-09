@@ -36,11 +36,10 @@ export default class OrganizationSettings extends LoggedInScreen {
         to: { name: Routers.UserManagement }
       },
       {
-        id: 'user_activity',
-        displayName: 'User Activity',
-        icon: 'di-icon-log',
-        to: { name: Routers.UserActivity },
-        disabled: EnvUtils.isDisableUserActivities()
+        id: 'sso_config',
+        displayName: 'SSO Config',
+        icon: 'di-icon-sso',
+        to: { name: Routers.SSO }
       },
       {
         id: 'clickhouse_config',
