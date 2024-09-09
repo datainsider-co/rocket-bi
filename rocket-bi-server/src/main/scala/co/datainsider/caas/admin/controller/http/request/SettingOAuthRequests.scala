@@ -31,5 +31,8 @@ case class MultiUpdateOAuthRequest(@Inject request: Request) extends LoggedInReq
       case _    => ValidationResult.Invalid("Whitelist email domain incorrect format")
     }
   }
+}
+
+case class DeleteOAuthRequest(@RouteParam id: String,@Inject request: Request) extends LoggedInRequest{
 
 }

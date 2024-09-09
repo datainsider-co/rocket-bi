@@ -13,6 +13,8 @@ object OAuthConfigRepository {
     "replace into caas.`login_method_provider` (oauth_type, organization_id, oauth_config) VALUES (?, ?, ?)"
   val QUERY_ALL_OAUTH_METHOD_PROVIDER =
     "select oauth_type, oauth_config from caas.`login_method_provider` where `organization_id`=?"
+  val QUERY_DELETE_OAUTH =
+    "DELETE FROM caas.`login_method_provider` WHERE organization_id = ? AND oauth_type = ?"
 }
 
 trait OAuthConfigRepository {
@@ -21,6 +23,8 @@ trait OAuthConfigRepository {
   def multiInsertOrUpdateIfExisted(oauthConfigAsMap: Map[String, OAuthConfig]): Boolean
 
   def getAllOAuthConfig(organizationId: Long): Map[String, OAuthConfig]
+
+  def deleteOathConfig(organizationId: Long, oauthType: String): Boolean
 }
 
 case class OAuthConfigRepositoryImpl @Inject() (@Named("mysql") client: JdbcClient) extends OAuthConfigRepository {
@@ -52,5 +56,9 @@ case class OAuthConfigRepositoryImpl @Inject() (@Named("mysql") client: JdbcClie
       .map(oauthConfig => Array(oauthConfig.oauthType, oauthConfig.organizationId, JsonParser.toJson(oauthConfig)))
       .toArray
     client.executeBatchUpdate(QUERY_INSERT_OR_UPDATE_OAUTH, data) > 0
+  }
+
+  override def deleteOathConfig(organizationId: Long, oauthType: String): Boolean = {
+    client.executeUpdate(QUERY_DELETE_OAUTH, organizationId, oauthType) > 0
   }
 }

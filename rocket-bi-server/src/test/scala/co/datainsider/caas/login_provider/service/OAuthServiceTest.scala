@@ -11,4 +11,14 @@ class OAuthServiceTest extends DataInsiderIntegrationTest {
 //    val r = await(fn)
 //    println(r)
 //  }
+
+
+  val service: OrgOAuthorizationProvider = injector.instance[OrgOAuthorizationProvider]
+  val baseRequest = MockUserContext.getLoggedInRequest(0, "root")
+
+  test("delete oauth config"){
+    val request = DeleteOAuthRequest(OAuthType.GOOGLE, baseRequest)
+    val isDeleteOk = service.deleteOauthConfig(request.getOrganizationId(), request.id).syncGet()
+    assert(isDeleteOk)
+  }
 }
