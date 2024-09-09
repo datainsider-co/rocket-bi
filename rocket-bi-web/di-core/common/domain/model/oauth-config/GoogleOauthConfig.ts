@@ -14,6 +14,18 @@ export class GoogleOauthConfig implements OauthConfig {
   static fromObject(obj: any): GoogleOauthConfig {
     return new GoogleOauthConfig(obj.name, obj.oauthType, obj.clientIds, obj.whitelistEmail, obj.isActive, obj.organizationId);
   }
+
+  getIcon(): string {
+    return 'ic_google_search_console_small.svg';
+  }
+
+  getPrettyType(): string {
+    return 'Google';
+  }
+
+  static default(): GoogleOauthConfig {
+    return new GoogleOauthConfig('Google', OauthType.GOOGLE, [''], [], false, 0);
+  }
 }
 
 export interface OauthConfigResponse {

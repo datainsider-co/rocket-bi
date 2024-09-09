@@ -19,4 +19,12 @@ export class FacebookOauthConfig implements OauthConfig {
   static fromObject(obj: any): FacebookOauthConfig {
     return new FacebookOauthConfig(obj.name, obj.oauthType, obj.appSecret, obj.whitelistEmail, obj.isActive, obj.organizationId);
   }
+
+  getIcon(): string {
+    return 'assets/icon/facebook.svg';
+  }
+
+  getPrettyType(): string {
+    return 'Facebook';
+  }
 }

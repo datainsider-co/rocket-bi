@@ -22,4 +22,19 @@ export abstract class OauthConfig {
         throw new DIException(`${obj.oauthType} is not unsupported.`);
     }
   }
+
+  static default(type: OauthType): OauthConfig {
+    switch (type) {
+      case OauthType.GOOGLE:
+        return GoogleOauthConfig.default();
+      // case OauthType.FACEBOOK:
+      //   return FacebookOauthConfig.fromObject(obj);
+      default:
+        throw new DIException(`${type} is not unsupported.`);
+    }
+  }
+
+  abstract getIcon(): string;
+
+  abstract getPrettyType(): string;
 }
