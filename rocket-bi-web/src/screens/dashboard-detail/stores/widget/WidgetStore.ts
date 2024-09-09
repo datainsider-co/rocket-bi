@@ -578,6 +578,22 @@ class WidgetStore extends VuexModule {
     const updatedKeys: Set<string> = new Set([...currentKeys, ...keys]);
     this.selectedKeysAsMap.set(id, Array.from(updatedKeys.keys()));
   }
+
+  @Action({ rawError: true })
+  async updateWidgetDescription(payload: { widget: Widget; newName: string }): Promise<void> {
+    const { widget, newName } = payload;
+    const clonedWidget = Widget.fromObject(widget);
+    clonedWidget.setDescription(newName);
+    const result: boolean = await this.handleUpdateWidget(clonedWidget);
+    if (result) {
+      this.setWidget({
+        widgetId: clonedWidget.id,
+        widget: clonedWidget
+      });
+    } else {
+      return Promise.reject(new DIException('Cannot edit description of this widget'));
+    }
+  }
 }
 
 export const WidgetModule: WidgetStore = getModule(WidgetStore);
