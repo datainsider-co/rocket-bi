@@ -18,7 +18,10 @@ import { _ThemeStore } from '@/store/modules/ThemeStore';
 import { DefaultProps, PropsDefinition } from 'vue/types/options';
 import { Watch } from 'vue-property-decorator';
 import Swal from 'sweetalert2';
-import { ExportType } from '@core/common/domain';
+import { DIException, ExportType } from '@core/common/domain';
+import NProgress from 'nprogress';
+import { SummarizeFunction } from '@/shared/components/chat/controller/functions/SummarizeFunction';
+import { Di } from '@core/common/modules';
 
 export class MouseEventData<T> {
   constructor(readonly event: MouseEvent, readonly data: T, readonly extraData: any = {}) {}
@@ -290,6 +293,41 @@ export abstract class BaseHighChartWidget<
 
   async export(type: ExportType): Promise<void> {
     await DashboardControllerModule.handleExport({ widgetId: this.id as number, type: type });
+  }
+
+  async copyToAssistant(): Promise<void> {
+    try {
+      const type = ExportType.CSV;
+      const widgetData = await DashboardControllerModule.getWidgetData({ widgetId: this.id as number, type: type });
+      this.$root.$emit(DashboardEvents.ParseToAssistant, widgetData);
+    } catch (e) {
+      Log.error(e);
+    }
+  }
+
+  async summarize() {
+    try {
+      this.showLoading();
+      const content = await Di.get(SummarizeFunction).execute({
+        type: this.chartInfo.extraData?.currentChartType ?? '',
+        response: this.data
+      });
+      this.$root.$emit(DashboardEvents.ShowEditDescriptionModal, this.id, content);
+    } catch (ex) {
+      Log.error(ex);
+      const exception = DIException.fromObject(ex);
+      PopupUtils.showError(exception.getPrettyMessage());
+    } finally {
+      this.hideLoading();
+    }
+  }
+
+  protected showLoading() {
+    NProgress.configure({ parent: `.di-widget-container--body[widget-id="${this.id}"]` }).start();
+  }
+
+  protected hideLoading() {
+    NProgress.configure({ parent: `.di-widget-container--body[widget-id="${this.id}"]` }).done();
   }
 }
 

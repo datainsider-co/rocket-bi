@@ -273,4 +273,13 @@ export default class DateFilter2 extends BaseWidget {
   async export(type: ExportType): Promise<void> {
     PopupUtils.showError('Unsupported Download CSV');
   }
+
+  async copyToAssistant(): Promise<void> {
+    PopupUtils.showError('Unsupported Copy to Assistant');
+  }
+
+  summarize(): Promise<void> {
+    PopupUtils.showError('Unsupported Summarize');
+    return Promise.reject('Unsupported Summarize');
+  }
 }

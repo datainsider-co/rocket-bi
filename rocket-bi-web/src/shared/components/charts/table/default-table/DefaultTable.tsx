@@ -35,7 +35,10 @@ import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvent
 import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
 import { Log } from '@core/utils';
 import { ColorUtils } from '@/utils/ColorUtils';
-import { ExportType } from '@core/common/domain';
+import { DIException, ExportType } from '@core/common/domain';
+import { Di } from '@core/common/modules';
+import { SummarizeFunction } from '@/shared/components/chat/controller/functions/SummarizeFunction';
+import { PopupUtils } from '@/utils';
 
 @Component({
   components: {
@@ -481,5 +484,33 @@ export default class DefaultTable extends BaseWidget {
     Log.debug('DefaultTable::handleOnClick::event::', e);
     e.preventDefault();
     this.showContextMenu(new MouseEventData<string>(e, ''));
+  }
+
+  async copyToAssistant(): Promise<void> {
+    try {
+      const type = ExportType.CSV;
+      const widgetData = await DashboardControllerModule.getWidgetData({ widgetId: this.chartId, type: type });
+      this.$root.$emit(DashboardEvents.ParseToAssistant, widgetData);
+    } catch (e) {
+      Log.error(e);
+    }
+  }
+
+  async summarize() {
+    try {
+      this.showLoading();
+      const content = await Di.get(SummarizeFunction).execute({
+        type: 'Group table',
+        response: this.internalTableResponse
+      });
+      Log.debug('summarize::', content);
+      this.$root.$emit(DashboardEvents.ShowEditDescriptionModal, this.chartId, content);
+    } catch (ex) {
+      Log.error(ex);
+      const exception = DIException.fromObject(ex);
+      PopupUtils.showError(exception.getPrettyMessage());
+    } finally {
+      this.hideLoading();
+    }
   }
 }

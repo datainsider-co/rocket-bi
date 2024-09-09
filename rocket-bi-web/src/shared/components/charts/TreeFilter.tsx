@@ -389,4 +389,13 @@ export default class TreeFilter extends BaseChartWidget<TableResponse, TreeFilte
     }
     return;
   }
+
+  async copyToAssistant(): Promise<void> {
+    PopupUtils.showError('Unsupported Copy to Assistant');
+  }
+
+  summarize(): Promise<void> {
+    PopupUtils.showError('Unsupported Summarize');
+    return Promise.reject('Unsupported Summarize');
+  }
 }
