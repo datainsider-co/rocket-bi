@@ -383,6 +383,49 @@ export class DashboardControllerStore extends VuexModule {
     }
     return effectedIds;
   }
+
+  /**
+   * Performs an action to handle getting widget data for exporting.
+   *
+   * @param {Object} payload - The payload object containing widgetId and type properties.
+   * @param {number} payload.widgetId - The ID of the widget.
+   * @param {ExportType} payload.type - The type of file to export.
+   * @returns {Promise<Blob>} - A promise that resolves with the exported file as a Blob.
+   * @throws {Error} - If an error occurs during the export process.
+   */
+  @Action
+  async getWidgetData(payload: { widgetId: number; type: ExportType }): Promise<Blob> {
+    try {
+      Swal.fire({
+        icon: 'info',
+        title: `Exporting data`,
+        html: 'Wait a minute...',
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+        allowOutsideClick: false
+      });
+
+      const { widgetId } = payload;
+      const request: QueryRequest = await FilterStoreUtils.buildQueryRequest({
+        widgetId: widgetId,
+        mainDateFilter: FilterModule.mainDateFilterRequest,
+        isFlattenPivot: true
+      });
+      const file: Blob = await ChartDataModule.export({ request, type: payload.type });
+      Swal.close();
+      return file;
+    } catch (ex) {
+      Swal.hideLoading();
+      Swal.fire({
+        icon: 'error',
+        title: 'Export Error',
+        html: ex.message
+      });
+      throw ex;
+    }
+  }
 }
 
 export const DashboardControllerModule: DashboardControllerStore = getModule(DashboardControllerStore);
