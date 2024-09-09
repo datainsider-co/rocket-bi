@@ -25,6 +25,8 @@
       </div>
       <DiRenameModal title="Rename Dashboard" label="Dashboard Name" ref="renameDashboardModal" />
       <DiRenameModal title="Rename Chart" label="Chart Name" ref="renameChartModal" />
+      <TextAreaModal ref="textAreaModal" />
+      <ActionModal ref="actionModal" />
     </div>
     <div v-if="enableFilter && !isMobile && !isEmbeddedView" class="dashboard-header--filter">
       <FilterBar
@@ -43,13 +45,13 @@
 <script lang="ts">
 import { CalendarData } from '@/shared/models';
 import { Component, Prop, Provide, Ref, Vue, Watch } from 'vue-property-decorator';
-import { DashboardId, DIException, FieldDetailInfo, InternalFilter, MainDateFilter2, ValueControlType, Widget } from '@core/common/domain';
+import { DashboardId, DIException, FieldDetailInfo, InternalFilter, MainDateFilter2, ValueControlType, Widget, WidgetId } from '@core/common/domain';
 import { DashboardMode, DateRange, isEdit, Routers } from '@/shared';
 import { DashboardControllerModule, DashboardModeModule, DashboardModule, FilterModule, WidgetModule } from '@/screens/dashboard-detail/stores';
 
 import DashboardControlBar from '@/screens/dashboard-detail/components/dashboard-control-bar/DashboardControlBar.vue';
 import FilterBar from '@/shared/components/FilterBar.vue';
-import { ChartUtils, DateTimeUtils, ListUtils } from '@/utils';
+import { DateTimeUtils, ListUtils, PopupUtils } from '@/utils';
 import { DataManager } from '@core/common/services';
 import { Log } from '@core/utils';
 import DiRenameModal from '@/shared/components/DiRenameModal.vue';
@@ -57,9 +59,11 @@ import { RouterUtils } from '@/utils/RouterUtils';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { Track } from '@/shared/anotation';
 import { TrackEvents } from '@core/tracking/enum/TrackEvents';
+import TextAreaModal from '@/screens/dashboard-detail/components/TextAreaModal.vue';
+import ActionModal from '@/screens/dashboard-detail/components/ActionModal.vue';
 
 @Component({
-  components: { DashboardControlBar, FilterBar, DiRenameModal }
+  components: { ActionModal, TextAreaModal, DashboardControlBar, FilterBar, DiRenameModal }
 })
 export default class DashboardHeader extends Vue {
   @Prop({ type: Boolean, default: false })
@@ -89,6 +93,12 @@ export default class DashboardHeader extends Vue {
   @Ref()
   private readonly controlBar!: DashboardControlBar;
 
+  @Ref()
+  private readonly textAreaModal!: TextAreaModal;
+
+  @Ref()
+  private readonly actionModal!: ActionModal;
+
   private get title(): string {
     return DashboardModule.title ?? 'Untitled dashboard';
   }
@@ -111,10 +121,12 @@ export default class DashboardHeader extends Vue {
 
   mounted() {
     this.$root.$on(DashboardEvents.ShowEditChartTitleModal, this.onShowEditChartTitleModal);
+    this.$root.$on(DashboardEvents.ShowEditDescriptionModal, this.onShowEditDescriptionModal);
   }
 
   beforeDestroy() {
-    this.$root.$on(DashboardEvents.ShowEditChartTitleModal, this.onShowEditChartTitleModal);
+    this.$root.$off(DashboardEvents.ShowEditChartTitleModal, this.onShowEditChartTitleModal);
+    this.$root.$off(DashboardEvents.ShowEditDescriptionModal, this.onShowEditDescriptionModal);
   }
 
   private onShowEditChartTitleModal(widget: Widget) {
@@ -130,6 +142,62 @@ export default class DashboardHeader extends Vue {
         this.renameChartModal.setLoading(false);
       }
     });
+  }
+
+  private onShowEditDescriptionModal(id: WidgetId, description: string) {
+    const widget = WidgetModule.findWidgetById(id);
+    if (!widget) {
+      return;
+    }
+
+    const modalConfig = {
+      title: 'Edit Summarize',
+      label: 'Summarize'
+    };
+    this.textAreaModal.show(description, (newText: string) => this.handleSaveSummarize(widget, newText), modalConfig);
+  }
+
+  private handleSaveSummarize(widget: Widget, text: string) {
+    const modalConfig = { title: 'Save', message: 'Would you like to save summarize to description?' };
+    try {
+      this.textAreaModal.hide();
+      this.$nextTick(() => {
+        this.actionModal.show(
+          [
+            {
+              text: 'Copy',
+              click: () => this.saveToClipboard(text)
+            },
+            {
+              text: 'Save to description',
+              click: async () => this.updateWidgetDescription(widget, text)
+            }
+          ],
+          modalConfig
+        );
+      });
+    } catch (e) {
+      Log.error(e);
+    }
+  }
+
+  private saveToClipboard(text: string) {
+    try {
+      navigator.clipboard.writeText(text);
+    } catch (ex) {
+      Log.error(ex);
+      PopupUtils.showError('Copy to clipboard failed! Please try again.');
+    }
+  }
+
+  private async updateWidgetDescription(widget: Widget, text: string) {
+    try {
+      await WidgetModule.updateWidgetDescription({ widget: widget, newName: text });
+    } catch (ex) {
+      Log.error(ex);
+      const exception = DIException.fromObject(ex);
+      PopupUtils.showError(exception.getPrettyMessage());
+    }
   }
 
   @Provide()
