@@ -85,7 +85,7 @@ class ApikeyServiceImpl @Inject() (
   val sessionDomain: String = ZConfig.getString("session.domain")
 
   override def create(request: CreateApiKeyRequest): Future[ApiKeyResponse] = {
-    val apiKey: String = s"${apiKeyPrefix}_${UUID.randomUUID().toString}"
+    val apiKey: String = request.apiKey.getOrElse(s"${apiKeyPrefix}_${UUID.randomUUID().toString}")
     val orgId: Long = request.currentOrganizationId.get
     val apiKeyInfo = ApiKeyInfo(
       organizationId = orgId,
