@@ -19,4 +19,12 @@ case class SettingController @Inject() (
         orgOAuthProvider.multiUpdateOauthConfig(request.oauthConfigAsMap).map(_ => request.oauthConfigAsMap)
       }
     }
+
+  filter(permissionFilter.requireAll("login_method:manage", LicensePermission.EditData))
+    .delete("/admin/setting/login_methods/:id") { request: DeleteOAuthRequest =>
+      Profiler(s"/admin/setting/login_methods DELETE") {
+        orgOAuthProvider.deleteOauthConfig(request.getOrganizationId(), request.id)
+      }
+    }
+
 }

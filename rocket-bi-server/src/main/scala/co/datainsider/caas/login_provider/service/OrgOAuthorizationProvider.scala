@@ -24,6 +24,8 @@ trait OrgOAuthorizationProvider {
 
   def multiUpdateOauthConfig(newConfigAsMap: Map[String, OAuthConfig]): Future[Boolean]
 
+  def deleteOauthConfig(organizationId: Long, oauthType: String): Future[Boolean]
+
   def isActive(organizationId: Long, oauthType: String): Future[Boolean]
 }
 
@@ -96,6 +98,13 @@ class OrgOAuthorizationProviderImpl @Inject() (oauthConfigRepository: OAuthConfi
       isWhitelistEmail <- oAuthService.isWhitelistEmail(oauthType, email)
     } yield isWhitelistEmail
   }
+
+  override def deleteOauthConfig(organizationId: Long, oauthType: String): Future[Boolean] = {
+    oauthConfigRepository.deleteOathConfig(organizationId, oauthType)
+    oAuthServiceCache.invalidate(organizationId.toString)
+    Future.True
+  }
+
 
   override def isActive(organizationId: Long, oauthType: String): Future[Boolean] = {
     for {

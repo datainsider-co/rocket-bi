@@ -45,6 +45,8 @@ const UserActivity = () =>
   import(/* webpackChunkName: "organization-activity" */ '@/screens/organization-settings/views/user-activity-log/UserActivityLog.vue');
 const ClickhouseConfig = () =>
   import(/* webpackChunkName: "organization-clickhouse-config" */ '@/screens/organization-settings/views/connector-config/ConnectorConfig.vue');
+const SSOConfig = () => import(/* webpackChunkName: "organization-clickhouse-config" */ '@/screens/organization-settings/views/sso-config/SSOConfig.vue');
+
 const PlanAndBilling = () => import(/* webpackChunkName: "organization-billing" */ '@/screens/organization-settings/views/plan-and-billing/PlanAndBilling.vue');
 const APIKeyManagement = () =>
   import(/* webpackChunkName: "organization-api-key" */ '@/screens/organization-settings/views/token-management/APIKeyManagement.vue');
@@ -305,6 +307,12 @@ const routes: Array<RouteConfig> = [
         path: 'user-activity',
         name: Routers.UserActivity,
         component: UserActivity,
+        props: true
+      },
+      {
+        path: 'sso',
+        name: Routers.SSO,
+        component: SSOConfig,
         props: true
       },
       {

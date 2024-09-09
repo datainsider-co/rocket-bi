@@ -1,6 +1,10 @@
 package co.datainsider.caas.login_provider.service
 
+import co.datainsider.caas.admin.controller.http.request.DeleteOAuthRequest
+import co.datainsider.caas.login_provider.domain.OAuthType
 import co.datainsider.caas.user_caas.services.DataInsiderIntegrationTest
+import co.datainsider.caas.user_profile.controller.http.filter.parser.MockUserContext
+import co.datainsider.caas.user_profile.domain.Implicits.FutureEnhanceLike
 import com.twitter.inject.Injector
 
 class OAuthServiceTest extends DataInsiderIntegrationTest {
@@ -11,4 +15,14 @@ class OAuthServiceTest extends DataInsiderIntegrationTest {
 //    val r = await(fn)
 //    println(r)
 //  }
+
+
+  val service: OrgOAuthorizationProvider = injector.instance[OrgOAuthorizationProvider]
+  val baseRequest = MockUserContext.getLoggedInRequest(0, "root")
+
+  test("delete oauth config"){
+    val request = DeleteOAuthRequest(OAuthType.GOOGLE, baseRequest)
+    val isDeleteOk = service.deleteOauthConfig(request.getOrganizationId(), request.id).syncGet()
+    assert(isDeleteOk)
+  }
 }

@@ -325,7 +325,7 @@ export class AuthenticationStore extends VuexModule {
   }
 
   @Mutation
-  setLoginMethod(payload: { googleOauthConfig: GoogleOauthConfig }) {
+  setLoginMethod(payload: { googleOauthConfig: GoogleOauthConfig | null }) {
     Log.debug('saveGoogleOauthConfig::', payload.googleOauthConfig);
     this.googleOauthConfig = payload.googleOauthConfig;
   }
@@ -364,6 +364,11 @@ export class AuthenticationStore extends VuexModule {
       Log.error('AuthenticationStore::init::failure', ex);
       this.setAuthStatus(AuthenticationStatus.UnAuthenticated);
     }
+  }
+
+  @Action({ rawError: true })
+  deleteLoginMethods(request: { type: OauthType }): Promise<boolean> {
+    return this.adminSettingService.deleteLoginMethods(request.type);
   }
 }
 

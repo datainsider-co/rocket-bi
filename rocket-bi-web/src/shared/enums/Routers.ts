@@ -44,7 +44,7 @@ export enum Routers {
   UserActivity = 'UserActivity',
   ClickhouseConfig = 'ClickhouseConfig',
   APIKeyManagement = 'APIKeyManagement',
-
+  SSO = 'SSO',
   UserSettings = 'UserSettings',
   UserProfile = 'UserProfile/me',
 
