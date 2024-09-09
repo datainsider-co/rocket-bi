@@ -47,8 +47,10 @@ export enum Routers {
   SSO = 'SSO',
   UserSettings = 'UserSettings',
   UserProfile = 'UserProfile/me',
-
   CDP = 'CDP',
+  SystemMonitor = 'SystemMonitor',
+  QueryUsage = 'QueryUsage',
+  UserUsage = 'UserUsage',
   PathExplorer = 'PathExplorer',
   EventAnalysis = 'EventAnalysis',
   CohortManagement = 'CohortManagement',

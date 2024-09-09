@@ -46,6 +46,12 @@ const UserActivity = () =>
 const ClickhouseConfig = () =>
   import(/* webpackChunkName: "organization-clickhouse-config" */ '@/screens/organization-settings/views/connector-config/ConnectorConfig.vue');
 const SSOConfig = () => import(/* webpackChunkName: "organization-clickhouse-config" */ '@/screens/organization-settings/views/sso-config/SSOConfig.vue');
+const SystemMonitor = () =>
+  import(/* webpackChunkName: "organization-clickhouse-config" */ '@/screens/organization-settings/views/system-monitor/SystemMonitor.vue');
+const UserUsage = () =>
+  import(/* webpackChunkName: "organization-clickhouse-config" */ '@/screens/organization-settings/views/system-monitor/views/UserUsage.vue');
+const QueryUsage = () =>
+  import(/* webpackChunkName: "organization-clickhouse-config" */ '@/screens/organization-settings/views/system-monitor/views/QueryUsage.vue');
 
 const PlanAndBilling = () => import(/* webpackChunkName: "organization-billing" */ '@/screens/organization-settings/views/plan-and-billing/PlanAndBilling.vue');
 const APIKeyManagement = () =>
@@ -309,11 +315,34 @@ const routes: Array<RouteConfig> = [
         component: UserActivity,
         props: true
       },
+
       {
         path: 'sso',
         name: Routers.SSO,
         component: SSOConfig,
         props: true
+      },
+      {
+        path: 'system-monitor',
+        name: Routers.SystemMonitor,
+        component: SystemMonitor,
+        redirect: {
+          name: Routers.QueryUsage
+        },
+        children: [
+          {
+            path: 'query-usage',
+            name: Routers.QueryUsage,
+            component: QueryUsage,
+            props: true
+          },
+          {
+            path: 'user-usage',
+            name: Routers.UserUsage,
+            component: UserUsage,
+            props: true
+          }
+        ]
       },
       {
         path: 'clickhouse-config',
