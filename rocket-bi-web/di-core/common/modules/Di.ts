@@ -31,5 +31,6 @@ export enum DIKeys {
   Profiler = 'profiler',
   NoAuthService = 'no_auth_service',
   AuthService = 'auth_service',
-  CompareBuilder = 'compare_builder'
+  CompareBuilder = 'compare_builder',
+  OpenAiClient = 'open_ai_client'
 }

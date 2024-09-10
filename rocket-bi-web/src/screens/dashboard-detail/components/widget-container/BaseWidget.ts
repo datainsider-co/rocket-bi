@@ -56,4 +56,8 @@ export abstract class BaseWidget extends Vue {
   get baseThemeColor(): string {
     return _ThemeStore.baseDashboardTheme;
   }
+
+  abstract copyToAssistant(): Promise<void>;
+
+  abstract summarize(): Promise<void>;
 }

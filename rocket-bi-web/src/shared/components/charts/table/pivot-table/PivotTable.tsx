@@ -21,7 +21,7 @@ import { DashboardControllerModule } from '@/screens/dashboard-detail/stores/con
 import CustomTable from '@chart/custom-table/CustomTable.vue';
 import { CustomBodyCellData, CustomFooterCellData, CustomHeaderCellData, CustomStyleData, CustomTableProp } from '@chart/custom-table/TableData';
 import { PivotTableRenderer } from '@chart/table/pivot-table/render/PivotTableRenderer';
-import { ListUtils } from '@/utils';
+import { ListUtils, PopupUtils } from '@/utils';
 import { TableBodyStyleRender } from '@chart/table/style-render/TableBodyStyleRender';
 import { TableDataUtils } from '@chart/custom-table/TableDataUtils';
 import { Log } from '@core/utils';
@@ -37,7 +37,9 @@ import { TableStyleUtils } from '@chart/table/TableStyleUtils';
 import { MouseEventData } from '@chart/BaseChart';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
-import { ExportType } from '@core/common/domain';
+import { DIException, ExportType } from '@core/common/domain';
+import { Di } from '@core/common/modules';
+import { SummarizeFunction } from '@/shared/components/chat/controller/functions/SummarizeFunction';
 
 @Component({
   components: {
@@ -546,5 +548,33 @@ export default class PivotTable extends BaseWidget {
     Log.debug('PivotTable::handleOnClick::event::', e);
     e.preventDefault();
     this.showContextMenu(new MouseEventData<string>(e, ''));
+  }
+
+  async copyToAssistant(): Promise<void> {
+    try {
+      const type = ExportType.CSV;
+      const widgetData = await DashboardControllerModule.getWidgetData({ widgetId: this.chartId, type: type });
+      this.$root.$emit(DashboardEvents.ParseToAssistant, widgetData);
+    } catch (e) {
+      Log.error(e);
+    }
+  }
+
+  async summarize() {
+    try {
+      this.showLoading();
+      const content = await Di.get(SummarizeFunction).execute({
+        type: 'Pivot table',
+        response: this.internalTableResponse
+      });
+      this.$root.$emit(DashboardEvents.ShowEditDescriptionModal, this.chartId, content);
+      Log.debug('summarize::', content);
+    } catch (ex) {
+      Log.error(ex);
+      const exception = DIException.fromObject(ex);
+      PopupUtils.showError(exception.getPrettyMessage());
+    } finally {
+      this.hideLoading();
+    }
   }
 }

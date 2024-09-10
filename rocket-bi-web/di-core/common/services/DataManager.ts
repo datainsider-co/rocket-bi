@@ -7,6 +7,7 @@ import router from '@/router/Router';
 import { RouterUtils } from '@/utils/RouterUtils';
 import { MainDateData } from '@/screens/dashboard-detail/stores';
 import { Di } from '@core/common/modules';
+import { OpenAiModels } from '@/shared/components/chat/controller/OpenAiModels';
 
 // don't edit value
 enum DataManagerKeys {
@@ -25,7 +26,8 @@ enum DataManagerKeys {
   LoginType = 'login_type',
   SelectedColumns = 'selected_columns',
   Organization = 'organization',
-  RecentIcons = 'recent_icons'
+  RecentIcons = 'recent_icons',
+  AssistantModel = 'assistant_model'
 }
 
 export class DataManager {
@@ -240,5 +242,13 @@ export class DataManager {
       Log.error('DataManager::getRecentIcons::error::', e);
       return [];
     }
+  }
+
+  static getAssistantModel(): OpenAiModels {
+    return (localStorage.getItem(DataManagerKeys.AssistantModel) as OpenAiModels) ?? OpenAiModels.GPT35Turbo;
+  }
+
+  static setAssistantModel(model: string) {
+    localStorage.setItem(DataManagerKeys.AssistantModel, model);
   }
 }

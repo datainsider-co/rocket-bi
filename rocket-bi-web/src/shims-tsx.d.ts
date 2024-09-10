@@ -89,6 +89,7 @@ declare global {
     GOOGLE_SEARCH_CONSOLE_SCOPES: string;
     FACEBOOK_ADS_URL: string;
     TIKTOK_ADS_URL: string;
+    OPEN_API_URL: string;
   }
   export interface QueryLanguage {
     clickHouse: { default: string };

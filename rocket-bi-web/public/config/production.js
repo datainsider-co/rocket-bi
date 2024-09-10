@@ -55,7 +55,8 @@ const productionConfig = {
   GA_SCOPES: 'profile https://www.googleapis.com/auth/analytics.readonly',
   GA4_SCOPES: 'profile https://www.googleapis.com/auth/analytics.readonly',
   GOOGLE_SEARCH_CONSOLE_SCOPES: 'https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/webmasters',
-  GOOGLE_ADS_SCOPES: 'https://www.googleapis.com/auth/adwords'
+  GOOGLE_ADS_SCOPES: 'https://www.googleapis.com/auth/adwords',
+  OPEN_API_URL: 'https://api.openai.com'
 };
 
 window.appConfig = productionConfig;

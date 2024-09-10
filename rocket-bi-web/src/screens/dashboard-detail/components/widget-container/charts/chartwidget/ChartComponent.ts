@@ -143,6 +143,8 @@ export default class ChartComponent extends Vue implements WidgetResizeHandler {
   registerEvents(): void {
     this.$root.$on(DashboardEvents.ResizeWidget, this.handleResize);
     this.$root.$on(DashboardEvents.Export, this.handleDownloadCSV);
+    this.$root.$on(DashboardEvents.CopyToAssistant, this.handleCopyToAssistant);
+    this.$root.$on(DashboardEvents.Summarize, this.handleSummarize);
   }
 
   beforeDestroy() {
@@ -152,6 +154,8 @@ export default class ChartComponent extends Vue implements WidgetResizeHandler {
   unregisterEvents(): void {
     this.$root.$off(DashboardEvents.ResizeWidget, this.handleResize);
     this.$root.$off(DashboardEvents.Export, this.handleDownloadCSV);
+    this.$root.$off(DashboardEvents.CopyToAssistant, this.handleCopyToAssistant);
+    this.$root.$off(DashboardEvents.Summarize, this.handleSummarize);
   }
 
   handleResize(id: WidgetId): void {
@@ -174,5 +178,17 @@ export default class ChartComponent extends Vue implements WidgetResizeHandler {
 
   private getCurrentQuerySetting(): QuerySetting {
     return ListUtils.getLast(DrilldownDataStoreModule.getQuerySettings(this.metaData.id)) ?? this.metaData.setting;
+  }
+
+  handleCopyToAssistant(id: WidgetId) {
+    if (this.metaData.id === id) {
+      this.chart.copyToAssistant();
+    }
+  }
+
+  handleSummarize(id: WidgetId) {
+    if (this.metaData.id === id) {
+      this.chart.summarize();
+    }
   }
 }

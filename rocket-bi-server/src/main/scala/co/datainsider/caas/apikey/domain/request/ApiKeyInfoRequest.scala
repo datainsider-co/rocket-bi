@@ -34,6 +34,7 @@ case class GetApiKeyRequest(@RouteParam apiKey: String, @Inject request: Request
 case class CreateApiKeyRequest(
     displayName: String,
     expiredTimeMs: Option[Long] = None,
+    apiKey: Option[String] = None,
     permissions: Set[String],
     @Inject request: Request
 ) extends LoggedInRequest {

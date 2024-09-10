@@ -351,4 +351,19 @@ export default class NumberWidget extends BaseChartWidget<SeriesOneResponse, Num
   async export(type: ExportType): Promise<void> {
     await DashboardControllerModule.handleExport({ widgetId: this.id as number, type: type });
   }
+
+  async copyToAssistant(): Promise<void> {
+    try {
+      const type = ExportType.CSV;
+      const widgetData = await DashboardControllerModule.getWidgetData({ widgetId: this.id as number, type: type });
+      this.$root.$emit(DashboardEvents.ParseToAssistant, widgetData);
+    } catch (e) {
+      Log.error(e);
+    }
+  }
+
+  summarize(): Promise<void> {
+    PopupUtils.showError('Unsupported Summarize');
+    return Promise.reject('Unsupported Summarize');
+  }
 }

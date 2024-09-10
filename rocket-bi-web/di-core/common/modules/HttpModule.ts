@@ -36,10 +36,20 @@ export class HttpModule extends BaseModule {
 
     const relayApiUrl = window.appConfig.VUE_APP_RELAY_API_URL;
     Container.bindName(DIKeys.RelayClient).to(this.buildClient(relayApiUrl, timeout));
+
+    const openApiUrl = window.appConfig.OPEN_API_URL;
+    Container.bindName(DIKeys.OpenAiClient).to(this.buildWithoutAuthenticationClient(openApiUrl, timeout));
   }
 
   private buildClient(apiUrl: string, timeout: number): BaseClient {
     return ClientBuilders.authAndTokenBuilder()
+      .withBaseUrl(apiUrl)
+      .withTimeout(timeout)
+      .build();
+  }
+
+  private buildWithoutAuthenticationClient(apiUrl: string, timeout: number): BaseClient {
+    return ClientBuilders.defaultBuilder()
       .withBaseUrl(apiUrl)
       .withTimeout(timeout)
       .build();

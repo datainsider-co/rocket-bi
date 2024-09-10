@@ -18,6 +18,9 @@
               <span>{{ dayLeft }}</span>
             </a>
           </router-link>
+          <a id="assistant-btn" title="Assistant" class="header-bar-item navigator" @click="toggleAssistant">
+            <ChatGPTIcon />
+          </a>
           <router-link v-slot="{ href, navigate, isActive, isExactActive }" active-class="item-selected" class="header-bar-item" to="/mydata">
             <a
               :id="genBtnId('dashboards')"
@@ -136,6 +139,8 @@
       </div>
     </div>
     <ChangePasswordModal ref="changePasswordModal" />
+    <AssistantSidebar ref="assistantSidebar" />
+    <DiRenameModal title="Add Open AI Secret Key" label="Secret Key" placeholder="Input Open Ai secret key" ref="secretModal" actionName="Add" />
   </div>
 </template>
 
@@ -147,7 +152,6 @@ import DiButton from '@/shared/components/common/DiButton.vue';
 import { RouterUtils } from '@/utils/RouterUtils';
 import { Log } from '@core/utils';
 import ChangePasswordModal from '@/shared/components/ChangePasswordModal.vue';
-import { Di } from '@core/common/modules';
 import { DataManager, UserProfileService } from '@core/common/services';
 import DataWarehouseIcon from '@/shared/components/Icon/DataWarehouseIcon.vue';
 import DatabaseIcon from '@/shared/components/Icon/DatabaseIcon.vue';
@@ -160,16 +164,19 @@ import { DatabaseSchemaModule } from '@/store/modules/data-builder/DatabaseSchem
 import LakeHouseIcon from '@/shared/components/Icon/LakeHouseIcon.vue';
 import CaretDownIcon from '@/shared/components/Icon/CaretDownIcon.vue';
 import { HtmlElementRenderUtils } from '@/utils/HtmlElementRenderUtils';
-import { UserProfile } from '@core/common/domain';
+import { DIException, UserProfile } from '@core/common/domain';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 import EnvUtils from '@/utils/EnvUtils';
 import LogoComponent from '@/screens/organization-settings/components/organization-logo-modal/LogoComponent.vue';
 import CompanyLogoNameComponent from '@/screens/organization-settings/components/organization-logo-modal/CompanyLogoNameComponent.vue';
 import { PlanAndBillingModule } from '@/screens/organization-settings/stores/PlanAndBillingStore';
-import moment from 'moment/moment';
 import { PlanDisplayNames, PlanType } from '@core/organization/domain/Plan/PlanType';
 import { DateUtils } from '@/utils';
 import { DataManagementModule } from '@/screens/data-management/store/DataManagementStore';
+import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
+import DiRenameModal from '@/shared/components/DiRenameModal.vue';
+import ChatGPTIcon from '@/shared/components/chat/components/ChatGPTIcon.vue';
+import AssistantSidebar from '@/shared/components/chat/AssistantSidebar.vue';
 
 interface RouterNode {
   label: string;
@@ -178,6 +185,9 @@ interface RouterNode {
 
 @Component({
   components: {
+    AssistantSidebar,
+    ChatGPTIcon,
+    DiRenameModal,
     CompanyLogoNameComponent,
     LogoComponent,
     CaretDownIcon,
@@ -230,6 +240,12 @@ export default class HeaderBar extends Vue {
   container?: string;
   @Prop({ type: Boolean, default: true })
   showLogout!: boolean;
+
+  @Ref()
+  private readonly secretModal!: DiRenameModal;
+
+  @Ref()
+  private readonly assistantSidebar!: AssistantSidebar;
 
   private get dataWarehouseMenuOptions(): RouterNode[] {
     return [
@@ -400,6 +416,29 @@ export default class HeaderBar extends Vue {
     $('.header-bar-container').on('click', '.header-bar-item:not(:has(+.custom-popover))', () => {
       this.showedMenu = false;
     });
+
+    this.$root.$on(DashboardEvents.ShowAddSecretKeyModal, this.onShowSecretKeyModel);
+  }
+
+  beforeDestroy() {
+    this.$root.$off(DashboardEvents.ShowAddSecretKeyModal, this.onShowSecretKeyModel);
+  }
+
+  private onShowSecretKeyModel(onCompleted: (key: string) => void) {
+    Log.debug('onShowSecretKeyModel');
+    this.secretModal.show('', async (newName: string) => {
+      try {
+        onCompleted(newName);
+        this.secretModal.hide();
+      } catch (ex) {
+        const exception = DIException.fromObject(ex);
+        Log.error(exception);
+      }
+    });
+  }
+
+  toggleAssistant() {
+    this.assistantSidebar.toggle();
   }
 }
 </script>
@@ -861,5 +900,12 @@ html.dark .dark-mode label:before {
   //margin-top: -$marginY;
   //margin-bottom: -$marginY;
   //height: calc(100% + #{$marginY * 2});
+}
+
+#assistant-btn:hover {
+  svg {
+    transition: fill 0.4s linear;
+    fill: var(--accent);
+  }
 }
 </style>

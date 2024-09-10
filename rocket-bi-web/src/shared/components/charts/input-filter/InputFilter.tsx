@@ -247,4 +247,13 @@ export default class InputFilter extends BaseWidget {
   async export(type: ExportType) {
     PopupUtils.showError('Unsupported Download CSV');
   }
+
+  async copyToAssistant(): Promise<void> {
+    PopupUtils.showError('Unsupported Copy to Assistant');
+  }
+
+  summarize(): Promise<void> {
+    PopupUtils.showError('Unsupported Summarize');
+    return Promise.reject('Unsupported Summarize');
+  }
 }
