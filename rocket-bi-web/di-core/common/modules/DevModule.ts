@@ -141,7 +141,7 @@ export class DevModule extends BaseModule {
       .scope(Scope.Singleton);
 
     Container.bind(ChatbotController)
-      .to(() => new OpenAiController())
+      .to(OpenAiController)
       .scope(Scope.Singleton);
 
     this.buildSortedFunction();
