@@ -74,8 +74,20 @@
                   @selected="changeType(column, arguments[0], true)"
                 />
               </td>
-              <td :class="{ disabled: isDeleteColumn(column) }">
-                <DiInput :id="genInputId('column-description')" :maxLength="255" :value.sync="column.description" placeholder="Input description" />
+              <td :class="{ disabled: isDeleteColumn(column) }" class="d-flex flex-row align-items-center" style="gap: 8px; height: 48px !important;">
+                <DiInput
+                  :id="genInputId('column-description')"
+                  class="flex-auto"
+                  :maxLength="255"
+                  :value.sync="column.description"
+                  placeholder="Input description"
+                />
+                <template>
+                  <DiLoading v-if="loadingAsMap.has(column.name)" mode="small" />
+                  <div v-else class="cursor-pointer open-ai-icon" @click="handleGenerateDescription(column, true)">
+                    <ChatGPTIcon color="var(--text-color)" :size="24" />
+                  </div>
+                </template>
               </td>
               <td :class="{ disabled: isDeleteColumn(column) }" class="default-value-cell dropdown-cell">
                 <DiDropdown
@@ -138,6 +150,12 @@
               </td>
               <td>
                 <DiInput :id="genInputId('column-description')" :maxLength="255" :value.sync="column.description" placeholder="Input description" />
+                <template>
+                  <DiLoading v-if="loadingAsMap.has(column.name)" mode="small" />
+                  <div v-else class="cursor-pointer open-ai-icon" @click="handleGenerateDescription(column, false)">
+                    <ChatGPTIcon color="var(--text-color)" :size="24" />
+                  </div>
+                </template>
               </td>
               <td class="default-value-cell dropdown-cell">
                 <DiDropdown
@@ -189,7 +207,7 @@ import { DataSchemaModel, ViewMode } from '@/screens/data-management/views/data-
 import { BoolColumn, ColumnType, DIException, StringColumn, TableSchema } from '@core/common/domain';
 import { cloneDeep, get, isEqual } from 'lodash';
 import { BoolOptions, ColumnTypeOptions } from '@/screens/data-management/views/data-schema/DataSchema.options';
-import { ChartUtils, DateTimeUtils, ListUtils, TimeoutUtils } from '@/utils';
+import { ChartUtils, DateTimeUtils, ListUtils, PopupUtils, TimeoutUtils } from '@/utils';
 import { SelectOption, Status } from '@/shared';
 import moment from 'moment';
 import InputSetting from '@/shared/settings/common/InputSetting.vue';
@@ -203,9 +221,17 @@ import { TrackEvents } from '@core/tracking/enum/TrackEvents';
 import { TrackingUtils } from '@core/tracking/TrackingUtils';
 import StatusWidget from '@/shared/components/StatusWidget.vue';
 import DiInput from '@/shared/components/common/DiInput.vue';
+import ChatGPTIcon from '@/shared/ChatGPTIcon.vue';
+import DiLoading from '@/shared/components/DiLoading.vue';
+import { Di } from '@core/common/modules';
+import { ColumnDescriptionFunction } from '@/shared/components/chat/controller/functions/ColumnDescriptionFunction';
+import { ChatbotController } from '@/shared/components/chat/controller/ChatbotController';
+import { TableSchemaPicker } from '@/shared/components/chat/controller/functions/TableSchemaPicker';
 
 @Component({
   components: {
+    DiLoading,
+    ChatGPTIcon,
     InputSetting,
     DiDatePicker,
     DiMultiChoice,
@@ -237,6 +263,8 @@ export default class FieldManagement extends Vue {
   protected tempColumns: Column[] = [];
 
   protected deleteColumns: Set<string> = new Set<string>();
+
+  protected loadingAsMap: Map<string, boolean> = new Map();
 
   protected get searchColumns(): Column[] {
     return (
@@ -539,16 +567,91 @@ export default class FieldManagement extends Vue {
   protected isDeleteColumn(column: Column) {
     return this.deleteColumns.has(column.name);
   }
+
   protected isStringColumn(columnType: ColumnType) {
     return ChartUtils.isTextType(columnType);
   }
 
   protected handleToggleEncrypt(column: Column, enable: boolean) {
     if (enable) {
-      TrackingUtils.track(TrackEvents.ColumnEnableEncryption, { column_name: column.name, column_type: column.className });
+      TrackingUtils.track(TrackEvents.ColumnEnableEncryption, {
+        column_name: column.name,
+        column_type: column.className
+      });
     } else {
-      TrackingUtils.track(TrackEvents.ColumnDisableEncryption, { column_name: column.name, column_type: column.className });
+      TrackingUtils.track(TrackEvents.ColumnDisableEncryption, {
+        column_name: column.name,
+        column_type: column.className
+      });
     }
+  }
+
+  async handleGenerateDescription(column: Column, isUpdate: boolean) {
+    Log.debug('handleGenerateDescription::', column, isUpdate);
+
+    if (!this.model) {
+      return;
+    }
+
+    if (!this.cloneTable) {
+      return;
+    }
+
+    if (ListUtils.isEmpty(this.cloneTable.columns)) {
+      return;
+    }
+    try {
+      this.showLoading(column);
+      const newDescription = await new ColumnDescriptionFunction(Di.get(ChatbotController)).execute(
+        TableSchemaPicker.normalizeDatabase(this.model.database),
+        this.cloneTable.name,
+        column.name
+      );
+      this.setDescription(column, newDescription, isUpdate);
+    } catch (ex) {
+      Log.error(ex);
+      PopupUtils.showError(DIException.fromObject(ex).getPrettyMessage());
+    } finally {
+      this.hideLoading(column);
+    }
+  }
+
+  private setDescription(column: Column, description: string, isUpdate: boolean) {
+    if (isUpdate) {
+      this.setDescriptionExistedColumn(column, description);
+      return;
+    } else {
+      this.setDescriptionNewColumn(column, description);
+    }
+  }
+
+  private setDescriptionExistedColumn(columnToUpdate: Column, description: string) {
+    const index = this.cloneTable.columns.findIndex(column => columnToUpdate.name === column.name);
+    if (index < 0) {
+      throw new DIException(`Column ${columnToUpdate.name} not found!`);
+    }
+
+    this.cloneTable.columns[index].description = description;
+  }
+
+  private setDescriptionNewColumn(columnToUpdate: Column, description: string) {
+    const index = this.tempColumns.findIndex(column => columnToUpdate.name === column.name);
+    if (index < 0) {
+      throw new DIException(`Column ${columnToUpdate.name} not found!`);
+    }
+
+    this.tempColumns[index].description = description;
+  }
+
+  ///Enhance with what column UI is loading
+  private showLoading(column: Column) {
+    this.loadingAsMap.set(column.name, true);
+    this.loadingAsMap = new Map(this.loadingAsMap); ///Update UI
+  }
+
+  private hideLoading(column: Column) {
+    this.loadingAsMap.delete(column.name);
+    this.loadingAsMap = new Map(this.loadingAsMap); ///Update UI
   }
 }
 </script>
