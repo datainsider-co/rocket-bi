@@ -13,7 +13,7 @@ import {
   ValueControlType
 } from '@core/common/domain';
 import { WidgetRenderer } from '@chart/widget-renderer';
-import { ConditionData, DateHistogramConditionTypes, DateRange, InputType, TableSettingColor } from '@/shared';
+import { ConditionData, DateHistogramConditionTypes, DateRange, InputType } from '@/shared';
 import { ConditionBuilder } from '@core/common/services';
 import { Di } from '@core/common/modules';
 import { ConditionUtils, Log } from '@core/utils';
@@ -276,6 +276,11 @@ export default class DateFilter2 extends BaseWidget {
 
   async copyToAssistant(): Promise<void> {
     PopupUtils.showError('Unsupported Copy to Assistant');
+  }
+
+  foreCast(): Promise<void> {
+    PopupUtils.showError('Unsupported Copy to Assistant');
+    return Promise.reject('Unsupported Forecast');
   }
 
   summarize(): Promise<void> {

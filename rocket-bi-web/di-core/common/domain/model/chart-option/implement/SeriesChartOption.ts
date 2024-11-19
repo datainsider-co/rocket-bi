@@ -118,13 +118,207 @@ export class SeriesChartOption extends ChartOption<SeriesOptionData> {
     return new SeriesChartOption(obj.options);
   }
 
-  static getDefaultChartOption(chartType: ChartType): SeriesChartOption {
+  static getDefaultAreaInvertedOption(): SeriesChartOption {
     const textColor = this.getPrimaryTextColor();
     const gridLineColor: string = this.getGridLineColor();
-    const enableMarker = chartType === ChartType.Lollipop;
     const options: SeriesOptionData = {
       chart: {
-        type: chartType
+        type: 'area',
+        inverted: true
+      },
+
+      legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'top',
+        floating: true,
+        enabled: true,
+        itemStyle: {
+          color: textColor
+        },
+        title: {
+          text: '',
+          enabled: true,
+          style: {
+            color: textColor
+          }
+        }
+      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
+      affectedByFilter: true,
+      themeColor: { enabled: true },
+      background: this.getThemeBackgroundColor(),
+      xAxis: [
+        {
+          visible: true,
+          labels: {
+            style: {
+              color: textColor
+            }
+          },
+          title: {
+            enabled: true,
+            style: {
+              color: textColor
+            },
+            text: ''
+          },
+          gridLineWidth: '0',
+          gridLineColor: gridLineColor
+        }
+      ],
+      yAxis: [
+        {
+          visible: true,
+          labels: {
+            style: {
+              color: textColor
+            }
+          },
+          title: {
+            enabled: true,
+            style: {
+              color: textColor
+            },
+            text: ''
+          },
+          gridLineWidth: '0.5',
+          gridLineColor: gridLineColor
+        },
+        {
+          visible: false,
+          labels: {
+            style: {
+              color: textColor
+            }
+          },
+          title: {
+            enabled: true,
+            style: {
+              color: textColor
+            },
+            text: 'Dual axis title'
+          },
+          gridLineWidth: '0.5',
+          gridLineColor: gridLineColor
+        }
+      ],
+      tooltip: {
+        backgroundColor: this.getTooltipBackgroundColor(),
+        style: {
+          color: textColor,
+          fontFamily: ChartOption.getSecondaryFontFamily()
+        }
+      }
+    };
+    return new SeriesChartOption(options);
+  }
+
+  static getDefaultLineInvertedOption(): SeriesChartOption {
+    const textColor = this.getPrimaryTextColor();
+    const gridLineColor: string = this.getGridLineColor();
+    const options: SeriesOptionData = {
+      chart: {
+        type: 'line',
+        inverted: true
+      },
+
+      legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'top',
+        floating: true,
+        enabled: true,
+        itemStyle: {
+          color: textColor
+        },
+        title: {
+          text: '',
+          enabled: true,
+          style: {
+            color: textColor
+          }
+        }
+      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
+      affectedByFilter: true,
+      themeColor: { enabled: true },
+      background: this.getThemeBackgroundColor(),
+      xAxis: [
+        {
+          visible: true,
+          labels: {
+            style: {
+              color: textColor
+            }
+          },
+          title: {
+            enabled: true,
+            style: {
+              color: textColor
+            },
+            text: ''
+          },
+          gridLineWidth: '0',
+          gridLineColor: gridLineColor
+        }
+      ],
+      yAxis: [
+        {
+          visible: true,
+          labels: {
+            style: {
+              color: textColor
+            }
+          },
+          title: {
+            enabled: true,
+            style: {
+              color: textColor
+            },
+            text: ''
+          },
+          gridLineWidth: '0.5',
+          gridLineColor: gridLineColor
+        },
+        {
+          visible: false,
+          labels: {
+            style: {
+              color: textColor
+            }
+          },
+          title: {
+            enabled: true,
+            style: {
+              color: textColor
+            },
+            text: 'Dual axis title'
+          },
+          gridLineWidth: '0.5',
+          gridLineColor: gridLineColor
+        }
+      ],
+      tooltip: {
+        backgroundColor: this.getTooltipBackgroundColor(),
+        style: {
+          color: textColor,
+          fontFamily: ChartOption.getSecondaryFontFamily()
+        }
+      }
+    };
+    return new SeriesChartOption(options);
+  }
+
+  static getDefaultColumnRangeOption(): SeriesChartOption {
+    const textColor = this.getPrimaryTextColor();
+    const gridLineColor: string = this.getGridLineColor();
+    const options: SeriesOptionData = {
+      chart: {
+        type: 'columnrange',
+        inverted: true
       },
       legend: {
         enabled: true,
@@ -153,8 +347,103 @@ export class SeriesChartOption extends ChartOption<SeriesOptionData> {
         series: {
           lineWidth: 2,
           dashStyle: 'Solid',
+          dataLabels: {
+            enabled: false,
+            style: {
+              ...ChartOption.getSecondaryStyle(),
+              color: textColor,
+              textOutline: 0
+            }
+          }
+        }
+      },
+      xAxis: [
+        {
+          visible: true,
+          labels: {
+            style: {
+              color: textColor
+            }
+          },
+          title: {
+            enabled: true,
+            style: {
+              color: textColor
+            },
+            text: ''
+          },
+          gridLineWidth: '0',
+          gridLineColor: gridLineColor
+        }
+      ],
+      yAxis: [
+        {
+          visible: true,
+          labels: {
+            style: {
+              color: textColor
+            }
+          },
+          title: {
+            enabled: true,
+            style: {
+              color: textColor
+            },
+            text: ''
+          },
+          gridLineWidth: '0.5',
+          gridLineColor: gridLineColor
+        },
+        {
+          visible: false,
+          labels: {
+            style: {
+              color: textColor
+            }
+          },
+          title: {
+            enabled: true,
+            style: {
+              color: textColor
+            },
+            text: 'Dual axis title'
+          },
+          gridLineWidth: '0.5',
+          gridLineColor: gridLineColor
+        }
+      ],
+      tooltip: {
+        backgroundColor: this.getTooltipBackgroundColor(),
+        style: {
+          color: textColor,
+          fontFamily: ChartOption.getSecondaryFontFamily()
+        }
+      }
+    };
+    return new SeriesChartOption(options);
+  }
+
+  static getDefaultChartOption(chartType: ChartType): SeriesChartOption {
+    const textColor = this.getPrimaryTextColor();
+    const gridLineColor: string = this.getGridLineColor();
+    const options: SeriesOptionData = {
+      chart: {
+        type: chartType
+      },
+      legend: {
+        enabled: false
+      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
+      affectedByFilter: true,
+      themeColor: { enabled: true },
+      background: this.getThemeBackgroundColor(),
+      plotOptions: {
+        series: {
+          lineWidth: 2,
+          dashStyle: 'Solid',
           marker: {
-            enabled: enableMarker
+            enabled: false
           },
           dataLabels: {
             enabled: false,

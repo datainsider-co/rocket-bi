@@ -78,4 +78,52 @@ export class PieChartOption extends ChartOption<SeriesOptionData> {
     };
     return new PieChartOption(options);
   }
+
+  static getDefaultSemiPieOption(): PieChartOption {
+    const textColor = this.getPrimaryTextColor();
+    const options: SeriesOptionData = {
+      legend: {
+        enabled: false,
+        verticalAlign: 'bottom',
+        layout: 'horizontal',
+        itemStyle: {
+          color: textColor
+        },
+        title: {
+          text: '',
+          enabled: true,
+          style: {
+            color: textColor
+          }
+        }
+      },
+      themeColor: { enabled: true },
+      tooltip: {
+        backgroundColor: this.getTooltipBackgroundColor(),
+        style: ChartOption.getSecondaryStyle()
+      },
+      title: ChartOption.getDefaultTitle(),
+      subtitle: ChartOption.getDefaultSubtitle(),
+      plotOptions: {
+        pie: {
+          startAngle: -90,
+          endAngle: 90,
+          center: ['50%', '100%'],
+          size: '150%',
+          innerSize: '50%',
+          dataLabels: {
+            enabled: true,
+            style: {
+              color: textColor
+            }
+          }
+        }
+      },
+      isSemiPie: true,
+      affectedByFilter: true,
+      isCrossFilter: true,
+      background: this.getThemeBackgroundColor()
+    };
+    return new PieChartOption(options);
+  }
 }

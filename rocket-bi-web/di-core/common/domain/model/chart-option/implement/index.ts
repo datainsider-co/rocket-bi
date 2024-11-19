@@ -39,3 +39,4 @@ export * from './InputControlOption';
 export * from './TreeFilterOption';
 export * from './DonutChartOption';
 export * from './VariablepieChartOption';
+export * from './GenericChartOption';

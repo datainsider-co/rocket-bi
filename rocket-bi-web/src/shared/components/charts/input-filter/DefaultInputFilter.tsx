@@ -4,9 +4,7 @@
  */
 
 import { WidgetRenderer } from '@chart/widget-renderer/WidgetRenderer';
-import { StringUtils } from '@/utils/StringUtils';
 import InputFilter from '@chart/input-filter/InputFilter';
-import SuggestionInput from '@/screens/data-ingestion/components/SuggestionInput.vue';
 import InputSetting from '@/shared/settings/common/InputSetting.vue';
 export class DefaultInputFilter implements WidgetRenderer<InputFilter> {
   render(widget: InputFilter, h: any): any {
