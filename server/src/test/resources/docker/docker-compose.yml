@@ -1,0 +1,57 @@
+version: '3.5'
+services:
+
+  clickhouse:
+    image: yandex/clickhouse-server:21.12.4
+    expose:
+      - 8123
+      - 9000
+
+  ssdb:
+    image: wendal/ssdb:latest
+    expose:
+      - 8888
+    restart: on-failure
+
+  mysql:
+    image: mysql:5.7
+    command: mysqld --user=root --verbose
+    expose:
+      - 3306
+    environment:
+      MYSQL_USER: "di"
+      MYSQL_PASSWORD: "di@2020!"
+      MYSQL_ROOT_PASSWORD: "di@2020!"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    restart: on-failure
+
+  postgres:
+    image: postgres:12
+    environment:
+      POSTGRES_DB: thien_vi
+      POSTGRES_USER: tvc12
+      POSTGRES_PASSWORD: di@123456
+    expose:
+      - 5432
+
+  vertica:
+    environment:
+      APP_DB_USER: "vertica"
+      APP_DB_PASSWORD: "di@2020!"
+      TZ: "UTC"
+    build: vertica
+    expose:
+      - 5433
+      - 5444
+
+#  redshift:
+#    image: guildeducation/docker-amazon-redshift
+#    environment:
+#      POSTGRES_PASSWORD: "123456"
+#    expose:
+#      - 5439
+
+  openssh:
+    build: openssh
+    expose:
+      - 22

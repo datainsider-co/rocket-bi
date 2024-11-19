@@ -1,0 +1,34 @@
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: rocket-bi-mysql
+    command: mysqld --user=root --verbose
+    ports:
+      - 3306:3306
+    volumes:
+      - /var/lib/rocket-bi/mysql:/var/lib/mysql
+    environment:
+      MYSQL_USER: "di"
+      MYSQL_PASSWORD: "di@2020!"
+      MYSQL_ROOT_PASSWORD: "di@2020!"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    restart: always
+
+  ssdb:
+    image: wendal/ssdb:latest
+    container_name: rocket-bi-ssdb
+    ports:
+      - 8888:8888
+    volumes:
+      - /var/lib/rocket-bi/ssdb:/var/lib/ssdb/data
+    restart: always
+
+  clickhouse:
+    image: yandex/clickhouse-server:21.12.4
+    container_name: rocket-bi-clickhouse
+    ports:
+      - 8123:8123
+      - 9000:9000
+    volumes:
+      - /var/lib/rocket-bi/clickhouse:/var/lib/clickhouse
+    restart: always
