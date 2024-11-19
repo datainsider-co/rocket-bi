@@ -14,20 +14,7 @@
         </div>
       </div>
       <div class="data-builder">
-        <div class="d-flex flex-row data-builder-header">
-          <h3 class="cursor-default unselectable">
-            Chart Builder
-          </h3>
-          <div class="ml-auto d-flex flex-row align-items-center btn-bar">
-            <DiButton :id="genBtnId('data-builder-cancel')" border title="Cancel" @click="handleCancel" />
-            <template v-if="isCreateMode">
-              <DiButton :id="genBtnId('data-builder-add')" primary title="Add" @click="handleAddToDashboard" :disabled="isDisableAddOrUpdate" />
-            </template>
-            <template v-else>
-              <DiButton :id="genBtnId('data-builder-update')" primary title="Save" @click="handleUpdateChart" :disabled="isDisableAddOrUpdate" />
-            </template>
-          </div>
-        </div>
+        <ChartBuilderHeader :enable="!isDisableAddOrUpdate" @cancel="handleCancel" @ok="handleSubmit" :action-name="isCreateMode ? 'Add' : 'Update'" />
         <div class="d-flex flex-row data-builder-body">
           <div class="builder-config-container">
             <div class="builder-config" v-show="isSettingConfig">
