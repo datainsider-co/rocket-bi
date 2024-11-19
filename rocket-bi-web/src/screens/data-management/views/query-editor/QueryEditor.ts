@@ -1,4 +1,4 @@
-import { Component, Inject, Mixins, Ref, Vue, Watch } from 'vue-property-decorator';
+import { Component, Inject, Mixins, Provide, Ref, Vue, Watch } from 'vue-property-decorator';
 import { DatabaseSchemaModule, SchemaReloadMode } from '@/store/modules/data-builder/DatabaseSchemaStore';
 import DiButton from '@/shared/components/common/DiButton.vue';
 import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
@@ -19,7 +19,6 @@ import {
   Dashboard,
   DashboardId,
   DatabaseInfo,
-  DIApiException,
   DIException,
   DirectoryId,
   Field,
@@ -36,7 +35,7 @@ import { ChartDataModule, DashboardControllerModule, DashboardModeModule, Dashbo
 // @ts-ignore
 import { Split, SplitArea } from 'vue-split-panel';
 import MyDataPickDirectory from '@/screens/lake-house/components/move-file/MyDataPickDirectory.vue';
-import { get, isEqual, toNumber } from 'lodash';
+import { clone, get, isEqual, toNumber } from 'lodash';
 import MyDataPickFile from '@/screens/lake-house/components/move-file/MyDataPickFile.vue';
 import { PopupUtils } from '@/utils/PopupUtils';
 import LayoutNoData from '@/shared/components/layout-wrapper/LayoutNoData.vue';
@@ -52,7 +51,7 @@ import { Track } from '@/shared/anotation';
 import DiRenameModal from '@/shared/components/DiRenameModal.vue';
 import { DirectoryModule } from '@/screens/directory/store/DirectoryStore';
 import router from '@/router/Router';
-import { ApiExceptions, Routers } from '@/shared';
+import { Routers } from '@/shared';
 import PasswordModal from '@/screens/dashboard-detail/components/PasswordModal.vue';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import { PermissionHandlerModule } from '@/store/modules/PermissionHandler';
@@ -66,10 +65,11 @@ import { TextParamToChartHandler } from '@/screens/data-management/components/pa
 import { NumberParamToChartHandler } from '@/screens/data-management/components/parameter-to-chart-builder/NumberParamToChartHandler';
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
-import { ConnectorType } from '@core/connector-config';
 import { FormulaControllerFactoryResolver } from '@/shared/fomula/builder/FormulaControllerFactoryResolver';
-import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
 import { FormulaControllerFactory } from '@/shared/fomula/builder/FormulaControllerFactory';
+import EventBus from '@/screens/dashboard-detail/components/chatbot/helpers/EventBus';
+import { PromptEvents } from '@/shared/enums/PromptEvents';
+import { QueryGenerator } from '@/screens/dashboard-detail/intefaces/chatbot/prompt-2-query/QueryGenerator';
 
 Vue.use(DataComponents);
 
@@ -137,7 +137,17 @@ export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPa
   private allowBack = false;
 
   async mounted() {
+    EventBus.$on(PromptEvents.submitPrompt, this.handleSubmitPrompt);
     await this.init();
+  }
+
+  beforeDestroy() {
+    EventBus.$off(PromptEvents.submitPrompt, this.handleSubmitPrompt);
+    ChartDataModule.reset();
+  }
+
+  handleSubmitPrompt(prompt: string) {
+    return new QueryGenerator().process(prompt, this.databaseTree?.getExpandingDatabases() ?? []);
   }
 
   private async init(): Promise<void> {
@@ -186,8 +196,17 @@ export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPa
     this.formulaController = factory.createFormulaController(FormulaSuggestionModule.allFunctions, DatabaseSchemaModule.databaseInfos);
   }
 
-  private get databaseName(): string {
+  get databaseName(): string {
     return (this.$route.query?.database as any) as string;
+  }
+
+  set databaseName(value: string) {
+    try {
+      const cloneQuery = clone(this.$route.query);
+      this.$router.replace({ query: { ...cloneQuery, database: value } });
+    } catch (ex) {
+      //Nothing do to when duplication warning
+    }
   }
 
   private get tableName() {
@@ -206,11 +225,12 @@ export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPa
     const database = this.databaseName || '';
     const table = this.tableName || '';
     const foundSchema: FindSchemaResponse = await this.findSchema(database, table);
-    if (foundSchema.database && foundSchema.table) {
-      await this.selectTable(foundSchema.database, foundSchema.table);
-      this.$nextTick(() => {
-        this.databaseTree?.selectDatabase(foundSchema.database!);
-      });
+    if (!foundSchema) {
+      return Promise.resolve();
+    }
+    this.databaseTree?.selectDatabase(foundSchema.database!);
+    if (foundSchema.table) {
+      await this.selectTable(foundSchema.database!, foundSchema.table);
     }
   }
 
@@ -292,10 +312,6 @@ export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPa
     if (this.reloadShortDatabaseInfos) {
       await this.reloadShortDatabaseInfos(SchemaReloadMode.OnlyDatabaseHasTable);
     }
-  }
-
-  beforeDestroy() {
-    ChartDataModule.reset();
   }
 
   private showFolderPickerModal(event: Event) {
@@ -659,6 +675,7 @@ export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPa
 
   protected async onToggleDatabase(dbName: string, isShowing: boolean): Promise<void> {
     if (isShowing) {
+      this.databaseName = dbName;
       await DatabaseSchemaModule.loadDatabaseInfo({ dbName });
     }
   }
@@ -765,5 +782,10 @@ export default class QueryEditor extends Mixins(AbstractSchemaComponent, SplitPa
           return false;
       }
     }
+  }
+
+  @Provide('getDatabaseSelected')
+  getSelectedDatabases(): DatabaseInfo[] {
+    return this.databaseTree?.getExpandingDatabases() ?? [];
   }
 }
