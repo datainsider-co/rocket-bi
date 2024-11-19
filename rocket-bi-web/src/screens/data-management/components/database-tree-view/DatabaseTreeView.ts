@@ -469,4 +469,15 @@ export default class DatabaseTreeView extends Vue {
       this.databaseCreationModal.setLoading(false);
     }
   }
+
+  getExpandingDatabases(): DatabaseInfo[] {
+    const result: DatabaseInfo[] = [];
+    const databaseAsMap: Map<string, DatabaseInfo> = new Map(this.schemas.map(db => [db.name, db]));
+    for (const dbName in this.treeViewInfo) {
+      if (this.treeViewInfo[dbName].show && databaseAsMap.has(dbName)) {
+        result.push(databaseAsMap.get(dbName)!);
+      }
+    }
+    return result;
+  }
 }
