@@ -34,3 +34,4 @@ export * from './TableQuerySettingHandler';
 export * from './TreeMapQuerySettingHandler';
 export * from './WordCloudQuerySettingHandler';
 export * from './VariablepieQuerySettingHandler';
+export * from './AreaRangeQuerySettingHandler';
