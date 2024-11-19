@@ -5,7 +5,7 @@ import { cloneDeep, get, merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
 import { MethodProfiler } from '@/shared/profiler/Annotation';
 import { DIException } from '@core/common/domain/exception';
-import { ChartUtils, ColumnRangeUtils, DateTimeUtils, HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
+import { ChartUtils, DateTimeUtils, HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
 import { SeriesOneResponse } from '@core/common/domain/response';
 import { CompareMode } from '@core/common/domain/request/query/CompareMode';
 import { NumberFormatter, RangeData } from '@core/common/services/Formatter';

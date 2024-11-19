@@ -33,3 +33,4 @@ export * from './ThemeUtils';
 export * from './TimeoutUtils';
 export * from './ZoomUtils';
 export * from './GoogleUtils';
+export * from './ColumnRangeUtils';

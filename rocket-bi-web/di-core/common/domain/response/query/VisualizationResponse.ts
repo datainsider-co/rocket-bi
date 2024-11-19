@@ -67,4 +67,29 @@ export abstract class VisualizationResponse {
   }
 
   abstract hasData(): boolean;
+
+  static empty(type: VizResponseType): VisualizationResponse {
+    switch (type) {
+      case VizResponseType.SeriesOneResponse:
+        return SeriesOneResponse.empty();
+      case VizResponseType.SeriesTwoResponse:
+        return SeriesTwoResponse.empty();
+      case VizResponseType.DrilldownResponse:
+        return DrilldownResponse.empty();
+      case VizResponseType.TableResponse:
+        return TableResponse.empty();
+      case VizResponseType.GroupedTableResponse:
+        return GroupTableResponse.empty();
+      case VizResponseType.WordCloudResponse:
+        return WordCloudResponse.empty();
+      case VizResponseType.TreeMapResponse:
+        return TreeMapResponse.empty();
+      case VizResponseType.MapResponse:
+        return MapResponse.empty();
+      case VizResponseType.GenericChartResponse:
+        return GenericChartResponse.empty();
+      default:
+        throw new ClassNotFound(`empty: object with className ${type} not found`);
+    }
+  }
 }

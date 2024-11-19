@@ -118,6 +118,15 @@ export default class ConfigDraggable extends Vue {
     });
   }
 
+  private toFunctionData(node: FunctionTreeNode): FunctionData {
+    const wrapperNode: FunctionTreeNode = new FunctionNodeBuilder(node, this.config)
+      .withRandomId()
+      .withSortInfo(this.enableSorting)
+      .build();
+
+    return ConfigDataUtils.toFunctionData(wrapperNode);
+  }
+
   private get enableSorting(): boolean {
     return this.configType == ConfigType.sorting;
   }

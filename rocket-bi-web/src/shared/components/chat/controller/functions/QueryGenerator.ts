@@ -1,13 +1,13 @@
-import EventBus from '@/screens/dashboard-detail/components/chatbot/helpers/EventBus';
 import { Di } from '@core/common/modules';
 import { Log } from '@core/utils';
 import { ListUtils, PopupUtils, StringUtils } from '@/utils';
 import { DatabaseInfo, DIException } from '@core/common/domain';
 import { PromptEvents, QueryEditorEvents } from '@/shared/enums/PromptEvents';
-import { ChatbotController } from '@/screens/dashboard-detail/intefaces/chatbot/ChatbotController';
-import { ClickhouseSQLFunction } from '@/screens/dashboard-detail/intefaces/chatbot/functions/ClickhouseSQLFunction';
-import { ShortInfoDatabaseSchema, TableSchemaPicker } from '@/screens/chart-builder/prompt-2-chart/ChartGenerator';
 import { QueryUtils } from '@/screens/data-management/views/query-editor/QueryUtils';
+import EventBus from '@/shared/components/chat/helpers/EventBus';
+import { ChatbotController } from '@/shared/components/chat/controller/ChatbotController';
+import { ShortInfoDatabaseSchema, TableSchemaPicker } from '@/shared/components/chat/controller/functions/TableSchemaPicker';
+import { ClickhouseSQLFunction } from '@/shared/components/chat/controller/functions/ClickhouseSQLFunction';
 
 export class QueryGenerator {
   async process(prompt: string, databases: DatabaseInfo[]): Promise<string> {

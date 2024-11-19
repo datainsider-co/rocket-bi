@@ -19,10 +19,10 @@ import { DefaultProps, PropsDefinition } from 'vue/types/options';
 import { Watch } from 'vue-property-decorator';
 import Swal from 'sweetalert2';
 import { DIException, ExportType } from '@core/common/domain';
-import { ForecastFunction } from '@/screens/dashboard-detail/intefaces/chatbot/functions/ForecastFunction';
 import { Di } from '@core/common/modules';
 import NProgress from 'nprogress';
-import { SummarizeFunction } from '@/screens/dashboard-detail/intefaces/chatbot/functions/SummarizeFunction';
+import { SummarizeFunction } from '@/shared/components/chat/controller/functions/SummarizeFunction';
+import { ForecastFunction } from '@/shared/components/chat/controller/functions/ForecastFunction';
 
 export class MouseEventData<T> {
   constructor(readonly event: MouseEvent, readonly data: T, readonly extraData: any = {}) {}

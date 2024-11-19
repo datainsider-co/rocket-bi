@@ -2,11 +2,11 @@ import { ChartType, ConfigType, FunctionTreeNode } from '@/shared';
 import { DIException } from '@core/common/domain';
 import { PromptBuilder } from '../PromptBuilder';
 import { OpenAiMessageRole } from '@core/chat-bot/domain/OpenAiMessageRole';
-import { ShortInfoTableSchema } from '@/screens/chart-builder/prompt-2-chart/ChartGenerator';
-import { ChatMessageData } from '@/screens/dashboard-detail/intefaces/chatbot/ChatMessageData';
-import { MessageType } from '@/screens/dashboard-detail/intefaces/chatbot/MessageType';
-import { ChartPromptGenerator } from '@/screens/dashboard-detail/intefaces/chatbot/prompt-builder/promt-chart-builder/chart-prompt-generator/ChartPromptGenerator';
 import { StringUtils } from '@/utils';
+import { ChatMessageData } from '@/shared/components/chat/controller/ChatMessageData';
+import { ChartPromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/ChartPromptGenerator';
+import { ShortInfoTableSchema } from '@/shared/components/chat/controller/functions/TableSchemaPicker';
+import { MessageType } from '@/shared/components/chat/controller/MessageType';
 
 export interface ChartPromptRequest {
   chartType: ChartType;
