@@ -19,7 +19,7 @@
               :fixedOverflowWidgets="true"
               :isReadOnly="isReadOnly"
               class="query-input"
-              placeholder="select * from..."
+              :placeholder="inputPlaceholder"
               @onExecute="handleExecuteQuery"
               @onSave="handleSave"
               @input="onQueryChanged"

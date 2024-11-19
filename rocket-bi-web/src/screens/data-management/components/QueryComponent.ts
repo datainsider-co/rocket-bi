@@ -3,9 +3,9 @@ import FormulaCompletionInput from '@/shared/components/formula-completion-input
 import { MonacoFormulaController } from '@/shared/fomula/MonacoFormulaController';
 import {
   ChartInfo,
+  createQueryParameter,
   DashboardId,
   DatabaseInfo,
-  createQueryParameter,
   DIException,
   ExportType,
   InlineSqlView,
@@ -34,7 +34,6 @@ import ChartBuilderModal from '@/screens/dashboard-detail/components/data-builde
 import VisualizationItem from '@/screens/chart-builder/config-builder/chart-selection-panel/VisualizationItem.vue';
 import { ChartDataModule, DashboardControllerModule, QuerySettingModule, WidgetModule } from '@/screens/dashboard-detail/stores';
 import ChartBuilderComponent from '@/screens/dashboard-detail/components/data-builder-modal/ChartBuilderComponent.vue';
-import { BFormTextarea } from 'bootstrap-vue';
 // @ts-ignore
 import { Split, SplitArea } from 'vue-split-panel';
 import { SchemaService } from '@core/schema/service/SchemaService';
@@ -53,6 +52,9 @@ import LoadingComponent from '@/shared/components/LoadingComponent.vue';
 import { QueryEditorMode } from '@/screens/data-management/views/query-editor/QueryEditorMode';
 import { DataManager } from '@core/common/services';
 import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
+import EventBus from '@/shared/components/chat/helpers/EventBus';
+import { QueryEditorEvents } from '@/shared/enums/PromptEvents';
+import { QueryGenerator } from '@/shared/components/chat/controller/functions/QueryGenerator';
 
 class AdHocAnalysisInfo {
   chartInfo: ChartInfo;
@@ -174,6 +176,9 @@ export default class QueryComponent extends Vue {
   @Inject({ from: 'preProcessQuery', default: undefined })
   protected readonly preProcessQuery?: (url: string) => Promise<string>;
 
+  @Inject({ from: 'getDatabaseSelected', default: undefined })
+  protected readonly getDatabaseSelected?: () => DatabaseInfo[];
+
   timeout: number | undefined = void 0;
 
   @Watch('defaultQuery')
@@ -216,6 +221,8 @@ export default class QueryComponent extends Vue {
     if (this.isQueryOnFirstTime && StringUtils.isNotEmpty(this.query)) {
       this.handleExecuteQuery();
     }
+
+    EventBus.$on(QueryEditorEvents.appendText, this.appendText);
     this.trackEventAdhocMode();
   }
 
@@ -366,8 +373,38 @@ export default class QueryComponent extends Vue {
 
   protected async getProcessedQuery(): Promise<string> {
     const isSelectAllText = this.editorController.isSelectingAll();
-    const query = isSelectAllText ? this.currentQuery : this.editorController.getSelectedText();
-    return this.preProcessQuery ? await this.preProcessQuery(query) : query;
+    let inputQuery: string;
+
+    if (isSelectAllText) {
+      inputQuery = this.currentQuery;
+    } else {
+      inputQuery = this.editorController.getSelectedText();
+    }
+
+    const processedQuery = await this.applyAI(inputQuery);
+
+    if (this.preProcessQuery) {
+      return await this.preProcessQuery(processedQuery);
+    } else {
+      return processedQuery;
+    }
+  }
+
+  private applyAI(query: string): Promise<string> {
+    const isSelectAllText = this.editorController.isSelectingAll();
+    if (isSelectAllText && QueryGenerator.shouldProcessQuery(query)) {
+      const selectedDatabases: DatabaseInfo[] = this.getDatabaseSelected ? this.getDatabaseSelected() : [];
+      try {
+        const command = QueryUtils.extractAICommand(query);
+        // process the command and return its promise
+        return new QueryGenerator().process(command, selectedDatabases);
+      } catch (ex) {
+        // do nothing, will execute default return
+      }
+    }
+
+    // return a resolved promise with original query as default behavior
+    return Promise.resolve(query);
   }
 
   protected assignQueryParameter(query: string, params: QueryParameter[], paramValue: Map<string, string>) {
@@ -544,6 +581,7 @@ export default class QueryComponent extends Vue {
   }
 
   beforeDestroy() {
+    EventBus.$off(QueryEditorEvents.appendText, this.appendText);
     window.removeEventListener('resize', this.resizeChart);
   }
 
@@ -754,13 +792,16 @@ export default class QueryComponent extends Vue {
       const parameter: QueryParameter = createQueryParameter();
       parameter.displayName = paramName;
       this.setParameter(parameter);
-      const paramSQLSyntax = ` {{ ${paramName} }}`;
-      this.editorController.multiAppendText(paramSQLSyntax, true);
+      this.appendText(` {{ ${paramName} }}`);
       if (this.mode === QueryEditorMode.Dashboard) {
         this.emitSaveQuery(new Event(''), false);
       }
       return;
     }
+  }
+
+  private appendText(text: string) {
+    this.editorController.multiAppendText(text, true);
   }
 
   setParameter(parameter: QueryParameter, index?: number): void {
@@ -953,5 +994,12 @@ export default class QueryComponent extends Vue {
 
   protected get isTestAccount(): boolean {
     return DataManager.isTestAccount();
+  }
+
+  get inputPlaceholder() {
+    return `
+    //@ai view all data in table ...<br>
+    select * from...
+    `;
   }
 }
