@@ -1,8 +1,8 @@
 import { ChartPromptGenerator } from '../ChartPromptGenerator';
 import { ConfigType, FunctionTreeNode } from '@/shared';
-import { ShortInfoTableSchema } from '@/screens/chart-builder/prompt-2-chart/ChartGenerator';
-import { ChatMessageData } from '@/screens/dashboard-detail/intefaces/chatbot/ChatMessageData';
-import { ChartBuilderResponse } from '@/screens/dashboard-detail/intefaces/chatbot/prompt-builder/promt-chart-builder/ChartPromptFactory';
+import { ShortInfoTableSchema } from '@/shared/components/chat/controller/functions/TableSchemaPicker';
+import { ChartBuilderResponse } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/ChartPromptFactory';
+import { ChatMessageData } from '@/shared/components/chat/controller/ChatMessageData';
 
 export class StackSeriesPromptGenerator extends ChartPromptGenerator {
   generate(_: ShortInfoTableSchema): string {
