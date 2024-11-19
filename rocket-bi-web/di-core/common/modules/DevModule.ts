@@ -55,6 +55,23 @@ import { ImageRepository, ImageRepositoryImpl } from '@core/common/repositories/
 import { ChatbotController, OpenAiController } from '@/shared/components/chat/controller/ChatbotController';
 import { SummarizeFunction } from '@/shared/components/chat/controller/functions/SummarizeFunction';
 import { SortedFunction } from '@/shared/components/chat/controller/functions/SortedFunction';
+import { ChartType } from '@/shared';
+import { SeriesPromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/impl/SeriesPromptGenerator';
+import { NumberPromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/impl/NumberPromptGenerator';
+import { BubblePromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/impl/BubblePromptGenerator';
+import { PiePromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/impl/PiePromptGenerator';
+import { FlattenTablePromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/impl/FlattenTablePromptGenerator';
+import { MapPromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/impl/MapPromptGenerator';
+import { PivotTablePromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/impl/PivotTablePromptGenerator';
+import { ScatterPromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/impl/ScatterPromptGenerator';
+import { StackSeriesPromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/impl/StackSeriesPromptGenerator';
+import { ChartPromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/ChartPromptGenerator';
+import { GroupTablePromptGenerator } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/chart-prompt-generator/impl/GroupTablePromptGenerator';
+import {
+  ChartPromptFactory,
+  ChartPromptFactoryImpl
+} from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/ChartPromptFactory';
+import { ChartBuilderFunction } from '@/shared/components/chat/controller/functions/ChartBuilderFunction';
 
 export class DevModule extends BaseModule {
   configuration(): void {
@@ -146,6 +163,9 @@ export class DevModule extends BaseModule {
 
     this.buildSortedFunction();
     this.buildSummarizeFunction();
+
+    this.bindChartBuilderFactory();
+    this.buildChartBuilderFunction();
   }
 
   buildProfiler(): Profiler {
@@ -190,6 +210,54 @@ export class DevModule extends BaseModule {
     const queryService = new QueryServiceImpl(queryRepository);
     Container.bind(QueryService)
       .factory(() => queryService)
+      .scope(Scope.Singleton);
+  }
+
+  private bindChartBuilderFactory() {
+    const handlers: Map<ChartType, ChartPromptGenerator> = new Map([
+      [ChartType.Area, new SeriesPromptGenerator()],
+      [ChartType.Bar, new SeriesPromptGenerator()],
+      [ChartType.BellCurve, new NumberPromptGenerator()],
+      [ChartType.Bubble, new BubblePromptGenerator()],
+      [ChartType.Bullet, new NumberPromptGenerator()],
+      [ChartType.CircularBar, new SeriesPromptGenerator()],
+      [ChartType.Column, new SeriesPromptGenerator()],
+      [ChartType.Donut, new PiePromptGenerator()],
+      [ChartType.FlattenTable, new FlattenTablePromptGenerator()],
+      [ChartType.Funnel, new PiePromptGenerator()],
+      [ChartType.Gauges, new NumberPromptGenerator()],
+      [ChartType.Histogram, new NumberPromptGenerator()],
+      [ChartType.Kpi, new NumberPromptGenerator()],
+      [ChartType.Line, new SeriesPromptGenerator()],
+      [ChartType.Lollipop, new SeriesPromptGenerator()],
+      [ChartType.Map, new MapPromptGenerator()],
+      [ChartType.Pareto, new SeriesPromptGenerator()],
+      [ChartType.Parliament, new PiePromptGenerator()],
+      [ChartType.Pie, new PiePromptGenerator()],
+      [ChartType.PivotTable, new PivotTablePromptGenerator()],
+      [ChartType.Pyramid, new PiePromptGenerator()],
+      [ChartType.Scatter, new ScatterPromptGenerator()],
+      [ChartType.SpiderWeb, new PiePromptGenerator()],
+      [ChartType.StackedBar, new StackSeriesPromptGenerator()],
+      [ChartType.StackedColumn, new StackSeriesPromptGenerator()],
+      [ChartType.StackedLine, new StackSeriesPromptGenerator()],
+      [ChartType.Table, new GroupTablePromptGenerator()],
+      [ChartType.Variablepie, new PiePromptGenerator()],
+      [ChartType.WindRose, new SeriesPromptGenerator()],
+      [ChartType.WordCloud, new PiePromptGenerator()]
+    ]);
+    Container.bind(ChartPromptFactory)
+      .factory(() => new ChartPromptFactoryImpl(handlers))
+      .scope(Scope.Singleton);
+  }
+
+  private buildChartBuilderFunction() {
+    const controller = Di.get(ChatbotController);
+    const factory = Di.get(ChartPromptFactory);
+
+    const fnc = new ChartBuilderFunction(controller, factory);
+    Container.bind(ChartBuilderFunction)
+      .factory(() => fnc)
       .scope(Scope.Singleton);
   }
 }
