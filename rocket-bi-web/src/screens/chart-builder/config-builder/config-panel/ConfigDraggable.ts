@@ -30,6 +30,8 @@ import VueContext from 'vue-context';
 import { Component, Prop, Ref, Vue, Watch } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import SelectFieldContext from '@/screens/chart-builder/config-builder/config-panel/SelectFieldContext.vue';
+import { ChartBuilderEvent } from '@/shared/components/chat/controller/functions/ChartGenerator';
+import EventBus from '@/shared/components/chat/helpers/EventBus';
 
 export interface ContextData {
   data: { node: FunctionTreeNode; i: number };
@@ -92,6 +94,29 @@ export default class ConfigDraggable extends Vue {
 
   @Ref()
   private readonly clickHereButton!: HTMLElement;
+
+  mounted() {
+    EventBus.$on(ChartBuilderEvent.addConfig, this.handleAddConfig);
+  }
+
+  beforeDestroy() {
+    EventBus.$off(ChartBuilderEvent.addConfig, this.handleAddConfig);
+  }
+
+  private handleAddConfig(type: ConfigType, nodes: FunctionTreeNode[]) {
+    if (this.configType !== type) {
+      return;
+    }
+
+    Log.debug('handleAddConfig::', type, nodes);
+    this.currentFunctions = nodes;
+    const configs: Record<string, FunctionData[]> = {};
+    configs[type] = nodes.map(this.toFunctionData);
+    _ConfigBuilderStore.setConfigs(configs);
+    this.$nextTick(() => {
+      this.$emit('onConfigChange');
+    });
+  }
 
   private get enableSorting(): boolean {
     return this.configType == ConfigType.sorting;

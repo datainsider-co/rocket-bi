@@ -4,6 +4,10 @@
       <template v-if="hasError">
         <ErrorWidget :error="errorMessage" @onRetry="handleRerender"></ErrorWidget>
       </template>
+
+      <template v-else-if="status === Statuses.Loading">
+        <DiLoading />
+      </template>
       <template v-else-if="isShowHint">
         <HintPanel :itemSelected="itemSelected"></HintPanel>
       </template>
@@ -45,12 +49,17 @@ import ErrorWidget from '@/shared/components/ErrorWidget.vue';
 import { ChartDataModule, DashboardModule } from '@/screens/dashboard-detail/stores';
 import { _ConfigBuilderStore } from '@/screens/chart-builder/config-builder/ConfigBuilderStore';
 import Dashboard from '@/screens/dashboard-detail/components/dashboard/Dashboard';
+import DiLoading from '@/shared/components/DiLoading.vue';
+import EventBus from '@/shared/components/chat/helpers/EventBus';
+import { ChartBuilderEvent } from '@/shared/components/chat/controller/functions/ChartGenerator';
 
 @Component({
-  components: { ErrorWidget, ChartHolder, EmptyWidget, HintPanel, StatusWidget, MatchingLocationButton }
+  components: { DiLoading, ErrorWidget, ChartHolder, EmptyWidget, HintPanel, StatusWidget, MatchingLocationButton }
 })
 export default class PreviewPanel extends Vue {
   private readonly CELL_WIDTH = 27.5;
+  private readonly Statuses = Status;
+  protected status = Status.Loaded;
 
   @Prop({ type: Boolean, default: false })
   protected readonly isEditMode!: boolean;
@@ -132,6 +141,24 @@ export default class PreviewPanel extends Vue {
   }
   protected onMatchingButtonClicked() {
     this.$emit('clickMatchingButton');
+  }
+
+  mounted() {
+    EventBus.$on(ChartBuilderEvent.analyzingPrompt, this.showLoading);
+    EventBus.$on(ChartBuilderEvent.analyzePromptCompleted, this.showLoaded);
+  }
+
+  beforeDestroy() {
+    EventBus.$off(ChartBuilderEvent.analyzingPrompt, this.showLoading);
+    EventBus.$off(ChartBuilderEvent.analyzePromptCompleted, this.showLoaded);
+  }
+
+  showLoading() {
+    this.status = Status.Loading;
+  }
+
+  showLoaded() {
+    this.status = Status.Loaded;
   }
 }
 </script>

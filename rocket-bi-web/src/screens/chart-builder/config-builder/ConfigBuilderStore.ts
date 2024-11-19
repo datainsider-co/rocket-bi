@@ -149,7 +149,7 @@ class ConfigBuilderStore extends VuexModule {
     this.initDefaultState();
     if (ChartInfo.isChartInfo(chart) && chart.extraData) {
       this.setSelectedChartType(chart.extraData.currentChartType ?? '');
-      this.setConfigs(chart.extraData);
+      this.setConfigs(chart.extraData?.configs ?? ({} as any));
       this.setFilter(chart.extraData);
       this.setChartOption(chart.setting.options);
       this.saveLatestState();
@@ -244,8 +244,11 @@ class ConfigBuilderStore extends VuexModule {
   }
 
   @Mutation
-  private setConfigs(extraData: WidgetExtraData): void {
-    this.configsAsMap = FunctionDataUtils.toConfigAsMap(extraData?.configs ?? ({} as any));
+  setConfigs(configs: Record<ConfigType, FunctionData[]>): void {
+    const configAsMap = FunctionDataUtils.toConfigAsMap(configs);
+    configAsMap.forEach((config, type) => {
+      this.configsAsMap.set(type, config);
+    });
   }
 
   // Filter

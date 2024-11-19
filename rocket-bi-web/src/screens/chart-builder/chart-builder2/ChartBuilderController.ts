@@ -42,11 +42,13 @@ import { ChartBuilderConfig, DefaultChartBuilderConfig } from '@/screens/dashboa
 import { SlTreeNodeModel } from '@/shared/components/builder/treemenu/SlVueTree';
 import { SlideXLeftTransition } from 'vue2-transitions';
 import DefaultSetting from '@/shared/settings/common/DefaultSetting.vue';
+import ChartBuilderHeader from '@/screens/chart-builder/chart-builder2/ChartBuilderHeader.vue';
 
 Vue.use(BuilderComponents);
 Vue.use(Settings);
 @Component({
   components: {
+    ChartBuilderHeader,
     DatabaseListing,
     ConfigBuilder,
     VizPanel,
