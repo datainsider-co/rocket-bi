@@ -67,9 +67,9 @@ import { AuthenticationModule } from '@/store/modules/AuthenticationStore';
 import { ConnectionModule } from '@/screens/organization-settings/stores/ConnectionStore';
 import { FormulaControllerFactoryResolver } from '@/shared/fomula/builder/FormulaControllerFactoryResolver';
 import { FormulaControllerFactory } from '@/shared/fomula/builder/FormulaControllerFactory';
-import EventBus from '@/screens/dashboard-detail/components/chatbot/helpers/EventBus';
 import { PromptEvents } from '@/shared/enums/PromptEvents';
-import { QueryGenerator } from '@/screens/dashboard-detail/intefaces/chatbot/prompt-2-query/QueryGenerator';
+import EventBus from '@/shared/components/chat/helpers/EventBus';
+import { QueryGenerator } from '@/shared/components/chat/controller/functions/QueryGenerator';
 
 Vue.use(DataComponents);
 
