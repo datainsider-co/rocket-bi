@@ -1,12 +1,12 @@
-import { ChatbotController } from '@/screens/dashboard-detail/intefaces/chatbot/ChatbotController';
-import { OpenAiModels } from '@/screens/dashboard-detail/intefaces/chatbot/OpenAiModels';
+import { ChatMessageData } from '@/shared/components/chat/controller/ChatMessageData';
+import { ChartType } from '@/shared';
+import { ChatbotController } from '@/shared/components/chat/controller/ChatbotController';
 import {
   ChartBuilderResponse,
   ChartPromptFactory,
   ChartPromptRequest
-} from '@/screens/dashboard-detail/intefaces/chatbot/prompt-builder/promt-chart-builder/ChartPromptFactory';
-import { ChatMessageData } from '@/screens/dashboard-detail/intefaces/chatbot/ChatMessageData';
-import { ChartType } from '@/shared';
+} from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/ChartPromptFactory';
+import { OpenAiModels } from '@/shared/components/chat/controller/OpenAiModels';
 
 export class ChartBuilderFunction {
   private controller: ChatbotController;
