@@ -67,7 +67,8 @@ export default class ChartComponent extends Vue implements WidgetResizeHandler {
     [ChartOptionClassName.LineStockSetting, 'LineStockChart'],
     [ChartOptionClassName.TreeFilterSetting, 'TreeFilter'],
     [ChartOptionClassName.VariablePieSetting, 'VariablepieChart'],
-    [ChartOptionClassName.DonutSetting, 'DonutChart']
+    [ChartOptionClassName.DonutSetting, 'DonutChart'],
+    [ChartOptionClassName.GenericSetting, 'GenericChart']
   ]);
 
   @Prop({ required: true, type: Object })

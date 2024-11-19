@@ -36,9 +36,10 @@ import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
 import { Log } from '@core/utils';
 import { ColorUtils } from '@/utils/ColorUtils';
 import { DIException, ExportType } from '@core/common/domain';
+import { ForecastFunction } from '@/screens/dashboard-detail/intefaces/chatbot/functions/ForecastFunction';
 import { Di } from '@core/common/modules';
-import { SummarizeFunction } from '@/shared/components/chat/controller/functions/SummarizeFunction';
 import { PopupUtils } from '@/utils';
+import { SummarizeFunction } from '@/screens/dashboard-detail/intefaces/chatbot/functions/SummarizeFunction';
 
 @Component({
   components: {
@@ -480,12 +481,6 @@ export default class DefaultTable extends BaseWidget {
     await DashboardControllerModule.handleExport({ widgetId: this.chartId, type: type });
   }
 
-  handleOnRightClick(e: MouseEvent) {
-    Log.debug('DefaultTable::handleOnClick::event::', e);
-    e.preventDefault();
-    this.showContextMenu(new MouseEventData<string>(e, ''));
-  }
-
   async copyToAssistant(): Promise<void> {
     try {
       const type = ExportType.CSV;
@@ -496,13 +491,39 @@ export default class DefaultTable extends BaseWidget {
     }
   }
 
+  handleOnRightClick(e: MouseEvent) {
+    Log.debug('DefaultTable::handleOnClick::event::', e);
+    e.preventDefault();
+    this.showContextMenu(new MouseEventData<string>(e, ''));
+  }
+
+  get fncPayload() {
+    return {
+      type: 'Group table',
+      response: this.internalTableResponse,
+      format: GroupTableResponse.empty()
+    };
+  }
+
+  async foreCast(): Promise<void> {
+    try {
+      this.showLoading();
+      const forecastData = (await Di.get(ForecastFunction).execute(this.fncPayload)) as AbstractTableResponse;
+      Log.debug(`foreCast::`, forecastData);
+
+      this.internalTableResponse = forecastData;
+    } catch (e) {
+      Log.error(e);
+      PopupUtils.showError(DIException.fromObject(e).getPrettyMessage());
+    } finally {
+      this.hideLoading();
+    }
+  }
+
   async summarize() {
     try {
       this.showLoading();
-      const content = await Di.get(SummarizeFunction).execute({
-        type: 'Group table',
-        response: this.internalTableResponse
-      });
+      const content = await Di.get(SummarizeFunction).execute(this.fncPayload);
       Log.debug('summarize::', content);
       this.$root.$emit(DashboardEvents.ShowEditDescriptionModal, this.chartId, content);
     } catch (ex) {

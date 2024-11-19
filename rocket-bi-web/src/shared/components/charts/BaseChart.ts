@@ -12,16 +12,17 @@ import { DashboardControllerModule, DrilldownDataStoreModule, QuerySettingModule
 import './BaseChart.scss';
 import '@/themes/scss/mixin.scss';
 import { ZoomModule } from '@/store/modules/ZoomStore';
-import { Log, UrlUtils } from '@core/utils';
+import { Log } from '@core/utils';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { _ThemeStore } from '@/store/modules/ThemeStore';
 import { DefaultProps, PropsDefinition } from 'vue/types/options';
 import { Watch } from 'vue-property-decorator';
 import Swal from 'sweetalert2';
 import { DIException, ExportType } from '@core/common/domain';
-import NProgress from 'nprogress';
-import { SummarizeFunction } from '@/shared/components/chat/controller/functions/SummarizeFunction';
+import { ForecastFunction } from '@/screens/dashboard-detail/intefaces/chatbot/functions/ForecastFunction';
 import { Di } from '@core/common/modules';
+import NProgress from 'nprogress';
+import { SummarizeFunction } from '@/screens/dashboard-detail/intefaces/chatbot/functions/SummarizeFunction';
 
 export class MouseEventData<T> {
   constructor(readonly event: MouseEvent, readonly data: T, readonly extraData: any = {}) {}
@@ -299,20 +300,33 @@ export abstract class BaseHighChartWidget<
     try {
       const type = ExportType.CSV;
       const widgetData = await DashboardControllerModule.getWidgetData({ widgetId: this.id as number, type: type });
+      Log.debug('copyToAssistant::', widgetData);
       this.$root.$emit(DashboardEvents.ParseToAssistant, widgetData);
     } catch (e) {
       Log.error(e);
     }
   }
 
+  async foreCast(): Promise<void> {
+    try {
+      this.showLoading();
+      const forecastData = (await Di.get(ForecastFunction).execute(this.getForecastPayload())) as Response;
+      Log.debug(`foreCast::`, forecastData);
+      this.displayForecastData(forecastData);
+    } catch (e) {
+      Log.error(e);
+      PopupUtils.showError(DIException.fromObject(e).getPrettyMessage());
+    } finally {
+      this.hideLoading();
+    }
+  }
+
   async summarize() {
     try {
       this.showLoading();
-      const content = await Di.get(SummarizeFunction).execute({
-        type: this.chartInfo.extraData?.currentChartType ?? '',
-        response: this.data
-      });
+      const content = await Di.get(SummarizeFunction).execute(this.getForecastPayload());
       this.$root.$emit(DashboardEvents.ShowEditDescriptionModal, this.id, content);
+      Log.debug('summarize::', content);
     } catch (ex) {
       Log.error(ex);
       const exception = DIException.fromObject(ex);
@@ -320,6 +334,18 @@ export abstract class BaseHighChartWidget<
     } finally {
       this.hideLoading();
     }
+  }
+
+  protected displayForecastData(data: Response): void {
+    //Nothing to do
+  }
+
+  private getForecastPayload() {
+    return {
+      type: this.chartInfo.extraData?.currentChartType ?? '',
+      response: this.data,
+      format: VisualizationResponse.empty(this.data.className)
+    };
   }
 
   protected showLoading() {

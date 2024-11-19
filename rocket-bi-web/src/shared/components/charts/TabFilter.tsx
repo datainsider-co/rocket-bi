@@ -421,6 +421,20 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
     PopupUtils.showError('Unsupported Download CSV');
   }
 
+  async copyToAssistant(): Promise<void> {
+    PopupUtils.showError('Unsupported Copy to Assistant');
+  }
+
+  foreCast(): Promise<void> {
+    PopupUtils.showError('Unsupported Copy to Assistant');
+    return Promise.reject('Unsupported Forecast');
+  }
+
+  summarize(): Promise<void> {
+    PopupUtils.showError('Unsupported Summarize');
+    return Promise.reject('Unsupported Summarize');
+  }
+
   private buildId(colum: TableColumn, index: number): string {
     return `${colum.normalizeName}_${index}`;
   }
@@ -431,14 +445,5 @@ export default class TabFilter extends BaseChartWidget<TableResponse, TabFilterO
 
   handleChangeKeyword(text: string) {
     this.keyword = text;
-  }
-
-  async copyToAssistant(): Promise<void> {
-    PopupUtils.showError('Unsupported Copy to Assistant');
-  }
-
-  summarize(): Promise<void> {
-    PopupUtils.showError('Unsupported Summarize');
-    return Promise.reject('Unsupported Summarize');
   }
 }

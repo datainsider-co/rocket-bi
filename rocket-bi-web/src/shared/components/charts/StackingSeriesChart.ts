@@ -179,6 +179,13 @@ export default class StackingSeriesChart extends BaseHighChartWidget<SeriesOneRe
     }
   }
 
+  protected displayForecastData(forecastData: SeriesOneResponse) {
+    HighchartUtils.reset(this.getChart());
+    this.load(forecastData, this.setting);
+    this.buildAxis(forecastData);
+    HighchartUtils.drawChart(this.getChart());
+  }
+
   private getConditionValue(equalValue?: EqualValue): number | undefined {
     return equalValue?.enabled ? equalValue?.value : undefined;
   }

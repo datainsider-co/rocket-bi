@@ -106,6 +106,7 @@ const LineStockChart = () => import('./LineStockChart');
 const TreeFilter = () => import('./TreeFilter');
 const DonutChart = () => import('./DonutChart');
 const VariablepieChart = () => import('./VariablepieChart');
+const GenericChart = () => import('./GenericChart');
 
 const ChartComponents = {
   install(Vue: typeof _Vue) {
@@ -144,6 +145,7 @@ const ChartComponents = {
     Vue.component('TreeFilter', TreeFilter);
     Vue.component('DonutChart', DonutChart);
     Vue.component('VariablepieChart', VariablepieChart);
+    Vue.component('GenericChart', GenericChart);
   }
 };
 

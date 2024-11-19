@@ -60,4 +60,8 @@ export class GroupedTableQuerySetting extends AbstractTableQuerySetting implemen
   isEnableCrossFilter(): boolean {
     return true;
   }
+
+  forecastable(): boolean {
+    return true;
+  }
 }

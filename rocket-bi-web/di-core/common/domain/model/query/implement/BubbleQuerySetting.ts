@@ -84,4 +84,8 @@ export class BubbleQuerySetting extends QuerySetting implements Paginatable {
       return BubbleQuerySetting.DEFAULT_NUM_DATA_POINT;
     }
   }
+
+  forecastable(): boolean {
+    return true;
+  }
 }

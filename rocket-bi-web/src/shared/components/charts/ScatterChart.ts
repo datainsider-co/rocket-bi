@@ -5,7 +5,7 @@ import { merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
 import { ClassProfiler } from '@/shared/profiler/Annotation';
 import { DIException } from '@core/common/domain/exception';
-import { SeriesTwoResponse } from '@core/common/domain/response';
+import { SeriesOneResponse, SeriesTwoResponse } from '@core/common/domain/response';
 import { HighchartUtils, MetricNumberMode } from '@/utils';
 import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
 import { Log } from '@core/utils';
@@ -168,6 +168,13 @@ export default class ScatterChart extends BaseHighChartWidget<SeriesTwoResponse,
         throw new DIException('Error when display chart. Please try again!');
       }
     }
+  }
+
+  protected displayForecastData(forecastData: SeriesOneResponse) {
+    HighchartUtils.reset(this.getChart());
+    this.load(forecastData);
+    this.buildAxis(forecastData);
+    HighchartUtils.drawChart(this.getChart());
   }
 
   protected load(chartData: SeriesTwoResponse) {

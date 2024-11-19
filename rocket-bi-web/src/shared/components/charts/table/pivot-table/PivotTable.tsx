@@ -38,8 +38,9 @@ import { MouseEventData } from '@chart/BaseChart';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
 import { DIException, ExportType } from '@core/common/domain';
+import { ForecastFunction } from '@/screens/dashboard-detail/intefaces/chatbot/functions/ForecastFunction';
 import { Di } from '@core/common/modules';
-import { SummarizeFunction } from '@/shared/components/chat/controller/functions/SummarizeFunction';
+import { SummarizeFunction } from '@/screens/dashboard-detail/intefaces/chatbot/functions/SummarizeFunction';
 
 @Component({
   components: {
@@ -99,6 +100,7 @@ export default class PivotTable extends BaseWidget {
     this.isSmallContainer = false;
     this.pagination = new Pagination({ page: 1, rowsPerPage: this.defaultRowsPerPage });
   }
+
   private get vizSetting(): PivotTableChartOption | null {
     return this.querySetting.getChartOption<PivotTableChartOption>() ?? null;
   }
@@ -544,12 +546,6 @@ export default class PivotTable extends BaseWidget {
     await DashboardControllerModule.handleExport({ widgetId: this.chartId, type: type });
   }
 
-  handleOnRightClick(e: MouseEvent) {
-    Log.debug('PivotTable::handleOnClick::event::', e);
-    e.preventDefault();
-    this.showContextMenu(new MouseEventData<string>(e, ''));
-  }
-
   async copyToAssistant(): Promise<void> {
     try {
       const type = ExportType.CSV;
@@ -560,13 +556,33 @@ export default class PivotTable extends BaseWidget {
     }
   }
 
+  get fncPayload() {
+    return {
+      type: 'Pivot table',
+      response: this.internalTableResponse,
+      format: GroupTableResponse.empty()
+    };
+  }
+
+  async foreCast(): Promise<void> {
+    try {
+      this.showLoading();
+      const forecastData = (await Di.get(ForecastFunction).execute(this.fncPayload)) as AbstractTableResponse;
+      Log.debug(`foreCast::`, forecastData);
+
+      this.internalTableResponse = forecastData;
+    } catch (e) {
+      Log.error(e);
+      PopupUtils.showError(DIException.fromObject(e).getPrettyMessage());
+    } finally {
+      this.hideLoading();
+    }
+  }
+
   async summarize() {
     try {
       this.showLoading();
-      const content = await Di.get(SummarizeFunction).execute({
-        type: 'Pivot table',
-        response: this.internalTableResponse
-      });
+      const content = await Di.get(SummarizeFunction).execute(this.fncPayload);
       this.$root.$emit(DashboardEvents.ShowEditDescriptionModal, this.chartId, content);
       Log.debug('summarize::', content);
     } catch (ex) {
@@ -576,5 +592,11 @@ export default class PivotTable extends BaseWidget {
     } finally {
       this.hideLoading();
     }
+  }
+
+  handleOnRightClick(e: MouseEvent) {
+    Log.debug('PivotTable::handleOnClick::event::', e);
+    e.preventDefault();
+    this.showContextMenu(new MouseEventData<string>(e, ''));
   }
 }

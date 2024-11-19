@@ -1,22 +1,20 @@
 import Highcharts, { TooltipFormatterContextObject } from 'highcharts';
 import { Component, Ref, Watch } from 'vue-property-decorator';
-import { ChartOption, ChartOptionData, EqualValue, MinMaxCondition, SeriesChartOption, SeriesQuerySetting, TextSetting } from '@core/common/domain/model';
-import { cloneDeep, get, merge } from 'lodash';
+import { ChartOption, ChartOptionData, EqualValue, GenericChartQuerySetting, MinMaxCondition, SeriesChartOption, TextSetting } from '@core/common/domain/model';
+import { merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
 import { MethodProfiler } from '@/shared/profiler/Annotation';
 import { DIException } from '@core/common/domain/exception';
-import { ChartUtils, ColumnRangeUtils, DateTimeUtils, HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
-import { SeriesOneResponse } from '@core/common/domain/response';
-import { CompareMode } from '@core/common/domain/request/query/CompareMode';
+import { ChartUtils, HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
+import { GenericChartResponse, SeriesOneResponse } from '@core/common/domain/response';
 import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
 import { Log } from '@core/utils';
-import { StringUtils } from '@/utils/StringUtils';
 import { ChartType } from '@/shared';
 
 @Component({
   props: PropsBaseChart
 })
-export default class SeriesChart extends BaseHighChartWidget<SeriesOneResponse, SeriesChartOption, SeriesQuerySetting> {
+export default class GenericChart extends BaseHighChartWidget<GenericChartResponse, ChartOption, GenericChartQuerySetting> {
   @Ref()
   chart: any;
 
@@ -29,12 +27,6 @@ export default class SeriesChart extends BaseHighChartWidget<SeriesOneResponse, 
     const yAxisFormatter = this.yAxisFormatter;
     const dualYAxisFormatter = this.dualYAxisFormatter;
     const manualOptions: Highcharts.Options = {
-      chart: {
-        type: 'line'
-      },
-      xAxis: {
-        type: 'category'
-      },
       colors: this.setting.colors,
       plotOptions: {
         series: {
@@ -139,12 +131,7 @@ export default class SeriesChart extends BaseHighChartWidget<SeriesOneResponse, 
     try {
       this.updateMetricNumber(this.setting.options);
       HighchartUtils.reset(this.getChart());
-      // this.buildDualAxis(this.data, this.setting.options);
-      if (this.data.haveComparison && this.data.haveComparison()) {
-        this.loadWithCompareResponse(this.data, this.setting);
-      } else {
-        this.load(this.data, this.setting);
-      }
+      this.load(this.data);
       HighchartUtils.updateChart(this.getChart(), this.setting.options);
       this.buildAxis(this.data);
       this.updateChartInfo();
@@ -164,166 +151,49 @@ export default class SeriesChart extends BaseHighChartWidget<SeriesOneResponse, 
     return equalValue?.enabled ? equalValue?.value : undefined;
   }
 
-  protected buildAxis(chartData: SeriesOneResponse) {
-    const options: any = {};
-    const isTimeStampXAxis = ChartUtils.isTimeStampType(this.query.xAxis.function.scalarFunction?.className ?? '');
-    Log.debug('buildAxis::isTimeStampXAxis', this.query.xAxis.function.scalarFunction?.className);
-    const yAxisCondition = get(this.setting, 'options.yAxis[0].condition');
-    const dualYAxisCondition = get(this.setting, 'options.yAxis[1].condition');
-    const xAxisFormatter = this.xAxisFormatter;
-    if (isTimeStampXAxis) {
-      options['xAxis'] = {
-        type: 'datetime',
-        dateTimeLabelFormats: {
-          day: '%Y-%m-%d'
-        }
-      };
-    } else if (ListUtils.isNotEmpty(chartData.xAxis)) {
-      options['xAxis'] = [
-        {
-          type: 'category',
-          categories: chartData.xAxis,
-          labels: {
-            useHTML: true,
-            formatter: function() {
-              return xAxisFormatter((this as any) as Highcharts.AxisLabelsFormatterContextObject);
-            }
-          }
-        }
-      ];
+  protected buildAxis(chartData: GenericChartResponse) {
+    //Nothing to do
+    switch (this.chartInfo.extraData?.currentChartType) {
+      case ChartType.ColumnRange:
+        return this.buildColumnRangeAxis(chartData);
+      default:
+      //Nothing to do
     }
-    if (ListUtils.isNotEmpty(chartData.yAxis)) {
-      options['yAxis'][0] = [
-        {
-          type: 'category',
-          categories: chartData.yAxis,
-          min: yAxisCondition?.enabled ? this.getConditionValue(yAxisCondition.min) : undefined,
-          max: yAxisCondition?.enabled ? this.getConditionValue(yAxisCondition.max) : undefined
-        },
-        {
-          min: dualYAxisCondition?.enabled ? this.getConditionValue(dualYAxisCondition.min) : undefined,
-          max: dualYAxisCondition?.enabled ? this.getConditionValue(dualYAxisCondition.max) : undefined
-        }
-      ];
-    } else {
-      options['yAxis'] = [
-        {
-          min: yAxisCondition?.enabled ? this.getConditionValue(yAxisCondition.min) : undefined,
-          max: yAxisCondition?.enabled ? this.getConditionValue(yAxisCondition.max) : undefined
-        },
-        {
-          min: dualYAxisCondition?.enabled ? this.getConditionValue(dualYAxisCondition.min) : undefined,
-          max: dualYAxisCondition?.enabled ? this.getConditionValue(dualYAxisCondition.max) : undefined
-        }
-      ];
-    }
+  }
 
-    if (chartData.haveComparison && chartData.haveComparison()) {
-      options.plotOptions = {
-        series: {
-          grouping: false
-        }
-      };
-    }
-    Log.debug('buildAxis:: options', options);
+  private buildColumnRangeAxis(data: GenericChartResponse) {
+    const options: any = {};
+    options['xAxis'] = [
+      {
+        categories: data.records.map(item => item[0])
+      }
+    ];
     HighchartUtils.updateChart(this.getChart(), options);
   }
 
-  protected loadWithCompareResponse(chartData: SeriesOneResponse, setting: SeriesChartOption): void {
-    const compareResponse = chartData.compareResponses?.get(CompareMode.RawValues);
-    const series: Record<string, any>[] = [];
-    compareResponse?.series.forEach((value, index) => {
-      const id = value.name;
-      chartData.series[index].id = id;
-      value.linkedTo = id;
-      value.pointPlacement = -0.2;
-      value.color = setting.options.comparisonColor;
-      value.yAxis = chartData.series[index].yAxis;
-      series.push(value, chartData.series[index]);
-    });
-    HighchartUtils.addSeries(this.getChart(), series);
-  }
-
-  protected displayForecastData(forecastData: SeriesOneResponse) {
+  protected displayForecastData(forecastData: GenericChartResponse) {
     HighchartUtils.reset(this.getChart());
-    this.load(forecastData, this.setting);
+    this.load(forecastData);
     this.buildAxis(forecastData);
     HighchartUtils.drawChart(this.getChart());
   }
 
-  protected load(chartData: SeriesOneResponse, setting: SeriesChartOption) {
-    const { seriesTypesByLabelMap } = setting;
-    const cloneSeries = cloneDeep(chartData.series);
-    const seriesWithType = cloneSeries
-      // .sort((legend, nextLegend) => StringUtils.compare(legend.name, nextLegend.name))
-      .map(item => {
-        const { name } = item;
-        const normalizedName = StringUtils.toCamelCase(name);
-        const type = seriesTypesByLabelMap.get(normalizedName) ?? this.setting?.options?.chart?.type ?? 'line';
-        const itemSetting = get(setting, `options.plotOptions.series.response.${normalizedName}`, {});
-        const isTimeStampXAxis = ChartUtils.isTimeStampType(this.query.xAxis.function.scalarFunction?.className ?? '');
-        const result = isTimeStampXAxis ? item.withTimeStamp(chartData.xAxis ?? []) : item;
-        Object.assign(result, { type: type }, itemSetting);
-        //Hot fix lỗi stack sai trong Area:
-        //Context: Khi có legend, response trên sever trả về sẽ bao gồm stack trong prop
-        //Error: Stack bị chia làm 4 group thay vì 1 Group
-        //Giải phạp tạm thời: xoá prop stack và nếu có stack thì sẽ stack thành 1 Group duy nhất
-        //Example:
-        ///[
-        //     {
-        //         "name": "Home Office",
-        //         "data": [
-        //             89133703.2,
-        //             596462670.8,
-        //             701273231.5
-        //         ],
-        //============ERROR HERE============
-        //         "stack": "Home Office",
-        //==================================
-        //     },
-        //     {
-        //         "name": "Consumer",
-        //         "data": [
-        //             160794807.8,
-        //             1295597383,
-        //             1628349620.8
-        //         ],
-        //==================================
-        //         "stack": "Consumer",
-        //==================================
-        //     },
-        //     {
-        //         "name": "Corporate",
-        //         "data": [
-        //             174450763.4,
-        //             925259129.4,
-        //             1015840954
-        //         ],
-        //============ERROR HERE============
-        //         "stack": "Corporate",
-        //==================================
-        //     },
-        //     {
-        //         "name": "",
-        //         "data": [
-        //             null,
-        //             -30764.8,
-        //             null
-        //         ],
-        //============ERROR HERE============
-        //         "stack": "",
-        //==================================
-        //     }
-        // ]
-        result['stack'] = undefined;
-        // Update Marker nếu đang chart type là Line và data chỉ có 1 value
-        if (type === ChartType.Line && item.data.length === 1) {
-          result['marker'] = { enabled: true };
-        }
-        return result;
-      });
-    Log.debug('SeriesChart::load::', seriesWithType);
-    HighchartUtils.addSeries(this.getChart(), seriesWithType);
+  protected load(chartData: GenericChartResponse) {
+    HighchartUtils.addSeries(this.getChart(), [
+      {
+        name: ListUtils.getHead(this.query.columns)?.name ?? '',
+        keys: this.getSeriesKeys(),
+        data: chartData.records
+      }
+    ]);
+  }
+
+  private getSeriesKeys() {
+    switch (this.chartInfo.extraData?.currentChartType) {
+      case ChartType.ColumnRange:
+      case ChartType.AreaRange:
+        return ['name', 'low', 'high'];
+    }
   }
 
   protected resizeHighchart(): void {
@@ -403,16 +273,37 @@ export default class SeriesChart extends BaseHighChartWidget<SeriesOneResponse, 
   }
 
   private tooltipFormatter(point: TooltipFormatterContextObject) {
-    const isTimeStampXAxis = ChartUtils.isTimeStampType(this.query.xAxis.function.scalarFunction?.className ?? '');
-    const x = isTimeStampXAxis ? DateTimeUtils.formatAsDDMMYYYYHms(point.x as number) : point.x;
-    const name = point.series.name;
-    const value = this.numberFormatter.format(point.y as number);
+    Log.debug('tooltipFormatter::', point);
+    switch (this.chartInfo.extraData?.currentChartType) {
+      case ChartType.ColumnRange:
+        return this.tooltipColumnRangeFormatter(point);
+      default: {
+        const { x, series, y } = point;
+        const name = series.name;
+        const value = this.numberFormatter.format(y as number);
+        const color = point.color;
+        const textColor = this.setting.options.tooltip?.style?.color ?? 'var(--text-color)';
+        const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
+        return `<div style="text-align: left; color: ${textColor}; font-family: ${fontFamily}">
+                <span>${x}</span></br>
+                <span style="color:${color}; padding-right: 5px;">●</span>${name}: <b>${value}</b>
+            </div>`;
+      }
+    }
+  }
+
+  private tooltipColumnRangeFormatter(point: TooltipFormatterContextObject) {
+    const { name, low, high } = point.point;
+    const xAxisName = ListUtils.getHead(this.query.columns)?.name ?? '';
     const color = point.color;
     const textColor = this.setting.options.tooltip?.style?.color ?? 'var(--text-color)';
     const fontFamily = this.setting.options.tooltip?.style?.fontFamily ?? ChartOption.getSecondaryFontFamily();
+
+    const formattedHigh = high !== undefined ? this.numberFormatter.format(high) : 0;
+    const formattedLow = low !== undefined ? this.numberFormatter.format(low) : 0;
     return `<div style="text-align: left; color: ${textColor}; font-family: ${fontFamily}">
-                <span>${x}</span></br>
-                <span style="color:${color}; padding-right: 5px;">●</span>${name}: <b>${value}</b>
+                <span>${name}</span></br>
+                <span style="color:${color}; padding-right: 5px;">●</span>${xAxisName}: <b>${formattedLow} - ${formattedHigh}</b>
             </div>`;
   }
 

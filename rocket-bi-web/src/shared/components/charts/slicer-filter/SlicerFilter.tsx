@@ -322,6 +322,19 @@ export default class SlicerFilter extends BaseWidget {
     PopupUtils.showError('Unsupported Download CSV');
   }
 
+  async copyToAssistant(): Promise<void> {
+    PopupUtils.showError('Unsupported Copy to Assistant');
+  }
+  foreCast(): Promise<void> {
+    PopupUtils.showError('Unsupported Copy to Assistant');
+    return Promise.reject('Unsupported Forecast');
+  }
+
+  summarize(): Promise<void> {
+    PopupUtils.showError('Unsupported Summarize');
+    return Promise.reject('Unsupported Summarize');
+  }
+
   private get slicerDisplay(): SlicerDisplay {
     const mode = this.getSlicerMode(this.query);
     if (mode === SlicerMode.Filter) {
@@ -342,14 +355,5 @@ export default class SlicerFilter extends BaseWidget {
       return SlicerMode.DynamicValues;
     }
     return SlicerMode.Filter;
-  }
-
-  async copyToAssistant(): Promise<void> {
-    PopupUtils.showError('Unsupported Copy to Assistant');
-  }
-
-  summarize(): Promise<void> {
-    PopupUtils.showError('Unsupported Summarize');
-    return Promise.reject('Unsupported Summarize');
   }
 }

@@ -252,6 +252,11 @@ export default class InputFilter extends BaseWidget {
     PopupUtils.showError('Unsupported Copy to Assistant');
   }
 
+  foreCast(): Promise<void> {
+    PopupUtils.showError('Unsupported Copy to Assistant');
+    return Promise.reject('Unsupported Forecast');
+  }
+
   summarize(): Promise<void> {
     PopupUtils.showError('Unsupported Summarize');
     return Promise.reject('Unsupported Summarize');

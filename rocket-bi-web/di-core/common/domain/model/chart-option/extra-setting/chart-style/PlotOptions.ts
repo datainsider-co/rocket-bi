@@ -53,6 +53,10 @@ export interface PlotSeries {
   //not highchart setting
   response?: ResponseSetting;
   targetOptions?: TargetOptions;
+  startAngle?: number;
+  endAngle?: number;
+  center?: string[];
+  size?: string;
 }
 
 export interface TargetOptions {
@@ -98,6 +102,7 @@ export interface DataLabels {
   textOutline?: string;
   useHTML?: boolean;
   condition?: MinMaxCondition;
+  distance?: number;
 }
 
 export interface MinMaxCondition {

@@ -5,7 +5,7 @@ import { merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
 import { ClassProfiler } from '@/shared/profiler/Annotation';
 import { DIException } from '@core/common/domain/exception';
-import { SeriesTwoResponse } from '@core/common/domain/response';
+import { SeriesOneResponse, SeriesTwoResponse } from '@core/common/domain/response';
 import { DomUtils, HighchartUtils, MetricNumberMode } from '@/utils';
 import { DashboardEvents } from '@/screens/dashboard-detail/enums/DashboardEvents';
 import { NumberFormatter, RangeData } from '@core/common/services/Formatter';

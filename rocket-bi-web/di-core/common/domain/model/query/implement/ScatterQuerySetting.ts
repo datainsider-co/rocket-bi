@@ -136,4 +136,8 @@ export class ScatterQuerySetting extends QuerySetting implements Zoomable, Drill
       this.legend = ConfigDataUtils.replaceDynamicFunction(this.legend, functions);
     }
   }
+
+  forecastable(): boolean {
+    return true;
+  }
 }
