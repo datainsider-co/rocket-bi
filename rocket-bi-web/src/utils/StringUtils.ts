@@ -270,4 +270,62 @@ export abstract class StringUtils {
   static capitalizeFirstLetter(text: string) {
     return text.charAt(0).toUpperCase() + text.slice(1);
   }
+
+  static isJsonString(str: string): boolean {
+    try {
+      JSON.parse(str);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static extractJsonFromMarkdown(markdown: string): string | null {
+    const jsonRegex = /```json([\s\S]*?)```/g;
+    const match = jsonRegex.exec(markdown);
+
+    if (match && match[1]) {
+      return match[1].trim(); // Extract the JSON part
+    }
+
+    return null; // Return null if no JSON block is found
+  }
+
+  static convertToJson(input: string): any {
+    // Check if the input is a valid JSON string
+    if (this.isJsonString(input)) {
+      return JSON.parse(input);
+    }
+
+    // If not, try to extract JSON from Markdown
+    const extractedJsonString = this.extractJsonFromMarkdown(input);
+
+    if (extractedJsonString && this.isJsonString(extractedJsonString)) {
+      return JSON.parse(extractedJsonString);
+    }
+
+    return null;
+  }
+
+  static isJson(input: string): boolean {
+    // Check if the input is a valid JSON string
+    if (this.isJsonString(input)) {
+      return true;
+    }
+
+    // Regex to extract JSON code block from Markdown
+    const jsonRegex = /```json([\s\S]*?)```/g;
+    const match = jsonRegex.exec(input);
+
+    // If a JSON block is found in the Markdown
+    if (match && match[1]) {
+      const extractedJsonString = match[1].trim();
+
+      // Check if the extracted block is a valid JSON string
+      return this.isJsonString(extractedJsonString);
+    }
+
+    // If neither case is valid, return false
+    return false;
+  }
 }
