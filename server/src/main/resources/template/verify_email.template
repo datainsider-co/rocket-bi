@@ -1,0 +1,77 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en" class="os-html"><head><title></title><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml><![endif]-->
+    <link type="text/css" href="https://app-rsrc.getbee.io/public/resources/preview/OverlayScrollbars.css" rel="stylesheet">
+    <script type="text/javascript" src="https://app-rsrc.getbee.io/public/resources/preview/OverlayScrollbars.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        OverlayScrollbars(document.querySelectorAll("body"), { });
+      });
+    </script>
+  <style>
+*{
+	box-sizing: border-box;
+}
+
+body{
+	margin: 0;
+	padding: 0;
+}
+
+a[x-apple-data-detectors] {
+	color: inherit !important;
+	text-decoration: inherit !important;
+}
+
+#MessageViewBody a {
+	color: inherit;
+	text-decoration: none;
+}
+
+p{
+	line-height: inherit
+}
+
+.desktop_hide,
+.desktop_hide table{
+	mso-hide: all;
+	display: none;
+	max-height: 0px;
+	overflow: hidden;
+}
+
+.image_block img + div{
+	display: none;
+}
+
+@media (max-width:660px) {
+  .social_block.desktop_hide .social-table {
+    display: inline-block!important;
+  }
+
+  .mobile_hide {
+    display: none;
+  }
+
+  .row-content {
+    width: 100%!important;
+  }
+
+  .stack .column {
+    width: 100%;
+    display: block;
+  }
+
+  .mobile_hide {
+    min-height: 0;
+    max-height: 0;
+    max-width: 0;
+    overflow: hidden;
+    font-size: 0px;
+  }
+
+  .desktop_hide,
+.desktop_hide table {
+    display: table!important;
+    max-height: none!important;
+  }
+}
+</style></head><body style="background-color: #f0f3f3; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;" class="os-host os-theme-dark os-host-resize-disabled os-host-scrollbar-horizontal-hidden os-host-transition os-host-overflow os-host-overflow-y"><div class="os-resize-observer-host observed"><div class="os-resize-observer" style="left: 0px; right: auto;"></div></div><div class="os-padding"><div class="os-viewport os-viewport-native-scrollbars-invisible os-viewport-native-scrollbars-overlaid" style="overflow-y: scroll;"><div class="os-content" style="padding: 0px; height: 100%; width: 100%;"><table class="nl-container" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f0f3f3;"><tbody><tr><td><table class="row row-1" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-size: auto;"><tbody><tr><td><table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-size: auto; background-color: #002af5; border-radius: 0; color: #000000; width: 640px; margin: 0 auto;" width="640"><tbody><tr><td class="column column-1" width="33.333333333333336%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-left: 20px; padding-right: 20px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"><table class="image_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"><tbody><tr><td class="pad" style="padding-bottom:10px;padding-top:10px;width:100%;padding-right:0px;padding-left:0px;"><div class="alignment" align="center" style="line-height:10px"><div style="max-width: 112.66666666666666px;"><img src="https://img.emlmind.com/en/v5/user-files?userId=6150045&amp;resource=himg&amp;disposition=inline&amp;name=6ae8fowudbh5dwmgq3g5xqgurcejigbm13bsr9oft9wth6iywrcgzraxw3edykrp8n57yjz5b5ipnoajg3ynwt9a4ga" style="display: block; height: auto; border: 0; width: 100%;" width="112.66666666666666"></div></div></td></tr></tbody></table></td><td class="column column-2" width="33.333333333333336%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-left: 20px; padding-right: 20px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"><div class="spacer_block block-1 mobile_hide" style="height:1px;line-height:1px;font-size:1px;"> </div></td><td class="column column-3" width="33.333333333333336%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-left: 20px; padding-right: 20px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"><div class="spacer_block block-1 mobile_hide" style="height:15px;line-height:15px;font-size:1px;"> </div><div class="spacer_block block-2" style="height:15px;line-height:15px;font-size:1px;"> </div></td></tr></tbody></table></td></tr></tbody></table><table class="row row-2" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"><tbody><tr><td><table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff; color: #000000; width: 640px; margin: 0 auto;" width="640"><tbody><tr><td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-left: 20px; padding-right: 20px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"><div class="spacer_block block-1" style="height:20px;line-height:20px;font-size:1px;"> </div><div class="spacer_block block-2" style="height:20px;line-height:20px;font-size:1px;"> </div><table class="text_block block-3" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"><tbody><tr><td class="pad"><div style="font-family: sans-serif"><div class="" style="font-size: 14px; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; mso-line-height-alt: 16.8px; color: #000000; line-height: 1.2;"><p style="margin: 0; font-size: 14px; mso-line-height-alt: 16.8px;"><span style="font-size:24px;"><strong><span style="">Thank for signing up with RocketBI</span></strong></span></p></div></div></td></tr></tbody></table><table class="text_block block-4" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"><tbody><tr><td class="pad"><div style="font-family: sans-serif"><div class="" style="font-size: 14px; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; mso-line-height-alt: 16.8px; color: #000000; line-height: 1.2;"><p style="margin: 0; font-size: 14px; mso-line-height-alt: 16.8px;"><span style="font-size:16px;">Don't lose access to your Data Intelligence Platform, we want to make sure you're using the right email. </span></p><p style="margin: 0; font-size: 14px; mso-line-height-alt: 16.8px;"><span style="font-size:16px;">Please use the verification code below to continue your registration.</span></p></div></div></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table><table class="row row-3" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"><tbody><tr><td><table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff; color: #000000; width: 640px; margin: 0 auto;" width="640"><tbody><tr><td class="column column-1" width="50%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-left: 20px; padding-right: 20px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"><table class="text_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"><tbody><tr><td class="pad" style="padding-left:10px;padding-right:10px;padding-top:10px;"><div style="font-family: sans-serif"><div class="" style="font-size: 14px; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; mso-line-height-alt: 16.8px; color: #000000; line-height: 1.2;"><p style="margin: 0; font-size: 14px; mso-line-height-alt: 16.8px;"><span style="font-size:18px;"><strong>Verification code:</strong> $code</span></p></div></div></td></tr></tbody></table></td><td class="column column-2" width="50%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-left: 20px; padding-right: 20px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"><table class="empty_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"><tbody><tr><td class="pad"><div></div></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table><table class="row row-4" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"><tbody><tr><td><table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #000000; color: #000000; width: 640px; margin: 0 auto;" width="640"><tbody><tr><td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"><div class="spacer_block block-1" style="height:10px;line-height:10px;font-size:1px;"> </div><table class="social_block block-2" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"><tbody><tr><td class="pad"><div class="alignment" align="center"><table class="social-table" width="241.33039647577093px" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block;"><tbody><tr><td style="padding:0 7px 0 7px;"><a href="javascript:void('rocket.bi')"><img src="https://img.emlmind.com/en/v5/user-files?userId=6150045&amp;resource=himg&amp;disposition=inline&amp;name=6ae8fowudbh5dwmgq3g5xqgurcejigbm13bsr9oft9wth6iywrcgzraxw3edykrp8n57yjz5b5ipnoajg3ynwt9a4ga" width="135.33039647577093" height="32" alt="Custom" title="Custom" style="display: block; height: auto; border: 0;"></a></td><td style="padding:0 7px 0 7px;"><a href="https://www.linkedin.com/company/datainsider-co" target="_blank"><img src="https://app-rsrc.getbee.io/public/resources/social-networks-icon-sets/t-only-logo-white/linkedin@2x.png" width="32" height="32" alt="LinkedIn" title="LinkedIn" style="display: block; height: auto; border: 0;"></a></td><td style="padding:0 7px 0 7px;"><a href="https://www.youtube.com/@rocketbi" target="_blank"><img src="https://app-rsrc.getbee.io/public/resources/social-networks-icon-sets/t-only-logo-white/youtube@2x.png" width="32" height="32" alt="YouTube" title="YouTube" style="display: block; height: auto; border: 0;"></a></td></tr></tbody></table></div></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table><table class="row row-5" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"><tbody><tr><td><table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #000000; color: #000000; width: 640px; margin: 0 auto;" width="640"><tbody><tr><td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"><table class="text_block block-1" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"><tbody><tr><td class="pad"><div style="font-family: sans-serif"><div class="" style="font-size: 14px; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; mso-line-height-alt: 16.8px; color: #bbbbbb; line-height: 1.2;"><p style="margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 16.8px;"><span style="font-size:12px;">Need a break from our emails? You can <a href="javascript:void('{{UnsubscribeUrl}}')" style="text-decoration: underline; color: #bbbbbb;" rel="noopener">unsubscribe</a>&nbsp;</span></p></div></div></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table><!-- End --><script type="text/javascript" src="https://app-rsrc.getbee.io/public/resources/preview/dark-mode/dark-mode.min.js"></script></div></div></div><div class="os-scrollbar os-scrollbar-horizontal os-scrollbar-unusable"><div class="os-scrollbar-track os-scrollbar-track-off"><div class="os-scrollbar-handle" style="width: 100%; transform: translate(0px, 0px);"></div></div></div><div class="os-scrollbar os-scrollbar-vertical"><div class="os-scrollbar-track os-scrollbar-track-off"><div class="os-scrollbar-handle" style="height: 24.556962%; transform: translate(0px, 0px);"></div></div></div><div class="os-scrollbar-corner"></div><textarea id="sigmaos-focus-handler" style="opacity: 0; position: fixed; pointer-events: none; height: 1px;"></textarea></body></html>

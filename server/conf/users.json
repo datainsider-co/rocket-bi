@@ -1,0 +1,14 @@
+[
+  {
+    "email": "hello@gmail.com",
+    "password": "123456",
+    "full_name": "Data Insider",
+    "password_mode": "raw"
+  },
+  {
+    "email": "hello2@gmail.com",
+    "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+    "full_name": "Data Insider 2",
+    "password_mode": "hash"
+  }
+]

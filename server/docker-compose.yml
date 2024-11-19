@@ -1,0 +1,14 @@
+services:
+  rocket-bi-server:
+    image: rocket-bi-server:latest
+    container_name: rocket-bi-server
+    network_mode: "host"
+    expose:
+      - "8080"
+    volumes:
+      - ./logs:/app/logs
+      - ./conf:/app/conf
+    environment:
+      MODE: local 
+    restart: always 
+   
