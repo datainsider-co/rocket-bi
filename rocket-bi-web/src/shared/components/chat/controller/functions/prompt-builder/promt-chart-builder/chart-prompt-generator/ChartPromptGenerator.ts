@@ -1,11 +1,11 @@
 import { DIException, Field } from '@core/common/domain';
 import { isArray } from 'lodash';
-import { ShortInfoTableSchema } from '@/screens/chart-builder/prompt-2-chart/ChartGenerator';
-import { ChatMessageData } from '@/screens/dashboard-detail/intefaces/chatbot/ChatMessageData';
+import { ShortInfoTableSchema } from '@/shared/components/chat/controller/functions/TableSchemaPicker';
+import { ChatMessageData } from '@/shared/components/chat/controller/ChatMessageData';
 import { StringUtils } from '@/utils';
 import { ConfigType, FunctionTreeNode } from '@/shared';
 import { _BuilderTableSchemaStore } from '@/store/modules/data-builder/BuilderTableSchemaStore';
-import { ChartBuilderResponse } from '@/screens/dashboard-detail/intefaces/chatbot/prompt-builder/promt-chart-builder/ChartPromptFactory';
+import { ChartBuilderResponse } from '@/shared/components/chat/controller/functions/prompt-builder/promt-chart-builder/ChartPromptFactory';
 
 /**
  * Provides a base class for generating chart prompts and parsing responses.
