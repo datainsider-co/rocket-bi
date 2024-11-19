@@ -185,7 +185,7 @@ export default class SpiderWebChart extends BaseHighChartWidget<SeriesOneRespons
         }
       ];
     }
-    if (chartData.haveComparison()) {
+    if (chartData.haveComparison && chartData.haveComparison()) {
       options.plotOptions = {
         series: {
           grouping: false

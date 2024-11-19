@@ -49,5 +49,6 @@ export enum ChartOptionClassName {
   InputControlSetting = 'input_control_setting',
   TreeFilterSetting = 'tree_filter_chart_setting',
   DonutSetting = 'donut_chart_setting',
-  VariablePieSetting = 'variablepie_chart_setting'
+  VariablePieSetting = 'variablepie_chart_setting',
+  GenericSetting = 'generic_chart_setting'
 }

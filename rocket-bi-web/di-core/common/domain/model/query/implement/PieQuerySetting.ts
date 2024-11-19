@@ -99,7 +99,14 @@ export class PieQuerySetting extends QuerySetting implements CrossFilterable, Zo
   }
 
   getDefaultSize(): [number, number] {
+    if (this.isSemiPie()) {
+      return [18, 10];
+    }
     return [10, 10];
+  }
+
+  private isSemiPie(): boolean {
+    return this.getChartOption()?.options?.isSemiPie ?? false;
   }
 
   isEnableCrossFilter(): boolean {

@@ -2,6 +2,7 @@ import { BaseModule, DIKeys } from '@core/common/modules';
 import { Container, Scope } from 'typescript-ioc';
 import { ChartType, DateConditionTypes, DateHistogramConditionTypes, DateTypes } from '@/shared';
 import {
+  AreaRangeQuerySettingHandler,
   BellCurveQuerySettingHandler,
   BellCurveVizSettingHandler,
   BubbleQuerySettingHandler,
@@ -112,13 +113,19 @@ export class ChartBuilderModule implements BaseModule {
     const pieChartHandler = new PieQuerySettingHandler();
     const builder: QuerySettingResolver = new QuerySettingResolverBuilder()
       .add(ChartType.Line, seriesHandler)
+      .add(ChartType.Spline, seriesHandler)
+      .add(ChartType.LineInverted, seriesHandler)
       .add(ChartType.Area, seriesHandler)
+      .add(ChartType.AreaInverted, seriesHandler)
       .add(ChartType.Bar, seriesHandler)
       .add(ChartType.Column, seriesHandler)
       .add(ChartType.Lollipop, seriesHandler)
       .add(ChartType.LineStock, new StockQuerySettingHandler())
       .add(ChartType.Pie, pieChartHandler)
+      .add(ChartType.SemiPie, pieChartHandler)
       .add(ChartType.Donut, pieChartHandler)
+      .add(ChartType.AreaRange, new AreaRangeQuerySettingHandler())
+      .add(ChartType.ColumnRange, new AreaRangeQuerySettingHandler())
       .add(ChartType.Funnel, new FunnelQuerySettingHandler())
       .add(ChartType.Pyramid, new PyramidQuerySettingHandler())
       .add(ChartType.Scatter, new ScatterQuerySettingHandler())
@@ -176,6 +183,8 @@ export class ChartBuilderModule implements BaseModule {
     const builder = new VizSettingResolverBuilder()
       .add(ChartType.Line, settingHandler)
       .add(ChartType.Area, settingHandler)
+      .add(ChartType.AreaInverted, settingHandler)
+      .add(ChartType.LineInverted, settingHandler)
       .add(ChartType.Bar, settingHandler)
       .add(ChartType.Column, settingHandler)
       .add(ChartType.Lollipop, settingHandler)

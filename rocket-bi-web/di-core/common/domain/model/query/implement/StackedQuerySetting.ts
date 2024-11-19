@@ -136,4 +136,8 @@ export class StackedQuerySetting extends QuerySetting implements Zoomable, Drill
   isEnableCrossFilter(): boolean {
     return true;
   }
+
+  forecastable(): boolean {
+    return true;
+  }
 }

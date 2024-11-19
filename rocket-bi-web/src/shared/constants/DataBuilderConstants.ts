@@ -43,6 +43,8 @@ export enum ConfigType {
   breakdowns = 'breakdowns',
   destination = 'destination',
   weight = 'weight',
+  min = 'min',
+  max = 'max',
 
   filters = 'filters',
   sorting = 'sorting',
@@ -60,6 +62,9 @@ const NONE_FUNCTION_FOR_NUMBER = new FunctionFamilyInfo(FunctionFamilyTypes.none
 const AGGREGATION_FUNCTION_FOR_TEXT = new FunctionFamilyInfo(FunctionFamilyTypes.aggregation, AggregationFunctionTypes.countAll);
 const AGGREGATION_FUNCTION_FOR_DATE = new FunctionFamilyInfo(FunctionFamilyTypes.aggregation, AggregationFunctionTypes.countAll);
 const AGGREGATION_FUNCTION_FOR_NUMBER = new FunctionFamilyInfo(FunctionFamilyTypes.aggregation, AggregationFunctionTypes.sum);
+
+const MIN_FUNCTION_FOR_NUMBER = new FunctionFamilyInfo(FunctionFamilyTypes.aggregation, AggregationFunctionTypes.minimum);
+const MAX_FUNCTION_FOR_NUMBER = new FunctionFamilyInfo(FunctionFamilyTypes.aggregation, AggregationFunctionTypes.maximum);
 
 const AGGREGATION_FUNCTION_FOR_MEASURE = new FunctionFamilyInfo(FunctionFamilyTypes.aggregation, AggregationFunctionTypes.Expression);
 
@@ -588,6 +593,72 @@ export abstract class DataBuilderConstantsV35 {
       defaultNumberFunctionInfo: GROUP_FUNCTION_FOR_NUMBER,
       defaultDateFunctionInfo: GROUP_FUNCTION_FOR_DATE,
       defaultTextFunctionInfo: GROUP_FUNCTION_FOR_TEXT
+    }
+  ];
+
+  static readonly AREA_RANGE_CONFIGS: DraggableConfig[] = [
+    {
+      key: ConfigType.xAxis,
+      title: 'X-Axis',
+      placeholder: 'Drag and drop your fields',
+      maxItem: 1,
+      preferFunctionTypes: [FunctionFamilyTypes.groupBy, FunctionFamilyTypes.dateHistogram],
+      defaultNumberFunctionInfo: GROUP_FUNCTION_FOR_NUMBER,
+      defaultDateFunctionInfo: GROUP_FUNCTION_FOR_DATE,
+      defaultTextFunctionInfo: GROUP_FUNCTION_FOR_TEXT
+    },
+    {
+      key: ConfigType.min,
+      title: 'Min Value',
+      placeholder: 'Drag and drop your fields',
+      maxItem: 1,
+      preferFunctionTypes: [FunctionFamilyTypes.aggregation],
+      defaultNumberFunctionInfo: MIN_FUNCTION_FOR_NUMBER,
+      defaultDateFunctionInfo: AGGREGATION_FUNCTION_FOR_DATE,
+      defaultTextFunctionInfo: AGGREGATION_FUNCTION_FOR_TEXT
+    },
+    {
+      key: ConfigType.max,
+      title: 'Max Value',
+      placeholder: 'Drag and drop your fields',
+      maxItem: 1,
+      preferFunctionTypes: [FunctionFamilyTypes.aggregation],
+      defaultNumberFunctionInfo: MAX_FUNCTION_FOR_NUMBER,
+      defaultDateFunctionInfo: AGGREGATION_FUNCTION_FOR_DATE,
+      defaultTextFunctionInfo: AGGREGATION_FUNCTION_FOR_TEXT
+    }
+  ];
+
+  static readonly COLUMN_RANGE_CONFIGS: DraggableConfig[] = [
+    {
+      key: ConfigType.xAxis,
+      title: 'X-Axis',
+      placeholder: 'Drag and drop your fields',
+      maxItem: 1,
+      preferFunctionTypes: [FunctionFamilyTypes.groupBy, FunctionFamilyTypes.dateHistogram],
+      defaultNumberFunctionInfo: GROUP_FUNCTION_FOR_NUMBER,
+      defaultDateFunctionInfo: GROUP_FUNCTION_FOR_DATE,
+      defaultTextFunctionInfo: GROUP_FUNCTION_FOR_TEXT
+    },
+    {
+      key: ConfigType.min,
+      title: 'Min Value',
+      placeholder: 'Drag and drop your fields',
+      maxItem: 1,
+      preferFunctionTypes: [FunctionFamilyTypes.aggregation],
+      defaultNumberFunctionInfo: MIN_FUNCTION_FOR_NUMBER,
+      defaultDateFunctionInfo: AGGREGATION_FUNCTION_FOR_DATE,
+      defaultTextFunctionInfo: AGGREGATION_FUNCTION_FOR_TEXT
+    },
+    {
+      key: ConfigType.max,
+      title: 'Max Value',
+      placeholder: 'Drag and drop your fields',
+      maxItem: 1,
+      preferFunctionTypes: [FunctionFamilyTypes.aggregation],
+      defaultNumberFunctionInfo: MAX_FUNCTION_FOR_NUMBER,
+      defaultDateFunctionInfo: AGGREGATION_FUNCTION_FOR_DATE,
+      defaultTextFunctionInfo: AGGREGATION_FUNCTION_FOR_TEXT
     }
   ];
   //Bar chart swap X-Axis's title and Y-Axis's title to display, but key is not change
@@ -1299,6 +1370,20 @@ export abstract class DataBuilderConstantsV35 {
       extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
     },
     {
+      title: 'Spline',
+      src: 'ic_line_chart.svg',
+      type: ChartType.Spline,
+      configPanels: DataBuilderConstantsV35.SERIES_CONFIGS,
+      extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
+    },
+    {
+      title: 'Line Inverted Axes',
+      src: 'ic_line_chart.svg',
+      type: ChartType.LineInverted,
+      configPanels: DataBuilderConstantsV35.SERIES_CONFIGS,
+      extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
+    },
+    {
       title: 'Area',
       src: 'ic_chart_area.svg',
       type: ChartType.Area,
@@ -1306,10 +1391,31 @@ export abstract class DataBuilderConstantsV35 {
       extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
     },
     {
+      title: 'Area Inverted Axes',
+      src: 'ic_chart_area.svg',
+      type: ChartType.AreaInverted,
+      configPanels: DataBuilderConstantsV35.SERIES_CONFIGS,
+      extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
+    },
+    {
+      title: 'Area Range',
+      src: 'ic_chart_area.svg',
+      type: ChartType.AreaRange,
+      configPanels: DataBuilderConstantsV35.AREA_RANGE_CONFIGS,
+      extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
+    },
+    {
       title: 'Column',
       src: 'ic_column.svg',
       type: ChartType.Column,
       configPanels: DataBuilderConstantsV35.SERIES_CONFIGS,
+      extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
+    },
+    {
+      title: 'Column Range',
+      src: 'ic_column.svg',
+      type: ChartType.ColumnRange,
+      configPanels: DataBuilderConstantsV35.COLUMN_RANGE_CONFIGS,
       extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
     },
     {
@@ -1337,6 +1443,13 @@ export abstract class DataBuilderConstantsV35 {
       title: 'Pie',
       src: 'ic_pie.svg',
       type: ChartType.Pie,
+      configPanels: DataBuilderConstantsV35.PIE_CONFIGS,
+      extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
+    },
+    {
+      title: 'Semi Pie',
+      src: 'ic_pie.svg',
+      type: ChartType.SemiPie,
       configPanels: DataBuilderConstantsV35.PIE_CONFIGS,
       extraPanels: DataBuilderConstantsV35.FILTER_CONFIGS
     },

@@ -5,7 +5,7 @@ import { merge } from 'lodash';
 import { BaseHighChartWidget, PropsBaseChart } from '@chart/BaseChart.ts';
 import { DIException } from '@core/common/domain/exception';
 import { HighchartUtils, ListUtils, MetricNumberMode } from '@/utils';
-import { SeriesTwoResponse } from '@core/common/domain/response';
+import { SeriesOneResponse, SeriesTwoResponse } from '@core/common/domain/response';
 import { NumberFormatter, RangeData } from '@core/common/services/Formatter';
 import { Log } from '@core/utils';
 
@@ -143,6 +143,13 @@ export default class HighchartsBubbleChart extends BaseHighChartWidget<SeriesTwo
         throw new DIException('Error when display chart. Please try again!');
       }
     }
+  }
+
+  protected displayForecastData(forecastData: SeriesOneResponse) {
+    HighchartUtils.reset(this.getChart());
+    this.load(forecastData);
+    this.buildAxis(forecastData);
+    HighchartUtils.drawChart(this.getChart());
   }
 
   protected load(chartData: SeriesTwoResponse) {

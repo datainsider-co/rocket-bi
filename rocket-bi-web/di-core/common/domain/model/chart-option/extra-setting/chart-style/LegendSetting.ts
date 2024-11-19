@@ -9,6 +9,9 @@ export interface LegendSetting {
   title?: TextSetting;
   itemStyle?: StyleSetting;
   maxHeight?: number;
+  x?: number;
+  y?: number;
+  floating?: boolean;
 }
 
 type LayoutValue = 'horizontal' | 'vertical';

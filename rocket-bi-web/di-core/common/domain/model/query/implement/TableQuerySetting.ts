@@ -58,4 +58,8 @@ export class TableQueryChartSetting extends AbstractTableQuerySetting {
     this.columns = ConfigDataUtils.replaceDynamicFunctions(this.columns, functions);
     Log.debug('TableQueryChartSetting::setDynamicFunctions::', this.columns);
   }
+
+  forecastable(): boolean {
+    return true;
+  }
 }

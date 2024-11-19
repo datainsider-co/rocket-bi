@@ -125,4 +125,8 @@ export class SeriesQuerySetting extends QuerySetting implements Zoomable, Drilld
   isEnableCrossFilter(): boolean {
     return true;
   }
+
+  forecastable(): boolean {
+    return true;
+  }
 }

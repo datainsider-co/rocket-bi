@@ -362,6 +362,11 @@ export default class NumberWidget extends BaseChartWidget<SeriesOneResponse, Num
     }
   }
 
+  foreCast(): Promise<void> {
+    PopupUtils.showError('Unsupported Copy to Assistant');
+    return Promise.reject('Unsupported Forecast');
+  }
+
   summarize(): Promise<void> {
     PopupUtils.showError('Unsupported Summarize');
     return Promise.reject('Unsupported Summarize');

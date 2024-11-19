@@ -19,6 +19,7 @@ import {
   Function,
   FunnelQuerySetting,
   GaugeQuerySetting,
+  GenericChartQuerySetting,
   GroupedTableQuerySetting,
   HeatMapQuerySetting,
   HistogramQuerySetting,
@@ -80,6 +81,10 @@ export abstract class QuerySetting implements Queryable {
     this.parameters = parameters;
   }
 
+  forecastable(): boolean {
+    return false;
+  }
+
   static fromObject(obj: any): QuerySetting | undefined {
     // return new PreviewChartRequest(filters, sorts);
     switch (obj?.className) {
@@ -134,11 +139,12 @@ export abstract class QuerySetting implements Queryable {
       case QuerySettingClassName.Scatter:
       case QuerySettingClassName.Series:
       case QuerySettingClassName.Stocks:
-      case QuerySettingClassName.GenericChart:
       case QuerySettingClassName.TabFilterQuerySetting:
       case QuerySettingClassName.TabFilter:
       case QuerySettingClassName.Gauge:
         return QuerySetting.fromObjectWithSettingType(obj);
+      case QuerySettingClassName.GenericChart:
+        return GenericChartQuerySetting.fromObject(obj);
       default:
         Log.info(`QuerySetting:: ${obj.className} unsupported`);
         return void 0;

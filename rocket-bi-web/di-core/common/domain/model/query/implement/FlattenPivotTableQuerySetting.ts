@@ -116,4 +116,8 @@ export class FlattenPivotTableQuerySetting extends QuerySetting implements Sorta
     this.rows = ConfigDataUtils.replaceDynamicFunctions(this.rows, functions);
     this.values = ConfigDataUtils.replaceDynamicFunctions(this.values, functions);
   }
+
+  forecastable(): boolean {
+    return true;
+  }
 }

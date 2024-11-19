@@ -14,6 +14,7 @@ import {
   FlattenTableChartOption,
   FunnelChartOption,
   GaugeChartOption,
+  GenericChartOption,
   HeatMapChartOption,
   HistogramChartOption,
   InputControlOption,
@@ -300,6 +301,8 @@ export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> i
         return VariablepieChartOption.fromObject(obj as VariablepieChartOption);
       case ChartOptionClassName.DonutSetting:
         return DonutChartOption.fromObject(obj as DonutChartOption);
+      case ChartOptionClassName.GenericSetting:
+        return GenericChartOption.fromObject(obj as DonutChartOption);
       default:
         throw new DIException(`ChartSetting:: ${obj.className} unsupported`);
     }
@@ -356,6 +359,13 @@ export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> i
       Object.assign(this.options, { title: title });
     } else {
       ObjectUtils.set(this.options, 'title.text', title);
+    }
+  }
+  setSubtitle(title: string): void {
+    if (isString(this.options.subtitle)) {
+      Object.assign(this.options, { subtitle: title });
+    } else {
+      ObjectUtils.set(this.options, 'subtitle.text', title);
     }
   }
 
@@ -419,17 +429,28 @@ export abstract class ChartOption<T extends ChartOptionData = ChartOptionData> i
   static getDefaultChartOption(chartType: ChartType) {
     Log.debug('getDefaultChartOption::', chartType);
     switch (chartType) {
-      case ChartType.BellCurve:
-        return BellCurveChartOption2.getDefaultChartOption();
       case ChartType.Line:
+      case ChartType.Spline:
       case ChartType.Bar:
       case ChartType.Area:
       case ChartType.AreaSpline:
       case ChartType.Column:
       case ChartType.Lollipop:
         return SeriesChartOption.getDefaultChartOption(chartType);
+      case ChartType.AreaInverted:
+        return SeriesChartOption.getDefaultAreaInvertedOption();
+      case ChartType.LineInverted:
+        return SeriesChartOption.getDefaultLineInvertedOption();
+      case ChartType.ColumnRange:
+        return GenericChartOption.getDefaultColumnRangeOption();
+      case ChartType.AreaRange:
+        return GenericChartOption.getDefaultAreaRangeOption();
+      case ChartType.BellCurve:
+        return BellCurveChartOption2.getDefaultChartOption();
       case ChartType.Pie:
         return PieChartOption.getDefaultChartOption();
+      case ChartType.SemiPie:
+        return PieChartOption.getDefaultSemiPieOption();
       case ChartType.Funnel:
         return FunnelChartOption.getDefaultChartOption();
       case ChartType.Pyramid:
