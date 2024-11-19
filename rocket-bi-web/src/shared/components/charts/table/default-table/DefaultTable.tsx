@@ -36,10 +36,10 @@ import { TableTooltipUtils } from '@chart/custom-table/TableTooltipUtils';
 import { Log } from '@core/utils';
 import { ColorUtils } from '@/utils/ColorUtils';
 import { DIException, ExportType } from '@core/common/domain';
-import { ForecastFunction } from '@/screens/dashboard-detail/intefaces/chatbot/functions/ForecastFunction';
 import { Di } from '@core/common/modules';
 import { PopupUtils } from '@/utils';
-import { SummarizeFunction } from '@/screens/dashboard-detail/intefaces/chatbot/functions/SummarizeFunction';
+import { SummarizeFunction } from '@/shared/components/chat/controller/functions/SummarizeFunction';
+import { ForecastFunction } from '@/shared/components/chat/controller/functions/ForecastFunction';
 
 @Component({
   components: {
