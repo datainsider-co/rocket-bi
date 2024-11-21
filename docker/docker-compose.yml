@@ -2,53 +2,43 @@ version: "3"
 
 services:
   mysql:
-    image: datainsiderco/rocket-mysql
-    container_name: rocket-mysql
-    restart: always
+    image: mysql:5.7
+    container_name: rocket-bi-mysql
+    command: mysqld --user=root --verbose
+    ports:
+      - 3306:3306
     volumes:
-      - ./mysql/data:/var/lib/mysql
+      - /var/lib/rocket-bi/mysql:/var/lib/mysql
+    environment:
+      MYSQL_USER: "di"
+      MYSQL_PASSWORD: "di@2020!"
+      MYSQL_ROOT_PASSWORD: "di@2020!"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    restart: always
 
   ssdb:
-    image: datainsiderco/rocket-ssdb
-    container_name: rocket-ssdb
+    image: wendal/ssdb:latest
+    container_name: rocket-bi-ssdb
+    ports:
+      - 8888:8888
     volumes:
-      - ./ssdb/data:/var/lib/ssdb/data
+      - /var/lib/rocket-bi/ssdb:/var/lib/ssdb/data
     restart: always
 
   rocket-bi-server:
     image: datainsiderco/rocket-bi-server:latest
     container_name: rocket-bi-server
-    restart: always
-    environment:
-      NAME: rocket-bi-server
-      MODE: production
+    ports:
+      - 8080:8080
     volumes:
-      - ./rocket-bi-server/logs:/app/logs
-      - biservice-mapdata:/app/mapdata
-    depends_on:
-      - mysql
-      - ssdb
-
+      - /var/lib/rocket-bi/server/logs:/app/logs
+    environment:
+      MODE: production
+    restart: always
+  
   rocket-bi-web:
     image: datainsiderco/rocket-bi-web:latest
     container_name: rocket-bi-web
     restart: always
-
-  nginx:
-    image: datainsiderco/rocket-nginx
-    container_name: rocket-nginx
-    restart: always
     ports:
-      - 5050:80
-    volumes:
-      - ./nginx/log/:/var/log/nginx/
-      - biservice-mapdata:/var/www/html/public/static/mapdata
-    depends_on:
-      - rocket-bi-server
-      - rocket-bi-web
-
-volumes:
-  biservice-mapdata:
-
-networks:
-  rocket_network:
+      - 5050:8080

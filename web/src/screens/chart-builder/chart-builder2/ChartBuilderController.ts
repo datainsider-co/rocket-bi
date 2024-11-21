@@ -44,6 +44,11 @@ import { SlideXLeftTransition } from 'vue2-transitions';
 import DefaultSetting from '@/shared/settings/common/DefaultSetting.vue';
 import ChartBuilderHeader from '@/screens/chart-builder/chart-builder2/ChartBuilderHeader.vue';
 
+enum ChartAction {
+  AddChart = 'onAddChart',
+  UpdateChart = 'onUpdateChart'
+}
+
 Vue.use(BuilderComponents);
 Vue.use(Settings);
 @Component({
@@ -264,32 +269,20 @@ export default class ChartBuilderController extends Vue {
   }
 
   @Emit('onCancel')
-  private async handleCancel() {
+  async handleCancel() {
     return true;
   }
 
-  private async handleAddToDashboard() {
+  private async handleChartAction(chartAction: ChartAction) {
     if (this.isDisableAddOrUpdate) {
       return;
     }
     const chartInfo: ChartInfo | null = this.getFinalChartInfo();
-    Log.debug('handleAddToDashboard:: chartInfo', chartInfo);
+    Log.debug('handleChartAction:: chartInfo', chartInfo);
     if (chartInfo) {
-      this.$emit('onAddChart', chartInfo);
+      this.$emit(chartAction, chartInfo);
     } else {
-      this.handleError(new DIException("Can't add chart to dashboard"));
-    }
-  }
-
-  private async handleUpdateChart() {
-    if (this.isDisableAddOrUpdate) {
-      return;
-    }
-    const chartInfo: ChartInfo | null = this.getFinalChartInfo();
-    if (chartInfo) {
-      this.$emit('onUpdateChart', chartInfo);
-    } else {
-      this.handleError(new DIException("Can't update chart"));
+      this.handleError(new DIException(`Can't ${chartAction.toLowerCase()} chart`));
     }
   }
 
@@ -396,7 +389,12 @@ export default class ChartBuilderController extends Vue {
       this.draggingType = null;
     }
   }
+
   private onDragEnd(node: SlTreeNodeModel<any>) {
     this.draggingType = null;
+  }
+
+  handleSubmit() {
+    this.handleChartAction(this.isCreateMode ? ChartAction.AddChart : ChartAction.UpdateChart);
   }
 }
