@@ -2,4 +2,4 @@
 
 tag=${1:-latest}
 
-docker build -t datainsiderco/rocket-bi-server:$tag .
+docker build --no-cache -t datainsiderco/rocket-bi-server:$tag .
