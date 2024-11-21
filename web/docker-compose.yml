@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   rocket-bi-web:
-    image: datainsiderco/rocket-bi-web:main
+    image: datainsiderco/rocket-bi-web:latest
     container_name: rocket-bi-web
     restart: always
     ports:
@@ -9,7 +9,3 @@ services:
     volumes:
       - ./public/config:/app/config
 
-networks:
-  default:
-    external:
-      name: di_network
