@@ -1,4 +1,5 @@
 #!/bin/sh
-git pull
 
-docker build --no-cache -t datainsiderco/rocket-bi-web:main .
+tag=${1:-latest}
+
+docker build --no-cache -t datainsiderco/rocket-bi-web:$tag .
