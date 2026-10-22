@@ -18,8 +18,16 @@ export function getSession(): string | undefined {
   return readCookie(document.cookie, SESSION_COOKIE);
 }
 
+/** v1's `DataManager.DEFAULT_MAX_AGE`: 30 days. */
+export const DEFAULT_SESSION_MAX_AGE = 2_592_000;
+
+/** A missing or non-positive max age would expire the cookie at once, so it falls back to the default. */
+export function toCookieMaxAge(maxAgeSeconds: number): number {
+  return Number.isFinite(maxAgeSeconds) && maxAgeSeconds > 0 ? Math.floor(maxAgeSeconds) : DEFAULT_SESSION_MAX_AGE;
+}
+
 export function saveSession(sessionId: string, maxAgeSeconds: number): void {
-  document.cookie = `${SESSION_COOKIE}=${encodeURIComponent(sessionId)};max-age=${maxAgeSeconds};path=/`;
+  document.cookie = `${SESSION_COOKIE}=${encodeURIComponent(sessionId)};max-age=${toCookieMaxAge(maxAgeSeconds)};path=/`;
 }
 
 export function clearSession(): void {

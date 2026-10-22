@@ -1,5 +1,6 @@
 export const ApiErrorReason = {
   notAuthenticated: 'not_authenticated',
+  verificationCodeInvalid: 'verification_code_invalid',
   timeout: 'timeout',
   network: 'network_error',
   unknown: 'unknown'

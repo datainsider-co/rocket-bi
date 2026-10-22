@@ -1,5 +1,13 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { clearSession, getSession, getShareToken, readCookie, saveSession } from './session';
+import {
+  DEFAULT_SESSION_MAX_AGE,
+  clearSession,
+  getSession,
+  getShareToken,
+  readCookie,
+  saveSession,
+  toCookieMaxAge
+} from './session';
 
 describe('readCookie', () => {
   it('finds a cookie among others', () => {
@@ -40,5 +48,16 @@ describe('getShareToken', () => {
   it('returns undefined when absent or empty', () => {
     expect(getShareToken('?x=2')).toBeUndefined();
     expect(getShareToken('?token=')).toBeUndefined();
+  });
+});
+
+describe('toCookieMaxAge', () => {
+  it('keeps a positive max age, rounded down', () => {
+    expect(toCookieMaxAge(60)).toBe(60);
+    expect(toCookieMaxAge(60.9)).toBe(60);
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])('falls back to the default for %s', value => {
+    expect(toCookieMaxAge(value)).toBe(DEFAULT_SESSION_MAX_AGE);
   });
 });
