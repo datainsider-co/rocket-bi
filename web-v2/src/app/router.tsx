@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import { Outlet, createBrowserRouter } from 'react-router';
+import { Outlet, createBrowserRouter, redirect } from 'react-router';
 import type { RouteObject } from 'react-router';
 import { NotFoundPage } from '@/app/error/NotFoundPage';
 import { RouteErrorPage } from '@/app/error/RouteErrorPage';
@@ -49,7 +49,14 @@ export const appRoutes: RouteObject[] = [
             // A page that crashes renders its error inside the app shell, so the header stays usable.
             errorElement: <RouteErrorPage />,
             children: [
-              { index: true, ...lazyPage(() => import('@/features/home/HomePage'), m => m.HomePage) },
+              { index: true, loader: () => redirect('/mydata') },
+              {
+                ...lazyPage(() => import('@/features/directory/layout/DirectoryLayout'), m => m.DirectoryLayout),
+                children: ['/mydata/:name?', '/shared/:name?', '/recent/:name?', '/starred/:name?', '/trash'].map(path => ({
+                  path,
+                  ...lazyPage(() => import('@/features/directory/listing/DirectoryListingPage'), m => m.DirectoryListingPage)
+                }))
+              },
               { path: '*', element: <NotFoundPage /> }
             ]
           }

@@ -35,7 +35,7 @@ describe('login page', () => {
 
   it('logs in, saves the session and goes to the redirect target', async () => {
     const service = fakeService();
-    const router = renderAppAt('/login?redirect=%2F%3Ftab%3Da', service);
+    const router = renderAppAt('/login?redirect=%2Fmydata%3Ftab%3Da', service);
 
     await fillAndSubmit('hello@gmail.com', '123456');
 
@@ -43,6 +43,7 @@ describe('login page', () => {
     expect(await screen.findByText('Root User')).toBeInTheDocument();
     expect(service.login).toHaveBeenCalledWith('hello@gmail.com', '123456');
     expect(getSession()).toBe('session-1');
+    expect(router.state.location.pathname).toBe('/mydata');
     expect(router.state.location.search).toBe('?tab=a');
     // The login response seeds the current user, so the app shell needs no check_session call.
     expect(service.checkSession).not.toHaveBeenCalled();
