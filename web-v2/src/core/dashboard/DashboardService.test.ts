@@ -1,0 +1,43 @@
+import { describe, expect, it, vi } from 'vitest';
+import { HttpClientBuilder } from '@/shared/http/HttpClientBuilder';
+import { HttpDashboardService } from './DashboardService';
+
+function setup(body: unknown) {
+  const requests: { method: string; url: string; body: string }[] = [];
+  const fetch = vi.fn<(request: Request) => Promise<Response>>(async request => {
+    requests.push({ method: request.method, url: request.url, body: await request.clone().text() });
+    return Response.json(body);
+  });
+  const service = new HttpDashboardService(new HttpClientBuilder('http://api.test').withFetch(fetch).build());
+  return { service, requests, sent: () => JSON.parse(requests[0]?.body || 'null') as unknown };
+}
+
+describe('HttpDashboardService', () => {
+  it('creates a dashboard with snake_case fields', async () => {
+    // Reply of `POST dashboards/create` from the local backend.
+    const { service, requests, sent } = setup({
+      org_id: 0,
+      id: 1,
+      name: 'probe-dash',
+      creator_id: 'root',
+      owner_id: 'root',
+      widgets: [],
+      widget_positions: {}
+    });
+
+    const dashboard = await service.create('probe-dash', 2);
+
+    expect(requests[0]).toMatchObject({ method: 'POST', url: 'http://api.test/dashboards/create' });
+    expect(sent()).toEqual({ name: 'probe-dash', parent_directory_id: 2, directory_type: 'dashboard' });
+    expect(dashboard).toMatchObject({ id: 1, name: 'probe-dash', ownerId: 'root' });
+  });
+
+  it('renames with to_name', async () => {
+    const { service, requests, sent } = setup({ success: true });
+
+    await service.rename(1, 'KPI');
+
+    expect(requests[0]).toMatchObject({ method: 'PUT', url: 'http://api.test/dashboards/1/rename' });
+    expect(sent()).toEqual({ to_name: 'KPI' });
+  });
+});

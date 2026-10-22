@@ -1,0 +1,147 @@
+import { z } from 'zod';
+import { ClickhouseConnection } from '@/core/connection/ClickhouseConnection';
+import type { Connection } from '@/core/connection/Connection';
+import { createConnection } from '@/core/connection/Connection';
+import { ConnectionType } from '@/core/connection/ConnectionType';
+import { DEFAULT_SSH_TIMEOUT_MS, SshConfig } from '@/core/connection/SshConfig';
+
+/** v1 shortened the SSH timeout for "Test connection" so a wrong tunnel fails fast. */
+export const TEST_SSH_TIMEOUT_MS = 30_000;
+
+const MAX_PORT = 65_535;
+
+/**
+ * One form for every supported type: fields another type doesn't use stay empty and are ignored by `toConnection`.
+ * Ports are strings because they come from text inputs.
+ */
+export const connectionFormSchema = z
+  .object({
+    type: z.enum([ConnectionType.Clickhouse, ConnectionType.MySql]),
+    host: z.string(),
+    port: z.string(),
+    httpPort: z.string(),
+    tcpPort: z.string(),
+    clusterName: z.string(),
+    useSsl: z.boolean(),
+    username: z.string(),
+    password: z.string(),
+    ssh: z.object({ host: z.string(), port: z.string(), username: z.string(), publicKey: z.string() }),
+    properties: z.array(z.object({ key: z.string(), value: z.string() }))
+  })
+  .superRefine((values, ctx) => {
+    const fail = (path: (string | number)[], message: string | undefined) => {
+      if (message) ctx.addIssue({ code: 'custom', path, message });
+    };
+
+    fail(['host'], requiredError(values.host, 'Host'));
+    fail(['username'], requiredError(values.username, 'Username'));
+    if (values.type === ConnectionType.Clickhouse) {
+      fail(['httpPort'], portError(values.httpPort, 'HTTP port'));
+      fail(['tcpPort'], portError(values.tcpPort, 'TCP port'));
+    } else {
+      fail(['port'], portError(values.port, 'Port'));
+    }
+
+    if (hasSshTunnel(values.ssh)) {
+      fail(['ssh', 'host'], requiredError(values.ssh.host, 'SSH host'));
+      fail(['ssh', 'port'], portError(values.ssh.port, 'SSH port'));
+      fail(['ssh', 'username'], requiredError(values.ssh.username, 'SSH username'));
+      fail(['ssh', 'publicKey'], requiredError(values.ssh.publicKey, 'Public key'));
+    }
+
+    propertyKeyErrors(values.properties).forEach((message, index) => fail(['properties', index, 'key'], message));
+  });
+
+export type ConnectionFormValues = z.infer<typeof connectionFormSchema>;
+export type SshFormValues = ConnectionFormValues['ssh'];
+export type PropertyRow = ConnectionFormValues['properties'][number];
+
+export function requiredError(value: string, label: string): string | undefined {
+  return value.trim() ? undefined : `${label} is required!`;
+}
+
+/** `undefined` for a whole number from 1 to 65535. */
+export function portError(value: string, label: string): string | undefined {
+  const text = value.trim();
+  if (!text) return `${label} is required!`;
+  const port = Number(text);
+  return /^\d+$/.test(text) && port >= 1 && port <= MAX_PORT ? undefined : `${label} must be from 1 to ${MAX_PORT}`;
+}
+
+/** Like v1, the tunnel is on as soon as one of host, port or username is filled; the key alone doesn't count. */
+export function hasSshTunnel(ssh: SshFormValues): boolean {
+  return [ssh.host, ssh.port, ssh.username].some(value => value.trim() !== '');
+}
+
+/** One entry per row: an error for an empty key or a key used by an earlier row, `undefined` otherwise. */
+export function propertyKeyErrors(rows: readonly PropertyRow[]): (string | undefined)[] {
+  const seen = new Set<string>();
+  return rows.map(({ key }) => {
+    const name = key.trim();
+    if (!name) return 'Key is required!';
+    if (seen.has(name)) return 'This key is already used';
+    seen.add(name);
+    return undefined;
+  });
+}
+
+function portText(port: number): string {
+  return port > 0 ? String(port) : '';
+}
+
+export function toFormValues(connection: Connection): ConnectionFormValues {
+  const tunnel = connection.tunnelConfig;
+  const clickhouse = connection instanceof ClickhouseConnection ? connection : undefined;
+  return {
+    type: connection.className,
+    host: connection.host,
+    port: connection instanceof ClickhouseConnection ? '' : portText(connection.port),
+    httpPort: portText(clickhouse?.httpPort ?? 0),
+    tcpPort: portText(clickhouse?.tcpPort ?? 0),
+    clusterName: clickhouse?.clusterName ?? '',
+    useSsl: clickhouse?.useSsl ?? false,
+    username: connection.username,
+    password: connection.password,
+    ssh: {
+      host: tunnel?.host ?? '',
+      port: portText(tunnel?.port ?? 0),
+      username: tunnel?.username ?? '',
+      publicKey: tunnel?.publicKey ?? ''
+    },
+    properties: Object.entries(connection.properties).map(([key, value]) => ({ key, value }))
+  };
+}
+
+export function defaultFormValues(type: ConnectionType): ConnectionFormValues {
+  return toFormValues(createConnection(type));
+}
+
+function toSshConfig(ssh: SshFormValues, timeoutMs: number): SshConfig {
+  const config = new SshConfig();
+  config.host = ssh.host.trim();
+  config.port = Number(ssh.port.trim());
+  config.username = ssh.username.trim();
+  config.publicKey = ssh.publicKey;
+  config.timeoutMs = timeoutMs;
+  return config;
+}
+
+/** Builds the connection to send from valid form values. Hosts, usernames and keys are trimmed; passwords are not. */
+export function toConnection(values: ConnectionFormValues, sshTimeoutMs = DEFAULT_SSH_TIMEOUT_MS): Connection {
+  const connection = createConnection(values.type);
+  connection.host = values.host.trim();
+  connection.username = values.username.trim();
+  connection.password = values.password;
+  connection.properties = Object.fromEntries(values.properties.map(row => [row.key.trim(), row.value]));
+  connection.tunnelConfig = hasSshTunnel(values.ssh) ? toSshConfig(values.ssh, sshTimeoutMs) : undefined;
+
+  if (connection instanceof ClickhouseConnection) {
+    connection.httpPort = Number(values.httpPort.trim());
+    connection.tcpPort = Number(values.tcpPort.trim());
+    connection.clusterName = values.clusterName.trim();
+    connection.useSsl = values.useSsl;
+  } else {
+    connection.port = Number(values.port.trim());
+  }
+  return connection;
+}
