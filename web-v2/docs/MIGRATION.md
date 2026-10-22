@@ -167,5 +167,5 @@ Port only if still needed. Decide before starting.
 - Behaviour matches v1, or the differences are written down in the feature's PR.
 - Unit tests for logic (parsers, `fromObject`, reducers, query-setting builders) and at least one component test.
 - Stories for reusable UI components.
-- `npm run typecheck`, `npm run lint`, `npm run test:run` and `npm run build` pass.
+- `pnpm typecheck`, `pnpm lint`, `pnpm test:run` and `pnpm build` pass.
 - Status in this file updated.

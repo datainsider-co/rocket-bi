@@ -10,15 +10,15 @@ implementation. Work is migrated **feature by feature**; the plan and per-featur
 
 ## Commands
 
-Package manager is **npm** (no pnpm/yarn on the dev machine).
+Package manager is **pnpm** (pinned via `packageManager`, enabled with `corepack enable pnpm`). Do not use npm or yarn.
 
 ```sh
-npm run dev          # Vite dev server, http://localhost:3000
-npm run typecheck    # tsc (TypeScript 7), no emit
-npm run lint         # oxlint
-npm run test         # vitest watch; npm run test:run for one pass
-npm run storybook    # http://localhost:6006
-npm run build        # tsc && vite build
+pnpm dev          # Vite dev server, http://localhost:3000
+pnpm typecheck    # tsc (TypeScript 7), no emit
+pnpm lint         # oxlint
+pnpm test         # vitest watch; pnpm test:run for one pass
+pnpm storybook    # http://localhost:6006
+pnpm build        # tsc && vite build
 ```
 
 Before calling a change done, run `typecheck`, `lint`, `test:run` and `build`.
@@ -36,7 +36,7 @@ There is no mock server. Development uses the real backend from the local docker
 ## Stack
 
 React 19 · TypeScript 7 · Vite 8 · TanStack Router (file-based) · TanStack Query · antd 6 · Highcharts 13 · Vitest +
-Testing Library (jsdom) · Storybook 10 · oxlint.
+Testing Library (jsdom) · Storybook 10 · oxlint · deneric2 (JSON → entity parsing for API responses).
 
 ## Rules
 

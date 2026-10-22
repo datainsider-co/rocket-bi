@@ -16,6 +16,7 @@ React rewrite of [`web/`](../web), migrated feature by feature.
 | Server state | TanStack Query |
 | UI state | React only: Context + `useState`/`useReducer`, read with `use()` |
 | Charts | Highcharts 13 via `highcharts-react-official` |
+| JSON parsing | deneric2 (API JSON → typed entities) |
 | Tests | Vitest + Testing Library (jsdom) |
 | Components | Storybook 10 |
 | Lint | oxlint |
@@ -23,19 +24,19 @@ React rewrite of [`web/`](../web), migrated feature by feature.
 ## Scripts
 
 ```sh
-npm install
-npm run dev            # http://localhost:3000
-npm run test           # watch mode; test:run for a single run
-npm run typecheck
-npm run lint
-npm run storybook      # http://localhost:6006
-npm run build
+pnpm install
+pnpm dev            # http://localhost:3000
+pnpm test           # watch mode; test:run for a single run
+pnpm typecheck
+pnpm lint
+pnpm storybook      # http://localhost:6006
+pnpm build
 ```
 
 ## Backend
 
 The dev server proxies `/api/*` to `http://localhost:8080` with the `/api` prefix stripped, i.e. the server from the
-local docker stack in [`docker/`](../docker). Override with `VITE_API_TARGET=http://host:port npm run dev`.
+local docker stack in [`docker/`](../docker). Override with `VITE_API_TARGET=http://host:port pnpm dev`.
 
 ## Conventions
 
