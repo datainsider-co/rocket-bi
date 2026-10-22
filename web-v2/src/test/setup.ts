@@ -18,3 +18,12 @@ if (!window.matchMedia) {
       dispatchEvent: () => false
     }) as MediaQueryList;
 }
+
+// jsdom has no ResizeObserver; antd's overflow menus (Dropdown, Menu) need it.
+if (!window.ResizeObserver) {
+  window.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
