@@ -187,6 +187,9 @@ importers:
       highcharts-react-official:
         specifier: ^3.2.3
         version: 3.2.3(highcharts@13.1.1)(react@19.3.1)
+      ky:
+        specifier: ^2.2.0
+        version: 2.2.0
       react:
         specifier: ^19.3.1
         version: 19.3.1
@@ -2243,6 +2246,10 @@ packages:
 
   jsonc-parser@3.3.1:
     resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
+
+  ky@2.2.0:
+    resolution: {integrity: sha512-4+B63kyZt+Y8snQiUGydK1vgY9xYQJZEh9K/nIAIEts+gYJzy1EiAw3BbK8xpWRuWUpN70SNCMjqRGTm75xxIA==}
+    engines: {node: '>=22'}
 
   lightningcss-android-arm64@1.33.0:
     resolution: {integrity: sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg==}
@@ -4661,6 +4668,8 @@ snapshots:
   json5@2.2.3: {}
 
   jsonc-parser@3.3.1: {}
+
+  ky@2.2.0: {}
 
   lightningcss-android-arm64@1.33.0:
     optional: true
