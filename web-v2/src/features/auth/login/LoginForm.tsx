@@ -3,7 +3,7 @@ import { Alert, Button, Form, Input } from 'antd';
 import { useForm } from 'react-hook-form';
 import { loginSchema } from '../auth.utils';
 import type { LoginValues } from '../auth.utils';
-import { FormField } from '../FormField';
+import { FormField } from '@/shared/form/FormField';
 
 interface LoginFormProps {
   isPending: boolean;

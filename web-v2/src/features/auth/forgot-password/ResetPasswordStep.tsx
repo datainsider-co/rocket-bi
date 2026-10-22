@@ -3,7 +3,7 @@ import { Alert, Button, Flex, Form, Input, Typography } from 'antd';
 import { useForm } from 'react-hook-form';
 import { resetPasswordSchema } from '../auth.utils';
 import type { ResetPasswordValues } from '../auth.utils';
-import { FormField } from '../FormField';
+import { FormField } from '@/shared/form/FormField';
 
 interface ResetPasswordStepProps {
   email: string;

@@ -4,7 +4,7 @@ import { Alert, Button, Flex, Form, Input, Typography } from 'antd';
 import { useForm } from 'react-hook-form';
 import { emailSchema } from '../auth.utils';
 import type { EmailValues } from '../auth.utils';
-import { FormField } from '../FormField';
+import { FormField } from '@/shared/form/FormField';
 
 interface EmailStepProps {
   initialEmail: string;
