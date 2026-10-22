@@ -3,6 +3,7 @@ import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import { App as AntApp } from 'antd';
 import { ThemeProvider } from '@/app/theme/ThemeContext';
 import { DiProvider } from '@/app/di/DiContext';
+import { Devtools } from '@/app/Devtools';
 import type { DiResolver } from '@/core/di/Container';
 
 interface AppProvidersProps {
@@ -17,6 +18,7 @@ export function AppProviders({ queryClient, container, children }: AppProvidersP
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AntApp>{children}</AntApp>
+          <Devtools />
         </ThemeProvider>
       </QueryClientProvider>
     </DiProvider>

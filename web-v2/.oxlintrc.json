@@ -20,7 +20,6 @@
   },
   "ignorePatterns": [
     "dist",
-    "storybook-static",
-    "src/routeTree.gen.ts"
+    "storybook-static"
   ]
 }

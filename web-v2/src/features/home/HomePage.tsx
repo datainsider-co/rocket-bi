@@ -1,12 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
 import { Card } from 'antd';
 import { HighchartsChart } from '@/shared/charts/HighchartsChart';
 
-export const Route = createFileRoute('/')({
-  component: HomePage
-});
-
-function HomePage() {
+export function HomePage() {
   return (
     <Card title="web-v2 is running">
       <HighchartsChart
