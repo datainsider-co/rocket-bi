@@ -23,8 +23,11 @@ describe('directoryTableTheme', () => {
 });
 
 describe('directoryTableVars', () => {
-  it('sets the name color in light mode', () => {
-    expect(directoryTableVars('light')).toEqual({ '--directory-name-color': V1_TABLE_COLORS.text });
+  it('sets the name and panel colors in light mode', () => {
+    expect(directoryTableVars('light')).toEqual({
+      '--directory-name-color': V1_TABLE_COLORS.text,
+      '--directory-panel-bg': V1_TABLE_COLORS.rowBg
+    });
   });
 
   it('sets nothing in dark mode', () => {

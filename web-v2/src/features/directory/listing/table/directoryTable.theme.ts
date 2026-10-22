@@ -10,7 +10,7 @@ export const V1_TABLE_COLORS = {
   secondaryText: '#5f6368',
   /** `--text-color`, the name column */
   text: '#4f4f4f',
-  /** `--directory-row-bg` */
+  /** `--directory-row-bg`, also the panel behind the table and the empty state (`--secondary`) */
   rowBg: '#ffffff',
   /** `--directory-hover-color` */
   rowHoverBg: '#f9faff',
@@ -49,8 +49,14 @@ export function directoryTableTheme(mode: ThemeMode): ThemeConfig {
   };
 }
 
-/** Colors the table tokens can't reach, read by the cells as CSS variables. Unset in dark mode (they inherit). */
+/**
+ * Colors the table tokens can't reach, read as CSS variables by the cells and the panel behind the table. Unset in
+ * dark mode, where they fall back to inherited text and a transparent panel.
+ */
 export function directoryTableVars(mode: ThemeMode): CSSProperties {
   if (mode === 'dark') return {};
-  return { '--directory-name-color': V1_TABLE_COLORS.text } as CSSProperties;
+  return {
+    '--directory-name-color': V1_TABLE_COLORS.text,
+    '--directory-panel-bg': V1_TABLE_COLORS.rowBg
+  } as CSSProperties;
 }

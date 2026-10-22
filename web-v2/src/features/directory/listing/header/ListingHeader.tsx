@@ -14,7 +14,7 @@ export function ListingHeader({ section, breadcrumbs, isRefreshing, onRefresh }:
   const lastIndex = breadcrumbs.length - 1;
 
   return (
-    <header className="mb-4 flex min-w-0 items-center gap-3">
+    <header className="mb-4 flex min-w-0 shrink-0 items-center gap-3">
       <Typography.Title level={4} className="!m-0 shrink-0">
         <Link to={section.path} className="flex items-center gap-2 !text-inherit">
           <i className={section.icon} />

@@ -19,7 +19,7 @@ export function DirectoryListingPage() {
   const rows = useRowActions(section);
 
   return (
-    <>
+    <div className="flex min-h-0 flex-1 flex-col">
       <ListingHeader
         section={listing.section}
         breadcrumbs={listing.breadcrumbs}
@@ -63,6 +63,6 @@ export function DirectoryListingPage() {
       {rows.move.target && (
         <MoveDirectoryModal directory={rows.move.target} onSelect={rows.move.submit} onCancel={rows.move.cancel} />
       )}
-    </>
+    </div>
   );
 }

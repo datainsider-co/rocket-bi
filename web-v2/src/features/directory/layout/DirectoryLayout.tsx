@@ -18,9 +18,9 @@ export function DirectoryLayout() {
   const create = useCreateItem(createParentId(section, parseIdParam(name)));
 
   return (
-    <Layout className="!bg-transparent">
+    <Layout className="min-h-0 flex-1 !bg-transparent">
       <DirectorySidebar active={section} onCreate={create.open} />
-      <Layout.Content className="min-w-0">
+      <Layout.Content className="flex min-h-0 min-w-0 flex-col">
         <Outlet />
       </Layout.Content>
       <NameModal

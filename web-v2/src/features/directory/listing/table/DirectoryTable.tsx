@@ -7,6 +7,8 @@ import { formatDateTime } from '../../directory.utils';
 import { DirectoryNameCell } from './cells/DirectoryNameCell';
 import { EmptyListing } from './EmptyListing';
 import { OwnerCell } from './cells/OwnerCell';
+import { bodyScrollHeight } from './table.utils';
+import { useElementHeight } from './useElementHeight';
 
 interface DirectoryTableProps {
   items: readonly Directory[];
@@ -41,8 +43,16 @@ const HEADER_CLASSES = [
   '[&_.ant-table-column-title]:flex-none'
 ].join(' ');
 
-/** v1 `MyData.vue` table: Name, Owner, Last Modified, Action. Owner hides below `sm`, the rest below `md`. */
+/**
+ * v1 `MyData.vue` table: Name, Owner, Last Modified, Action. Owner hides below `sm`, the rest below `md`. It fills the
+ * height it is given: the header stays and the rows scroll. With no rows the empty state takes its place, as in v1.
+ */
 export function DirectoryTable({ items, isLoading, nameOrder, onToggleNameSort, onOpen, renderActions }: DirectoryTableProps) {
+  const { ref: boxRef, height: boxHeight } = useElementHeight<HTMLDivElement>();
+  const scrollY = bodyScrollHeight(boxHeight);
+
+  if (!isLoading && items.length === 0) return <EmptyListing />;
+
   const columns: TableColumnsType<Directory> = [
     {
       key: 'name',
@@ -70,22 +80,25 @@ export function DirectoryTable({ items, isLoading, nameOrder, onToggleNameSort, 
   ];
 
   return (
-    <Table<Directory>
-      className={HEADER_CLASSES}
-      rowKey="id"
-      columns={columns}
-      dataSource={items}
-      loading={isLoading}
-      pagination={false}
-      showSorterTooltip={false}
-      locale={{ emptyText: isLoading ? ' ' : <EmptyListing /> }}
-      onChange={(_pagination, _filters, _sorter, { action }) => {
-        if (action === 'sort') onToggleNameSort();
-      }}
-      onRow={directory => ({
-        onClick: onOpen ? () => onOpen(directory) : undefined,
-        className: onOpen ? 'cursor-pointer' : undefined
-      })}
-    />
+    <div ref={boxRef} className="min-h-0 flex-1 overflow-hidden rounded bg-[color:var(--directory-panel-bg,transparent)]">
+      <Table<Directory>
+        className={HEADER_CLASSES}
+        rowKey="id"
+        columns={columns}
+        dataSource={items}
+        loading={isLoading}
+        pagination={false}
+        scroll={scrollY === undefined ? undefined : { y: scrollY }}
+        showSorterTooltip={false}
+        locale={{ emptyText: ' ' }}
+        onChange={(_pagination, _filters, _sorter, { action }) => {
+          if (action === 'sort') onToggleNameSort();
+        }}
+        onRow={directory => ({
+          onClick: onOpen ? () => onOpen(directory) : undefined,
+          className: onOpen ? 'cursor-pointer' : undefined
+        })}
+      />
+    </div>
   );
 }
