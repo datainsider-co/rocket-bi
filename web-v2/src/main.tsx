@@ -3,9 +3,16 @@ import { createRoot } from 'react-dom/client';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { AppProviders } from '@/app/AppProviders';
 import { createQueryClient } from '@/app/queryClient';
+import { createSessionExpiredHandler } from '@/app/sessionExpiredHandler';
+import { clearSession } from '@/core/session/session';
+import { subscribeSessionExpired } from '@/core/session/sessionExpired';
 import { routeTree } from './routeTree.gen';
 
 const queryClient = createQueryClient();
+
+subscribeSessionExpired(
+  createSessionExpiredHandler({ queryClient, clearSession, redirect: path => window.location.assign(path) })
+);
 
 const router = createRouter({
   routeTree,
