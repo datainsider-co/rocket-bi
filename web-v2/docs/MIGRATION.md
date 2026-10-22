@@ -84,7 +84,7 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| Login | v1 actually renders `screens/login-v2` (+ `basic-login` SignIn); `screens/login` is dead code. v2: `features/auth/login` (`/login`) and `features/auth/forgot-password` (`/forgot-password`: email → OTP → new password). Models in `core/auth`, `core/user`. Left: Google login (backend has it off, needs Google Identity Services), the Register link (`REGISTER_URL`), post-login billing/ClickHouse checks | In progress |
+| Login | v1 actually renders `screens/login-v2` (+ `basic-login` SignIn); `screens/login` is dead code. v2: `features/auth/login` (`/login`) and `features/auth/forgot-password` (`/forgot-password`: email → OTP → new password). Models in `core/auth`, `core/user`. Left: Google login (backend has it off, needs Google Identity Services), the Register link (`REGISTER_URL`), post-login billing check (the data source check is done, see Phase 6) | In progress |
 | Register | route `/register` | – | Not started |
 | Current user profile | `screens/current-user` (route `/settings/user-profile/me`) | 4 | Not started |
 | Confirmation | `screens/confirmation` | 1 | Not started |
@@ -144,7 +144,7 @@ chart type to handler, not a DI container.
 | Overview, user management, user detail | `screens/organization-settings`, `screens/user-management`, `di-core/admin` | 86 | Not started |
 | Token management, SSO | `token-management`, `sso-config` | – | Not started |
 | User activity log, system monitor (query/user usage) | `user-activity-log`, `system-monitor` | – | Not started |
-| ClickHouse / connector config | `connector-config`, `di-core/connector-config` | – | Not started |
+| ClickHouse / connector config | `connector-config`, `di-core/connector-config`. Done: first-run setup (`features/data-source/setup`, mounted in `AppLayout` instead of v1's redirect to the settings page): permission check, pick type → form with test connection, SSH tunnel and properties → schema fetch progress. ClickHouse and MySQL only (`core/connection`). Left: the DataSource settings page (listing, Update Schema, Refresh, Change/Edit; on hold), BigQuery/PostgreSQL/Redshift/Vertica | In progress |
 | Plan and billing | `plan-and-billing`, `plan-detail`, `di-core/billing` | – | Not started |
 
 ### Phase 7: Data cook (ETL)
