@@ -1,6 +1,8 @@
 import type { DiModule } from '@/core/di/Container';
 import { AuthModule } from '@/core/auth/AuthModule';
+import { ConnectionModule } from '@/core/connection/ConnectionModule';
+import { PermissionModule } from '@/core/permission/PermissionModule';
 import { HttpModule } from './HttpModule';
 
 /** Bound in order when the app starts, like v1's `Di.init([...])`. Feature modules go after `HttpModule`. */
-export const appModules: readonly DiModule[] = [HttpModule, AuthModule];
+export const appModules: readonly DiModule[] = [HttpModule, AuthModule, PermissionModule, ConnectionModule];

@@ -6,7 +6,11 @@ import { AppProviders } from '@/app/AppProviders';
 import { appRoutes } from '@/app/router';
 import { AuthenticationService } from '@/core/auth/AuthenticationService';
 import { LoginResponse } from '@/core/auth/LoginResponse';
+import { ConnectionService } from '@/core/connection/ConnectionService';
 import { createContainer } from '@/core/di/Container';
+import type { DiModule } from '@/core/di/Container';
+import { PermissionService } from '@/core/permission/PermissionService';
+import { fakeConnectionService, fakePermissionService } from '@/features/data-source/testing';
 
 type Service = AuthenticationService;
 
@@ -23,9 +27,19 @@ export function fakeAuthenticationService(overrides: Partial<Service> = {}, user
   };
 }
 
-/** Test-only: renders the real routes at `path`, with `service` bound in place of the HTTP one. */
-export function renderAppAt(path: string, service: Service) {
-  const container = createContainer([di => di.bindValue(AuthenticationService, service)]);
+/**
+ * Test-only: renders the real routes at `path`, with `service` bound in place of the HTTP one. Other services are
+ * quiet fakes (no permissions, so no data source setup); `modules` can replace them.
+ */
+export function renderAppAt(path: string, service: Service, modules: readonly DiModule[] = []) {
+  const container = createContainer([
+    di => {
+      di.bindValue(AuthenticationService, service);
+      di.bindValue(PermissionService, fakePermissionService());
+      di.bindValue(ConnectionService, fakeConnectionService());
+    },
+    ...modules
+  ]);
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = createMemoryRouter(appRoutes, { initialEntries: [path] });
   render(
