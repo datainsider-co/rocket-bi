@@ -39,6 +39,7 @@ describe('login page', () => {
 
     await fillAndSubmit('hello@gmail.com', '123456');
 
+    await userEvent.click(await screen.findByRole('button', { name: 'Settings' }));
     expect(await screen.findByText('Root User')).toBeInTheDocument();
     expect(service.login).toHaveBeenCalledWith('hello@gmail.com', '123456');
     expect(getSession()).toBe('session-1');

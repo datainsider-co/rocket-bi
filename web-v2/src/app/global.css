@@ -12,6 +12,8 @@
   /* v1 `--accent-2`, same as antd's colorPrimary. */
   --color-brand: #0066ff;
   --color-ink: #212b36;
+  /* v1 `--header-color`. */
+  --color-header: #597fff;
 }
 
 @layer base {
