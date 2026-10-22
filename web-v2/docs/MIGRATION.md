@@ -24,7 +24,7 @@ toolchain, refactoring modules on the way. The backend API stays the same.
 |---|---|
 | Vue 2 class components, `vue-property-decorator` | Function components + hooks |
 | Vuex modules (`vuex-module-decorators`) | TanStack Query (server data), Context providers (UI state) |
-| `typescript-ioc` DI (`Di.init([...Module])`) | Plain modules and factory functions; context for things that must be swappable |
+| `typescript-ioc` DI (`Di.init([...Module])`) | Own typed container without decorators (`src/core/di/Container.ts`): tokens, `DiModule`s bound at startup, `useDi()` in React |
 | `vue-router` 3 (`src/router/Router.ts`) | TanStack Router, file-based (`src/routes/`) |
 | bootstrap-vue + ant-design-vue 1 | antd 6 |
 | Highcharts 11 + `highcharts-vue` | Highcharts 13 + `highcharts-react-official` |
@@ -47,7 +47,8 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
   renamed every key of every request and response (snake_case ↔ camelCase, `JsonUtils`), which also rewrote keys that
   are data (column names, map keys). v2's HTTP client does no renaming, so check each field's casing against the real
   backend and leave `Record` keys untouched.
-- Repositories (HTTP calls): rewrite as plain functions on top of the shared HTTP client, and expose them through
+- Repositories and services: classes taking their dependencies in the constructor, bound in the module's `DiModule`
+  (`di.bindSingleton(Token, d => new Impl(d.get(ApiClient)))`), and exposed through
   TanStack Query hooks inside the feature.
 - Anything that pulls in `web/src/*`: move the needed piece into `core` or `shared`, never import from `web/`.
 
@@ -71,7 +72,8 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Project scaffold | React 19, TS 7, Vite 8, Vitest, Storybook, antd 6, Highcharts 13, TanStack Query/Router, oxlint | Done |
 | Dev proxy to local backend | `/api` → `localhost:8080` | Done |
 | Theme (light/dark) via Context | Reference for the state pattern | Done |
-| HTTP client | `src/shared/http/createHttpClient.ts` (ky): prefix, timeout, headers from a `getHeaders` callback, errors → `ApiError`, `onUnauthenticated` callback, no retries (TanStack Query owns them). Returns plain JSON, no key conversion. App instance: `src/app/http.ts`. v1: `di-core/common/misc/ClientBuilder.ts`, `di-core/common/services/HttpClient.ts` | Done |
+| HTTP client | `src/shared/http/createHttpClient.ts` (ky): prefix, timeout, headers from a `getHeaders` callback, errors → `ApiError`, `onUnauthenticated` callback, no retries (TanStack Query owns them). Returns plain JSON, no key conversion. `HttpClientBuilder` mirrors v1's builder; the app's `ApiClient` is bound in `src/app/di/HttpModule.ts`. v1: `di-core/common/misc/ClientBuilder.ts`, `di-core/common/services/HttpClient.ts` | Done |
+| Dependency injection | `src/core/di/Container.ts`: `token<T>()`, `bindValue` / `bindSingleton` (v1 only used singletons), lazy, circular-dependency check, later modules override earlier ones (test modules). Modules listed in `src/app/di/appModules.ts`, container created in `main.tsx`, passed to `DiProvider` (`useDi`) and router context (`di`, for loaders). No decorators or `reflect-metadata`. v1: `di-core/common/modules/` | Done |
 | Session and auth state | Login state, current user, permissions. v1: `src/store/modules/AuthenticationStore.ts`, `di-core/common/services/DataManager.ts`, `PermissionHandler.ts`. Done: `ssid` cookie and share token (`src/core/session/session.ts`), session expiry → clear cache and full reload to `/login` (`src/app/sessionExpiredHandler.ts`), no query retry on 4xx. Left: login screen, current user, permissions | In progress |
 | Route guards | Redirect to login when there is no session; logged-in users skip login. v1: `router.beforeEach` in `Router.ts` | Not started |
 | App layout | Header, navigation, page shell | Not started |

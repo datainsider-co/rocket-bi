@@ -67,7 +67,10 @@ type-only imports.
   components line by line, and don't carry over v1 bugs.
 - Confirm request and response shapes against the running backend, not just the v1 types.
 - When a domain model from `web/di-core/` is needed, port it into `src/core/<module>/` as a deneric2 entity, fixing
-  types for strict mode. Replace `typescript-ioc` injection with plain functions.
+  types for strict mode. Replace `typescript-ioc` injection with the v2 container (`src/core/di/Container.ts`): no
+  decorators; classes take dependencies in the constructor, each module exports a `DiModule` that binds them to
+  tokens, and the module is added to `src/app/di/appModules.ts`. Components read them with `useDi(Token)`, route
+  loaders with `context.di.get(Token)`. Tests build their own container and override bindings with a test module.
 - HTTP goes through `src/shared/http/createHttpClient.ts`. It returns plain JSON (`unknown`) with keys as the server
   sent them. **Never add a global snake_case ↔ camelCase conversion**: map each field explicitly in the deneric2 schema
   (both `fromJson` and `toJson`), verify casing against the real backend, and never rename keys inside `Record` /
@@ -77,7 +80,7 @@ type-only imports.
 
 ```
 src/
-  app/            app-wide providers, query client, theme, router context
+  app/            app-wide providers, query client, theme, router context, DI modules and `useDi` (app/di)
   routes/         TanStack Router file routes; keep them thin and render a feature's page component
   features/<name>/  one folder per migrated feature: components, hooks, API queries, feature-local state
   core/<module>/  domain models and API functions ported from web/di-core, no React
