@@ -109,6 +109,10 @@ page's dependencies (zod, Highcharts, ...) stay out of the main bundle; anything
 - Forms: react-hook-form with a zod schema (`zodResolver`); schemas live in the feature's `*.utils.ts` and are unit
   tested. Lay fields out with antd via `features/auth/FormField.tsx` (move it to `shared/` when a second feature
   needs it).
+- Icons: `@ant-design/icons` for new UI. v1's icon fonts are in `public/fonts/` and linked from `index.html`, so the
+  v1 classes work as is when porting a screen: `di-icon-*` (data-insider-icon), `setting-icon-*` (chart settings) and
+  Font Awesome 5 (`fa`, `fas`, `fab`). Copied from `web/public/fonts` without the IcoMoon demo files;
+  `data-insider-icon/selection.json` is kept for editing the set in IcoMoon.
 - Charts go through `src/shared/charts/HighchartsChart.tsx`.
 - CommonJS-only packages: a default import can be the whole `module.exports` in the browser (Vite pre-bundle) but the
   real export in Vitest, so green tests don't prove it renders. Check the page in `pnpm dev` after adding such a
