@@ -66,8 +66,12 @@ type-only imports.
   learn the behaviour and the exact API requests and responses. Then write idiomatic React; don't translate Vue class
   components line by line, and don't carry over v1 bugs.
 - Confirm request and response shapes against the running backend, not just the v1 types.
-- When a domain model from `web/di-core/` is needed, port it into `src/core/<module>/` with its `fromObject`
-  factory, fixing types for strict mode. Replace `typescript-ioc` injection with plain functions.
+- When a domain model from `web/di-core/` is needed, port it into `src/core/<module>/` as a deneric2 entity, fixing
+  types for strict mode. Replace `typescript-ioc` injection with plain functions.
+- HTTP goes through `src/shared/http/createHttpClient.ts`. It returns plain JSON (`unknown`) with keys as the server
+  sent them. **Never add a global snake_case ↔ camelCase conversion**: map each field explicitly in the deneric2 schema
+  (both `fromJson` and `toJson`), verify casing against the real backend, and never rename keys inside `Record` /
+  map-like fields, which are data (v1 corrupted column names this way).
 
 ## Project layout
 

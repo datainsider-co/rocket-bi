@@ -43,7 +43,10 @@ through `typescript-ioc` decorators.
 
 Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only the parts that feature needs:
 
-- Domain models with their `fromObject` factories: copy, then fix imports and types for TS 7 strict mode.
+- Domain models: rewrite as deneric2 entities whose schema maps every field explicitly, both ways. v1's HTTP client
+  renamed every key of every request and response (snake_case ↔ camelCase, `JsonUtils`), which also rewrote keys that
+  are data (column names, map keys). v2's HTTP client does no renaming, so check each field's casing against the real
+  backend and leave `Record` keys untouched.
 - Repositories (HTTP calls): rewrite as plain functions on top of the shared HTTP client, and expose them through
   TanStack Query hooks inside the feature.
 - Anything that pulls in `web/src/*`: move the needed piece into `core` or `shared`, never import from `web/`.
@@ -68,8 +71,8 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Project scaffold | React 19, TS 7, Vite 8, Vitest, Storybook, antd 6, Highcharts 13, TanStack Query/Router, oxlint | Done |
 | Dev proxy to local backend | `/api` → `localhost:8080` | Done |
 | Theme (light/dark) via Context | Reference for the state pattern | Done |
-| HTTP client | Base URL, timeout, `Authorization` header from session, error mapping. v1: `di-core/common/misc/ClientBuilder.ts`, `di-core/common/services/HttpClient.ts` | Not started |
-| Session and auth state | Login state, current user, permissions. v1: `src/store/modules/AuthenticationStore.ts`, `di-core/common/services/DataManager.ts`, `PermissionHandler.ts` | Not started |
+| HTTP client | `src/shared/http/createHttpClient.ts` (ky): prefix, timeout, headers from a `getHeaders` callback, errors → `ApiError`, `onUnauthenticated` callback, no retries (TanStack Query owns them). Returns plain JSON, no key conversion. App instance: `src/app/http.ts`. v1: `di-core/common/misc/ClientBuilder.ts`, `di-core/common/services/HttpClient.ts` | Done |
+| Session and auth state | Login state, current user, permissions. v1: `src/store/modules/AuthenticationStore.ts`, `di-core/common/services/DataManager.ts`, `PermissionHandler.ts`. Done: `ssid` cookie and share token (`src/core/session/session.ts`), session expiry → clear cache and full reload to `/login` (`src/app/sessionExpiredHandler.ts`), no query retry on 4xx. Left: login screen, current user, permissions | In progress |
 | Route guards | Redirect to login when there is no session; logged-in users skip login. v1: `router.beforeEach` in `Router.ts` | Not started |
 | App layout | Header, navigation, page shell | Not started |
 | Feature flags | v1 `VUE_APP_IS_DISABLE_*` (LakeHouse, Streaming, CDP, Ingestion, User activities) | Not started |
@@ -155,7 +158,7 @@ Port only if still needed. Decide before starting.
 | Feature | v1 location | Size | Note |
 |---|---|---|---|
 | Data ingestion (sources, jobs, queued, streaming, history) | `screens/data-ingestion`, `di-core/data-ingestion` | 156 + 136 | `VUE_APP_IS_DISABLE_INGESTION: true` |
-| Lake house | `screens/lake-house`, `di-core/lake-house` | 10 + 33 | `VUE_APP_IS_DISABLE_LAKE_HOUSE: true` |
+| Lake house | `screens/lake-house`, `di-core/lake-house` | 10 + 33 | `VUE_APP_IS_DISABLE_LAKE_HOUSE: true`. **Won't migrate** (decided 2026-10-22). It was the only v1 user of byte-level upload progress, so v2 has no XHR upload helper |
 | CDP, tracking profile | `screens/tracking-profile`, `di-core/tracking` | 17 + 14 | `VUE_APP_IS_DISABLE_CDP: true` |
 | Shopify integration | routes `/shopify`, `/shopify/redirect` | – | |
 | Chat bot (OpenAI) | `src/shared/components/chat`, `di-core/chat-bot` | – | |
