@@ -1,4 +1,4 @@
-import { asString, type JsonObject } from '@/core/json/json';
+import { asArray, asString, getPath, type JsonObject } from '@/core/json/json';
 
 /** v1 `AbstractTableQuerySetting` and friends: settings the server pages (`from` / `size`). */
 const PAGED_SETTINGS = new Set([
@@ -44,6 +44,23 @@ export function settingClassName(setting: JsonObject): string {
 
 export function isPagedSetting(setting: JsonObject): boolean {
   return PAGED_SETTINGS.has(settingClassName(setting));
+}
+
+/**
+ * Whether the server can answer the setting (v1 `QuerySetting.canQuery`). Inputs query their min/max only when they
+ * have both columns (slicer, date select); a plain input has one, a parameter input none. A tab control with several
+ * columns picks columns and has nothing to query; a tree filter queries its first level.
+ */
+export function canQuerySetting(setting: JsonObject): boolean {
+  const columns = asArray(setting['values']).length;
+  switch (settingClassName(setting)) {
+    case 'input_control_chart_setting':
+      return columns === 2;
+    case 'tab_control_chart_setting':
+      return getPath(setting, ['options', 'class_name']) === 'tree_filter_chart_setting' || columns === 1;
+    default:
+      return true;
+  }
 }
 
 /**
