@@ -117,3 +117,8 @@
     padding: 22px 20px;
   }
 }
+
+/* Embedded, the page is the whole document (no app layout gives it a height). */
+.dashboard-page[data-embedded='true'] {
+  height: 100vh;
+}

@@ -42,6 +42,13 @@ export const appRoutes: RouteObject[] = [
         ]
       },
       {
+        // For an iframe on the same domain: the session cookie is shared, the app around the dashboard is not.
+        path: '/embedded/dashboard/:name',
+        loader: args => requireSession(args),
+        errorElement: <RouteErrorPage />,
+        ...lazyPage(() => import('@/features/dashboard/detail/DashboardPage'), m => m.EmbeddedDashboardPage)
+      },
+      {
         loader: args => requireSession(args),
         element: <AppLayout />,
         children: [

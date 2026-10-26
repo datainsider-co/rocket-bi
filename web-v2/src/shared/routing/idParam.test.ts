@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dashboardPath, parseIdParam, toIdParam, toSlug } from './idParam';
+import { dashboardPath, embeddedDashboardPath, parseIdParam, toIdParam, toSlug } from './idParam';
 
 describe('toSlug', () => {
   it.each([
@@ -43,5 +43,11 @@ describe('toIdParam / parseIdParam', () => {
 describe('dashboardPath', () => {
   it('builds /dashboard/<slug>-<id>', () => {
     expect(dashboardPath(9, 'KPI')).toBe('/dashboard/kpi-9');
+  });
+});
+
+describe('embeddedDashboardPath', () => {
+  it('builds v1 embedded URLs', () => {
+    expect(embeddedDashboardPath(9, 'KPI')).toBe('/embedded/dashboard/kpi-9');
   });
 });

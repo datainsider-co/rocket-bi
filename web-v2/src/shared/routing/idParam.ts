@@ -27,3 +27,8 @@ export function parseIdParam(param: string | undefined): number | undefined {
 export function dashboardPath(dashboardId: number, name: string): string {
   return `/dashboard/${toIdParam(dashboardId, name)}`;
 }
+
+/** v1 `Routers.EmbeddedDashboard`: the dashboard alone, for an iframe. */
+export function embeddedDashboardPath(dashboardId: number, name: string): string {
+  return `/embedded/dashboard/${toIdParam(dashboardId, name)}`;
+}

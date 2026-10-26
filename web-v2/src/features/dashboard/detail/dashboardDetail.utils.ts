@@ -69,5 +69,6 @@ export function dashboardErrorMessage(error: unknown): string {
   if (isApiError(error) && (error.reason === 'not_allowed' || error.status === 403)) {
     return "You don't have permission to view dashboard";
   }
+  if (isNotFoundError(error)) return 'Dashboard not found';
   return 'Load dashboard error!';
 }

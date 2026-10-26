@@ -3,15 +3,18 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { dashboardFromJson } from '@/core/dashboard/Dashboard';
 import fixture from '@/core/dashboard/dashboard.fixture.json';
 import filtersFixture from '@/core/dashboard/filters.fixture.json';
+import { LoginResponse } from '@/core/auth/LoginResponse';
 import { DashboardService } from '@/core/dashboard/DashboardService';
 import { Directory } from '@/core/directory/Directory';
 import { DirectoryService } from '@/core/directory/DirectoryService';
+import { PermissionService } from '@/core/permission/PermissionService';
 import { ResourcePermissionService } from '@/core/permission/ResourcePermissionService';
 import { clearSession, saveSession } from '@/core/session/session';
 import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
 import { QueryService } from '@/core/query/QueryService';
 import { fakeQueryService, fakeResourcePermissionService } from '@/features/dashboard/testing';
+import { fakePermissionService } from '@/features/data-source/testing';
 import userEvent from '@testing-library/user-event';
 import { ApiError } from '@/shared/http/ApiError';
 
@@ -267,6 +270,64 @@ describe('dashboard page', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Exit full screen' }));
     expect(page).toHaveAttribute('data-mode', 'view');
+  });
+
+  it('queries the dashboard as another user, and back', { timeout: 15_000 }, async () => {
+    const queries = fakeQueryService();
+    const ann = new LoginResponse({ user_info: { username: 'ann' } });
+    renderAppAt('/dashboard/v2-sample-1', fakeAuthenticationService({}, ann), [
+      di => {
+        di.bindValue(DashboardService, fakeDashboardService({ get: vi.fn<DashboardService['get']>(async () => dashboardFromJson(fixture)) }));
+        di.bindValue(PermissionService, fakePermissionService(['rls:view:*']));
+        di.bindValue(QueryService, queries);
+      }
+    ]);
+    await screen.findByText('Sample', {}, SLOW);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Options' }));
+    await userEvent.click(await screen.findByText('View As', {}, SLOW));
+    await userEvent.click(screen.getByRole('combobox', { name: 'User' }));
+    await userEvent.click(await screen.findByTitle('root', {}, SLOW));
+    await userEvent.click(screen.getByRole('button', { name: 'View As' }));
+
+    // The KPI (3) is queried again as root, with the profile the server sent.
+    const root = { username: 'root', full_name: 'root', email: 'hello@gmail.com', gender: 0 };
+    await waitFor(() => expect(queries.queryAs).toHaveBeenCalledWith(expect.objectContaining({ chart_id: 3 }), root, expect.anything()), SLOW);
+    expect(screen.getByRole('button', { name: /View As:\s*root/ })).toBeInTheDocument();
+
+    const before = vi.mocked(queries.query).mock.calls.length;
+    await userEvent.click(screen.getByRole('button', { name: /Exit View As/ }));
+    expect(screen.queryByRole('button', { name: /View As:\s*root/ })).not.toBeInTheDocument();
+    // Back to the viewer's own data.
+    await waitFor(() => expect(vi.mocked(queries.query).mock.calls.length).toBeGreaterThan(before), SLOW);
+  });
+
+  it('offers View As only with the rls:view permission', async () => {
+    renderAt('/dashboard/v2-sample-1', async () => dashboardFromJson(fixture));
+    await screen.findByText('Sample', {}, SLOW);
+    await userEvent.click(screen.getByRole('button', { name: 'Options' }));
+    expect(await screen.findByText('Full screen')).toBeInTheDocument();
+    expect(screen.queryByText('View As')).not.toBeInTheDocument();
+  });
+
+  it('shows the embedded dashboard alone, at its embedded URL', async () => {
+    const router = renderAt('/embedded/dashboard/old-name-1', async () => dashboardFromJson(fixture));
+
+    expect(await screen.findByText('Sample', {}, SLOW)).toBeInTheDocument();
+    await waitFor(() => expect(router.state.location.pathname).toBe('/embedded/dashboard/v2-sample-1'), SLOW);
+    expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Options' })).not.toBeInTheDocument();
+    // No app header around it.
+    expect(screen.queryByRole('link', { name: 'Dashboards' })).not.toBeInTheDocument();
+  });
+
+  it('says an embedded dashboard is missing instead of leaving', async () => {
+    const router = renderAt('/embedded/dashboard/gone-7', async () => {
+      throw new ApiError('not found', 404, 'not_found');
+    });
+
+    expect(await screen.findByText('Dashboard not found', {}, SLOW)).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/embedded/dashboard/gone-7');
   });
 
   it('rewrites an outdated name in the URL', async () => {

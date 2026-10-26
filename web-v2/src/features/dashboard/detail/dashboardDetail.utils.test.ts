@@ -78,6 +78,7 @@ describe('errors', () => {
 
   it('uses v1 messages', () => {
     expect(dashboardErrorMessage(new ApiError('nope', 401, 'not_allowed'))).toBe("You don't have permission to view dashboard");
+    expect(dashboardErrorMessage(new ApiError('gone', 404, 'not_found'))).toBe('Dashboard not found');
     expect(dashboardErrorMessage(new Error('x'))).toBe('Load dashboard error!');
   });
 });
