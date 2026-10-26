@@ -1,0 +1,7 @@
+node_modules
+dist
+storybook-static
+coverage
+*.local
+.env*.local
+.vite
