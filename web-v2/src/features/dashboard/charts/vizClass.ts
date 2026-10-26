@@ -10,3 +10,17 @@ export const ChartVizClass = {
   Input: 'input_filter_setting',
   Tree: 'tree_filter_chart_setting'
 } as const;
+
+/** Viz classes rendered as filters, which set a control instead of showing data. */
+const FILTER_CLASSES = new Set<string>([
+  ChartVizClass.TabFilter,
+  ChartVizClass.Dropdown,
+  ChartVizClass.Slicer,
+  ChartVizClass.DateSelect,
+  ChartVizClass.Input,
+  ChartVizClass.Tree
+]);
+
+export function isFilterVizClass(className: string): boolean {
+  return FILTER_CLASSES.has(className);
+}

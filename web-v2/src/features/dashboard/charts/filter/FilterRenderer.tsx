@@ -9,7 +9,7 @@ import type { ChartViz } from '@/core/query/vizOptions';
 import type { ChartQuery } from '../../controls/chartQuery.utils';
 import type { ControlEntry } from '../../controls/controls.utils';
 import { titleText } from '../highchartsBase';
-import { ChartVizClass } from '../vizClass';
+import { ChartVizClass, isFilterVizClass } from '../vizClass';
 import { DateRangeModePicker } from './DateRangeModePicker';
 import { DropdownFilterView } from './DropdownFilterView';
 import {
@@ -28,18 +28,8 @@ import { SlicerFilterView } from './SlicerFilterView';
 import { TabFilterView } from './TabFilterView';
 import { TreeFilter } from './TreeFilter';
 
-/** Viz classes rendered as filters, which set a control instead of showing data. */
-const FILTER_CLASSES = new Set<string>([
-  ChartVizClass.TabFilter,
-  ChartVizClass.Dropdown,
-  ChartVizClass.Slicer,
-  ChartVizClass.DateSelect,
-  ChartVizClass.Input,
-  ChartVizClass.Tree
-]);
-
 export function isFilterViz(viz: ChartViz): boolean {
-  return FILTER_CLASSES.has(viz.className);
+  return isFilterVizClass(viz.className);
 }
 
 export interface FilterRendererProps {
