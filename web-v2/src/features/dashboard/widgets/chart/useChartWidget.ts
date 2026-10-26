@@ -9,6 +9,7 @@ import { isFilterViz } from '../../charts/filter/FilterRenderer';
 import { selectionOf, selectionToControl } from '../../charts/filter/filter.utils';
 import { buildChartQuery, isAffectedByFilter } from '../../controls/chartQuery.utils';
 import type { ControlEntry } from '../../controls/controls.utils';
+import { useDashboardPermissions } from '../../access/DashboardPermissionsContext';
 import { useDashboardControls } from '../../controls/DashboardControlsContext';
 import { canExportSetting, LOAD_MORE_DASHBOARDS_KEY, pointMenuItems, widgetMenuItems } from './chartMenus.utils';
 import { useChartExport } from './useChartExport';
@@ -36,6 +37,7 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
   const [paging, setPaging] = useState<Paging>(FIRST_PAGE);
   const [pointMenu, setPointMenu] = useState<PointMenu | null>(null);
   const view = useChartView(widget);
+  const { canDownload } = useDashboardPermissions();
 
   const filtersOn = view.view.filtersOn ?? isAffectedByFilter(widget.setting);
   const appliedRequests = filtersOn ? headerRequests : NO_REQUESTS;
@@ -88,7 +90,7 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
     {
       zoomLevel: canZoom(view.viewed.setting) ? zoomLevelOf(view.viewed.setting) : undefined,
       canResetDrill,
-      canExport: canExportSetting(widget.setting, isFilterViz(viz))
+      canExport: canDownload && canExportSetting(widget.setting, isFilterViz(viz))
     },
     { zoom: view.zoom, resetDrill: view.reset, download: type => void download(type) }
   );

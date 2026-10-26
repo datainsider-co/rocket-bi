@@ -4,11 +4,14 @@ import { dashboardFromJson } from '@/core/dashboard/Dashboard';
 import fixture from '@/core/dashboard/dashboard.fixture.json';
 import filtersFixture from '@/core/dashboard/filters.fixture.json';
 import { DashboardService } from '@/core/dashboard/DashboardService';
+import { Directory } from '@/core/directory/Directory';
+import { DirectoryService } from '@/core/directory/DirectoryService';
+import { ResourcePermissionService } from '@/core/permission/ResourcePermissionService';
 import { clearSession, saveSession } from '@/core/session/session';
 import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing';
-import { fakeDashboardService } from '@/features/directory/testing';
+import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
 import { QueryService } from '@/core/query/QueryService';
-import { fakeQueryService } from '@/features/dashboard/testing';
+import { fakeQueryService, fakeResourcePermissionService } from '@/features/dashboard/testing';
 import userEvent from '@testing-library/user-event';
 import { ApiError } from '@/shared/http/ApiError';
 
@@ -74,8 +77,8 @@ describe('dashboard page', () => {
 
     expect(await screen.findByRole('heading', { name: 'v2 Sample' }, SLOW)).toBeInTheDocument();
     expect(get).toHaveBeenCalledWith(1);
-    // Text widget, rendered as HTML.
-    expect(screen.getByText('Sample').tagName).toBe('B');
+    // Text widget, rendered as HTML, once the dashboard's password check is done.
+    expect((await screen.findByText('Sample', {}, SLOW)).tagName).toBe('B');
     // The tab widget's first tab.
     expect(screen.getByRole('tab', { name: 'Pie' })).toBeInTheDocument();
   });
@@ -192,6 +195,78 @@ describe('dashboard page', () => {
     await waitFor(() => expect(filterRequestsOf(queries, 3)).toEqual([]), SLOW);
     await userEvent.click(screen.getByRole('button', { name: /Reset Filters/ }));
     await waitFor(() => expect(filterRequestsOf(queries, 3)).toEqual([region]), SLOW);
+  });
+
+  it('asks for the password of a protected dashboard before showing it', { timeout: 15_000 }, async () => {
+    const queries = fakeQueryService();
+    // sha256("abc"); the test user is not the owner (root).
+    const hashed = 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad';
+    const directories = fakeDirectoryService({
+      get: vi.fn<DirectoryService['get']>(async id => new Directory({ id, directory_type: 'dashboard', data: { config: { enabled: true, hashed_password: hashed } } }))
+    });
+    renderAppAt('/dashboard/v2-sample-1', fakeAuthenticationService(), [
+      di => {
+        di.bindValue(DashboardService, fakeDashboardService({ get: vi.fn<DashboardService['get']>(async () => dashboardFromJson(fixture)) }));
+        di.bindValue(DirectoryService, directories);
+        di.bindValue(QueryService, queries);
+      }
+    ]);
+
+    const input = await screen.findByLabelText('Password', {}, SLOW);
+    expect(queries.query).not.toHaveBeenCalled();
+    await userEvent.type(input, 'abd{Enter}');
+    expect(await screen.findByText('Password is incorrect!')).toBeInTheDocument();
+    await userEvent.clear(input);
+    await userEvent.type(input, 'abc');
+    await userEvent.click(screen.getByRole('button', { name: 'Access' }));
+
+    expect(await screen.findByText('Sample', {}, SLOW)).toBeInTheDocument();
+    await waitFor(() => expect(queries.query).toHaveBeenCalled(), SLOW);
+  });
+
+  it('leaves a protected dashboard on Cancel', async () => {
+    const directories = fakeDirectoryService({
+      get: vi.fn<DirectoryService['get']>(async id => new Directory({ id, data: { config: { enabled: true, hashed_password: 'x' } } }))
+    });
+    const router = renderAppAt('/dashboard/v2-sample-1', fakeAuthenticationService(), [
+      di => {
+        di.bindValue(DashboardService, fakeDashboardService({ get: vi.fn<DashboardService['get']>(async () => dashboardFromJson(fixture)) }));
+        di.bindValue(DirectoryService, directories);
+      }
+    ]);
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Cancel' }, SLOW));
+    await waitFor(() => expect(router.state.location.pathname).toBe('/mydata'), SLOW);
+  });
+
+  it('hides downloads from viewers who may not download', { timeout: 15_000 }, async () => {
+    const permissions = fakeResourcePermissionService({ permittedActions: vi.fn<ResourcePermissionService['permittedActions']>(async () => ['view']) });
+    renderAppAt('/dashboard/v2-sample-1', fakeAuthenticationService(), [
+      di => {
+        di.bindValue(DashboardService, fakeDashboardService({ get: vi.fn<DashboardService['get']>(async () => dashboardFromJson(fixture)) }));
+        di.bindValue(ResourcePermissionService, permissions);
+      }
+    ]);
+
+    await screen.findByText('Sample', {}, SLOW);
+    await waitFor(() => expect(permissions.permittedActions).toHaveBeenCalledWith('dashboard', 1, expect.arrayContaining(['download'])), SLOW);
+    const table = document.querySelector<HTMLElement>('[data-widget-id="7"]')!;
+    // Nothing else is in the table's menu, so it has none.
+    expect(within(table).queryByRole('button', { name: 'Chart actions' })).not.toBeInTheDocument();
+  });
+
+  it('lays the dashboard over the app in full screen, and back', async () => {
+    renderAt('/dashboard/v2-sample-1', async () => dashboardFromJson(fixture));
+    await screen.findByText('Sample', {}, SLOW);
+    const page = document.querySelector('.dashboard-page')!;
+
+    await userEvent.click(screen.getByRole('button', { name: 'Options' }));
+    await userEvent.click(await screen.findByText('Full screen'));
+    expect(page).toHaveAttribute('data-mode', 'fullscreen');
+    expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Exit full screen' }));
+    expect(page).toHaveAttribute('data-mode', 'view');
   });
 
   it('rewrites an outdated name in the URL', async () => {

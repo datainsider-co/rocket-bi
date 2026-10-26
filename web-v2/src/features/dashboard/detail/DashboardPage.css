@@ -20,6 +20,29 @@
   padding: 13px 15px 15px;
 }
 
+/* Holds the dashboard at its full height so TV mode can measure and scale it; its child fills it like before. */
+.dashboard-page__fit {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.dashboard-page__fit > * {
+  flex: 1 0 auto;
+}
+
+/* v1 ViewFullScreen / TVMode: the page over the app header. Below antd's popups (1000+), so menus stay on top. */
+.dashboard-page[data-mode='fullscreen'],
+.dashboard-page[data-mode='tv'] {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+.dashboard-page[data-mode='tv'] .dashboard-page__body {
+  overflow: hidden;
+}
+
 .dashboard-content {
   position: relative;
   isolation: isolate;
