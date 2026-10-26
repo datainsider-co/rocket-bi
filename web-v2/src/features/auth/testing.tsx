@@ -13,7 +13,8 @@ import type { DiModule } from '@/core/di/Container';
 import { DirectoryService } from '@/core/directory/DirectoryService';
 import { PermissionService } from '@/core/permission/PermissionService';
 import { QueryService } from '@/core/query/QueryService';
-import { fakeQueryService } from '@/features/dashboard/testing';
+import { SchemaService } from '@/core/schema/SchemaService';
+import { fakeQueryService, fakeSchemaService } from '@/features/dashboard/testing';
 import { fakeConnectionService, fakePermissionService } from '@/features/data-source/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
 
@@ -46,6 +47,7 @@ export function renderAppAt(path: string, service: Service, modules: readonly Di
       di.bindValue(DirectoryService, fakeDirectoryService());
       di.bindValue(DashboardService, fakeDashboardService());
       di.bindValue(QueryService, fakeQueryService());
+      di.bindValue(SchemaService, fakeSchemaService());
     },
     ...modules
   ]);

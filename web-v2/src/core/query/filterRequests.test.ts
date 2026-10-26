@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fixture from '@/core/dashboard/filters.fixture.json';
 import type { JsonObject } from '@/core/json/json';
-import { filterColumnOf, inCondition, innerFilterRequest } from './filterRequests';
+import { equalCondition, filterColumnOf, inCondition, innerFilterRequest } from './filterRequests';
 import { canQuerySetting } from './QueryRequest';
 
 const settings = new Map(fixture.widgets.map(widget => [widget.id, (widget as { setting?: JsonObject }).setting ?? {}]));
@@ -63,5 +63,14 @@ describe('canQuerySetting', () => {
     [23, 'parameter input (no column)', false]
   ])('widget %i, %s: %s', (id, _, expected) => {
     expect(canQuerySetting(setting(id))).toBe(expected);
+  });
+});
+
+describe('equalCondition', () => {
+  it('compares the column field, with its scalar function', () => {
+    const scalar = { class_name: 'to_year' };
+    expect(equalCondition({ function: { field, scalar_function: scalar } }, '2020')).toEqual({ class_name: 'equal', field, value: '2020', scalar_function: scalar });
+    expect(equalCondition({ function: { field } }, 'a')).toEqual({ class_name: 'equal', field, value: 'a' });
+    expect(equalCondition(undefined, 'a')).toBeUndefined();
   });
 });

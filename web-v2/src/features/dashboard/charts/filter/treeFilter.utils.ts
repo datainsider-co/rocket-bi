@@ -1,4 +1,5 @@
 import { asArray, asString, getPath, isRecord, type JsonObject } from '@/core/json/json';
+import { equalCondition } from '@/core/query/filterRequests';
 
 /**
  * Tree filter (v1 `TreeFilter`): one level per column of `values`. A node's key is the path from the root,
@@ -35,17 +36,6 @@ export function treeSelectedValues(keys: readonly string[], rootKey: string): st
   const checked = new Set(keys);
   const topmost = [...keys].sort().filter(key => !checked.has(parentKey(key)));
   return [...new Set(topmost.flatMap(treePath))];
-}
-
-function equalCondition(column: unknown, value: string): JsonObject | undefined {
-  const fn = isRecord(column) ? column['function'] : undefined;
-  if (!isRecord(fn) || !isRecord(fn['field'])) return undefined;
-  return {
-    class_name: 'equal',
-    field: fn['field'],
-    value,
-    ...(isRecord(fn['scalar_function']) && { scalar_function: fn['scalar_function'] })
-  };
 }
 
 /**

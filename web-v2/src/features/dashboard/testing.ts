@@ -1,6 +1,8 @@
 import { vi } from 'vitest';
 import { asRecord, asString } from '@/core/json/json';
 import type { QueryService } from '@/core/query/QueryService';
+import { databaseSchemaFromJson, type SchemaService } from '@/core/schema/SchemaService';
+import schema from '@/core/schema/database.fixture.json';
 import { visualizationResponseFromJson } from '@/core/query/VisualizationResponse';
 import responses from '@/core/query/queryResponses.fixture.json';
 
@@ -16,6 +18,15 @@ export function fakeQueryService(overrides: Partial<QueryService> = {}): QuerySe
       if (!json) throw new Error(`no fixture for ${className}`);
       return visualizationResponseFromJson(json);
     }),
+    export: vi.fn<QueryService['export']>(async () => new Blob(['a,b'])),
+    ...overrides
+  };
+}
+
+/** Test-only: answers every database with the local backend's `sample_v2`. */
+export function fakeSchemaService(overrides: Partial<SchemaService> = {}): SchemaService {
+  return {
+    getDatabase: vi.fn<SchemaService['getDatabase']>(async () => databaseSchemaFromJson(schema)),
     ...overrides
   };
 }

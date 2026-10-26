@@ -20,6 +20,18 @@ export function inCondition(column: JsonObject, values: readonly string[]): Json
   };
 }
 
+/** `column = value` on the column's field and scalar function (v1 `ConditionUtils.buildEqualCondition`). */
+export function equalCondition(column: unknown, value: string): JsonObject | undefined {
+  const fn = isRecord(column) ? column['function'] : undefined;
+  if (!isRecord(fn) || !isRecord(fn['field'])) return undefined;
+  return {
+    class_name: 'equal',
+    field: fn['field'],
+    value,
+    ...(isRecord(fn['scalar_function']) && { scalar_function: fn['scalar_function'] })
+  };
+}
+
 /**
  * The request a chart's inner filter adds to the chart's own query (v1 `ChartFilter.buildFilterRequest`). Its id is the
  * chart's; nothing when "Show all" is picked.
