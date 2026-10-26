@@ -80,4 +80,12 @@ describe('HttpDashboardService', () => {
     expect(sent()).toEqual({ fields: [field], exclude_ids: [1], from: 0, size: 40, is_removed: false });
     expect(page).toMatchObject({ total: 1, dashboards: [{ id: 2, name: 'v2 Filters' }] });
   });
+
+  it('gets the directory id of a dashboard', async () => {
+    // The local backend answers a bare number.
+    const { service, requests } = setup(8);
+
+    expect(await service.getDirectoryId(1)).toBe(8);
+    expect(requests[0]).toMatchObject({ method: 'GET', url: 'http://api.test/dashboards/1/get_directory_id' });
+  });
 });

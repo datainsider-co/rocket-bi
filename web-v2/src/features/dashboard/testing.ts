@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 import { asRecord, asString } from '@/core/json/json';
+import { ALL_RESOURCE_ACTIONS, type ResourcePermissionService } from '@/core/permission/ResourcePermissionService';
 import type { QueryService } from '@/core/query/QueryService';
 import { databaseSchemaFromJson, type SchemaService } from '@/core/schema/SchemaService';
 import schema from '@/core/schema/database.fixture.json';
@@ -27,6 +28,14 @@ export function fakeQueryService(overrides: Partial<QueryService> = {}): QuerySe
 export function fakeSchemaService(overrides: Partial<SchemaService> = {}): SchemaService {
   return {
     getDatabase: vi.fn<SchemaService['getDatabase']>(async () => databaseSchemaFromJson(schema)),
+    ...overrides
+  };
+}
+
+/** Test-only: grants every action on every resource unless overridden. */
+export function fakeResourcePermissionService(overrides: Partial<ResourcePermissionService> = {}): ResourcePermissionService {
+  return {
+    permittedActions: vi.fn<ResourcePermissionService['permittedActions']>(async () => [...ALL_RESOURCE_ACTIONS]),
     ...overrides
   };
 }

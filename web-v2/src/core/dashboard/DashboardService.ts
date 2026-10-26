@@ -53,6 +53,8 @@ export interface DashboardService {
    * unplaced positions (-1) as they are: place them first.
    */
   resizeWidgets(dashboardId: number, positions: PositionMap): Promise<void>;
+  /** The directory entry of a dashboard, which holds its password. */
+  getDirectoryId(id: number): Promise<number>;
   /** Dashboards to drill through to, by name, those the user can see only. */
   listDrillThrough(request: DrillThroughRequest, signal?: AbortSignal): Promise<DrillThroughPage>;
 }
@@ -78,6 +80,10 @@ export class HttpDashboardService implements DashboardService {
 
   async resizeWidgets(dashboardId: number, positions: PositionMap): Promise<void> {
     await this.http.put(`dashboards/${dashboardId}/widgets/resize`, { json: { positions: positionsToJson(positions) } });
+  }
+
+  async getDirectoryId(id: number): Promise<number> {
+    return asNumber(await this.http.get(`dashboards/${id}/get_directory_id`).json());
   }
 
   async listDrillThrough({ fields, excludeIds, from, size }: DrillThroughRequest, signal?: AbortSignal): Promise<DrillThroughPage> {

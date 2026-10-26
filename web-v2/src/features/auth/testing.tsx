@@ -12,9 +12,10 @@ import { createContainer } from '@/core/di/Container';
 import type { DiModule } from '@/core/di/Container';
 import { DirectoryService } from '@/core/directory/DirectoryService';
 import { PermissionService } from '@/core/permission/PermissionService';
+import { ResourcePermissionService } from '@/core/permission/ResourcePermissionService';
 import { QueryService } from '@/core/query/QueryService';
 import { SchemaService } from '@/core/schema/SchemaService';
-import { fakeQueryService, fakeSchemaService } from '@/features/dashboard/testing';
+import { fakeQueryService, fakeResourcePermissionService, fakeSchemaService } from '@/features/dashboard/testing';
 import { fakeConnectionService, fakePermissionService } from '@/features/data-source/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
 
@@ -43,6 +44,7 @@ export function renderAppAt(path: string, service: Service, modules: readonly Di
     di => {
       di.bindValue(AuthenticationService, service);
       di.bindValue(PermissionService, fakePermissionService());
+      di.bindValue(ResourcePermissionService, fakeResourcePermissionService());
       di.bindValue(ConnectionService, fakeConnectionService());
       di.bindValue(DirectoryService, fakeDirectoryService());
       di.bindValue(DashboardService, fakeDashboardService());
