@@ -6,10 +6,21 @@ import { DashboardService } from '@/core/dashboard/DashboardService';
 import { clearSession, saveSession } from '@/core/session/session';
 import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing';
 import { fakeDashboardService } from '@/features/directory/testing';
+import { QueryService } from '@/core/query/QueryService';
+import { fakeQueryService } from '@/features/dashboard/testing';
+import userEvent from '@testing-library/user-event';
 import { ApiError } from '@/shared/http/ApiError';
 
 /** The page loads lazily and draws charts; under a full parallel run that can take more than the default second. */
 const SLOW = { timeout: 5000 };
+
+/** `possible_values` of the column chart's Region condition in its latest query, if the condition applies. */
+function regionFilterOfColumn(queries: QueryService): string[] | undefined {
+  const calls = vi.mocked(queries.query).mock.calls.map(([request]) => request as { chart_id?: number; query_setting: { filters?: unknown } });
+  const last = calls.filter(request => request.chart_id === 4).at(-1);
+  const filters = last?.query_setting.filters as { conditions: { final_condition?: { possible_values: string[] } }[] }[] | undefined;
+  return filters?.[0]?.conditions[0]?.final_condition?.possible_values;
+}
 
 function renderAt(path: string, get: DashboardService['get']) {
   return renderAppAt(path, fakeAuthenticationService(), [
@@ -57,8 +68,26 @@ describe('dashboard page', () => {
     expect(screen.getByText('$')).toBeInTheDocument();
     await waitFor(() => expect(screen.getAllByTestId('highcharts-chart')).toHaveLength(3), SLOW);
     expect(screen.getAllByText('North America')).not.toHaveLength(0);
-    // Filters come with M3.
-    expect(screen.getByText('tab_filter_chart_setting is not supported yet')).toBeInTheDocument();
+  });
+
+  it('filters the charts that depend on a filter, and resets', { timeout: 15_000 }, async () => {
+    const queries = fakeQueryService();
+    renderAppAt('/dashboard/v2-sample-1', fakeAuthenticationService(), [
+      di => {
+        di.bindValue(DashboardService, fakeDashboardService({ get: vi.fn<DashboardService['get']>(async () => dashboardFromJson(fixture)) }));
+        di.bindValue(QueryService, queries);
+      }
+    ]);
+    // Charts don't draw here (no layout), so the filter's tag is the only "Asia".
+    const regionTag = async (label: string) => (await screen.findByText(label, {}, SLOW)).closest('.ant-tag')!;
+
+    await userEvent.click(await regionTag('Asia'));
+
+    // The column chart (widget 4) has a dynamic condition on the Region filter (widget 8).
+    await waitFor(() => expect(regionFilterOfColumn(queries)).toEqual(['Asia']), SLOW);
+    await userEvent.click(screen.getByRole('button', { name: /Reset Filters/ }));
+    await waitFor(() => expect(regionFilterOfColumn(queries)).toBeUndefined(), SLOW);
+    expect(screen.queryByRole('button', { name: /Reset Filters/ })).not.toBeInTheDocument();
   });
 
   it('rewrites an outdated name in the URL', async () => {

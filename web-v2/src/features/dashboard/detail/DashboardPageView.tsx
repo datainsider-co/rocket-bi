@@ -1,6 +1,8 @@
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Result, Spin, Typography } from 'antd';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
+import { DashboardControlsProvider } from '../controls/DashboardControlsContext';
+import { ResetFiltersButton } from '../controls/ResetFiltersButton';
 import { getDashboardTheme } from '../theme/dashboardThemes';
 import { DashboardCanvas } from './DashboardCanvas';
 import '../theme/dashboardTheme.css';
@@ -41,17 +43,26 @@ export function DashboardPageView(props: DashboardPageViewProps) {
   const { dashboard, onBack } = props;
   const theme = getDashboardTheme(dashboard?.setting.themeName ?? '');
 
-  return (
+  const page = (
     <div className="dashboard-theme dashboard-page" data-dashboard-theme={theme.cssName}>
       <header className="dashboard-page__header flex items-center gap-2">
         <Button type="text" icon={<ArrowLeftOutlined />} aria-label="Back" onClick={onBack} />
-        <Typography.Title level={4} className="m-0! truncate" style={{ color: 'var(--text-color)' }} title={dashboard?.name}>
+        <Typography.Title level={4} className="m-0! min-w-0 flex-1 truncate" style={{ color: 'var(--text-color)' }} title={dashboard?.name}>
           {dashboard?.name ?? ''}
         </Typography.Title>
+        {dashboard && <ResetFiltersButton />}
       </header>
       <div className="dashboard-page__body">
         <Body {...props} />
       </div>
     </div>
+  );
+  // A new dashboard starts from its own filter defaults.
+  return dashboard ? (
+    <DashboardControlsProvider key={dashboard.id} widgets={dashboard.widgets}>
+      {page}
+    </DashboardControlsProvider>
+  ) : (
+    page
   );
 }

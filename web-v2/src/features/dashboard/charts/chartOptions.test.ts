@@ -70,7 +70,14 @@ describe('buildPieChartOptions', () => {
   const options = buildPieChartOptions({ options: vizOf(6), response: pieResponse, themeColors: THEME });
 
   it('draws the response points', () => {
-    expect(options.series?.[0]).toMatchObject({ type: 'pie', name: 'sales_channel', data: [['Offline', 587060], ['Online', 441986]] });
+    expect(options.series?.[0]).toMatchObject({
+      type: 'pie',
+      name: 'sales_channel',
+      data: [
+        { name: 'Offline', y: 587060, selected: false },
+        { name: 'Online', y: 441986, selected: false }
+      ]
+    });
     expect(options.title).toMatchObject({ text: 'Units by channel' });
     expect(options.legend).toMatchObject({ enabled: true });
   });
@@ -85,6 +92,18 @@ describe('buildPieChartOptions', () => {
     const built = buildPieChartOptions({ options: viz, response: pieResponse, themeColors: THEME });
     const dataLabels = built.plotOptions?.pie?.dataLabels as Highcharts.DataLabelsOptions;
     expect(callFormatter(dataLabels.formatter, { name: 'Online', percentage: 42.951 })).toContain('Online : 42.95 %');
+  });
+});
+
+describe('pie cross filter', () => {
+  it('pulls out the selected slice and toggles it on click', () => {
+    const picks: string[][] = [];
+    const options = buildPieChartOptions({ options: {}, response: pieResponse, themeColors: THEME, selected: ['Online'], onSelect: picks.push.bind(picks) });
+    expect(options.series?.[0]).toMatchObject({ data: [{ selected: false }, { name: 'Online', selected: true, sliced: true }] });
+    const click = options.plotOptions?.pie?.point?.events?.click as unknown;
+    callFormatter(click, { name: 'Online' });
+    callFormatter(click, { name: 'Offline' });
+    expect(picks).toEqual([[], ['Offline']]);
   });
 });
 

@@ -32,10 +32,14 @@ interface PieOptionsInput {
   options: VizOptions;
   response: SeriesTwoResponse;
   themeColors: readonly string[];
+  /** Slices selected as a cross filter; shown pulled out. */
+  selected?: readonly string[];
+  /** Clicking a slice selects it, clicking it again clears the selection (v1 `PieChart.handleSelectItem`). */
+  onSelect?: (selected: string[]) => void;
 }
 
 /** Pie charts (v1 `PieChart.vue`). */
-export function buildPieChartOptions({ options, response, themeColors }: PieOptionsInput): Highcharts.Options {
+export function buildPieChartOptions({ options, response, themeColors, selected = [], onSelect }: PieOptionsInput): Highcharts.Options {
   const pie = (options.plotOptions?.pie ?? {}) as { dataLabels?: { displayUnit?: string; labelFormat?: string; style?: { color?: string } } };
   const format = createNumberFormat({
     displayUnit: pie.dataLabels?.displayUnit,
@@ -68,6 +72,13 @@ export function buildPieChartOptions({ options, response, themeColors }: PieOpti
         allowPointSelect: true,
         cursor: 'pointer',
         borderRadius: 0,
+        point: {
+          events: {
+            click(this: Highcharts.Point) {
+              onSelect?.(selected.includes(this.name) ? [] : [this.name]);
+            }
+          }
+        },
         dataLabels: {
           useHTML: true,
           formatter(this: Highcharts.Point) {
@@ -83,7 +94,11 @@ export function buildPieChartOptions({ options, response, themeColors }: PieOpti
         }
       }
     },
-    series: response.series.map(series => ({ type: 'pie', name: series.name, data: series.data.map(([name, y]) => [name, y]) }))
+    series: response.series.map(series => ({
+      type: 'pie',
+      name: series.name,
+      data: series.data.map(([name, y]) => ({ name, y, selected: selected.includes(name), sliced: selected.includes(name) }))
+    }))
   };
 
   return merge({}, BASE_CONFIG, PIE_DEFAULTS, options, manual) as Highcharts.Options;

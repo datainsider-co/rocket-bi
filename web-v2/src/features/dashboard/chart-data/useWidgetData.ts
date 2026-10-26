@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useDi } from '@/app/di/DiContext';
 import type { ChartWidget } from '@/core/dashboard/Widget';
+import type { JsonObject } from '@/core/json/json';
 import { toQueryRequestJson, type Paging } from '@/core/query/QueryRequest';
 import { QueryService } from '@/core/query/QueryService';
 import { dashboardKeys } from '../detail/dashboardQueries';
@@ -19,6 +20,8 @@ export const chartDataKeys = {
 
 interface WidgetDataOptions {
   dashboardId: number;
+  /** The widget's setting with control values applied (`applyControlValues`); the stored one by default. */
+  setting?: JsonObject;
   paging?: Paging;
 }
 
@@ -26,11 +29,11 @@ interface WidgetDataOptions {
  * The data of one chart widget (v1 `DashboardControllerStore.renderChart` + `ChartDataStore`). While a new request
  * loads, the previous data stays on screen (v1's "updating" state): `isFetching` with `data`.
  */
-export function useWidgetData(widget: ChartWidget, { dashboardId, paging }: WidgetDataOptions) {
+export function useWidgetData(widget: ChartWidget, { dashboardId, setting = widget.setting, paging }: WidgetDataOptions) {
   const service = useDi(QueryService);
   const request = useMemo(
-    () => toQueryRequestJson({ setting: widget.setting, paging, dashboardId, chartId: widget.id }),
-    [widget.setting, widget.id, paging, dashboardId]
+    () => toQueryRequestJson({ setting, paging, dashboardId, chartId: widget.id }),
+    [setting, widget.id, paging, dashboardId]
   );
   return useQuery({
     queryKey: chartDataKeys.request(dashboardId, widget.id, request),
