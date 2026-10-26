@@ -12,6 +12,8 @@ import { createContainer } from '@/core/di/Container';
 import type { DiModule } from '@/core/di/Container';
 import { DirectoryService } from '@/core/directory/DirectoryService';
 import { PermissionService } from '@/core/permission/PermissionService';
+import { QueryService } from '@/core/query/QueryService';
+import { fakeQueryService } from '@/features/dashboard/testing';
 import { fakeConnectionService, fakePermissionService } from '@/features/data-source/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
 
@@ -32,7 +34,8 @@ export function fakeAuthenticationService(overrides: Partial<Service> = {}, user
 
 /**
  * Test-only: renders the real routes at `path`, with `service` bound in place of the HTTP one. Other services are
- * quiet fakes (no permissions, so no data source setup; an empty directory tree); `modules` can replace them.
+ * quiet fakes (no permissions, so no data source setup; an empty directory tree; chart queries answered from
+ * fixtures); `modules` can replace them.
  */
 export function renderAppAt(path: string, service: Service, modules: readonly DiModule[] = []) {
   const container = createContainer([
@@ -42,6 +45,7 @@ export function renderAppAt(path: string, service: Service, modules: readonly Di
       di.bindValue(ConnectionService, fakeConnectionService());
       di.bindValue(DirectoryService, fakeDirectoryService());
       di.bindValue(DashboardService, fakeDashboardService());
+      di.bindValue(QueryService, fakeQueryService());
     },
     ...modules
   ]);

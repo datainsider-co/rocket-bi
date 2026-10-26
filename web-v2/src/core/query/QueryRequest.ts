@@ -1,0 +1,65 @@
+import { asString, type JsonObject } from '@/core/json/json';
+
+/** v1 `AbstractTableQuerySetting` and friends: settings the server pages (`from` / `size`). */
+const PAGED_SETTINGS = new Set([
+  'table_chart_setting',
+  'group_table_chart_setting',
+  'raw_query_setting',
+  'pivot_table_chart_setting',
+  'flatten_pivot_table_chart_setting',
+  'scatter_chart_setting',
+  'bubble_chart_setting',
+  'bell_curve_chart_setting'
+]);
+
+/** v1's first page of a table. */
+export const DEFAULT_PAGE_SIZE = 20;
+
+export interface Paging {
+  from: number;
+  size: number;
+}
+
+/** Backend `FilterRequest`; `condition` is a backend `Condition` as JSON. */
+export interface FilterRequestJson {
+  filter_id: number;
+  condition: JsonObject;
+  is_apply_relatively?: boolean;
+  is_active?: boolean;
+}
+
+export interface QueryRequestInput {
+  setting: JsonObject;
+  filterRequests?: readonly FilterRequestJson[];
+  /** Tables page; everything else asks for all rows (-1). */
+  paging?: Paging;
+  dashboardId?: number;
+  chartId?: number;
+  parameters?: Readonly<Record<string, string>>;
+}
+
+export function settingClassName(setting: JsonObject): string {
+  return asString(setting['class_name']);
+}
+
+export function isPagedSetting(setting: JsonObject): boolean {
+  return PAGED_SETTINGS.has(settingClassName(setting));
+}
+
+/**
+ * Body of `POST chart/query` (backend `ChartRequest`). Like v1, the viz options are left out (`options: {}`): the
+ * server doesn't need them to query.
+ */
+export function toQueryRequestJson({ setting, filterRequests = [], paging, dashboardId, chartId, parameters = {} }: QueryRequestInput): JsonObject {
+  const page = paging ?? (isPagedSetting(setting) ? { from: 0, size: DEFAULT_PAGE_SIZE } : { from: -1, size: -1 });
+  return {
+    query_setting: { ...setting, options: {} },
+    filter_requests: filterRequests,
+    from: page.from,
+    size: page.size,
+    use_boost: false,
+    ...(dashboardId !== undefined && { dashboard_id: dashboardId }),
+    ...(chartId !== undefined && { chart_id: chartId }),
+    parameters
+  };
+}
