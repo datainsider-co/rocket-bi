@@ -40,4 +40,22 @@ describe('HttpDashboardService', () => {
     expect(requests[0]).toMatchObject({ method: 'PUT', url: 'http://api.test/dashboards/1/rename' });
     expect(sent()).toEqual({ to_name: 'KPI' });
   });
+
+  it('saves every widget position with z_index', async () => {
+    const { service, requests, sent } = setup({ success: true });
+
+    await service.resizeWidgets(3, {
+      1: { row: 4, column: 0, width: 7, height: 2, zIndex: 0 },
+      2: { row: 0, column: 7, width: 5, height: 6, zIndex: 1 }
+    });
+
+    expect(requests[0]).toMatchObject({ method: 'PUT', url: 'http://api.test/dashboards/3/widgets/resize' });
+    // Body accepted by the local backend.
+    expect(sent()).toEqual({
+      positions: {
+        '1': { row: 4, column: 0, width: 7, height: 2, z_index: 0 },
+        '2': { row: 0, column: 7, width: 5, height: 6, z_index: 1 }
+      }
+    });
+  });
 });

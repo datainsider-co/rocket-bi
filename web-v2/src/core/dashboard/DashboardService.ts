@@ -2,6 +2,7 @@ import type { KyInstance } from 'ky';
 import Deneric from 'deneric2';
 import { token } from '@/core/di/Container';
 import { DirectoryType } from '@/core/directory/Directory';
+import { positionsToJson, type PositionMap } from './Position';
 
 /**
  * What the directory screens need of a dashboard. The full model (widgets, positions, setting) comes with the
@@ -29,6 +30,12 @@ export interface DashboardService {
    */
   create(name: string, parentDirectoryId: number): Promise<DashboardSummary>;
   rename(id: number, name: string): Promise<void>;
+  /**
+   * Saves widget positions. The server rejects the request unless `positions` has exactly one entry per widget of
+   * the dashboard, including widgets inside tabs and filter panels, so always send the whole map. It stores
+   * unplaced positions (-1) as they are: place them first.
+   */
+  resizeWidgets(dashboardId: number, positions: PositionMap): Promise<void>;
 }
 
 export const DashboardService = token<DashboardService>('DashboardService');
@@ -44,5 +51,9 @@ export class HttpDashboardService implements DashboardService {
 
   async rename(id: number, name: string): Promise<void> {
     await this.http.put(`dashboards/${id}/rename`, { json: { to_name: name } });
+  }
+
+  async resizeWidgets(dashboardId: number, positions: PositionMap): Promise<void> {
+    await this.http.put(`dashboards/${dashboardId}/widgets/resize`, { json: { positions: positionsToJson(positions) } });
   }
 }
