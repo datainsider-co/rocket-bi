@@ -1,0 +1,23 @@
+/* Overrides for react-grid-layout/css/styles.css. */
+
+.dashboard-grid__item {
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.dashboard-grid--editable > .dashboard-grid__item {
+  cursor: move;
+}
+
+/* Inline z-indexes layer widgets in overlap mode; keep the one being moved above all of them. */
+.dashboard-grid > .react-grid-item.react-draggable-dragging,
+.dashboard-grid > .react-grid-item.resizing {
+  z-index: var(--dashboard-grid-top-z) !important;
+}
+
+.dashboard-grid > .react-grid-placeholder {
+  z-index: var(--dashboard-grid-top-z);
+  background: var(--color-brand);
+  opacity: 0.15;
+  border-radius: 4px;
+}
