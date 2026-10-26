@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { WidgetId } from '@/core/dashboard/Position';
 import type { Widget } from '@/core/dashboard/Widget';
+import { getDashboardTheme } from '../theme/dashboardThemes';
 import { ChartWidgetView } from './chart/ChartWidgetView';
 import { ImageWidgetView } from './image/ImageWidgetView';
 import { TabWidgetView } from './tab/TabWidgetView';
@@ -19,7 +20,9 @@ interface WidgetRendererProps {
 function WidgetBody({ widget, dashboard, mobile, renderWidget }: WidgetRendererProps) {
   switch (widget.kind) {
     case 'chart':
-      return <ChartWidgetView widget={widget} />;
+      return (
+        <ChartWidgetView widget={widget} dashboardId={dashboard.id} themeColors={getDashboardTheme(dashboard.setting.themeName).colors} />
+      );
     case 'text':
       return <TextWidgetView widget={widget} />;
     case 'image':
