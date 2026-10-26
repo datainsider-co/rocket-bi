@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { dashboardFromJson } from '@/core/dashboard/Dashboard';
 import fixture from '@/core/dashboard/filters.fixture.json';
 import type { ChartWidget, Widget } from '@/core/dashboard/Widget';
-import { buildChartQuery } from './chartQuery.utils';
+import { buildChartQuery, isAffectedByFilter } from './chartQuery.utils';
 import { MAIN_DATE_ID } from './controls.utils';
 
 const dashboard = dashboardFromJson(fixture);
@@ -47,5 +47,18 @@ describe('buildChartQuery', () => {
   it('sends the parameter input value, else the stored one', () => {
     expect(buildChartQuery(chart(24), {}, widgets).parameters).toEqual({ min_units: '5000' });
     expect(buildChartQuery(chart(24), { 23: { selected_value: ['9000'] } }, widgets).parameters).toEqual({ min_units: '9000' });
+  });
+
+  it('adds the header filter requests after the inner filter', () => {
+    const header = { filter_id: -1, condition: { class_name: 'in' }, is_apply_relatively: true, is_active: true };
+    expect(buildChartQuery(chart(21), {}, widgets, [header]).filterRequests).toEqual([header]);
+  });
+});
+
+describe('isAffectedByFilter', () => {
+  it('is on unless the chart turned it off', () => {
+    expect(isAffectedByFilter({})).toBe(true);
+    expect(isAffectedByFilter({ options: { options: { affected_by_filter: true } } })).toBe(true);
+    expect(isAffectedByFilter({ options: { options: { affected_by_filter: false } } })).toBe(false);
   });
 });

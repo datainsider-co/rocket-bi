@@ -1,5 +1,5 @@
 import type { ChartWidget, Widget } from '@/core/dashboard/Widget';
-import type { JsonObject } from '@/core/json/json';
+import { getPath, type JsonObject } from '@/core/json/json';
 import { applyControlValues, controlsFor, ValueControlType } from '@/core/query/controlValues';
 import { applyDynamicFunctions, isFunctionControl, referencedFunctionIds, selectedColumns, type FunctionSelection } from '@/core/query/dynamicFunctions';
 import { innerFilterRequest } from '@/core/query/filterRequests';
@@ -42,17 +42,31 @@ function parameterInputs(setting: JsonObject, controls: ControlEntryMap, widgets
 }
 
 /**
- * A chart's query with the dashboard's controls applied: filter values into its dynamic conditions, tab control picks
- * into its columns, its inner filter as a filter request and its inputs' values as parameters. Only the controls the
- * chart depends on are read, so other changes leave the result equal (and the chart's query key unchanged).
+ * Whether the header's filters reach the chart unless the viewer says otherwise (v1 `isAffectedByFilter`, "Affected by
+ * filter" in the chart's settings). Filter widgets are affected too, as in v1.
  */
-export function buildChartQuery(widget: ChartWidget, controls: ControlEntryMap, widgets: ReadonlyMap<number, Widget>): ChartQuery {
+export function isAffectedByFilter(setting: JsonObject): boolean {
+  return getPath(setting, ['options', 'options', 'affected_by_filter']) !== false;
+}
+
+/**
+ * A chart's query with the dashboard's controls applied: filter values into its dynamic conditions, tab control picks
+ * into its columns, its inner filter and the header's filters (`headerRequests`, those that reach it) as filter
+ * requests and its inputs' values as parameters. Only the controls the chart depends on are read, so other changes
+ * leave the result equal (and the chart's query key unchanged).
+ */
+export function buildChartQuery(
+  widget: ChartWidget,
+  controls: ControlEntryMap,
+  widgets: ReadonlyMap<number, Widget>,
+  headerRequests: readonly FilterRequestJson[] = []
+): ChartQuery {
   const withValues = applyControlValues(widget.setting, controlsFor(widget.setting, widget.id, controls));
   const setting = applyDynamicFunctions(withValues, functionSelection(widget.setting, controls, widgets));
   const inner = widget.chartFilter && innerFilterRequest(widget.id, widget.chartFilter.setting, selected(controls, widget.chartFilter.id));
   return {
     setting,
-    filterRequests: inner ? [inner] : [],
+    filterRequests: inner ? [inner, ...headerRequests] : [...headerRequests],
     parameters: queryParameters(widget.setting, parameterInputs(widget.setting, controls, widgets))
   };
 }

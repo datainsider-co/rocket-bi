@@ -4,6 +4,7 @@ import { MainDateFilterSetting } from '@/core/dashboard/DashboardSetting';
 import fixture from '@/core/dashboard/filters.fixture.json';
 import { widgetFromJson, type ChartWidget } from '@/core/dashboard/Widget';
 import { DateMode } from '@/core/query/dateRanges';
+import { FilterCondition } from '@/core/query/internalFilter';
 import {
   MAIN_DATE_ID,
   controlEntryOf,
@@ -134,13 +135,13 @@ describe('panelOfWidgets', () => {
 
 describe('controls state', () => {
   const initial = { 1: { selected_value: ['Asia'] } };
-  const state: ControlsState = { controls: initial, pending: {} };
+  const state: ControlsState = { controls: initial, pending: {}, headerFilters: [] };
 
   it('sets, clears and resets controls', () => {
     const changed = controlsReducer(state, { type: 'set', id: 2, values: { selected_value: ['Fruits'] } });
     expect(changed.controls).toEqual({ 1: { selected_value: ['Asia'] }, 2: { selected_value: ['Fruits'] } });
     expect(hasChangedControls(changed, initial)).toBe(true);
-    expect(controlsReducer(changed, { type: 'reset', initial }).controls).toEqual(initial);
+    expect(controlsReducer(changed, { type: 'reset', initial, headerFilters: [] }).controls).toEqual(initial);
   });
 
   it('compares modes and keys too', () => {
@@ -172,8 +173,22 @@ describe('controls state', () => {
     const dated = controlsReducer(state, { type: 'mainDate', mainDate, values: { min_value: ['a'], max_value: ['b'] } });
     expect(dated.mainDate).toBe(mainDate);
     expect(hasChangedControls(dated, initial)).toBe(false);
-    const reset = controlsReducer(dated, { type: 'reset', initial: { ...initial, [MAIN_DATE_ID]: {} } });
+    const reset = controlsReducer(dated, { type: 'reset', initial: { ...initial, [MAIN_DATE_ID]: {} }, headerFilters: [] });
     expect(reset.controls).toEqual({ ...initial, [MAIN_DATE_ID]: { min_value: ['a'], max_value: ['b'] } });
-    expect(controlsReducer(state, { type: 'reset', initial: { [MAIN_DATE_ID]: {} } }).controls).toEqual({});
+    expect(controlsReducer(state, { type: 'reset', initial: { [MAIN_DATE_ID]: {} }, headerFilters: [] }).controls).toEqual({});
+  });
+
+  it('edits, removes and resets header filters', () => {
+    const region = { id: -1, name: 'Region', field: {}, condition: FilterCondition.In, values: ['Asia'], enabled: true, nested: false };
+    const country = { ...region, id: -2, name: 'Country' };
+    const opened = { ...state, headerFilters: [region, country] };
+    const off = controlsReducer(opened, { type: 'headerFilter', filter: { ...region, enabled: false } });
+    expect(off.headerFilters).toEqual([{ ...region, enabled: false }, country]);
+    expect(hasChangedControls(off, initial, [region, country])).toBe(true);
+    expect(hasChangedControls(opened, initial, [region, country])).toBe(false);
+
+    const removed = controlsReducer(off, { type: 'removeHeaderFilter', id: -2 });
+    expect(removed.headerFilters).toEqual([{ ...region, enabled: false }]);
+    expect(controlsReducer(removed, { type: 'reset', initial, headerFilters: [region, country] }).headerFilters).toEqual([region, country]);
   });
 });

@@ -24,6 +24,7 @@ export function useChartView(widget: ChartWidget) {
     back: useCallback((index: number) => dispatch({ type: 'back', index }), []),
     zoom: useCallback((level: string) => dispatch({ type: 'zoom', level }), []),
     sort: useCallback((sort: TableSort | undefined) => dispatch({ type: 'sort', sort }), []),
+    toggleFilters: useCallback((on: boolean) => dispatch({ type: 'filters', on }), []),
     reset: useCallback(() => dispatch({ type: 'reset' }), [])
   };
 }

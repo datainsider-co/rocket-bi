@@ -1,6 +1,8 @@
 import { createContext, use, useCallback, useMemo, useReducer, useState, type ReactNode } from 'react';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { Widget } from '@/core/dashboard/Widget';
+import { filterRequestOf, type InternalFilter } from '@/core/query/internalFilter';
+import type { FilterRequestJson } from '@/core/query/QueryRequest';
 import {
   controlEntryOf,
   controlsReducer,
@@ -29,7 +31,13 @@ interface DashboardControlsState {
   /** Present when the dashboard has a main date filter. */
   mainDate?: MainDateState;
   setMainDate: (mainDate: MainDateState) => void;
-  /** Back to every control's default, the main date excepted. */
+  /** Dashboard-wide filters, those drill through opened the dashboard with first. */
+  headerFilters: readonly InternalFilter[];
+  /** The requests of the header filters that are on and complete; every chart affected by filters sends them. */
+  headerRequests: readonly FilterRequestJson[];
+  setHeaderFilter: (filter: InternalFilter) => void;
+  removeHeaderFilter: (id: number) => void;
+  /** Back to every control's default, the main date excepted, and to the header filters the dashboard opened with. */
   reset: () => void;
   changed: boolean;
 }
@@ -38,8 +46,12 @@ const DashboardControlsContext = createContext<DashboardControlsState | null>(nu
 
 const currentDate = () => new Date();
 
+const NO_FILTERS: readonly InternalFilter[] = [];
+
 interface DashboardControlsProviderProps {
   dashboard: Dashboard;
+  /** The header filters to start with (`?filters=`). */
+  headerFilters?: readonly InternalFilter[];
   storage?: MainDateStorage;
   now?: () => Date;
   children: ReactNode;
@@ -50,12 +62,23 @@ interface DashboardControlsProviderProps {
  * `FilterStore.groupFilterMap`, `DashboardControllerStore.dynamicFunctionMap`). Mount it with a `key` per dashboard so
  * a different dashboard starts from its own defaults.
  */
-export function DashboardControlsProvider({ dashboard, storage = localMainDateStorage, now = currentDate, children }: DashboardControlsProviderProps) {
+export function DashboardControlsProvider({
+  dashboard,
+  headerFilters = NO_FILTERS,
+  storage = localMainDateStorage,
+  now = currentDate,
+  children
+}: DashboardControlsProviderProps) {
   const [start] = useState(() => {
     const mainDate = initialMainDate(dashboard.setting.mainDateFilter, storage.load(dashboard.id));
-    return { mainDate, initial: initialControls(dashboard.widgets, mainDate, now()) };
+    return { mainDate, initial: initialControls(dashboard.widgets, mainDate, now()), headerFilters };
   });
-  const [state, dispatch] = useReducer(controlsReducer, { controls: start.initial, pending: {}, mainDate: start.mainDate });
+  const [state, dispatch] = useReducer(controlsReducer, {
+    controls: start.initial,
+    pending: {},
+    mainDate: start.mainDate,
+    headerFilters: start.headerFilters
+  });
   const widgets = useMemo(() => new Map<number, Widget>(dashboard.widgets.map(widget => [widget.id, widget])), [dashboard.widgets]);
   const panels = useMemo(() => panelOfWidgets(dashboard.widgets), [dashboard.widgets]);
 
@@ -71,7 +94,10 @@ export function DashboardControlsProvider({ dashboard, storage = localMainDateSt
     },
     [storage, dashboard.id, now]
   );
-  const reset = useCallback(() => dispatch({ type: 'reset', initial: start.initial }), [start.initial]);
+  const setHeaderFilter = useCallback((filter: InternalFilter) => dispatch({ type: 'headerFilter', filter }), []);
+  const removeHeaderFilter = useCallback((id: number) => dispatch({ type: 'removeHeaderFilter', id }), []);
+  const reset = useCallback(() => dispatch({ type: 'reset', initial: start.initial, headerFilters: start.headerFilters }), [start]);
+  const headerRequests = useMemo(() => state.headerFilters.flatMap(filter => filterRequestOf(filter) ?? []), [state.headerFilters]);
 
   const value = useMemo(
     () => ({
@@ -82,10 +108,14 @@ export function DashboardControlsProvider({ dashboard, storage = localMainDateSt
       applyPanel,
       mainDate: state.mainDate,
       setMainDate,
+      headerFilters: state.headerFilters,
+      headerRequests,
+      setHeaderFilter,
+      removeHeaderFilter,
       reset,
-      changed: hasChangedControls(state, start.initial)
+      changed: hasChangedControls(state, start.initial, start.headerFilters)
     }),
-    [state, widgets, panels, setControl, applyPanel, setMainDate, reset, start.initial]
+    [state, widgets, panels, setControl, applyPanel, setMainDate, headerRequests, setHeaderFilter, removeHeaderFilter, reset, start]
   );
   return <DashboardControlsContext value={value}>{children}</DashboardControlsContext>;
 }

@@ -3,6 +3,7 @@ import type { JsonObject } from '@/core/json/json';
 import type { ExportType } from '@/core/query/QueryService';
 import { ZOOM_LEVELS } from '@/core/query/zoom';
 import { DRILL_DATE_LEVELS, type DrillField } from './chartView.utils';
+import type { DrillTarget } from './drillThrough.utils';
 
 type MenuItems = NonNullable<MenuProps['items']>;
 
@@ -12,10 +13,22 @@ export interface DrillChoices {
   loading: boolean;
 }
 
+/** Dashboards to drill through to, loaded page by page. */
+export interface DrillThroughChoices {
+  dashboards: readonly DrillTarget[];
+  loading: boolean;
+  hasMore: boolean;
+}
+
+/** The point menu stays open when this item is clicked, so the next page shows. */
+export const LOAD_MORE_DASHBOARDS_KEY = 'drill-through:more';
+
 export interface PointMenuInput {
   value: string;
   /** The chart can drill; `undefined` hides the item. */
   drill?: DrillChoices;
+  /** The chart can drill through; `undefined` hides the item. */
+  drillThrough?: DrillThroughChoices;
   canResetFilter: boolean;
   canResetDrill: boolean;
 }
@@ -25,6 +38,21 @@ export interface PointMenuHandlers {
   drillDown: (value: string, field: DrillField, dateLevel?: string) => void;
   resetFilter: () => void;
   resetDrill: () => void;
+  drillThrough: (target: DrillTarget) => void;
+  loadMoreDashboards: () => void;
+}
+
+function drillThroughChildren(choices: DrillThroughChoices, handlers: PointMenuHandlers): MenuItems {
+  const { dashboards, loading, hasMore } = choices;
+  if (dashboards.length === 0) {
+    return [{ key: 'drill-through:none', label: loading ? 'Loading...' : 'No dashboard to drill through', disabled: true }];
+  }
+  return [
+    ...dashboards.map(target => ({ key: `drill-through:${target.id}`, label: target.name, onClick: () => handlers.drillThrough(target) })),
+    ...(hasMore || loading
+      ? [{ key: LOAD_MORE_DASHBOARDS_KEY, label: loading ? 'Loading...' : 'Load more', disabled: loading, onClick: handlers.loadMoreDashboards }]
+      : [])
+  ];
 }
 
 function drillChildren(value: string, drill: DrillChoices, onDrill: PointMenuHandlers['drillDown']): MenuItems {
@@ -45,12 +73,13 @@ function drillChildren(value: string, drill: DrillChoices, onDrill: PointMenuHan
   );
 }
 
-/** The menu of a clicked point (v1 `WidgetContextMenu.getMenuOptions`); drill through comes with M4b. */
+/** The menu of a clicked point (v1 `WidgetContextMenu.getMenuOptions`). */
 export function pointMenuItems(input: PointMenuInput, handlers: PointMenuHandlers): MenuItems {
-  const { value, drill, canResetFilter, canResetDrill } = input;
+  const { value, drill, drillThrough, canResetFilter, canResetDrill } = input;
   return [
     { key: 'filter', label: `Use "${value}" as a filter`, onClick: () => handlers.useAsFilter(value) },
     ...(drill ? [{ key: 'drill', label: 'Drill down', children: drillChildren(value, drill, handlers.drillDown) }] : []),
+    ...(drillThrough ? [{ key: 'drill-through', label: 'Drill through', children: drillThroughChildren(drillThrough, handlers) }] : []),
     { key: 'reset-filter', label: 'Reset filter', disabled: !canResetFilter, onClick: handlers.resetFilter },
     ...(canResetDrill ? [{ key: 'reset-drill', label: 'Reset drill down', onClick: handlers.resetDrill }] : [])
   ];

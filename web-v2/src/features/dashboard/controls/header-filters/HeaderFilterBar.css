@@ -1,0 +1,15 @@
+/* v1 FilterBar.vue / InternalFilterPanel.scss: chips on the theme's filter color, faded while off. */
+
+.header-filter-bar {
+  padding: 8px 15px 0;
+}
+
+.header-filter {
+  max-width: 100%;
+  background: var(--filter-color);
+  color: var(--text-color);
+}
+
+.header-filter[data-enabled='false'] {
+  opacity: 0.5;
+}

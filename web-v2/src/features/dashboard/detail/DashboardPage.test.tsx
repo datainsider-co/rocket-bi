@@ -33,6 +33,12 @@ function revenueByCountry(queries: QueryService) {
   return { finals, measure };
 }
 
+/** `filter_requests` of the latest query of a chart. */
+function filterRequestsOf(queries: QueryService, chartId: number): unknown[] | undefined {
+  const calls = vi.mocked(queries.query).mock.calls.map(([request]) => request as { chart_id?: number; filter_requests: unknown[] });
+  return calls.filter(request => request.chart_id === chartId).at(-1)?.filter_requests;
+}
+
 /** Filling charts and tables wait for their container's size; jsdom lays nothing out, so report one. */
 function stubResizeObserver() {
   vi.stubGlobal(
@@ -152,6 +158,40 @@ describe('dashboard page', () => {
     await userEvent.click(await screen.findByText('Download CSV'));
     await waitFor(() => expect(queries.export).toHaveBeenCalledWith(expect.objectContaining({ chart_id: 7, from: -1, size: -1 }), 'csv'), SLOW);
     await waitFor(() => expect(saved).toHaveBeenCalled(), SLOW);
+  });
+
+  it('applies the filters of the URL to every chart, and turns one off from the header', { timeout: 15_000 }, async () => {
+    const queries = fakeQueryService();
+    // What v1's drill through put in `?filters=`.
+    const v1Filter = {
+      className: 'dynamic_filter',
+      name: 'Region',
+      currentValues: ['Asia'],
+      currentOptionSelected: 'in',
+      isEnable: true,
+      field: { className: 'table_field', dbName: 'sample_v2', tblName: 'sales', fieldName: 'region', fieldType: 'string' }
+    };
+    renderAppAt(`/dashboard/v2-sample-1?filters=${encodeURIComponent(JSON.stringify([v1Filter]))}`, fakeAuthenticationService(), [
+      di => {
+        di.bindValue(DashboardService, fakeDashboardService({ get: vi.fn<DashboardService['get']>(async () => dashboardFromJson(fixture)) }));
+        di.bindValue(QueryService, queries);
+      }
+    ]);
+    const region = {
+      filter_id: -1,
+      condition: { class_name: 'in', possible_values: ['Asia'], field: { class_name: 'table_field', db_name: 'sample_v2', tbl_name: 'sales', field_name: 'region', field_type: 'string' } },
+      is_apply_relatively: true,
+      is_active: true
+    };
+
+    expect(await screen.findByText('Filters (1)', {}, SLOW)).toBeInTheDocument();
+    // The KPI (3) has no condition on any filter widget, yet the header filter reaches it.
+    await waitFor(() => expect(filterRequestsOf(queries, 3)).toEqual([region]), SLOW);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Turn off Region' }));
+    await waitFor(() => expect(filterRequestsOf(queries, 3)).toEqual([]), SLOW);
+    await userEvent.click(screen.getByRole('button', { name: /Reset Filters/ }));
+    await waitFor(() => expect(filterRequestsOf(queries, 3)).toEqual([region]), SLOW);
   });
 
   it('rewrites an outdated name in the URL', async () => {

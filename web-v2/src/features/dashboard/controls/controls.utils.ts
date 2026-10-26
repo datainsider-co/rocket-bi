@@ -5,6 +5,7 @@ import { asArray, getPath, isRecord, type JsonObject } from '@/core/json/json';
 import { ValueControlType, type ControlValues } from '@/core/query/controlValues';
 import { DateMode, formatDateTime, isDateMode, rangeValues } from '@/core/query/dateRanges';
 import { functionColumns, functionKey, isFunctionControl } from '@/core/query/dynamicFunctions';
+import type { InternalFilter } from '@/core/query/internalFilter';
 import { treeRootKey, treeSelectedValues } from '../charts/filter/treeFilter.utils';
 import { ChartVizClass } from '../charts/vizClass';
 
@@ -150,13 +151,18 @@ export interface ControlsState {
   /** Changes made in a filter panel and not applied yet, per panel id. */
   pending: Readonly<Record<number, ControlEntryMap>>;
   mainDate?: MainDateState;
+  /** Dashboard-wide filters (v1 `InternalFilter`), from `?filters=`; the header's filter bar edits them. */
+  headerFilters: readonly InternalFilter[];
 }
 
 export type ControlsAction =
   | { type: 'set'; id: number; values: ControlEntry; panelId?: number }
   | { type: 'apply'; panelId: number }
   | { type: 'mainDate'; mainDate: MainDateState; values: ControlEntry }
-  | { type: 'reset'; initial: ControlEntryMap };
+  /** Replaces the header filter with the same id. */
+  | { type: 'headerFilter'; filter: InternalFilter }
+  | { type: 'removeHeaderFilter'; id: number }
+  | { type: 'reset'; initial: ControlEntryMap; headerFilters: readonly InternalFilter[] };
 
 function withoutKey<T>(record: Readonly<Record<number, T>>, key: number): Record<number, T> {
   const { [key]: _removed, ...rest } = record;
@@ -177,11 +183,18 @@ export function controlsReducer(state: ControlsState, action: ControlsAction): C
     }
     case 'mainDate':
       return { ...state, mainDate: action.mainDate, controls: { ...state.controls, [MAIN_DATE_ID]: action.values } };
+    case 'headerFilter': {
+      const { filter } = action;
+      return { ...state, headerFilters: state.headerFilters.map(item => (item.id === filter.id ? filter : item)) };
+    }
+    case 'removeHeaderFilter':
+      return { ...state, headerFilters: state.headerFilters.filter(item => item.id !== action.id) };
     case 'reset': {
-      // Reset Filters leaves the main date alone: it has its own picker, and v1 kept it too.
+      // Reset Filters leaves the main date alone: it has its own picker, and v1 kept it too. Header filters go back to
+      // those the URL opened with (v1's button never touched them).
       const mainDate = state.controls[MAIN_DATE_ID];
       const controls = mainDate ? { ...withoutKey(action.initial, MAIN_DATE_ID), [MAIN_DATE_ID]: mainDate } : withoutKey(action.initial, MAIN_DATE_ID);
-      return { ...state, controls, pending: {} };
+      return { ...state, controls, pending: {}, headerFilters: action.headerFilters };
     }
   }
 }
@@ -198,9 +211,12 @@ function sameEntry(a: ControlEntry | undefined, b: ControlEntry | undefined): bo
   return [...keys].every(key => isEqual(orEmpty(a?.[key]), orEmpty(b?.[key])));
 }
 
-/** Whether any control other than the main date left its default, or a panel holds unapplied changes. */
-export function hasChangedControls(state: ControlsState, initial: ControlEntryMap): boolean {
-  if (Object.keys(state.pending).length > 0) return true;
+/**
+ * Whether any control other than the main date left its default, a panel holds unapplied changes or the header
+ * filters differ from those the dashboard opened with.
+ */
+export function hasChangedControls(state: ControlsState, initial: ControlEntryMap, initialHeaderFilters: readonly InternalFilter[] = []): boolean {
+  if (Object.keys(state.pending).length > 0 || !isEqual(state.headerFilters, initialHeaderFilters)) return true;
   const ids = new Set([...Object.keys(state.controls), ...Object.keys(initial)].map(Number));
   ids.delete(MAIN_DATE_ID);
   return [...ids].some(id => !sameEntry(state.controls[id], initial[id]));

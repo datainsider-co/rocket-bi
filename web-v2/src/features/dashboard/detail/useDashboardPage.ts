@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { useDi } from '@/app/di/DiContext';
 import { DashboardService } from '@/core/dashboard/DashboardService';
+import { FILTERS_PARAM, parseFiltersParam } from '@/core/query/filtersParam';
 import { dashboardPath, parseIdParam } from '@/shared/routing/idParam';
 import { dashboardQueryOptions } from './dashboardQueries';
 import { dashboardErrorMessage, isNotFoundError } from './dashboardDetail.utils';
@@ -21,6 +22,8 @@ export function useDashboardPage() {
   const location = useLocation();
   const query = useQuery({ ...dashboardQueryOptions(service, id ?? 0), enabled: id !== undefined });
   const dashboard = query.data;
+  // Read once per URL; the controls only take them as their starting point.
+  const headerFilters = useMemo(() => parseFiltersParam(new URLSearchParams(location.search).get(FILTERS_PARAM)), [location.search]);
 
   const isMissing = id === undefined || isNotFoundError(query.error);
   useEffect(() => {
@@ -38,6 +41,7 @@ export function useDashboardPage() {
 
   return {
     dashboard,
+    headerFilters,
     isLoading: query.isPending && !isMissing,
     error: query.error && !isMissing ? dashboardErrorMessage(query.error) : undefined,
     retry: () => void query.refetch(),

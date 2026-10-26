@@ -4,16 +4,20 @@ import { drilldownSetting, isDrilledField, type DrilldownStep } from '@/core/que
 import type { TableSort } from '@/core/query/tableSort';
 import { applyTableSort } from '@/core/query/tableSort';
 import { applyZoom, ZOOM_LEVELS } from '@/core/query/zoom';
+import { isDateType, isTextType } from '@/core/schema/fieldTypes';
 import { tableField, type DatabaseSchema } from '@/core/schema/SchemaService';
 
 /**
- * How the viewer changed one chart without saving it (v1 `DrilldownDataStore`, `ZoomStore`, the table's sort): the
- * drill down steps with the setting each one produced, the date function picked, the column sorted on.
+ * How the viewer changed one chart without saving it (v1 `DrilldownDataStore`, `ZoomStore`, the table's sort, the
+ * filter icon's toggle): the drill down steps with the setting each one produced, the date function picked, the
+ * column sorted on, whether the header's filters apply.
  */
 export interface ChartView {
   drills: readonly { step: DrilldownStep; setting: JsonObject }[];
   zoom?: string;
   sort?: TableSort;
+  /** Set once the viewer toggled the header's filters for this chart; until then the chart's setting decides. */
+  filtersOn?: boolean;
 }
 
 export const INITIAL_VIEW: ChartView = { drills: [] };
@@ -34,6 +38,7 @@ export type ChartViewAction =
   | { type: 'back'; index: number }
   | { type: 'zoom'; level: string }
   | { type: 'sort'; sort?: TableSort }
+  | { type: 'filters'; on: boolean }
   | { type: 'reset' };
 
 export function chartViewReducer(view: ChartView, action: ChartViewAction): ChartView {
@@ -49,6 +54,8 @@ export function chartViewReducer(view: ChartView, action: ChartViewAction): Char
       return { ...view, zoom: action.level };
     case 'sort':
       return { ...view, sort: action.sort };
+    case 'filters':
+      return { ...view, filtersOn: action.on };
     case 'reset':
       return { ...view, drills: [], zoom: undefined };
   }
@@ -61,8 +68,6 @@ export interface DrillField {
   isDate: boolean;
 }
 
-const DATE_TYPES = new Set(['date', 'datetime', 'datetime64']);
-
 /**
  * The fields a chart can drill into (v1 `loadGroupedFieldsWillDrilldown`): the text and date columns of its
  * dimension's table, without those already drilled through.
@@ -72,10 +77,9 @@ export function drillFields(schema: DatabaseSchema | undefined, setting: JsonObj
   const table = schema?.tables.find(item => item.name === tblName);
   if (!table) return [];
   return table.columns.flatMap(item => {
-    const type = item.type.toLowerCase();
-    const isDate = DATE_TYPES.has(type);
+    const isDate = isDateType(item.type);
     const field = tableField(table, item);
-    if ((type !== 'string' && !isDate) || isDrilledField(setting, field)) return [];
+    if ((!isTextType(item.type) && !isDate) || isDrilledField(setting, field)) return [];
     return [{ label: item.displayName, field, isDate }];
   });
 }

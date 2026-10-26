@@ -8,6 +8,7 @@ export function DashboardPage() {
   return (
     <DashboardPageView
       dashboard={page.dashboard}
+      headerFilters={page.headerFilters}
       isLoading={page.isLoading}
       error={page.error}
       mobile={mobile}

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { canExportSetting, pointMenuItems, widgetMenuItems, type PointMenuHandlers, type WidgetMenuHandlers } from './chartMenus.utils';
+import { canExportSetting, LOAD_MORE_DASHBOARDS_KEY, pointMenuItems, widgetMenuItems, type PointMenuHandlers, type WidgetMenuHandlers } from './chartMenus.utils';
 
 type Item = { key: string; label?: string; disabled?: boolean; onClick?: () => void; children?: Item[] };
 const keys = (items: unknown[]) => (items as Item[]).map(item => item.key);
@@ -13,7 +13,9 @@ function pointHandlers() {
     useAsFilter: vi.fn<PointMenuHandlers['useAsFilter']>(),
     drillDown: vi.fn<PointMenuHandlers['drillDown']>(),
     resetFilter: vi.fn<() => void>(),
-    resetDrill: vi.fn<() => void>()
+    resetDrill: vi.fn<() => void>(),
+    drillThrough: vi.fn<PointMenuHandlers['drillThrough']>(),
+    loadMoreDashboards: vi.fn<() => void>()
   };
 }
 
@@ -43,6 +45,32 @@ describe('pointMenuItems', () => {
     const none = pointMenuItems({ value: 'a', drill: { fields: [], loading: false }, canResetFilter: true, canResetDrill: false }, pointHandlers());
     expect(find(none, 'drill').children![0]!.label).toBe('No field to drill down');
     expect(keys(pointMenuItems({ value: 'a', canResetFilter: true, canResetDrill: false }, pointHandlers()))).toEqual(['filter', 'reset-filter']);
+  });
+});
+
+describe('pointMenuItems drill through', () => {
+  const base = { value: 'Asia', canResetFilter: false, canResetDrill: false };
+  const sales = { id: 2, name: 'Sales' };
+
+  it('opens a listed dashboard and loads more on demand', () => {
+    const handlers = pointHandlers();
+    const items = pointMenuItems({ ...base, drillThrough: { dashboards: [sales], loading: false, hasMore: true } }, handlers);
+    expect(keys(items)).toEqual(['filter', 'drill-through', 'reset-filter']);
+    const [target, more] = find(items, 'drill-through').children!;
+    target!.onClick!();
+    expect(handlers.drillThrough).toHaveBeenCalledWith(sales);
+    expect(more).toMatchObject({ key: LOAD_MORE_DASHBOARDS_KEY, label: 'Load more' });
+    more!.onClick!();
+    expect(handlers.loadMoreDashboards).toHaveBeenCalled();
+  });
+
+  it('says when dashboards load or there are none', () => {
+    const children = (drillThrough: { dashboards: (typeof sales)[]; loading: boolean; hasMore: boolean }) =>
+      find(pointMenuItems({ ...base, drillThrough }, pointHandlers()), 'drill-through').children!;
+    expect(children({ dashboards: [], loading: true, hasMore: false })[0]).toMatchObject({ label: 'Loading...', disabled: true });
+    expect(children({ dashboards: [], loading: false, hasMore: false })[0]!.label).toBe('No dashboard to drill through');
+    expect(children({ dashboards: [sales], loading: true, hasMore: true })[1]).toMatchObject({ label: 'Loading...', disabled: true });
+    expect(children({ dashboards: [sales], loading: false, hasMore: false })).toHaveLength(1);
   });
 });
 

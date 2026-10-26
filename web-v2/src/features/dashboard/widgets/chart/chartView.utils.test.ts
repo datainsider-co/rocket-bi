@@ -50,6 +50,13 @@ describe('chart view', () => {
     expect(viewedSetting(table, sorted)['sorts']).toEqual([{ class_name: 'order_by', function: table.columns[0]!.function, order: 'ASC' }]);
     expect(viewedSetting(table, chartViewReducer(sorted, { type: 'sort' }))).toBe(table);
   });
+
+  it('keeps the filter toggle through Reset drill down', () => {
+    const off = chartViewReducer(INITIAL_VIEW, { type: 'filters', on: false });
+    expect(off.filtersOn).toBe(false);
+    expect(chartViewReducer(off, { type: 'reset' }).filtersOn).toBe(false);
+    expect(viewedSetting(stored, off)).toBe(stored);
+  });
 });
 
 describe('drillFields', () => {

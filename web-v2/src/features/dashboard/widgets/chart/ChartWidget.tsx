@@ -2,6 +2,7 @@ import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { ChartWidget as ChartWidgetModel } from '@/core/dashboard/Widget';
 import { getDashboardTheme } from '../../theme/dashboardThemes';
 import { WidgetContainer } from '../WidgetContainer';
+import { AppliedFiltersView } from './AppliedFiltersView';
 import { ChartActionsView } from './ChartActionsView';
 import { ChartWidgetView } from './ChartWidgetView';
 import { InnerFilter } from './InnerFilter';
@@ -17,7 +18,10 @@ export function ChartWidget({ widget, dashboard }: ChartWidgetProps) {
   const chart = useChartWidget(widget, dashboard.id);
   const actions = (
     <ChartActionsView
-      innerFilter={widget.chartFilter && <InnerFilter filter={widget.chartFilter} dashboardId={dashboard.id} />}
+      innerFilter={
+        widget.chartFilter && <InnerFilter filter={widget.chartFilter} dashboardId={dashboard.id} headerRequests={chart.innerFilterRequests} />
+      }
+      appliedFilters={chart.appliedFilters.filters.length > 0 && <AppliedFiltersView {...chart.appliedFilters} />}
       menuItems={chart.widgetItems}
     />
   );

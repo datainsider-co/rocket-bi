@@ -51,7 +51,7 @@ export function ChartWidgetView({ widget, dashboardId, themeColors, chart }: Cha
       <div className="min-h-0 flex-1">
         <ChartRenderer widget={widget} viz={chart.viz} response={data.data} themeColors={themeColors} table={chart.table} crossFilter={chart.crossFilter} />
       </div>
-      <PointMenuView position={chart.pointMenu.position} items={chart.pointMenu.items} onClose={chart.pointMenu.onClose} />
+      <PointMenuView {...chart.pointMenu} />
     </div>
   );
 }
