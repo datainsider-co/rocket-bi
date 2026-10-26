@@ -103,8 +103,8 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
-| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0, M1 |
-| Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | Not started |
+| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0, M1, M2 |
+| Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI, flat table (M2). Next: stacked, drilldown, pivot, the rest |
 | Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Not started |
 | Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Not started |
 | Embedded dashboard | route `/embedded/dashboard/:name` | – | Not started |
@@ -122,10 +122,13 @@ Decisions (2026-10-26):
 - **Query settings stay raw JSON.** `ChartWidget.setting` is the stored backend `ChartSetting`; v2 reads what it needs
   with accessor and transform functions instead of porting v1's 35 QuerySetting and 40 ChartOption classes. ChartBuilder
   ports what it needs later.
-- **Viz options (`setting.options.options`) get their own key conversion.** v1 stored them snake_case (`plot_options`,
-  `font_size`, `x_axis`), so they can't go to Highcharts as is. Only that subtree is converted, with lodash
-  `camelCase` on read and `snakeCase` on write (byte-for-byte what v1 did), skipping subtrees whose keys are data. The
-  result is typed as Highcharts options plus v1's own keys (`affectedByFilter`, `background`, ...).
+- **Viz options (`setting.options.options`) get their own key conversion** (`core/query/vizOptions.ts`). v1 stored
+  them snake_case (`plot_options`, `font_size`, `x_axis`), so they can't go to Highcharts as is. Only that subtree is
+  converted, with lodash `camelCase` on read and `snakeCase` on write, exactly as v1 did. That includes keys that are
+  data (series names under `plot_options.series.response`, `typesByLabel`): v1 converted those too and looks them up
+  with `camelCase(name)`, so v2 does the same (`vizKey`) instead of skipping them, or stored per-series settings
+  would stop matching. The result is typed as Highcharts options plus v1's own keys (`affectedByFilter`,
+  `background`, ...), and merged over v1's defaults with lodash `merge` like v1.
 - **Share links (`?token=`) are in scope**, but blocked by the backend: the token from `share/dashboard/{id}/anyone`
   (and the older `dashboards/{id}/share`) carries `0:dashboard:view:<id>`, while `GET dashboards/{id}` checks
   `directory:view:<directoryId>`, so it answers 401 `not_allowed` (v1 is affected too). Needs a server fix.
@@ -135,14 +138,15 @@ Decisions (2026-10-26):
 |---|---|---|
 | M0 | Real payloads: sample dashboard seeded on the local backend (MySQL `sample_v2.sales`), fixture in `core/dashboard/dashboard.fixture.json` | Done |
 | M1 | Read-only page: `core/dashboard` (`Dashboard`, `DashboardSetting` with v1 defaults, `Widget` union), `DashboardService.get`, route with `<slug>-<id>` (outdated name rewritten, 404 → `/mydata`, permission message), theme variables scoped to the page (`features/dashboard/theme`), widget card, text (sanitized HTML), image, tab and filter panel grids, chart placeholder | Done |
-| M2 | Query pipeline (`chart/query`, responses, max 7 requests at a time), options key conversion, renderers per `ChartOption` class: series (column/bar/line/area), pie, KPI, table | Not started |
+| M2 | Query pipeline: `core/query` (`toQueryRequestJson`, `VisualizationResponse`, `QueryService`), `features/dashboard/chart-data/useWidgetData` (request = query key, max 7 at a time, previous data kept while updating). Viz options conversion. Renderers (`features/dashboard/charts`): series (column/bar/line/area, per-series settings, dual axis, datetime x axis), pie, KPI (icon, prefix/postfix, display units), flat table with server pages. Left for later steps: KPI comparison and trend line, table formatting/sorting/totals, stacked and the other chart types; filters render "not supported yet" until M3 | Done |
 | M3 | Filters: default conditions, tab/choice/dropdown, cross filter, main date, dynamic function and values, query parameters, inner filter, slicer/input/tree/date; local and `?filters=` persistence; Reset Filters | Not started |
 | M4 | Widget actions: sort and paging, export CSV/Excel, drilldown, zoom, drill through, applied filters | Not started |
 | M5 | Permissions, password-protected dashboards, fullscreen and TV mode, auto refresh, theme palette for charts, RLS View As, share token, embedded route | Not started |
 | M6 | Edit mode without ChartBuilder: layout save, rename, add text/image/tab/filter panel, delete/duplicate, tab settings, setting modals, main date setup, copy/paste, leave guard; Add/Edit chart hook for ChartBuilder | Not started |
 
 v1 bugs not carried over: resize listener never removed, text edits saved twice, query settings mutated in place,
-inner filters kept after reset, the always-null `mainDateFilterRequest`, unsanitized text widget HTML.
+inner filters kept after reset, the always-null `mainDateFilterRequest`, unsanitized text widget HTML, data label
+min/max conditions that hid every non-zero value (`ChartUtils.isShowValue`).
 
 Chart types to support (v1 `ChartType` enum): Area, AreaRange, AreaInverted, AreaSpline, Bar, BellCurve, Bubble,
 Column, ColumnRange, ColumnDrillDown, BarDrillDown, PieDrillDown, Funnel, Gauges, HeatMap, TreeMap, Histogram, Line,
