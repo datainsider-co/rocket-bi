@@ -184,6 +184,9 @@ importers:
       antd:
         specifier: ^6.6.7
         version: 6.6.7(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      dayjs:
+        specifier: ^1.11.23
+        version: 1.11.23
       deneric2:
         specifier: ^2.0.0
         version: 2.0.0
