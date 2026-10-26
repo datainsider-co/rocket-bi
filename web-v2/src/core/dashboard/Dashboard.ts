@@ -1,4 +1,4 @@
-import { asArray, asNumber, asRecord, asString, isRecord } from '@/core/json/json';
+import { asArray, asNumber, asRecord, asString, isRecord, type JsonObject } from '@/core/json/json';
 import { DashboardSetting } from './DashboardSetting';
 import { positionsFromJson, type Position, type WidgetId } from './Position';
 import { widgetFromJson, type Widget } from './Widget';
@@ -13,6 +13,8 @@ export interface Dashboard {
   readonly name: string;
   readonly ownerId: string;
   readonly setting: DashboardSetting;
+  /** `setting` as stored: saving merges onto it, so keys v2 doesn't model survive. */
+  readonly settingJson: JsonObject;
   readonly widgets: readonly Widget[];
   /** Every widget's position, tab and filter panel children included, each in its own grid. */
   readonly positions: Readonly<Record<WidgetId, Position>>;
@@ -26,6 +28,7 @@ export function dashboardFromJson(value: unknown): Dashboard {
     ownerId: asString(json['owner_id']),
     // A dashboard created without a setting has none; v1 then used the default.
     setting: new DashboardSetting(isRecord(json['setting']) ? json['setting'] : undefined),
+    settingJson: asRecord(json['setting']),
     widgets: asArray(json['widgets']).map(widgetFromJson),
     positions: positionsFromJson(json['widget_positions'])
   };

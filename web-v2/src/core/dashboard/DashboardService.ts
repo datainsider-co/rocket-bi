@@ -4,7 +4,8 @@ import { token } from '@/core/di/Container';
 import { DirectoryType } from '@/core/directory/Directory';
 import { asArray, asNumber, asRecord, type JsonObject } from '@/core/json/json';
 import { dashboardFromJson, type Dashboard } from './Dashboard';
-import { positionsToJson, type PositionMap } from './Position';
+import { positionToJson, positionsToJson, type Position, type PositionMap } from './Position';
+import { widgetFromJson, type Widget } from './Widget';
 
 /**
  * What the directory screens need of a dashboard. The full model is `Dashboard`.
@@ -53,6 +54,13 @@ export interface DashboardService {
    * unplaced positions (-1) as they are: place them first.
    */
   resizeWidgets(dashboardId: number, positions: PositionMap): Promise<void>;
+  /** Creates a widget from its JSON (`id` -1) at `position`; answers it with the id the server gave. */
+  createWidget(dashboardId: number, widget: JsonObject, position: Position): Promise<Widget>;
+  /** Replaces a widget with `widget`, its whole JSON. */
+  editWidget(dashboardId: number, widget: JsonObject): Promise<void>;
+  deleteWidget(dashboardId: number, widgetId: number): Promise<void>;
+  /** Replaces the dashboard's setting, main date filter included (v1 `DashboardRepository.editSetting`). */
+  editSetting(dashboardId: number, setting: JsonObject): Promise<void>;
   /** The directory entry of a dashboard, which holds its password. */
   getDirectoryId(id: number): Promise<number>;
   /** Dashboards to drill through to, by name, those the user can see only. */
@@ -80,6 +88,24 @@ export class HttpDashboardService implements DashboardService {
 
   async resizeWidgets(dashboardId: number, positions: PositionMap): Promise<void> {
     await this.http.put(`dashboards/${dashboardId}/widgets/resize`, { json: { positions: positionsToJson(positions) } });
+  }
+
+  async createWidget(dashboardId: number, widget: JsonObject, position: Position): Promise<Widget> {
+    const json = { widget, position: positionToJson(position) };
+    return widgetFromJson(await this.http.post(`dashboards/${dashboardId}/widgets/create`, { json }).json());
+  }
+
+  async editWidget(dashboardId: number, widget: JsonObject): Promise<void> {
+    const widgetId = asNumber(widget['id']);
+    await this.http.put(`dashboards/${dashboardId}/widgets/${widgetId}/edit`, { json: { dashboard_id: dashboardId, widget_id: widgetId, widget } });
+  }
+
+  async deleteWidget(dashboardId: number, widgetId: number): Promise<void> {
+    await this.http.delete(`dashboards/${dashboardId}/widgets/${widgetId}`);
+  }
+
+  async editSetting(dashboardId: number, setting: JsonObject): Promise<void> {
+    await this.http.put(`dashboards/${dashboardId}`, { json: { setting } });
   }
 
   async getDirectoryId(id: number): Promise<number> {

@@ -88,4 +88,42 @@ describe('HttpDashboardService', () => {
     expect(await service.getDirectoryId(1)).toBe(8);
     expect(requests[0]).toMatchObject({ method: 'GET', url: 'http://api.test/dashboards/1/get_directory_id' });
   });
+
+  it('creates a widget at a position and reads the one the server stored', async () => {
+    // Reply of the local backend for a new text widget.
+    const { service, requests, sent } = setup({ class_name: 'text_widget', id: 25, name: '', content: 'hello', is_html_render: false, extra_data: {} });
+    const widget = { class_name: 'text_widget', id: -1, content: 'hello' };
+
+    const created = await service.createWidget(3, widget, { row: -1, column: -1, width: 8, height: 3, zIndex: 1 });
+
+    expect(requests[0]).toMatchObject({ method: 'POST', url: 'http://api.test/dashboards/3/widgets/create' });
+    expect(sent()).toEqual({ widget, position: { row: -1, column: -1, width: 8, height: 3, z_index: 1 } });
+    expect(created).toMatchObject({ id: 25, kind: 'text', content: 'hello' });
+  });
+
+  it('edits a widget with its whole JSON', async () => {
+    const { service, requests, sent } = setup({ success: true });
+    const widget = { class_name: 'text_widget', id: 25, content: 'edited' };
+
+    await service.editWidget(3, widget);
+
+    expect(requests[0]).toMatchObject({ method: 'PUT', url: 'http://api.test/dashboards/3/widgets/25/edit' });
+    expect(sent()).toEqual({ dashboard_id: 3, widget_id: 25, widget });
+  });
+
+  it('deletes a widget', async () => {
+    const { service, requests } = setup({ success: true });
+    await service.deleteWidget(3, 25);
+    expect(requests[0]).toMatchObject({ method: 'DELETE', url: 'http://api.test/dashboards/3/widgets/25' });
+  });
+
+  it('replaces the setting as given', async () => {
+    const { service, requests, sent } = setup({ success: true });
+    const setting = { theme_name: 'light_theme1', main_date_filter: { id: -99887766, mode: 'last_7_days' }, unknown: { a: 1 } };
+
+    await service.editSetting(3, setting);
+
+    expect(requests[0]).toMatchObject({ method: 'PUT', url: 'http://api.test/dashboards/3' });
+    expect(sent()).toEqual({ setting });
+  });
 });

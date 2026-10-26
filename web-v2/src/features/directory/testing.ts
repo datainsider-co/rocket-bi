@@ -1,6 +1,7 @@
 import { vi } from 'vitest';
 import { DashboardSummary } from '@/core/dashboard/DashboardService';
 import type { DashboardService } from '@/core/dashboard/DashboardService';
+import { widgetFromJson } from '@/core/dashboard/Widget';
 import { Directory, DirectoryParents } from '@/core/directory/Directory';
 import type { DirectoryService } from '@/core/directory/DirectoryService';
 
@@ -40,6 +41,10 @@ export function fakeDashboardService(overrides: Partial<DashboardService> = {}):
     create: vi.fn<DashboardService['create']>(async name => new DashboardSummary({ id: 50, name })),
     rename: vi.fn<DashboardService['rename']>(async () => {}),
     resizeWidgets: vi.fn<DashboardService['resizeWidgets']>(async () => {}),
+    createWidget: vi.fn<DashboardService['createWidget']>(async (_dashboardId, widget) => widgetFromJson({ ...widget, id: 900 })),
+    editWidget: vi.fn<DashboardService['editWidget']>(async () => {}),
+    deleteWidget: vi.fn<DashboardService['deleteWidget']>(async () => {}),
+    editSetting: vi.fn<DashboardService['editSetting']>(async () => {}),
     getDirectoryId: vi.fn<DashboardService['getDirectoryId']>(async id => id + 100),
     listDrillThrough: vi.fn<DashboardService['listDrillThrough']>(async () => ({ total: 0, dashboards: [] })),
     ...overrides
