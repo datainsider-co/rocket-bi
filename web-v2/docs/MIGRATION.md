@@ -103,10 +103,10 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
-| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0 to M3 |
+| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0 to M3, M4a |
 | Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI, flat table (M2). Next: stacked, drilldown, pivot, the rest |
 | Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Left: `?filters=` (with drill through, M4); filters' own style options (active/inactive and choice colors, title style; antd defaults for now), the filter panel's vertical header and active tab background, the date select's min/max dates as calendar bounds |
-| Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Not started |
+| Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | In progress: drilldown done (M4a). Left: drill through (M4b), maps |
 | Embedded dashboard | route `/embedded/dashboard/:name` | – | Not started |
 
 \* The 129 files cover both viewing and editing.
@@ -167,16 +167,32 @@ Decisions (M3b):
 | M2 | Query pipeline: `core/query` (`toQueryRequestJson`, `VisualizationResponse`, `QueryService`), `features/dashboard/chart-data/useWidgetData` (request = query key, max 7 at a time, previous data kept while updating). Viz options conversion. Renderers (`features/dashboard/charts`): series (column/bar/line/area, per-series settings, dual axis, datetime x axis), pie, KPI (icon, prefix/postfix, display units), flat table with server pages. Left for later steps: KPI comparison and trend line, table formatting/sorting/totals, stacked and the other chart types; filters render "not supported yet" until M3 | Done |
 | M3a | Controls: `core/query/controlValues.ts` (fill `dynamic_condition.final_condition` from a control's values, pure), `features/dashboard/controls` (one `useReducer` context per dashboard, defaults from `options.default.setting.value`, Reset Filters). Tab filter in its four displays and the dropdown filter write their selection; a pie slice click is a cross filter. Only the charts whose conditions name a changed control get a new request | Done |
 | M3b | `features/dashboard/controls`: every control in one reducer (values, pending filter panel changes, main date), `buildChartQuery` (pure: control values, tab control columns via `core/query/dynamicFunctions`, inner filter request via `core/query/filterRequests`, parameters via `core/query/queryParameters`). Main date filter in the header (`core/query/dateRanges`, choice kept in local storage under v1's key). Filter panel with Apply. Inner filter in the chart's action bar. Tab control. Slicer, date select, input and tree filters (`charts/filter/FilterRenderer`). A click on a series point opens a menu with Use as a filter / Reset filter. Charts the server can't query (inputs, tab controls) get an empty table without a request (`canQuerySetting`). Second fixture: `core/dashboard/filters.fixture.json`, dashboard "v2 Filters" seeded on the local backend with one widget per control. `?filters=` moved to M4 | Done |
-| M4 | Widget actions: sort and paging, export CSV/Excel, drilldown, zoom, drill through, applied filters, `?filters=` from drill through (v1 `InternalFilter`, needs v1's condition builder) | Not started |
+| M4a | Widget actions (`features/dashboard/widgets/chart`): a menu in the chart's action bar (Change date function, Reset drill down, Download CSV / Excel) and a point menu, opened by a right click on any Highcharts point (`HighchartsChart.onPointContextMenu`) or a click on a series point (Use as a filter, Drill down by text field or date part, Reset filter, Reset drill down). Pure transforms in `core/query`: `zoom.ts`, `drilldown.ts`, `tableSort.ts`; the viewer's changes are a per-chart reducer (`chartView.utils`) applied before the controls. Tables sort on the server by one column (header click), back to the first page. Export: `QueryService.export` (`query/{csv,xlsx}`, every row). Drill fields from `core/schema/SchemaService` (`GET databases/{name}`, fixture `core/schema/database.fixture.json`) | Done |
+| M4b | Drill through (dashboard listing, `?filters=` in a new tab), applied filters (header filter bar and the chart's filter icon), `?filters=` on load (v1 `InternalFilter`, needs v1's condition builder) | Not started |
 | M5 | Permissions, password-protected dashboards, fullscreen and TV mode, auto refresh, theme palette for charts, RLS View As, share token, embedded route | Not started |
 | M6 | Edit mode without ChartBuilder: layout save, rename, add text/image/tab/filter panel, delete/duplicate, tab settings, setting modals, main date setup, copy/paste, leave guard; Add/Edit chart hook for ChartBuilder | Not started |
+
+Decisions (M4a):
+
+- **Per-chart view state** (drill steps, date function, table sort) lives in the chart's own reducer, not in the
+  dashboard's controls: it isn't shared, and Reset Filters leaves it (v1 too). It is lost when the chart unmounts (a
+  tab switch), as v1 lost it on reload.
+- **Point menu** opens on a right click on any point, like v1, plus a left click on series points (M3b). Pie slices keep
+  their left click as cross filter.
+- **Drill down** offers the text and date columns of the dimension's table, without those already drilled (v1);
+  charts on ad hoc SQL tables get none (v1 parsed the SQL for a schema). Map charts wait for geo areas.
+- **Export** sends every row (`from`/`size` -1). v1 sent a table's first page bounds, which the server ignored.
+- **Not ported**: v1's zoom and drilldown icons in the action bar (`enable_icon_zoom`, `is_enable_drilldown`), and
+  the widget-level "Use as a filter" / "Drill down" that ask for a value first (`DimensionPicker`): the point menu
+  covers both.
 
 v1 bugs not carried over: resize listener never removed, text edits saved twice, query settings mutated in place,
 inner filters kept after reset, the always-null `mainDateFilterRequest`, unsanitized text widget HTML, data label
 min/max conditions that hid every non-zero value (`ChartUtils.isShowValue`), tab filters that forgot the selection on
 remount and dynamic conditions that threw (and broke the chart) for values they can't hold. M3b: parameter inputs that
 changed nothing, slicers on a date column sending epoch millis (and their end date at 00:00:00), tree filters sending a
-checked node's value again for each checked child, date select defaults given as two dates applying nothing.
+checked node's value again for each checked child, date select defaults given as two dates applying nothing. M4a:
+zoom keeping the old function's `result_type`, query settings mutated by zoom and drilldown.
 
 Chart types to support (v1 `ChartType` enum): Area, AreaRange, AreaInverted, AreaSpline, Bar, BellCurve, Bubble,
 Column, ColumnRange, ColumnDrillDown, BarDrillDown, PieDrillDown, Funnel, Gauges, HeatMap, TreeMap, Histogram, Line,
