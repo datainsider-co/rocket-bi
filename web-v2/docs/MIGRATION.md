@@ -105,7 +105,7 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
 | Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0 to M3 |
 | Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI, flat table (M2). Next: stacked, drilldown, pivot, the rest |
-| Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Left: `?filters=` (with drill through, M4) |
+| Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Left: `?filters=` (with drill through, M4); filters' own style options (active/inactive and choice colors, title style; antd defaults for now), the filter panel's vertical header and active tab background, the date select's min/max dates as calendar bounds |
 | Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Not started |
 | Embedded dashboard | route `/embedded/dashboard/:name` | – | Not started |
 
@@ -114,8 +114,9 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 #### Dashboard page plan (view and edit, ChartBuilder excluded)
 
 v1 spreads the page over seven Vuex stores that mutate shared query settings. v2 keeps the dashboard in TanStack
-Query, builds each chart's request with a pure `buildQueryRequest(widget, filterState)` that doubles as its query key,
-and keeps filter state in one `useReducer` context.
+Query, keeps every control in one `useReducer` context (`features/dashboard/controls/DashboardControlsContext`) and
+builds each chart's query with the pure `buildChartQuery(widget, controls, widgets)`; the request it makes is the
+chart's query key, so a chart re-queries only when a control it depends on changes.
 
 Decisions (2026-10-26):
 
@@ -134,8 +135,9 @@ Decisions (2026-10-26):
   `directory:view:<directoryId>`, so it answers 401 `not_allowed` (v1 is affected too). Needs a server fix.
 - How filters reach charts (verified in v1 and on the server): every v1 filter widget has `isEnableFilter() = false`, so
   none of them sends a dashboard-wide `FilterRequest`. A chart is filtered only where its own filters hold a
-  `dynamic_condition` naming the control; the server skips one without `final_condition`. v1's `mainFilterRequestMap`
-  and `affected_by_filter` only matter for URL / header filters (`InternalFilter`), which come with drill through.
+  `dynamic_condition` naming the control; the server skips one without `final_condition`. The only `FilterRequest`
+  a chart sends is its own inner filter's (`filter_id` = the chart's id). v1's `mainFilterRequestMap` and
+  `affected_by_filter` only matter for URL / header filters (`InternalFilter`), which come with drill through.
 - Out of scope: Boost (hidden in v1), Copy to assistant / Summarize (chatbot deferred), tracking, deprecated widgets.
 
 Decisions (M3b):
@@ -179,8 +181,8 @@ checked node's value again for each checked child, date select defaults given as
 Chart types to support (v1 `ChartType` enum): Area, AreaRange, AreaInverted, AreaSpline, Bar, BellCurve, Bubble,
 Column, ColumnRange, ColumnDrillDown, BarDrillDown, PieDrillDown, Funnel, Gauges, HeatMap, TreeMap, Histogram, Line,
 Spline, LineInverted, Pareto, Pie, SemiPie, Pyramid, Scatter, Table, Kpi, WordCloud, StackedColumn, StackedBar,
-StackedLine, Map, PivotTable, Parliament, SpiderWeb, Sankey, FlattenTable, FlattenPivotTable; filter widgets TabFilter,
-SingleChoice, MultiChoice, DropDown, SlicerFilter, DateSelectFilter, InputFilter.
+StackedLine, Map, PivotTable, Parliament, SpiderWeb, Sankey, FlattenTable, FlattenPivotTable. The filter widgets
+(TabFilter, SingleChoice, MultiChoice, DropDown, SlicerFilter, DateSelectFilter, InputFilter, TreeFilter) are done.
 
 Suggested order: the common series charts (Column/Bar/Line/Area/Pie) and Kpi, then Table/Pivot, then the rest.
 
