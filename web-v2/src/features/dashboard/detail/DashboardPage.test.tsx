@@ -330,6 +330,165 @@ describe('dashboard page', () => {
     expect(router.state.location.pathname).toBe('/embedded/dashboard/gone-7');
   });
 
+  describe('edit mode', () => {
+    function renderEditable(overrides: Partial<DashboardService> = {}) {
+      const dashboards = fakeDashboardService({ get: vi.fn<DashboardService['get']>(async () => dashboardFromJson(fixture)), ...overrides });
+      const router = renderAppAt('/dashboard/v2-sample-1', fakeAuthenticationService(), [di => di.bindValue(DashboardService, dashboards)]);
+      return { dashboards, router };
+    }
+
+    async function startEditing() {
+      await screen.findByText('Sample', {}, SLOW);
+      await userEvent.click(await screen.findByRole('button', { name: /Edit/ }, SLOW));
+      return screen.findByRole('button', { name: /Save/ });
+    }
+
+    it('adds a text widget', { timeout: 15_000 }, async () => {
+      const { dashboards } = renderEditable();
+      await startEditing();
+
+      await userEvent.click(screen.getByRole('button', { name: /Adding/ }));
+      await userEvent.click(await screen.findByText('Add text'));
+      await userEvent.type(await screen.findByRole('textbox', { name: 'Text' }), 'Quarterly notes');
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      await waitFor(() => expect(dashboards.createWidget).toHaveBeenCalled(), SLOW);
+      const [dashboardId, json, position] = vi.mocked(dashboards.createWidget).mock.calls[0]!;
+      expect(dashboardId).toBe(1);
+      expect(json).toMatchObject({ class_name: 'text_widget', id: -1, content: 'Quarterly notes', is_html_render: false });
+      expect(position).toEqual({ row: -1, column: -1, width: 8, height: 3, zIndex: 1 });
+      expect(await screen.findByText('Quarterly notes', {}, SLOW)).toBeInTheDocument();
+    });
+
+    it('deletes a widget after asking', { timeout: 15_000 }, async () => {
+      const { dashboards } = renderEditable();
+      await startEditing();
+      const note = document.querySelector<HTMLElement>('[data-widget-id="10"]')!;
+
+      await userEvent.click(within(note).getByRole('button', { name: 'Widget actions' }));
+      await userEvent.click(await screen.findByText('Delete'));
+      await userEvent.click(await screen.findByRole('button', { name: 'Yes' }));
+
+      await waitFor(() => expect(dashboards.deleteWidget).toHaveBeenCalledWith(1, 10), SLOW);
+      await waitFor(() => expect(document.querySelector('[data-widget-id="10"]')).toBeNull(), SLOW);
+    });
+
+    it('saves every position on Save and goes back to view', { timeout: 15_000 }, async () => {
+      const { dashboards } = renderEditable();
+      const save = await startEditing();
+
+      await userEvent.click(save);
+
+      await waitFor(() => expect(dashboards.resizeWidgets).toHaveBeenCalled(), SLOW);
+      const [, positions] = vi.mocked(dashboards.resizeWidgets).mock.calls[0]!;
+      expect(Object.keys(positions).map(Number).sort((a, b) => a - b)).toEqual(fixture.widgets.map(widget => widget.id).sort((a, b) => a - b));
+      expect(await screen.findByRole('button', { name: /Edit/ })).toBeInTheDocument();
+    });
+
+    it('renames the dashboard', { timeout: 15_000 }, async () => {
+      const { dashboards, router } = renderEditable();
+      await startEditing();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Rename dashboard' }));
+      const input = await screen.findByLabelText('Dashboard Name');
+      await userEvent.clear(input);
+      await userEvent.type(input, 'Sales 2026{Enter}');
+
+      await waitFor(() => expect(dashboards.rename).toHaveBeenCalledWith(1, 'Sales 2026'), SLOW);
+      expect(await screen.findByRole('heading', { name: 'Sales 2026' })).toBeInTheDocument();
+      // Still editing the same dashboard at its new URL.
+      await waitFor(() => expect(router.state.location.pathname).toBe('/dashboard/sales-2026-1'), SLOW);
+      expect(screen.getByRole('button', { name: /Save/ })).toBeInTheDocument();
+    });
+
+    it('asks before leaving while editing', { timeout: 15_000 }, async () => {
+      renderEditable();
+      await startEditing();
+      expect(screen.queryByRole('button', { name: 'Back' })).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Back' }));
+      // antd shows a confirm's title twice (header and body).
+      expect((await screen.findAllByText('Leave edit mode?')).length).toBeGreaterThan(0);
+      await userEvent.click(screen.getByRole('button', { name: 'Stay' }));
+      expect(screen.getByRole('button', { name: /Save/ })).toBeInTheDocument();
+    });
+
+    it('adds a tab and moves a widget into it', { timeout: 15_000 }, async () => {
+      const { dashboards } = renderEditable();
+      const save = await startEditing();
+      const tabs = () => document.querySelector<HTMLElement>('[data-widget-id="12"]')!;
+      const openTabMenu = async () => userEvent.click(within(tabs()).getAllByRole('button', { name: 'Widget actions' })[0]!);
+      const lastEdit = () => vi.mocked(dashboards.editWidget).mock.calls.at(-1)?.[1] as { tab_items: { name: string; widget_ids: number[] }[] };
+
+      await openTabMenu();
+      await userEvent.click(await screen.findByText('Add tab'));
+      await waitFor(() => expect(lastEdit()?.tab_items.map(tab => tab.name)).toEqual(['Pie', 'Empty', 'New tab']), SLOW);
+
+      await openTabMenu();
+      await userEvent.click(await screen.findByText('Add chart'));
+      await userEvent.click(await screen.findByRole('checkbox', { name: 'Note' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+      await waitFor(() => expect(lastEdit()?.tab_items[0]?.widget_ids).toEqual([11, 10]), SLOW);
+
+      // On Save the note gets a place in the tab's grid.
+      await userEvent.click(save);
+      await waitFor(() => expect(dashboards.resizeWidgets).toHaveBeenCalled(), SLOW);
+      const [, positions] = vi.mocked(dashboards.resizeWidgets).mock.calls[0]!;
+      expect(positions[10]!.row).toBeGreaterThanOrEqual(0);
+    });
+
+    it("sets a tab widget's header on the left", { timeout: 15_000 }, async () => {
+      const { dashboards } = renderEditable();
+      await startEditing();
+      const tabs = document.querySelector<HTMLElement>('[data-widget-id="12"]')!;
+
+      await userEvent.click(within(tabs).getAllByRole('button', { name: 'Widget actions' })[0]!);
+      await userEvent.click(await screen.findByText('Config tab'));
+      await userEvent.click(await screen.findByText('Left'));
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      await waitFor(() => expect(dashboards.editWidget).toHaveBeenCalled(), SLOW);
+      expect(vi.mocked(dashboards.editWidget).mock.calls[0]![1]).toMatchObject({ id: 12, extra_data: { current_chart_type: 'tab', header: { position: 'vertical' } } });
+    });
+
+    it("saves the dashboard's settings, its date filter included", { timeout: 15_000 }, async () => {
+      const { dashboards } = renderEditable();
+      await startEditing();
+
+      // The app header has a Settings menu too.
+      await userEvent.click(within(document.querySelector<HTMLElement>('.dashboard-page__header')!).getByRole('button', { name: /Settings/ }));
+      await userEvent.click(await screen.findByRole('combobox', { name: 'Theme' }));
+      await userEvent.click(await screen.findByTitle('Clear Sky'));
+      await userEvent.click(screen.getByRole('switch', { name: 'Date filter' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+      await waitFor(() => expect(dashboards.editSetting).toHaveBeenCalled(), SLOW);
+      const [dashboardId, setting] = vi.mocked(dashboards.editSetting).mock.calls[0]!;
+      expect(dashboardId).toBe(1);
+      expect(setting).toMatchObject({
+        theme_name: 'dark_theme1',
+        enable_overlap: true,
+        background: { color: '#000', opacity: 10 },
+        main_date_filter: { id: -99887766, mode: 'all_time' },
+        widget_setting: { padding: 15 }
+      });
+      // The page follows: the dark theme, and the date filter in the header.
+      await waitFor(() => expect(document.querySelector('.dashboard-page')).toHaveAttribute('data-dashboard-theme', 'clear-sky'), SLOW);
+      expect(await screen.findByRole('combobox', { name: 'Date range' })).toBeInTheDocument();
+    });
+
+    it('offers no Edit without the edit permission', async () => {
+      renderAppAt('/dashboard/v2-sample-1', fakeAuthenticationService(), [
+        di => {
+          di.bindValue(DashboardService, fakeDashboardService({ get: vi.fn<DashboardService['get']>(async () => dashboardFromJson(fixture)) }));
+          di.bindValue(ResourcePermissionService, fakeResourcePermissionService({ permittedActions: async () => ['view', 'download'] }));
+        }
+      ]);
+      await screen.findByText('Sample', {}, SLOW);
+      await waitFor(() => expect(screen.queryByRole('button', { name: /Edit/ })).not.toBeInTheDocument(), SLOW);
+    });
+  });
+
   it('rewrites an outdated name in the URL', async () => {
     const router = renderAt('/dashboard/old-name-1?token=abc', async () => dashboardFromJson(fixture));
 

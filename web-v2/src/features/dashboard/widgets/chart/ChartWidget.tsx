@@ -1,5 +1,6 @@
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { ChartWidget as ChartWidgetModel } from '@/core/dashboard/Widget';
+import { useDashboardEdit } from '../../edit/DashboardEditContext';
 import { getDashboardTheme } from '../../theme/dashboardThemes';
 import { WidgetContainer } from '../WidgetContainer';
 import { AppliedFiltersView } from './AppliedFiltersView';
@@ -16,13 +17,14 @@ interface ChartWidgetProps {
 /** A chart on its card, with its action bar (v1 `ChartHolder`). */
 export function ChartWidget({ widget, dashboard }: ChartWidgetProps) {
   const chart = useChartWidget(widget, dashboard.id);
+  const { editing, widgetMenu } = useDashboardEdit();
   const actions = (
     <ChartActionsView
       innerFilter={
         widget.chartFilter && <InnerFilter filter={widget.chartFilter} dashboardId={dashboard.id} headerRequests={chart.innerFilterRequests} />
       }
       appliedFilters={chart.appliedFilters.filters.length > 0 && <AppliedFiltersView {...chart.appliedFilters} />}
-      menuItems={chart.widgetItems}
+      menuItems={editing ? widgetMenu(widget) : chart.widgetItems}
     />
   );
   return (

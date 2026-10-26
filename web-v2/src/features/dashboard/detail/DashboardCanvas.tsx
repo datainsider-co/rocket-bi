@@ -3,6 +3,7 @@ import { Empty } from 'antd';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { WidgetId } from '@/core/dashboard/Position';
 import type { Widget } from '@/core/dashboard/Widget';
+import { useDashboardEdit } from '../edit/DashboardEditContext';
 import { DashboardGrid } from '../grid/DashboardGrid';
 import { WidgetRenderer } from '../widgets/WidgetRenderer';
 import { dashboardCssVars, topLevelPositions } from './dashboardDetail.utils';
@@ -16,6 +17,7 @@ interface DashboardCanvasProps {
 export function DashboardCanvas({ dashboard, mobile }: DashboardCanvasProps) {
   const widgetsById = useMemo(() => new Map<WidgetId, Widget>(dashboard.widgets.map(widget => [widget.id, widget])), [dashboard.widgets]);
   const positions = useMemo(() => topLevelPositions(dashboard), [dashboard]);
+  const { editing, onPositionsChange } = useDashboardEdit();
 
   const renderWidget = useCallback(
     function render(id: WidgetId) {
@@ -29,12 +31,13 @@ export function DashboardCanvas({ dashboard, mobile }: DashboardCanvasProps) {
   return (
     <div className="dashboard-content" style={dashboardCssVars(setting)} data-fit-mode={setting.backgroundImage.fitMode}>
       {Object.keys(positions).length === 0 ? (
-        <Empty className="m-auto" description="Your dashboard is empty" />
+        <Empty className="m-auto" description={editing ? 'Your dashboard is empty: add a widget from Adding' : 'Your dashboard is empty'} />
       ) : (
         <DashboardGrid
           positions={positions}
           renderItem={renderWidget}
-          editable={false}
+          editable={editing}
+          onPositionsChange={onPositionsChange}
           overlap={setting.enableOverlap}
           mobile={mobile}
         />

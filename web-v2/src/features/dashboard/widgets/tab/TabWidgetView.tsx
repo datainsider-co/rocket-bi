@@ -1,30 +1,39 @@
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Empty, Tabs } from 'antd';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { WidgetId } from '@/core/dashboard/Position';
 import type { TabWidget } from '@/core/dashboard/Widget';
-import { DashboardGrid } from '../../grid/DashboardGrid';
-import { NESTED_GRID_MARGIN } from '../../grid/dashboardGrid.utils';
-import { GRID_NO_DRAG_CLASS } from '../../grid/DashboardGridView';
 import { tabPositions } from '../../detail/dashboardDetail.utils';
+import { DashboardGrid, type NestedGridEdit } from '../../grid/DashboardGrid';
+import { NESTED_GRID_MARGIN } from '../../grid/dashboardGrid.utils';
+import { tabHeaderCssVars, type TabHeaderStyle } from './tabWidget.utils';
+import './TabWidget.css';
 
 interface TabWidgetViewProps {
   widget: TabWidget;
   dashboard: Dashboard;
   mobile: boolean;
   renderWidget: (id: WidgetId) => ReactNode;
+  edit: NestedGridEdit;
+  /** The open tab, by index. */
+  active: number;
+  onActiveChange: (index: number) => void;
+  header: TabHeaderStyle;
 }
 
-/** v1 `TabViewer.vue` in view mode: one grid per tab, only the open tab rendered (v1 `lazy`). */
-export function TabWidgetView({ widget, dashboard, mobile, renderWidget }: TabWidgetViewProps) {
-  const [activeKey, setActiveKey] = useState('0');
-
+/**
+ * v1 `TabViewer.vue`: one grid per tab, only the open tab rendered (v1 `lazy`), headers on top or on the left. Its
+ * widgets move in edit mode; the header bar drags the whole widget.
+ */
+export function TabWidgetView({ widget, dashboard, mobile, renderWidget, edit, active, onActiveChange, header }: TabWidgetViewProps) {
   return (
     <Tabs
-      className={`h-full ${GRID_NO_DRAG_CLASS}`}
+      className="tab-widget h-full"
+      style={tabHeaderCssVars(header)}
       size="small"
-      activeKey={activeKey}
-      onChange={setActiveKey}
+      tabPlacement={header.position === 'vertical' ? 'start' : 'top'}
+      activeKey={String(Math.min(active, Math.max(widget.tabItems.length - 1, 0)))}
+      onChange={key => onActiveChange(Number(key))}
       destroyOnHidden
       items={widget.tabItems.map((tab, index) => ({
         key: String(index),
@@ -37,7 +46,8 @@ export function TabWidgetView({ widget, dashboard, mobile, renderWidget }: TabWi
               <DashboardGrid
                 positions={tabPositions(dashboard, tab)}
                 renderItem={renderWidget}
-                editable={false}
+                editable={edit.editable}
+                onPositionsChange={edit.onPositionsChange}
                 overlap={dashboard.setting.enableOverlap}
                 mobile={mobile}
                 margin={NESTED_GRID_MARGIN}

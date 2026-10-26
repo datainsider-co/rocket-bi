@@ -1,0 +1,21 @@
+/* v1 TabViewer: the header's font, color and active / inactive backgrounds from the widget's settings. */
+
+.tab-widget .ant-tabs-tab {
+  padding: 4px 12px;
+  border-radius: 4px 4px 0 0;
+  background: var(--tab-inactive-background);
+  font-size: var(--tab-font-size);
+}
+
+.tab-widget .ant-tabs-tab + .ant-tabs-tab {
+  margin-left: 2px;
+}
+
+.tab-widget .ant-tabs-tab .ant-tabs-tab-btn,
+.tab-widget .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--tab-color);
+}
+
+.tab-widget .ant-tabs-tab.ant-tabs-tab-active {
+  background: var(--tab-active-background);
+}
