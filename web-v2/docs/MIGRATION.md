@@ -103,7 +103,7 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
-| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0 to M4 |
+| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0 to M4, M5a |
 | Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI, flat table (M2). Next: stacked, drilldown, pivot, the rest |
 | Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Left: filters' own style options (active/inactive and choice colors, title style; antd defaults for now), the filter panel's vertical header and active tab background, the date select's min/max dates as calendar bounds |
 | Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Done (M4a, M4b). Left: maps |
@@ -169,7 +169,8 @@ Decisions (M3b):
 | M3b | `features/dashboard/controls`: every control in one reducer (values, pending filter panel changes, main date), `buildChartQuery` (pure: control values, tab control columns via `core/query/dynamicFunctions`, inner filter request via `core/query/filterRequests`, parameters via `core/query/queryParameters`). Main date filter in the header (`core/query/dateRanges`, choice kept in local storage under v1's key). Filter panel with Apply. Inner filter in the chart's action bar. Tab control. Slicer, date select, input and tree filters (`charts/filter/FilterRenderer`). A click on a series point opens a menu with Use as a filter / Reset filter. Charts the server can't query (inputs, tab controls) get an empty table without a request (`canQuerySetting`). Second fixture: `core/dashboard/filters.fixture.json`, dashboard "v2 Filters" seeded on the local backend with one widget per control. `?filters=` moved to M4 | Done |
 | M4a | Widget actions (`features/dashboard/widgets/chart`): a menu in the chart's action bar (Change date function, Reset drill down, Download CSV / Excel) and a point menu, opened by a right click on any Highcharts point (`HighchartsChart.onPointContextMenu`) or a click on a series point (Use as a filter, Drill down by text field or date part, Reset filter, Reset drill down). Pure transforms in `core/query`: `zoom.ts`, `drilldown.ts`, `tableSort.ts`; the viewer's changes are a per-chart reducer (`chartView.utils`) applied before the controls. Tables sort on the server by one column (header click), back to the first page. Export: `QueryService.export` (`query/{csv,xlsx}`, every row). Drill fields from `core/schema/SchemaService` (`GET databases/{name}`, fixture `core/schema/database.fixture.json`) | Done |
 | M4b | Header filters (v1 `InternalFilter`): `core/query/internalFilter.ts` (model, v1's condition builder), `core/query/filtersParam.ts` (`?filters=` in v1's JSON, read on load), one more entry of the controls state, sent by every chart as a `FilterRequest` (`buildChartQuery`'s `headerRequests`). Filter bar under the header (`controls/header-filters`: edit condition and values, turn off, remove) and the chart's filter icon (`AppliedFiltersView`, on/off per chart). Drill through in the point menu: `core/query/drillThrough.ts` (clicked value → filters), `DashboardService.listDrillThrough` (`dashboards/list_drill_through`, 40 per page, Load more), the dashboard opens in a new tab with `?filters=`. Field types in `core/schema/fieldTypes.ts` | Done |
-| M5 | Permissions, password-protected dashboards, fullscreen and TV mode, auto refresh, theme palette for charts, RLS View As, share token, embedded route | Not started |
+| M5a | Access and display (`features/dashboard/access`, `features/dashboard/mode`): permissions (owner: all, else `share/dashboard/{id}/action_permitted` via `core/permission/ResourcePermissionService`; downloads hidden without `download`), password-protected dashboards (`data.config` of the directory, `DashboardService.getDirectoryId`; nothing is queried until the password is given), Full screen and TV mode in the header's Options, auto refresh (`useAutoRefresh`). The theme palette for charts was already done in M2 (`chartColors`) | Done |
+| M5b | RLS View As (`chart/view_as`, user suggestions), share token (`?token=`, blocked by the server, see above), embedded route | Not started |
 | M6 | Edit mode without ChartBuilder: layout save, rename, add text/image/tab/filter panel, delete/duplicate, tab settings, setting modals, main date setup, copy/paste, leave guard; Add/Edit chart hook for ChartBuilder | Not started |
 
 Decisions (M4a):
@@ -204,6 +205,22 @@ Decisions (M4b):
   two bounds for a histogram bin, nothing for bubbles. Dates get no filter: the chart groups them by a date function
   the filter can't hold. Disabled for tab filters (v1). The listing is the server's: dashboards with a filter widget
   on one of the carried fields, the current one excluded.
+
+Decisions (M5a):
+
+- **Permissions** only matter for downloads in view mode so far; `DashboardPermissions` (`canEdit`, `canShare`, ...)
+  is ready for edit mode (M6) and Share (Phase 2). Until the server answers, the viewer may only view.
+- **Password**: checked in the browser against the sha256 hex in `data.config.hashed_password`, like v1 (`@noble/hashes`,
+  as `crypto.subtle` needs a secure context). The server doesn't enforce it: the dashboard's JSON is already loaded,
+  only the charts wait. Asked on every visit, not of the owner; a directory that can't be read counts as unprotected
+  (v1 then never loaded the charts). Setting a password belongs to the Share dialog (Phase 2).
+- **Full screen** lays the page over the app (fixed, below antd's popups) instead of hiding the app header. **TV mode**
+  also asks the browser for full screen on the whole document, so menus still show, and scales a dashboard taller
+  than the screen to fit; Esc goes back to view.
+- **Auto refresh** invalidates the dashboard's chart queries each interval: charts keep their data while they reload,
+  their filters stay as they are (v1 re-ran its whole init), and nothing runs while the tab is hidden. Picking the
+  interval is a setting, so it comes with edit mode (M6).
+- Not ported here: Share, View As and Relationship in the Options menu (Phase 2, M5b, Phase 5).
 
 v1 bugs not carried over: resize listener never removed, text edits saved twice, query settings mutated in place,
 inner filters kept after reset, the always-null `mainDateFilterRequest`, unsanitized text widget HTML, data label
