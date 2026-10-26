@@ -1,0 +1,96 @@
+/* v1 DashboardDetail.scss: the page background and the dashboard's content box, styled by `dashboardCssVars`. */
+
+.dashboard-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  background: linear-gradient(131deg, var(--min-background-color) 2%, var(--max-background-color) 90%);
+  color: var(--text-color);
+}
+
+.dashboard-page__header {
+  padding: 13px 15px 0;
+}
+
+.dashboard-page__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 13px 15px 15px;
+}
+
+.dashboard-content {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  width: var(--dashboard-content-width, 100%);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 25px 30px;
+}
+
+.dashboard-content::before,
+.dashboard-content::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: '';
+  border-radius: var(--dashboard-border-radius, 10px);
+}
+
+.dashboard-content::before {
+  background: var(--dashboard-background-color, #fafafb);
+  border: var(--dashboard-stroke-width, 1px) solid var(--dashboard-stroke-color, #e5e5e5);
+}
+
+.dashboard-content::after {
+  background-image: var(--dashboard-background-image);
+  filter: var(--dashboard-background-filter);
+  background-position: center;
+}
+
+.dashboard-content[data-fit-mode='fill']::after {
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.dashboard-content[data-fit-mode='fit']::after {
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.dashboard-content[data-fit-mode='stretch']::after {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.dashboard-content[data-fit-mode='repeat']::after {
+  background-repeat: repeat;
+}
+
+.dashboard-content[data-fit-mode='repeat-x']::after {
+  background-repeat: repeat-x;
+}
+
+.dashboard-content[data-fit-mode='repeat-y']::after {
+  background-repeat: repeat-y;
+}
+
+.dashboard-content[data-fit-mode='parallax']::after {
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.dashboard-content[data-fit-mode='none']::after {
+  background: none;
+}
+
+@media (max-width: 767px) {
+  .dashboard-content {
+    width: 100%;
+    padding: 22px 20px;
+  }
+}
