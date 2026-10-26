@@ -1,6 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { ConnectionService } from '@/core/connection/ConnectionService';
-import type { PermissionService } from '@/core/permission/PermissionService';
 
 /** Everything under `connection` is invalidated together once the connection changes. */
 export const connectionKeys = {
@@ -28,15 +27,6 @@ export function sshPublicKeyQueryOptions(service: ConnectionService) {
   return queryOptions({
     queryKey: connectionKeys.sshPublicKey,
     queryFn: () => service.getSshPublicKey(),
-    staleTime: Number.POSITIVE_INFINITY
-  });
-}
-
-/** Whether `username` has `permission`. Move to a shared place when a second feature checks permissions. */
-export function permissionQueryOptions(service: PermissionService, username: string, permission: string) {
-  return queryOptions({
-    queryKey: ['permission', username, permission] as const,
-    queryFn: async () => (await service.isPermitted(username, [permission]))[permission] === true,
     staleTime: Number.POSITIVE_INFINITY
   });
 }
