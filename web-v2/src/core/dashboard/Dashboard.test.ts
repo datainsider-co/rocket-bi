@@ -56,9 +56,12 @@ describe('widgetFromJson', () => {
     expect(widgetFromJson({ ...json, extra_data: { current_chart_type: 'filter_panel' } }).kind).toBe('filter_panel');
   });
 
-  it('reads the inner filter of a chart', () => {
-    const widget = widgetFromJson({ class_name: 'chart_v3', id: 3, setting: {}, chart_filter: { class_name: 'chart_v3', id: -3, setting: {} } });
-    expect(widget.kind === 'chart' && widget.chartFilter?.id).toBe(-3);
+  it('reads the inner filter of a chart, its id from the chart', () => {
+    const widget = widgetFromJson({ class_name: 'chart_v3', id: 3, setting: {}, chart_filter: { class_name: 'chart_v3', id: -13, setting: {} } });
+    expect(widget.kind === 'chart' && widget.chartFilter?.id).toBe(-13);
+    // A copy v1 made kept its original's inner filter id.
+    const copy = widgetFromJson({ class_name: 'chart_v3', id: 40, setting: {}, chart_filter: { class_name: 'chart_v3', id: -13, setting: {} } });
+    expect(copy.kind === 'chart' && copy.chartFilter?.id).toBe(-50);
   });
 
   it('keeps unknown widgets as unsupported', () => {

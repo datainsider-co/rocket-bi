@@ -71,8 +71,16 @@ export interface UnsupportedWidget extends WidgetBase {
 
 export type Widget = ChartWidget | TextWidget | ImageWidget | TabWidget | UnsupportedWidget;
 
+/** v1 `ChartInfoUtils.generatedChartFilterId`: an inner filter's id follows its chart's. */
+export function innerFilterId(chartId: WidgetId): WidgetId {
+  return -(chartId + 10);
+}
+
 function chartFromJson(json: JsonObject, base: Omit<WidgetBase, 'json'>): ChartWidget {
-  const chartFilter = isRecord(json['chart_filter']) ? widgetFromJson(json['chart_filter']) : undefined;
+  // Read from the chart's id rather than stored: a chart duplicated by v1 kept its original's, so both shared one
+  // selection.
+  const stored = isRecord(json['chart_filter']) ? widgetFromJson(json['chart_filter']) : undefined;
+  const chartFilter = stored && { ...stored, id: innerFilterId(base.id) };
   return {
     ...base,
     json,
