@@ -15,7 +15,8 @@ import { PermissionService } from '@/core/permission/PermissionService';
 import { ResourcePermissionService } from '@/core/permission/ResourcePermissionService';
 import { QueryService } from '@/core/query/QueryService';
 import { SchemaService } from '@/core/schema/SchemaService';
-import { fakeQueryService, fakeResourcePermissionService, fakeSchemaService } from '@/features/dashboard/testing';
+import { UserService } from '@/core/user/UserService';
+import { fakeQueryService, fakeResourcePermissionService, fakeSchemaService, fakeUserService } from '@/features/dashboard/testing';
 import { fakeConnectionService, fakePermissionService } from '@/features/data-source/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
 
@@ -50,6 +51,7 @@ export function renderAppAt(path: string, service: Service, modules: readonly Di
       di.bindValue(DashboardService, fakeDashboardService());
       di.bindValue(QueryService, fakeQueryService());
       di.bindValue(SchemaService, fakeSchemaService());
+      di.bindValue(UserService, fakeUserService());
     },
     ...modules
   ]);

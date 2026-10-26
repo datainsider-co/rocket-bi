@@ -85,4 +85,21 @@ describe('HttpQueryService', () => {
     expect(fetch.mock.calls[0]?.[0]).toMatchObject({ method: 'POST', url: 'http://api.test/chart/query' });
     expect(response.kind).toBe('series_two');
   });
+
+  it('posts View As queries with the user as sent by the server', async () => {
+    const bodies: unknown[] = [];
+    const fetch = vi.fn<(request: Request) => Promise<Response>>(async request => {
+      bodies.push(await request.clone().json());
+      return Response.json(responses.pie_chart_setting);
+    });
+    const service = new HttpQueryService(new HttpClientBuilder('http://api.test').withFetch(fetch).build());
+    const user = { username: 'ann', properties: { 'team.region': 'Asia' } };
+
+    const response = await service.queryAs({ query_setting: {} }, user);
+
+    expect(fetch.mock.calls[0]?.[0]).toMatchObject({ method: 'POST', url: 'http://api.test/chart/view_as' });
+    // Body accepted by the local backend.
+    expect(bodies[0]).toEqual({ query_request: { query_setting: {} }, user_profile: user });
+    expect(response.kind).toBe('series_two');
+  });
 });

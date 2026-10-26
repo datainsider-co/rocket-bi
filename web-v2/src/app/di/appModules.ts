@@ -6,6 +6,7 @@ import { DirectoryModule } from '@/core/directory/DirectoryModule';
 import { PermissionModule } from '@/core/permission/PermissionModule';
 import { QueryModule } from '@/core/query/QueryService';
 import { SchemaModule } from '@/core/schema/SchemaService';
+import { UserModule } from '@/core/user/UserService';
 import { HttpModule } from './HttpModule';
 
 /** Bound in order when the app starts, like v1's `Di.init([...])`. Feature modules go after `HttpModule`. */
@@ -17,5 +18,6 @@ export const appModules: readonly DiModule[] = [
   DirectoryModule,
   DashboardModule,
   QueryModule,
-  SchemaModule
+  SchemaModule,
+  UserModule
 ];

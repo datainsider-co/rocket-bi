@@ -11,6 +11,11 @@ export type ExportType = 'csv' | 'xlsx';
 export interface QueryService {
   /** `request` is a body built by `toQueryRequestJson`. */
   query(request: JsonObject, signal?: AbortSignal): Promise<VisualizationResponse>;
+  /**
+   * The same query as another user sees it under row level security (`chart/view_as`). `user` is their profile as
+   * `UserService.suggest` returned it.
+   */
+  queryAs(request: JsonObject, user: JsonObject, signal?: AbortSignal): Promise<VisualizationResponse>;
   /** The request's whole result as a file (`query/{type}`). */
   export(request: JsonObject, type: ExportType): Promise<Blob>;
 }
@@ -19,12 +24,17 @@ export const QueryService = token<QueryService>('QueryService');
 
 const EXPORT_TIMEOUT = 5 * 60_000;
 
-/** v1 `QueryRepository`. View As (`chart/view_as`) comes with its feature. */
+/** v1 `QueryRepository`. */
 export class HttpQueryService implements QueryService {
   constructor(private readonly http: KyInstance) {}
 
   async query(request: JsonObject, signal?: AbortSignal): Promise<VisualizationResponse> {
     return visualizationResponseFromJson(await this.http.post('chart/query', { json: request, signal }).json());
+  }
+
+  async queryAs(request: JsonObject, user: JsonObject, signal?: AbortSignal): Promise<VisualizationResponse> {
+    const json = { query_request: request, user_profile: user };
+    return visualizationResponseFromJson(await this.http.post('chart/view_as', { json, signal }).json());
   }
 
   export(request: JsonObject, type: ExportType): Promise<Blob> {

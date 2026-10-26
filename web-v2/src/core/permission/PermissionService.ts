@@ -3,7 +3,9 @@ import { token } from '@/core/di/Container';
 
 export const Permission = {
   /** Set up and change the organization's data warehouse connection. */
-  manageConnection: 'organization:manage:connection'
+  manageConnection: 'organization:manage:connection',
+  /** Query a dashboard as another user, under their row level security (`chart/view_as`). */
+  viewAs: 'rls:view:*'
 } as const;
 
 export interface PermissionService {
