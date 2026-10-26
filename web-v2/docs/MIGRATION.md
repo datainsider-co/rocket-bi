@@ -62,6 +62,18 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
 - **B. Route-level switch.** A reverse proxy sends migrated routes to v2 and the rest to v1 on the same domain, sharing
   the session. Ships earlier, but v1 and v2 must agree on auth storage and URLs.
 
+## Current status (2026-10-26)
+
+- **Done**: most of the foundation (left: feature flags, parts of the app header), login and forgot password (left:
+  Google login, Register), the directory listings (left: Duplicate, Copy, Share), the first-run data source setup,
+  and the dashboard through M6: every filter widget, header filters, drilldown, drill through, downloads, permissions,
+  password, full screen and TV mode, auto refresh, View As, embedded route, and edit mode without ChartBuilder.
+- **Next**: the other chart types (stacked, pivot, ...) and ChartBuilder (Phase 4), in an order still to be decided.
+  ChartBuilder plugs into edit mode through `ChartBuilderBridge`.
+- **Blocked by the server**: share links (`?token=`), see Phase 3 M5b. MySQL `like` and datetime `between` filters,
+  see Decisions (M3b).
+- **Open decision**: how v2 ships next to v1 (Coexistence above).
+
 ## Phases
 
 Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure of effort.
@@ -75,7 +87,7 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Theme (light/dark) via Context | Reference for the state pattern | Done |
 | HTTP client | `src/shared/http/createHttpClient.ts` (ky): prefix, timeout, headers from a `getHeaders` callback, errors → `ApiError`, `onUnauthenticated` callback, no retries (TanStack Query owns them). Returns plain JSON, no key conversion. `HttpClientBuilder` mirrors v1's builder; the app's `ApiClient` is bound in `src/app/di/HttpModule.ts`. v1: `di-core/common/misc/ClientBuilder.ts`, `di-core/common/services/HttpClient.ts` | Done |
 | Dependency injection | `src/core/di/Container.ts`: `token<T>()`, `bindValue` / `bindSingleton` (v1 only used singletons), lazy, circular-dependency check, later modules override earlier ones (test modules). Modules listed in `src/app/di/appModules.ts`, container created in `main.tsx`, passed to `DiProvider` (`useDi`). No decorators or `reflect-metadata`. v1: `di-core/common/modules/` | Done |
-| Session and auth state | Login state, current user, permissions. v1: `src/store/modules/AuthenticationStore.ts`, `di-core/common/services/DataManager.ts`, `PermissionHandler.ts`. Done: `ssid` cookie and share token (`src/core/session/session.ts`), session expiry → clear cache and full reload to `/login` (`src/app/sessionExpiredHandler.ts`), no query retry on 4xx. Current user: `features/auth/current-user` (`check_session` query, seeded by login; logout calls `/user/auth/logout`, which v1 never did). Left: permissions | In progress |
+| Session and auth state | Login state, current user, permissions. v1: `src/store/modules/AuthenticationStore.ts`, `di-core/common/services/DataManager.ts`, `PermissionHandler.ts`. Done: `ssid` cookie and share token (`src/core/session/session.ts`), session expiry → clear cache and full reload to `/login` (`src/app/sessionExpiredHandler.ts`), no query retry on 4xx. Current user: `features/auth/current-user` (`check_session` query, seeded by login; logout calls `/user/auth/logout`, which v1 never did). Permissions: organization ones via `core/permission/PermissionService` (`admin/permissions/{username}/is_permitted`, `shared/permission/permissionQueries`), resource ones via `ResourcePermissionService` (`share/{type}/{id}/action_permitted`). Left: share token without a session (blocked by the server, see Phase 3 M5b) | In progress |
 | Route guards | `src/app/routeGuards.ts` (loaders): no session → `/login?redirect=<path>`; logged-in users skip login and forgot password. v1: `router.beforeEach` in `Router.ts` | Done |
 | App layout | Header, navigation, page shell. Header done (`src/app/layout/header`, v1 `src/shared/components/HeaderBar.vue`): organization logo and name, Dashboards, Data Warehouse menu, Settings menu (profile, Organization Settings, dark mode, Sign Out), drawer below `md`. Links use v1 paths, so they show Not found until those pages land. Left: Change Password (v1 `ChangePasswordModal`, default login only), Assistant sidebar, trial days left (plan and billing), Lake House / Data Ingestion / CDP behind feature flags | In progress |
 | Feature flags | v1 `VUE_APP_IS_DISABLE_*` (LakeHouse, Streaming, CDP, Ingestion, User activities) | Not started |
@@ -95,16 +107,16 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| My Data, Shared with me, Recent, Starred, Trash | `screens/directory` (routes `/mydata`, `/shared`, `/recent`, `/starred`, `/trash`) | 12 | In progress. Done (`features/directory`, `core/directory`, `core/dashboard`): the five listings at v1's paths (`/` redirects to `/mydata`), folders by `<slug>-<id>`, breadcrumbs, name sort, refresh; New folder/dashboard (in the open My Data folder, otherwise the root; v1 sent the section's virtual id, which the server rejects); rename (dashboards and queries through `dashboards/{id}/rename`), move (folder picker), star, move to trash; restore and delete forever in Trash. Left: Duplicate and Copy (need the dashboard model and v1's `PasswordModal`), Share (row below), share-token (`?token=`) access, which v1 allowed without login |
-| Share and permission dialogs | `src/shared/components/SharePermissionManager.vue`, `di-core/share` | – | Not started |
+| My Data, Shared with me, Recent, Starred, Trash | `screens/directory` (routes `/mydata`, `/shared`, `/recent`, `/starred`, `/trash`) | 12 | In progress. Done (`features/directory`, `core/directory`, `core/dashboard`): the five listings at v1's paths (`/` redirects to `/mydata`), folders by `<slug>-<id>`, breadcrumbs, name sort, refresh; New folder/dashboard (in the open My Data folder, otherwise the root; v1 sent the section's virtual id, which the server rejects); rename (dashboards and queries through `dashboards/{id}/rename`), move (folder picker), star, move to trash; restore and delete forever in Trash. Left: Duplicate and Copy (the dashboard model and the password check now exist, in `core/dashboard` and `features/dashboard/access`), Share (row below), share-token (`?token=`) access, which v1 allowed without login (blocked by the server) |
+| Share and permission dialogs | `src/shared/components/SharePermissionManager.vue`, `di-core/share` | – | Not started. Setting a dashboard password lives here (`DiShareModal`, stored in the directory's `data.config`) |
 
 ### Phase 3: Dashboard (view)
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
-| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0 to M5 (share token blocked by the server) |
-| Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI, flat table (M2). Next: stacked, drilldown, pivot, the rest |
+| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | Done (plan below): M0 to M6; share token blocked by the server |
+| Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI, flat table with server sort (M2, M4a); drilldown, date function and export work on them (M4a). Next: stacked, pivot, the rest |
 | Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Left: filters' own style options (active/inactive and choice colors, title style; antd defaults for now), the filter panel's vertical header and active tab background, the date select's min/max dates as calendar bounds |
 | Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Done (M4a, M4b). Left: maps |
 | Embedded dashboard | route `/embedded/dashboard/:name` | – | Done (M5b) with the session cookie; with a share token once the server allows it |
@@ -132,7 +144,8 @@ Decisions (2026-10-26):
   `background`, ...), and merged over v1's defaults with lodash `merge` like v1.
 - **Share links (`?token=`) are in scope**, but blocked by the backend: the token from `share/dashboard/{id}/anyone`
   (and the older `dashboards/{id}/share`) carries `0:dashboard:view:<id>`, while `GET dashboards/{id}` checks
-  `directory:view:<directoryId>`, so it answers 401 `not_allowed` (v1 is affected too). Needs a server fix.
+  `directory:view:<directoryId>`, so it answers 401 `not_allowed` (v1 is affected too). Needs a server fix; still so
+  in M5b, which lists what the client needs then.
 - How filters reach charts (verified in v1 and on the server): every v1 filter widget has `isEnableFilter() = false`, so
   none of them sends a dashboard-wide `FilterRequest`. A chart is filtered only where its own filters hold a
   `dynamic_condition` naming the control; the server skips one without `final_condition`. The only `FilterRequest`
@@ -171,7 +184,9 @@ Decisions (M3b):
 | M4b | Header filters (v1 `InternalFilter`): `core/query/internalFilter.ts` (model, v1's condition builder), `core/query/filtersParam.ts` (`?filters=` in v1's JSON, read on load), one more entry of the controls state, sent by every chart as a `FilterRequest` (`buildChartQuery`'s `headerRequests`). Filter bar under the header (`controls/header-filters`: edit condition and values, turn off, remove) and the chart's filter icon (`AppliedFiltersView`, on/off per chart). Drill through in the point menu: `core/query/drillThrough.ts` (clicked value → filters), `DashboardService.listDrillThrough` (`dashboards/list_drill_through`, 40 per page, Load more), the dashboard opens in a new tab with `?filters=`. Field types in `core/schema/fieldTypes.ts` | Done |
 | M5a | Access and display (`features/dashboard/access`, `features/dashboard/mode`): permissions (owner: all, else `share/dashboard/{id}/action_permitted` via `core/permission/ResourcePermissionService`; downloads hidden without `download`), password-protected dashboards (`data.config` of the directory, `DashboardService.getDirectoryId`; nothing is queried until the password is given), Full screen and TV mode in the header's Options, auto refresh (`useAutoRefresh`). The theme palette for charts was already done in M2 (`chartColors`) | Done |
 | M5b | RLS View As (`features/dashboard/view-as`: user search via `core/user/UserService` `user/profile/suggest`, charts through `QueryService.queryAs` `chart/view_as`, offered with `rls:view:*`), embedded route (`EmbeddedDashboardPage`, outside the app layout). Left: share token (`?token=`), blocked by the server (see below) | Done, token blocked |
-| M6 | Edit mode without ChartBuilder: layout save, rename, add text/image/tab/filter panel, delete/duplicate, tab settings, setting modals, main date setup, copy/paste, leave guard; Add/Edit chart hook for ChartBuilder | Not started |
+| M6a | Edit mode (`features/dashboard/edit`): Edit with the `edit` permission (desktop, not embedded, not under View As), grids editable, layout saved on Save (`layoutToSave`: each grid's unplaced widgets placed, z-index from 0), rename the dashboard, Adding (text, image by URL, tab, filter panel, paste), widget menus (edit title, edit text, replace image, copy, duplicate, delete), copy/paste through the clipboard, leave guard. Server writes in `DashboardService` (`widgets/create`, `widgets/{id}/edit`, `DELETE widgets/{id}`, `PUT dashboards/{id}` for the setting), cache updates in `useDashboardEditor`, new widget JSON in `core/dashboard/widgetJson`. `ChartBuilderBridge` adds Add chart / Config chart once ChartBuilder exists | Done |
+| M6b | Tabs and filter panels (`edit/tabEdit.utils`): add, rename, delete and sort tabs, move widgets into a tab and back out, add and remove a filter panel's filters, header style (Config tab), now also rendered by `TabWidgetView` | Done |
+| M6c | Dashboard settings in one dialog (`edit/settings`): theme (with v1's border and background defaults), overlap, auto refresh, the date filter in the header and its default range, size, background, border, widget defaults (padding, card, title, subtitle) | Done |
 
 Decisions (M4a):
 
@@ -238,6 +253,32 @@ Decisions (M5b):
   client still needs: the route guards to let a token through without a session, no `check_session` without a session
   (its 401 sends the viewer to login), and permissions from `permission_tokens/{token}/action_permitted`.
 
+Decisions (M6):
+
+- **What saves when**: every widget change is saved at once, like v1; only the layout waits for Save, which sends one
+  position per widget (the server rejects anything else) and goes back to view. There is no Cancel (v1 had none).
+  Auto refresh pauses while editing.
+- **Leave guard**: leaving the dashboard while editing asks first (React Router `useBlocker`); renaming rewrites the URL
+  and doesn't. Closing the tab with an unsaved layout asks through `beforeunload`.
+- **New widgets** are v1's `empty()` JSON, verified on the local backend, placed at -1/-1 so the grid finds a free
+  slot; Save turns that into real positions per grid.
+- **Images by URL**: the open source server has no upload endpoint (`/upload`, `/media/upload` answer 404), and v1's
+  stock image search is not ported.
+- **Copy and paste** use v1's `CopiedData` envelope through the system clipboard, but the widget inside is the server's
+  JSON (`format: server`); v1's copies hold camelCase objects only v1's global key renaming could read, so they are
+  refused. Ctrl+V pastes in edit mode only (v1 pasted in view mode too); Paste in the menu reads the clipboard.
+- **Inner filter ids** come from the chart's id when read (`-(id + 10)`, v1's rule): a chart v1 duplicated kept its
+  original's, so both shared one selection.
+- **Tabs**: the widget menu acts on the open tab (v1 had a menu per tab header); tabs are sorted with buttons, not by
+  dragging. Deleting a tab or a tab widget puts its widgets back on the dashboard in free slots (v1 left them at their
+  coordinates inside the tab, on top of other widgets). Widgets move in and out of tabs through a picker, like v1.
+- **Settings**: v1's four dialogs are one, saved over the stored setting so unknown keys stay. Picking a theme applies
+  its border and background like v1; corners share one radius. Setting up or removing the date filter restarts the
+  dashboard's controls. Text widgets edit their font size, color, alignment and emphasis, not their background.
+- **ChartBuilder** is not ported: `DashboardPage` takes an optional `ChartBuilderBridge`, and Add chart and Config chart
+  appear once it is given. v1's inner filter items (add, update, delete a chart's filter) open ChartBuilder too; they
+  come with it.
+
 v1 bugs not carried over: resize listener never removed, text edits saved twice, query settings mutated in place,
 inner filters kept after reset, the always-null `mainDateFilterRequest`, unsanitized text widget HTML, data label
 min/max conditions that hid every non-zero value (`ChartUtils.isShowValue`), tab filters that forgot the selection on
@@ -246,7 +287,8 @@ changed nothing, slicers on a date column sending epoch millis (and their end da
 checked node's value again for each checked child, date select defaults given as two dates applying nothing. M4a:
 zoom keeping the old function's `result_type`, query settings mutated by zoom and drilldown. M4b: a second drill
 through dropping the first one's filters (v1 carried only local storage filters), drill through on a date sending an
-`in` on the label that matched no row, number `between` checking its first value twice.
+`in` on the label that matched no row, number `between` checking its first value twice. M6: duplicated charts sharing
+their inner filter, tab children left on top of other widgets, Ctrl+V pasting in view mode.
 
 Chart types to support (v1 `ChartType` enum): Area, AreaRange, AreaInverted, AreaSpline, Bar, BellCurve, Bubble,
 Column, ColumnRange, ColumnDrillDown, BarDrillDown, PieDrillDown, Funnel, Gauges, HeatMap, TreeMap, Histogram, Line,
@@ -260,7 +302,7 @@ Suggested order: the common series charts (Column/Bar/Line/Area/Pie) and Kpi, th
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| Dashboard edit mode (layout, add/remove/resize widgets, settings) | `screens/dashboard-detail` | (see above) | Not started |
+| Dashboard edit mode (layout, add/remove/resize widgets, settings) | `screens/dashboard-detail` | (see above) | Done (M6), without ChartBuilder: adding or configuring a chart and its inner filter come with it |
 | Chart builder | `screens/chart-builder` | 53 | Not started |
 | Query/Viz setting resolvers and handlers | `src/shared/resolver`, `src/shared/module/ChartBuilderModule.ts`, `web/docs/CREATE_CHART_FLOW.md` | – | Not started |
 
