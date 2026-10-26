@@ -28,7 +28,8 @@ toolchain, refactoring modules on the way. The backend API stays the same.
 | `vue-router` 3 (`src/router/Router.ts`) | React Router 8 (data mode), routes declared in `src/app/router.tsx`, pages in features |
 | bootstrap-vue + ant-design-vue 1 | antd 6 |
 | Highcharts 11 + `highcharts-vue` | Highcharts 13 + `highcharts-react-official` |
-| gridstack 2 (dashboard layout) | To decide when the dashboard phase starts (`react-grid-layout` or gridstack 12) |
+| gridstack 2 (dashboard layout) | `react-grid-layout` 2 (`features/dashboard/grid`) |
+| `vue-drag-drop` + `vuedraggable` (field drag and drop) | `@dnd-kit/core` (`shared/field-dnd`) |
 | monaco-editor-vue | `@monaco-editor/react` |
 | SCSS themes in `src/themes/` | antd theme tokens (`ConfigProvider`); CSS for what tokens can't cover |
 | Jest-style unit tests (`tests/unit/`) | Vitest + Testing Library, next to the code |
@@ -101,6 +102,7 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
+| Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
 | Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | Not started |
 | Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | Not started |
 | Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Not started |
@@ -124,6 +126,36 @@ Suggested order: the common series charts (Column/Bar/Line/Area/Pie) and Kpi, th
 | Dashboard edit mode (layout, add/remove/resize widgets, settings) | `screens/dashboard-detail` | (see above) | Not started |
 | Chart builder | `screens/chart-builder` | 53 | Not started |
 | Query/Viz setting resolvers and handlers | `src/shared/resolver`, `src/shared/module/ChartBuilderModule.ts`, `web/docs/CREATE_CHART_FLOW.md` | – | Not started |
+
+#### Notes for wiring the grid and the drop zones
+
+Widget grid (`features/dashboard/grid/DashboardGrid`, stories in `Dashboard/DashboardGrid`):
+
+- Controlled: pass the positions of one grid (the dashboard's top-level widgets, or one tab's widgets) and merge what
+  `onPositionsChange` reports into the dashboard's full map. It reports only in edit mode, never on mobile, and
+  also reports the compaction react-grid-layout applies to a stored layout with gaps.
+- v1's sizes are kept (48 columns, 32px cells, 10px margin, 8px in tab and filter panel grids): `gridMetrics` maps
+  gridstack's cell pitch to react-grid-layout's row height, so saved dashboards render the same.
+- Overlap mode replaces v1's gridstack engine patch with react-grid-layout's `allowOverlap`; pressing a widget brings
+  it to front. Mobile (`useIsMobile`, viewport below 768px) stacks widgets in one column, read only.
+- Saving (`DashboardService.resizeWidgets`): the server rejects the request unless it has exactly one position per
+  widget of the dashboard, tab children included, and it stores -1/-1 as is. Before saving, run `placeUnplaced` per
+  grid (top level, each tab) and `normalizeZIndex`, then send the whole map. v1 saved once when leaving edit mode.
+- Inside a widget, mark inputs and other interactive parts with `GRID_NO_DRAG_CLASS`; a grid nested in a widget
+  already doesn't drag the widget around it.
+
+Field drag and drop (`shared/field-dnd`, stories in `Shared/FieldDnd`):
+
+- `FieldDndProvider` around the field tree and the zones, `FieldDraggable` on tree leaves, `FieldDropZone` per config
+  zone. Give the provider a rule per zone (`size`, `maxItems`, `disabled`, `accepts`) and apply the `DropAction` it
+  hands to `onDrop`, with `applyDrop` or by hand (v1 rebuilt the function node for the target zone and merged
+  configs on replace: do that in the factory).
+- Rules follow v1: append to the zone, insert at a gap, replace the item of a full single-item zone (only from the
+  tree), reorder in a zone, move or copy between zones (`transferModeOf`: v1 copies to and from sorting and out of
+  the filter zone). The filter zone's OR/AND groups can be a zone per AND group; the innermost zone wins.
+- No live reordering animation, by design: gap lines show where the field lands, which keeps hit areas where they
+  are drawn. Drags start after 4px, so clicks on an item's menus still work; text fields and `FIELD_NO_DRAG_CLASS`
+  never start a drag.
 
 The v1 resolver/handler registry (QuerySetting, VizSetting, PanelSetting per chart type) should become a typed map from
 chart type to handler, not a DI container.
