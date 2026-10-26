@@ -60,7 +60,7 @@ describe('positions per grid', () => {
   const dashboard = dashboardFromJson(fixture);
 
   it('leaves tab children out of the dashboard grid', () => {
-    expect(Object.keys(topLevelPositions(dashboard)).map(Number).sort((a, b) => a - b)).toEqual([3, 4, 6, 8, 10, 12]);
+    expect(Object.keys(topLevelPositions(dashboard)).map(Number).sort((a, b) => a - b)).toEqual([3, 4, 6, 7, 8, 10, 12]);
   });
 
   it('gives a tab its own widgets', () => {

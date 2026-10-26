@@ -21,7 +21,8 @@ describe('dashboardFromJson', () => {
       [8, 'chart'],
       [10, 'text'],
       [11, 'chart'],
-      [12, 'tab']
+      [12, 'tab'],
+      [7, 'chart']
     ]);
   });
 

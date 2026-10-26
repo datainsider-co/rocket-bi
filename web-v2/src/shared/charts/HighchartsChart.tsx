@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import Highcharts from 'highcharts';
-import HighchartsReactModule from 'highcharts-react-official';
+import HighchartsReactModule, { type HighchartsReactRefObject } from 'highcharts-react-official';
 
 /**
  * The package ships CommonJS only (`module.exports = { HighchartsReact, default }`). Vite's pre-bundle hands that whole
@@ -16,6 +16,11 @@ export interface HighchartsChartProps {
   height?: number | string;
   /** Take the parent's size and follow it when it changes (dashboard widgets resize without a window resize). */
   fill?: boolean;
+  /**
+   * A right click on a point (the one under the mouse), with where it happened in viewport pixels. Highcharts has no
+   * point context menu event without a module, so the container's event asks the chart for its hovered point.
+   */
+  onPointContextMenu?: (point: Highcharts.Point, position: { x: number; y: number }) => void;
 }
 
 /**
@@ -41,20 +46,28 @@ function useElementSize(enabled: boolean) {
   return { ref, size };
 }
 
-export function HighchartsChart({ options, height = 400, fill = false }: HighchartsChartProps) {
+export function HighchartsChart({ options, height = 400, fill = false, onPointContextMenu }: HighchartsChartProps) {
   const { ref, size } = useElementSize(fill);
+  const chartRef = useRef<HighchartsReactRefObject>(null);
+  const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
+    const point = chartRef.current?.chart?.hoverPoint;
+    if (!point || !onPointContextMenu) return;
+    event.preventDefault();
+    onPointContextMenu(point, { x: event.clientX, y: event.clientY });
+  };
 
   const chart = fill ? { ...options.chart, width: size?.width, height: size?.height } : { height, ...options.chart };
   const content = (
     <HighchartsReact
+      ref={chartRef}
       highcharts={Highcharts}
       options={{ credits: { enabled: false }, ...options, chart }}
       containerProps={{ 'data-testid': 'highcharts-chart' }}
     />
   );
-  if (!fill) return content;
+  if (!fill) return onPointContextMenu ? <div onContextMenu={onContextMenu}>{content}</div> : content;
   return (
-    <div ref={ref} className="size-full min-h-0 overflow-hidden">
+    <div ref={ref} className="size-full min-h-0 overflow-hidden" onContextMenu={onContextMenu}>
       {size && size.height > 0 && content}
     </div>
   );

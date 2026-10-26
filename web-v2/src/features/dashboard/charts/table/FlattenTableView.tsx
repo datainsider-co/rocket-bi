@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import { Table } from 'antd';
 import type { Paging } from '@/core/query/QueryRequest';
+import type { TableSort } from '@/core/query/tableSort';
 import type { JsonTableResponse } from '@/core/query/VisualizationResponse';
 import { GRID_NO_DRAG_CLASS } from '../../grid/DashboardGridView';
-import { toColumns, toRows, type TableRow } from './table.utils';
+import { toColumns, toRows, toTableSort, type TableRow } from './table.utils';
 
 interface FlattenTableViewProps {
   title?: string;
@@ -12,14 +13,16 @@ interface FlattenTableViewProps {
   paging: Paging;
   loading: boolean;
   onPageChange: (paging: Paging) => void;
+  sort?: TableSort;
+  onSortChange: (sort: TableSort | undefined) => void;
 }
 
 /**
- * Tables (v1 `DefaultTable`): title, rows of the current page, server-side pages. Field formatting, conditional
- * colors, totals and sorting come later (MIGRATION.md, dashboard M4).
+ * Tables (v1 `DefaultTable`): title, rows of the current page, server-side pages and sorting on one column. Field
+ * formatting, conditional colors and totals come later.
  */
-export function FlattenTableView({ title, subtitle, response, paging, loading, onPageChange }: FlattenTableViewProps) {
-  const columns = useMemo(() => toColumns(response.headers), [response.headers]);
+export function FlattenTableView({ title, subtitle, response, paging, loading, onPageChange, sort, onSortChange }: FlattenTableViewProps) {
+  const columns = useMemo(() => toColumns(response.headers, sort), [response.headers, sort]);
   const rows = useMemo(() => toRows(response.records, paging.from), [response.records, paging.from]);
 
   return (
@@ -37,7 +40,7 @@ export function FlattenTableView({ title, subtitle, response, paging, loading, o
       <div className={`mt-2 min-h-0 flex-1 overflow-auto ${GRID_NO_DRAG_CLASS}`}>
         <Table<TableRow>
           size="small"
-                    columns={columns}
+          columns={columns}
           dataSource={rows}
           loading={loading}
           pagination={{
@@ -48,6 +51,7 @@ export function FlattenTableView({ title, subtitle, response, paging, loading, o
             showSizeChanger: false,
             onChange: (page, size) => onPageChange({ from: (page - 1) * size, size })
           }}
+          onChange={(_pagination, _filters, sorter, { action }) => action === 'sort' && onSortChange(toTableSort(sorter))}
         />
       </div>
     </div>

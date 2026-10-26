@@ -608,6 +608,139 @@
       "extra_data": {
         "current_chart_type": "tab"
       }
+    },
+    {
+      "class_name": "chart_v3",
+      "id": 7,
+      "name": "Sales",
+      "description": "",
+      "setting": {
+        "class_name": "table_chart_setting",
+        "columns": [
+          {
+            "name": "region",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "sample_v2",
+                "tbl_name": "sales",
+                "field_name": "region",
+                "field_type": "string"
+              },
+              "group_by_func": false,
+              "aggregate_func": false
+            },
+            "is_horizontal_view": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false,
+            "is_flatten": false
+          },
+          {
+            "name": "country",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "sample_v2",
+                "tbl_name": "sales",
+                "field_name": "country",
+                "field_type": "string"
+              },
+              "group_by_func": false,
+              "aggregate_func": false
+            },
+            "is_horizontal_view": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false,
+            "is_flatten": false
+          },
+          {
+            "name": "item_type",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "sample_v2",
+                "tbl_name": "sales",
+                "field_name": "item_type",
+                "field_type": "string"
+              },
+              "group_by_func": false,
+              "aggregate_func": false
+            },
+            "is_horizontal_view": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false,
+            "is_flatten": false
+          },
+          {
+            "name": "total_revenue",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "sample_v2",
+                "tbl_name": "sales",
+                "field_name": "total_revenue",
+                "field_type": "double"
+              },
+              "group_by_func": false,
+              "aggregate_func": false
+            },
+            "is_horizontal_view": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false,
+            "is_flatten": false
+          }
+        ],
+        "formatters": [],
+        "filters": [],
+        "sorts": [],
+        "sql_views": [],
+        "options": {
+          "class_name": "flatten_table_setting",
+          "options": {
+            "title": {
+              "align": "center",
+              "enabled": true,
+              "text": "Sales",
+              "style": {
+                "color": "var(--text-color)",
+                "font_family": "var(--widget-primary-font-family, Roboto)",
+                "font_size": "20px"
+              }
+            },
+            "subtitle": {
+              "align": "center",
+              "enabled": true,
+              "text": "",
+              "style": {
+                "color": "var(--secondary-text-color)",
+                "font_family": "var(--widget-secondary-font-family, Roboto)",
+                "font_size": "11px"
+              }
+            },
+            "affected_by_filter": true,
+            "background": "var(--chart-background-color)"
+          }
+        },
+        "dynamic_function_ids": []
+      },
+      "creator_id": "root",
+      "owner_id": "root",
+      "background_color": "var(--chart-background-color)",
+      "text_color": "#fff",
+      "extra_data": {
+        "configs": {},
+        "filters": {},
+        "current_chart_type": "flatten_table"
+      },
+      "comparison_info": {}
     }
   ],
   "widget_positions": {
@@ -657,6 +790,13 @@
       "row": 0,
       "column": 12,
       "width": 18,
+      "height": 12,
+      "z_index": 0
+    },
+    "7": {
+      "row": 18,
+      "column": 0,
+      "width": 30,
       "height": 12,
       "z_index": 0
     }

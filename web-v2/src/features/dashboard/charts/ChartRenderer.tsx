@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
+import type Highcharts from 'highcharts';
 import { getPath, asString } from '@/core/json/json';
 import type { Paging } from '@/core/query/QueryRequest';
+import type { TableSort } from '@/core/query/tableSort';
 import type { VisualizationResponse } from '@/core/query/VisualizationResponse';
 import type { ChartViz } from '@/core/query/vizOptions';
 import type { ChartWidget } from '@/core/dashboard/Widget';
@@ -17,6 +19,8 @@ export interface TablePaging {
   paging: Paging;
   loading: boolean;
   onPageChange: (paging: Paging) => void;
+  sort?: TableSort;
+  onSortChange: (sort: TableSort | undefined) => void;
 }
 
 /** The chart as a control for others (v1 cross filter). */
@@ -24,8 +28,13 @@ export interface CrossFilter {
   /** Its own selection, e.g. pie slices; empty means none. */
   selected: readonly string[];
   onSelect: (selected: string[]) => void;
-  /** A click on a series point, which opens the point menu. */
-  onPointClick: (value: string, position: { x: number; y: number }) => void;
+  /** Opens the point menu for a value: a click on a series point, a right click on any point. */
+  onPointMenu: (value: string, position: { x: number; y: number }) => void;
+}
+
+/** The value a point stands for: a pie slice's name, a series point's category. */
+function pointValue(point: Highcharts.Point): string {
+  return point.name ?? String(point.category ?? point.x);
 }
 
 export interface ChartRendererProps {
@@ -53,19 +62,21 @@ function Unsupported({ title, type }: { title: string; type: string }) {
  * ported yet say so instead of failing. Filters go through `FilterRenderer`.
  */
 export function ChartRenderer({ widget, viz, response, themeColors, table, crossFilter }: ChartRendererProps) {
-  const { selected, onSelect, onPointClick } = crossFilter;
+  const { selected, onSelect, onPointMenu } = crossFilter;
   const highchartsOptions = useMemo(() => {
     if (viz.className === ChartVizClass.Series && response.kind === 'series_one') {
       const scalarFunction = asString(getPath(widget.setting, ['x_axis', 'function', 'scalar_function', 'class_name']));
-      return buildSeriesChartOptions({ options: viz.options, response, themeColors, timestampXAxis: isTimestampFunction(scalarFunction), onPointClick });
+      return buildSeriesChartOptions({ options: viz.options, response, themeColors, timestampXAxis: isTimestampFunction(scalarFunction), onPointClick: onPointMenu });
     }
     if (viz.className === ChartVizClass.Pie && response.kind === 'series_two') {
       return buildPieChartOptions({ options: viz.options, response, themeColors, selected, onSelect });
     }
     return undefined;
-  }, [viz, response, themeColors, widget.setting, selected, onSelect, onPointClick]);
+  }, [viz, response, themeColors, widget.setting, selected, onSelect, onPointMenu]);
 
-  if (highchartsOptions) return <HighchartsChart options={highchartsOptions} fill />;
+  if (highchartsOptions) {
+    return <HighchartsChart options={highchartsOptions} fill onPointContextMenu={(point, position) => onPointMenu(pointValue(point), position)} />;
+  }
   if (viz.className === ChartVizClass.Number && response.kind === 'series_one') return <KpiView kpi={buildKpi(viz.options, response)} />;
   if (response.kind === 'json_table') {
     return (
@@ -76,6 +87,8 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
         paging={table.paging}
         loading={table.loading}
         onPageChange={table.onPageChange}
+        sort={table.sort}
+        onSortChange={table.onSortChange}
       />
     );
   }

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { dashboardFromJson } from '@/core/dashboard/Dashboard';
 import fixture from '@/core/dashboard/dashboard.fixture.json';
 import filtersFixture from '@/core/dashboard/filters.fixture.json';
@@ -33,6 +33,21 @@ function revenueByCountry(queries: QueryService) {
   return { finals, measure };
 }
 
+/** Filling charts and tables wait for their container's size; jsdom lays nothing out, so report one. */
+function stubResizeObserver() {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      constructor(private readonly callback: ResizeObserverCallback) {}
+      observe() {
+        this.callback([{ contentRect: { width: 400, height: 300 } } as ResizeObserverEntry], this as unknown as ResizeObserver);
+      }
+      unobserve() {}
+      disconnect() {}
+    }
+  );
+}
+
 function renderAt(path: string, get: DashboardService['get']) {
   return renderAppAt(path, fakeAuthenticationService(), [
     di => di.bindValue(DashboardService, fakeDashboardService({ get: vi.fn<DashboardService['get']>(get) }))
@@ -60,18 +75,7 @@ describe('dashboard page', () => {
   });
 
   it('queries and draws each chart', async () => {
-    // Filling charts wait for their container's size; jsdom lays nothing out, so report one.
-    vi.stubGlobal(
-      'ResizeObserver',
-      class {
-        constructor(private readonly callback: ResizeObserverCallback) {}
-        observe() {
-          this.callback([{ contentRect: { width: 400, height: 300 } } as ResizeObserverEntry], this as unknown as ResizeObserver);
-        }
-        unobserve() {}
-        disconnect() {}
-      }
-    );
+    stubResizeObserver();
     renderAt('/dashboard/v2-sample-1', async () => dashboardFromJson(fixture));
 
     // KPI with its prefix, and the Highcharts charts (column, pie, the pie in the tab) with response categories.
@@ -122,6 +126,32 @@ describe('dashboard page', () => {
     // Measure (19) is a tab control: picking Profit swaps the chart's controlled column.
     await userEvent.click(screen.getByText('Profit'));
     await waitFor(() => expect(revenueByCountry(queries).measure).toBe('Profit'), SLOW);
+  });
+
+  it('sorts a table on the server and downloads a chart', { timeout: 15_000 }, async () => {
+    stubResizeObserver();
+    const queries = fakeQueryService();
+    const saved = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:file');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    renderAppAt('/dashboard/v2-sample-1', fakeAuthenticationService(), [
+      di => {
+        di.bindValue(DashboardService, fakeDashboardService({ get: vi.fn<DashboardService['get']>(async () => dashboardFromJson(fixture)) }));
+        di.bindValue(QueryService, queries);
+      }
+    ]);
+    const tableQueries = () =>
+      vi.mocked(queries.query).mock.calls.map(([request]) => request as { chart_id?: number; query_setting: { sorts?: unknown[] } }).filter(request => request.chart_id === 7);
+
+    // The Sales table (widget 7): a header click sorts on the server, from the first page.
+    await userEvent.click(await screen.findByRole('columnheader', { name: /country/ }, SLOW));
+    await waitFor(() => expect(tableQueries().at(-1)?.query_setting.sorts).toEqual([expect.objectContaining({ class_name: 'order_by', order: 'ASC' })]), SLOW);
+
+    // Its menu downloads every row as CSV.
+    const table = document.querySelector<HTMLElement>('[data-widget-id="7"]')!;
+    await userEvent.click(within(table).getByRole('button', { name: 'Chart actions' }));
+    await userEvent.click(await screen.findByText('Download CSV'));
+    await waitFor(() => expect(queries.export).toHaveBeenCalledWith(expect.objectContaining({ chart_id: 7, from: -1, size: -1 }), 'csv'), SLOW);
+    await waitFor(() => expect(saved).toHaveBeenCalled(), SLOW);
   });
 
   it('rewrites an outdated name in the URL', async () => {

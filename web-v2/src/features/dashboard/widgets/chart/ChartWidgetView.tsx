@@ -3,19 +3,20 @@ import type { ChartWidget } from '@/core/dashboard/Widget';
 import { ChartRenderer } from '../../charts/ChartRenderer';
 import { FilterRenderer, isFilterViz } from '../../charts/filter/FilterRenderer';
 import { chartTitle } from './chartWidget.utils';
+import { DrillPathView } from './DrillPathView';
 import { PointMenuView } from './PointMenuView';
-import { useChartWidget } from './useChartWidget';
+import type { ChartWidgetState } from './useChartWidget';
 
 interface ChartWidgetViewProps {
   widget: ChartWidget;
   dashboardId: number;
   themeColors: readonly string[];
+  chart: ChartWidgetState;
 }
 
-/** v1 `ChartHolder`: loading, error with retry, then the chart or the filter (v1 `StatusWidget`). */
-export function ChartWidgetView({ widget, dashboardId, themeColors }: ChartWidgetViewProps) {
-  const chart = useChartWidget(widget, dashboardId);
-  const { data, pointActions } = chart;
+/** v1 `ChartHolder` body: loading, error with retry, then the chart or the filter (v1 `StatusWidget`). */
+export function ChartWidgetView({ widget, dashboardId, themeColors, chart }: ChartWidgetViewProps) {
+  const { data } = chart;
 
   if (data.isPending) return <Spin className="flex! h-full items-center justify-center" />;
   if (data.isError) {
@@ -45,16 +46,12 @@ export function ChartWidgetView({ widget, dashboardId, themeColors }: ChartWidge
     );
   }
   return (
-    <>
-      <ChartRenderer widget={widget} viz={chart.viz} response={data.data} themeColors={themeColors} table={chart.table} crossFilter={chart.crossFilter} />
-      <PointMenuView
-        position={pointActions.menu?.position}
-        value={pointActions.menu?.value ?? ''}
-        canReset={pointActions.canReset}
-        onUseAsFilter={pointActions.useAsFilter}
-        onReset={pointActions.reset}
-        onClose={pointActions.close}
-      />
-    </>
+    <div className="flex h-full flex-col">
+      <DrillPathView steps={chart.drillPath.steps} onBack={chart.drillPath.onBack} />
+      <div className="min-h-0 flex-1">
+        <ChartRenderer widget={widget} viz={chart.viz} response={data.data} themeColors={themeColors} table={chart.table} crossFilter={chart.crossFilter} />
+      </div>
+      <PointMenuView position={chart.pointMenu.position} items={chart.pointMenu.items} onClose={chart.pointMenu.onClose} />
+    </div>
   );
 }
