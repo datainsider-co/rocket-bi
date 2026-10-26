@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { dashboardPath, toIdParam } from '@/shared/routing/idParam';
 import { DefaultDirectoryId, DirectoryType } from '@/core/directory/Directory';
 import type { Directory, DirectoryParents } from '@/core/directory/Directory';
 import { SortOrder } from '@/core/directory/DirectoryService';
@@ -84,37 +85,10 @@ export function sectionFromPath(pathname: string): DirectorySection {
   return SECTIONS.find(section => section.key === segment)?.key ?? DirectorySection.MyData;
 }
 
-/** Lower-case ASCII words joined by `-`, Vietnamese accents removed: `Báo cáo Q1` → `bao-cao-q1`. */
-export function toSlug(name: string): string {
-  return name
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[đĐ]/g, 'd')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-/** URL segment for an item, `<slug>-<id>`, read back by `parseIdParam`. Same shape as v1's `buildParamPath`. */
-export function toIdParam(id: number, name: string): string {
-  return `${toSlug(name)}-${id}`;
-}
-
-/** The id at the end of a `<slug>-<id>` segment, or a bare id. `undefined` when there is no valid id. */
-export function parseIdParam(param: string | undefined): number | undefined {
-  if (!param) return undefined;
-  const raw = param.slice(param.lastIndexOf('-') + 1);
-  if (!/^\d+$/.test(raw)) return undefined;
-  return Number(raw);
-}
-
 export function folderPath(id: number, name: string): string {
   return `/mydata/${toIdParam(id, name)}`;
 }
 
-export function dashboardPath(dashboardId: number, name: string): string {
-  return `/dashboard/${toIdParam(dashboardId, name)}`;
-}
 
 /**
  * Where clicking a row goes. Folders always open under My Data, whatever the section, as in v1. Saved queries open in

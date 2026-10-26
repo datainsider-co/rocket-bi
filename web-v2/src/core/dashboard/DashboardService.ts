@@ -2,11 +2,13 @@ import type { KyInstance } from 'ky';
 import Deneric from 'deneric2';
 import { token } from '@/core/di/Container';
 import { DirectoryType } from '@/core/directory/Directory';
-import { positionsToJson, type PositionMap } from './Position';
+import { asArray, asNumber, asRecord, type JsonObject } from '@/core/json/json';
+import { dashboardFromJson, type Dashboard } from './Dashboard';
+import { positionToJson, positionsToJson, type Position, type PositionMap } from './Position';
+import { widgetFromJson, type Widget } from './Widget';
 
 /**
- * What the directory screens need of a dashboard. The full model (widgets, positions, setting) comes with the
- * dashboard viewer.
+ * What the directory screens need of a dashboard. The full model is `Dashboard`.
  */
 export class DashboardSummary extends Deneric {
   id = 0;
@@ -23,7 +25,23 @@ export class DashboardSummary extends Deneric {
   }
 }
 
+/** A page of `dashboards/list_drill_through`. */
+export interface DrillThroughPage {
+  total: number;
+  dashboards: DashboardSummary[];
+}
+
+export interface DrillThroughRequest {
+  /** Backend fields; a dashboard is listed when one of its filter widgets is on one of them. */
+  fields: readonly JsonObject[];
+  /** The current dashboard. */
+  excludeIds: readonly number[];
+  from: number;
+  size: number;
+}
+
 export interface DashboardService {
+  get(id: number): Promise<Dashboard>;
   /**
    * Creates an empty dashboard. v1 also sent a default `setting`; the server accepts none and v1 falls back to the
    * default setting when it reads one without it.
@@ -36,6 +54,17 @@ export interface DashboardService {
    * unplaced positions (-1) as they are: place them first.
    */
   resizeWidgets(dashboardId: number, positions: PositionMap): Promise<void>;
+  /** Creates a widget from its JSON (`id` -1) at `position`; answers it with the id the server gave. */
+  createWidget(dashboardId: number, widget: JsonObject, position: Position): Promise<Widget>;
+  /** Replaces a widget with `widget`, its whole JSON. */
+  editWidget(dashboardId: number, widget: JsonObject): Promise<void>;
+  deleteWidget(dashboardId: number, widgetId: number): Promise<void>;
+  /** Replaces the dashboard's setting, main date filter included (v1 `DashboardRepository.editSetting`). */
+  editSetting(dashboardId: number, setting: JsonObject): Promise<void>;
+  /** The directory entry of a dashboard, which holds its password. */
+  getDirectoryId(id: number): Promise<number>;
+  /** Dashboards to drill through to, by name, those the user can see only. */
+  listDrillThrough(request: DrillThroughRequest, signal?: AbortSignal): Promise<DrillThroughPage>;
 }
 
 export const DashboardService = token<DashboardService>('DashboardService');
@@ -43,6 +72,10 @@ export const DashboardService = token<DashboardService>('DashboardService');
 /** Paths and field names are the backend's (`DashboardController`, Jackson SNAKE_CASE). */
 export class HttpDashboardService implements DashboardService {
   constructor(private readonly http: KyInstance) {}
+
+  async get(id: number): Promise<Dashboard> {
+    return dashboardFromJson(await this.http.get(`dashboards/${id}`).json());
+  }
 
   async create(name: string, parentDirectoryId: number): Promise<DashboardSummary> {
     const json = { name, parent_directory_id: parentDirectoryId, directory_type: DirectoryType.Dashboard };
@@ -55,5 +88,34 @@ export class HttpDashboardService implements DashboardService {
 
   async resizeWidgets(dashboardId: number, positions: PositionMap): Promise<void> {
     await this.http.put(`dashboards/${dashboardId}/widgets/resize`, { json: { positions: positionsToJson(positions) } });
+  }
+
+  async createWidget(dashboardId: number, widget: JsonObject, position: Position): Promise<Widget> {
+    const json = { widget, position: positionToJson(position) };
+    return widgetFromJson(await this.http.post(`dashboards/${dashboardId}/widgets/create`, { json }).json());
+  }
+
+  async editWidget(dashboardId: number, widget: JsonObject): Promise<void> {
+    const widgetId = asNumber(widget['id']);
+    await this.http.put(`dashboards/${dashboardId}/widgets/${widgetId}/edit`, { json: { dashboard_id: dashboardId, widget_id: widgetId, widget } });
+  }
+
+  async deleteWidget(dashboardId: number, widgetId: number): Promise<void> {
+    await this.http.delete(`dashboards/${dashboardId}/widgets/${widgetId}`);
+  }
+
+  async editSetting(dashboardId: number, setting: JsonObject): Promise<void> {
+    await this.http.put(`dashboards/${dashboardId}`, { json: { setting } });
+  }
+
+  async getDirectoryId(id: number): Promise<number> {
+    return asNumber(await this.http.get(`dashboards/${id}/get_directory_id`).json());
+  }
+
+  async listDrillThrough({ fields, excludeIds, from, size }: DrillThroughRequest, signal?: AbortSignal): Promise<DrillThroughPage> {
+    const json = { fields, exclude_ids: excludeIds, from, size, is_removed: false };
+    const page = asRecord(await this.http.post('dashboards/list_drill_through', { json, signal }).json());
+    // Each item is a whole dashboard, widgets included; the listing needs its id and name.
+    return { total: asNumber(page['total']), dashboards: asArray(page['data']).map(item => new DashboardSummary(item)) };
   }
 }

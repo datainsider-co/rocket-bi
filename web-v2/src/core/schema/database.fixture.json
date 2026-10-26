@@ -1,0 +1,115 @@
+{
+  "name": "sample_v2",
+  "display_name": "sample_v2",
+  "tables": [
+    {
+      "name": "sales",
+      "db_name": "sample_v2",
+      "display_name": "sales",
+      "columns": [
+        {
+          "class_name": "string",
+          "name": "region",
+          "display_name": "region",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "country",
+          "display_name": "country",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "item_type",
+          "display_name": "item_type",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "sales_channel",
+          "display_name": "sales_channel",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "order_priority",
+          "display_name": "order_priority",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "datetime",
+          "name": "order_date",
+          "display_name": "order_date",
+          "input_as_timestamp": false,
+          "input_formats": [],
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "int64",
+          "name": "order_id",
+          "display_name": "order_id",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "datetime",
+          "name": "ship_date",
+          "display_name": "ship_date",
+          "input_as_timestamp": false,
+          "input_formats": [],
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "int32",
+          "name": "units_sold",
+          "display_name": "units_sold",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "double",
+          "name": "unit_price",
+          "display_name": "unit_price",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "double",
+          "name": "unit_cost",
+          "display_name": "unit_cost",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "double",
+          "name": "total_revenue",
+          "display_name": "total_revenue",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "double",
+          "name": "total_cost",
+          "display_name": "total_cost",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "double",
+          "name": "total_profit",
+          "display_name": "total_profit",
+          "is_nullable": true,
+          "is_encrypted": false
+        }
+      ]
+    }
+  ]
+}

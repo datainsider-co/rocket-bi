@@ -5,6 +5,12 @@ import { DASHBOARD_MARGIN } from './dashboardGrid.utils';
 import { DashboardGridView } from './DashboardGridView';
 import { useDashboardGrid } from './useDashboardGrid';
 
+/** How a grid inside a widget (a tab, a filter panel) follows edit mode. */
+export interface NestedGridEdit {
+  editable: boolean;
+  onPositionsChange?: (changed: Record<WidgetId, Position>) => void;
+}
+
 export interface DashboardGridProps {
   /** Positions of the widgets in this grid only (a tab widget passes its own widgets). */
   positions: PositionMap;

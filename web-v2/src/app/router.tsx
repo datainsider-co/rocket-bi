@@ -3,7 +3,7 @@ import { Outlet, createBrowserRouter, redirect } from 'react-router';
 import type { RouteObject } from 'react-router';
 import { NotFoundPage } from '@/app/error/NotFoundPage';
 import { RouteErrorPage } from '@/app/error/RouteErrorPage';
-import { AppLayout } from '@/app/layout/AppLayout';
+import { AppLayout, type AppRouteHandle } from '@/app/layout/AppLayout';
 import { PageLoading } from '@/app/layout/PageLoading';
 import { redirectIfLoggedIn, requireSession } from '@/app/routeGuards';
 import { AuthLayout } from '@/features/auth/AuthLayout';
@@ -42,6 +42,13 @@ export const appRoutes: RouteObject[] = [
         ]
       },
       {
+        // For an iframe on the same domain: the session cookie is shared, the app around the dashboard is not.
+        path: '/embedded/dashboard/:name',
+        loader: args => requireSession(args),
+        errorElement: <RouteErrorPage />,
+        ...lazyPage(() => import('@/features/dashboard/detail/DashboardPage'), m => m.EmbeddedDashboardPage)
+      },
+      {
         loader: args => requireSession(args),
         element: <AppLayout />,
         children: [
@@ -56,6 +63,11 @@ export const appRoutes: RouteObject[] = [
                   path,
                   ...lazyPage(() => import('@/features/directory/listing/DirectoryListingPage'), m => m.DirectoryListingPage)
                 }))
+              },
+              {
+                path: '/dashboard/:name',
+                handle: { fullBleed: true } satisfies AppRouteHandle,
+                ...lazyPage(() => import('@/features/dashboard/detail/DashboardPage'), m => m.DashboardPage)
               },
               { path: '*', element: <NotFoundPage /> }
             ]

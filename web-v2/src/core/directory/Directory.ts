@@ -38,6 +38,9 @@ export class Directory extends Deneric {
   isStarred = false;
   createdDate = 0;
   updatedDate = 0;
+  /** A dashboard's password (`data.config`, v1 `PasswordConfig`): sha256 hex of it, asked of everyone but the owner. */
+  passwordEnabled = false;
+  hashedPassword = '';
 
   constructor(json?: unknown) {
     super({
@@ -50,7 +53,9 @@ export class Directory extends Deneric {
       dashboardId: ['dashboard_id', Number],
       isStarred: ['is_starred', Boolean],
       createdDate: ['created_date', Number],
-      updatedDate: ['updated_date', Number]
+      updatedDate: ['updated_date', Number],
+      passwordEnabled: ['data.config.enabled', Boolean],
+      hashedPassword: ['data.config.hashed_password', String]
     });
     this.fromJson(json);
   }

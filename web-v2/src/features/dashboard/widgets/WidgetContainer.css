@@ -1,0 +1,41 @@
+/* v1 WidgetContainer.vue: the card behind every widget, styled by `widgetCssVars`. */
+
+.widget-container {
+  position: relative;
+  height: 100%;
+}
+
+.widget-container::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: '';
+  background-color: var(--widget-background-color, #fff);
+  border-radius: var(--widget-border-radius, 20px);
+  box-shadow: 0 2px 4px 0 #0000001a;
+  outline: var(--widget-border-width, 1px) solid var(--widget-border-color, #e5e5e5);
+}
+
+.widget-container--no-shadow::before {
+  box-shadow: none;
+}
+
+.widget-container__body {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: var(--widget-padding, 15px);
+  border-radius: var(--widget-border-radius, 20px);
+  overflow: hidden;
+  color: var(--text-color);
+}
+
+.widget-container__actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}

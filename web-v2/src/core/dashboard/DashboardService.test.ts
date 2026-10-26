@@ -32,6 +32,15 @@ describe('HttpDashboardService', () => {
     expect(dashboard).toMatchObject({ id: 1, name: 'probe-dash', ownerId: 'root' });
   });
 
+  it('gets a dashboard with its widgets', async () => {
+    const { service, requests } = setup({ id: 5, name: 'Sales', owner_id: 'root', widgets: [{ class_name: 'text_widget', id: 9 }], widget_positions: {} });
+
+    const dashboard = await service.get(5);
+
+    expect(requests[0]).toMatchObject({ method: 'GET', url: 'http://api.test/dashboards/5' });
+    expect(dashboard).toMatchObject({ id: 5, name: 'Sales', widgets: [{ id: 9, kind: 'text' }] });
+  });
+
   it('renames with to_name', async () => {
     const { service, requests, sent } = setup({ success: true });
 
@@ -57,5 +66,64 @@ describe('HttpDashboardService', () => {
         '2': { row: 0, column: 7, width: 5, height: 6, z_index: 1 }
       }
     });
+  });
+
+  it('lists drill through dashboards', async () => {
+    // Reply of the local backend, the dashboard cut to what is read.
+    const { service, requests, sent } = setup({ total: 1, data: [{ org_id: 0, id: 2, name: 'v2 Filters', owner_id: 'root', widgets: [] }] });
+    const field = { class_name: 'table_field', db_name: 'sample_v2', tbl_name: 'sales', field_name: 'region', field_type: 'string' };
+
+    const page = await service.listDrillThrough({ fields: [field], excludeIds: [1], from: 0, size: 40 });
+
+    expect(requests[0]).toMatchObject({ method: 'POST', url: 'http://api.test/dashboards/list_drill_through' });
+    // Body accepted by the local backend.
+    expect(sent()).toEqual({ fields: [field], exclude_ids: [1], from: 0, size: 40, is_removed: false });
+    expect(page).toMatchObject({ total: 1, dashboards: [{ id: 2, name: 'v2 Filters' }] });
+  });
+
+  it('gets the directory id of a dashboard', async () => {
+    // The local backend answers a bare number.
+    const { service, requests } = setup(8);
+
+    expect(await service.getDirectoryId(1)).toBe(8);
+    expect(requests[0]).toMatchObject({ method: 'GET', url: 'http://api.test/dashboards/1/get_directory_id' });
+  });
+
+  it('creates a widget at a position and reads the one the server stored', async () => {
+    // Reply of the local backend for a new text widget.
+    const { service, requests, sent } = setup({ class_name: 'text_widget', id: 25, name: '', content: 'hello', is_html_render: false, extra_data: {} });
+    const widget = { class_name: 'text_widget', id: -1, content: 'hello' };
+
+    const created = await service.createWidget(3, widget, { row: -1, column: -1, width: 8, height: 3, zIndex: 1 });
+
+    expect(requests[0]).toMatchObject({ method: 'POST', url: 'http://api.test/dashboards/3/widgets/create' });
+    expect(sent()).toEqual({ widget, position: { row: -1, column: -1, width: 8, height: 3, z_index: 1 } });
+    expect(created).toMatchObject({ id: 25, kind: 'text', content: 'hello' });
+  });
+
+  it('edits a widget with its whole JSON', async () => {
+    const { service, requests, sent } = setup({ success: true });
+    const widget = { class_name: 'text_widget', id: 25, content: 'edited' };
+
+    await service.editWidget(3, widget);
+
+    expect(requests[0]).toMatchObject({ method: 'PUT', url: 'http://api.test/dashboards/3/widgets/25/edit' });
+    expect(sent()).toEqual({ dashboard_id: 3, widget_id: 25, widget });
+  });
+
+  it('deletes a widget', async () => {
+    const { service, requests } = setup({ success: true });
+    await service.deleteWidget(3, 25);
+    expect(requests[0]).toMatchObject({ method: 'DELETE', url: 'http://api.test/dashboards/3/widgets/25' });
+  });
+
+  it('replaces the setting as given', async () => {
+    const { service, requests, sent } = setup({ success: true });
+    const setting = { theme_name: 'light_theme1', main_date_filter: { id: -99887766, mode: 'last_7_days' }, unknown: { a: 1 } };
+
+    await service.editSetting(3, setting);
+
+    expect(requests[0]).toMatchObject({ method: 'PUT', url: 'http://api.test/dashboards/3' });
+    expect(sent()).toEqual({ setting });
   });
 });

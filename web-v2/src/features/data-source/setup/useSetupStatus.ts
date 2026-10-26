@@ -3,12 +3,8 @@ import { useDi } from '@/app/di/DiContext';
 import { ConnectionService } from '@/core/connection/ConnectionService';
 import { Permission, PermissionService } from '@/core/permission/PermissionService';
 import { useCurrentUser } from '@/features/auth/current-user/useCurrentUser';
-import {
-  connectionExistsQueryOptions,
-  connectionQueryOptions,
-  permissionQueryOptions,
-  refreshHistoryQueryOptions
-} from '../connectionQueries';
+import { permissionQueryOptions } from '@/shared/permission/permissionQueries';
+import { connectionExistsQueryOptions, connectionQueryOptions, refreshHistoryQueryOptions } from '../connectionQueries';
 import { HIDDEN, toInitialSetupState } from './setup.utils';
 import type { SetupState } from './setup.utils';
 
