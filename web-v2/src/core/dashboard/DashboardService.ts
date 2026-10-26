@@ -2,11 +2,11 @@ import type { KyInstance } from 'ky';
 import Deneric from 'deneric2';
 import { token } from '@/core/di/Container';
 import { DirectoryType } from '@/core/directory/Directory';
+import { dashboardFromJson, type Dashboard } from './Dashboard';
 import { positionsToJson, type PositionMap } from './Position';
 
 /**
- * What the directory screens need of a dashboard. The full model (widgets, positions, setting) comes with the
- * dashboard viewer.
+ * What the directory screens need of a dashboard. The full model is `Dashboard`.
  */
 export class DashboardSummary extends Deneric {
   id = 0;
@@ -24,6 +24,7 @@ export class DashboardSummary extends Deneric {
 }
 
 export interface DashboardService {
+  get(id: number): Promise<Dashboard>;
   /**
    * Creates an empty dashboard. v1 also sent a default `setting`; the server accepts none and v1 falls back to the
    * default setting when it reads one without it.
@@ -43,6 +44,10 @@ export const DashboardService = token<DashboardService>('DashboardService');
 /** Paths and field names are the backend's (`DashboardController`, Jackson SNAKE_CASE). */
 export class HttpDashboardService implements DashboardService {
   constructor(private readonly http: KyInstance) {}
+
+  async get(id: number): Promise<Dashboard> {
+    return dashboardFromJson(await this.http.get(`dashboards/${id}`).json());
+  }
 
   async create(name: string, parentDirectoryId: number): Promise<DashboardSummary> {
     const json = { name, parent_directory_id: parentDirectoryId, directory_type: DirectoryType.Dashboard };

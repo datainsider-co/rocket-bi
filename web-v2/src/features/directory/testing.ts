@@ -34,6 +34,9 @@ export function fakeDirectoryService(overrides: Partial<Service> = {}): Service 
 /** Test-only: dashboard calls that succeed unless overridden. */
 export function fakeDashboardService(overrides: Partial<DashboardService> = {}): DashboardService {
   return {
+    get: vi.fn<DashboardService['get']>(async () => {
+      throw new Error('not stubbed');
+    }),
     create: vi.fn<DashboardService['create']>(async name => new DashboardSummary({ id: 50, name })),
     rename: vi.fn<DashboardService['rename']>(async () => {}),
     resizeWidgets: vi.fn<DashboardService['resizeWidgets']>(async () => {}),

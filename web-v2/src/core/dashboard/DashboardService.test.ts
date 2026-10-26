@@ -32,6 +32,15 @@ describe('HttpDashboardService', () => {
     expect(dashboard).toMatchObject({ id: 1, name: 'probe-dash', ownerId: 'root' });
   });
 
+  it('gets a dashboard with its widgets', async () => {
+    const { service, requests } = setup({ id: 5, name: 'Sales', owner_id: 'root', widgets: [{ class_name: 'text_widget', id: 9 }], widget_positions: {} });
+
+    const dashboard = await service.get(5);
+
+    expect(requests[0]).toMatchObject({ method: 'GET', url: 'http://api.test/dashboards/5' });
+    expect(dashboard).toMatchObject({ id: 5, name: 'Sales', widgets: [{ id: 9, kind: 'text' }] });
+  });
+
   it('renames with to_name', async () => {
     const { service, requests, sent } = setup({ success: true });
 
