@@ -103,13 +103,46 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
-| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | Not started |
+| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0, M1 |
 | Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | Not started |
 | Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Not started |
 | Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Not started |
 | Embedded dashboard | route `/embedded/dashboard/:name` | – | Not started |
 
 \* The 129 files cover both viewing and editing.
+
+#### Dashboard page plan (view and edit, ChartBuilder excluded)
+
+v1 spreads the page over seven Vuex stores that mutate shared query settings. v2 keeps the dashboard in TanStack
+Query, builds each chart's request with a pure `buildQueryRequest(widget, filterState)` that doubles as its query key,
+and keeps filter state in one `useReducer` context.
+
+Decisions (2026-10-26):
+
+- **Query settings stay raw JSON.** `ChartWidget.setting` is the stored backend `ChartSetting`; v2 reads what it needs
+  with accessor and transform functions instead of porting v1's 35 QuerySetting and 40 ChartOption classes. ChartBuilder
+  ports what it needs later.
+- **Viz options (`setting.options.options`) get their own key conversion.** v1 stored them snake_case (`plot_options`,
+  `font_size`, `x_axis`), so they can't go to Highcharts as is. Only that subtree is converted, with lodash
+  `camelCase` on read and `snakeCase` on write (byte-for-byte what v1 did), skipping subtrees whose keys are data. The
+  result is typed as Highcharts options plus v1's own keys (`affectedByFilter`, `background`, ...).
+- **Share links (`?token=`) are in scope**, but blocked by the backend: the token from `share/dashboard/{id}/anyone`
+  (and the older `dashboards/{id}/share`) carries `0:dashboard:view:<id>`, while `GET dashboards/{id}` checks
+  `directory:view:<directoryId>`, so it answers 401 `not_allowed` (v1 is affected too). Needs a server fix.
+- Out of scope: Boost (hidden in v1), Copy to assistant / Summarize (chatbot deferred), tracking, deprecated widgets.
+
+| Step | Scope | Status |
+|---|---|---|
+| M0 | Real payloads: sample dashboard seeded on the local backend (MySQL `sample_v2.sales`), fixture in `core/dashboard/dashboard.fixture.json` | Done |
+| M1 | Read-only page: `core/dashboard` (`Dashboard`, `DashboardSetting` with v1 defaults, `Widget` union), `DashboardService.get`, route with `<slug>-<id>` (outdated name rewritten, 404 → `/mydata`, permission message), theme variables scoped to the page (`features/dashboard/theme`), widget card, text (sanitized HTML), image, tab and filter panel grids, chart placeholder | Done |
+| M2 | Query pipeline (`chart/query`, responses, max 7 requests at a time), options key conversion, renderers per `ChartOption` class: series (column/bar/line/area), pie, KPI, table | Not started |
+| M3 | Filters: default conditions, tab/choice/dropdown, cross filter, main date, dynamic function and values, query parameters, inner filter, slicer/input/tree/date; local and `?filters=` persistence; Reset Filters | Not started |
+| M4 | Widget actions: sort and paging, export CSV/Excel, drilldown, zoom, drill through, applied filters | Not started |
+| M5 | Permissions, password-protected dashboards, fullscreen and TV mode, auto refresh, theme palette for charts, RLS View As, share token, embedded route | Not started |
+| M6 | Edit mode without ChartBuilder: layout save, rename, add text/image/tab/filter panel, delete/duplicate, tab settings, setting modals, main date setup, copy/paste, leave guard; Add/Edit chart hook for ChartBuilder | Not started |
+
+v1 bugs not carried over: resize listener never removed, text edits saved twice, query settings mutated in place,
+inner filters kept after reset, the always-null `mainDateFilterRequest`, unsanitized text widget HTML.
 
 Chart types to support (v1 `ChartType` enum): Area, AreaRange, AreaInverted, AreaSpline, Bar, BellCurve, Bubble,
 Column, ColumnRange, ColumnDrillDown, BarDrillDown, PieDrillDown, Funnel, Gauges, HeatMap, TreeMap, Histogram, Line,
