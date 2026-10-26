@@ -15,10 +15,7 @@ interface TabWidgetViewProps {
   renderWidget: (id: WidgetId) => ReactNode;
 }
 
-/**
- * v1 `TabViewer.vue` in view mode: one grid per tab, only the open tab rendered (v1 `lazy`). Filter panels share it
- * until their own header, footer and apply button are ported.
- */
+/** v1 `TabViewer.vue` in view mode: one grid per tab, only the open tab rendered (v1 `lazy`). */
 export function TabWidgetView({ widget, dashboard, mobile, renderWidget }: TabWidgetViewProps) {
   const [activeKey, setActiveKey] = useState('0');
 

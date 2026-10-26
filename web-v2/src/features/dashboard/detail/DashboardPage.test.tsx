@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { dashboardFromJson } from '@/core/dashboard/Dashboard';
 import fixture from '@/core/dashboard/dashboard.fixture.json';
+import filtersFixture from '@/core/dashboard/filters.fixture.json';
 import { DashboardService } from '@/core/dashboard/DashboardService';
 import { clearSession, saveSession } from '@/core/session/session';
 import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing';
@@ -20,6 +21,16 @@ function regionFilterOfColumn(queries: QueryService): string[] | undefined {
   const last = calls.filter(request => request.chart_id === 4).at(-1);
   const filters = last?.query_setting.filters as { conditions: { final_condition?: { possible_values: string[] } }[] }[] | undefined;
   return filters?.[0]?.conditions[0]?.final_condition?.possible_values;
+}
+
+/** Final conditions and measure of the latest "Revenue by country" query (widget 20 of the filters fixture). */
+function revenueByCountry(queries: QueryService) {
+  const calls = vi.mocked(queries.query).mock.calls.map(([request]) => request as { chart_id?: number; query_setting: Record<string, unknown> });
+  const setting = calls.filter(request => request.chart_id === 20).at(-1)?.query_setting;
+  const filters = setting?.['filters'] as { conditions: { dynamic_widget_id: number; final_condition?: unknown }[] }[] | undefined;
+  const finals = (filters?.[0]?.conditions ?? []).filter(condition => condition.final_condition).map(condition => condition.dynamic_widget_id);
+  const measure = (setting?.['y_axis'] as { name: string }[] | undefined)?.[0]?.name;
+  return { finals, measure };
 }
 
 function renderAt(path: string, get: DashboardService['get']) {
@@ -88,6 +99,29 @@ describe('dashboard page', () => {
     await userEvent.click(screen.getByRole('button', { name: /Reset Filters/ }));
     await waitFor(() => expect(regionFilterOfColumn(queries)).toBeUndefined(), SLOW);
     expect(screen.queryByRole('button', { name: /Reset Filters/ })).not.toBeInTheDocument();
+  });
+
+  it('applies filter panel changes on Apply, tab control picks at once', { timeout: 15_000 }, async () => {
+    const queries = fakeQueryService();
+    renderAppAt('/dashboard/v2-filters-2', fakeAuthenticationService(), [
+      di => {
+        di.bindValue(DashboardService, fakeDashboardService({ get: vi.fn<DashboardService['get']>(async () => dashboardFromJson(filtersFixture)) }));
+        di.bindValue(QueryService, queries);
+      }
+    ]);
+    await waitFor(() => expect(revenueByCountry(queries).measure).toBe('Revenue'), SLOW);
+
+    // Sales channel (13) sits in the filter panel: the chart waits for Apply. The fake answers every tab filter with
+    // regions.
+    await userEvent.click(await screen.findByRole('checkbox', { name: 'Asia' }, SLOW));
+    expect(screen.getByRole('checkbox', { name: 'Asia' })).toBeChecked();
+    expect(revenueByCountry(queries).finals).toEqual([]);
+    await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
+    await waitFor(() => expect(revenueByCountry(queries).finals).toEqual([13]), SLOW);
+
+    // Measure (19) is a tab control: picking Profit swaps the chart's controlled column.
+    await userEvent.click(screen.getByText('Profit'));
+    await waitFor(() => expect(revenueByCountry(queries).measure).toBe('Profit'), SLOW);
   });
 
   it('rewrites an outdated name in the URL', async () => {

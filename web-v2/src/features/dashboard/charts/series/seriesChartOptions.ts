@@ -43,6 +43,8 @@ interface SeriesOptionsInput {
   themeColors: readonly string[];
   /** The x axis groups by a timestamp function (`datetime_to_millis`, ...). */
   timestampXAxis: boolean;
+  /** A click on a point, with its x value and where the click was on screen (v1 opened its point menu). */
+  onPointClick?: (value: string, position: { x: number; y: number }) => void;
 }
 
 /** v1 `SeriesChartOption.toSeriesOptions`: dual axis, `stacking: 'none'` and percent stacking fixes. */
@@ -91,7 +93,7 @@ function seriesList(options: VizOptions, response: SeriesOneResponse, timestampX
 }
 
 /** Column, bar, line and area charts (v1 `SeriesChart.vue`): stored viz options + the response → Highcharts options. */
-export function buildSeriesChartOptions({ options: stored, response, themeColors, timestampXAxis }: SeriesOptionsInput): Highcharts.Options {
+export function buildSeriesChartOptions({ options: stored, response, themeColors, timestampXAxis, onPointClick }: SeriesOptionsInput): Highcharts.Options {
   const options = normalize(stored);
   const series = options.plotOptions?.series as Record<string, unknown> | undefined;
   const dataLabels = (series?.['dataLabels'] ?? {}) as { displayUnit?: string; condition?: MinMaxCondition; style?: { color?: string } };
@@ -135,6 +137,14 @@ export function buildSeriesChartOptions({ options: stored, response, themeColors
     plotOptions: {
       series: {
         cursor: 'pointer',
+        point: {
+          events: {
+            click(this: Highcharts.Point, event: Highcharts.PointClickEventObject) {
+              const { clientX, clientY } = event as unknown as MouseEvent;
+              onPointClick?.(String(this.category ?? this.x), { x: clientX, y: clientY });
+            }
+          }
+        },
         dataLabels: {
           useHTML: true,
           formatter(this: Highcharts.Point) {

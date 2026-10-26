@@ -1,14 +1,10 @@
-import { useCallback, useMemo, useState } from 'react';
 import { Button, Spin } from 'antd';
 import type { ChartWidget } from '@/core/dashboard/Widget';
-import { DEFAULT_PAGE_SIZE, isPagedSetting, type Paging } from '@/core/query/QueryRequest';
-import { applyControlValues, controlsFor } from '@/core/query/controlValues';
-import { vizFromSetting } from '@/core/query/vizOptions';
-import { selectionOf, selectionToControl } from '../../charts/filter/filter.utils';
-import { useDashboardControls } from '../../controls/DashboardControlsContext';
 import { ChartRenderer } from '../../charts/ChartRenderer';
-import { useWidgetData } from '../../chart-data/useWidgetData';
+import { FilterRenderer, isFilterViz } from '../../charts/filter/FilterRenderer';
 import { chartTitle } from './chartWidget.utils';
+import { PointMenuView } from './PointMenuView';
+import { useChartWidget } from './useChartWidget';
 
 interface ChartWidgetViewProps {
   widget: ChartWidget;
@@ -16,47 +12,49 @@ interface ChartWidgetViewProps {
   themeColors: readonly string[];
 }
 
-const FIRST_PAGE: Paging = { from: 0, size: DEFAULT_PAGE_SIZE };
-
-/**
- * v1 `ChartHolder`: queries the chart with the values of the controls it depends on, then loading, error with retry,
- * or the chart (v1 `StatusWidget`). Its own selection (a filter, a clicked pie slice) becomes a control for others.
- */
+/** v1 `ChartHolder`: loading, error with retry, then the chart or the filter (v1 `StatusWidget`). */
 export function ChartWidgetView({ widget, dashboardId, themeColors }: ChartWidgetViewProps) {
-  const [paging, setPaging] = useState<Paging>(FIRST_PAGE);
-  const { controls, setControl } = useDashboardControls();
-  const paged = isPagedSetting(widget.setting);
-  const viz = useMemo(() => vizFromSetting(widget.setting), [widget.setting]);
-  const setting = useMemo(() => applyControlValues(widget.setting, controlsFor(widget.setting, widget.id, controls)), [widget, controls]);
-  const query = useWidgetData(widget, { dashboardId, setting, paging: paged ? paging : undefined });
-  const selected = useMemo(() => selectionOf(controls[widget.id]), [controls, widget.id]);
-  const onSelect = useCallback((values: string[]) => setControl(widget.id, selectionToControl(values)), [setControl, widget.id]);
+  const chart = useChartWidget(widget, dashboardId);
+  const { data, pointActions } = chart;
 
-  if (query.isPending) return <Spin className="flex! h-full items-center justify-center" />;
-  if (query.isError) {
+  if (data.isPending) return <Spin className="flex! h-full items-center justify-center" />;
+  if (data.isError) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
         <div className="truncate font-medium">{chartTitle(widget)}</div>
         <div className="line-clamp-3 text-xs" style={{ color: 'var(--secondary-text-color)' }}>
-          {query.error.message}
+          {data.error.message}
         </div>
-        <Button size="small" onClick={() => void query.refetch()}>
+        <Button size="small" onClick={() => void data.refetch()}>
           Retry
         </Button>
       </div>
     );
   }
+  if (isFilterViz(chart.viz)) {
+    return (
+      <FilterRenderer
+        widget={widget}
+        viz={chart.viz}
+        response={data.data}
+        query={chart.query}
+        dashboardId={dashboardId}
+        entry={chart.entry}
+        onChange={chart.setEntry}
+      />
+    );
+  }
   return (
-    <ChartRenderer
-      widget={widget}
-      viz={viz}
-      response={query.data}
-      themeColors={themeColors}
-      paging={paging}
-      isUpdating={query.isFetching}
-      onPageChange={setPaging}
-      selected={selected}
-      onSelect={onSelect}
-    />
+    <>
+      <ChartRenderer widget={widget} viz={chart.viz} response={data.data} themeColors={themeColors} table={chart.table} crossFilter={chart.crossFilter} />
+      <PointMenuView
+        position={pointActions.menu?.position}
+        value={pointActions.menu?.value ?? ''}
+        canReset={pointActions.canReset}
+        onUseAsFilter={pointActions.useAsFilter}
+        onReset={pointActions.reset}
+        onClose={pointActions.close}
+      />
+    </>
   );
 }

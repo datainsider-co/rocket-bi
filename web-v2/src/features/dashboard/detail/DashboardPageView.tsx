@@ -2,6 +2,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Result, Spin, Typography } from 'antd';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import { DashboardControlsProvider } from '../controls/DashboardControlsContext';
+import { MainDateFilter } from '../controls/MainDateFilter';
 import { ResetFiltersButton } from '../controls/ResetFiltersButton';
 import { getDashboardTheme } from '../theme/dashboardThemes';
 import { DashboardCanvas } from './DashboardCanvas';
@@ -51,6 +52,7 @@ export function DashboardPageView(props: DashboardPageViewProps) {
           {dashboard?.name ?? ''}
         </Typography.Title>
         {dashboard && <ResetFiltersButton />}
+        {dashboard?.setting.mainDateFilter && <MainDateFilter />}
       </header>
       <div className="dashboard-page__body">
         <Body {...props} />
@@ -59,7 +61,7 @@ export function DashboardPageView(props: DashboardPageViewProps) {
   );
   // A new dashboard starts from its own filter defaults.
   return dashboard ? (
-    <DashboardControlsProvider key={dashboard.id} widgets={dashboard.widgets}>
+    <DashboardControlsProvider key={dashboard.id} dashboard={dashboard}>
       {page}
     </DashboardControlsProvider>
   ) : (
