@@ -2,6 +2,7 @@ import { asArray, asString, getPath, isRecord, type JsonObject } from '@/core/js
 import { ValueControlType, type ControlValues } from '@/core/query/controlValues';
 import { formatDateTime } from '@/core/query/dateRanges';
 import type { TableResponse } from '@/core/query/VisualizationResponse';
+import { isDateType } from '@/core/schema/fieldTypes';
 
 /**
  * Slicer filter (v1 `SlicerFilter` + `NumberSlicer`): a range over a column's min and max. Its setting queries
@@ -13,7 +14,6 @@ export type SlicerKind = 'number' | 'date' | 'date_part';
 
 export type SlicerRange = readonly [number, number];
 
-const DATE_TYPES = new Set(['date', 'datetime', 'datetime64']);
 /** v1 `isDateHistogramPeriodic`: date parts that repeat (a year, a month of year), shown as numbers. */
 const DATE_PARTS = new Set([
   'to_year',
@@ -34,8 +34,7 @@ export function slicerKind(setting: JsonObject): SlicerKind {
     // A slicer without column only drives other charts; its options say what it holds.
     return getPath(setting, ['options', 'options', 'dynamic_settings', 'is_number']) === false ? 'date' : 'number';
   }
-  const fieldType = asString(getPath(first, ['function', 'field', 'field_type'])).toLowerCase();
-  if (!DATE_TYPES.has(fieldType)) return 'number';
+  if (!isDateType(asString(getPath(first, ['function', 'field', 'field_type'])))) return 'number';
   const scalar = asString(getPath(first, ['function', 'scalar_function', 'class_name']));
   return DATE_PARTS.has(scalar) ? 'date_part' : 'date';
 }

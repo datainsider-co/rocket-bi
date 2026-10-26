@@ -67,4 +67,17 @@ describe('HttpDashboardService', () => {
       }
     });
   });
+
+  it('lists drill through dashboards', async () => {
+    // Reply of the local backend, the dashboard cut to what is read.
+    const { service, requests, sent } = setup({ total: 1, data: [{ org_id: 0, id: 2, name: 'v2 Filters', owner_id: 'root', widgets: [] }] });
+    const field = { class_name: 'table_field', db_name: 'sample_v2', tbl_name: 'sales', field_name: 'region', field_type: 'string' };
+
+    const page = await service.listDrillThrough({ fields: [field], excludeIds: [1], from: 0, size: 40 });
+
+    expect(requests[0]).toMatchObject({ method: 'POST', url: 'http://api.test/dashboards/list_drill_through' });
+    // Body accepted by the local backend.
+    expect(sent()).toEqual({ fields: [field], exclude_ids: [1], from: 0, size: 40, is_removed: false });
+    expect(page).toMatchObject({ total: 1, dashboards: [{ id: 2, name: 'v2 Filters' }] });
+  });
 });

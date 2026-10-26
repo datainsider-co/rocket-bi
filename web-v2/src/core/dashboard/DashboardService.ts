@@ -2,6 +2,7 @@ import type { KyInstance } from 'ky';
 import Deneric from 'deneric2';
 import { token } from '@/core/di/Container';
 import { DirectoryType } from '@/core/directory/Directory';
+import { asArray, asNumber, asRecord, type JsonObject } from '@/core/json/json';
 import { dashboardFromJson, type Dashboard } from './Dashboard';
 import { positionsToJson, type PositionMap } from './Position';
 
@@ -23,6 +24,21 @@ export class DashboardSummary extends Deneric {
   }
 }
 
+/** A page of `dashboards/list_drill_through`. */
+export interface DrillThroughPage {
+  total: number;
+  dashboards: DashboardSummary[];
+}
+
+export interface DrillThroughRequest {
+  /** Backend fields; a dashboard is listed when one of its filter widgets is on one of them. */
+  fields: readonly JsonObject[];
+  /** The current dashboard. */
+  excludeIds: readonly number[];
+  from: number;
+  size: number;
+}
+
 export interface DashboardService {
   get(id: number): Promise<Dashboard>;
   /**
@@ -37,6 +53,8 @@ export interface DashboardService {
    * unplaced positions (-1) as they are: place them first.
    */
   resizeWidgets(dashboardId: number, positions: PositionMap): Promise<void>;
+  /** Dashboards to drill through to, by name, those the user can see only. */
+  listDrillThrough(request: DrillThroughRequest, signal?: AbortSignal): Promise<DrillThroughPage>;
 }
 
 export const DashboardService = token<DashboardService>('DashboardService');
@@ -60,5 +78,12 @@ export class HttpDashboardService implements DashboardService {
 
   async resizeWidgets(dashboardId: number, positions: PositionMap): Promise<void> {
     await this.http.put(`dashboards/${dashboardId}/widgets/resize`, { json: { positions: positionsToJson(positions) } });
+  }
+
+  async listDrillThrough({ fields, excludeIds, from, size }: DrillThroughRequest, signal?: AbortSignal): Promise<DrillThroughPage> {
+    const json = { fields, exclude_ids: excludeIds, from, size, is_removed: false };
+    const page = asRecord(await this.http.post('dashboards/list_drill_through', { json, signal }).json());
+    // Each item is a whole dashboard, widgets included; the listing needs its id and name.
+    return { total: asNumber(page['total']), dashboards: asArray(page['data']).map(item => new DashboardSummary(item)) };
   }
 }
