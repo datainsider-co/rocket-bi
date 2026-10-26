@@ -14,18 +14,18 @@ export type SlicerKind = 'number' | 'date' | 'date_part';
 export type SlicerRange = readonly [number, number];
 
 const DATE_TYPES = new Set(['date', 'datetime', 'datetime64']);
-/** v1 `isDateHistogramPeriodic`. */
+/** v1 `isDateHistogramPeriodic`: date parts that repeat (a year, a month of year), shown as numbers. */
 const DATE_PARTS = new Set([
   'to_year',
-  'to_quarter_num',
-  'to_month_num',
-  'to_week_num',
+  'to_quarter',
+  'to_month',
+  'to_week',
   'to_day_of_year',
   'to_day_of_month',
   'to_day_of_week',
-  'to_hour_num',
-  'to_minute_num',
-  'to_second_num'
+  'to_hour',
+  'to_minute',
+  'to_second'
 ]);
 
 export function slicerKind(setting: JsonObject): SlicerKind {

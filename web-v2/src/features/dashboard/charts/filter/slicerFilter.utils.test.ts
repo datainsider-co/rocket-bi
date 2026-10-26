@@ -12,6 +12,8 @@ describe('slicerKind', () => {
     ['a number column', column('double'), 'number'],
     ['a date column', column('DateTime', 'datetime_to_millis'), 'date'],
     ['a year of a date column', column('datetime', 'to_year'), 'date_part'],
+    ['a month of year of a date column', column('date', 'to_month'), 'date_part'],
+    ['a numbered month of a date column', column('date', 'to_month_num'), 'date'],
     ['no column, number by default', { values: [] }, 'number'],
     ['no column, set to dates', { values: [], options: { options: { dynamic_settings: { is_number: false } } } }, 'date']
   ])('%s', (_, setting, kind) => {
