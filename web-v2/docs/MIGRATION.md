@@ -103,11 +103,11 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
-| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0 to M4, M5a |
+| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0 to M5 (share token blocked by the server) |
 | Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI, flat table (M2). Next: stacked, drilldown, pivot, the rest |
 | Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Left: filters' own style options (active/inactive and choice colors, title style; antd defaults for now), the filter panel's vertical header and active tab background, the date select's min/max dates as calendar bounds |
 | Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Done (M4a, M4b). Left: maps |
-| Embedded dashboard | route `/embedded/dashboard/:name` | – | Not started |
+| Embedded dashboard | route `/embedded/dashboard/:name` | – | Done (M5b) with the session cookie; with a share token once the server allows it |
 
 \* The 129 files cover both viewing and editing.
 
@@ -170,7 +170,7 @@ Decisions (M3b):
 | M4a | Widget actions (`features/dashboard/widgets/chart`): a menu in the chart's action bar (Change date function, Reset drill down, Download CSV / Excel) and a point menu, opened by a right click on any Highcharts point (`HighchartsChart.onPointContextMenu`) or a click on a series point (Use as a filter, Drill down by text field or date part, Reset filter, Reset drill down). Pure transforms in `core/query`: `zoom.ts`, `drilldown.ts`, `tableSort.ts`; the viewer's changes are a per-chart reducer (`chartView.utils`) applied before the controls. Tables sort on the server by one column (header click), back to the first page. Export: `QueryService.export` (`query/{csv,xlsx}`, every row). Drill fields from `core/schema/SchemaService` (`GET databases/{name}`, fixture `core/schema/database.fixture.json`) | Done |
 | M4b | Header filters (v1 `InternalFilter`): `core/query/internalFilter.ts` (model, v1's condition builder), `core/query/filtersParam.ts` (`?filters=` in v1's JSON, read on load), one more entry of the controls state, sent by every chart as a `FilterRequest` (`buildChartQuery`'s `headerRequests`). Filter bar under the header (`controls/header-filters`: edit condition and values, turn off, remove) and the chart's filter icon (`AppliedFiltersView`, on/off per chart). Drill through in the point menu: `core/query/drillThrough.ts` (clicked value → filters), `DashboardService.listDrillThrough` (`dashboards/list_drill_through`, 40 per page, Load more), the dashboard opens in a new tab with `?filters=`. Field types in `core/schema/fieldTypes.ts` | Done |
 | M5a | Access and display (`features/dashboard/access`, `features/dashboard/mode`): permissions (owner: all, else `share/dashboard/{id}/action_permitted` via `core/permission/ResourcePermissionService`; downloads hidden without `download`), password-protected dashboards (`data.config` of the directory, `DashboardService.getDirectoryId`; nothing is queried until the password is given), Full screen and TV mode in the header's Options, auto refresh (`useAutoRefresh`). The theme palette for charts was already done in M2 (`chartColors`) | Done |
-| M5b | RLS View As (`chart/view_as`, user suggestions), share token (`?token=`, blocked by the server, see above), embedded route | Not started |
+| M5b | RLS View As (`features/dashboard/view-as`: user search via `core/user/UserService` `user/profile/suggest`, charts through `QueryService.queryAs` `chart/view_as`, offered with `rls:view:*`), embedded route (`EmbeddedDashboardPage`, outside the app layout). Left: share token (`?token=`), blocked by the server (see below) | Done, token blocked |
 | M6 | Edit mode without ChartBuilder: layout save, rename, add text/image/tab/filter panel, delete/duplicate, tab settings, setting modals, main date setup, copy/paste, leave guard; Add/Edit chart hook for ChartBuilder | Not started |
 
 Decisions (M4a):
@@ -221,6 +221,22 @@ Decisions (M5a):
   their filters stay as they are (v1 re-ran its whole init), and nothing runs while the tab is hidden. Picking the
   interval is a setting, so it comes with edit mode (M6).
 - Not ported here: Share, View As and Relationship in the Options menu (Phase 2, M5b, Phase 5).
+
+Decisions (M5b):
+
+- **View As** keeps the picked user's profile exactly as `user/profile/suggest` sent it and sends it back as
+  `user_profile`: row level security reads its `properties`, whose keys v1 renamed. It is page state, not a mode:
+  full screen still works while viewing as someone, and exports stay the viewer's own (the server has no View As
+  export). Offered only with `rls:view:*`, which the server requires; v1 offered it to everyone.
+- **Embedded** (`/embedded/dashboard/:name`): the page without the app layout, header filter bar, Back and Options;
+  the title, Reset Filters and the main date stay (v1). Its name is rewritten to the embedded path; an unknown
+  dashboard says "Dashboard not found" in place instead of leaving the iframe.
+- **Share token, still blocked** (checked again 2026-10-26): with `Token-Id`, `chart/query` and
+  `permission_tokens/{token}/action_permitted` answer, but `GET dashboards/{id}`, `dashboards/{id}/get_directory_id`
+  and `directories/{id}` return 401. `DashboardPermissionFilter.requireTokenPermission` builds
+  `directory:view:<directoryId>`, while the token holds `dashboard:view:<dashboardId>`. Once the server is fixed, the
+  client still needs: the route guards to let a token through without a session, no `check_session` without a session
+  (its 401 sends the viewer to login), and permissions from `permission_tokens/{token}/action_permitted`.
 
 v1 bugs not carried over: resize listener never removed, text edits saved twice, query settings mutated in place,
 inner filters kept after reset, the always-null `mainDateFilterRequest`, unsanitized text widget HTML, data label
