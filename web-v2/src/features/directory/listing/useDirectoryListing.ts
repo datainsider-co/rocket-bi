@@ -4,7 +4,8 @@ import { useLocation, useParams } from 'react-router';
 import { useDi } from '@/app/di/DiContext';
 import { DirectoryService } from '@/core/directory/DirectoryService';
 import type { DirectorySort } from '@/core/directory/DirectoryService';
-import { DEFAULT_SORT, getSection, parseIdParam, sectionFromPath, toBreadcrumbs, toggleSortOrder } from '../directory.utils';
+import { parseIdParam } from '@/shared/routing/idParam';
+import { DEFAULT_SORT, getSection, sectionFromPath, toBreadcrumbs, toggleSortOrder } from '../directory.utils';
 import { listingQueryOptions, parentsQueryOptions } from '../directoryQueries';
 
 /** The listing at the current URL: section, open folder, sort, items and breadcrumbs. */

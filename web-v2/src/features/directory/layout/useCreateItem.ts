@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { dashboardPath, folderPath } from '../directory.utils';
+import { dashboardPath } from '@/shared/routing/idParam';
+import { folderPath } from '../directory.utils';
 import { useDirectoryMutations } from '../useDirectoryMutations';
 
 export type CreateKind = 'folder' | 'dashboard';

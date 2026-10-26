@@ -1,6 +1,7 @@
 import { Layout } from 'antd';
 import { Outlet, useLocation, useParams } from 'react-router';
-import { createParentId, parseIdParam, sectionFromPath } from '../directory.utils';
+import { parseIdParam } from '@/shared/routing/idParam';
+import { createParentId, sectionFromPath } from '../directory.utils';
 import { NameModal } from '../dialogs/NameModal';
 import { DirectorySidebar } from './DirectorySidebar';
 import { useCreateItem } from './useCreateItem';
