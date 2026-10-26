@@ -103,9 +103,9 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
-| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0, M1, M2 |
+| Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | In progress (plan below). Done: M0 to M3 |
 | Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI, flat table (M2). Next: stacked, drilldown, pivot, the rest |
-| Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | In progress: tab filter (tabs, single/multi choice, dropdown), dropdown filter, pie cross filter, Reset Filters (M3a) |
+| Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Left: `?filters=` (with drill through, M4) |
 | Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Not started |
 | Embedded dashboard | route `/embedded/dashboard/:name` | – | Not started |
 
@@ -138,21 +138,43 @@ Decisions (2026-10-26):
   and `affected_by_filter` only matter for URL / header filters (`InternalFilter`), which come with drill through.
 - Out of scope: Boost (hidden in v1), Copy to assistant / Summarize (chatbot deferred), tracking, deprecated widgets.
 
+Decisions (M3b):
+
+- **One controls state.** Filters, cross filters, inner filters, tab controls and the main date (fixed id
+  `-99887766`) are all entries of the same map; v1 spread them over `QuerySettingStore`, `FilterStore` and
+  `DashboardControllerStore`. A tab control's entry is the picked option keys in v1's format (`<camelCase name>_<index>`),
+  a tree filter's also keeps its checked keys, a date select's its mode.
+- **Filter panel children** show their change at once, but it waits per panel until Apply (v1 `GroupFilterInfo`).
+- **Tab control** replaces, by one walk over the setting, every column whose `dynamic_function_id` names the control,
+  and expands sorts on a `dynamic_function`; v1 had one replace method per query setting class.
+- **Query parameters**: the chart's stored values (`setting.parameters`, else `query_parameter` in its viz options),
+  overridden by the inputs listed in `parameter_widget_ids`. v1's code for the inputs was commented out, so changing
+  one did nothing.
+- **Reset Filters** resets every control except the main date (v1's button only cleared the header filters, M4).
+- **UI differences**: the inner filter is a small dropdown at every width (v1 switched to tabs or an icon by width);
+  the main date and date select use a preset select plus a range picker (v1 `DiCalendar`); the point menu opens on a
+  left click (v1: right click, which Highcharts only reports with a module) and has only the filter items until M4.
+- **Backend bugs on MySQL**, not worked around: `like` and `like_case_insensitive` conditions generate ClickHouse's
+  `like()` function (SQL error), and a `between_and_including` on a datetime column answers 500 "No database
+  selected", so the main date and date select filters fail on MySQL tables (v1 too).
+
 | Step | Scope | Status |
 |---|---|---|
 | M0 | Real payloads: sample dashboard seeded on the local backend (MySQL `sample_v2.sales`), fixture in `core/dashboard/dashboard.fixture.json` | Done |
 | M1 | Read-only page: `core/dashboard` (`Dashboard`, `DashboardSetting` with v1 defaults, `Widget` union), `DashboardService.get`, route with `<slug>-<id>` (outdated name rewritten, 404 → `/mydata`, permission message), theme variables scoped to the page (`features/dashboard/theme`), widget card, text (sanitized HTML), image, tab and filter panel grids, chart placeholder | Done |
 | M2 | Query pipeline: `core/query` (`toQueryRequestJson`, `VisualizationResponse`, `QueryService`), `features/dashboard/chart-data/useWidgetData` (request = query key, max 7 at a time, previous data kept while updating). Viz options conversion. Renderers (`features/dashboard/charts`): series (column/bar/line/area, per-series settings, dual axis, datetime x axis), pie, KPI (icon, prefix/postfix, display units), flat table with server pages. Left for later steps: KPI comparison and trend line, table formatting/sorting/totals, stacked and the other chart types; filters render "not supported yet" until M3 | Done |
 | M3a | Controls: `core/query/controlValues.ts` (fill `dynamic_condition.final_condition` from a control's values, pure), `features/dashboard/controls` (one `useReducer` context per dashboard, defaults from `options.default.setting.value`, Reset Filters). Tab filter in its four displays and the dropdown filter write their selection; a pie slice click is a cross filter. Only the charts whose conditions name a changed control get a new request | Done |
-| M3b | Main date filter (min/max values), filter panel with Apply, inner chart filter, tab control (dynamic function), query parameters, slicer/input/tree/date filters, series click, `?filters=` from drill through | Not started |
-| M4 | Widget actions: sort and paging, export CSV/Excel, drilldown, zoom, drill through, applied filters | Not started |
+| M3b | `features/dashboard/controls`: every control in one reducer (values, pending filter panel changes, main date), `buildChartQuery` (pure: control values, tab control columns via `core/query/dynamicFunctions`, inner filter request via `core/query/filterRequests`, parameters via `core/query/queryParameters`). Main date filter in the header (`core/query/dateRanges`, choice kept in local storage under v1's key). Filter panel with Apply. Inner filter in the chart's action bar. Tab control. Slicer, date select, input and tree filters (`charts/filter/FilterRenderer`). A click on a series point opens a menu with Use as a filter / Reset filter. Charts the server can't query (inputs, tab controls) get an empty table without a request (`canQuerySetting`). Second fixture: `core/dashboard/filters.fixture.json`, dashboard "v2 Filters" seeded on the local backend with one widget per control. `?filters=` moved to M4 | Done |
+| M4 | Widget actions: sort and paging, export CSV/Excel, drilldown, zoom, drill through, applied filters, `?filters=` from drill through (v1 `InternalFilter`, needs v1's condition builder) | Not started |
 | M5 | Permissions, password-protected dashboards, fullscreen and TV mode, auto refresh, theme palette for charts, RLS View As, share token, embedded route | Not started |
 | M6 | Edit mode without ChartBuilder: layout save, rename, add text/image/tab/filter panel, delete/duplicate, tab settings, setting modals, main date setup, copy/paste, leave guard; Add/Edit chart hook for ChartBuilder | Not started |
 
 v1 bugs not carried over: resize listener never removed, text edits saved twice, query settings mutated in place,
 inner filters kept after reset, the always-null `mainDateFilterRequest`, unsanitized text widget HTML, data label
 min/max conditions that hid every non-zero value (`ChartUtils.isShowValue`), tab filters that forgot the selection on
-remount and dynamic conditions that threw (and broke the chart) for values they can't hold.
+remount and dynamic conditions that threw (and broke the chart) for values they can't hold. M3b: parameter inputs that
+changed nothing, slicers on a date column sending epoch millis (and their end date at 00:00:00), tree filters sending a
+checked node's value again for each checked child, date select defaults given as two dates applying nothing.
 
 Chart types to support (v1 `ChartType` enum): Area, AreaRange, AreaInverted, AreaSpline, Bar, BellCurve, Bubble,
 Column, ColumnRange, ColumnDrillDown, BarDrillDown, PieDrillDown, Funnel, Gauges, HeatMap, TreeMap, Histogram, Line,
