@@ -422,6 +422,37 @@ kiểm bằng backend local.
   (`MySqlParser` sinh `toDateTime(...)` của ClickHouse). Range custom và comparison custom vì vậy chưa chạy được trên
   stack local; các mode tương đối chạy được.
 
+## Quyết định ở CB7b1 (2026-10-28)
+
+CB7b chia thành: **CB7b1** style của table (Style, Grid, Header, Values, Tooltip) cùng renderer; **CB7b2** Field
+formatting và Conditional formatting; **CB7b3** Collapse Table; **CB7b4** Pivot Table.
+
+- **Renderer** (`features/dashboard/charts/table/tableStyle.utils.ts`, v1 `TableStyleUtils.getTableSettingStyle`):
+  options thành biến CSS trên table. Màu đã lưu thường chính là biến của theme (`var(--header-background-color)`), nên
+  v2 đặt tên biến riêng (`--ft-*`) thay vì đổi sang hex như v1 (`parseColor`). Đọc: font, màu, cỡ, căn lề, nền và text
+  wrap của header; màu và nền của dòng chẵn / lẻ, font, cỡ, text wrap của dòng; đường grid dọc (header, body), ngang
+  (body), row padding; nền card; title và subtitle (font, màu, cỡ, căn lề, trước đây chưa áp).
+  - Header căn lề theo option như v1, không theo kiểu cột; ô số trong body vẫn căn phải.
+  - Header dính có màu trong suốt thì vẽ đè lên nền card, để dòng cuộn bên dưới không lộ ra. v1 trộn màu
+    (`combineColor`).
+  - Phân trang lấy màu chữ của header như v1.
+- **Tooltip của ô** (v1 `TableTooltipUtils`): mọi ô header và body có chữ hiện toàn bộ nội dung sau 1 giây, màu và
+  font theo `tooltip.*`. Tooltip mở trong `.dashboard-theme`, nên màu là biến theme vẫn có tác dụng.
+- **Tab Settings** theo thứ tự v1: Title, Style, Grid, Column headers, Values, Background, Tooltip, Other.
+  - Style: 6 theme của v1 (bản light, `settings/table/tableThemes.json`). Chọn theme ghi tên theme và mọi setting của
+    nó; Revert về Default.
+  - Grid: màu, độ dày, bật ở Header / Body cho đường dọc, Body cho đường ngang.
+- **Khác v1:**
+  - Bỏ các toggle Total và Header của đường ngang: table phẳng không có dòng total và chỉ có một dòng header, nên
+    trong v1 chúng không có tác dụng.
+  - Theme không ghi các key mà không ai đọc (`total.*`, `value.is_word_wrap`, `value.style.align`,
+    `value.style.color`); font `Arial` ghi thành `Arial, sans-serif` cho khớp lựa chọn.
+  - Revert của Values ghi đúng biến theme. v1 ghi `var(----row-even-background-color)` (dòng thành trắng) và
+    `--row-odd-background-color` (dòng trong suốt).
+  - Revert của Grid và Tooltip về giá trị của table mới. v1 về grid của theme tối và màu chữ khác.
+  - Danh sách theme không phụ thuộc theme sáng / tối của dashboard (v1 lấy theo base theme; với custom thì rỗng). Hai
+    bản chỉ khác grid của Default.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -433,7 +464,7 @@ kiểm bằng backend local.
 | CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control). Display as column để lại CB7 | Xong |
 | CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Xong |
 | CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Xong. Table chỉ có tab chung; các tab style của table và tab Comparison của Number làm ở CB7 |
-| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Chia theo thứ tự của `MIGRATION.md` (chọn 2026-10-28): **CB7a** Number: comparison và trend line (tab Comparison), xong. **CB7b** Tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer, Collapse Table, Pivot Table. **CB7c** Stacked Column / Bar, Circular Bar, Lollipop. **CB7d** Scatter, Bubble, Area Range, Column Range. **CB7e** Funnel, Pyramid, Variable Pie, Parliament, Word Cloud, Tree map, Heat map, Gauges, Bullet. **CB7f** Pareto, Bell curve, Histogram, Spider web, Wind rose, Sankey, Line stock. Map có thiết kế riêng | Chưa làm |
+| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Chia theo thứ tự của `MIGRATION.md` (chọn 2026-10-28): **CB7a** Number: comparison và trend line (tab Comparison), xong. **CB7b** Tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer, Collapse Table, Pivot Table: CB7b1 (style) xong. **CB7c** Stacked Column / Bar, Circular Bar, Lollipop. **CB7d** Scatter, Bubble, Area Range, Column Range. **CB7e** Funnel, Pyramid, Variable Pie, Parliament, Word Cloud, Tree map, Heat map, Gauges, Bullet. **CB7f** Pareto, Bell curve, Histogram, Spider web, Wind rose, Sankey, Line stock. Map có thiết kế riêng | Chưa làm |
 | CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query, Delete table | Chưa làm |
 
 ## Ghi chú về field drag and drop
