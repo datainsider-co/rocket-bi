@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { columnKind } from './columnType.utils';
 import { steppedZoom, zoomLabel } from './canvasZoom.utils';
 
 describe('steppedZoom', () => {
@@ -29,19 +28,5 @@ describe('zoomLabel', () => {
     [0.1, '10%']
   ])('%d -> %s', (zoom, label) => {
     expect(zoomLabel(zoom)).toBe(label);
-  });
-});
-
-describe('columnKind', () => {
-  it.each([
-    ['date', 'date'],
-    ['datetime64', 'date'],
-    ['int64', 'number'],
-    ['double', 'number'],
-    ['string', 'text'],
-    ['', 'text'],
-    ['array', 'text']
-  ])('%s -> %s', (type, kind) => {
-    expect(columnKind(type)).toBe(kind);
   });
 });

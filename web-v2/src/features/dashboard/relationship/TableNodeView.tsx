@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Dropdown } from 'antd';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { ColumnTypeIcon } from './ColumnTypeIcon';
+import { ColumnTypeIcon } from '@/shared/schema/ColumnTypeIcon';
 import { TABLE_DRAG_HANDLE_CLASS, type TableNode } from './relationshipGraph.utils';
 
 const NO_NAME = '<<noname>>';
@@ -41,7 +41,7 @@ function TableNodeViewImpl({ id, data, isConnectable }: NodeProps<TableNode>) {
             key={column.name}
             className={`relationship-table__row${related.has(column.name) ? ' relationship-table__row--related' : ''}`}
           >
-            <ColumnTypeIcon type={column.type} />
+            <ColumnTypeIcon type={column.type} color="var(--relationship-accent)" />
             <span className="truncate" title={column.name}>
               {column.name}
             </span>

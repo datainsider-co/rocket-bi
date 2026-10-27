@@ -9,11 +9,17 @@ const GLYPHS: Record<ColumnKind, string> = {
     'M6.588 12.03a.706.706 0 0 1-.088-1.407l.088-.005.706-.001V5.411H5.412v.177c0 .36-.27.657-.618.7l-.088.006a.706.706 0 0 1-.7-.617L4 5.588v-.882c0-.36.27-.657.617-.7L4.706 4h6.588c.36 0 .657.27.7.617l.006.089v.882a.706.706 0 0 1-1.406.089l-.006-.089v-.176L8.705 5.41v5.206h.707a.706.706 0 0 1 .088 1.407l-.088.005H6.588z'
 };
 
+interface ColumnTypeIconProps {
+  type: string;
+  /** The circle's fill; the brand colour by default, as in v1's builder. */
+  color?: string;
+}
+
 /** 16px icon for a column type. */
-export function ColumnTypeIcon({ type }: { type: string }) {
+export function ColumnTypeIcon({ type, color = 'var(--color-brand)' }: ColumnTypeIconProps) {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" className="shrink-0">
-      <circle cx="8" cy="8" r="8" fill="var(--relationship-accent)" />
+      <circle cx="8" cy="8" r="8" fill={color} />
       <path d={GLYPHS[columnKind(type)]} fill="#fff" />
     </svg>
   );
