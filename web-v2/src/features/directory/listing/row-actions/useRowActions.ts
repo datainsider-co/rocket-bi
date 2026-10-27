@@ -1,21 +1,25 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { App } from 'antd';
 import { useNavigate } from 'react-router';
 import type { Directory } from '@/core/directory/Directory';
 import { DirectoryAction, DirectorySection, itemPath, typeLabel } from '../../directory.utils';
+import { directoryKeys } from '../../directoryQueries';
 import { useDirectoryMutations } from '../../useDirectoryMutations';
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Something went wrong';
 }
 
-/** What a row can do: open it, the settings menu, and Trash's restore and delete. */
+/** What a row can do: open it, share it, the settings menu, and Trash's restore and delete. */
 export function useRowActions(section: DirectorySection) {
   const { message, modal } = App.useApp();
   const navigate = useNavigate();
   const mutations = useDirectoryMutations();
   const [renaming, setRenaming] = useState<Directory | null>(null);
   const [moving, setMoving] = useState<Directory | null>(null);
+  const [sharing, setSharing] = useState<Directory | null>(null);
+  const queryClient = useQueryClient();
 
   const run = async (task: Promise<unknown>) => {
     try {
@@ -76,6 +80,13 @@ export function useRowActions(section: DirectorySection) {
         }
       },
       cancel: () => setRenaming(null)
+    },
+    share: {
+      target: sharing,
+      open: (directory: Directory) => setSharing(directory),
+      close: () => setSharing(null),
+      // v1 reloaded the listing after sharing.
+      onShared: () => void queryClient.invalidateQueries({ queryKey: directoryKeys.all })
     },
     move: {
       target: moving,

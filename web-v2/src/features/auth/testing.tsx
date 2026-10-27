@@ -15,10 +15,12 @@ import { PermissionService } from '@/core/permission/PermissionService';
 import { ResourcePermissionService } from '@/core/permission/ResourcePermissionService';
 import { QueryService } from '@/core/query/QueryService';
 import { SchemaService } from '@/core/schema/SchemaService';
+import { ShareService } from '@/core/share/ShareService';
 import { UserService } from '@/core/user/UserService';
 import { fakeQueryService, fakeResourcePermissionService, fakeSchemaService, fakeUserService } from '@/features/dashboard/testing';
 import { fakeConnectionService, fakePermissionService } from '@/features/data-source/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
+import { fakeShareService } from '@/features/share/testing';
 
 type Service = AuthenticationService;
 
@@ -52,6 +54,7 @@ export function renderAppAt(path: string, service: Service, modules: readonly Di
       di.bindValue(QueryService, fakeQueryService());
       di.bindValue(SchemaService, fakeSchemaService());
       di.bindValue(UserService, fakeUserService());
+      di.bindValue(ShareService, fakeShareService());
     },
     ...modules
   ]);

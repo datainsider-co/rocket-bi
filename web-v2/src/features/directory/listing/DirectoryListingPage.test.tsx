@@ -4,8 +4,10 @@ import userEvent from '@testing-library/user-event';
 import { DashboardService } from '@/core/dashboard/DashboardService';
 import { DefaultDirectoryId, Directory, DirectoryParents } from '@/core/directory/Directory';
 import { DirectoryService } from '@/core/directory/DirectoryService';
+import { ShareService } from '@/core/share/ShareService';
 import { clearSession, saveSession } from '@/core/session/session';
 import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing';
+import { fakeShareService } from '@/features/share/testing';
 import { fakeDashboardService, fakeDirectoryService } from '../testing';
 
 const OWNER = { username: 'root', full_name: 'Root User' };
@@ -21,11 +23,12 @@ const KPI = new Directory({
   owner: OWNER
 });
 
-function renderAt(path: string, directories: DirectoryService, dashboards = fakeDashboardService()) {
+function renderAt(path: string, directories: DirectoryService, dashboards = fakeDashboardService(), share = fakeShareService()) {
   return renderAppAt(path, fakeAuthenticationService(), [
     di => {
       di.bindValue(DirectoryService, directories);
       di.bindValue(DashboardService, dashboards);
+      di.bindValue(ShareService, share);
     }
   ]);
 }
@@ -173,6 +176,25 @@ describe('directory listing', () => {
     expect(await screen.findByText("Are you sure to delete folder 'Sales'?")).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
     await waitFor(() => expect(service.remove).toHaveBeenCalledWith(2));
+  });
+
+  it('shares a folder from its row and reloads the listing after Apply', async () => {
+    const service = fakeDirectoryService({ list: vi.fn<DirectoryService['list']>(async () => [SALES]) });
+    const share = fakeShareService();
+    renderAt('/mydata', service, fakeDashboardService(), share);
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Share Sales' }));
+    expect(await screen.findByRole('list', { name: 'People with access' })).toBeInTheDocument();
+    expect(share.getSharing).toHaveBeenCalledWith({ type: 'directory', id: 2 }, 0, 100);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Get link' }));
+    expect(await screen.findByRole('textbox', { name: 'Link' })).toHaveValue(`${window.location.origin}/shared/sales-2?token=tok-1`);
+    expect(screen.queryByRole('switch', { name: 'Password protection' })).not.toBeInTheDocument();
+    const loads = vi.mocked(service.list).mock.calls.length;
+    await userEvent.click(screen.getAllByRole('button', { name: 'Apply' })[0] as HTMLElement);
+
+    await waitFor(() => expect(screen.queryByRole('list', { name: 'People with access' })).not.toBeInTheDocument());
+    await waitFor(() => expect(vi.mocked(service.list).mock.calls.length).toBeGreaterThan(loads));
   });
 
   it('restores and deletes forever in Trash, where rows do not open', async () => {

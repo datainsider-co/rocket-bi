@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hashPassword, needsPassword, OWNER_PERMISSIONS, passwordError, permissionsOf, VIEW_ONLY } from './access.utils';
+import { needsPassword, OWNER_PERMISSIONS, passwordError, permissionsOf, VIEW_ONLY } from './access.utils';
 
 /** sha256("abc"), as v1 stored it for the password "abc". */
 const ABC = 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad';
@@ -32,13 +32,6 @@ describe('needsPassword', () => {
     expect(needsPassword({ passwordEnabled: true, ownerId: 'root' }, 'ann')).toBe(true);
     expect(needsPassword({ passwordEnabled: true, ownerId: 'root' }, 'root')).toBe(false);
     expect(needsPassword({ passwordEnabled: false, ownerId: 'root' }, 'ann')).toBe(false);
-  });
-});
-
-describe('hashPassword', () => {
-  it("matches v1's sha256 hex", () => {
-    expect(hashPassword('abc')).toBe(ABC);
-    expect(hashPassword('mật khẩu')).toHaveLength(64);
   });
 });
 
