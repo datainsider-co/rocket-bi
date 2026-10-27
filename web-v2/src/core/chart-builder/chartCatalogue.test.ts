@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { asRecord, type JsonObject } from '@/core/json/json';
 import { builderDataFromJson } from './BuilderData';
-import { CHART_TYPES, chartIconOf, chartTypeInfoOf, ChartKind, defaultFunctionOf, functionInfoForFamily, newFunctionData, SORTING_ZONE } from './chartCatalogue';
+import { CHART_TYPES, chartIconOf, chartTypeInfoOf, ChartKind, defaultFunctionOf, functionInfoForFamily, newFunctionData, pickerItemsOf, SORTING_ZONE } from './chartCatalogue';
 import { ChartType } from './chartType';
 import { canBuildSetting } from './querySetting';
 import sent from './builderRequests.fixture.json';
@@ -124,5 +124,20 @@ describe('newFunctionData', () => {
     const x = newFunctionData({ id: 1, field: field('string'), columnName: 'region', tableName: 'sales', zone: zoneOf(ChartType.Column, 'x_axis') });
     const y = newFunctionData({ id: 2, field: field('double'), columnName: 'total', tableName: 'sales', zone: zoneOf(ChartType.Column, 'y_axis') });
     expect(canBuildSetting({ chartType: ChartType.Column, configs: { x_axis: [x], y_axis: [y] }, filters: {} })).toBe(true);
+  });
+});
+
+describe('pickerItemsOf', () => {
+  it("lists v1's charts then the filter widgets, the ones v2 doesn't build disabled", () => {
+    const items = pickerItemsOf(ChartKind.Chart);
+    expect(items).toHaveLength(39 + 9);
+    expect(items[0]).toEqual({ type: 'flatten_table', title: 'Table', icon: 'ic_table.svg', buildable: true });
+    expect(items[1]).toEqual({ type: 'table', title: 'Collapse Table', icon: 'ic_collapse_table.svg', buildable: false });
+    expect(items.at(-1)).toMatchObject({ type: 'multi_tree_filter', buildable: true });
+    expect(items.filter(item => item.buildable)).toHaveLength(CHART_TYPES.length - 2);
+  });
+
+  it('lists the inner filter types for an inner filter', () => {
+    expect(pickerItemsOf(ChartKind.InnerFilter).map(item => item.type)).toEqual(['drop_down_filter', 'tab_inner_filter']);
   });
 });

@@ -160,6 +160,69 @@ const OTHER_ICONS: Readonly<Record<string, string>> = {
   line_stock: 'ic_linestock.svg'
 };
 
+/** One choice of the chart type picker; v2 offers the types it doesn't build yet disabled. */
+export interface PickerItem {
+  readonly type: string;
+  readonly title: string;
+  readonly icon: string;
+  readonly buildable: boolean;
+}
+
+/** v1 `ALL_CHARTS` without its hidden items, in its order, by type and title. */
+const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
+  [T.Table, 'Table'],
+  ['table', 'Collapse Table'],
+  ['pivot_table', 'Pivot Table'],
+  [T.Number, 'Number'],
+  [T.Line, 'Line'],
+  [T.Spline, 'Spline'],
+  [T.LineInverted, 'Line Inverted Axes'],
+  [T.Area, 'Area'],
+  [T.AreaInverted, 'Area Inverted Axes'],
+  ['arearange', 'Area Range'],
+  [T.Column, 'Column'],
+  ['column_range', 'Column Range'],
+  [T.Bar, 'Bar'],
+  ['lollipop', 'Lollipop'],
+  ['Parliament', 'Parliament'],
+  [T.Pie, 'Pie'],
+  [T.SemiPie, 'Semi Pie'],
+  ['variablepie', 'Variable Pie'],
+  [T.Donut, 'Donut'],
+  ['scatter', 'Scatter'],
+  ['bubble_chart', 'Bubble'],
+  ['funnel', 'Funnel'],
+  ['pyramid', 'Pyramid'],
+  ['pareto', 'Pareto'],
+  ['bell_curve', 'Bell curve'],
+  ['gauge', 'Gauges'],
+  ['bullet', 'Bullet Graph'],
+  ['heatmap', 'Heat maps'],
+  ['wordcloud', 'Word Cloud'],
+  ['tree_map', 'Tree maps'],
+  ['stack_column', 'Stacked Column'],
+  ['stack_bar', 'Stacked Bar'],
+  ['circular_bar', 'Circular Bar'],
+  ['histogram', 'Histogram'],
+  ['map', 'Map'],
+  ['spider_web', 'Spider Web'],
+  ['sankey', 'Sankey Diagram'],
+  ['wind_rose', 'Wind Rose'],
+  ['line_stock', 'Line Stock']
+];
+
+const pickerItem = ([type, title]: readonly [string, string]): PickerItem => ({ type, title, icon: chartIconOf(type), buildable: chartTypeInfoOf(type) !== undefined });
+
+/**
+ * What the picker offers (v1 `ChartBuilderConfig.vizItems`): every chart then every filter widget for a chart, the
+ * inner filter types for a chart's inner filter.
+ */
+export function pickerItemsOf(kind: typeof ChartKind.Chart | typeof ChartKind.InnerFilter): PickerItem[] {
+  if (kind === K.InnerFilter) return CHART_TYPES.filter(info => info.kind === K.InnerFilter).map(info => pickerItem([info.type, info.title]));
+  const filters = CHART_TYPES.filter(info => info.kind === K.Filter).map(info => [info.type, info.title] as const);
+  return [...V1_CHARTS, ...filters].map(pickerItem);
+}
+
 /** v1's generic icon, for chart controls and unknown types (v1 `ChartUtils.getControlIconSrc`). */
 export const CONTROL_ICON = 'chart_control.svg';
 
