@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import type { VisualizationResponse } from '@/core/query/VisualizationResponse';
+import { NumberSettingsView } from './NumberSettingsView';
+import { PieSettingsView } from './PieSettingsView';
 import { SeriesSettingsView } from './SeriesSettingsView';
+import { TableSettingsView } from './TableSettingsView';
 import { seriesResponseOf, settingsKindOf } from './settingsPanel.utils';
 import { axisTitlesOf, seriesChoicesOf } from './tabs/seriesTabs.utils';
 import { useChartSettings } from './useChartSettings';
@@ -17,6 +20,16 @@ export function SettingsPanel({ response, themeColors }: SettingsPanelProps) {
   const series = useMemo(() => seriesChoicesOf(seriesResponseOf(response)), [response]);
   const axisTitles = useMemo(() => axisTitlesOf(setting), [setting]);
 
-  if (settingsKindOf(chartType) !== 'series') return <p className="m-0 text-black/45">The chart&apos;s settings are not available yet.</p>;
-  return <SeriesSettingsView viz={viz} onChange={onChange} chartType={chartType} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
+  switch (settingsKindOf(chartType)) {
+    case 'series':
+      return <SeriesSettingsView viz={viz} onChange={onChange} chartType={chartType} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
+    case 'pie':
+      return <PieSettingsView viz={viz} onChange={onChange} chartType={chartType} themeColors={themeColors} />;
+    case 'number':
+      return <NumberSettingsView viz={viz} onChange={onChange} chartType={chartType} />;
+    case 'table':
+      return <TableSettingsView viz={viz} onChange={onChange} chartType={chartType} />;
+    default:
+      return <p className="m-0 text-black/45">The chart&apos;s settings are not available yet.</p>;
+  }
 }

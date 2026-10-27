@@ -57,8 +57,20 @@ describe('SettingsPanel', () => {
     expect(screen.getByText('Stack')).toBeInTheDocument();
   });
 
-  it('says when a chart type has no settings yet', () => {
+  it('gives pies a label style', async () => {
     renderPanel(ChartType.Pie);
+    await userEvent.click(screen.getByText('Data Label'));
+    expect(screen.getByText('Label style')).toBeInTheDocument();
+  });
+
+  it('lets tables turn their title off', async () => {
+    renderPanel(ChartType.Table);
+    await userEvent.click(screen.getByRole('switch', { name: 'Title' }));
+    expect(options()['title']).toMatchObject({ enabled: false });
+  });
+
+  it('says when a chart type has no settings yet', () => {
+    renderPanel(ChartType.DropDown);
     expect(screen.getByText(/settings are not available yet/)).toBeInTheDocument();
   });
 });

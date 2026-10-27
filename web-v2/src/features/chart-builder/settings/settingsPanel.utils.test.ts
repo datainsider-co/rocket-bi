@@ -8,7 +8,16 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(chartType)).toBe('series');
   });
 
-  it.each([ChartType.Pie, ChartType.Table, ChartType.DropDown, 'pivot_table'])('has none yet for %s', chartType => {
+  it.each([ChartType.Pie, ChartType.SemiPie, ChartType.Donut])('gives %s the pie settings', chartType => {
+    expect(settingsKindOf(chartType)).toBe('pie');
+  });
+
+  it('gives number charts and tables their settings', () => {
+    expect(settingsKindOf(ChartType.Number)).toBe('number');
+    expect(settingsKindOf(ChartType.Table)).toBe('table');
+  });
+
+  it.each([ChartType.DropDown, ChartType.DropDownInnerFilter, 'pivot_table'])('has none yet for %s', chartType => {
     expect(settingsKindOf(chartType)).toBeUndefined();
   });
 });
