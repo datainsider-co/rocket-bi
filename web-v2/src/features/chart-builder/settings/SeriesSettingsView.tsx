@@ -1,4 +1,5 @@
 import { Collapse } from 'antd';
+import { settingItemsOf } from './settingItems';
 import type { SettingOption } from './settingOptions';
 import { hasStackTab } from './settingsPanel.utils';
 import { BackgroundTab } from './tabs/BackgroundTab';
@@ -41,5 +42,5 @@ export function SeriesSettingsView({ viz, onChange, chartType, series, axisTitle
     { key: 'tooltip', label: 'Tooltip', children: <TooltipTab {...tab} /> },
     { key: 'other', label: 'Other', children: <OtherTab {...tab} chartType={chartType} /> }
   ];
-  return <Collapse ghost size="small" defaultActiveKey={['title']} items={items.map(item => ({ ...item, label: <span className="text-xs font-semibold uppercase">{item.label}</span> }))} />;
+  return <Collapse ghost size="small" defaultActiveKey={['title']} items={settingItemsOf(items)} />;
 }

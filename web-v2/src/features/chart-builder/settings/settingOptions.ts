@@ -31,6 +31,9 @@ export const FONT_FAMILIES: readonly SettingOption[] = [
 /** v1 `SecondaryFontSizeOptions`, the sizes of titles, legends, axes and labels. */
 export const FONT_SIZES: readonly SettingOption[] = [10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 42].map(size => ({ label: String(size), value: `${size}px` }));
 
+/** v1 `PrimaryFontSizeOptions`, the sizes of a number chart's value. */
+export const PRIMARY_FONT_SIZES: readonly SettingOption[] = [11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 32, 36, 42, 48, 64].map(size => ({ label: String(size), value: `${size}px` }));
+
 /** v1 `DashOptions`. */
 export const DASH_STYLES: readonly SettingOption[] = ['Solid', 'ShortDash', 'ShortDot', 'ShortDashDot', 'ShortDashDotDot', 'Dot', 'Dash', 'LongDash'].map(dash => ({
   label: dash,
@@ -84,4 +87,11 @@ export const MIN_COMPARISONS: readonly SettingOption[] = [
 export const MAX_COMPARISONS: readonly SettingOption[] = [
   { label: 'Less than or equal', value: 'true' },
   { label: 'Less than', value: 'false' }
+];
+
+/** v1 `LabelFormatOptions` (`DataLabelFormatterMode`), for pie labels. */
+export const LABEL_FORMATS: readonly SettingOption[] = [
+  { label: 'Data value', value: 'name_and_value' },
+  { label: 'Data percent', value: 'name_and_percent' },
+  { label: 'Data', value: 'name' }
 ];
