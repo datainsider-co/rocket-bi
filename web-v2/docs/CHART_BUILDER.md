@@ -346,6 +346,39 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
   Style, Grid, Header, Values, Field formatting, Conditional formatting và Tooltip của v1 làm cùng renderer table vẽ
   được các style đó (CB7). Font, màu và căn lề của title trong table hiện chưa được renderer áp.
 
+## Quyết định ở CB6c (2026-10-28)
+
+- **Tab của filter** (v1 `TabFilterSetting`, `SlicerFilterSetting`, `DateFilterSetting`, `InputFilterSetting`,
+  `TreeFilterSetting`): Title (chỉ title, không subtitle và căn lề, như v1 `FilterTitleTab`), tab control theo loại
+  filter, Background, Other. Inner filter (Dropdown, Tab của chart) không có Title và Background.
+  - Tab, Single / Multi choice, Dropdown: Position (row / column), màu active / inactive, search box và placeholder.
+    Dropdown không có các mục này; inner filter không có Position. Choice dùng `choice_active_color` /
+    `choice_de_active_color` như v1. Ô màu hiện màu mà renderer đang vẽ (`tabFilterColors`).
+  - Slicer: Step (trừ slicer theo ngày), giá trị mặc định, so sánh From / To (`from.equal`, `to.equal`).
+  - Date select, Input: chỉ giá trị mặc định.
+  - Tree: màu active / inactive, giá trị mặc định.
+- **Giá trị mặc định** (`settings/filter/filterDefault.utils.ts`, v1 `DefaultValueSetting`):
+  - Nút "Use the preview's selection" lưu selection hiện tại của filter trong preview vào `default.setting`; Reset ghi
+    `null` như v1. Tab hiện giá trị đang lưu, và nút chỉ bật khi selection khác giá trị đó.
+  - Preview của filter bắt đầu từ giá trị mặc định đang lưu (`defaultControlValues`), như trên dashboard.
+  - `value` có dạng mà dashboard đọc lại: danh sách giá trị (tab, dropdown, key cột với function control), cặp
+    `[from, to]` (slicer), `{ mode, dates }` (date select), `{ selected_keys, expanded_keys }` (tree, giữ
+    `expanded_keys` đã lưu), chuỗi (input). Test khứ hồi: giá trị ghi ra được `defaultControlValues` đọc lại đúng
+    selection.
+  - Filter theo giá trị (tab, dropdown) lưu thêm `conditions` là condition `in` của v1, vì dashboard v1 dùng nó để áp
+    giá trị mặc định cho inner filter. Các loại khác v1 không đọc `conditions` (`isEnableFilter` luôn false), nên v2
+    không ghi.
+  - Chọn All (không chọn gì) thì không có giá trị mặc định (`null`).
+- **Khác v1:**
+  - v1 lưu màu inactive vào `de_active_color` nhưng đọc `deactivate_color`; v2 đọc và ghi `de_active_color`, key mà
+    renderer đọc.
+  - Revert của Tab controls giữ giá trị mặc định; v1 xoá luôn nó. Giá trị mặc định có nút Reset riêng.
+  - Ô placeholder bị disable khi tắt search box (v1 viết sai tên prop nên ô này không bao giờ bị disable).
+  - Slicer lưu giá trị mặc định là cặp `[from, to]`. Slicer thường của v1 lưu object range, trong khi chính dashboard
+    v1 lại đọc theo cặp.
+- **Chưa làm:** setting của slicer không có cột (v1 `DynamicSettingTab`: min / max, dùng với ngày), vì builder v2 chưa
+  tạo được slicer không cột.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -356,7 +389,7 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
 | CB3 | **Cây field** (chỉ đọc). Chọn database (`GET databases`), bảng và cột có search và icon theo kiểu, mở sẵn các bảng đang dùng, cột kéo được, các chart control của dashboard | Xong |
 | CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control). Display as column để lại CB7 | Xong |
 | CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Xong |
-| CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | (a), (b) xong; (c) chưa làm. Table chỉ có tab chung; các tab style của table làm ở CB7 |
+| CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Xong. Table chỉ có tab chung; các tab style của table và tab Comparison của Number làm ở CB7 |
 | CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Kèm theo: các tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer của chúng, và tab Comparison của Number cùng phần so sánh / trend line của KPI | Chưa làm |
 | CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query, Delete table | Chưa làm |
 
