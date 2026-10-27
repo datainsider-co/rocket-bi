@@ -1,0 +1,149 @@
+/* Relationship editor: v1's Konva drawing (`TableSchemaItem`, `CurvedConnector`) redone in DOM over React Flow. */
+
+.relationship-editor {
+  /* v1 data-cook ACCENT_COLOR, also `--color-header`. */
+  --relationship-accent: var(--color-header);
+  --relationship-text: #4f4f4f;
+  --relationship-header-bg: #f2f2f7;
+  --relationship-row-border: #f2f2f7;
+  --relationship-hover-bg: #f9faff;
+
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #fff;
+}
+
+/* The page is full screen; the editor covers it, above the modal's header and close button. */
+.relationship-editor--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  padding: 15px;
+}
+
+.relationship-canvas {
+  font-family: var(--font-sans);
+}
+
+/* Table node */
+
+.relationship-table,
+.relationship-table * {
+  box-sizing: border-box;
+}
+
+.relationship-table {
+  width: 209px;
+  color: var(--relationship-text);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.relationship-table__db {
+  height: 38px;
+  padding: 16px 12px 0;
+  font-weight: 700;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: move;
+}
+
+.relationship-table__card {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  outline: 1px solid transparent;
+}
+
+.relationship-table:hover .relationship-table__card {
+  outline-color: var(--relationship-accent);
+}
+
+.relationship-table__header {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 8px 0 12px;
+  background: var(--relationship-header-bg);
+  border-radius: 4px 4px 0 0;
+  cursor: move;
+}
+
+.relationship-table__header > .truncate {
+  flex: 1;
+}
+
+.relationship-table__menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--relationship-text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.relationship-table__menu:hover {
+  background: var(--relationship-hover-bg);
+}
+
+.relationship-table__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--relationship-row-border);
+}
+
+.relationship-table__row:last-child {
+  border-bottom: 0;
+}
+
+.relationship-table__row--related,
+.relationship-canvas--editable .relationship-table__row:hover {
+  color: var(--relationship-accent);
+}
+
+/* Each row is one handle covering the whole row: drag it to join columns. */
+.react-flow .relationship-table__handle {
+  inset: 0;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  transform: none;
+  cursor: default;
+}
+
+.relationship-canvas--editable .relationship-table__handle.connectable {
+  cursor: crosshair;
+}
+
+/* Lines */
+
+.react-flow .relationship-edge {
+  stroke: var(--relationship-accent);
+  stroke-width: 2;
+}
+
+.relationship-canvas .react-flow__edge {
+  cursor: default;
+}
+
+.relationship-canvas--editable .react-flow__edge {
+  cursor: pointer;
+}
