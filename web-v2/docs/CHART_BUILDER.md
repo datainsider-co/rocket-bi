@@ -379,6 +379,49 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
 - **Chưa làm:** setting của slicer không có cột (v1 `DynamicSettingTab`: min / max, dùng với ngày), vì builder v2 chưa
   tạo được slicer không cột.
 
+## Quyết định ở CB7a (2026-10-28)
+
+Number: date range, comparison và trend line (v1 `ComparisonUtils`, `NumberWidget`, tab Comparison). Spec lấy từ v1 và
+kiểm bằng backend local.
+
+- **Lõi thuần** `core/query/comparison.ts`, đọc `data_range`, `comparison`, `trend_line` trong options đã lưu:
+  - Điều kiện theo mode: `this_*` → `current_*`, `last_day/week/month/quarter/year` → `last_n_*` = 1,
+    `last_7_days` / `last_30_days` → `last_n_day` 7 / 30, `custom` → `between_and_including` theo range đã lưu,
+    `all_time` → không có điều kiện.
+  - Comparison bật: gửi `compare_request` ở gốc body (`mode: "RawValues"`, server chỉ nhận PascalCase). Kỳ so sánh của
+    mode tương đối là cùng điều kiện kèm `interval_function` (`past_n_*`); của range custom là range tính sẵn (kỳ
+    trước có cùng số ngày, hoặc lùi 1 tháng / quý / năm); comparison custom dùng range riêng của nó. All time so với
+    không gì cả, nên giá trị so sánh là tổng.
+  - Chỉ bật date range: thêm một filter request trên cột ngày.
+  - `buildChartQuery` gắn cả hai, nên dashboard, preview và export đều dùng. Response đọc
+    `compare_responses.RawValues` thành `compareValue`.
+- **Trend line:** một query series thứ hai (`useKpiTrend`), giá trị theo thời gian (`Trend by` → `to_*_num`), sắp
+  tăng dần, trong range. Vẽ bằng spline / areaspline trơn: không trục, legend, tooltip.
+- **Layout của KPI** theo v1:
+  - Không theme: PercentageBar dưới giá trị (icon lên / xuống, % không dấu, giá trị so sánh; xanh `#4dcf36` / đỏ
+    `#ea6b6b`), trend line xanh / đỏ phía dưới.
+  - `style_area_1`: icon lớn bên trái, giá trị và % trên một hàng, trend line dọc đáy card cao 126px.
+  - Theme khác có trend line: trend line bên phải (70%, tối đa 296px), mờ dần sang trái.
+  - Theme khác không có trend line: % dạng pill ở góc trên phải.
+  - Màu của %: màu của giá trị (`color_by_inherit`), hoặc màu tăng / giảm. Màu trend line: màu riêng, hoặc màu của
+    % (`color_by_percentage`).
+- **Tab Date Range** (v1 Comparison tab): bật date range, cột ngày (mọi cột ngày của các bảng trong builder, như
+  v1), mode, ngày custom, Compare with với kỳ so sánh, Trend line (Display as, màu, Trend by), Revert tắt cả ba. Chỉ
+  hiện khi có cột ngày. Đổi mode thì lưu luôn range như v1, và range của comparison preset đi theo.
+- **Khác v1:**
+  - Chỉ bật date range: v1 lọc theo range đã lưu, nên "last 30 days" đứng yên ở ngày lưu chart. v2 để server tính mode
+    tương đối, như v1 vẫn làm với comparison.
+  - Previous period của last 7 / 30 days: v1 chỉ lùi 1 ngày; v2 lùi đúng 7 / 30 ngày.
+  - Trend line giữ filter của chart và filter của dashboard; v1 bỏ hết.
+  - Layout có theme: v1 hiện giá trị so sánh chưa định dạng khi `display` là value; v2 định dạng như giá trị.
+  - Bật trend line không reset màu, và không ghi `comparison.trend_by` thừa.
+  - Default của tab không được ghi khi mở tab (v1 merge vào props mà không emit).
+- **Chưa làm:** dropdown đổi range cho người xem trên layout không theme (v1 `DateRangeDropdown`), cột ngày trong cột
+  nested (v1 thêm `get_array_element`).
+- **Backend local:** MySQL lỗi 500 (`No database selected`) với `between_and_including` trên cột datetime
+  (`MySqlParser` sinh `toDateTime(...)` của ClickHouse). Range custom và comparison custom vì vậy chưa chạy được trên
+  stack local; các mode tương đối chạy được.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -390,7 +433,7 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
 | CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control). Display as column để lại CB7 | Xong |
 | CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Xong |
 | CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Xong. Table chỉ có tab chung; các tab style của table và tab Comparison của Number làm ở CB7 |
-| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Kèm theo: các tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer của chúng, và tab Comparison của Number cùng phần so sánh / trend line của KPI | Chưa làm |
+| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Chia theo thứ tự của `MIGRATION.md` (chọn 2026-10-28): **CB7a** Number: comparison và trend line (tab Comparison), xong. **CB7b** Tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer, Collapse Table, Pivot Table. **CB7c** Stacked Column / Bar, Circular Bar, Lollipop. **CB7d** Scatter, Bubble, Area Range, Column Range. **CB7e** Funnel, Pyramid, Variable Pie, Parliament, Word Cloud, Tree map, Heat map, Gauges, Bullet. **CB7f** Pareto, Bell curve, Histogram, Spider web, Wind rose, Sankey, Line stock. Map có thiết kế riêng | Chưa làm |
 | CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query, Delete table | Chưa làm |
 
 ## Ghi chú về field drag and drop
