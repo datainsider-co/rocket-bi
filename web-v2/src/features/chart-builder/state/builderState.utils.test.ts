@@ -162,6 +162,24 @@ describe('updateItem and removeItem', () => {
   });
 });
 
+describe('changeItemField', () => {
+  it('keeps the function for the same kind of column, taking its name', () => {
+    const state = run(column(), { type: 'changeItemField', zone: 'y_axis', id: 2, field: field('total_profit', 'double') });
+    expect(items(state, 'y_axis')).toMatchObject([{ id: 2, name: 'total_profit', columnName: 'total_profit', functionFamily: 'Aggregation', functionType: 'Sum' }]);
+  });
+
+  it("takes the zone's default for another kind", () => {
+    const state = run(column(), { type: 'changeItemField', zone: 'y_axis', id: 2, field: region });
+    expect(items(state, 'y_axis')).toMatchObject([{ id: 2, name: 'region', functionFamily: 'Aggregation', functionType: 'Count all' }]);
+  });
+
+  it('ignores an unknown item', () => {
+    const state = column();
+    expect(run(state, { type: 'changeItemField', zone: 'y_axis', id: 9, field: region })).toBe(state);
+    expect(run(state, { type: 'changeItemField', zone: 'nowhere', id: 2, field: region })).toBe(state);
+  });
+});
+
 describe('chartType', () => {
   it('moves the zones across and keeps the title', () => {
     const titled = run(column(), { type: 'options', options: { ...defaultVizOptions(ChartType.Column), options: { title: { text: 'Revenue' } } } });
@@ -250,6 +268,25 @@ describe('conditions', () => {
     const state = run(withRegion(), { type: 'addCondition', field: revenue, groupId: 1 });
     const moved = run(state, { type: 'moveCondition', from: { groupId: 1, index: 1 }, to: { groupId: 1, index: 0 } });
     expect(moved.data.filters['1']?.map(condition => condition.id)).toEqual([2, 1]);
+  });
+
+  it('keeps the condition on a column of the same kind', () => {
+    const state = withRegion();
+    const condition = state.data.filters['1']?.[0];
+    if (!condition) throw new Error('no condition');
+    const valued = run(state, { type: 'updateCondition', condition: { ...condition, allValues: ['Asia'] } });
+    const changed = run(valued, { type: 'changeConditionField', groupId: 1, id: 1, field: field('country', 'string') });
+    expect(changed.data.filters['1']).toMatchObject([{ id: 1, columnName: 'country', allValues: ['Asia'], subType: 'in' }]);
+  });
+
+  it('starts the condition over on another kind of column', () => {
+    const changed = run(withRegion(), { type: 'changeConditionField', groupId: 1, id: 1, field: revenue });
+    expect(changed.data.filters['1']).toMatchObject([{ id: 1, groupId: 1, columnName: 'total_revenue', subType: 'equal', familyType: 'number', allValues: [] }]);
+  });
+
+  it('ignores an unknown condition', () => {
+    const state = withRegion();
+    expect(run(state, { type: 'changeConditionField', groupId: 1, id: 5, field: revenue })).toBe(state);
   });
 
   it('ignores a move from a missing condition', () => {

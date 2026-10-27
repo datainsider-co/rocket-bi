@@ -29,7 +29,7 @@ export interface FieldTreeInput {
   readonly controls?: readonly ChartControl[];
 }
 
-/** The field tree's data and UI state (v1 `DatabaseListing` + `BuilderTableSchemaStore`). */
+/** The field tree's data and UI state (v1 `DatabaseListing` + `BuilderTableSchemaStore`): the view's props, and its tables. */
 export function useFieldTree({ usedSettings, adhocTable, controls }: FieldTreeInput) {
   const service = useDi(SchemaService);
   const refs = useMemo(() => usedSettings.flatMap(fieldRefsOf), [usedSettings]);
@@ -65,9 +65,13 @@ export function useFieldTree({ usedSettings, adhocTable, controls }: FieldTreeIn
   };
   const databaseSelect: DatabaseSelect | undefined = adhocTable ? undefined : { options: databases.data ?? [], value: dbName || undefined, onChange: onSelectDatabase };
   return {
-    databases: databaseSelect,
-    search: { keyword, onChange: setKeyword },
-    tables: tableState,
-    controls: controls && searchControls(controls, keyword)
+    view: {
+      databases: databaseSelect,
+      search: { keyword, onChange: setKeyword },
+      tables: tableState,
+      controls: controls && searchControls(controls, keyword)
+    },
+    /** Every table of the database, whatever the search, for picking a field from a menu. */
+    nodes
   };
 }

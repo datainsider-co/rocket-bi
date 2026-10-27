@@ -17,6 +17,8 @@ export interface BuilderContextValue extends BuilderEnv {
   readonly state: BuilderState;
   /** The chart's setting (`builderSettingOf`), `undefined` while the zones are not filled. */
   readonly setting: JsonObject | undefined;
+  /** Whether the user changed anything since the builder opened. */
+  readonly dirty: boolean;
   readonly dispatch: ActionDispatch<[BuilderAction]>;
 }
 
@@ -29,10 +31,10 @@ interface BuilderProviderProps extends BuilderEnv {
 
 /** The builder's state, shared by its panels (field tree drops, config panel, preview, settings). */
 export function BuilderProvider({ start, controls, sqlQueryOf, dashboardId, children }: BuilderProviderProps) {
-  const { state, setting, dispatch } = useBuilderState(start, sqlQueryOf);
+  const { state, setting, dirty, dispatch } = useBuilderState(start, sqlQueryOf);
   const value = useMemo<BuilderContextValue>(
-    () => ({ state, setting, dispatch, controls, sqlQueryOf, dashboardId }),
-    [state, setting, dispatch, controls, sqlQueryOf, dashboardId]
+    () => ({ state, setting, dirty, dispatch, controls, sqlQueryOf, dashboardId }),
+    [state, setting, dirty, dispatch, controls, sqlQueryOf, dashboardId]
   );
   return <BuilderContext value={value}>{children}</BuilderContext>;
 }

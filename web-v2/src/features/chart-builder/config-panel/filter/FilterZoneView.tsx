@@ -2,7 +2,10 @@ import { Fragment, type ReactNode } from 'react';
 import type { ConditionData } from '@/core/chart-builder/ConditionData';
 import { FieldDropZone } from '@/shared/field-dnd/FieldDropZone';
 import { FILTER_ZONE, groupZoneId } from '../../dnd/builderDnd.utils';
+import type { TableNode } from '../../field-tree/fieldTree.utils';
+import type { DroppedField } from '../../state/builderState.utils';
 import { DropHintView } from '../DropHintView';
+import { filterableField } from '../fieldMenu.utils';
 import { ZoneTitleView } from '../ZoneTitleView';
 import { ConditionItemView } from './ConditionItemView';
 
@@ -11,13 +14,17 @@ export interface FilterZoneViewProps {
   chipsOf: (condition: ConditionData) => readonly string[];
   renderEditor: (condition: ConditionData, close: () => void) => ReactNode;
   onRemove: (condition: ConditionData) => void;
+  /** Tables to pick a field from by click: a new group ("click here"), another field for a condition (its name). */
+  tables: readonly TableNode[];
+  onAddField: (field: DroppedField) => void;
+  onSwapField: (condition: ConditionData, field: DroppedField) => void;
 }
 
 /**
  * The Filters zone (v1 `FilterDraggable`): and-groups, or-ed together. A field dropped on a group joins it; dropped
  * anywhere else in the zone, it starts a new group.
  */
-export function FilterZoneView({ groups, chipsOf, renderEditor, onRemove }: FilterZoneViewProps) {
+export function FilterZoneView({ groups, chipsOf, renderEditor, onRemove, tables, onAddField, onSwapField }: FilterZoneViewProps) {
   return (
     <section className="flex flex-col gap-1" aria-label="Filters">
       <ZoneTitleView title="Filters" optional />
@@ -41,6 +48,8 @@ export function FilterZoneView({ groups, chipsOf, renderEditor, onRemove }: Filt
                           <ConditionItemView
                             condition={condition}
                             chips={chipsOf(condition)}
+                            tables={tables}
+                            onPickField={field => onSwapField(condition, field)}
                             renderEditor={close => renderEditor(condition, close)}
                             onRemove={() => onRemove(condition)}
                           />
@@ -51,7 +60,7 @@ export function FilterZoneView({ groups, chipsOf, renderEditor, onRemove }: Filt
                 </fieldset>
               </Fragment>
             ))}
-            <DropHintView />
+            <DropHintView tables={tables} accepts={filterableField} onPick={onAddField} />
           </div>
         }
       />

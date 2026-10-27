@@ -1,6 +1,6 @@
 import { asRecord, type JsonObject } from '@/core/json/json';
 import { builderDataFromJson, builderDataToJson, type BuilderData } from '@/core/chart-builder/BuilderData';
-import { chartTypeInfoOf, newFunctionData, SORTING_ZONE, type ZoneConfig } from '@/core/chart-builder/chartCatalogue';
+import { chartTypeInfoOf, defaultFunctionOf, newFunctionData, SORTING_ZONE, type ZoneConfig } from '@/core/chart-builder/chartCatalogue';
 import { newConditionData, type ConditionData } from '@/core/chart-builder/ConditionData';
 import { suggestConfigs } from '@/core/chart-builder/configSuggestion';
 import { defaultVizOptions, vizOptionsForType } from '@/core/chart-builder/defaultVizOptions';
@@ -55,12 +55,16 @@ export type BuilderAction =
   /** An item changed from its menu (function, sorting, name, top N); matched by id. */
   | { type: 'updateItem'; zone: string; item: FunctionData }
   | { type: 'removeItem'; zone: string; id: number }
+  /** Another column picked for an item (v1 `ConfigDraggable.handleChangeField`). */
+  | { type: 'changeItemField'; zone: string; id: number; field: DroppedField }
   /** A field dropped into the Filter zone: into the and-group `groupId` at `index` (default last), or a new or-group. */
   | { type: 'addCondition'; field: DroppedField; groupId?: number; index?: number }
   /** A condition dragged to `index` of the and-group `groupId`, or into a new or-group. */
   | { type: 'moveCondition'; from: ConditionAt; to: { groupId?: number; index: number } }
   | { type: 'updateCondition'; condition: ConditionData }
   | { type: 'removeCondition'; groupId: number; id: number }
+  /** Another column picked for a condition (v1 `FilterItem.handleOnChangedField`). */
+  | { type: 'changeConditionField'; groupId: number; id: number; field: DroppedField }
   | { type: 'options'; options: JsonObject };
 
 /** A builder for a new chart of `chartType` (v1 `ConfigBuilderStore.initDefaultState` + `setItemSelected`). */
@@ -164,6 +168,32 @@ function removeItem(state: BuilderState, zone: string, id: number): BuilderState
   return withConfigs(state, { ...state.data.configs, [zone]: items.filter(item => item.id !== id) });
 }
 
+/**
+ * The item on another column: its name and field follow the column, its function stays while the column is the same
+ * kind, else it takes the zone's default.
+ */
+function changeItemField(state: BuilderState, zone: string, id: number, dropped: DroppedField): BuilderState {
+  const items = state.data.configs[zone];
+  const item = items?.find(current => current.id === id);
+  if (!items || !item) return state;
+  const { family, type } = isSameFieldKind(item.field, dropped.field)
+    ? { family: item.functionFamily, type: item.functionType }
+    : defaultFunctionOf(dropped.field, zonesOf(state.data.chartType).find(config => config.key === zone));
+  const { dynamicFunction: _previous, ...rest } = item;
+  const changed: FunctionData = {
+    ...rest,
+    field: dropped.field,
+    name: dropped.columnName,
+    columnName: dropped.columnName,
+    tableName: dropped.tableName,
+    isNested: dropped.isNested ?? false,
+    functionFamily: family,
+    functionType: type,
+    ...(dropped.dynamicFunction && { dynamicFunction: dropped.dynamicFunction })
+  };
+  return withConfigs(state, { ...state.data.configs, [zone]: items.map(current => (current.id === id ? changed : current)) });
+}
+
 function withFilters(state: BuilderState, filters: BuilderData['filters']): BuilderState {
   return { ...state, data: { ...state.data, filters }, touched: true };
 }
@@ -203,6 +233,20 @@ function updateCondition(state: BuilderState, condition: ConditionData): Builder
   return withFilters(state, { ...filters, [condition.groupId]: next });
 }
 
+/**
+ * The condition on another column: it keeps its condition and values while the column is the same kind, else it
+ * starts over as a field just dropped (v1 `ChartUtils.setDefaultValue`).
+ */
+function changeConditionField(state: BuilderState, groupId: number, id: number, dropped: DroppedField): BuilderState {
+  const group = state.data.filters[groupId];
+  const condition = group?.find(current => current.id === id);
+  if (!group || !condition) return state;
+  const changed = isSameFieldKind(condition.field, dropped.field)
+    ? { ...condition, field: dropped.field, columnName: dropped.columnName, tableName: dropped.tableName, isNested: dropped.isNested ?? false }
+    : newConditionData({ ...dropped, id, groupId });
+  return updateCondition(state, changed);
+}
+
 /** v1 `ConfigBuilderStore.removeFilter`: an empty group goes too. */
 function removeCondition(state: BuilderState, groupId: number, id: number): BuilderState {
   const { filters } = state.data;
@@ -222,6 +266,8 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
       return updateItem(state, action.zone, action.item);
     case 'removeItem':
       return removeItem(state, action.zone, action.id);
+    case 'changeItemField':
+      return changeItemField(state, action.zone, action.id, action.field);
     case 'addCondition':
       return addCondition(state, action.field, action.groupId, action.index);
     case 'moveCondition':
@@ -230,6 +276,8 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
       return updateCondition(state, action.condition);
     case 'removeCondition':
       return removeCondition(state, action.groupId, action.id);
+    case 'changeConditionField':
+      return changeConditionField(state, action.groupId, action.id, action.field);
     case 'options':
       return { ...state, options: action.options };
   }

@@ -16,6 +16,7 @@ import { FieldTreeView } from '../field-tree/FieldTreeView';
 import { BuilderProvider, useBuilder } from '../state/BuilderContext';
 import type { BuilderStart } from '../state/useBuilderState';
 import { ConfigPanel } from './ConfigPanel';
+import { FieldChoicesContext } from './FieldChoicesContext';
 
 const nodes = tableNodesOf(databaseSchemaFromJson(schemaJson).tables);
 
@@ -73,7 +74,9 @@ function Playground({ start }: { start: BuilderStart }) {
                 <Tree />
               </div>
               <div className="w-80 shrink-0 overflow-auto">
-                <ConfigPanel />
+                <FieldChoicesContext value={nodes}>
+                  <ConfigPanel />
+                </FieldChoicesContext>
               </div>
               <StatePreview />
             </div>

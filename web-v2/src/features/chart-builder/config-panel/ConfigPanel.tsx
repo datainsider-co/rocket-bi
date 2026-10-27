@@ -11,6 +11,8 @@ export function ConfigPanel() {
       filter={{
         chipsOf: filter.chipsOf,
         onRemove: filter.onRemove,
+        onAddField: filter.onAddField,
+        onSwapField: filter.onSwapField,
         renderEditor: (condition, close) => (
           <ConditionEditor
             condition={condition}

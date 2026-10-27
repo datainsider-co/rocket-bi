@@ -2,6 +2,9 @@ import { MoreOutlined } from '@ant-design/icons';
 import { Button, Dropdown, type MenuProps } from 'antd';
 import { familyOptionsOf, typeOptionsOf } from '@/core/chart-builder/functionOptions';
 import type { FunctionData } from '@/core/chart-builder/FunctionData';
+import type { TableNode } from '../field-tree/fieldTree.utils';
+import type { DroppedField } from '../state/builderState.utils';
+import { FieldMenuView } from './FieldMenuView';
 import { MenuLinkView } from './MenuLinkView';
 import { showsFamily, showsType, SORT_OPTIONS, topNLabel, withFamily } from './zoneItem.utils';
 
@@ -9,7 +12,10 @@ interface ZoneItemViewProps {
   item: FunctionData;
   /** In the Sorting zone, the item shows its sorting and top N. */
   sorting: boolean;
+  /** Tables to pick another field from by clicking the name. */
+  tables: readonly TableNode[];
   onChange: (item: FunctionData) => void;
+  onPickField: (field: DroppedField) => void;
   onConfig: () => void;
   onRemove: () => void;
 }
@@ -17,7 +23,7 @@ interface ZoneItemViewProps {
 const asItems = (keys: readonly string[]): NonNullable<MenuProps['items']> => keys.map(key => ({ key, label: key }));
 
 /** An item of a zone (v1 `DraggableItem`): its family, type and sorting as menus, its name, and a menu to config or remove it. */
-export function ZoneItemView({ item, sorting, onChange, onConfig, onRemove }: ZoneItemViewProps) {
+export function ZoneItemView({ item, sorting, tables, onChange, onPickField, onConfig, onRemove }: ZoneItemViewProps) {
   const typeItems = typeOptionsOf(item.field, item.functionFamily).map((group, index) =>
     group.label ? { type: 'group' as const, key: group.label, label: group.label, children: asItems(group.types) } : { type: 'group' as const, key: `types-${index}`, children: asItems(group.types) }
   );
@@ -45,9 +51,16 @@ export function ZoneItemView({ item, sorting, onChange, onConfig, onRemove }: Zo
             onSelect={functionType => onChange({ ...item, functionType })}
           />
         )}
-        <span className="truncate font-medium" title={source || item.name}>
-          {item.name}
-        </span>
+        {item.dynamicFunction ? (
+          <span className="truncate font-medium">{item.name}</span>
+        ) : (
+          // v1 `handleClickChangeField`: the name opens the tables to swap the field.
+          <FieldMenuView tables={tables} onPick={onPickField}>
+            <button type="button" title={source || item.name} aria-label={`Change field of ${item.name}`} className="min-w-0 cursor-pointer truncate border-0 bg-transparent p-0 font-medium text-inherit">
+              {item.name}
+            </button>
+          </FieldMenuView>
+        )}
         {sorting && (
           <MenuLinkView label={item.sorting} ariaLabel={`Sorting of ${item.name}`} items={asItems(SORT_OPTIONS)} selected={item.sorting} onSelect={value => onChange({ ...item, sorting: value })} />
         )}

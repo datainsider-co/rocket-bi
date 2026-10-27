@@ -1,4 +1,4 @@
-import { useMemo, useReducer } from 'react';
+import { useMemo, useReducer, useState } from 'react';
 import type { JsonObject } from '@/core/json/json';
 import { builderReducer, builderSettingOf, builderStateOf, newBuilderState, type BuilderState } from './builderState.utils';
 
@@ -14,7 +14,9 @@ function initialState(start: BuilderStart): BuilderState {
  * SQL, for charts on SQL views; keep it stable, it is a dependency of the setting.
  */
 export function useBuilderState(start: BuilderStart, sqlQueryOf?: (viewName: string) => string | undefined) {
-  const [state, dispatch] = useReducer(builderReducer, start, initialState);
+  const [initial] = useState(() => initialState(start));
+  const [state, dispatch] = useReducer(builderReducer, initial);
   const setting = useMemo(() => builderSettingOf(state, sqlQueryOf), [state, sqlQueryOf]);
-  return { state, setting, dispatch };
+  // The reducer gives the same state back for what changes nothing, so any other state is an edit.
+  return { state, setting, dispatch, dirty: state !== initial };
 }
