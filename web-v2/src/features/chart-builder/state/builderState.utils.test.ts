@@ -3,6 +3,7 @@ import { asRecord, type JsonObject } from '@/core/json/json';
 import { ChartType } from '@/core/chart-builder/chartType';
 import { defaultVizOptions, vizTitleOf } from '@/core/chart-builder/defaultVizOptions';
 import type { FunctionData } from '@/core/chart-builder/FunctionData';
+import { applyVizChanges } from '@/core/chart-builder/vizChanges';
 import stored from '@/core/chart-builder/builder.fixture.json';
 import storedDashboard from '@/core/dashboard/dashboard.fixture.json';
 import {
@@ -71,10 +72,11 @@ describe('builderStateOf', () => {
 
   it('shows option changes on the stored setting without rebuilding it', () => {
     const widget = storedWidget(36);
-    const options = { class_name: 'number_chart_setting', options: { title: { text: 'Profit' } } };
-    const state = run(builderStateOf(widget), { type: 'options', options });
+    const setting = asRecord(widget['setting']);
+    const state = run(builderStateOf(widget), { type: 'vizChanges', changes: { 'title.text': 'Profit' } });
     expect(state.touched).toBe(false);
-    expect(builderSettingOf(state)).toStrictEqual({ ...asRecord(widget['setting']), options });
+    expect(builderSettingOf(state)).toStrictEqual({ ...setting, options: applyVizChanges(asRecord(setting['options']), { 'title.text': 'Profit' }) });
+    expect(vizTitleOf(state.options)).toBe('Profit');
   });
 });
 
@@ -182,7 +184,7 @@ describe('changeItemField', () => {
 
 describe('chartType', () => {
   it('moves the zones across and keeps the title', () => {
-    const titled = run(column(), { type: 'options', options: { ...defaultVizOptions(ChartType.Column), options: { title: { text: 'Revenue' } } } });
+    const titled = run(column(), { type: 'vizChanges', changes: { 'title.text': 'Revenue' } });
     const pie = run(titled, { type: 'chartType', chartType: ChartType.Pie });
     expect(Object.fromEntries(Object.entries(pie.data.configs).map(([key, list]) => [key, list.map(item => item.id)]))).toEqual({ legend: [1], value: [2], sorting: [] });
     expect(pie.options['class_name']).toBe('highcharts_pie_chart_setting');

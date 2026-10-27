@@ -8,6 +8,7 @@ import { convertRowMode } from '@/core/chart-builder/functionConvertor';
 import { SortType, type FunctionData } from '@/core/chart-builder/FunctionData';
 import { isSameFieldKind } from '@/core/chart-builder/functions';
 import { buildSetting } from '@/core/chart-builder/querySetting';
+import { applyVizChanges, type VizChanges } from '@/core/chart-builder/vizChanges';
 import { applyDrop, type DropAction } from '@/shared/field-dnd/fieldDnd.utils';
 
 type Configs = Readonly<Record<string, readonly FunctionData[]>>;
@@ -65,7 +66,8 @@ export type BuilderAction =
   | { type: 'removeCondition'; groupId: number; id: number }
   /** Another column picked for a condition (v1 `FilterItem.handleOnChangedField`). */
   | { type: 'changeConditionField'; groupId: number; id: number; field: DroppedField }
-  | { type: 'options'; options: JsonObject };
+  /** Edits from the Settings tab. */
+  | { type: 'vizChanges'; changes: VizChanges };
 
 /** A builder for a new chart of `chartType` (v1 `ConfigBuilderStore.initDefaultState` + `setItemSelected`). */
 export function newBuilderState(chartType: string): BuilderState {
@@ -278,8 +280,8 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
       return removeCondition(state, action.groupId, action.id);
     case 'changeConditionField':
       return changeConditionField(state, action.groupId, action.id, action.field);
-    case 'options':
-      return { ...state, options: action.options };
+    case 'vizChanges':
+      return { ...state, options: applyVizChanges(state.options, action.changes) };
   }
 }
 
