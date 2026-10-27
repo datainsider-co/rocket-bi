@@ -9,7 +9,8 @@ import { tabHeaderStyleOf } from '../widgets/tab/tabWidget.utils';
 import {
   applyButtonStyleOf,
   moveInOrder,
-  tabEditMenuItems,
+  tabItemMenuItems,
+  tabWidgetMenuItems,
   widgetLabel,
   widgetsOfTab,
   widgetsToAdd,
@@ -95,7 +96,7 @@ describe('widgets to pick', () => {
   });
 });
 
-describe('tabEditMenuItems', () => {
+describe('tab menus', () => {
   const handlers = (): TabEditHandlers => ({
     addTab: vi.fn<TabEditHandlers['addTab']>(),
     renameTab: vi.fn<TabEditHandlers['renameTab']>(),
@@ -109,25 +110,38 @@ describe('tabEditMenuItems', () => {
   type Item = { key?: string; disabled?: boolean; onClick?: () => void; children?: Item[] };
   const flat = (items: unknown[]): Item[] => (items as Item[]).flatMap(item => [item, ...(item.children ?? [])]).filter(item => item.key);
 
-  it('acts on the open tab', () => {
+  it("offers the tab widget's own items", () => {
     const all = handlers();
-    const items = flat(tabEditMenuItems(tab, 1, OWNER_PERMISSIONS, all));
-    expect(items.map(item => item.key)).toEqual(['add-tab', 'sort', 'config', 'rename-tab', 'add-widgets', 'remove-widgets', 'delete-tab', 'delete']);
+    const items = flat(tabWidgetMenuItems(tab, OWNER_PERMISSIONS, all));
+    expect(items.map(item => item.key)).toEqual(['add-tab', 'sort', 'config-tab', 'delete']);
+    items.find(item => item.key === 'add-tab')!.onClick!();
+    expect(all.addTab).toHaveBeenCalledWith(tab);
+  });
+
+  it('acts on one tab from its own menu', () => {
+    const all = handlers();
+    const items = flat(tabItemMenuItems(tab, 1, OWNER_PERMISSIONS, all));
+    expect(items.map(item => item.key)).toEqual(['rename-tab', 'add-widgets', 'remove-widgets', 'delete-tab']);
     items.find(item => item.key === 'delete-tab')!.onClick!();
     expect(all.deleteTab).toHaveBeenCalledWith(tab, 1);
   });
 
+  it('has no tab menu for a tab that does not exist', () => {
+    expect(tabItemMenuItems(tab, 5, OWNER_PERMISSIONS, handlers())).toEqual([]);
+  });
+
   it("works on a filter panel's one tab", () => {
     const panel = widgetFromJson({ ...newFilterPanelJson(), id: 9 }) as TabWidget;
-    const items = flat(tabEditMenuItems(panel, 0, OWNER_PERMISSIONS, handlers()));
-    expect(items.map(item => item.key)).toEqual(['rename-tab', 'add-widgets', 'remove-widgets', 'config', 'delete']);
-    expect(items.find(item => item.key === 'remove-widgets')!.disabled).toBe(true);
+    const items = flat(tabWidgetMenuItems(panel, OWNER_PERMISSIONS, handlers()));
+    expect(items.map(item => item.key)).toEqual(['rename-tab', 'add-filters', 'remove-filters', 'config-panel', 'delete']);
+    expect(items.find(item => item.key === 'remove-filters')!.disabled).toBe(true);
   });
 
   it('disables edits without the permission', () => {
-    const items = flat(tabEditMenuItems(tab, 0, permissionsOf(['delete']), handlers()));
+    const items = flat(tabWidgetMenuItems(tab, permissionsOf(['delete']), handlers()));
     expect(items.find(item => item.key === 'add-tab')!.disabled).toBe(true);
     expect(items.find(item => item.key === 'delete')!.disabled).toBe(false);
+    expect(flat(tabItemMenuItems(tab, 0, permissionsOf(['delete']), handlers())).every(item => item.disabled)).toBe(true);
   });
 });
 

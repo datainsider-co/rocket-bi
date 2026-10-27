@@ -5,12 +5,16 @@ import { ImageUrlModalView } from './ImageUrlModalView';
 import { PickWidgetsModalView } from './PickWidgetsModalView';
 import { RenameModalView } from './RenameModalView';
 import { settingDraft } from './settings/dashboardSettings.utils';
-import { DashboardSettingsModalView } from './settings/DashboardSettingsModalView';
+import { EditDashboardModalView } from './settings/EditDashboardModalView';
+import { EditWidgetsModalView } from './settings/EditWidgetsModalView';
+import { ThemesModalView } from './settings/themes/ThemesModalView';
 import { SortTabsModalView } from './SortTabsModalView';
 import { applyButtonStyleOf, widgetLabel, widgetsOfTab, widgetsToAdd } from './tabEdit.utils';
 import { TabStyleModalView } from './TabStyleModalView';
 import { TextEditorModalView } from './TextEditorModalView';
 import { initialTextContent } from './textEditor.utils';
+
+const SETTING_DIALOGS = { themes: ThemesModalView, editDashboard: EditDashboardModalView, editWidgets: EditWidgetsModalView };
 
 interface EditDialogsViewProps {
   dialogs: EditDialogs;
@@ -89,8 +93,13 @@ export function EditDialogsView({ dialogs, dashboard }: EditDialogsViewProps) {
         />
       );
     }
-    case 'settings':
-      return dashboard ? <DashboardSettingsModalView initial={settingDraft(dashboard)} onSubmit={dialogs.submitSettings} onCancel={close} /> : null;
+    case 'themes':
+    case 'editDashboard':
+    case 'editWidgets': {
+      if (!dashboard) return null;
+      const SettingDialog = SETTING_DIALOGS[dialog.kind];
+      return <SettingDialog initial={settingDraft(dashboard)} onSubmit={dialogs.submitSettings} onCancel={close} />;
+    }
     case undefined:
       return null;
   }

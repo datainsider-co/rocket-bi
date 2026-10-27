@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { DatePicker, InputNumber, Slider } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { GRID_NO_DRAG_CLASS } from '../../grid/DashboardGridView';
+import { FilterTitle } from './FilterTitle';
 import type { SlicerKind, SlicerRange } from './slicerFilter.utils';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -14,6 +15,7 @@ function parseInput(text: string): number | null {
 
 interface SlicerFilterViewProps {
   title?: string;
+  titleStyle?: CSSProperties;
   kind: SlicerKind;
   bounds: SlicerRange;
   range: SlicerRange;
@@ -25,7 +27,7 @@ interface SlicerFilterViewProps {
  * v1 `NumberSlicer`: a range slider between the column's min and max, with two inputs (two date pickers for dates).
  * The slider reports when the drag ends; inputs when they lose focus.
  */
-export function SlicerFilterView({ title, kind, bounds, range, step, onChange }: SlicerFilterViewProps) {
+export function SlicerFilterView({ title, titleStyle, kind, bounds, range, step, onChange }: SlicerFilterViewProps) {
   // The drag in progress; the picked range otherwise.
   const [dragging, setDragging] = useState<SlicerRange | null>(null);
   const [from, to] = dragging ?? range;
@@ -40,19 +42,20 @@ export function SlicerFilterView({ title, kind, bounds, range, step, onChange }:
   const toDate = (value: Dayjs | null, fallback: number) => (value ? toNumber(value.valueOf(), fallback) : fallback);
 
   return (
-    <div className={`flex h-full flex-col gap-2 ${GRID_NO_DRAG_CLASS}`}>
-      {title && <div className="truncate font-medium">{title}</div>}
-      <div className="flex gap-2">
+    <div className={`filter-widget filter-widget--padded ${GRID_NO_DRAG_CLASS}`}>
+      <FilterTitle text={title} style={titleStyle} className="mb-2" />
+      <div className="mb-4 flex shrink-0 gap-2">
         {isDate ? (
           <>
-            <DatePicker aria-label="From" className="w-1/2" allowClear={false} value={dayjs(from)} onChange={value => commit([toDate(value, from), to])} format="DD/MM/YYYY" />
-            <DatePicker aria-label="To" className="w-1/2" allowClear={false} value={dayjs(to)} onChange={value => commit([from, toDate(value, to)])} format="DD/MM/YYYY" />
+            <DatePicker aria-label="From" className="filter-input w-1/2" allowClear={false} value={dayjs(from)} onChange={value => commit([toDate(value, from), to])} format="DD/MM/YYYY" />
+            <DatePicker aria-label="To" className="filter-input w-1/2" allowClear={false} value={dayjs(to)} onChange={value => commit([from, toDate(value, to)])} format="DD/MM/YYYY" />
           </>
         ) : (
           <>
             <InputNumber
               aria-label="From"
-              className="w-1/2!"
+              className="filter-input w-1/2!"
+              controls={false}
               key={`from-${from}`}
               defaultValue={from}
               onBlur={event => commit([toNumber(parseInput(event.target.value), from), to])}
@@ -60,7 +63,8 @@ export function SlicerFilterView({ title, kind, bounds, range, step, onChange }:
             />
             <InputNumber
               aria-label="To"
-              className="w-1/2!"
+              className="filter-input w-1/2!"
+              controls={false}
               key={`to-${to}`}
               defaultValue={to}
               onBlur={event => commit([from, toNumber(parseInput(event.target.value), to)])}
@@ -70,6 +74,7 @@ export function SlicerFilterView({ title, kind, bounds, range, step, onChange }:
         )}
       </div>
       <Slider
+        className="filter-slider"
         range
         min={bounds[0]}
         max={bounds[1]}

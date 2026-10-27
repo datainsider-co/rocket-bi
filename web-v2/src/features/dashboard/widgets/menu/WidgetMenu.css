@@ -1,0 +1,87 @@
+/* v1 ActionWidgetMore: a 40px ghost button (`btn-icon-40 btn-ghost`) and its popover (`none-action-container`). */
+
+.widget-menu-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.widget-menu-button:hover,
+.widget-menu-button[aria-expanded='true'] {
+  background: var(--hover-color);
+}
+
+.widget-menu-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* v1 b-icon-three-dots-vertical in a tab's header: 14px, 8px after the title. */
+.widget-menu-button--small {
+  width: 14px;
+  height: 14px;
+  margin-left: 8px;
+  border-radius: 50%;
+  color: var(--secondary-text-color);
+}
+
+.widget-menu-button--small:hover {
+  color: var(--header-color);
+}
+
+.widget-menu .ant-dropdown-menu {
+  width: 210px;
+  margin-top: 4px;
+  padding: 4px;
+  border: var(--menu-border);
+  border-radius: 4px;
+  background: var(--menu-background-color);
+  box-shadow: var(--menu-shadow);
+}
+
+.widget-menu .ant-dropdown-menu .ant-dropdown-menu-item,
+.widget-menu .ant-dropdown-menu .ant-dropdown-menu-submenu-title {
+  min-height: 32px;
+  padding: 8px;
+  border-radius: 4px;
+  color: var(--secondary-text-color);
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.widget-menu .ant-dropdown-menu .ant-dropdown-menu-item + .ant-dropdown-menu-item,
+.widget-menu .ant-dropdown-menu .ant-dropdown-menu-item + .ant-dropdown-menu-submenu,
+.widget-menu .ant-dropdown-menu .ant-dropdown-menu-submenu + .ant-dropdown-menu-item {
+  margin-top: 4px;
+}
+
+.widget-menu .ant-dropdown-menu .ant-dropdown-menu-item:not(.ant-dropdown-menu-item-disabled):hover,
+.widget-menu .ant-dropdown-menu .ant-dropdown-menu-submenu-title:hover {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.widget-menu .ant-dropdown-menu .ant-dropdown-menu-item-disabled {
+  color: var(--text-disabled-color, #bebebe);
+}
+
+.widget-menu .ant-dropdown-menu-item-icon {
+  min-width: 16px;
+  margin-inline-end: 8px !important;
+  font-size: 16px !important;
+}
+
+.widget-menu .ant-dropdown-menu-item-group-title {
+  padding: 4px 8px;
+  color: var(--secondary-text-color);
+  font-size: 12px;
+}

@@ -178,6 +178,14 @@ describe('controls state', () => {
     expect(controlsReducer(state, { type: 'reset', initial: { [MAIN_DATE_ID]: {} }, headerFilters: [] }).controls).toEqual({});
   });
 
+  it('drops the main date and its values when it is removed', () => {
+    const dated = controlsReducer(state, { type: 'mainDate', mainDate: { mode: DateMode.LastYear, dates: [] }, values: { min_value: ['a'] } });
+    const removed = controlsReducer(dated, { type: 'removeMainDate' });
+    expect(removed.mainDate).toBeUndefined();
+    expect(removed.controls).toEqual(initial);
+    expect(dated.controls[MAIN_DATE_ID]).toEqual({ min_value: ['a'] });
+  });
+
   it('edits, removes and resets header filters', () => {
     const region = { id: -1, name: 'Region', field: {}, condition: FilterCondition.In, values: ['Asia'], enabled: true, nested: false };
     const country = { ...region, id: -2, name: 'Country' };

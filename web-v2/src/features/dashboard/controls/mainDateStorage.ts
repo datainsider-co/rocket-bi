@@ -4,6 +4,7 @@ import type { StoredMainDate } from './controls.utils';
 export interface MainDateStorage {
   load(dashboardId: number): unknown;
   save(dashboardId: number, value: StoredMainDate): void;
+  remove(dashboardId: number): void;
 }
 
 /** v1's key, so a choice made in v1 still applies on the same origin. */
@@ -23,6 +24,13 @@ export const localMainDateStorage: MainDateStorage = {
       localStorage.setItem(keyOf(dashboardId), JSON.stringify(value));
     } catch {
       // Private mode or full storage: the choice just isn't remembered.
+    }
+  },
+  remove(dashboardId) {
+    try {
+      localStorage.removeItem(keyOf(dashboardId));
+    } catch {
+      // Nothing was stored.
     }
   }
 };

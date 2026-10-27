@@ -29,6 +29,20 @@ describe('buildKpi', () => {
     expect(buildKpi({}, empty)).toMatchObject({ value: '--', prefix: '', icon: undefined, title: undefined });
   });
 
+  it("uses v1's plain layout, value centered, without a theme", () => {
+    expect(buildKpi({}, response)).toMatchObject({ layout: 'plain', valueStyle: { justifyContent: 'center' } });
+    expect(buildKpi({ theme: '' }, response).layout).toBe('plain');
+  });
+
+  it("uses v1's themed layout, value on the left, with a theme", () => {
+    expect(buildKpi({ theme: 'style_1' }, response)).toMatchObject({ layout: 'themed', valueStyle: { justifyContent: 'flex-start' } });
+  });
+
+  it('keeps a stored value alignment in either layout', () => {
+    expect(buildKpi({ align: 'right' }, response).valueStyle.justifyContent).toBe('flex-end');
+    expect(buildKpi({ theme: 'style_1', align: 'center' }, response).valueStyle.justifyContent).toBe('center');
+  });
+
   it('builds the icon when enabled', () => {
     const kpi = buildKpi({ icon: { enabled: true, iconClass: 'setting-icon-wallet', color: '#fff', background: '#000' } }, response);
     expect(kpi.icon).toEqual({ className: 'setting-icon-wallet', style: { color: '#fff', background: '#000', borderRadius: '4px', boxShadow: undefined } });

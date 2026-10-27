@@ -54,7 +54,12 @@ export function vizFromSetting(setting: JsonObject): ChartViz {
   };
 }
 
+/** Viz options written in v1's camelCase, keyed the way v1 sent them (`snakeCase`, data keys included). */
+export function toStoredKeys(options: object): JsonObject {
+  return asRecord(convertKeys(options, snakeCase));
+}
+
 /** Back to the stored shape, for saving a chart (ChartBuilder). */
 export function vizToStored(viz: ChartViz): JsonObject {
-  return { class_name: viz.className, options: convertKeys(viz.options, snakeCase) };
+  return { class_name: viz.className, options: toStoredKeys(viz.options) };
 }

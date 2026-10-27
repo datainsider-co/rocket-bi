@@ -1,5 +1,10 @@
 import type { Dashboard } from '@/core/dashboard/Dashboard';
+import { useMemo } from 'react';
+import type { DateMode } from '@/core/query/dateRanges';
 import type { DashboardPermissions } from '../access/access.utils';
+import type { MainDateEditing } from '../controls/main-date/useMainDateFilter';
+import { settingDraft, withMainDate } from './settings/dashboardSettings.utils';
+import { useSettingMenu } from './settings/useSettingMenu';
 import type { ChartBuilderBridge } from './chartBuilderBridge';
 import { useDashboardEditor } from './useDashboardEditor';
 import { useEditDialogs } from './useEditDialogs';
@@ -22,7 +27,17 @@ export function useDashboardEditing({ dashboard, permissions, available, chartBu
   const dialogs = useEditDialogs(editor, mode.release);
   const actions = useWidgetEditActions({ dashboard: mode.shown, editor, editing: mode.editing, openDialog: dialogs.open, release: mode.release, chartBuilder });
   useLeaveGuard(mode.editing, mode.dirty, dashboard?.id);
-  return { canEdit: available && permissions.canEdit, mode, dialogs, actions };
+  // v1 `DashboardStore.updateMainDateFilter`: the whole setting, saved like the settings dialog does.
+  const mainDate = useMemo(
+    (): MainDateEditing => ({
+      save: async (mainDateMode: DateMode | undefined) => {
+        if (dashboard) await editor.saveSetting(withMainDate(settingDraft(dashboard), mainDateMode));
+      }
+    }),
+    [dashboard, editor]
+  );
+  const settingMenu = useSettingMenu(dashboard, editor, dialogs.open);
+  return { canEdit: available && permissions.canEdit, mode, dialogs, actions, mainDate, settingMenu };
 }
 
 export type DashboardEditing = ReturnType<typeof useDashboardEditing>;

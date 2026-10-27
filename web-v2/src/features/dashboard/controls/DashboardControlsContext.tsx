@@ -31,6 +31,8 @@ interface DashboardControlsState {
   /** Present when the dashboard has a main date filter. */
   mainDate?: MainDateState;
   setMainDate: (mainDate: MainDateState) => void;
+  /** Takes the main date filter off the page and forgets the viewer's choice (v1 `FilterStore.removeMainDateData`). */
+  removeMainDate: () => void;
   /** Dashboard-wide filters, those drill through opened the dashboard with first. */
   headerFilters: readonly InternalFilter[];
   /** The requests of the header filters that are on and complete; every chart affected by filters sends them. */
@@ -94,6 +96,10 @@ export function DashboardControlsProvider({
     },
     [storage, dashboard.id, now]
   );
+  const removeMainDate = useCallback(() => {
+    storage.remove(dashboard.id);
+    dispatch({ type: 'removeMainDate' });
+  }, [storage, dashboard.id]);
   const setHeaderFilter = useCallback((filter: InternalFilter) => dispatch({ type: 'headerFilter', filter }), []);
   const removeHeaderFilter = useCallback((id: number) => dispatch({ type: 'removeHeaderFilter', id }), []);
   const reset = useCallback(() => dispatch({ type: 'reset', initial: start.initial, headerFilters: start.headerFilters }), [start]);
@@ -108,6 +114,7 @@ export function DashboardControlsProvider({
       applyPanel,
       mainDate: state.mainDate,
       setMainDate,
+      removeMainDate,
       headerFilters: state.headerFilters,
       headerRequests,
       setHeaderFilter,
@@ -115,7 +122,7 @@ export function DashboardControlsProvider({
       reset,
       changed: hasChangedControls(state, start.initial, start.headerFilters)
     }),
-    [state, widgets, panels, setControl, applyPanel, setMainDate, headerRequests, setHeaderFilter, removeHeaderFilter, reset, start]
+    [state, widgets, panels, setControl, applyPanel, setMainDate, removeMainDate, headerRequests, setHeaderFilter, removeHeaderFilter, reset, start]
   );
   return <DashboardControlsContext value={value}>{children}</DashboardControlsContext>;
 }

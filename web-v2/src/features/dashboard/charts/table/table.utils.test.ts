@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import responses from '@/core/query/queryResponses.fixture.json';
 import { visualizationResponseFromJson, type JsonTableResponse, type TableHeader } from '@/core/query/VisualizationResponse';
-import { toColumns, toRows, toTableSort } from './table.utils';
+import type { VizOptions } from '@/core/query/vizOptions';
+import { tableCellText, tableNumberFormat, toColumns, toRows, toTableSort } from './table.utils';
 
 const response = visualizationResponseFromJson(responses.table_chart_setting) as JsonTableResponse;
 
@@ -43,5 +44,41 @@ describe('sorting', () => {
     expect(toTableSort([{ column: { title: 'region' }, order: 'descend' }])).toEqual({ column: 'region', direction: 'DESC' });
     expect(toTableSort({ column: { title: 'region' }, order: undefined })).toBeUndefined();
     expect(toTableSort({ order: 'ascend' })).toBeUndefined();
+  });
+});
+
+describe('tableNumberFormat', () => {
+  it("uses v1's defaults: no display unit, 2 decimals, comma thousands", () => {
+    expect(tableNumberFormat({})(6021738.87)).toBe('6,021,738.87');
+    expect(tableNumberFormat({})(15)).toBe('15.00');
+  });
+
+  it('follows the stored precision, separators and display unit', () => {
+    expect(tableNumberFormat({ precision: 0, thousandSep: '.', decimalPoint: ',' })(1234.5)).toBe('1.235');
+    const options = { plotOptions: { table: { dataLabels: { displayUnit: 'default' } } } } as VizOptions;
+    expect(tableNumberFormat(options)(52150)).toBe('52.15k');
+  });
+});
+
+describe('tableCellText', () => {
+  const number = { isTextLeft: false, isGroupBy: false };
+  const format = tableNumberFormat({});
+
+  it('formats numbers and numeric strings in number columns', () => {
+    expect(tableCellText(1574222.1, number, format)).toBe('1,574,222.10');
+    expect(tableCellText('8', number, format)).toBe('8.00');
+  });
+
+  it('keeps text, group by columns and values that are not numbers', () => {
+    expect(tableCellText(12, { isTextLeft: true, isGroupBy: false }, format)).toBe('12');
+    expect(tableCellText(12, { isTextLeft: false, isGroupBy: true }, format)).toBe('12');
+    expect(tableCellText('n/a', number, format)).toBe('n/a');
+    expect(tableCellText('', number, format)).toBe('');
+    expect(tableCellText(true, number, format)).toBe('true');
+  });
+
+  it('shows -- for empty cells', () => {
+    expect(tableCellText(null, number, format)).toBe('--');
+    expect(tableCellText(undefined, { isTextLeft: true, isGroupBy: false }, format)).toBe('--');
   });
 });

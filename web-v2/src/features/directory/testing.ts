@@ -28,6 +28,7 @@ export function fakeDirectoryService(overrides: Partial<Service> = {}): Service 
     restore: vi.fn<Service['restore']>(async () => {}),
     star: vi.fn<Service['star']>(async () => {}),
     unstar: vi.fn<Service['unstar']>(async () => {}),
+    setPassword: vi.fn<Service['setPassword']>(async () => {}),
     ...overrides
   };
 }

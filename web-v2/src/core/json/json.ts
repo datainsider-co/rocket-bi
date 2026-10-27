@@ -34,3 +34,8 @@ export function asNumber(value: unknown, fallback = 0): number {
 export function asBoolean(value: unknown, fallback = false): boolean {
   return typeof value === 'boolean' ? value : fallback;
 }
+
+/** A shallow copy without the keys whose value is `undefined`, the way `JSON.stringify` leaves them out. */
+export function withoutUndefined<T extends object>(value: T): T {
+  return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)) as T;
+}

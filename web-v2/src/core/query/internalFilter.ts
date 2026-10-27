@@ -200,6 +200,15 @@ const NO_INPUT = new Set<FilterCondition>([
   C.CurrentYear
 ]);
 
+/**
+ * A condition's own keys without its field (`{ class_name: 'in', possible_values }`), or `undefined` while `values`
+ * lack what it needs. A single value condition reads `values[0]`, a range `values[0]` and `values[1]`, a list the
+ * non-empty ones.
+ */
+export function conditionBody(condition: FilterCondition, values: readonly string[]): JsonObject | undefined {
+  return BUILDERS[condition](values);
+}
+
 export function isFilterCondition(value: unknown): value is FilterCondition {
   return typeof value === 'string' && Object.hasOwn(BUILDERS, value);
 }
@@ -233,7 +242,7 @@ export function defaultCondition(family: ConditionFamily | undefined): FilterCon
 export function filterConditionOf(filter: InternalFilter): JsonObject | undefined {
   const family = familyOf(filter);
   if (!family || !FAMILY_CONDITIONS[family].includes(filter.condition)) return undefined;
-  const body = BUILDERS[filter.condition](filter.values);
+  const body = conditionBody(filter.condition, filter.values);
   if (!body) return undefined;
   return {
     ...body,

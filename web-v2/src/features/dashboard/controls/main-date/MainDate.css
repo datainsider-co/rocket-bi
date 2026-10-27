@@ -1,0 +1,294 @@
+/* v1 DiCalendar.vue, themes/scss/calendar/new-di-calender.scss and SetupMainDateFilter.vue. */
+
+.main-date-trigger {
+  display: flex;
+  align-items: center;
+  height: 39px;
+  padding: 0 8px 0 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-color);
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+}
+
+.main-date-trigger:hover,
+.main-date-trigger:focus-visible,
+.main-date-trigger[aria-expanded='true'] {
+  background-color: var(--hover-color);
+}
+
+.main-date-trigger__icon {
+  width: 16px;
+  margin: 0 8px;
+  color: var(--secondary-text-color);
+  font-size: 16px;
+}
+
+.main-date-trigger__label {
+  width: 180px;
+  margin-left: 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.main-date-popover {
+  width: 646px;
+  max-width: calc(100vw - 16px);
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--calendar-bg, var(--menu-background-color));
+  color: var(--text-color);
+}
+
+.main-date-popover__presets {
+  display: flex;
+  justify-content: flex-end;
+  height: 40px;
+  padding: 3px 6px 0 0;
+}
+
+.main-date-popover__preset {
+  width: 130px;
+}
+
+.main-date-popover__preset .ant-select-content,
+.main-date-popover__preset .ant-select-selection-item {
+  color: var(--text-color);
+  text-align: right;
+}
+
+.main-date-popover__body {
+  display: flex;
+  gap: 4px;
+}
+
+.main-date-popover__column {
+  flex: 1;
+  min-width: 0;
+}
+
+.main-date-popover__column-title {
+  height: 40px;
+  margin-bottom: 13px;
+  background: var(--secondary-2);
+  color: var(--text-color);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 40px;
+  text-align: center;
+}
+
+.main-date-calendar {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.main-date-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.main-date-calendar__title {
+  color: var(--secondary-text-color);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.main-date-calendar__arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.main-date-calendar__arrow:hover:not(:disabled) {
+  background: var(--hover-color);
+}
+
+.main-date-calendar__arrow:disabled {
+  cursor: default;
+  opacity: 0.3;
+}
+
+.main-date-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 8px;
+  padding: 30px 0 16px;
+}
+
+.main-date-calendar__weekday {
+  padding: 5px 0;
+  color: var(--secondary-text-color);
+  font-size: 15.7px;
+  font-weight: 500;
+  line-height: 19px;
+  text-align: center;
+}
+
+.main-date-calendar__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-color);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.main-date-calendar__day > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+}
+
+.main-date-calendar__day:hover:not(:disabled) > span {
+  background: var(--hover-color);
+}
+
+.main-date-calendar__day:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.main-date-calendar__day--in-range {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.main-date-calendar__day--today > span {
+  border-color: var(--accent);
+}
+
+.main-date-calendar__day--other-end > span {
+  border-color: var(--accent);
+}
+
+.main-date-calendar__day--picked > span,
+.main-date-calendar__day--picked:hover:not(:disabled) > span {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text-color, #fff);
+}
+
+.main-date-popover__footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 58px;
+  padding: 0 16px 0 10px;
+}
+
+.main-date-popover__edit {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 4px;
+}
+
+.main-date-popover__link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.main-date-popover__link:hover {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.main-date-popover__button {
+  width: 128px;
+  height: 26px;
+}
+
+/* v1's Apply takes the dashboard theme's accent, not the app's brand color. */
+.main-date-popover__button.ant-btn-variant-solid {
+  background: var(--accent);
+  color: var(--accent-text-color, #fff);
+}
+
+.main-date-popover__button.ant-btn-variant-solid:not(:disabled):hover {
+  background: var(--accent-hover-color, var(--accent));
+}
+
+.setup-main-date {
+  width: 250px;
+  padding: 8px 16px;
+  color: var(--text-color);
+}
+
+.setup-main-date__title {
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.setup-main-date__list {
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.setup-main-date__item {
+  padding: 8px 0 8px 20px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-color);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.setup-main-date__item:hover,
+.setup-main-date__item:focus-visible {
+  background: var(--hover-color);
+  opacity: 1;
+}
+
+@media (max-width: 700px) {
+  .main-date-popover__body {
+    flex-direction: column;
+  }
+
+  .main-date-trigger__label {
+    width: auto;
+  }
+}

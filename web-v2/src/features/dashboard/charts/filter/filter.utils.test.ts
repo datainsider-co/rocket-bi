@@ -2,11 +2,14 @@ import { describe, expect, it } from 'vitest';
 import responses from '@/core/query/queryResponses.fixture.json';
 import { visualizationResponseFromJson, type TableResponse } from '@/core/query/VisualizationResponse';
 import {
+  ALL_OPTION,
   dateSelectionOf,
   dateSelectionToControl,
   filterOptions,
   functionOptions,
   isNumberInput,
+  isTabOptionPicked,
+  pickTabOption,
   searchOptions,
   selectionOf,
   selectionToControl,
@@ -98,5 +101,48 @@ describe('isNumberInput', () => {
   it('follows the options without column', () => {
     expect(isNumberInput({ values: [] }, true)).toBe(true);
     expect(isNumberInput({}, undefined)).toBe(false);
+  });
+});
+
+describe('isTabOptionPicked', () => {
+  it('picks All when nothing is selected', () => {
+    expect(isTabOptionPicked([], ALL_OPTION)).toBe(true);
+    expect(isTabOptionPicked([], 'Asia')).toBe(false);
+  });
+
+  it('picks the selected values only', () => {
+    expect(isTabOptionPicked(['Asia'], ALL_OPTION)).toBe(false);
+    expect(isTabOptionPicked(['Asia'], 'Asia')).toBe(true);
+    expect(isTabOptionPicked(['Asia'], 'Europe')).toBe(false);
+  });
+});
+
+describe('pickTabOption', () => {
+  const single = { multiple: false, required: false, optionCount: 3 };
+  const multi = { multiple: true, required: false, optionCount: 3 };
+
+  it('clears the selection on All', () => {
+    expect(pickTabOption(['Asia'], ALL_OPTION, multi)).toEqual([]);
+    expect(pickTabOption(['Asia'], ALL_OPTION, single)).toEqual([]);
+  });
+
+  it('picks one value outside multi choice', () => {
+    expect(pickTabOption(['Asia', 'Europe'], 'Africa', single)).toEqual(['Africa']);
+  });
+
+  it('toggles in multi choice, every value meaning All', () => {
+    expect(pickTabOption(['Asia'], 'Europe', multi)).toEqual(['Asia', 'Europe']);
+    expect(pickTabOption(['Asia', 'Europe'], 'Asia', multi)).toEqual(['Europe']);
+    expect(pickTabOption(['Asia', 'Europe'], 'Africa', multi)).toEqual([]);
+  });
+
+  it('keeps one column of a tab control', () => {
+    expect(pickTabOption(['profit_0'], 'profit_0', { ...multi, required: true })).toEqual(['profit_0']);
+  });
+
+  it('does not change the selection it is given', () => {
+    const selected = ['Asia'];
+    pickTabOption(selected, 'Europe', multi);
+    expect(selected).toEqual(['Asia']);
   });
 });

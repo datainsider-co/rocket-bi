@@ -2,6 +2,7 @@ import { Button, Result, Spin } from 'antd';
 import { DashboardPermissionsProvider } from '../access/DashboardPermissionsContext';
 import { PasswordGateView } from '../access/PasswordGateView';
 import { DashboardEditProvider } from '../edit/DashboardEditContext';
+import { SettingButtonView } from '../edit/settings/SettingButtonView';
 import { ViewAsProvider } from '../view-as/ViewAsContext';
 import { DashboardCanvas } from './DashboardCanvas';
 import type { DashboardPageViewProps } from './DashboardPageView';
@@ -35,7 +36,7 @@ export function DashboardPageBody({ dashboard, load, state, layout, onBack }: Da
           handlers={editing.actions.widget}
           tabHandlers={editing.actions.tab}
         >
-          <DashboardCanvas dashboard={dashboard} mobile={layout.mobile} />
+          <DashboardCanvas dashboard={dashboard} mobile={layout.mobile} corner={editing.mode.editing && <SettingButtonView items={editing.settingMenu} />} />
         </DashboardEditProvider>
       </ViewAsProvider>
     </DashboardPermissionsProvider>

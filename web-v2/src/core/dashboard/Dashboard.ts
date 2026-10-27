@@ -26,8 +26,9 @@ export function dashboardFromJson(value: unknown): Dashboard {
     id: asNumber(json['id']),
     name: asString(json['name']),
     ownerId: asString(json['owner_id']),
-    // A dashboard created without a setting has none; v1 then used the default.
-    setting: new DashboardSetting(isRecord(json['setting']) ? json['setting'] : undefined),
+    // A dashboard created without a setting has none; v1 then used the default, which has the main date filter.
+    setting: isRecord(json['setting']) ? new DashboardSetting(json['setting']) : DashboardSetting.default(),
+    // Kept as stored (`{}` for none), so reading the dashboard never writes defaults back.
     settingJson: asRecord(json['setting']),
     widgets: asArray(json['widgets']).map(widgetFromJson),
     positions: positionsFromJson(json['widget_positions'])

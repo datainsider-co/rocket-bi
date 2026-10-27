@@ -4,6 +4,8 @@ import { asString, getPath, type JsonObject } from '@/core/json/json';
 /** How a filter panel looks (v1 `GroupFilter` `extra_data.header` / `footer`), with v1's defaults. */
 export interface FilterPanelLook {
   header: CSSProperties;
+  /** The panel's background (v1 `header.active.background`, the open tab's color). */
+  background: string;
   /** Footer alignment: `left`, `center` or `right`. */
   align: string;
   applyTitle: string;
@@ -23,6 +25,7 @@ export function filterPanelLook(json: JsonObject): FilterPanelLook {
       color: text(json, ['header', 'color'], 'var(--text-color)'),
       fontSize: text(json, ['header', 'font_size'], '14px')
     },
+    background: text(json, ['header', 'active', 'background'], 'var(--chart-background-color)'),
     align: ALIGN[text(json, ['footer', 'align'], 'right')] ?? 'flex-end',
     applyTitle: text(json, ['footer', 'apply', 'title'], 'Apply'),
     apply: {

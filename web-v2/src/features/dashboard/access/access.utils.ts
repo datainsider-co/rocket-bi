@@ -1,6 +1,5 @@
-import { sha256 } from '@noble/hashes/sha2.js';
-import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils.js';
 import { ALL_RESOURCE_ACTIONS, ResourceAction } from '@/core/permission/ResourcePermissionService';
+import { hashPassword } from '@/shared/security/hashPassword';
 
 /** What the viewer may do on the dashboard (v1 `DashboardModeStore.can*`, `PermissionWidget`). */
 export interface DashboardPermissions {
@@ -36,11 +35,6 @@ export const VIEW_ONLY = permissionsOf([ResourceAction.View]);
 /** v1 `PasswordModal.requirePassword`: a password is asked of everyone but the owner, once it is on. */
 export function needsPassword(directory: { passwordEnabled: boolean; ownerId: string }, username: string): boolean {
   return directory.passwordEnabled && directory.ownerId !== username;
-}
-
-/** v1 `SecurityUtils.hash`: sha256 as lowercase hex, what `hashed_password` holds. */
-export function hashPassword(password: string): string {
-  return bytesToHex(sha256(utf8ToBytes(password)));
 }
 
 /** Why the password can't open the dashboard, or `undefined` when it can (v1 `PasswordModal.validate`). */

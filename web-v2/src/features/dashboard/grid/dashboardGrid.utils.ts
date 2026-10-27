@@ -4,7 +4,10 @@ import { isUnplaced, positionEntries, type Position, type PositionMap, type Widg
 /** v1 dashboards use 48 columns and 32px cells; saved positions are in these units. */
 export const GRID_COLUMNS = 48;
 export const GRID_CELL_HEIGHT = 32;
-/** Gap between widgets: the dashboard uses 10px, grids inside tab and filter panel widgets 0.5rem. */
+/**
+ * v1's gridstack `margin`: the space on each side of a widget, so two widgets are twice this apart. The dashboard uses
+ * 10px, grids inside tab and filter panel widgets 0.5rem.
+ */
 export const DASHBOARD_MARGIN = 10;
 export const NESTED_GRID_MARGIN = 8;
 /** v1 switches to the one-column layout below this viewport width (`ChartUtils.isMobile`). */
@@ -17,15 +20,17 @@ export interface GridMetrics {
 }
 
 /**
- * react-grid-layout sizes rows as `rowHeight` plus a margin between them, while gridstack (v1) used a fixed cell
- * pitch with the margin taken out of each item. This keeps v1's pitch so saved dashboards render at the same size:
- * an item of height h is `h * cellHeight - margin` px in both, and half a margin pads the grid's edges.
+ * react-grid-layout sizes rows as `rowHeight` plus a margin between them, while gridstack 2 (v1) used a fixed cell
+ * pitch and inset each widget's content by `margin` on every side. This keeps v1's pitch and insets so saved dashboards
+ * render at the same place and size: an item of height h is `h * cellHeight - 2 * margin` px in both, two items are
+ * `2 * margin` apart, and the grid's edges are padded by one margin.
  */
 export function gridMetrics(margin: number, cellHeight = GRID_CELL_HEIGHT): GridMetrics {
+  const gap = 2 * margin;
   return {
-    rowHeight: cellHeight - margin,
-    margin: [margin, margin],
-    containerPadding: [margin / 2, margin / 2]
+    rowHeight: cellHeight - gap,
+    margin: [gap, gap],
+    containerPadding: [margin, margin]
   };
 }
 

@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react';
-import { Empty, Tabs } from 'antd';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { WidgetId } from '@/core/dashboard/Position';
 import type { TabWidget } from '@/core/dashboard/Widget';
 import { tabPositions } from '../../detail/dashboardDetail.utils';
 import { DashboardGrid, type NestedGridEdit } from '../../grid/DashboardGrid';
 import { NESTED_GRID_MARGIN } from '../../grid/dashboardGrid.utils';
-import { tabHeaderCssVars, type TabHeaderStyle } from './tabWidget.utils';
+import { TabNavView, type TabMenus } from './TabNavView';
+import { openTabIndex, tabHeaderCssVars, type TabHeaderStyle } from './tabWidget.utils';
 import './TabWidget.css';
 
 interface TabWidgetViewProps {
@@ -14,7 +14,7 @@ interface TabWidgetViewProps {
   dashboard: Dashboard;
   mobile: boolean;
   renderWidget: (id: WidgetId) => ReactNode;
-  edit: NestedGridEdit;
+  edit: NestedGridEdit & { menus?: TabMenus };
   /** The open tab, by index. */
   active: number;
   onActiveChange: (index: number) => void;
@@ -22,39 +22,35 @@ interface TabWidgetViewProps {
 }
 
 /**
- * v1 `TabViewer.vue`: one grid per tab, only the open tab rendered (v1 `lazy`), headers on top or on the left. Its
- * widgets move in edit mode; the header bar drags the whole widget.
+ * v1 `TabViewer.vue`: no card, boxed tab headers on top or on the left, and the open tab's grid on the chart
+ * background (only that tab rendered, v1 `lazy`). Its widgets move in edit mode; the header drags the whole widget.
  */
 export function TabWidgetView({ widget, dashboard, mobile, renderWidget, edit, active, onActiveChange, header }: TabWidgetViewProps) {
+  const open = openTabIndex(active, widget.tabItems.length);
+  const tab = widget.tabItems[open];
   return (
-    <Tabs
-      className="tab-widget h-full"
-      style={tabHeaderCssVars(header)}
-      size="small"
-      tabPlacement={header.position === 'vertical' ? 'start' : 'top'}
-      activeKey={String(Math.min(active, Math.max(widget.tabItems.length - 1, 0)))}
-      onChange={key => onActiveChange(Number(key))}
-      destroyOnHidden
-      items={widget.tabItems.map((tab, index) => ({
-        key: String(index),
-        label: tab.name,
-        children:
-          tab.widgetIds.length === 0 ? (
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Your tab is empty" />
-          ) : (
-            <div className="h-full overflow-auto">
-              <DashboardGrid
-                positions={tabPositions(dashboard, tab)}
-                renderItem={renderWidget}
-                editable={edit.editable}
-                onPositionsChange={edit.onPositionsChange}
-                overlap={dashboard.setting.enableOverlap}
-                mobile={mobile}
-                margin={NESTED_GRID_MARGIN}
-              />
-            </div>
-          )
-      }))}
-    />
+    <div className="tab-widget" data-position={header.position} style={tabHeaderCssVars(header)}>
+      <TabNavView tabs={widget.tabItems} active={open} onActiveChange={onActiveChange} menus={edit.menus} />
+      <div className="tab-widget__body" role="tabpanel" aria-label={tab?.name}>
+        {!tab ? (
+          <div className="tab-widget__empty">There are no open tabs</div>
+        ) : tab.widgetIds.length === 0 ? (
+          <div className="tab-widget__empty">Your tab is empty</div>
+        ) : (
+          <div className="tab-widget__grid">
+            <DashboardGrid
+              key={open}
+              positions={tabPositions(dashboard, tab)}
+              renderItem={renderWidget}
+              editable={edit.editable}
+              onPositionsChange={edit.onPositionsChange}
+              overlap={dashboard.setting.enableOverlap}
+              mobile={mobile}
+              margin={NESTED_GRID_MARGIN}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

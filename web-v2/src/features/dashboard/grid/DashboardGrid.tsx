@@ -19,7 +19,7 @@ export interface DashboardGridProps {
   overlap?: boolean;
   /** From `useIsMobile()` at the page level, so nested grids follow the dashboard. */
   mobile?: boolean;
-  /** Px between widgets: `DASHBOARD_MARGIN`, or `NESTED_GRID_MARGIN` inside tab and filter panel widgets. */
+  /** Px around each widget (v1 gridstack `margin`): `DASHBOARD_MARGIN`, or `NESTED_GRID_MARGIN` in tab and filter panel widgets. */
   margin?: number;
   /**
    * Called after a drag, resize or bring-to-front with only the changed widgets. Merge them into the dashboard's

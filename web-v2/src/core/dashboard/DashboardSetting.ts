@@ -238,6 +238,16 @@ export class DashboardSetting extends Deneric {
     this.fromJson(json);
   }
 
+  /**
+   * A dashboard without a stored setting (v1 `DashboardSetting.default()`): v1's defaults, an all time main date
+   * filter included. A stored setting without `main_date_filter` has none.
+   */
+  static default(): DashboardSetting {
+    const setting = new DashboardSetting();
+    setting.mainDateFilter = new MainDateFilterSetting();
+    return setting;
+  }
+
   override toJson(): Record<string, unknown> {
     return {
       ...(super.toJson() as Record<string, unknown>),

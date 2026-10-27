@@ -25,6 +25,7 @@ export function ChartWidget({ widget, dashboard }: ChartWidgetProps) {
       }
       appliedFilters={chart.appliedFilters.filters.length > 0 && <AppliedFiltersView {...chart.appliedFilters} />}
       menuItems={editing ? widgetMenu(widget) : chart.widgetItems}
+      editing={editing}
     />
   );
   return (

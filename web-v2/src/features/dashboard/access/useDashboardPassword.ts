@@ -5,7 +5,7 @@ import type { Dashboard } from '@/core/dashboard/Dashboard';
 import { DashboardService } from '@/core/dashboard/DashboardService';
 import { DirectoryService } from '@/core/directory/DirectoryService';
 import { useCurrentUser } from '@/features/auth/current-user/useCurrentUser';
-import { dashboardKeys } from '../detail/dashboardQueries';
+import { dashboardDirectoryQueryOptions } from './dashboardDirectoryQuery';
 import { needsPassword, passwordError } from './access.utils';
 
 /** Checking the dashboard's directory, waiting for its password, or open. */
@@ -22,11 +22,7 @@ export function useDashboardPassword(dashboard: Dashboard | undefined) {
   const username = useCurrentUser().data?.userInfo.username;
   const [unlockedId, setUnlockedId] = useState<number>();
   const id = dashboard?.id ?? 0;
-  const directory = useQuery({
-    queryKey: [...dashboardKeys.detail(id), 'directory'],
-    queryFn: async () => directories.get(await dashboards.getDirectoryId(id)),
-    enabled: dashboard !== undefined
-  });
+  const directory = useQuery({ ...dashboardDirectoryQueryOptions(dashboards, directories, id), enabled: dashboard !== undefined });
 
   const settled = directory.isSuccess || directory.isError;
   const required = directory.data !== undefined && dashboard !== undefined && needsPassword({ passwordEnabled: directory.data.passwordEnabled, ownerId: dashboard.ownerId }, username ?? '');

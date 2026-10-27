@@ -31,7 +31,9 @@ export function fakeQueryService(overrides: Partial<QueryService> = {}): QuerySe
 /** Test-only: answers every database with the local backend's `sample_v2`. */
 export function fakeSchemaService(overrides: Partial<SchemaService> = {}): SchemaService {
   return {
+    listDatabases: vi.fn<SchemaService['listDatabases']>(async () => [{ name: 'sample_v2', displayName: 'sample_v2' }]),
     getDatabase: vi.fn<SchemaService['getDatabase']>(async () => databaseSchemaFromJson(schema)),
+    detectTableSchema: vi.fn<SchemaService['detectTableSchema']>(async () => ({ dbName: '', name: 'adhoc_view', columns: [] })),
     ...overrides
   };
 }

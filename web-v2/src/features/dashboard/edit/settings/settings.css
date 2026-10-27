@@ -1,0 +1,540 @@
+/*
+  v1 DiCustomModal, DiTab and the settings components (DashboardSettingModal, DashboardSizeSetting, WidgetTextSetting,
+  ...). The gear and its menu take the dashboard theme's colors, like the header's Options. The dialogs render inside
+  the dashboard page for its `--accent`, but keep light surfaces and text in every theme (v1 turned them dark).
+*/
+
+/* The gear at the dashboard's top right in edit mode (v1 `.dashboard--content--setting`). */
+.dashboard-setting-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.dashboard-setting-button:hover,
+.dashboard-setting-button:focus-visible,
+.dashboard-setting-button[aria-expanded='true'] {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+/* v1 ContextMenu: rows of 14px text with an icon on the theme's menu color, the current interval checked. */
+.dashboard-setting-menu .ant-dropdown-menu,
+.dashboard-setting-menu.ant-dropdown-menu-submenu .ant-dropdown-menu {
+  min-width: 200px;
+  padding: 0;
+  border: var(--menu-border);
+  border-radius: 4px;
+  background: var(--menu-background-color, #fff);
+  box-shadow: var(--menu-shadow);
+}
+
+.dashboard-setting-menu .ant-dropdown-menu-item:hover,
+.dashboard-setting-menu .ant-dropdown-menu-submenu-title:hover,
+.dashboard-setting-menu .ant-dropdown-menu-submenu-open > .ant-dropdown-menu-submenu-title {
+  background: var(--hover-color, #f9faff);
+}
+
+.dashboard-setting-menu .ant-dropdown-menu-submenu-expand-icon,
+.dashboard-setting-menu .ant-dropdown-menu-submenu-arrow-icon {
+  color: var(--text-color, #4f4f4f);
+}
+
+.dashboard-setting-menu .ant-dropdown-menu-item,
+.dashboard-setting-menu .ant-dropdown-menu-submenu-title {
+  padding: 11px 16px;
+  color: var(--text-color, #4f4f4f);
+  font-size: 14px;
+  letter-spacing: 0.2px;
+}
+
+.dashboard-setting-menu .ant-dropdown-menu-item .ant-dropdown-menu-item-icon,
+.dashboard-setting-menu .ant-dropdown-menu-submenu-title .ant-dropdown-menu-item-icon {
+  margin-inline-end: 10px;
+  font-size: 14px;
+}
+
+.dashboard-setting-menu .ant-dropdown-menu-submenu-expand-icon {
+  inset-inline-end: 16px;
+}
+
+.dashboard-setting-menu .ant-dropdown-menu-submenu-title {
+  padding-inline-end: 44px;
+}
+
+.dashboard-setting-menu__check {
+  color: var(--accent, #597fff);
+}
+
+/* Edit Dashboard, Edit Widgets (DiCustomModal size lg). */
+.setting-dialog .ant-modal-container,
+.theme-dialog .ant-modal-container {
+  padding: 16px;
+  border-radius: 4px;
+}
+
+.setting-dialog .ant-modal-header {
+  margin-bottom: 15px;
+}
+
+.theme-dialog .ant-modal-header {
+  margin-bottom: 8px;
+}
+
+.setting-dialog__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4f4f4f;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+}
+
+.setting-dialog__title > i {
+  font-size: 22px;
+}
+
+/* v1 #edit-dashboard-setting and #widget-setting-modal .modal-body min-height. */
+.setting-dialog .ant-modal-body {
+  min-height: 469px;
+}
+
+.setting-dialog--widget-setting-modal .ant-modal-body {
+  min-height: 445px;
+}
+
+.setting-dialog__tabs > .ant-tabs-nav {
+  width: fit-content;
+  margin-bottom: 16px;
+}
+
+.setting-dialog__tabs .ant-tabs-tab {
+  padding: 12px 0;
+  color: #4f4f4f;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.setting-dialog__tabs .ant-tabs-tab + .ant-tabs-tab {
+  margin-inline-start: 32px;
+}
+
+.setting-dialog__tabs .ant-tabs-tab .ant-tabs-tab-icon:not(:last-child) {
+  margin-inline-end: 12px;
+}
+
+.setting-dialog__tabs .ant-tabs-tab-icon > i {
+  font-size: 14px;
+}
+
+.setting-dialog__tabs .ant-tabs-tab:hover,
+.setting-dialog__tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--accent, #597fff);
+}
+
+.setting-dialog__tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  font-weight: 700;
+}
+
+.setting-dialog__tabs .ant-tabs-ink-bar {
+  background: var(--accent, #597fff);
+}
+
+.setting-dialog__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.setting-dialog__error {
+  flex: 1;
+  color: #ff4d4f;
+  font-size: 14px;
+  text-align: left;
+}
+
+.setting-dialog__footer .ant-btn,
+.theme-dialog__footer .ant-btn {
+  height: 40px;
+  border-radius: 4px;
+}
+
+.setting-dialog__cancel {
+  min-width: 83px;
+}
+
+.setting-dialog__ok {
+  min-width: 122px;
+}
+
+.setting-dialog .ant-btn-primary:not(:disabled),
+.theme-dialog .ant-btn-primary:not(:disabled) {
+  background: var(--accent, #597fff);
+}
+
+.setting-dialog .ant-btn-primary:not(:disabled):hover,
+.theme-dialog .ant-btn-primary:not(:disabled):hover {
+  background: var(--accent, #597fff);
+  opacity: 0.85;
+}
+
+/* One tab's content. */
+.setting-tab {
+  color: #4f4f4f;
+  font-size: 14px;
+}
+
+.setting-tab__title {
+  margin: 0 0 8px;
+  color: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 132%;
+}
+
+.setting-tab__subtitle {
+  margin: 0 0 16px;
+  color: #8e8e93;
+  font-size: 14px;
+  line-height: 132%;
+}
+
+.setting-tab__subtitle--tight {
+  margin-bottom: 8px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.setting-row--fill {
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.setting-row--fill > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.setting-row--text {
+  gap: 20px;
+}
+
+.setting-field__label {
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.setting-slider {
+  margin-bottom: 8px;
+}
+
+.setting-slider .ant-slider {
+  margin: 8px 6px 14px;
+}
+
+/* v1 DiSlider: a thick accent track. */
+.setting-slider .ant-slider .ant-slider-rail,
+.setting-slider .ant-slider .ant-slider-track {
+  height: 6px;
+  border-radius: 3px;
+}
+
+.setting-slider .ant-slider .ant-slider-track,
+.setting-slider .ant-slider:hover .ant-slider-track {
+  background: var(--accent, #597fff);
+}
+
+.setting-slider .ant-slider .ant-slider-handle {
+  inset-block-start: 1px;
+}
+
+.setting-slider .ant-slider .ant-slider-handle::after {
+  background: var(--accent, #597fff);
+  box-shadow: 0 0 0 2px var(--accent, #597fff);
+}
+
+/* v1 PercentageInput keeps its up and down buttons in view. */
+.setting-input.ant-input-number .ant-input-number-actions {
+  width: 24px;
+  opacity: 1;
+}
+
+/* v1 DiInputComponent / DiDropdown: 40px fields with a light grey border. */
+.setting-input.ant-input,
+.setting-input.ant-input-affix-wrapper,
+.setting-input.ant-input-number,
+.setting-input.ant-select {
+  height: 40px;
+  border-radius: 4px;
+}
+
+.setting-input.ant-input-number .ant-input-number-input {
+  height: 38px;
+}
+
+.setting-input.ant-input-number {
+  display: flex;
+  align-items: center;
+}
+
+.setting-input-addon {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.setting-size-link {
+  margin: auto 5px 12px;
+  color: #5f6368;
+  font-size: 18px;
+}
+
+/* v1 ColorPickerV2: a fill icon and the color, centered in a 40px field. */
+.setting-color-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #fff;
+  color: #4f4f4f;
+  cursor: pointer;
+}
+
+.setting-color-input:hover,
+.setting-color-input:focus-visible {
+  border-color: var(--accent, #597fff);
+}
+
+.setting-color-input > i {
+  font-size: 16px;
+}
+
+.setting-color-input__swatch {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #0000001a;
+  border-radius: 4px;
+}
+
+/* v1 FontStyleSetting / AlignSettingV2: square toggles, the pressed one grey. */
+.setting-toggle.ant-btn {
+  width: 47px;
+  height: 40px;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.setting-toggle--wide.ant-btn {
+  width: 75px;
+}
+
+.setting-toggle.ant-btn[aria-pressed='true'] {
+  background: #e0e0e0;
+  color: #4f4f4f;
+}
+
+/* v1 DiRadiusInput and IndependentCornerInput. */
+.setting-radius {
+  display: flex;
+  align-items: flex-end;
+}
+
+.setting-radius__all,
+.setting-radius__corners {
+  flex: 1;
+  min-width: 0;
+}
+
+.setting-radius__toggle {
+  width: 24px;
+  height: 24px;
+  margin: 0 5px 8px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #4f4f4f;
+  font-size: 17.5px;
+  cursor: pointer;
+}
+
+.setting-radius__toggle:hover,
+.setting-radius__toggle[aria-pressed='true'] {
+  background: #f9faff;
+}
+
+.setting-corners {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px #d6d6d6;
+}
+
+.setting-corners:focus-within,
+.setting-corners:hover {
+  box-shadow: 0 0 0 1px var(--accent, #597fff);
+}
+
+.setting-corners__preview {
+  margin: 0 2px 0 7px;
+  font-size: 16px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.setting-corners > input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0 8px;
+  border: none;
+  border-right: 1px solid #d6d6d6;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+
+.setting-corners > input:last-child {
+  border-right: none;
+}
+
+/* Themes (v1 #dashboard-setting, DiCustomModal size md). */
+.theme-dialog .ant-modal-title {
+  color: #4f4f4f;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+}
+
+.theme-dialog .ant-modal-body {
+  padding: 15px 8px 22px;
+}
+
+.theme-dialog .ant-modal-footer {
+  margin-top: 24px;
+}
+
+.theme-dialog__footer {
+  display: flex;
+  gap: 16px;
+}
+
+.theme-dialog__footer > .ant-btn {
+  flex: 1;
+  height: 42px;
+}
+
+.theme-picker {
+  margin-bottom: 24px;
+}
+
+.theme-picker__header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.theme-picker__header > h5 {
+  margin: 0;
+  color: #5f6368;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.75;
+  letter-spacing: 0.13px;
+}
+
+.theme-picker__reset {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent, #597fff);
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+}
+
+.theme-picker__row {
+  display: flex;
+  justify-content: space-between;
+  min-width: 0;
+  margin: 0;
+  padding: 2px;
+  border: none;
+}
+
+.theme-picker__row + .theme-picker__row {
+  margin-top: 24px;
+}
+
+.theme-picker__item {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.theme-picker__item > img {
+  display: block;
+  width: 80px;
+  height: 86px;
+  box-sizing: border-box;
+  margin-bottom: 6px;
+  border: 2px solid transparent;
+}
+
+.theme-picker__item > span {
+  display: block;
+  width: 80px;
+  overflow: hidden;
+  color: #5f6368;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theme-picker__item[aria-pressed='true'] > img {
+  border-color: var(--accent, #597fff);
+}
+
+.theme-picker__item[aria-pressed='true'] > span {
+  color: var(--accent, #597fff);
+}
+
+.theme-picker__overlap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #5f6368;
+  font-size: 14px;
+}
+
+.theme-picker__overlap > label {
+  cursor: pointer;
+}

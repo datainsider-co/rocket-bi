@@ -11,5 +11,11 @@ export type EditDialog =
   | { kind: 'pickWidgets'; widget: TabWidget; index: number; mode: 'add' | 'remove' }
   | { kind: 'sortTabs'; widget: TabWidget }
   | { kind: 'tabStyle'; widget: TabWidget }
-  /** The dashboard's own settings (v1 Settings, Edit Dashboard, Edit Widgets, Themes, Auto Refresh). */
-  | { kind: 'settings' };
+  /** The dashboard's own settings: v1 Themes (Options → Settings, the gear's Themes), Edit Dashboard, Edit Widgets. */
+  | { kind: SettingDialogKind };
+
+export type SettingDialogKind = 'themes' | 'editDashboard' | 'editWidgets';
+
+export function isSettingDialog(dialog: EditDialog | undefined): dialog is { kind: SettingDialogKind } {
+  return dialog?.kind === 'themes' || dialog?.kind === 'editDashboard' || dialog?.kind === 'editWidgets';
+}

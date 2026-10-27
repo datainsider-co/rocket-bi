@@ -13,6 +13,24 @@ describe('dashboardFromJson', () => {
     expect(dashboard.setting.themeName).toBe('light_default');
   });
 
+  it('gives a dashboard without a stored setting the all time main date, and keeps the stored JSON empty', () => {
+    expect(fixture).not.toHaveProperty('setting');
+    expect(dashboard.setting.mainDateFilter).toMatchObject({ id: -99887766, mode: 'all_time' });
+    expect(dashboard.settingJson).toEqual({});
+  });
+
+  it('has no main date for a stored setting without one, and keeps the setting as stored', () => {
+    const stored = { theme_name: 'light_theme1', unknown_key: { a: 1 } };
+    const read = dashboardFromJson({ ...fixture, setting: stored });
+    expect(read.setting.mainDateFilter).toBeUndefined();
+    expect(read.settingJson).toEqual(stored);
+  });
+
+  it('reads a stored main date filter', () => {
+    const read = dashboardFromJson({ ...fixture, setting: { main_date_filter: { id: -99887766, mode: 'last_7_days' } } });
+    expect(read.setting.mainDateFilter).toMatchObject({ mode: 'last_7_days' });
+  });
+
   it('reads every widget with its kind', () => {
     expect(dashboard.widgets.map(widget => [widget.id, widget.kind])).toEqual([
       [3, 'chart'],

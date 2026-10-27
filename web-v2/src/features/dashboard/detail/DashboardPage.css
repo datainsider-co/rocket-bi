@@ -9,10 +9,6 @@
   color: var(--text-color);
 }
 
-.dashboard-page__header {
-  padding: 13px 15px 0;
-}
-
 .dashboard-page__body {
   flex: 1;
   min-height: 0;
@@ -52,6 +48,25 @@
   min-height: 100%;
   margin: 0 auto;
   padding: 25px 30px;
+}
+
+/*
+  The top right corner of the content (v1 `.dashboard--content--setting`, fixed 19px below the top of the body and
+  16px inside the content's right edge). Sticky, so it stays there while the body scrolls; above the widgets.
+*/
+.dashboard-content__corner {
+  position: sticky;
+  /* Where it sits unscrolled: the content's top padding, below the body's (sticky offsets start inside it). */
+  top: 25px;
+  z-index: 1000;
+  align-self: flex-end;
+  height: 0;
+}
+
+.dashboard-content__corner > * {
+  position: absolute;
+  top: -19px;
+  right: -14px;
 }
 
 .dashboard-content::before,
