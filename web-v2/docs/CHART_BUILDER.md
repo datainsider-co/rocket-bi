@@ -325,6 +325,27 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
   vẫn được lưu để v1 dùng.
 - **Data label của pie** (label format, distance) và các tab của pie, number, table: CB6b.
 
+## Quyết định ở CB6b (2026-10-28)
+
+- **Pie, Semi pie, Donut** (v1 `PieSetting` / `DonutSetting`): Legend, Title & Subtitle, Data Color, Data Label,
+  Background, Tooltip, Other, theo thứ tự của v1 (Legend đứng đầu). Data Label có thêm Label style
+  (`name_and_value`, `name_and_percent`, `name`) và Label position (`distance`, -100 đến 60, slider áp dụng khi thả
+  tay), lưu dưới `plot_options.pie.data_labels`.
+- **Number** (v1 `NumberSetting`): Title & Subtitle, Theme, Icon, Data Label, Tooltip, Background, Other.
+  - Theme: 6 theme v1 cho chọn (`style_1` đến `style_5`, `style_area_1`), ảnh ở `public/chart-builder/kpi-themes`,
+    preset ở `settings/number/kpiThemes.json`. Chọn theme thì thay nguyên từng key của theme, giữ text của title,
+    subtitle, prefix, postfix, icon đang chọn và lựa chọn trend line (v1 `ThemeTab`).
+  - Icon: lưới icon `setting-icon-*` của v1 theo nhóm (`kpiIcons.json`), lọc theo tên, cùng màu icon, màu nền và
+    hình dạng (bo góc). v1 có nhóm Recent lưu trong local storage; v2 chưa làm.
+  - **Khác v1:** chart chưa có icon mà tắt Show icon thì v1 lại bật icon của theme; v2 giữ đúng lựa chọn. Revert của
+    Data Label không ghi `displayUnit` ở gốc options (key mà không ai đọc).
+  - **Chưa làm:** tab Comparison, vì renderer KPI của v2 chưa vẽ phần so sánh và trend line. Tab Tooltip giữ như v1
+    nhưng KPI không có tooltip để áp.
+- **Table** (theo lựa chọn 2026-10-28): chỉ các tab mà renderer table của v2 đọc: Title & Subtitle (có toggle bật /
+  tắt như v1), Background và Other (display unit mặc định None, precision, dấu thập phân, dấu phân cách hàng nghìn).
+  Style, Grid, Header, Values, Field formatting, Conditional formatting và Tooltip của v1 làm cùng renderer table vẽ
+  được các style đó (CB7). Font, màu và căn lề của title trong table hiện chưa được renderer áp.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -335,8 +356,8 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
 | CB3 | **Cây field** (chỉ đọc). Chọn database (`GET databases`), bảng và cột có search và icon theo kiểu, mở sẵn các bảng đang dùng, cột kéo được, các chart control của dashboard | Xong |
 | CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control). Display as column để lại CB7 | Xong |
 | CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Xong |
-| CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | (a) xong; (b), (c) chưa làm |
-| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3 | Chưa làm |
+| CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | (a), (b) xong; (c) chưa làm. Table chỉ có tab chung; các tab style của table làm ở CB7 |
+| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Kèm theo: các tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer của chúng, và tab Comparison của Number cùng phần so sánh / trend line của KPI | Chưa làm |
 | CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query, Delete table | Chưa làm |
 
 ## Ghi chú về field drag and drop

@@ -69,7 +69,7 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
   and the dashboard through M7: every filter widget, header filters, drilldown, drill through, downloads, permissions,
   password, full screen and TV mode, auto refresh, View As, embedded route, edit mode without ChartBuilder, Share, Relationship (React Flow), and
   header, settings and widgets that look like v1 (checked with Playwright screenshots against v1).
-- **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 to CB5 and CB6a done, CB6b next) for the chart types
+- **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 to CB5, CB6a and CB6b done, CB6c next) for the chart types
   v2 already renders; the other chart types (stacked, pivot, ...) follow, each with its builder handler. ChartBuilder
   plugs into edit mode as the `ChartBuilderHost` the dashboard route gives `DashboardPage`.
 - **Share links (`?token=`)**: the Share dialog (M7b) creates directory tokens, which the server accepts; opening
@@ -371,9 +371,9 @@ Suggested order: the common series charts (Column/Bar/Line/Area/Pie) and Kpi, th
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Dashboard edit mode (layout, add/remove/resize widgets, settings) | `screens/dashboard-detail` | (see above) | Done (M6); adding or configuring a chart and its inner filter with ChartBuilder (CB5) |
-| Chart builder | `screens/chart-builder`, `screens/dashboard-detail/components/data-builder-modal` | 53 | In progress: plan, decisions and steps (CB0 to CB8) in [`CHART_BUILDER.md`](CHART_BUILDER.md); CB0 to CB5 and CB6a done |
+| Chart builder | `screens/chart-builder`, `screens/dashboard-detail/components/data-builder-modal` | 53 | In progress: plan, decisions and steps (CB0 to CB8) in [`CHART_BUILDER.md`](CHART_BUILDER.md); CB0 to CB5, CB6a and CB6b done |
 | Query/Viz setting resolvers and handlers | `src/shared/resolver`, `src/shared/module/ChartBuilderModule.ts`, `web/docs/CREATE_CHART_FLOW.md` | – | Done for the chart types in scope (CB1, `core/chart-builder`) |
-| Chart settings (Settings tab) | `src/shared/settings` | 140 | Part of ChartBuilder (CB6): series charts done (CB6a); pie, number, table and filters next |
+| Chart settings (Settings tab) | `src/shared/settings` | 140 | Part of ChartBuilder (CB6): series, pie, number and the table's common tabs done (CB6a, CB6b); filters next, table styles with CB7 |
 
 #### Notes for wiring the grid
 
