@@ -17,6 +17,7 @@ export interface BuilderSlots {
   types: ReactNode;
   tree: ReactNode;
   panel: ReactNode;
+  settings: ReactNode;
   preview: ReactNode;
 }
 
@@ -30,7 +31,14 @@ const TABS: readonly { key: Tab; label: string; icon: string }[] = [
  * Add / Update on top, the field tree and the zones, and the preview. Rendered in place rather than in a portal, so
  * the dashboard's theme variables reach the preview.
  */
-export function ChartBuilderModalView({ actions, slots }: { actions: BuilderActions; slots: BuilderSlots }) {
+interface ChartBuilderModalViewProps {
+  actions: BuilderActions;
+  slots: BuilderSlots;
+  /** The chart card's background, from its viz options. */
+  previewBackground: string;
+}
+
+export function ChartBuilderModalView({ actions, slots, previewBackground }: ChartBuilderModalViewProps) {
   const [tab, setTab] = useState<Tab>('builder');
   return (
     <Modal
@@ -81,9 +89,9 @@ export function ChartBuilderModalView({ actions, slots }: { actions: BuilderActi
                 </div>
               </>
             ) : (
-              <div className="w-80 shrink-0 text-black/45">The chart&apos;s settings are not available yet.</div>
+              <div className="w-[36rem] shrink-0 overflow-auto pr-1">{slots.settings}</div>
             )}
-            <div className="min-w-0 flex-1 rounded border border-solid border-black/10 p-3" style={{ background: 'var(--chart-background-color)' }}>
+            <div className="min-w-0 flex-1 rounded border border-solid border-black/10 p-3" style={{ background: previewBackground }}>
               {slots.preview}
             </div>
           </div>

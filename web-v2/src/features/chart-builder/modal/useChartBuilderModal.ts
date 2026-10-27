@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { App } from 'antd';
 import { pickerItemsOf } from '@/core/chart-builder/chartCatalogue';
+import { asRecord, asString } from '@/core/json/json';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { TableSchema } from '@/core/schema/SchemaService';
 import type { ChartBuilderRequest } from '@/features/dashboard/edit/chartBuilderBridge';
@@ -9,6 +10,7 @@ import { useFieldTree } from '../field-tree/useFieldTree';
 import { builderModeOf, previewJsonOf, typeKindOf, usedSettingsOf } from '../host/builderSession.utils';
 import { useChartSave } from '../host/useChartSave';
 import { usePreview } from '../preview/usePreview';
+import { THEME_BACKGROUND } from '../settings/tabs/commonTabs.utils';
 import { useBuilder } from '../state/BuilderContext';
 import { builderExtraDataOf } from '../state/builderState.utils';
 import type { BuilderActions } from './ChartBuilderModalView';
@@ -58,6 +60,7 @@ export function useChartBuilderModal({ request, dashboard, editor, adhocTable, o
     tables: tree.nodes,
     types: { items: types, value: state.data.chartType, onChange: (chartType: string) => dispatch({ type: 'chartType', chartType }) },
     preview,
+    previewBackground: asString(asRecord(state.options['options'])['background']) || THEME_BACKGROUND,
     actions
   };
 }
