@@ -1,0 +1,61 @@
+/* v1 FilterPanelViewer.vue: a flat box on the panel's background, header 12px 12px 1px, body 6px, footer 50px. */
+
+.filter-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  color: var(--secondary-text-color);
+}
+
+.filter-panel__header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  min-height: 33px;
+  padding: 12px 12px 1px;
+  line-height: 1.4;
+}
+
+.filter-panel__header > i::before {
+  color: inherit;
+  font-size: inherit;
+}
+
+.filter-panel__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.filter-panel__actions {
+  display: flex;
+  margin: -8px -8px -8px 0;
+}
+
+.filter-panel__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 6px;
+}
+
+.filter-panel__footer {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  height: 50px;
+  padding: 12px;
+}
+
+.filter-panel__apply.ant-btn {
+  height: 26px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  box-shadow: none;
+}

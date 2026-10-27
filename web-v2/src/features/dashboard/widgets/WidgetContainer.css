@@ -39,3 +39,23 @@
   align-items: center;
   justify-content: flex-end;
 }
+
+/* v1 ChartHolder's action bar: the inner filter and filter icon stay, the view mode menu shows while hovering. */
+.chart-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (hover: hover) {
+  .chart-actions__hover {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .widget-container:hover .chart-actions__hover,
+  .chart-actions__hover:focus-within,
+  .chart-actions__hover:has([aria-expanded='true']) {
+    opacity: 1;
+  }
+}

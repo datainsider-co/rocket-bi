@@ -43,6 +43,28 @@ export function toggleOption(selected: readonly string[], value: string, optionC
   return next.length >= optionCount ? [] : next;
 }
 
+/** The value of the All option a tab filter shows before its values (v1 `TabSelection.OPTION_SHOW_ALL`). */
+export const ALL_OPTION = '__all__';
+
+/** Whether a tab filter option shows as picked: All when nothing is picked, else the picked values. */
+export function isTabOptionPicked(selected: readonly string[], value: string): boolean {
+  return value === ALL_OPTION ? selected.length === 0 : selected.includes(value);
+}
+
+/**
+ * The selection after picking an option: All clears it, multi choice toggles the value (a tab control keeps at least
+ * one column), the other displays pick that value only.
+ */
+export function pickTabOption(
+  selected: readonly string[],
+  value: string,
+  pick: { multiple: boolean; required: boolean; optionCount: number }
+): string[] {
+  if (value === ALL_OPTION) return [];
+  if (!pick.multiple) return [value];
+  return pick.required ? toggleRequiredOption(selected, value) : toggleOption(selected, value, pick.optionCount);
+}
+
 /** A tab control's options: one per column, sorted by name (v1 `TabFilter.buildFunctionOptions`). */
 export function functionOptions(setting: JsonObject): FilterOption[] {
   return functionColumns(setting)

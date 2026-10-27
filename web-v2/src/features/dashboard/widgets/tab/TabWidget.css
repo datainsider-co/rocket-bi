@@ -1,21 +1,104 @@
-/* v1 TabViewer: the header's font, color and active / inactive backgrounds from the widget's settings. */
+/*
+  v1 TabViewer.vue: no card. Tabs are 32px boxes (padding 6px 12px, 1px apart) on the header's inactive background, the
+  open one on its active background; the open tab's grid sits on the chart background with 6px padding.
+*/
 
-.tab-widget .ant-tabs-tab {
-  padding: 4px 12px;
+.tab-widget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  color: var(--secondary-text-color);
+}
+
+.tab-widget[data-position='vertical'] {
+  flex-direction: row;
+}
+
+.tab-widget__nav {
+  display: flex;
+  flex-shrink: 0;
+  gap: 1px;
+  max-width: 100%;
+  overflow: auto;
+  white-space: nowrap;
+}
+
+.tab-widget[data-position='vertical'] .tab-widget__nav {
+  flex-direction: column;
+  max-width: 40%;
+}
+
+.tab-widget__tab {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  height: 32px;
+  padding: 6px 12px;
   border-radius: 4px 4px 0 0;
   background: var(--tab-inactive-background);
-  font-size: var(--tab-font-size);
-}
-
-.tab-widget .ant-tabs-tab + .ant-tabs-tab {
-  margin-left: 2px;
-}
-
-.tab-widget .ant-tabs-tab .ant-tabs-tab-btn,
-.tab-widget .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
   color: var(--tab-color);
+  font-size: var(--tab-font-size);
+  line-height: 1.4;
 }
 
-.tab-widget .ant-tabs-tab.ant-tabs-tab-active {
+.tab-widget[data-position='vertical'] .tab-widget__tab {
+  border-radius: 4px 0 0 4px;
+}
+
+.tab-widget__tab[data-active='true'] {
   background: var(--tab-active-background);
+}
+
+.tab-widget__title {
+  max-width: 200px;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.tab-widget__end .widget-menu-button--small {
+  margin-left: 0;
+}
+
+.tab-widget[data-position='vertical'] .tab-widget__end {
+  margin-top: auto;
+  justify-content: center;
+}
+
+.tab-widget__body {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 6px;
+  border-radius: 0 0 4px 4px;
+  background: var(--chart-background-color);
+}
+
+.tab-widget__grid {
+  height: 100%;
+  overflow: auto;
+}
+
+/* v1 `.grid-stack-container { padding-bottom: 32px }`: room to drop a widget below the last one. */
+.tab-widget__grid > div {
+  padding-bottom: 32px;
+}
+
+.tab-widget__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-color);
+  font-size: 16px;
+  letter-spacing: 0.27px;
+  line-height: 1.5;
+  text-align: center;
 }

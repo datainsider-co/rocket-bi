@@ -22,6 +22,11 @@ export function tabHeaderStyleOf(widget: TabWidget): TabHeaderStyle {
   };
 }
 
+/** The tab to show: the picked one, or the last when tabs were deleted since; 0 without tabs. */
+export function openTabIndex(active: number, tabCount: number): number {
+  return Math.max(Math.min(active, tabCount - 1), 0);
+}
+
 /** The header style as CSS variables for `TabWidget.css`. */
 export function tabHeaderCssVars(style: TabHeaderStyle): CSSProperties {
   return {

@@ -10,6 +10,7 @@ import { HighchartsChart } from '@/shared/charts/HighchartsChart';
 import { titleText } from './highchartsBase';
 import { buildKpi } from './kpi/kpi.utils';
 import { KpiView } from './kpi/KpiView';
+import { tableNumberFormat } from './table/table.utils';
 import { buildPieChartOptions } from './pie/pieChartOptions';
 import { buildSeriesChartOptions, isTimestampFunction } from './series/seriesChartOptions';
 import { FlattenTableView } from './table/FlattenTableView';
@@ -73,6 +74,7 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
     }
     return undefined;
   }, [viz, response, themeColors, widget.setting, selected, onSelect, onPointMenu]);
+  const tableFormat = useMemo(() => tableNumberFormat(viz.options), [viz.options]);
 
   if (highchartsOptions) {
     return <HighchartsChart options={highchartsOptions} fill onPointContextMenu={(point, position) => onPointMenu(pointValue(point), position)} />;
@@ -89,6 +91,7 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
         onPageChange={table.onPageChange}
         sort={table.sort}
         onSortChange={table.onSortChange}
+        numberFormat={tableFormat}
       />
     );
   }

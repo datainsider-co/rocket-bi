@@ -120,6 +120,8 @@ export function buildSeriesChartOptions({ options: stored, response, themeColors
             type: 'category',
             categories: [...response.xAxis],
             labels: {
+              // v1: HTML labels, so they take the page's font size and keep their full text when rotated.
+              useHTML: true,
               formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
                 return axisLabel(String(this.value), xAxis[0]);
               }

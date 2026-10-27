@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import type { ChartWidget } from '@/core/dashboard/Widget';
 import { asString, type JsonObject } from '@/core/json/json';
 import { ValueControlType } from '@/core/query/controlValues';
-import { DateMode } from '@/core/query/dateRanges';
 import { isFunctionControl } from '@/core/query/dynamicFunctions';
 import type { VisualizationResponse } from '@/core/query/VisualizationResponse';
 import type { ChartViz } from '@/core/query/vizOptions';
@@ -10,19 +9,19 @@ import type { ChartQuery } from '../../controls/chartQuery.utils';
 import type { ControlEntry } from '../../controls/controls.utils';
 import { titleText } from '../highchartsBase';
 import { ChartVizClass, isFilterVizClass } from '../vizClass';
-import { DateRangeModePicker } from './DateRangeModePicker';
+import { DateSelectFilter } from './DateSelectFilter';
 import { DropdownFilterView } from './DropdownFilterView';
 import {
   TabFilterDisplay,
-  dateSelectionOf,
-  dateSelectionToControl,
   filterOptions,
   functionOptions,
   isNumberInput,
   selectionOf,
   selectionToControl
 } from './filter.utils';
+import { filterTitleStyle, tabFilterLook, treeFilterCssVars } from './filterStyle.utils';
 import { InputFilterView } from './InputFilterView';
+import './FilterWidget.css';
 import { slicerBounds, slicerKind, slicerRangeOf, slicerToControl } from './slicerFilter.utils';
 import { SlicerFilterView } from './SlicerFilterView';
 import { TabFilterView } from './TabFilterView';
@@ -53,7 +52,7 @@ export function FilterRenderer({ widget, viz, response, query, dashboardId, entr
   const table = response.kind === 'table' ? response : EMPTY;
   const selected = useMemo(() => selectionOf(entry), [entry]);
   const onSelect = (values: string[]) => onChange(selectionToControl(values));
-  const { displayAs = TabFilterDisplay.Normal, direction, search } = options as { displayAs?: string; direction?: string; search?: { enabled?: boolean } };
+  const titleStyle = filterTitleStyle(options.title);
 
   switch (viz.className) {
     case ChartVizClass.TabFilter: {
@@ -61,24 +60,23 @@ export function FilterRenderer({ widget, viz, response, query, dashboardId, entr
       return (
         <TabFilterView
           title={title}
+          look={tabFilterLook(options as JsonObject)}
           options={functionMode ? functionOptions(widget.setting) : filterOptions(table, true)}
           selected={selected}
           mode={functionMode ? 'function' : 'filter'}
-          displayAs={displayAs}
-          direction={direction === 'column' ? 'column' : 'row'}
-          searchEnabled={search?.enabled ?? true}
           onChange={values => onChange(functionMode ? { [ValueControlType.SelectedValue]: values } : selectionToControl(values))}
         />
       );
     }
     case ChartVizClass.Dropdown:
-      return <DropdownFilterView title={title} options={filterOptions(table, false)} selected={selected} onChange={onSelect} />;
+      return <DropdownFilterView title={title} titleStyle={titleStyle} options={filterOptions(table, false)} selected={selected} onChange={onSelect} />;
     case ChartVizClass.Slicer: {
       const kind = slicerKind(widget.setting);
       const bounds = slicerBounds(table, options as JsonObject, kind);
       return (
         <SlicerFilterView
           title={title}
+          titleStyle={titleStyle}
           kind={kind}
           bounds={bounds}
           range={slicerRangeOf(entry, bounds, kind)}
@@ -87,15 +85,8 @@ export function FilterRenderer({ widget, viz, response, query, dashboardId, entr
         />
       );
     }
-    case ChartVizClass.DateSelect: {
-      const { mode, range } = dateSelectionOf(entry);
-      return (
-        <div className="flex h-full flex-col justify-center gap-1">
-          {title && <div className="truncate font-medium">{title}</div>}
-          <DateRangeModePicker mode={mode} range={range} onChange={(next: DateMode, dates) => onChange(dateSelectionToControl(next, dates, new Date()))} />
-        </div>
-      );
-    }
+    case ChartVizClass.DateSelect:
+      return <DateSelectFilter title={title} titleStyle={titleStyle} entry={entry} onChange={onChange} />;
     case ChartVizClass.Input: {
       return (
         <InputFilterView
@@ -111,7 +102,8 @@ export function FilterRenderer({ widget, viz, response, query, dashboardId, entr
       return (
         <TreeFilter
           title={title}
-          singleChoice={displayAs === TabFilterDisplay.SingleChoice}
+          look={{ titleStyle, colors: treeFilterCssVars(options as JsonObject) }}
+          singleChoice={options['displayAs'] === TabFilterDisplay.SingleChoice}
           widget={widget}
           dashboardId={dashboardId}
           query={query}

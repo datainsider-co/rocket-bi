@@ -3,8 +3,6 @@ import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { WidgetId } from '@/core/dashboard/Position';
 import type { TabWidget as TabWidgetModel } from '@/core/dashboard/Widget';
 import { useDashboardEdit } from '../../edit/DashboardEditContext';
-import { WidgetEditMenuView } from '../../edit/WidgetEditMenuView';
-import { WidgetContainer } from '../WidgetContainer';
 import { tabHeaderStyleOf } from './tabWidget.utils';
 import { TabWidgetView } from './TabWidgetView';
 
@@ -15,23 +13,22 @@ interface TabWidgetProps {
   renderWidget: (id: WidgetId) => ReactNode;
 }
 
-/** A tab widget on its card; in edit mode its menu acts on the open tab (v1 `TabViewer`). */
+/** A tab widget; in edit mode a gear after its tabs and dots on each tab open their menus (v1 `TabViewer`). */
 export function TabWidget({ widget, dashboard, mobile, renderWidget }: TabWidgetProps) {
   const [active, setActive] = useState(0);
-  const { editing, onPositionsChange, tabMenu } = useDashboardEdit();
+  const { editing, onPositionsChange, tabMenu, tabItemMenu } = useDashboardEdit();
   const header = useMemo(() => tabHeaderStyleOf(widget), [widget]);
+  const menus = editing ? { widget: tabMenu(widget), tab: (index: number) => tabItemMenu(widget, index) } : undefined;
   return (
-    <WidgetContainer widget={widget} defaults={dashboard.setting.widgetSetting} actions={editing && <WidgetEditMenuView items={tabMenu(widget, active)} />}>
-      <TabWidgetView
-        widget={widget}
-        dashboard={dashboard}
-        mobile={mobile}
-        renderWidget={renderWidget}
-        edit={{ editable: editing, onPositionsChange }}
-        active={active}
-        onActiveChange={setActive}
-        header={header}
-      />
-    </WidgetContainer>
+    <TabWidgetView
+      widget={widget}
+      dashboard={dashboard}
+      mobile={mobile}
+      renderWidget={renderWidget}
+      edit={{ editable: editing, onPositionsChange, menus }}
+      active={active}
+      onActiveChange={setActive}
+      header={header}
+    />
   );
 }

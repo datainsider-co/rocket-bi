@@ -106,44 +106,41 @@ export interface TabEditHandlers {
 }
 
 /**
- * A tab widget's menu (v1 `TabViewer.widgetConfigOptions` + its tab menu, for the open tab) or a filter panel's (v1
- * `FilterPanelViewer`, whose one tab holds the filters).
+ * A tab widget's own menu, behind the gear after its tabs (v1 `TabViewer.widgetConfigOptions`), or a filter panel's
+ * (v1 `FilterPanelViewer`, whose one tab holds the filters).
  */
-export function tabEditMenuItems(widget: TabWidget, index: number, permissions: DashboardPermissions, handlers: TabEditHandlers): MenuItems {
+export function tabWidgetMenuItems(widget: TabWidget, permissions: DashboardPermissions, handlers: TabEditHandlers): MenuItems {
   const { canEdit, canDelete } = permissions;
   const item = (key: string, label: string, onClick: () => void, enabled = canEdit) => ({ key, label, onClick, disabled: !enabled });
   const remove = item('delete', 'Delete widget', () => handlers.remove(widget), canDelete);
   if (widget.kind === 'filter_panel') {
     return [
       item('rename-tab', 'Edit title', () => handlers.renameTab(widget, 0)),
-      item('add-widgets', 'Add filter', () => handlers.addWidgets(widget, 0)),
-      item('remove-widgets', 'Remove filter', () => handlers.removeWidgets(widget, 0), canEdit && (widget.tabItems[0]?.widgetIds.length ?? 0) > 0),
-      item('config', 'Config widget', () => handlers.configTab(widget)),
+      item('add-filters', 'Add filter', () => handlers.addWidgets(widget, 0)),
+      item('remove-filters', 'Remove filter', () => handlers.removeWidgets(widget, 0), canEdit && (widget.tabItems[0]?.widgetIds.length ?? 0) > 0),
+      item('config-panel', 'Config widget', () => handlers.configTab(widget)),
       remove
     ];
   }
-  const tab = widget.tabItems[index];
   return [
     item('add-tab', 'Add tab', () => handlers.addTab(widget)),
     item('sort', 'Sort orders', () => handlers.sortTabs(widget), canEdit && widget.tabItems.length > 1),
-    item('config', 'Config tab', () => handlers.configTab(widget)),
-    ...(tab
-      ? [
-          { type: 'divider' as const },
-          {
-            type: 'group' as const,
-            label: tab.name || 'This tab',
-            children: [
-              item('rename-tab', 'Edit title', () => handlers.renameTab(widget, index)),
-              item('add-widgets', 'Add chart', () => handlers.addWidgets(widget, index)),
-              item('remove-widgets', 'Remove chart', () => handlers.removeWidgets(widget, index), canEdit && tab.widgetIds.length > 0),
-              item('delete-tab', 'Delete tab', () => handlers.deleteTab(widget, index))
-            ]
-          },
-          { type: 'divider' as const }
-        ]
-      : []),
+    item('config-tab', 'Config tab', () => handlers.configTab(widget)),
     remove
+  ];
+}
+
+/** The menu of one tab, behind the dots in its header (v1 `TabViewer.tabConfigOptions`). */
+export function tabItemMenuItems(widget: TabWidget, index: number, permissions: DashboardPermissions, handlers: TabEditHandlers): MenuItems {
+  const tab = widget.tabItems[index];
+  if (!tab) return [];
+  const { canEdit } = permissions;
+  const item = (key: string, label: string, onClick: () => void, enabled = canEdit) => ({ key, label, onClick, disabled: !enabled });
+  return [
+    item('rename-tab', 'Edit title', () => handlers.renameTab(widget, index)),
+    item('add-widgets', 'Add chart', () => handlers.addWidgets(widget, index)),
+    item('remove-widgets', 'Remove chart', () => handlers.removeWidgets(widget, index), canEdit && tab.widgetIds.length > 0),
+    item('delete-tab', 'Delete tab', () => handlers.deleteTab(widget, index))
   ];
 }
 

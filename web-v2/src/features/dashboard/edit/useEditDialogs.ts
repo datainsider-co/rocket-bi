@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import type { WidgetId } from '@/core/dashboard/Position';
 import type { JsonObject } from '@/core/json/json';
 import { imageWidgetJson, NEW_WIDGET_POSITION, renamedWidgetJson, textWidgetJson, type TextContent } from '@/core/dashboard/widgetJson';
-import type { EditDialog } from './editDialogs';
+import { isSettingDialog, type EditDialog } from './editDialogs';
 import type { TabHeaderStyle } from '../widgets/tab/tabWidget.utils';
 import { withTabRenamed, withTabsOrdered, withTabStyle, withWidgetsAdded, withWidgetsRemoved, type ApplyButtonStyle } from './tabEdit.utils';
 import type { DashboardEditor } from './useDashboardEditor';
@@ -58,7 +58,7 @@ export function useEditDialogs(editor: DashboardEditor | undefined, release: (id
   };
 
   const submitSettings = async (setting: JsonObject) => {
-    if (!editor || dialog?.kind !== 'settings') return;
+    if (!editor || !isSettingDialog(dialog)) return;
     await editor.saveSetting(setting);
     close();
   };

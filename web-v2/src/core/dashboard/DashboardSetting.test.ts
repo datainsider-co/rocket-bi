@@ -69,6 +69,16 @@ describe('DashboardSetting', () => {
     expect(setting.autoRefreshSetting.isAutoRefresh).toBe(false);
   });
 
+  it('has an all time main date filter by default, like v1 DashboardSetting.default()', () => {
+    const setting = DashboardSetting.default();
+    expect(setting.mainDateFilter).toMatchObject({ id: MainDateFilterSetting.ID, mode: 'all_time' });
+    expect(setting.toJson()).toMatchObject({ main_date_filter: { id: -99887766, mode: 'all_time' }, theme_name: 'light_default' });
+  });
+
+  it('has no main date filter when a stored setting leaves it out', () => {
+    expect(new DashboardSetting({ theme_name: 'light_theme1' }).mainDateFilter).toBeUndefined();
+  });
+
   it('gives widget defaults their own values', () => {
     const { widgetSetting } = new DashboardSetting({});
     expect(widgetSetting.padding).toBe(15);

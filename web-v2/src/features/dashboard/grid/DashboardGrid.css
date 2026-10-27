@@ -21,3 +21,10 @@
   opacity: 0.15;
   border-radius: 4px;
 }
+
+/* gridstack (v1) without `alwaysShowResizeHandle`: a widget's resize handles show while hovering it. */
+@media (hover: hover) {
+  .dashboard-grid > .dashboard-grid__item:not(:hover, .resizing) > .react-resizable-handle {
+    opacity: 0;
+  }
+}

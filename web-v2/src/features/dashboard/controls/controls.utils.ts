@@ -159,6 +159,8 @@ export type ControlsAction =
   | { type: 'set'; id: number; values: ControlEntry; panelId?: number }
   | { type: 'apply'; panelId: number }
   | { type: 'mainDate'; mainDate: MainDateState; values: ControlEntry }
+  /** The main date filter was removed: no picker, and charts no longer filter by it. */
+  | { type: 'removeMainDate' }
   /** Replaces the header filter with the same id. */
   | { type: 'headerFilter'; filter: InternalFilter }
   | { type: 'removeHeaderFilter'; id: number }
@@ -183,6 +185,8 @@ export function controlsReducer(state: ControlsState, action: ControlsAction): C
     }
     case 'mainDate':
       return { ...state, mainDate: action.mainDate, controls: { ...state.controls, [MAIN_DATE_ID]: action.values } };
+    case 'removeMainDate':
+      return { ...state, mainDate: undefined, controls: withoutKey(state.controls, MAIN_DATE_ID) };
     case 'headerFilter': {
       const { filter } = action;
       return { ...state, headerFilters: state.headerFilters.map(item => (item.id === filter.id ? filter : item)) };

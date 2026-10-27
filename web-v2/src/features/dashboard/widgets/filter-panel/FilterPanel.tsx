@@ -14,10 +14,12 @@ interface FilterPanelProps {
   mobile: boolean;
   renderWidget: (id: WidgetId) => ReactNode;
   edit: NestedGridEdit;
+  /** Edit mode: the panel's menu, shown in its header. */
+  actions?: ReactNode;
 }
 
 /** A filter panel (v1 `GroupFilter`): only its first tab is ever shown, as in v1. */
-export function FilterPanel({ widget, dashboard, mobile, renderWidget, edit }: FilterPanelProps) {
+export function FilterPanel({ widget, dashboard, mobile, renderWidget, edit, actions }: FilterPanelProps) {
   const { applyPanel } = useDashboardControls();
   const tab = widget.tabItems[0];
   const positions = useMemo(() => (tab ? tabPositions(dashboard, tab) : {}), [dashboard, tab]);
@@ -30,6 +32,7 @@ export function FilterPanel({ widget, dashboard, mobile, renderWidget, edit }: F
       grid={{ overlap: dashboard.setting.enableOverlap, mobile, ...edit }}
       renderWidget={renderWidget}
       onApply={() => applyPanel(widget.id)}
+      actions={actions}
     />
   );
 }

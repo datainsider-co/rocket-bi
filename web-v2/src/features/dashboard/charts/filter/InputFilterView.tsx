@@ -1,5 +1,6 @@
 import { Input, InputNumber } from 'antd';
 import { GRID_NO_DRAG_CLASS } from '../../grid/DashboardGridView';
+import { FilterTitle } from './FilterTitle';
 
 interface InputFilterViewProps {
   title?: string;
@@ -10,19 +11,23 @@ interface InputFilterViewProps {
   onChange: (value: string) => void;
 }
 
-/** v1 `InputFilter`: a text or number box applied on Enter or when it loses focus; clearing it removes the filter. */
+/**
+ * v1 `InputFilter`: the title (v1's plain filter title, not the stored title style) and a box on one line. Applied on
+ * Enter or when the box loses focus; emptying it removes the filter.
+ */
 export function InputFilterView({ title, value, placeholder, isNumber, onChange }: InputFilterViewProps) {
   const commit = (next: string) => {
     if (next.trim() !== value) onChange(next.trim());
   };
 
   return (
-    <div className={`flex h-full flex-col justify-center gap-1 ${GRID_NO_DRAG_CLASS}`}>
-      {title && <div className="truncate font-medium">{title}</div>}
+    <div className={`filter-widget filter-widget--inline ${GRID_NO_DRAG_CLASS}`}>
+      <FilterTitle text={title} className="filter-title--input" />
       {isNumber ? (
         <InputNumber
           aria-label={title}
-          className="w-full!"
+          className="filter-input min-w-0 flex-1"
+          controls={false}
           // Re-mounts when the value changes elsewhere (Reset Filters), so the box shows it.
           key={value}
           defaultValue={value === '' ? undefined : value}
@@ -33,13 +38,12 @@ export function InputFilterView({ title, value, placeholder, isNumber, onChange 
       ) : (
         <Input
           aria-label={title}
+          className="filter-input min-w-0 flex-1"
           key={value}
           defaultValue={value}
           placeholder={placeholder}
-          allowClear
           onBlur={event => commit(event.target.value)}
           onPressEnter={event => event.currentTarget.blur()}
-          onClear={() => onChange('')}
         />
       )}
     </div>

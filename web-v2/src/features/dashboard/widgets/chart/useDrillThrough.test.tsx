@@ -35,7 +35,7 @@ function setup(listDrillThrough: DashboardService['listDrillThrough']) {
     <MemoryRouter initialEntries={['/dashboard/v2-sample-1?token=abc']}>
       <QueryClientProvider client={queryClient}>
         <DiProvider container={container}>
-          <DashboardControlsProvider dashboard={dashboard} headerFilters={[channel]} storage={{ load: () => undefined, save: () => {} }}>
+          <DashboardControlsProvider dashboard={dashboard} headerFilters={[channel]} storage={{ load: () => undefined, save: () => {}, remove: () => {} }}>
             {children}
           </DashboardControlsProvider>
         </DiProvider>

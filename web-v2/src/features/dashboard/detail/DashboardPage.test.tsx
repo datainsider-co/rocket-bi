@@ -105,8 +105,8 @@ describe('dashboard page', () => {
         di.bindValue(QueryService, queries);
       }
     ]);
-    // Charts don't draw here (no layout), so the filter's tag is the only "Asia".
-    const regionTag = async (label: string) => (await screen.findByText(label, {}, SLOW)).closest('.ant-tag')!;
+    // Charts don't draw here (no layout), so the filter's tab is the only "Asia".
+    const regionTag = (label: string) => screen.findByRole('button', { name: label }, SLOW);
 
     await userEvent.click(await regionTag('Asia'));
 
@@ -115,6 +115,32 @@ describe('dashboard page', () => {
     await userEvent.click(screen.getByRole('button', { name: /Reset Filters/ }));
     await waitFor(() => expect(regionFilterOfColumn(queries)).toBeUndefined(), SLOW);
     expect(screen.queryByRole('button', { name: /Reset Filters/ })).not.toBeInTheDocument();
+  });
+
+  it('applies a main date range to the charts that follow it', { timeout: 15_000 }, async () => {
+    const queries = fakeQueryService();
+    renderAppAt('/dashboard/v2-filters-2', fakeAuthenticationService(), [
+      di => {
+        di.bindValue(DashboardService, fakeDashboardService({ get: vi.fn<DashboardService['get']>(async () => dashboardFromJson(filtersFixture)) }));
+        di.bindValue(QueryService, queries);
+      }
+    ]);
+    await waitFor(() => expect(revenueByCountry(queries).measure).toBe('Revenue'), SLOW);
+    expect(revenueByCountry(queries).finals).not.toContain(-99887766);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Main date: All Time' }));
+    expect(await screen.findByRole('group', { name: 'Start Date' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'End Date' })).toBeInTheDocument();
+    // View mode has no Remove or Edit Main Date.
+    expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('combobox', { name: 'Date range' }));
+    await userEvent.click(await screen.findByTitle('Last Year'));
+    await userEvent.click(within(document.querySelector<HTMLElement>('.main-date-popover')!).getByRole('button', { name: 'Apply' }));
+
+    await waitFor(() => expect(revenueByCountry(queries).finals).toContain(-99887766), SLOW);
+    const year = new Date().getFullYear() - 1;
+    expect(screen.getByRole('button', { name: `Main date: 01/01/${year} - 31/12/${year}` })).toBeInTheDocument();
+    localStorage.removeItem('main_filter_mode_2');
   });
 
   it('applies filter panel changes on Apply, tab control picks at once', { timeout: 15_000 }, async () => {
@@ -350,7 +376,7 @@ describe('dashboard page', () => {
       await userEvent.click(screen.getByRole('button', { name: /Adding/ }));
       await userEvent.click(await screen.findByText('Add text'));
       await userEvent.type(await screen.findByRole('textbox', { name: 'Text' }), 'Quarterly notes');
-      await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+      await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Save' }));
 
       await waitFor(() => expect(dashboards.createWidget).toHaveBeenCalled(), SLOW);
       const [dashboardId, json, position] = vi.mocked(dashboards.createWidget).mock.calls[0]!;
@@ -424,7 +450,7 @@ describe('dashboard page', () => {
       await userEvent.click(await screen.findByText('Add tab'));
       await waitFor(() => expect(lastEdit()?.tab_items.map(tab => tab.name)).toEqual(['Pie', 'Empty', 'New tab']), SLOW);
 
-      await openTabMenu();
+      await userEvent.click(within(tabs()).getByRole('button', { name: 'Actions of tab Pie' }));
       await userEvent.click(await screen.findByText('Add chart'));
       await userEvent.click(await screen.findByRole('checkbox', { name: 'Note' }));
       await userEvent.click(screen.getByRole('button', { name: 'Add' }));
@@ -445,22 +471,24 @@ describe('dashboard page', () => {
       await userEvent.click(within(tabs).getAllByRole('button', { name: 'Widget actions' })[0]!);
       await userEvent.click(await screen.findByText('Config tab'));
       await userEvent.click(await screen.findByText('Left'));
-      await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+      await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Save' }));
 
       await waitFor(() => expect(dashboards.editWidget).toHaveBeenCalled(), SLOW);
       expect(vi.mocked(dashboards.editWidget).mock.calls[0]![1]).toMatchObject({ id: 12, extra_data: { current_chart_type: 'tab', header: { position: 'vertical' } } });
     });
 
-    it("saves the dashboard's settings, its date filter included", { timeout: 15_000 }, async () => {
+    it("saves the dashboard's theme from Options → Settings", { timeout: 15_000 }, async () => {
       const { dashboards } = renderEditable();
       await startEditing();
 
-      // The app header has a Settings menu too.
-      await userEvent.click(within(document.querySelector<HTMLElement>('.dashboard-page__header')!).getByRole('button', { name: /Settings/ }));
-      await userEvent.click(await screen.findByRole('combobox', { name: 'Theme' }));
-      await userEvent.click(await screen.findByTitle('Clear Sky'));
-      await userEvent.click(screen.getByRole('switch', { name: 'Date filter' }));
-      await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Options' }));
+      await userEvent.click(await screen.findByRole('menuitem', { name: 'Settings' }));
+      const dialog = await screen.findByRole('dialog');
+      expect(within(dialog).getByText('Dashboard Setting')).toBeInTheDocument();
+      await userEvent.click(within(dialog).getByRole('button', { name: 'Clear Sky' }));
+      expect(within(dialog).getByRole('button', { name: 'Clear Sky' })).toHaveAttribute('aria-pressed', 'true');
+      await userEvent.click(within(dialog).getByRole('switch', { name: 'Overlap mode' }));
+      await userEvent.click(within(dialog).getByRole('button', { name: 'Apply' }));
 
       await waitFor(() => expect(dashboards.editSetting).toHaveBeenCalled(), SLOW);
       const [dashboardId, setting] = vi.mocked(dashboards.editSetting).mock.calls[0]!;
@@ -469,12 +497,96 @@ describe('dashboard page', () => {
         theme_name: 'dark_theme1',
         enable_overlap: true,
         background: { color: '#000', opacity: 10 },
+        // Saved without a setting, the dashboard had v1's default all time date filter.
         main_date_filter: { id: -99887766, mode: 'all_time' },
         widget_setting: { padding: 15 }
       });
-      // The page follows: the dark theme, and the date filter in the header.
       await waitFor(() => expect(document.querySelector('.dashboard-page')).toHaveAttribute('data-dashboard-theme', 'clear-sky'), SLOW);
-      expect(await screen.findByRole('combobox', { name: 'Date range' })).toBeInTheDocument();
+    });
+
+    it('edits the widgets from the gear in the corner', { timeout: 15_000 }, async () => {
+      const { dashboards } = renderEditable();
+      await startEditing();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Setting Dashboard' }));
+      await userEvent.click(await screen.findByText('Edit Widgets'));
+      const dialog = await screen.findByRole('dialog');
+      await userEvent.click(within(dialog).getByRole('button', { name: 'Bold' }));
+      await userEvent.click(within(dialog).getByRole('tab', { name: /Padding and Border/ }));
+      const padding = within(dialog).getByRole('spinbutton', { name: 'Padding' });
+      await userEvent.clear(padding);
+      await userEvent.type(padding, '24');
+      await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+      await waitFor(() => expect(dashboards.editSetting).toHaveBeenCalled(), SLOW);
+      expect(vi.mocked(dashboards.editSetting).mock.calls[0]![1]).toMatchObject({
+        theme_name: 'light_default',
+        widget_setting: { padding: 24, primary_text: { is_bold: true, font_size: '20px' } }
+      });
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument(), SLOW);
+    });
+
+    it('turns auto refresh on from the gear at once', { timeout: 15_000 }, async () => {
+      const { dashboards } = renderEditable();
+      await startEditing();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Setting Dashboard' }));
+      await userEvent.hover(await screen.findByText('Auto Refresh Data'));
+      await userEvent.click(await screen.findByText('30 Seconds'));
+
+      await waitFor(() => expect(dashboards.editSetting).toHaveBeenCalled(), SLOW);
+      expect(vi.mocked(dashboards.editSetting).mock.calls[0]![1]).toMatchObject({ auto_refresh_setting: { is_auto_refresh: true, refresh_interval_ms: 30_000 } });
+    });
+
+    it('sets up the main date filter from the header', { timeout: 15_000 }, async () => {
+      const { dashboards } = renderEditable({
+        get: vi.fn<DashboardService['get']>(async () => dashboardFromJson({ ...fixture, setting: { theme_name: 'light_theme1' } }))
+      });
+      await screen.findByText('Sample', {}, SLOW);
+      // A stored setting without a main date filter has none, and only edit mode offers one.
+      expect(screen.queryByRole('button', { name: /Main date/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Setup Main Date Filter' })).not.toBeInTheDocument();
+      await startEditing();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Setup Main Date Filter' }));
+      expect(await screen.findByText('Choose Default Time Range')).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: 'Last 30 Days' }));
+
+      await waitFor(() => expect(dashboards.editSetting).toHaveBeenCalled(), SLOW);
+      const [, setting] = vi.mocked(dashboards.editSetting).mock.calls[0]!;
+      expect(setting).toMatchObject({ theme_name: 'light_theme1', main_date_filter: { id: -99887766, mode: 'last_30_days' } });
+      expect(await screen.findByRole('button', { name: /Main date: \d{2}\/\d{2}\/\d{4} - \d{2}\/\d{2}\/\d{4}/ }, SLOW)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Setup Main Date Filter' })).not.toBeInTheDocument();
+      localStorage.removeItem('main_filter_mode_1');
+    });
+
+    it('removes the main date filter after asking', { timeout: 15_000 }, async () => {
+      const { dashboards } = renderEditable();
+      await startEditing();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Main date: All Time' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Remove' }));
+      expect((await screen.findAllByText('Remove main date filter')).length).toBeGreaterThan(0);
+      expect(screen.getByText('Are you sure that you want to remove the main date filter?')).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: 'Yes' }));
+
+      await waitFor(() => expect(dashboards.editSetting).toHaveBeenCalled(), SLOW);
+      const [, setting] = vi.mocked(dashboards.editSetting).mock.calls[0]!;
+      expect(setting).not.toHaveProperty('main_date_filter');
+      expect(await screen.findByRole('button', { name: 'Setup Main Date Filter' }, SLOW)).toBeInTheDocument();
+    });
+
+    it('chooses the default range again with Edit Main Date', { timeout: 15_000 }, async () => {
+      const { dashboards } = renderEditable();
+      await startEditing();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Main date: All Time' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Edit Main Date' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'This Year' }));
+
+      await waitFor(() => expect(dashboards.editSetting).toHaveBeenCalled(), SLOW);
+      expect(vi.mocked(dashboards.editSetting).mock.calls[0]![1]).toMatchObject({ main_date_filter: { id: -99887766, mode: 'this_year' } });
+      localStorage.removeItem('main_filter_mode_1');
     });
 
     it('offers no Edit without the edit permission', async () => {

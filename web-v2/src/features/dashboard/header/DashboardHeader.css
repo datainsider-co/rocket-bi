@@ -1,0 +1,216 @@
+/* v1 DashboardHeader.vue, DashboardControlBar.scss, DiButton.vue and _button.scss (btn-ghost, btn-icon-border). */
+
+.dashboard-header {
+  padding: 13px 47px 0 28px;
+  color: var(--text-color);
+}
+
+.dashboard-header__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 39px;
+  margin: 9px 0;
+}
+
+.dashboard-header__left {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+}
+
+.dashboard-header__title {
+  overflow: hidden;
+  margin: 0;
+  color: var(--text-color);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 23.44px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-header__icon-button {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 24px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dashboard-header__icon-button:hover,
+.dashboard-header__icon-button:focus-visible {
+  background-color: var(--icon-hover-color, #d6d6d6);
+}
+
+.dashboard-header__back {
+  margin: 0 8px 0 -4px;
+  font-size: 16px;
+}
+
+.dashboard-header__rename {
+  margin: 0 16px 0 10px;
+  font-size: 16px;
+}
+
+.dashboard-header__right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.dashboard-header-button {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+}
+
+.dashboard-header-button:hover,
+.dashboard-header-button:focus-visible,
+.dashboard-header-button[aria-expanded='true'] {
+  background-color: var(--hover-color);
+  color: var(--text-color);
+}
+
+.dashboard-header-button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.dashboard-header-button > i {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.dashboard-header-button__title {
+  padding-left: 8px;
+  white-space: nowrap;
+}
+
+/* Popovers of the header (Options, main date, setup), rendered inside the page so they take its theme. */
+.dashboard-popover {
+  --antd-arrow-background-color: var(--menu-background-color);
+}
+
+.dashboard-popover .ant-popover-container {
+  padding: 0;
+  border: var(--menu-border);
+  border-radius: 4px;
+  background: var(--menu-background-color);
+  box-shadow: var(--menu-shadow);
+}
+
+.dashboard-options-menu {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+}
+
+.dashboard-options-menu__item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.dashboard-options-menu__item:hover,
+.dashboard-options-menu__item:focus-visible {
+  background-color: var(--hover-color);
+  color: var(--text-color);
+}
+
+.dashboard-options-menu__item > i {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+.dashboard-options-menu__item > span {
+  padding-left: 8px;
+}
+
+/* v1 dashboard-fullscreen-mode: a low header whose buttons show on hover. */
+.dashboard-page[data-mode='fullscreen'] .dashboard-header,
+.dashboard-page[data-mode='tv'] .dashboard-header {
+  padding: 0 8px;
+}
+
+.dashboard-page[data-mode='fullscreen'] .dashboard-header__bar,
+.dashboard-page[data-mode='tv'] .dashboard-header__bar {
+  min-height: 60px;
+  margin: 0;
+}
+
+.dashboard-page[data-mode='fullscreen'] .dashboard-header__right,
+.dashboard-page[data-mode='tv'] .dashboard-header__right {
+  opacity: 0;
+  transition: opacity 150ms;
+}
+
+.dashboard-page[data-mode='fullscreen'] .dashboard-header:hover .dashboard-header__right,
+.dashboard-page[data-mode='tv'] .dashboard-header:hover .dashboard-header__right,
+.dashboard-page .dashboard-header__right:focus-within {
+  opacity: 1;
+}
+
+/* Embedded: v1 embedded-dashboard-header. */
+.dashboard-page[data-embedded='true'] .dashboard-header {
+  padding: 0 16px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 13px 16px 0;
+  }
+
+  .dashboard-header__bar {
+    flex-wrap: wrap;
+  }
+
+  .dashboard-header__left {
+    flex: unset;
+    max-width: calc(100% - 60px);
+  }
+
+  .dashboard-header__right {
+    flex: 1;
+  }
+
+  /* v1 dashboard-control-bar--mobile: icons only. */
+  .dashboard-header-button__title {
+    display: none;
+  }
+}

@@ -1,0 +1,324 @@
+/*
+  v1 filter widgets: TabFilter (TableStyle.scss, TabSelection.scss, NormalTabItem, MultiChoiceItem), DiSearchInput,
+  InputFilter (input-filter.scss), NumberSlicer (ion range slider, round skin), DateSelectFilter2, TreeSelection.
+  Colors come from the dashboard theme and the variables set by `filterStyle.utils`.
+*/
+
+.filter-widget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+/* v1 `.tab-filter-container.horizontal`: title and content on one line, at the top. */
+.filter-widget--inline {
+  flex-direction: row;
+  align-items: center;
+  height: auto;
+}
+
+/* v1 TabViewer / FilterPanelViewer: filters inside a tab or a filter panel get more padding. */
+.dashboard-grid .dashboard-grid .filter-widget--padded {
+  padding: 4px 8px;
+}
+
+.filter-title {
+  flex-shrink: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.filter-title--inline {
+  max-width: 41%;
+  margin-right: 8px;
+}
+
+.filter-title--input {
+  max-width: 50%;
+  margin-right: 8px;
+  color: var(--text-color);
+}
+
+/* DiSearchInput */
+.filter-search.ant-input-affix-wrapper {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid #e7ebee;
+  border-radius: 4px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.filter-search .ant-input-prefix {
+  margin-inline-end: 8px;
+  color: var(--secondary-text-color);
+  font-size: 16px;
+}
+
+.filter-search .ant-input {
+  background: transparent;
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.filter-search .ant-input::placeholder {
+  color: var(--secondary-text-color);
+}
+
+/* TabSelection: one line that scrolls, or a column. */
+.filter-options {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.filter-options--row {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.filter-options--column {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.filter-options--choice {
+  gap: 12px;
+}
+
+.filter-options--column.filter-options--choice {
+  gap: 0;
+}
+
+/* NormalTabItem */
+.filter-tab-item {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  height: 32px;
+  padding: 8px;
+  border: 1px solid #d6d6d6;
+  border-radius: 4px;
+  background: var(--filter-de-active);
+  color: var(--secondary-text-color);
+  font: inherit;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.filter-tab-item[aria-pressed='true'] {
+  border: none;
+  background: var(--filter-active);
+  color: var(--tab-filter-active);
+}
+
+/* MultiChoiceItem / SingleChoiceItem: the label takes the setting's text color. */
+.filter-choice {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--filter-choice-text);
+  font: inherit;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.filter-options--column .filter-choice {
+  margin-bottom: 12px;
+}
+
+.filter-choice svg {
+  flex-shrink: 0;
+}
+
+.filter-tab-item:focus-visible,
+.filter-choice:focus-visible,
+.filter-date:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Inputs: InputSetting in v1's filters, 32px with a light gray border. */
+.filter-input.ant-input,
+.filter-input.ant-input-number,
+.filter-input.ant-picker {
+  height: 32px;
+  border-color: #d6d6d6;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font-size: 14px;
+}
+
+.filter-input.ant-input {
+  padding: 0 8px;
+}
+
+.filter-input.ant-input-number {
+  padding: 0;
+}
+
+.filter-input .ant-input-number-input {
+  height: 30px;
+  padding: 0 8px;
+  color: var(--secondary-text-color);
+}
+
+.filter-input .ant-picker-input > input {
+  color: var(--secondary-text-color);
+}
+
+.filter-select.ant-select {
+  height: 32px;
+  border-color: #d6d6d6;
+  border-radius: 4px;
+  background: var(--filter-de-active, transparent);
+  color: var(--text-color);
+}
+
+/* Ion range slider, round skin: a 6px line, the range in the accent color, 16px handles with a white ring. */
+.filter-slider.ant-slider-horizontal {
+  flex-shrink: 0;
+  height: 16px;
+  margin: 4px 8px 0;
+  padding-block: 5px;
+}
+
+.filter-slider .ant-slider-rail,
+.filter-slider .ant-slider-track {
+  top: 5px;
+  height: 6px;
+}
+
+.filter-slider .ant-slider-rail {
+  border-radius: 4px;
+  background: var(--primary);
+}
+
+.filter-slider .ant-slider-track,
+.filter-slider:hover .ant-slider-track {
+  background: var(--accent);
+}
+
+.filter-slider .ant-slider-handle {
+  inset-block-start: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.filter-slider .ant-slider-handle::before {
+  inset: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.filter-slider .ant-slider-handle::after,
+.filter-slider .ant-slider-handle:hover::after,
+.filter-slider .ant-slider-handle:focus::after,
+.filter-slider .ant-slider-handle:active::after,
+.filter-slider .ant-slider-handle-dragging::after {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px #fff;
+}
+
+/* DateSelectFilter2: DiCalendar's input in a bordered box. */
+.filter-date {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #d6d6d6;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-color);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.filter-date__icon {
+  width: 16px;
+  font-size: 16px;
+}
+
+.filter-date__label {
+  flex: 1;
+  overflow: hidden;
+  text-align: left;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.filter-date__arrow {
+  font-size: 12px;
+  color: var(--secondary-text-color);
+}
+
+/* TreeSelection */
+.filter-tree.ant-tree {
+  background: transparent;
+  color: var(--tree-item-color, var(--text-color));
+  font-size: var(--tree-item-size, 14px);
+}
+
+.filter-tree .ant-tree-treenode {
+  padding-bottom: 4px;
+}
+
+.filter-tree .ant-tree-switcher {
+  color: var(--tree-switch-color, inherit);
+}
+
+/* antd 6 draws the box on `.ant-tree-checkbox` itself. v1 hid the indeterminate mark. */
+.filter-tree .ant-tree-checkbox,
+.filter-tree .ant-tree-checkbox:hover,
+.filter-tree .ant-tree-checkbox-indeterminate,
+.filter-tree .ant-tree-checkbox-indeterminate:hover {
+  border: 1px solid var(--tree-de-active);
+  background: transparent;
+}
+
+.filter-tree .ant-tree-checkbox-checked,
+.filter-tree .ant-tree-checkbox-checked:hover {
+  border-color: transparent;
+  background: var(--tree-active);
+}
+
+.filter-tree .ant-tree-checkbox-indeterminate::after {
+  display: none;
+}
+
+.filter-tree .ant-tree-node-content-wrapper {
+  white-space: nowrap;
+}
+
+.filter-tree .ant-tree-node-content-wrapper:hover,
+.filter-tree .ant-tree-node-content-wrapper.ant-tree-node-selected {
+  background: none;
+}

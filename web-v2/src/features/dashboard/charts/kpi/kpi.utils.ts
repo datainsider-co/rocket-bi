@@ -34,8 +34,15 @@ interface Heading {
   style: CSSProperties;
 }
 
-/** What the KPI card shows (v1 `NumberWidget` + `NormalLayout`). Comparison and trend line come with M3/M4. */
+/**
+ * v1 picks the KPI's layout by `options.theme`: without one, `NoneThemeLayout` (title and value centered in the card),
+ * with one, `NormalLayout` (icon, title and value from the top left).
+ */
+export type KpiLayout = 'plain' | 'themed';
+
+/** What the KPI card shows (v1 `NumberWidget` + its layouts). Comparison and trend line come with M3/M4. */
 export interface KpiModel {
+  layout: KpiLayout;
   title?: Heading;
   subtitle?: Heading;
   value: string;
@@ -87,15 +94,19 @@ export function buildKpi(options: VizOptions, response: SeriesOneResponse): KpiM
   const postfix = options['postfix'] as Affix | undefined;
   const icon = options['icon'] as KpiIcon | undefined;
   const hasValue = typeof value === 'number';
+  const layout: KpiLayout = typeof options['theme'] === 'string' && options['theme'] !== '' ? 'themed' : 'plain';
+  // v1 aligns the plain layout's value bar to the center by default, the themed one's value to the left.
+  const align = options['align'] ?? (layout === 'plain' ? 'center' : 'left');
 
   return {
+    layout,
     title: heading(options.title),
     subtitle: heading(options.subtitle),
     value: hasValue ? format(value) : '--',
     exactValue: hasValue ? exact(value) : '--',
     prefix: affixText(prefix),
     postfix: affixText(postfix),
-    valueStyle: { ...textCss(style, '36px'), justifyContent: alignToFlex(options['align']) },
+    valueStyle: { ...textCss(style, '36px'), justifyContent: alignToFlex(align) },
     prefixStyle: textCss(prefix?.style, '36px'),
     postfixStyle: textCss(postfix?.style, '36px'),
     background: typeof options.background === 'string' ? options.background : undefined,

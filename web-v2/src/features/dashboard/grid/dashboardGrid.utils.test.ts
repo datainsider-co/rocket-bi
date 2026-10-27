@@ -19,18 +19,18 @@ const pos = (row: number, column: number, width = 4, height = 3, zIndex = 0): Po
 });
 
 describe('gridMetrics', () => {
-  it('keeps the v1 cell pitch', () => {
+  it('keeps the v1 cell pitch and insets', () => {
     const { rowHeight, margin } = gridMetrics(10);
-    // Height of an item 3 rows high: 3 rows + 2 gaps, as gridstack's 3 * 32 - 10.
-    expect(3 * rowHeight + 2 * margin[1]).toBe(3 * 32 - 10);
+    // An item 3 rows high: 3 rows + 2 gaps, as gridstack's 3 * 32 with 10px taken off the top and the bottom.
+    expect(3 * rowHeight + 2 * margin[1]).toBe(3 * 32 - 20);
   });
 
-  it('pads the edges with half a margin', () => {
-    expect(gridMetrics(8)).toEqual({ rowHeight: 24, margin: [8, 8], containerPadding: [4, 4] });
+  it('puts two margins between items and one on the edges', () => {
+    expect(gridMetrics(8)).toEqual({ rowHeight: 16, margin: [16, 16], containerPadding: [8, 8] });
   });
 
   it('takes a custom cell height', () => {
-    expect(gridMetrics(10, 40).rowHeight).toBe(30);
+    expect(gridMetrics(10, 40).rowHeight).toBe(20);
   });
 });
 
