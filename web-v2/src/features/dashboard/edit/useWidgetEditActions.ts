@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { App } from 'antd';
+import { withoutChartFilter } from '@/core/chart-builder/chartWidget';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { WidgetId } from '@/core/dashboard/Position';
-import type { TabWidget, Widget } from '@/core/dashboard/Widget';
+import type { ChartWidget, TabWidget, Widget } from '@/core/dashboard/Widget';
 import { childWidgetIds, copyWidgetJson, NEW_WIDGET_POSITION, newFilterPanelJson, newTabWidgetJson } from '@/core/dashboard/widgetJson';
 import type { ChartBuilderBridge } from './chartBuilderBridge';
 import { copiedText, copyPosition, isPasteError, pastedWidget } from './dashboardEdit.utils';
@@ -75,7 +76,14 @@ export function useWidgetEditActions({ dashboard, editor, editing, openDialog, r
     rename: target => openDialog({ kind: 'rename', widget: target }),
     editText: target => target.kind === 'text' && openDialog({ kind: 'text', widget: target }),
     replaceImage: target => target.kind === 'image' && openDialog({ kind: 'image', widget: target }),
-    ...(chartBuilder && { configChart: (target: Widget) => target.kind === 'chart' && chartBuilder.configChart(target) }),
+    ...(chartBuilder && {
+      configChart: (target: Widget) => target.kind === 'chart' && chartBuilder.open({ kind: 'configChart', chart: target }),
+      innerFilter: {
+        add: (chart: ChartWidget) => chartBuilder.open({ kind: 'addInnerFilter', chart }),
+        config: (chart: ChartWidget) => chartBuilder.open({ kind: 'configInnerFilter', chart }),
+        remove: (chart: ChartWidget) => void run(() => editor!.updateWidget(withoutChartFilter(chart.json)), 'Can not delete chart filter, try again')
+      }
+    }),
     copy: target =>
       void run(async () => {
         await clipboard.writeText(copiedText(target, positionOf(target), window.location.href));
@@ -130,7 +138,7 @@ export function useWidgetEditActions({ dashboard, editor, editing, openDialog, r
     ...(typeof clipboard?.readText === 'function' && {
       paste: () => void run(async () => pasteText(await clipboard.readText()), 'Can not read the clipboard')
     }),
-    ...(chartBuilder && { addChart: chartBuilder.addChart })
+    ...(chartBuilder && { addChart: () => chartBuilder.open({ kind: 'addChart' }) })
   }), [editor, openDialog, run, clipboard, pasteText, chartBuilder]);
 
   return { widget, tab, add };

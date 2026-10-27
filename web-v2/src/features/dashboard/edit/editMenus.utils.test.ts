@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { widgetFromJson, type Widget } from '@/core/dashboard/Widget';
+import { widgetFromJson, type ChartWidget, type Widget } from '@/core/dashboard/Widget';
 import { OWNER_PERMISSIONS, permissionsOf } from '../access/access.utils';
 import { addMenuItems, leavesDashboard, widgetEditMenuItems, type WidgetEditHandlers } from './editMenus.utils';
 
@@ -36,6 +36,20 @@ describe('widgetEditMenuItems', () => {
     const items = widgetEditMenuItems(chart, OWNER_PERMISSIONS, { ...handlers(), configChart });
     find(items, 'config').onClick!();
     expect(configChart).toHaveBeenCalledWith(chart);
+  });
+
+  it('offers to add an inner filter, or to update and delete the one there', () => {
+    const innerFilter = { add: vi.fn<(chart: ChartWidget) => void>(), config: vi.fn<(chart: ChartWidget) => void>(), remove: vi.fn<(chart: ChartWidget) => void>() };
+    const withFilter = widgetFromJson({ class_name: 'chart_v3', id: 5, setting: {}, chart_filter: { class_name: 'chart_v3', id: -15, setting: {} } });
+    const added = widgetEditMenuItems(chart, OWNER_PERMISSIONS, { ...handlers(), innerFilter });
+    expect(keys(added)).toEqual(['rename', 'copy', 'add-inner-filter', 'duplicate', 'delete']);
+    find(added, 'add-inner-filter').onClick!();
+    expect(innerFilter.add).toHaveBeenCalledWith(chart);
+    const existing = widgetEditMenuItems(withFilter, permissionsOf(['view']), { ...handlers(), innerFilter });
+    expect(keys(existing)).toEqual(['rename', 'copy', 'config-inner-filter', 'delete-inner-filter', 'duplicate', 'delete']);
+    expect(find(existing, 'delete-inner-filter').disabled).toBe(true);
+    find(existing, 'config-inner-filter').onClick!();
+    expect(innerFilter.config).toHaveBeenCalledWith(withFilter);
   });
 
   it('disables what the viewer may not do', () => {

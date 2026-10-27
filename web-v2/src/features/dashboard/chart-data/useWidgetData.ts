@@ -28,6 +28,8 @@ interface WidgetDataOptions {
   /** The widget's query with the dashboard's controls applied (`buildChartQuery`); the stored setting by default. */
   query?: ChartQuery;
   paging?: Paging;
+  /** False while there is nothing to query yet (ChartBuilder's preview before its zones are filled). */
+  enabled?: boolean;
 }
 
 /**
@@ -35,7 +37,7 @@ interface WidgetDataOptions {
  * loads, the previous data stays on screen (v1's "updating" state): `isFetching` with `data`. A chart the server can't
  * query (an input, a tab control) gets an empty table without a request. Under View As it is queried as that user.
  */
-export function useWidgetData(widget: ChartWidget, { dashboardId, query, paging }: WidgetDataOptions) {
+export function useWidgetData(widget: ChartWidget, { dashboardId, query, paging, enabled = true }: WidgetDataOptions) {
   const service = useDi(QueryService);
   const viewAs = useViewAsUser();
   const setting = query?.setting ?? widget.setting;
@@ -58,6 +60,7 @@ export function useWidgetData(widget: ChartWidget, { dashboardId, query, paging 
       if (!queryable) return Promise.resolve(EMPTY_TABLE);
       return limit(() => (viewAs ? service.queryAs(request, viewAs.json, signal) : service.query(request, signal)));
     },
-    placeholderData: keepPreviousData
+    placeholderData: keepPreviousData,
+    enabled
   });
 }
