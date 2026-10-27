@@ -230,8 +230,60 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
   này bằng chế độ Chart Control của trình sửa.
 - **Chưa làm ở bước này:**
   - Chọn field bằng menu bảng / cột (v1 `SelectFieldContext`): link "click here" của zone và click tên item hoặc
-    condition để đổi field. Chuyển sang CB5.
+    condition để đổi field. Đã làm ở CB5.
   - Edit Measure trong menu của item: CB8.
+
+## Quyết định ở CB5 (2026-10-27)
+
+- **Gắn vào dashboard qua một host component:**
+  - Route `/dashboard/:name` dùng `DashboardBuilderPage` (`features/chart-builder`). Trang này truyền
+    `ChartBuilderHost` cho `DashboardPage`, và host là một lazy chunk riêng. Dashboard không import ChartBuilder;
+    route embedded vẫn dùng `DashboardPage` không có builder.
+  - Trang dashboard giữ request đang mở (`ChartBuilderRequest`: `addChart`, `configChart`, `addInnerFilter`,
+    `configInnerFilter`). `ChartBuilderBridge` chỉ còn `open(request)`.
+  - Host được render bên trong `DashboardControlsProvider`, nên preview áp các control hiện tại của dashboard và các
+    header filter (nếu chart bị ảnh hưởng bởi filter), giống v1.
+- **Luồng:**
+  - Add chart: picker trước (lưới 39 chart + 9 filter như v1). Loại chưa build được thì disabled.
+  - Config chart: mở thẳng builder trên chart.
+  - Add chart filter: bắt đầu bằng Dropdown, loại inner filter đầu tiên của v1.
+  - Builder có ô chọn loại chart để đổi type, gồm các loại cùng nhóm (chart + filter, hoặc inner filter). v1 dùng hàng
+    icon kèm "View all".
+- **Lưu** (`host/builderSession.utils.ts`, JSON trong `core/chart-builder/chartWidget.ts`):
+  - JSON widget giống v1 `getFinalChartInfo`: name là title, description là subtitle, `background_color` /
+    `text_color` lấy từ options (key snake_case đã lưu), nếu thiếu thì dùng `#0000001A` / `#fff`. Kiểm bằng
+    `builderRequests.fixture.json`: dựng lại đúng 19 body mà v1 gửi.
+  - Chart sửa giữ các key của nó, kể cả `chart_filter`. `extra_data` của builder được ghi đè lên `extra_data` đã lưu.
+  - Chart mới được tạo ở -1/-1 với kích thước v1 `getDefaultSize` theo setting (`chartSizeOf`). Grid sẽ tìm chỗ
+    trống, như M6.
+  - Inner filter được lưu bằng cách sửa chart cha, với `chart_filter.id = -(id + 10)`. "Delete chart filter" bỏ
+    `chart_filter` mà không mở builder.
+  - Lưu qua `useDashboardEditor` (cập nhật cả cache). Lỗi thì báo bằng message của server và giữ builder mở.
+- **Nút Add / Update** bị disabled khi zone chưa dựng được setting hoặc preview lỗi (v1 `isDisableAddOrUpdate`).
+- **Rời builder:** chỉ hỏi xác nhận khi đã sửa gì đó. `dirty` nghĩa là state khác state lúc mở, vì reducer trả lại đúng
+  state cũ với action không đổi gì.
+- **Control trong builder:** mọi chart khác của dashboard cùng main date filter. Inner filter không có control nào,
+  như v1.
+- **Chart ad hoc** (setting có `sql_views`): cây field chỉ hiện bảng của view, đọc bằng `databases/adhoc/tables` với
+  câu SQL đã thay tham số. Không có tab Chart Control. Nếu đọc lỗi thì mở builder trên database như v1.
+  - **Khác v1:** tham số lấy theo giá trị đã lưu của chart. v1 lấy giá trị hiện tại của các input.
+- **Preview** dùng `ChartRenderer` / `FilterRenderer` và `useWidgetData` (thêm cờ `enabled`) của dashboard:
+  - Id là id của widget đang sửa (chart mới là -1), để inner filter và selection của chính nó vẫn có tác dụng.
+  - Filter widget giữ selection riêng của preview.
+  - Không query dưới quyền View As (host bọc `ViewAsProvider` không có user).
+  - Sort của table trong preview chưa làm.
+- **Modal render tại chỗ** (`getContainer={false}`), không qua portal, để biến CSS theme của dashboard áp được lên
+  preview.
+- **Chọn field bằng menu** (v1 `SelectFieldContext`, `config-panel/FieldMenuView`):
+  - "click here" của mỗi zone thêm field vào cuối zone; ở zone Filters thì tạo nhóm mới.
+  - Click tên item hoặc tên condition để đổi field: cùng loại cột thì giữ function / condition, khác loại thì về mặc
+    định (`changeItemField`, `changeConditionField`).
+  - Menu của Filters không có measure. Item là chart control thì không đổi field được: v1 mở danh sách control, v2
+    chưa làm.
+  - Bảng lấy từ `useFieldTree` qua `FieldChoicesContext`.
+- **Donut:** renderer của dashboard vẽ `donut_chart_setting` bằng code của pie. v1 `DonutChart` chỉ khác `PieChart`
+  ở `innerSize` trong options. Trước bước này Donut đã build được nhưng hiện "not supported".
+- **Tab Settings** chưa có nội dung; làm ở CB6.
 
 ## Các bước
 
@@ -242,7 +294,7 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
 | CB2 | **Reducer của builder** (`features/chart-builder`). Khởi tạo từ widget hoặc rỗng. Đổi loại chart (`latestState` và chuyển config như v1). Thêm / sửa / xoá / đổi thứ tự config. Filter theo nhóm. Function convertor (table; scatter và bubble đi cùng type của chúng ở CB7). Setting dẫn xuất từ state. Dọn options khi xoá function để lại CB7 | Xong |
 | CB3 | **Cây field** (chỉ đọc). Chọn database (`GET databases`), bảng và cột có search và icon theo kiểu, mở sẵn các bảng đang dùng, cột kéo được, các chart control của dashboard | Xong |
 | CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control). Display as column để lại CB7 | Xong |
-| CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Chưa làm |
+| CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Xong |
 | CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Chưa làm |
 | CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3 | Chưa làm |
 | CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query, Delete table | Chưa làm |
