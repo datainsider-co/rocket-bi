@@ -453,6 +453,43 @@ formatting và Conditional formatting; **CB7b3** Collapse Table; **CB7b4** Pivot
   - Danh sách theme không phụ thuộc theme sáng / tối của dashboard (v1 lấy theo base theme; với custom thì rỗng). Hai
     bản chỉ khác grid của Default.
 
+## Quyết định ở CB7b2 (2026-10-28)
+
+Field formatting và Conditional formatting của table phẳng.
+
+- **Phát hiện:** trên table phẳng, v1 không bao giờ vẽ Background, Font color và Icon. v1 xin server các cột phụ
+  (`formatters`), nhưng `table_chart_setting` bỏ qua chúng (đã thử trên backend local). Chỉ Data bar chạy, vì nó chỉ
+  cần min / max của cột (`min_max_values`, theo tên cột, tính trên toàn bộ kết quả). v2 nay đọc `min_max_values`.
+- **Lựa chọn (2026-10-28):** v2 tính Background, Font color và Icon ở client, từ giá trị của chính ô và min / max của
+  cột, khi formatting bật, trên field của chính cột, theo color scale hoặc rules, và áp cho values. Formatting theo
+  field khác hoặc theo Field value vẫn không vẽ được.
+- **Renderer** (`charts/table/tableFormatting.utils.ts`, `columnDecorations.tsx`):
+  - Formatting tìm theo `vizKey(tên cột)`, đúng key v1 ghi. v1 còn khớp theo tiền tố, nên cột "sales" lấy formatting
+    của "salesAmount"; v2 chỉ khớp đúng tên.
+  - Field formatting: display unit và precision riêng của cột, đè lên của table; màu, nền, căn lề cho values / header
+    khi bật Apply to.
+  - Color scale: trộn RGB tuyến tính giữa min, center (nếu bật) và max, với giá trị custom; ô trống theo Default
+    formatting. Màu không phải hex (biến theme) thì lấy màu gần hơn.
+  - Rules: rule đầu tiên khớp thắng; `>` / `>=` cần thêm `<` / `<=`; `=` so một giá trị; percent so vị trí trong
+    min / max; `blank` khớp chữ, còn ô trống tính là 0 như v1.
+  - Data bar: thanh âm và dương hai phía trục, theo min / max (hoặc custom), trái sang phải hoặc ngược lại; trục chỉ vẽ
+    khi màu không trong suốt. Icon: theo rules, bên trái, phải hoặc chỉ icon, căn trên / giữa / dưới.
+- **Tab Settings** (sau Values, như v1):
+  - Field formatting: chọn cột, màu chữ, nền, căn lề, Apply to header / values (bật thì lưu luôn màu và căn lề đang
+    hiện, như v1), display unit, precision.
+  - Conditional formatting: chọn cột số; bật / tắt Background color, Font color, Data bars, Icons; "Advanced controls"
+    mở dialog: color scale hoặc rules, data bar, icon (6 style của v1 đặt sẵn rules). Lưu khi các số hợp lệ.
+  - Bật một formatting chưa có thì dùng default trên field của chính cột (v1 làm vậy với cột số / aggregate).
+- **Khác v1:**
+  - Chỉ cột số (số hoặc aggregate) có conditional formatting, vì chỉ chúng có min / max. Bỏ "Format by field value" và
+    "Based on field" khác: không vẽ được trên table phẳng.
+  - Bỏ Apply to total của Field formatting: table phẳng không có dòng total.
+  - Revert của Field formatting xoá display unit và precision của cột để theo table; v1 ghi None và 2.
+  - Bật lại Data bar giữ setting cũ; v1 reset về default.
+  - Renderer kiểm `enabled`; v1 dựa vào việc formatter tắt không được gửi.
+  - Icon là chữ trong React; v1 chèn emoji bằng HTML (có thể bị XSS từ setting).
+  - Danh sách icon cho rule gồm icon của 6 style; v1 có khoảng 300 emoji.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -464,7 +501,7 @@ formatting và Conditional formatting; **CB7b3** Collapse Table; **CB7b4** Pivot
 | CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control). Display as column để lại CB7 | Xong |
 | CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Xong |
 | CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Xong. Table chỉ có tab chung; các tab style của table và tab Comparison của Number làm ở CB7 |
-| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Chia theo thứ tự của `MIGRATION.md` (chọn 2026-10-28): **CB7a** Number: comparison và trend line (tab Comparison), xong. **CB7b** Tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer, Collapse Table, Pivot Table: CB7b1 (style) xong. **CB7c** Stacked Column / Bar, Circular Bar, Lollipop. **CB7d** Scatter, Bubble, Area Range, Column Range. **CB7e** Funnel, Pyramid, Variable Pie, Parliament, Word Cloud, Tree map, Heat map, Gauges, Bullet. **CB7f** Pareto, Bell curve, Histogram, Spider web, Wind rose, Sankey, Line stock. Map có thiết kế riêng | Chưa làm |
+| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Chia theo thứ tự của `MIGRATION.md` (chọn 2026-10-28): **CB7a** Number: comparison và trend line (tab Comparison), xong. **CB7b** Tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer, Collapse Table, Pivot Table: CB7b1 (style), CB7b2 (field và conditional formatting) xong. **CB7c** Stacked Column / Bar, Circular Bar, Lollipop. **CB7d** Scatter, Bubble, Area Range, Column Range. **CB7e** Funnel, Pyramid, Variable Pie, Parliament, Word Cloud, Tree map, Heat map, Gauges, Bullet. **CB7f** Pareto, Bell curve, Histogram, Spider web, Wind rose, Sankey, Line stock. Map có thiết kế riêng | Chưa làm |
 | CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query, Delete table | Chưa làm |
 
 ## Ghi chú về field drag and drop
