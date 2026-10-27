@@ -20,6 +20,8 @@ export interface SeriesOneResponse {
   readonly series: readonly SeriesItem[];
   readonly xAxis: readonly string[];
   readonly yAxis: readonly string[];
+  /** A number chart's compared value (`compare_responses.RawValues`), when it asked for a comparison. */
+  readonly compareValue?: number;
 }
 
 /** Pie and other name/value charts (`series_two_response`): each point is `[name, value]`. */
@@ -89,6 +91,13 @@ function tableHeaderFromJson(value: unknown): TableHeader {
   };
 }
 
+/** The first value of the raw compared response; the server keys it by the PascalCase mode. */
+function compareValueOf(value: unknown): { compareValue?: number } {
+  const series = asArray(asRecord(asRecord(value)['RawValues'])['series'])[0];
+  const compared = toNullableNumber(asArray(asRecord(series)['data'])[0]);
+  return compared === null ? {} : { compareValue: compared };
+}
+
 function stringList(value: unknown): string[] {
   return asArray(value).map(item => String(item));
 }
@@ -102,7 +111,8 @@ export function visualizationResponseFromJson(value: unknown): VisualizationResp
         kind: 'series_one',
         series: asArray(json['series']).map(seriesItemFromJson),
         xAxis: stringList(json['x_axis']),
-        yAxis: stringList(json['y_axis'])
+        yAxis: stringList(json['y_axis']),
+        ...compareValueOf(json['compare_responses'])
       };
     case 'series_two_response':
       return {

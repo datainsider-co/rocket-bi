@@ -36,6 +36,8 @@ export interface QueryRequestInput {
   dashboardId?: number;
   chartId?: number;
   parameters?: Readonly<Record<string, string>>;
+  /** A number chart's comparison (`compareRequestOf`). */
+  compareRequest?: JsonObject;
 }
 
 export function settingClassName(setting: JsonObject): string {
@@ -67,11 +69,12 @@ export function canQuerySetting(setting: JsonObject): boolean {
  * Body of `POST chart/query` (backend `ChartRequest`). Like v1, the viz options are left out (`options: {}`): the
  * server doesn't need them to query.
  */
-export function toQueryRequestJson({ setting, filterRequests = [], paging, dashboardId, chartId, parameters = {} }: QueryRequestInput): JsonObject {
+export function toQueryRequestJson({ setting, filterRequests = [], paging, dashboardId, chartId, parameters = {}, compareRequest }: QueryRequestInput): JsonObject {
   const page = paging ?? (isPagedSetting(setting) ? { from: 0, size: DEFAULT_PAGE_SIZE } : { from: -1, size: -1 });
   return {
     query_setting: { ...setting, options: {} },
     filter_requests: filterRequests,
+    ...(compareRequest && { compare_request: compareRequest }),
     from: page.from,
     size: page.size,
     use_boost: false,

@@ -50,9 +50,10 @@ export function useWidgetData(widget: ChartWidget, { dashboardId, query, paging,
         parameters: query?.parameters,
         paging,
         dashboardId,
-        chartId: widget.id
+        chartId: widget.id,
+        compareRequest: query?.compareRequest
       }),
-    [setting, query?.filterRequests, query?.parameters, widget.id, paging, dashboardId]
+    [setting, query?.filterRequests, query?.parameters, query?.compareRequest, widget.id, paging, dashboardId]
   );
   return useQuery({
     queryKey: chartDataKeys.request(dashboardId, widget.id, request, viewAs?.profile.username),
