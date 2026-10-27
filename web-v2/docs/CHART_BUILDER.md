@@ -285,6 +285,46 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
   ở `innerSize` trong options. Trước bước này Donut đã build được nhưng hiện "not supported".
 - **Tab Settings** chưa có nội dung; làm ở CB6.
 
+## Quyết định ở CB6a (2026-10-28)
+
+- **Sửa options như v1** (`core/chart-builder/vizChanges.ts`):
+  - Mỗi thay đổi là một lodash path theo camelCase của v1 (`title.style.fontSize`, `yAxis[1].visible`,
+    `plotOptions.series.response.<vizKey(name)>.name`), giống `ChartOption.setOption`.
+  - `applyVizChanges` đổi options đã lưu sang camelCase, áp các path rồi đổi lại bằng `toStoredKeys`, nên v1 đọc được.
+    Giá trị `undefined` thì xoá key (khi gửi đi, `undefined` của v1 cũng mất).
+  - Reducer có action `vizChanges` thay cho `options`. Sửa options không đổi `touched`, nên chart chưa có builder data
+    vẫn giữ setting đã lưu, chỉ thay phần options (quyết định D2).
+  - Query không gửi options, nên sửa setting không query lại; preview vẽ lại ngay.
+- **Code** ở `features/chart-builder/settings`:
+  - `fields/`: control dùng chung (text và number áp dụng khi Enter hoặc mất focus như v1 `InputSetting`, select,
+    color, toggle, align, Revert to default).
+  - `tabs/`: mỗi tab một view. Giá trị mặc định và các thay đổi gồm nhiều key nằm trong `commonTabs.utils.ts` và
+    `seriesTabs.utils.ts`.
+  - `SettingsPanel` chọn bộ tab theo loại chart. Ở bước này chỉ chart series (Column, Bar, Line, Spline, Area và các
+    biến thể inverted) có tab; các loại khác vẫn báo chưa có (CB6b, CB6c).
+- **Bố cục:** các tab là panel thu gọn được theo thứ tự của v1, mở sẵn Title & Subtitle. Tab Settings chiếm chỗ của
+  cây field và config panel, preview giữ nguyên kích thước. Nền của preview lấy theo `background` của options.
+- **Màu là biến theme** (`var(--text-color)`, ...): ô màu hiện "Theme" với màu hiện tại; chọn màu thì lưu hex.
+- **Display:** chọn từng series theo response của preview (key `vizKey`, sắp theo tên như v1). Chưa có data thì báo
+  là series sẽ hiện khi chart có data.
+- **Dual Y Axis:** bật thì chuyển series thứ hai sang trục phải, tắt thì đưa mọi series về trục chính và bỏ min /
+  max của trục phải, như v1. Series nào dùng trục phải thì chọn ở Display.
+- **Khác v1:**
+  - Tooltip: v1 lưu font vào `tooltip.fontFamily`, nhưng cả tab lẫn chart đều không đọc key này. v2 lưu vào
+    `tooltip.style.fontFamily`. Revert về màu của theme, không về tooltip tối `#333645`.
+  - Background: v1 luôn hiện trắng (truyền nhầm prop); v2 hiện màu của chart.
+  - Gridlines: v1 coi `'0'` (đã tắt) là vẫn bật; v2 đọc theo số.
+  - Display: bỏ hai ô Type và Line width vì v1 luôn disable chúng. Revert bỏ `type` riêng của series thay vì ghi chart
+    type, vì `line_inverted` không phải type của Highcharts. Marker và dash theo type Highcharts của series, nên Spline
+    cũng có dash.
+  - Data label condition: bật Min / Max thì lưu luôn giá trị đang hiện. v1 ghi `condition.min = 0` (số, không phải
+    object), và khi bật Max lại ghi nhầm vào Min.
+  - Display unit của Donut lưu dưới `plot_options.pie`, nơi renderer đọc. v1 ghi vào `series`.
+  - Không ghi default lúc mở tab. Các tab trục của v1 tự revert khi trục chưa có setting (`created`).
+- **Lưu nhưng v2 chưa dùng:** `is_enable_drilldown` (menu của v2 chưa đọc cờ này) và `legend.max_height`. Các key này
+  vẫn được lưu để v1 dùng.
+- **Data label của pie** (label format, distance) và các tab của pie, number, table: CB6b.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -295,7 +335,7 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
 | CB3 | **Cây field** (chỉ đọc). Chọn database (`GET databases`), bảng và cột có search và icon theo kiểu, mở sẵn các bảng đang dùng, cột kéo được, các chart control của dashboard | Xong |
 | CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control). Display as column để lại CB7 | Xong |
 | CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Xong |
-| CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Chưa làm |
+| CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | (a) xong; (b), (c) chưa làm |
 | CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3 | Chưa làm |
 | CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query, Delete table | Chưa làm |
 
