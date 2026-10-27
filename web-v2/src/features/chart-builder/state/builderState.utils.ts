@@ -6,6 +6,7 @@ import { suggestConfigs } from '@/core/chart-builder/configSuggestion';
 import { defaultVizOptions, vizOptionsForType } from '@/core/chart-builder/defaultVizOptions';
 import { convertRowMode } from '@/core/chart-builder/functionConvertor';
 import { SortType, type FunctionData } from '@/core/chart-builder/FunctionData';
+import { isSameFieldKind } from '@/core/chart-builder/functions';
 import { buildSetting } from '@/core/chart-builder/querySetting';
 import { applyDrop, type DropAction } from '@/shared/field-dnd/fieldDnd.utils';
 
@@ -32,12 +33,19 @@ export interface BuilderState {
   readonly latest?: LatestEdit;
 }
 
-/** A column dropped from the field tree. */
+/** A column dropped from the field tree, or a chart control dropped as a field (with its `dynamicFunction`). */
 export interface DroppedField {
   readonly field: JsonObject;
   readonly columnName: string;
   readonly tableName: string;
   readonly isNested?: boolean;
+  readonly dynamicFunction?: JsonObject;
+}
+
+/** Where a condition sits: its group and its index there. */
+export interface ConditionAt {
+  readonly groupId: number;
+  readonly index: number;
 }
 
 export type BuilderAction =
@@ -47,8 +55,10 @@ export type BuilderAction =
   /** An item changed from its menu (function, sorting, name, top N); matched by id. */
   | { type: 'updateItem'; zone: string; item: FunctionData }
   | { type: 'removeItem'; zone: string; id: number }
-  /** A field dropped into the Filter zone: into the and-group `groupId`, or a new or-group. */
-  | { type: 'addCondition'; field: DroppedField; groupId?: number }
+  /** A field dropped into the Filter zone: into the and-group `groupId` at `index` (default last), or a new or-group. */
+  | { type: 'addCondition'; field: DroppedField; groupId?: number; index?: number }
+  /** A condition dragged to `index` of the and-group `groupId`, or into a new or-group. */
+  | { type: 'moveCondition'; from: ConditionAt; to: { groupId?: number; index: number } }
   | { type: 'updateCondition'; condition: ConditionData }
   | { type: 'removeCondition'; groupId: number; id: number }
   | { type: 'options'; options: JsonObject };
@@ -99,6 +109,15 @@ function changeChartType(state: BuilderState, chartType: string): BuilderState {
   return { ...state, data: { ...state.data, chartType, configs }, options, touched: true };
 }
 
+/**
+ * A field dropped onto an item, in its place (v1 `ConfigDraggable.handleReplaceFunction`): it keeps the item's id, and its
+ * function while the field is the same kind of column.
+ */
+function replacingItem(created: FunctionData, replaced: FunctionData): FunctionData {
+  if (!isSameFieldKind(replaced.field, created.field)) return { ...created, id: replaced.id };
+  return { ...created, id: replaced.id, functionFamily: replaced.functionFamily, functionType: replaced.functionType, displayAsColumn: replaced.displayAsColumn };
+}
+
 /** Where an item lands in another zone (v1 `FunctionNodeBuilder` without a new family): a new id, the zone's sorting. */
 function movedItem(item: FunctionData, zoneId: string, id: number): FunctionData {
   return { ...item, id, displayAsColumn: false, sorting: zoneId === SORTING_ZONE.key ? SortType.Ascending : SortType.Unsorted };
@@ -122,7 +141,7 @@ function drop(state: BuilderState, action: DropAction, field: DroppedField | und
   // Only drops from the tree create an item, and those have their field (checked above).
   const created = newFunctionData({ ...(field ?? NO_FIELD), id, zone });
   const dropped = applyDrop<FunctionData>(lists, action, {
-    fromExternal: () => created,
+    fromExternal: (_zoneId, replaced) => (replaced ? replacingItem(created, replaced) : created),
     fromZone: (item, zoneId) => movedItem(item, zoneId, id)
   });
   if (dropped === lists) return state;
@@ -149,12 +168,30 @@ function withFilters(state: BuilderState, filters: BuilderData['filters']): Buil
   return { ...state, data: { ...state.data, filters }, touched: true };
 }
 
-function addCondition(state: BuilderState, field: DroppedField, groupId: number | undefined): BuilderState {
+const groupIdsOf = (filters: BuilderData['filters']) => Object.values(filters).flat().map(condition => condition.groupId);
+
+function addCondition(state: BuilderState, field: DroppedField, groupId: number | undefined, index: number | undefined): BuilderState {
   const { filters } = state.data;
-  const conditions = Object.values(filters).flat();
-  const group = groupId ?? nextId(conditions.map(condition => condition.groupId));
-  const condition = newConditionData({ ...field, id: nextId(idsOf(conditions)), groupId: group });
-  return withFilters(state, { ...filters, [group]: [...(filters[group] ?? []), condition] });
+  const group = groupId ?? nextId(groupIdsOf(filters));
+  const condition = newConditionData({ ...field, id: nextId(idsOf(Object.values(filters).flat())), groupId: group });
+  const conditions = filters[group] ?? [];
+  return withFilters(state, { ...filters, [group]: conditions.toSpliced(index ?? conditions.length, 0, condition) });
+}
+
+/**
+ * v1 `FilterDraggable` drags between groups: the condition leaves its group (an empty group goes) for another group or
+ * a new one, keeping its id. In its own group, `to.index` is counted without it.
+ */
+function moveCondition(state: BuilderState, from: ConditionAt, to: { groupId?: number; index: number }): BuilderState {
+  const { filters } = state.data;
+  const source = filters[from.groupId];
+  const condition = source?.[from.index];
+  if (!source || !condition) return state;
+  const groupId = to.groupId ?? nextId(groupIdsOf(filters));
+  const rest = source.toSpliced(from.index, 1);
+  const left = rest.length > 0 ? { ...filters, [from.groupId]: rest } : withoutKey(filters, String(from.groupId));
+  const target = left[groupId] ?? [];
+  return withFilters(state, { ...left, [groupId]: target.toSpliced(to.index, 0, { ...condition, groupId }) });
 }
 
 /** v1 `ConfigBuilderStore.updateFilter`: replaces the condition in its group, adds it when it isn't there. */
@@ -186,7 +223,9 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
     case 'removeItem':
       return removeItem(state, action.zone, action.id);
     case 'addCondition':
-      return addCondition(state, action.field, action.groupId);
+      return addCondition(state, action.field, action.groupId, action.index);
+    case 'moveCondition':
+      return moveCondition(state, action.from, action.to);
     case 'updateCondition':
       return updateCondition(state, action.condition);
     case 'removeCondition':

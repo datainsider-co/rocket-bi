@@ -90,9 +90,25 @@ describe('drop', () => {
     expect(items(run(column(), insert('sorting', revenue)), 'sorting')).toMatchObject([{ id: 3, sorting: 'Ascending' }]);
   });
 
-  it("replaces a full single-item zone's item", () => {
+  it("replaces a full single-item zone's item, keeping its id", () => {
     const state = run(column(), { type: 'drop', drop: { type: 'replace', zoneId: 'x_axis', index: 0 }, field: field('country', 'string') });
-    expect(items(state, 'x_axis').map(item => item.name)).toEqual(['country']);
+    expect(items(state, 'x_axis').map(item => [item.id, item.name])).toEqual([[1, 'country']]);
+  });
+
+  it('keeps the function of the replaced item for the same kind of column only', () => {
+    const pie = run(newBuilderState(ChartType.Pie), insert('value', revenue));
+    const [sum] = items(pie, 'value');
+    if (!sum) throw new Error('no item');
+    const averaged = run(pie, { type: 'updateItem', zone: 'value', item: { ...sum, functionType: 'Average' } });
+    const replace = { type: 'replace', zoneId: 'value', index: 0 } as const;
+    expect(items(run(averaged, { type: 'drop', drop: replace, field: field('total_profit', 'double') }), 'value')).toMatchObject([{ name: 'total_profit', functionType: 'Average' }]);
+    expect(items(run(averaged, { type: 'drop', drop: replace, field: region }), 'value')).toMatchObject([{ name: 'region', functionType: 'Count all' }]);
+  });
+
+  it('adds a chart control as a dynamic item', () => {
+    const data = { id: 50, display_name: 'Group by', chart_info_type: 'FunctionController' };
+    const control: DroppedField = { field: { class_name: 'chart_control_field', control_data: data }, columnName: 'Group by', tableName: '', dynamicFunction: data };
+    expect(items(run(newBuilderState(ChartType.Column), insert('x_axis', control)), 'x_axis')).toMatchObject([{ functionFamily: 'Dynamic', dynamicFunction: data }]);
   });
 
   it('reorders inside a zone, keeping the items', () => {
@@ -204,6 +220,41 @@ describe('conditions', () => {
     expect(builderSettingOf(updated)?.['filters']).toEqual([{ class_name: 'and', conditions: [{ class_name: 'in', possible_values: ['Asia'], field: region.field }] }]);
     const added = run(state, { type: 'updateCondition', condition: { ...condition, id: 5, groupId: 8 } });
     expect(Object.keys(added.data.filters)).toEqual(['1', '8']);
+  });
+
+  it('adds a condition at an index of its group', () => {
+    const state = run(withRegion(), { type: 'addCondition', field: revenue, groupId: 1, index: 0 });
+    expect(state.data.filters['1']?.map(condition => condition.id)).toEqual([2, 1]);
+  });
+
+  it('moves a condition to another group, dropping its emptied group', () => {
+    const state = run(withRegion(), { type: 'addCondition', field: revenue });
+    const moved = run(state, { type: 'moveCondition', from: { groupId: 2, index: 0 }, to: { groupId: 1, index: 0 } });
+    expect(Object.keys(moved.data.filters)).toEqual(['1']);
+    expect(moved.data.filters['1']?.map(condition => [condition.id, condition.groupId])).toEqual([
+      [2, 1],
+      [1, 1]
+    ]);
+  });
+
+  it('moves a condition into a new group', () => {
+    const state = run(withRegion(), { type: 'addCondition', field: revenue, groupId: 1 });
+    const moved = run(state, { type: 'moveCondition', from: { groupId: 1, index: 1 }, to: { index: 0 } });
+    expect(Object.fromEntries(Object.entries(moved.data.filters).map(([key, group]) => [key, group.map(condition => [condition.id, condition.groupId])]))).toEqual({
+      '1': [[1, 1]],
+      '2': [[2, 2]]
+    });
+  });
+
+  it('reorders a condition inside its group', () => {
+    const state = run(withRegion(), { type: 'addCondition', field: revenue, groupId: 1 });
+    const moved = run(state, { type: 'moveCondition', from: { groupId: 1, index: 1 }, to: { groupId: 1, index: 0 } });
+    expect(moved.data.filters['1']?.map(condition => condition.id)).toEqual([2, 1]);
+  });
+
+  it('ignores a move from a missing condition', () => {
+    const state = withRegion();
+    expect(run(state, { type: 'moveCondition', from: { groupId: 1, index: 3 }, to: { index: 0 } })).toBe(state);
   });
 
   it('removes a condition with its group once empty, and ignores unknown ones', () => {
