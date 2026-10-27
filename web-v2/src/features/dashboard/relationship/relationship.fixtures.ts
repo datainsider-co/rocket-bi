@@ -110,6 +110,7 @@ export function fixtureRelationshipService(json: unknown = RELATIONSHIP_JSON): R
 /** A schema service that knows `sample_v2` and the fixture's SQL views. */
 export function fixtureSchemaService(): SchemaService {
   return {
+    listDatabases: async () => [{ name: SAMPLE_DATABASE_JSON.name, displayName: SAMPLE_DATABASE_JSON.name }],
     getDatabase: async dbName =>
       databaseSchemaFromJson(dbName === SAMPLE_DATABASE_JSON.name ? SAMPLE_DATABASE_JSON : { name: dbName }),
     detectTableSchema: async query =>

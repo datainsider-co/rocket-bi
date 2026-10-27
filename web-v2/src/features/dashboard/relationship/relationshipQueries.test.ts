@@ -66,6 +66,7 @@ describe('loadRelationshipData', () => {
 
   it('gives tables whose schema fails to load no columns', async () => {
     const schema: SchemaService = {
+      listDatabases: vi.fn<SchemaService['listDatabases']>(async () => []),
       getDatabase: vi.fn<SchemaService['getDatabase']>(async () => {
         throw new Error('forbidden');
       }),
