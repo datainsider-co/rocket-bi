@@ -60,6 +60,25 @@ describe('visualizationResponseFromJson', () => {
     expect(response.records[0]).toMatchObject({ '0': 'North America', '3': '6021738.87' });
   });
 
+  it("reads a table's min and max per column", () => {
+    const response = visualizationResponseFromJson({
+      class_name: 'json_table_response',
+      headers: [],
+      records: [],
+      min_max_values: [{ value_name: 'total_revenue', min: 2733.69, max: 6456747.15 }, { value_name: 'bad', min: null, max: 1 }]
+    });
+    expect(response.kind === 'json_table' && response.minMaxValues).toEqual([{ valueName: 'total_revenue', min: 2733.69, max: 6456747.15 }]);
+  });
+
+  it('reads compared values of number charts', () => {
+    const response = visualizationResponseFromJson({
+      class_name: 'series_one_response',
+      series: [{ name: 'p', data: [2] }],
+      compare_responses: { RawValues: { class_name: 'series_one_response', series: [{ name: 'p', data: [1] }] } }
+    });
+    expect(response.kind === 'series_one' && response.compareValue).toBe(1);
+  });
+
   it('reads filter values as rows', () => {
     const response = visualizationResponseFromJson(responses.tab_filter_chart_setting);
     expect(response).toMatchObject({ kind: 'table', headers: ['label', 'value'], records: [['Asia', 'Asia'], expect.anything(), expect.anything()] });

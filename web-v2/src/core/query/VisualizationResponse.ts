@@ -56,6 +56,14 @@ export interface JsonTableResponse {
   readonly headers: readonly TableHeader[];
   readonly records: readonly JsonObject[];
   readonly total: number;
+  /** Per column (by name) with `is_calc_min_max`, over the whole result, not the page (`min_max_values`). */
+  readonly minMaxValues?: readonly MinMaxValue[];
+}
+
+export interface MinMaxValue {
+  readonly valueName: string;
+  readonly min: number;
+  readonly max: number;
 }
 
 export interface UnsupportedResponse {
@@ -96,6 +104,17 @@ function compareValueOf(value: unknown): { compareValue?: number } {
   const series = asArray(asRecord(asRecord(value)['RawValues'])['series'])[0];
   const compared = toNullableNumber(asArray(asRecord(series)['data'])[0]);
   return compared === null ? {} : { compareValue: compared };
+}
+
+function minMaxValuesOf(value: unknown): { minMaxValues?: MinMaxValue[] } {
+  const values = asArray(value)
+    .filter(isRecord)
+    .flatMap(item => {
+      const min = toNullableNumber(item['min']);
+      const max = toNullableNumber(item['max']);
+      return min === null || max === null ? [] : [{ valueName: asString(item['value_name']), min, max }];
+    });
+  return values.length > 0 ? { minMaxValues: values } : {};
 }
 
 function stringList(value: unknown): string[] {
@@ -141,7 +160,8 @@ export function visualizationResponseFromJson(value: unknown): VisualizationResp
         kind: 'json_table',
         headers: asArray(json['headers']).map(tableHeaderFromJson),
         records: asArray(json['records']).filter(isRecord),
-        total: asNumber(json['total'], asArray(json['records']).length)
+        total: asNumber(json['total'], asArray(json['records']).length),
+        ...minMaxValuesOf(json['min_max_values'])
       };
     default:
       return { kind: 'unsupported', className };

@@ -102,6 +102,7 @@
 }
 
 .flatten-table .ant-table-tbody > tr > td {
+  position: relative;
   height: calc(48px + 2 * var(--ft-row-padding, 0px));
   padding: var(--ft-row-padding, 0px) 12px !important;
   border-bottom: var(--ft-grid-body-horizontal, none);
@@ -146,4 +147,28 @@
   margin-inline-end: auto;
   color: var(--ft-header-color, var(--text-color));
   font-size: 14px;
+}
+
+/* A cell's data bar behind its text, and its icon beside it (v1 `data-bar-panel`, `icon-bar`). */
+.table-cell__bar {
+  position: absolute;
+  inset: 1px 12px;
+  pointer-events: none;
+}
+
+.table-cell__bar-part {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+}
+
+.table-cell__text,
+.table-cell__icon-bar {
+  position: relative;
+}
+
+.table-cell__icon-bar {
+  display: inline-flex;
+  gap: 5px;
+  max-width: 100%;
 }

@@ -5,6 +5,7 @@ import type { JsonObject } from '@/core/json/json';
 import type { TableSort } from '@/core/query/tableSort';
 import type { TableHeader } from '@/core/query/VisualizationResponse';
 import type { VizOptions } from '@/core/query/vizOptions';
+import type { DecorateColumn } from './columnDecorations';
 import { createNumberFormat, DisplayUnit } from '../numberFormat';
 
 /** Formats a number cell. */
@@ -51,23 +52,32 @@ function titled(title: string): HTMLAttributes<HTMLElement> {
  * (headers align by the table's options). Leaves sort on the server; `sort` marks the sorted one. Each cell carries its
  * full text for its tooltip.
  */
-export function toColumns(headers: readonly TableHeader[], sort?: TableSort, format: CellNumberFormat = String): TableColumnsType<TableRow> {
-  return headers.map(header =>
-    header.children.length > 0
-      ? { key: header.key, title: header.label, onHeaderCell: () => titled(header.label), children: toColumns(header.children, sort, format) }
-      : {
-          key: header.key,
-          title: header.label,
-          dataIndex: ['record', header.key],
-          align: header.isTextLeft ? 'left' : 'right',
-          ellipsis: { showTitle: false },
-          onHeaderCell: () => titled(header.label),
-          onCell: (row: TableRow) => titled(tableCellText(row.record[header.key], header, format)),
-          sorter: true,
-          sortOrder: sort?.column === header.label ? (sort.direction === 'ASC' ? 'ascend' : 'descend') : null,
-          render: (value: unknown) => tableCellText(value, header, format)
-        }
-  );
+export function toColumns(headers: readonly TableHeader[], sort?: TableSort, format: CellNumberFormat = String, decorate?: DecorateColumn): TableColumnsType<TableRow> {
+  return headers.map(header => {
+    if (header.children.length > 0) {
+      return { key: header.key, title: header.label, onHeaderCell: () => titled(header.label), children: toColumns(header.children, sort, format, decorate) };
+    }
+    const decoration = decorate?.(header);
+    const cellFormat = decoration?.format ?? format;
+    return {
+      key: header.key,
+      title: header.label,
+      dataIndex: ['record', header.key],
+      align: header.isTextLeft ? 'left' : 'right',
+      ellipsis: { showTitle: false },
+      onHeaderCell: () => ({ ...titled(header.label), style: decoration?.headerStyle }),
+      onCell: (row: TableRow) => {
+        const value = row.record[header.key];
+        return { ...titled(tableCellText(value, header, cellFormat)), style: decoration?.cellStyle?.(value) };
+      },
+      sorter: true,
+      sortOrder: sort?.column === header.label ? (sort.direction === 'ASC' ? 'ascend' : 'descend') : null,
+      render: (value: unknown) => {
+        const text = tableCellText(value, header, cellFormat);
+        return decoration?.render ? decoration.render(value, text) : text;
+      }
+    };
+  });
 }
 
 /** antd's sorter → the sort to query with; none when the column went back to unsorted. */

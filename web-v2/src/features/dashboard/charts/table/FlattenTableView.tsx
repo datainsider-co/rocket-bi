@@ -4,6 +4,7 @@ import type { Paging } from '@/core/query/QueryRequest';
 import type { TableSort } from '@/core/query/tableSort';
 import type { JsonTableResponse } from '@/core/query/VisualizationResponse';
 import { GRID_NO_DRAG_CLASS } from '../../grid/DashboardGridView';
+import type { DecorateColumn } from './columnDecorations';
 import { TABLE_COMPONENTS } from './tableComponents';
 import type { TableLook } from './tableStyle.utils';
 import { TableTooltipContext } from './TableTooltipContext';
@@ -22,15 +23,17 @@ interface FlattenTableViewProps {
   numberFormat: CellNumberFormat;
   /** The table's colors, fonts, grid and tooltip from its options. */
   look: TableLook;
+  /** Each column's own formatting (`columnDecorationsOf`). */
+  decorate?: DecorateColumn;
 }
 
 /**
  * Tables (v1 `DefaultTable`): title, rows of the current page with v1's number format, the row count, server-side
- * pages and sorting on one column, styled by the table's options, each cell with its full text on hover. Per-field
- * formatting and conditional colors come later.
+ * pages and sorting on one column, styled by the table's options, each column by its own formatting, each cell with
+ * its full text on hover.
  */
-export function FlattenTableView({ title, subtitle, response, paging, loading, onPageChange, sort, onSortChange, numberFormat, look }: FlattenTableViewProps) {
-  const columns = useMemo(() => toColumns(response.headers, sort, numberFormat), [response.headers, sort, numberFormat]);
+export function FlattenTableView({ title, subtitle, response, paging, loading, onPageChange, sort, onSortChange, numberFormat, look, decorate }: FlattenTableViewProps) {
+  const columns = useMemo(() => toColumns(response.headers, sort, numberFormat, decorate), [response.headers, sort, numberFormat, decorate]);
   const rows = useMemo(() => toRows(response.records, paging.from), [response.records, paging.from]);
 
   return (

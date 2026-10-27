@@ -12,6 +12,7 @@ import { buildKpi } from './kpi/kpi.utils';
 import { KpiView } from './kpi/KpiView';
 import { tableNumberFormat } from './table/table.utils';
 import { tableLookOf } from './table/tableStyle.utils';
+import { columnDecorationsOf, tableColumnsOf } from './table/columnDecorations';
 import { buildPieChartOptions } from './pie/pieChartOptions';
 import { buildSeriesChartOptions, isTimestampFunction } from './series/seriesChartOptions';
 import { FlattenTableView } from './table/FlattenTableView';
@@ -79,6 +80,11 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
   }, [viz, response, themeColors, widget.setting, selected, onSelect, onPointMenu]);
   const tableFormat = useMemo(() => tableNumberFormat(viz.options), [viz.options]);
   const tableLook = useMemo(() => tableLookOf(viz.options), [viz.options]);
+  const minMaxValues = response.kind === 'json_table' ? response.minMaxValues : undefined;
+  const decorate = useMemo(
+    () => columnDecorationsOf({ options: viz.options, columns: tableColumnsOf(widget.setting), minMaxValues }),
+    [viz.options, widget.setting, minMaxValues]
+  );
 
   if (highchartsOptions) {
     return <HighchartsChart options={highchartsOptions} fill onPointContextMenu={(point, position) => onPointMenu(pointValue(point), position)} />;
@@ -97,6 +103,7 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
         onSortChange={table.onSortChange}
         numberFormat={tableFormat}
         look={tableLook}
+        decorate={decorate}
       />
     );
   }
