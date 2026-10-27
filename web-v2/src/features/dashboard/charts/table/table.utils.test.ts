@@ -8,12 +8,20 @@ const response = visualizationResponseFromJson(responses.table_chart_setting) as
 
 describe('toColumns', () => {
   it('reads cells by header key and aligns numbers right', () => {
-    expect(toColumns(response.headers).map(column => ({ ...column, render: undefined }))).toEqual([
-      { key: '0', title: 'region', dataIndex: ['record', '0'], align: 'left', ellipsis: true, sorter: true, sortOrder: null, render: undefined },
-      { key: '1', title: 'country', dataIndex: ['record', '1'], align: 'left', ellipsis: true, sorter: true, sortOrder: null, render: undefined },
-      { key: '2', title: 'item_type', dataIndex: ['record', '2'], align: 'left', ellipsis: true, sorter: true, sortOrder: null, render: undefined },
-      { key: '3', title: 'total_revenue', dataIndex: ['record', '3'], align: 'right', ellipsis: true, sorter: true, sortOrder: null, render: undefined }
+    expect(toColumns(response.headers)).toMatchObject([
+      { key: '0', title: 'region', dataIndex: ['record', '0'], align: 'left', ellipsis: { showTitle: false }, sorter: true, sortOrder: null },
+      { key: '1', title: 'country', dataIndex: ['record', '1'], align: 'left', ellipsis: { showTitle: false }, sorter: true, sortOrder: null },
+      { key: '2', title: 'item_type', dataIndex: ['record', '2'], align: 'left', ellipsis: { showTitle: false }, sorter: true, sortOrder: null },
+      { key: '3', title: 'total_revenue', dataIndex: ['record', '3'], align: 'right', ellipsis: { showTitle: false }, sorter: true, sortOrder: null }
     ]);
+  });
+
+  it('gives each cell its full text for its tooltip', () => {
+    const [, , , revenue] = toColumns(response.headers, undefined, value => `$${value}`);
+    const row = toRows(response.records, 0)[0];
+    expect(revenue?.onHeaderCell?.({})).toEqual({ 'data-title': 'total_revenue' });
+    const onCell = revenue && 'onCell' in revenue ? revenue.onCell : undefined;
+    expect(row && onCell?.(row)).toEqual({ 'data-title': `$${String(row?.record['3'])}` });
   });
 
   it('nests grouped headers', () => {

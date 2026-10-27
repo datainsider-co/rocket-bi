@@ -1,4 +1,7 @@
-/* v1 DefaultTable (TableHeader.vue, TableStyle.scss, custom-table): 48px rows on the theme's table colors. */
+/*
+ * v1 DefaultTable (TableHeader.vue, TableStyle.scss, custom-table): 48px rows on the theme's table colors. The table's
+ * options set the `--ft-*` variables (`tableStyleVars`); without them the theme's apply.
+ */
 
 .flatten-table__header {
   display: flex;
@@ -77,11 +80,21 @@
   height: 48px;
   padding: 1px 12px !important;
   border-bottom: none;
-  background: var(--header-background-color, #f5f5f5);
-  color: var(--table-header-color, var(--secondary-text-color));
-  font-size: 12px;
+  /* A translucent header color over the card's background, so rows scrolling under the sticky header stay hidden. */
+  background: linear-gradient(var(--ft-header-bg, var(--header-background-color, #f5f5f5)), var(--ft-header-bg, var(--header-background-color, #f5f5f5)))
+    var(--ft-card-bg, var(--chart-background-color, transparent));
+  color: var(--ft-header-color, var(--table-header-color, var(--secondary-text-color)));
+  font-family: var(--ft-header-font, inherit);
+  font-size: var(--ft-header-size, 12px);
   font-weight: bold;
   letter-spacing: 0.2px;
+  /* v1 aligns headers by the table's options only, not by their column's type. */
+  text-align: var(--ft-header-align, left) !important;
+  white-space: var(--ft-header-white-space, nowrap);
+}
+
+.flatten-table .ant-table-thead > tr > th + th {
+  border-left: var(--ft-grid-header-vertical, none);
 }
 
 .flatten-table .ant-table-thead > tr > th::before {
@@ -89,21 +102,32 @@
 }
 
 .flatten-table .ant-table-tbody > tr > td {
-  height: 48px;
-  padding: 0 12px !important;
-  border-bottom: none;
-  font-size: 14px;
+  height: calc(48px + 2 * var(--ft-row-padding, 0px));
+  padding: var(--ft-row-padding, 0px) 12px !important;
+  border-bottom: var(--ft-grid-body-horizontal, none);
+  font-family: var(--ft-row-font, inherit);
+  font-size: var(--ft-row-size, 14px);
   letter-spacing: 0.23px;
+  white-space: var(--ft-row-white-space, nowrap);
+}
+
+.flatten-table .ant-table-tbody > tr > td + td {
+  border-left: var(--ft-grid-body-vertical, none);
+}
+
+/* v1 `.hide-footer`: no line under the last row. */
+.flatten-table .ant-table-tbody > tr:last-child > td {
+  border-bottom: none;
 }
 
 .flatten-table .flatten-table__row--even > td {
-  background: var(--row-even-background-color, transparent);
-  color: var(--row-even-color, var(--secondary-text-color));
+  background: var(--ft-row-even-bg, var(--row-even-background-color, transparent));
+  color: var(--ft-row-even-color, var(--row-even-color, var(--secondary-text-color)));
 }
 
 .flatten-table .flatten-table__row--odd > td {
-  background: var(--row-odd-background-color, #00000003);
-  color: var(--row-odd-color, var(--secondary-text-color));
+  background: var(--ft-row-odd-bg, var(--row-odd-background-color, #00000003));
+  color: var(--ft-row-odd-color, var(--row-odd-color, var(--secondary-text-color)));
 }
 
 .flatten-table .ant-table-tbody > tr:hover > td {
@@ -113,12 +137,13 @@
 .flatten-table .ant-pagination {
   align-items: center;
   margin: 8px 0 0 !important;
-  color: var(--secondary-text-color);
+  /* v1: the pages take the header's text color, which reads on the table's theme. */
+  color: var(--ft-header-color, var(--secondary-text-color));
 }
 
 /* v1's footer: the row count on the left, the pages on the right. */
 .flatten-table .ant-pagination-total-text {
   margin-inline-end: auto;
-  color: var(--text-color);
+  color: var(--ft-header-color, var(--text-color));
   font-size: 14px;
 }

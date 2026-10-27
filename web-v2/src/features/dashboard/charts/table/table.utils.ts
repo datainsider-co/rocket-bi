@@ -1,3 +1,4 @@
+import type { HTMLAttributes } from 'react';
 import type { TableColumnsType } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
 import type { JsonObject } from '@/core/json/json';
@@ -40,20 +41,28 @@ export interface TableRow {
   record: JsonObject;
 }
 
+/** Gives a cell its full text, for its tooltip (`TooltipCell`). */
+function titled(title: string): HTMLAttributes<HTMLElement> {
+  return { 'data-title': title } as HTMLAttributes<HTMLElement>;
+}
+
 /**
- * Header tree → antd columns; leaves read the record cell under the header's key. Numbers align right, as in v1.
- * Leaves sort on the server; `sort` marks the sorted one.
+ * Header tree → antd columns; leaves read the record cell under the header's key. Numbers align right, as in v1
+ * (headers align by the table's options). Leaves sort on the server; `sort` marks the sorted one. Each cell carries its
+ * full text for its tooltip.
  */
 export function toColumns(headers: readonly TableHeader[], sort?: TableSort, format: CellNumberFormat = String): TableColumnsType<TableRow> {
   return headers.map(header =>
     header.children.length > 0
-      ? { key: header.key, title: header.label, children: toColumns(header.children, sort, format) }
+      ? { key: header.key, title: header.label, onHeaderCell: () => titled(header.label), children: toColumns(header.children, sort, format) }
       : {
           key: header.key,
           title: header.label,
           dataIndex: ['record', header.key],
           align: header.isTextLeft ? 'left' : 'right',
-          ellipsis: true,
+          ellipsis: { showTitle: false },
+          onHeaderCell: () => titled(header.label),
+          onCell: (row: TableRow) => titled(tableCellText(row.record[header.key], header, format)),
           sorter: true,
           sortOrder: sort?.column === header.label ? (sort.direction === 'ASC' ? 'ascend' : 'descend') : null,
           render: (value: unknown) => tableCellText(value, header, format)
