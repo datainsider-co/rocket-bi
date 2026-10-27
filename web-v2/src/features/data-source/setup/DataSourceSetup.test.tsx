@@ -12,6 +12,12 @@ import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing'
 import { ApiError } from '@/shared/http/ApiError';
 import { fakeConnectionService, fakePermissionService } from '../testing';
 
+/**
+ * Each test renders the whole app (router, lazy page, setup dialog) before its first step, which can take longer than
+ * Testing Library's 1s default while the suite runs in parallel.
+ */
+const APP_LOADED = { timeout: 5000 };
+
 const ROOT = new LoginResponse({ user_info: { username: 'root' }, user_profile: { username: 'root' } });
 
 /** Before starting: an old finished run. After starting: the new run, already done, so no polling wait. */
@@ -49,7 +55,7 @@ describe('data source setup', () => {
     const user = userEvent.setup();
     renderHome(service);
 
-    await user.click(await screen.findByRole('button', { name: 'MySQL' }));
+    await user.click(await screen.findByRole('button', { name: 'MySQL' }, APP_LOADED));
     expect(await screen.findByText('MySQL Config')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Apply' }));
@@ -97,7 +103,7 @@ describe('data source setup', () => {
     const user = userEvent.setup();
     renderHome(service);
 
-    await user.click(await screen.findByRole('button', { name: 'ClickHouse' }));
+    await user.click(await screen.findByRole('button', { name: 'ClickHouse' }, APP_LOADED));
     await user.type(await screen.findByLabelText('Host'), 'nohost');
     await user.type(screen.getByLabelText('HTTP Port'), '8123');
     await user.type(screen.getByLabelText('TCP Port'), '9000');
@@ -111,7 +117,7 @@ describe('data source setup', () => {
     const user = userEvent.setup();
     renderHome(fakeConnectionService({ exists: vi.fn<ConnectionService['exists']>(async () => false) }));
 
-    await user.click(await screen.findByRole('button', { name: 'MySQL' }));
+    await user.click(await screen.findByRole('button', { name: 'MySQL' }, APP_LOADED));
     await user.click(await screen.findByRole('button', { name: 'Back' }));
     await user.click(await screen.findByRole('button', { name: 'Skip' }));
 
@@ -127,7 +133,7 @@ describe('data source setup', () => {
       })
     );
 
-    expect(await screen.findByText('ClickHouse Config')).toBeInTheDocument();
+    expect(await screen.findByText('ClickHouse Config', {}, APP_LOADED)).toBeInTheDocument();
     expect(screen.getByLabelText('Host')).toHaveValue('ch');
     expect(screen.getByLabelText('TCP Port')).toHaveValue('9000');
   });
@@ -147,7 +153,7 @@ describe('data source setup', () => {
     const user = userEvent.setup();
     renderHome(service);
 
-    await user.click(await screen.findByRole('button', { name: 'MySQL' }));
+    await user.click(await screen.findByRole('button', { name: 'MySQL' }, APP_LOADED));
     await user.type(await screen.findByLabelText('Host'), 'db');
     await user.type(screen.getByLabelText('Port'), '3306');
     await user.type(screen.getByLabelText('Username'), 'root');
@@ -164,7 +170,7 @@ describe('data source setup', () => {
     const user = userEvent.setup();
     renderHome(service);
 
-    await user.click(await screen.findByRole('button', { name: 'MySQL' }));
+    await user.click(await screen.findByRole('button', { name: 'MySQL' }, APP_LOADED));
     await user.click(await screen.findByText('Connect using an SSH tunnel'));
 
     await waitFor(() => expect(screen.getByLabelText('Public Key')).toHaveValue('ssh-rsa TEST'));
@@ -175,7 +181,7 @@ describe('data source setup', () => {
     const service = fakeConnectionService({ exists: vi.fn<ConnectionService['exists']>(async () => false) });
     const { permissionService } = renderHome(service, []);
 
-    await waitFor(() => expect(permissionService.isPermitted).toHaveBeenCalledWith('root', [Permission.manageConnection]));
+    await waitFor(() => expect(permissionService.isPermitted).toHaveBeenCalledWith('root', [Permission.manageConnection]), APP_LOADED);
     expect(service.exists).not.toHaveBeenCalled();
     expect(screen.queryByText(/Setup/)).not.toBeInTheDocument();
   });
@@ -184,7 +190,7 @@ describe('data source setup', () => {
     const service = fakeConnectionService();
     renderHome(service);
 
-    await waitFor(() => expect(service.getRefreshHistory).toHaveBeenCalled());
+    await waitFor(() => expect(service.getRefreshHistory).toHaveBeenCalled(), APP_LOADED);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });
