@@ -32,6 +32,7 @@ export function fakeQueryService(overrides: Partial<QueryService> = {}): QuerySe
 export function fakeSchemaService(overrides: Partial<SchemaService> = {}): SchemaService {
   return {
     getDatabase: vi.fn<SchemaService['getDatabase']>(async () => databaseSchemaFromJson(schema)),
+    detectTableSchema: vi.fn<SchemaService['detectTableSchema']>(async () => ({ dbName: '', name: 'adhoc_view', columns: [] })),
     ...overrides
   };
 }

@@ -32,16 +32,16 @@ function columnFromJson(value: unknown): SchemaColumn {
   return { name, displayName: asString(json['display_name']) || name, type: asString(json['class_name']) };
 }
 
+/** `dbName` stands in for a missing `db_name`. */
+export function tableSchemaFromJson(value: unknown, dbName = ''): TableSchema {
+  const json = asRecord(value);
+  return { dbName: asString(json['db_name'], dbName), name: asString(json['name']), columns: asArray(json['columns']).map(columnFromJson) };
+}
+
 export function databaseSchemaFromJson(value: unknown): DatabaseSchema {
   const json = asRecord(value);
   const name = asString(json['name']);
-  return {
-    name,
-    tables: asArray(json['tables']).map(table => {
-      const tableJson = asRecord(table);
-      return { dbName: asString(tableJson['db_name'], name), name: asString(tableJson['name']), columns: asArray(tableJson['columns']).map(columnFromJson) };
-    })
-  };
+  return { name, tables: asArray(json['tables']).map(table => tableSchemaFromJson(table, name)) };
 }
 
 /** A column as a query setting refers to it (backend `TableField`). */
@@ -51,6 +51,8 @@ export function tableField(table: Pick<TableSchema, 'dbName' | 'name'>, column: 
 
 export interface SchemaService {
   getDatabase(dbName: string, signal?: AbortSignal): Promise<DatabaseSchema>;
+  /** Columns a SQL query returns, as an ad-hoc table (`adhoc_view`) with an empty `dbName`. */
+  detectTableSchema(query: string, signal?: AbortSignal): Promise<TableSchema>;
 }
 
 export const SchemaService = token<SchemaService>('SchemaService');
@@ -60,6 +62,10 @@ export class HttpSchemaService implements SchemaService {
 
   async getDatabase(dbName: string, signal?: AbortSignal): Promise<DatabaseSchema> {
     return databaseSchemaFromJson(await this.http.get(`databases/${encodeURIComponent(dbName)}`, { signal }).json());
+  }
+
+  async detectTableSchema(query: string, signal?: AbortSignal): Promise<TableSchema> {
+    return tableSchemaFromJson(await this.http.post('databases/adhoc/tables', { json: { query }, signal }).json());
   }
 }
 

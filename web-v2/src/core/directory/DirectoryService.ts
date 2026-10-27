@@ -1,5 +1,6 @@
 import type { KyInstance } from 'ky';
 import { token } from '@/core/di/Container';
+import { asRecord } from '@/core/json/json';
 import { Directory, DirectoryParents, DirectoryType } from './Directory';
 
 export const SortOrder = {
@@ -41,6 +42,11 @@ export interface DirectoryService {
   restore(id: number): Promise<void>;
   star(id: number): Promise<void>;
   unstar(id: number): Promise<void>;
+  /**
+   * Sets a dashboard's or query's password (`data.config`, sha256 hex of it), or removes it when `hashedPassword` is
+   * `undefined`. The server only updates a whole directory, so the rest is sent back as it was read.
+   */
+  setPassword(id: number, hashedPassword: string | undefined): Promise<void>;
 }
 
 export const DirectoryService = token<DirectoryService>('DirectoryService');
@@ -119,6 +125,13 @@ export class HttpDirectoryService implements DirectoryService {
 
   async unstar(id: number): Promise<void> {
     await this.http.post(`directories/${id}/unstar`);
+  }
+
+  async setPassword(id: number, hashedPassword: string | undefined): Promise<void> {
+    const directory = asRecord(await this.http.get(`directories/${id}`).json());
+    const { config: _removed, ...data } = asRecord(directory['data']);
+    const config = hashedPassword === undefined ? {} : { config: { enabled: true, hashed_password: hashedPassword } };
+    await this.http.put(`directories/${id}`, { json: { ...directory, data: { ...data, ...config } } });
   }
 
   private async postList(path: string, sorts: readonly DirectorySort[]): Promise<Directory[]> {

@@ -120,4 +120,34 @@ describe('HttpDirectoryService', () => {
     await service[method](4);
     expect(requests[0]).toMatchObject({ method: verb, url: `http://api.test/${path}` });
   });
+
+  it('sets a password on the whole directory, other data kept', async () => {
+    // Directory 9 of the local backend, with an unknown key in `data`.
+    const { service, requests, sent } = setup({ ...DASHBOARD_JSON, id: 9, data: { extra: 1 } });
+
+    await service.setPassword(9, 'ba7816bf');
+
+    expect(requests.map(request => `${request.method} ${request.url}`)).toEqual([
+      'GET http://api.test/directories/9',
+      'PUT http://api.test/directories/9'
+    ]);
+    // Body accepted by the local backend.
+    expect(sent(1)).toEqual({ ...DASHBOARD_JSON, id: 9, data: { extra: 1, config: { enabled: true, hashed_password: 'ba7816bf' } } });
+  });
+
+  it('adds data to a directory that has none', async () => {
+    const { service, sent } = setup(DASHBOARD_JSON);
+
+    await service.setPassword(3, 'ab');
+
+    expect(sent(1)).toEqual({ ...DASHBOARD_JSON, data: { config: { enabled: true, hashed_password: 'ab' } } });
+  });
+
+  it('removes the password by dropping config', async () => {
+    const { service, sent } = setup({ ...DASHBOARD_JSON, data: { config: { enabled: true, hashed_password: 'ab' } } });
+
+    await service.setPassword(3, undefined);
+
+    expect(sent(1)).toEqual({ ...DASHBOARD_JSON, data: {} });
+  });
 });
