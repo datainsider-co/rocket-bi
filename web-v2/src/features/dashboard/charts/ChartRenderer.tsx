@@ -45,6 +45,8 @@ export interface ChartRendererProps {
   themeColors: readonly string[];
   table: TablePaging;
   crossFilter: CrossFilter;
+  /** A number chart's trend line values (`useKpiTrend`). */
+  trend?: readonly (number | null)[];
 }
 
 function Unsupported({ title, type }: { title: string; type: string }) {
@@ -62,7 +64,7 @@ function Unsupported({ title, type }: { title: string; type: string }) {
  * Picks the renderer for a chart (v1 `ChartComponent`: by viz option class, tables by their response). Charts not
  * ported yet say so instead of failing. Filters go through `FilterRenderer`.
  */
-export function ChartRenderer({ widget, viz, response, themeColors, table, crossFilter }: ChartRendererProps) {
+export function ChartRenderer({ widget, viz, response, themeColors, table, crossFilter, trend }: ChartRendererProps) {
   const { selected, onSelect, onPointMenu } = crossFilter;
   const highchartsOptions = useMemo(() => {
     if (viz.className === ChartVizClass.Series && response.kind === 'series_one') {
@@ -79,7 +81,7 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
   if (highchartsOptions) {
     return <HighchartsChart options={highchartsOptions} fill onPointContextMenu={(point, position) => onPointMenu(pointValue(point), position)} />;
   }
-  if (viz.className === ChartVizClass.Number && response.kind === 'series_one') return <KpiView kpi={buildKpi(viz.options, response)} />;
+  if (viz.className === ChartVizClass.Number && response.kind === 'series_one') return <KpiView kpi={buildKpi(viz.options, response, trend)} />;
   if (response.kind === 'json_table') {
     return (
       <FlattenTableView

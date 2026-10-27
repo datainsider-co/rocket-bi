@@ -49,7 +49,7 @@ export function ChartWidgetView({ widget, dashboardId, themeColors, chart }: Cha
     <div className="flex h-full flex-col">
       <DrillPathView steps={chart.drillPath.steps} onBack={chart.drillPath.onBack} />
       <div className="min-h-0 flex-1">
-        <ChartRenderer widget={widget} viz={chart.viz} response={data.data} themeColors={themeColors} table={chart.table} crossFilter={chart.crossFilter} />
+        <ChartRenderer widget={widget} viz={chart.viz} response={data.data} themeColors={themeColors} table={chart.table} crossFilter={chart.crossFilter} trend={chart.trend} />
       </div>
       <PointMenuView {...chart.pointMenu} />
     </div>

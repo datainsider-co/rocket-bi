@@ -4,6 +4,7 @@ import { DEFAULT_PAGE_SIZE, isPagedSetting, type FilterRequestJson, type Paging 
 import type { TableSort } from '@/core/query/tableSort';
 import { vizFromSetting } from '@/core/query/vizOptions';
 import { zoomLevelOf, canZoom } from '@/core/query/zoom';
+import { useKpiTrend } from '../../chart-data/useKpiTrend';
 import { useWidgetData } from '../../chart-data/useWidgetData';
 import { isFilterViz } from '../../charts/filter/FilterRenderer';
 import { selectionOf, selectionToControl } from '../../charts/filter/filter.utils';
@@ -44,6 +45,7 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
   const viz = useMemo(() => vizFromSetting(widget.setting), [widget.setting]);
   const query = useMemo(() => buildChartQuery(view.viewed, controls, widgets, appliedRequests), [view.viewed, controls, widgets, appliedRequests]);
   const data = useWidgetData(view.viewed, { dashboardId, query, paging: isPagedSetting(widget.setting) ? paging : undefined });
+  const trend = useKpiTrend(view.viewed, query, dashboardId);
   const download = useChartExport(widget, dashboardId, query);
   const drillChoices = useDrillFields(view.viewed.setting, view.drillColumn, pointMenu !== null);
   const drillThrough = useDrillThrough(view.viewed.setting, pointMenu?.value, dashboardId);
@@ -99,6 +101,7 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
     viz,
     query,
     data,
+    trend,
     entry,
     setEntry,
     table: { paging, loading: data.isFetching, onPageChange: setPaging, sort: view.view.sort, onSortChange },

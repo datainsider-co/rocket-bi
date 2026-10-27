@@ -1,51 +1,73 @@
-import { Tooltip } from 'antd';
 import type { KpiModel } from './kpi.utils';
+import { KpiHeading } from './KpiHeading';
+import { KpiIcon } from './KpiIcon';
+import { KpiPercentage } from './KpiPercentage';
+import { KpiTrendChart } from './KpiTrendChart';
+import { KpiValue } from './KpiValue';
 import './Kpi.css';
 
-function KpiValue({ kpi }: { kpi: KpiModel }) {
-  return (
-    <Tooltip title={`${kpi.prefix}${kpi.exactValue}${kpi.postfix}`}>
-      <div className="kpi__value" style={kpi.valueStyle}>
-        {kpi.prefix && <span style={kpi.prefixStyle}>{kpi.prefix}</span>}
-        <span>{kpi.value}</span>
-        {kpi.postfix && <span style={kpi.postfixStyle}>{kpi.postfix}</span>}
-      </div>
-    </Tooltip>
-  );
-}
-
 /**
- * The KPI widget (v1 `NumberWidget`): without a theme v1's `NoneThemeLayout`, title and value centered in the card;
- * with one its `NormalLayout`, icon, title, subtitle, then the value, from the top left.
+ * The KPI widget (v1 `NumberWidget`), by layout (`KpiLayout`): plain, centered, with v1's `PercentageBar` and the trend
+ * line below; themed, from the top left, the comparison as a pill; with a trend line on the right; or the area layout,
+ * the trend line along the bottom.
  */
 export function KpiView({ kpi }: { kpi: KpiModel }) {
-  if (kpi.layout === 'plain') {
-    return (
-      <div className="kpi kpi--plain">
-        {(kpi.title || kpi.subtitle) && (
-          <div className="kpi__header">
-            {kpi.title && <div className="kpi__title" style={kpi.title.style} title={kpi.title.text}>{kpi.title.text}</div>}
-            {kpi.subtitle && <div className="kpi__subtitle" style={kpi.subtitle.style} title={kpi.subtitle.text}>{kpi.subtitle.text}</div>}
+  switch (kpi.layout) {
+    case 'plain':
+      return (
+        <div className="kpi kpi--plain">
+          {(kpi.title || kpi.subtitle) && (
+            <div className="kpi__header">
+              {kpi.title && <div className="kpi__title" style={kpi.title.style} title={kpi.title.text}>{kpi.title.text}</div>}
+              {kpi.subtitle && <div className="kpi__subtitle" style={kpi.subtitle.style} title={kpi.subtitle.text}>{kpi.subtitle.text}</div>}
+            </div>
+          )}
+          <KpiValue kpi={kpi} />
+          {kpi.comparison && (
+            <div className="kpi__bar" style={{ color: kpi.comparison.barColor }}>
+              <i className={kpi.comparison.barIcon} aria-hidden />
+              <span>{kpi.comparison.barText}</span>
+            </div>
+          )}
+          <KpiTrendChart trend={kpi.trend} className="kpi__trend--below" />
+        </div>
+      );
+    case 'trend':
+      return (
+        <div className="kpi kpi--themed kpi--trend">
+          <div className="flex items-center gap-4">
+            <KpiIcon icon={kpi.icon} />
+            <KpiValue kpi={kpi} />
           </div>
-        )}
-        <KpiValue kpi={kpi} />
-      </div>
-    );
+          <KpiHeading kpi={kpi} />
+          <KpiPercentage comparison={kpi.comparison} className="mt-6" />
+          <KpiTrendChart trend={kpi.trend} className="kpi__trend--right" />
+        </div>
+      );
+    case 'area':
+      return (
+        <div className="kpi kpi--themed kpi--area">
+          <div className="flex items-start gap-4">
+            <KpiIcon icon={kpi.icon} large />
+            <div className="flex min-w-0 flex-col gap-2">
+              <KpiHeading kpi={kpi} />
+              <div className="flex items-center gap-5">
+                <KpiValue kpi={kpi} />
+                <KpiPercentage comparison={kpi.comparison} />
+              </div>
+            </div>
+          </div>
+          <KpiTrendChart trend={kpi.trend} className="kpi__trend--bottom" />
+        </div>
+      );
+    default:
+      return (
+        <div className="kpi kpi--themed">
+          <KpiIcon icon={kpi.icon} />
+          <KpiHeading kpi={kpi} />
+          <KpiValue kpi={kpi} />
+          <KpiPercentage comparison={kpi.comparison} className="kpi__percentage--pill" />
+        </div>
+      );
   }
-  return (
-    <div className="kpi kpi--themed">
-      {kpi.icon && (
-        <div className="flex size-12 shrink-0 items-center justify-center" style={kpi.icon.style}>
-          <i className={`${kpi.icon.className} text-2xl`} />
-        </div>
-      )}
-      {(kpi.title || kpi.subtitle) && (
-        <div className="flex flex-col gap-2">
-          {kpi.title && <div style={kpi.title.style}>{kpi.title.text}</div>}
-          {kpi.subtitle && <div style={kpi.subtitle.style}>{kpi.subtitle.text}</div>}
-        </div>
-      )}
-      <KpiValue kpi={kpi} />
-    </div>
-  );
 }

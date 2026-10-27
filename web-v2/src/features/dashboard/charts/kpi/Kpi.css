@@ -63,3 +63,64 @@
   letter-spacing: 2.57px;
   text-overflow: ellipsis;
 }
+
+/* v1 PercentageBar (`default` style): the icon, the change without sign and the compared value. */
+.kpi__bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.kpi--themed {
+  position: relative;
+}
+
+.kpi__percentage {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* v1 NormalLayout: the comparison as a pill at the top right. */
+.kpi__percentage--pill {
+  position: absolute;
+  top: 45.5px;
+  right: 24px;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+  border-radius: 12px;
+}
+
+.kpi__trend {
+  min-height: 0;
+}
+
+/* v1 NoneThemeLayout: the trend line fills the card below the value. */
+.kpi__trend--below {
+  flex: 1;
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* v1 TrendLineLayout: on the right, under the header row, faded on its left. */
+.kpi__trend--right {
+  position: absolute;
+  top: 80px;
+  right: 0;
+  bottom: 0;
+  width: 70%;
+  max-width: 296px;
+  mask-image: linear-gradient(to right, transparent, #000 30%);
+}
+
+/* v1 AreaLayout: along the bottom of the card, 126px tall, faded on its right. */
+.kpi__trend--bottom {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 126px;
+  mask-image: linear-gradient(to left, transparent, #000 30%);
+}
