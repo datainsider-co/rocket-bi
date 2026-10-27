@@ -69,7 +69,7 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
       const scalarFunction = asString(getPath(widget.setting, ['x_axis', 'function', 'scalar_function', 'class_name']));
       return buildSeriesChartOptions({ options: viz.options, response, themeColors, timestampXAxis: isTimestampFunction(scalarFunction), onPointClick: onPointMenu });
     }
-    if (viz.className === ChartVizClass.Pie && response.kind === 'series_two') {
+    if ((viz.className === ChartVizClass.Pie || viz.className === ChartVizClass.Donut) && response.kind === 'series_two') {
       return buildPieChartOptions({ options: viz.options, response, themeColors, selected, onSelect });
     }
     return undefined;

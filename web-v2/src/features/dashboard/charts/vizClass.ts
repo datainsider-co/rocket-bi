@@ -2,6 +2,8 @@
 export const ChartVizClass = {
   Series: 'highcharts_series_chart_setting',
   Pie: 'highcharts_pie_chart_setting',
+  /** Drawn as a pie: v1 `DonutChart` is `PieChart` with a hole (`innerSize` in its options). */
+  Donut: 'donut_chart_setting',
   Number: 'number_chart_setting',
   TabFilter: 'tab_filter_chart_setting',
   Dropdown: 'dropdown_filter_chart_setting',
