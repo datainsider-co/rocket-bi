@@ -206,11 +206,13 @@ export interface NewItemInput {
   readonly columnName: string;
   readonly tableName: string;
   readonly isNested?: boolean;
+  /** A chart control's data (v1 `ChartControlData`), when the field is that control. */
+  readonly dynamicFunction?: JsonObject;
   readonly zone: ZoneConfig;
 }
 
 /** A field just dropped into a zone (v1 `FunctionNodeBuilder` + `ConfigDataUtils.toFunctionData`). */
-export function newFunctionData({ id, field, columnName, tableName, isNested = false, zone: zoneConfig }: NewItemInput): FunctionData {
+export function newFunctionData({ id, field, columnName, tableName, isNested = false, dynamicFunction, zone: zoneConfig }: NewItemInput): FunctionData {
   const { family, type } = defaultFunctionOf(field, zoneConfig);
   return {
     id,
@@ -224,6 +226,7 @@ export function newFunctionData({ id, field, columnName, tableName, isNested = f
     displayAsColumn: false,
     isNested,
     numElemsShown: 10,
-    isShowNElements: false
+    isShowNElements: false,
+    ...(dynamicFunction && { dynamicFunction })
   };
 }

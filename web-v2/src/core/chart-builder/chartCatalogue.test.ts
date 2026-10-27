@@ -102,6 +102,19 @@ describe('newFunctionData', () => {
     expect(item).toEqual(stored);
   });
 
+  it('makes a chart control dropped into a zone a dynamic item holding its data', () => {
+    const control = { id: 50, display_name: 'Group by', chart_info_type: 'FunctionController' };
+    const item = newFunctionData({
+      id: 3,
+      field: { class_name: 'chart_control_field', control_data: control },
+      columnName: 'Group by',
+      tableName: '',
+      dynamicFunction: control,
+      zone: zoneOf(ChartType.Column, 'x_axis')
+    });
+    expect(item).toMatchObject({ functionFamily: 'Dynamic', functionType: '', name: 'Group by', dynamicFunction: control });
+  });
+
   it('sorts ascending in the Sorting zone', () => {
     const item = newFunctionData({ id: 1, field: field('double'), columnName: 'total', tableName: 'sales', zone: SORTING_ZONE });
     expect(item).toMatchObject({ functionFamily: 'Aggregation', functionType: 'Sum', sorting: 'Ascending' });

@@ -25,6 +25,15 @@ export function fieldKindOf(field: JsonObject): FieldKind {
   return FieldKind.Number;
 }
 
+/**
+ * Whether two fields are the same kind of column, so a zone item can keep its function when one replaces the other
+ * (v1 `ChartUtils.isDiffFieldType`). Measures and chart controls never are.
+ */
+export function isSameFieldKind(first: JsonObject, second: JsonObject): boolean {
+  const kind = fieldKindOf(first);
+  return kind !== FieldKind.Expression && kind !== FieldKind.Control && kind === fieldKindOf(second);
+}
+
 const scalar = (className: string, innerFn?: JsonObject): JsonObject =>
   innerFn ? { class_name: className, inner_fn: innerFn } : { class_name: className };
 
