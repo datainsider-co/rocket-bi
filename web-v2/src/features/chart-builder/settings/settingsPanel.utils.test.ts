@@ -17,7 +17,11 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(ChartType.Table)).toBe('table');
   });
 
-  it.each([ChartType.DropDown, ChartType.DropDownInnerFilter, 'pivot_table'])('has none yet for %s', chartType => {
+  it.each([ChartType.DropDown, ChartType.DropDownInnerFilter, ChartType.SlicerFilter, ChartType.MultiTreeFilter])('gives %s the filter settings', chartType => {
+    expect(settingsKindOf(chartType)).toBe('filter');
+  });
+
+  it.each(['pivot_table', 'gauge'])('has none yet for %s', chartType => {
     expect(settingsKindOf(chartType)).toBeUndefined();
   });
 });

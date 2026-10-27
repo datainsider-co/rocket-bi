@@ -1,34 +1,46 @@
 import { useMemo } from 'react';
 import type { VisualizationResponse } from '@/core/query/VisualizationResponse';
+import { slicerKind } from '@/features/dashboard/charts/filter/slicerFilter.utils';
+import type { ControlEntry } from '@/features/dashboard/controls/controls.utils';
+import { filterControlKindOf } from './filter/filterTabs.utils';
+import { FilterSettingsView } from './FilterSettingsView';
 import { NumberSettingsView } from './NumberSettingsView';
 import { PieSettingsView } from './PieSettingsView';
 import { SeriesSettingsView } from './SeriesSettingsView';
-import { TableSettingsView } from './TableSettingsView';
 import { seriesResponseOf, settingsKindOf } from './settingsPanel.utils';
+import { TableSettingsView } from './TableSettingsView';
 import { axisTitlesOf, seriesChoicesOf } from './tabs/seriesTabs.utils';
 import { useChartSettings } from './useChartSettings';
+import { useFilterDefault } from './useFilterDefault';
 
 interface SettingsPanelProps {
   /** The preview's data, for the settings that list its series. */
   response: VisualizationResponse | undefined;
   themeColors: readonly string[];
+  /** A filter's selection in the preview, which can become its default value. */
+  filterEntry?: ControlEntry;
 }
 
 /** The builder's Settings tab (v1 `ChartSettingModal`): the chart's viz options, by chart type. */
-export function SettingsPanel({ response, themeColors }: SettingsPanelProps) {
+export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPanelProps) {
   const { chartType, setting, viz, onChange } = useChartSettings();
   const series = useMemo(() => seriesChoicesOf(seriesResponseOf(response)), [response]);
   const axisTitles = useMemo(() => axisTitlesOf(setting), [setting]);
+  const defaultValue = useFilterDefault(setting, viz, filterEntry, onChange);
+  const tab = { viz, onChange, chartType };
 
+  const filterKind = filterControlKindOf(chartType);
   switch (settingsKindOf(chartType)) {
     case 'series':
-      return <SeriesSettingsView viz={viz} onChange={onChange} chartType={chartType} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
+      return <SeriesSettingsView {...tab} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
     case 'pie':
-      return <PieSettingsView viz={viz} onChange={onChange} chartType={chartType} themeColors={themeColors} />;
+      return <PieSettingsView {...tab} themeColors={themeColors} />;
     case 'number':
-      return <NumberSettingsView viz={viz} onChange={onChange} chartType={chartType} />;
+      return <NumberSettingsView {...tab} />;
     case 'table':
-      return <TableSettingsView viz={viz} onChange={onChange} chartType={chartType} />;
+      return <TableSettingsView {...tab} />;
+    case 'filter':
+      return filterKind && <FilterSettingsView {...tab} kind={filterKind} hasStep={setting !== undefined && slicerKind(setting) !== 'date'} defaultValue={defaultValue} />;
     default:
       return <p className="m-0 text-black/45">The chart&apos;s settings are not available yet.</p>;
   }

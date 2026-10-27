@@ -3,7 +3,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChartType } from '@/core/chart-builder/chartType';
 import type { SeriesOneResponse } from '@/core/query/VisualizationResponse';
+import stored from '@/core/chart-builder/builder.fixture.json';
+import type { ControlEntry } from '@/features/dashboard/controls/controls.utils';
 import { BuilderProvider, useBuilder } from '../state/BuilderContext';
+import type { BuilderStart } from '../state/useBuilderState';
 import { SettingsPanel } from './SettingsPanel';
 
 const response: SeriesOneResponse = {
@@ -24,10 +27,10 @@ function Probe() {
 
 const options = () => JSON.parse(screen.getByTestId('options').textContent ?? '{}') as Record<string, Record<string, unknown>>;
 
-function renderPanel(chartType: string) {
+function renderPanel(start: BuilderStart | string, filterEntry?: ControlEntry) {
   render(
-    <BuilderProvider start={{ chartType }} controls={[]}>
-      <SettingsPanel response={response} themeColors={['#111111', '#222222']} />
+    <BuilderProvider start={typeof start === 'string' ? { chartType: start } : start} controls={[]}>
+      <SettingsPanel response={response} themeColors={['#111111', '#222222']} filterEntry={filterEntry} />
       <Probe />
     </BuilderProvider>
   );
@@ -69,8 +72,20 @@ describe('SettingsPanel', () => {
     expect(options()['title']).toMatchObject({ enabled: false });
   });
 
-  it('says when a chart type has no settings yet', () => {
+  it("saves a filter's selection in the preview as its default, and resets it", async () => {
+    const widget = stored.widgets.find(item => item.id === 39);
+    if (!widget) throw new Error('no tab filter');
+    renderPanel({ widget }, { selected_value: ['Asia'] });
+    await userEvent.click(screen.getByRole('button', { name: "Use the preview's selection" }));
+    expect(options()['default']).toMatchObject({ setting: { value: ['Asia'], conditions: { class_name: 'in', possible_values: ['Asia'] } } });
+    expect(screen.getByText('Asia')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Reset' }));
+    expect(options()['default']).toMatchObject({ setting: null });
+  });
+
+  it('gives a dropdown no tab look', () => {
     renderPanel(ChartType.DropDown);
-    expect(screen.getByText(/settings are not available yet/)).toBeInTheDocument();
+    expect(screen.getByText('Tab controls')).toBeInTheDocument();
+    expect(screen.queryByText('Search box')).not.toBeInTheDocument();
   });
 });

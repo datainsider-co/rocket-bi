@@ -24,7 +24,7 @@ export function ChartBuilderModal(props: ChartBuilderModalInput) {
             types: <ChartTypeSelectView {...types} />,
             tree: <FieldTreeView {...tree} />,
             panel: <ConfigPanel />,
-            settings: <SettingsPanel response={preview.data.data} themeColors={themeColors} />,
+            settings: <SettingsPanel response={preview.data.data} themeColors={themeColors} filterEntry={preview.filter.entry} />,
             preview: <PreviewView preview={preview} dashboardId={dashboard.id} themeColors={themeColors} />
           }}
         />

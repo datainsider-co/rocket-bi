@@ -5,7 +5,7 @@ import { DEFAULT_PAGE_SIZE, isPagedSetting, type Paging } from '@/core/query/Que
 import { vizFromSetting } from '@/core/query/vizOptions';
 import { useWidgetData } from '@/features/dashboard/chart-data/useWidgetData';
 import { buildChartQuery, isAffectedByFilter } from '@/features/dashboard/controls/chartQuery.utils';
-import type { ControlEntry } from '@/features/dashboard/controls/controls.utils';
+import { defaultControlValues, type ControlEntry } from '@/features/dashboard/controls/controls.utils';
 import { useDashboardControls } from '@/features/dashboard/controls/DashboardControlsContext';
 
 const FIRST_PAGE: Paging = { from: 0, size: DEFAULT_PAGE_SIZE };
@@ -20,8 +20,8 @@ function chartOf(json: JsonObject | undefined): ChartWidget | undefined {
 
 /**
  * The chart being built, queried like on the dashboard with its current controls and header filters (v1 `VizPanel`,
- * `buildChartQuery`). A filter keeps its own selection here, apart from the dashboard's. A new setting shows its
- * first page.
+ * `buildChartQuery`). A filter keeps its own selection here, apart from the dashboard's, starting from its default
+ * value. A new setting shows its first page.
  */
 export function usePreview(json: JsonObject | undefined, dashboardId: number) {
   const chart = useMemo(() => chartOf(json), [json]);
@@ -36,6 +36,8 @@ export function usePreview(json: JsonObject | undefined, dashboardId: number) {
   const data = useWidgetData(widget, { dashboardId, query, paging: isPagedSetting(widget.setting) ? paging : undefined, enabled: chart !== undefined });
   const viz = useMemo(() => vizFromSetting(widget.setting), [widget.setting]);
   const [entry, setEntry] = useState<ControlEntry>();
+  const [now] = useState(() => new Date());
+  const defaultEntry = useMemo(() => chart && defaultControlValues(chart, now), [chart, now]);
 
   return {
     chart,
@@ -43,7 +45,7 @@ export function usePreview(json: JsonObject | undefined, dashboardId: number) {
     query,
     data,
     table: { paging, loading: data.isFetching, onPageChange: (next: Paging) => setPage({ setting: widget.setting, paging: next }), onSortChange: () => {} },
-    filter: { entry, onChange: setEntry },
+    filter: { entry: entry ?? defaultEntry, onChange: setEntry },
     /** v1 kept Add disabled while the preview failed. */
     failed: data.isError
   };
