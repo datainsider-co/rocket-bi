@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 import type { VisualizationResponse } from '@/core/query/VisualizationResponse';
 import { slicerKind } from '@/features/dashboard/charts/filter/slicerFilter.utils';
 import type { ControlEntry } from '@/features/dashboard/controls/controls.utils';
+import { useFieldChoices } from '../config-panel/FieldChoicesContext';
 import { filterControlKindOf } from './filter/filterTabs.utils';
+import { dateFieldChoicesOf } from './number/comparisonTab.utils';
 import { FilterSettingsView } from './FilterSettingsView';
 import { NumberSettingsView } from './NumberSettingsView';
 import { PieSettingsView } from './PieSettingsView';
@@ -27,6 +29,8 @@ export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPa
   const series = useMemo(() => seriesChoicesOf(seriesResponseOf(response)), [response]);
   const axisTitles = useMemo(() => axisTitlesOf(setting), [setting]);
   const defaultValue = useFilterDefault(setting, viz, filterEntry, onChange);
+  const tables = useFieldChoices();
+  const dateFields = useMemo(() => dateFieldChoicesOf(tables), [tables]);
   const tab = { viz, onChange, chartType };
 
   const filterKind = filterControlKindOf(chartType);
@@ -36,7 +40,7 @@ export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPa
     case 'pie':
       return <PieSettingsView {...tab} themeColors={themeColors} />;
     case 'number':
-      return <NumberSettingsView {...tab} />;
+      return <NumberSettingsView {...tab} dateFields={dateFields} />;
     case 'table':
       return <TableSettingsView {...tab} />;
     case 'filter':
