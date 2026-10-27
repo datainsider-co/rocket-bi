@@ -185,6 +185,54 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
 - **Chưa làm ở bước này:** action trên bảng và cột (CB8). Cây field chưa được gắn vào builder; việc này làm ở CB4 và
   CB5.
 
+## Quyết định ở CB4 (2026-10-27)
+
+- **Context của builder** (`state/BuilderContext.tsx`): `BuilderProvider` giữ state, setting và `dispatch`, cùng chart
+  control của dashboard, `sqlQueryOf` và `dashboardId`. Các panel đọc nó qua `useBuilder`.
+- **Kéo thả** (`features/chart-builder/dnd`): `BuilderDndProvider` bọc cây field và config panel trong một
+  `FieldDndProvider`.
+  - Zone id là key đã lưu (`x_axis`, `sorting`, ...). Zone Filters có id `filters`, thả vào đó thì tạo nhóm OR mới.
+    Mỗi nhóm AND là một zone `filters:<groupId>` nằm trong zone Filters, và được ưu tiên vì là zone trong cùng.
+  - Zone config nhận cột, item và condition. Trong các chart control, nó chỉ nhận function controller (v1
+    `disabledDropConfig`).
+  - Zone Filters nhận cột, item và condition, nhưng không nhận measure và chart control.
+  - Item chuyển giữa hai zone config thì move. Kéo vào / ra Sorting, và giữa zone config với Filters thì copy.
+    Condition kéo sang nhóm khác thì move, giữ id; nhóm bị rỗng thì xoá.
+  - `builderActionOf` đổi `DropAction` thành action của reducer: condition kéo vào zone config thành item mới, item
+    kéo vào Filters thành condition mới.
+- **Reducer bổ sung:**
+  - Thả lên item của zone một item đã đầy thì thay item đó: giữ id, và giữ function nếu cột cùng loại (v1
+    `mergeConfig` + `isDiffFieldType`). Measure và chart control luôn lấy function mặc định.
+  - Function controller thả vào zone thành item `Dynamic`: field là `chart_control_field` như v1, `dynamic_function`
+    là data của control.
+  - `addCondition` nhận vị trí trong nhóm. Thêm `moveCondition`.
+- **Item của zone** (v1 `DraggableItem`): function family, type và sorting (chỉ ở zone Sorting) là các link mở menu.
+  Family lấy theo kiểu cột (`core/chart-builder/functionOptions`), không theo zone, như v1. Measure và chart control
+  không có menu family. Menu "..." gồm Config và Remove.
+- **Dialog Config** (v1 `ConfigModal`) gồm display name, function, sorting và top N. Sorting chỉ có ở zone Sorting
+  hoặc với aggregation; top N chỉ có khi đã sort. Validate bằng zod như v1: display name bắt buộc, top N là số nguyên
+  dương khi đang bật. Khác v1:
+  - Đổi family trong dialog thì lấy type đầu tiên theo kiểu cột, giống menu nhanh. Dialog v1 luôn lấy Count all cho
+    aggregation, kể cả cột số.
+  - Top N lưu dạng số; v1 lưu chuỗi đã gõ. v1 đọc được cả hai.
+  - Display as column: v1 không có UI cho nó, nên làm cùng Pivot Table ở CB7.
+- **Trình sửa condition** (v1 `InternalFilterPopover`):
+  - Một danh sách condition chung, thay cho hai chế độ Range / Selection của v1. Khi lưu `in` / `not in` trên cột số
+    hoặc ngày, `filter_mode_selected` là `selection` để v1 mở lại đúng.
+  - Manual Input: condition dạng danh sách lấy giá trị cột từ server như v1 `SelectionFilter` (`select_distinct`, sort
+    ASC, 80 dòng mỗi trang, nút Load more). Giá trị rỗng và null không hiện, vì condition danh sách bỏ qua chúng.
+    Condition khác dùng `FilterValueInput`, chuyển từ header filter sang `shared/filter-input`.
+  - Chart Control: chọn control, rồi chọn giá trị của control cho condition: `selected_value`, hoặc start / end với
+    date select, slicer và main date filter. Number và table không làm control được (v1 `isEnableControl`).
+  - Đổi chế độ hoặc đổi control thì xoá giá trị đã chọn. v1 nhớ lại giá trị của chế độ trước.
+  - Condition không nhận giá trị (`is null`, ...) không có chế độ Chart Control.
+- **Không mang sang:** thả chart control vào zone Filters. v1 tạo condition chưa có field rồi hỏi field; v2 làm việc
+  này bằng chế độ Chart Control của trình sửa.
+- **Chưa làm ở bước này:**
+  - Chọn field bằng menu bảng / cột (v1 `SelectFieldContext`): link "click here" của zone và click tên item hoặc
+    condition để đổi field. Chuyển sang CB5.
+  - Edit Measure trong menu của item: CB8.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -193,8 +241,8 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
 | CB1 | **`core/chart-builder`.** Entity `FunctionData`, `ConditionData`, `extra_data`. Danh mục chart (v1 `DataBuilderConstantsV35`: zone, số item tối đa, function mặc định theo kiểu field). Builder cho function (function, table column, order by, top N, dynamic function), condition và query setting. Viz options mặc định và cách merge khi đổi loại chart. Test bằng CB0: từ `extra_data` của 19 widget, dựng lại `setting` và default options phải khớp hoàn toàn (`toStrictEqual`) với body mà v1 đã gửi | Xong |
 | CB2 | **Reducer của builder** (`features/chart-builder`). Khởi tạo từ widget hoặc rỗng. Đổi loại chart (`latestState` và chuyển config như v1). Thêm / sửa / xoá / đổi thứ tự config. Filter theo nhóm. Function convertor (table; scatter và bubble đi cùng type của chúng ở CB7). Setting dẫn xuất từ state. Dọn options khi xoá function để lại CB7 | Xong |
 | CB3 | **Cây field** (chỉ đọc). Chọn database (`GET databases`), bảng và cột có search và icon theo kiểu, mở sẵn các bảng đang dùng, cột kéo được, các chart control của dashboard | Xong |
-| CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control) | Chưa làm |
-| CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. So với v1 bằng screenshot Playwright | Chưa làm |
+| CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control). Display as column để lại CB7 | Xong |
+| CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Chưa làm |
 | CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Chưa làm |
 | CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3 | Chưa làm |
 | CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query, Delete table | Chưa làm |
