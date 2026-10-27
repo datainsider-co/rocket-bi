@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { DeleteOutlined } from '@ant-design/icons';
 import { Button, Select, Typography } from 'antd';
 import { familyOf, inputOf, type InternalFilter } from '@/core/query/internalFilter';
-import { FilterValueInput } from './FilterValueInput';
+import { FilterValueInput } from '@/shared/filter-input/FilterValueInput';
 import { appliedFilter, conditionOptions, withCondition } from './headerFilters.utils';
 
 interface FilterEditorViewProps {
