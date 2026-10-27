@@ -69,8 +69,9 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
   and the dashboard through M7: every filter widget, header filters, drilldown, drill through, downloads, permissions,
   password, full screen and TV mode, auto refresh, View As, embedded route, edit mode without ChartBuilder, Share, Relationship (React Flow), and
   header, settings and widgets that look like v1 (checked with Playwright screenshots against v1).
-- **Next**: the other chart types (stacked, pivot, ...) and ChartBuilder (Phase 4), in an order still to be decided.
-  ChartBuilder plugs into edit mode through `ChartBuilderBridge`.
+- **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 done, CB1 next) for the chart types
+  v2 already renders; the other chart types (stacked, pivot, ...) follow, each with its builder handler. ChartBuilder
+  plugs into edit mode through `ChartBuilderBridge`.
 - **Share links (`?token=`)**: the Share dialog (M7b) creates directory tokens, which the server accepts; opening
   them without a session still needs client work, see Phase 3 M5b. **Blocked by the server**: MySQL `like` and
   datetime `between` filters, see Decisions (M3b).
@@ -370,10 +371,11 @@ Suggested order: the common series charts (Column/Bar/Line/Area/Pie) and Kpi, th
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Dashboard edit mode (layout, add/remove/resize widgets, settings) | `screens/dashboard-detail` | (see above) | Done (M6), without ChartBuilder: adding or configuring a chart and its inner filter come with it |
-| Chart builder | `screens/chart-builder` | 53 | Not started |
-| Query/Viz setting resolvers and handlers | `src/shared/resolver`, `src/shared/module/ChartBuilderModule.ts`, `web/docs/CREATE_CHART_FLOW.md` | – | Not started |
+| Chart builder | `screens/chart-builder`, `screens/dashboard-detail/components/data-builder-modal` | 53 | In progress: plan, decisions and steps (CB0 to CB8) in [`CHART_BUILDER.md`](CHART_BUILDER.md); CB0 done |
+| Query/Viz setting resolvers and handlers | `src/shared/resolver`, `src/shared/module/ChartBuilderModule.ts`, `web/docs/CREATE_CHART_FLOW.md` | – | Part of ChartBuilder (CB1) |
+| Chart settings (Settings tab) | `src/shared/settings` | 140 | Part of ChartBuilder (CB6) |
 
-#### Notes for wiring the grid and the drop zones
+#### Notes for wiring the grid
 
 Widget grid (`features/dashboard/grid/DashboardGrid`, stories in `Dashboard/DashboardGrid`):
 
@@ -390,21 +392,7 @@ Widget grid (`features/dashboard/grid/DashboardGrid`, stories in `Dashboard/Dash
 - Inside a widget, mark inputs and other interactive parts with `GRID_NO_DRAG_CLASS`; a grid nested in a widget
   already doesn't drag the widget around it.
 
-Field drag and drop (`shared/field-dnd`, stories in `Shared/FieldDnd`):
-
-- `FieldDndProvider` around the field tree and the zones, `FieldDraggable` on tree leaves, `FieldDropZone` per config
-  zone. Give the provider a rule per zone (`size`, `maxItems`, `disabled`, `accepts`) and apply the `DropAction` it
-  hands to `onDrop`, with `applyDrop` or by hand (v1 rebuilt the function node for the target zone and merged
-  configs on replace: do that in the factory).
-- Rules follow v1: append to the zone, insert at a gap, replace the item of a full single-item zone (only from the
-  tree), reorder in a zone, move or copy between zones (`transferModeOf`: v1 copies to and from sorting and out of
-  the filter zone). The filter zone's OR/AND groups can be a zone per AND group; the innermost zone wins.
-- No live reordering animation, by design: gap lines show where the field lands, which keeps hit areas where they
-  are drawn. Drags start after 4px, so clicks on an item's menus still work; text fields and `FIELD_NO_DRAG_CLASS`
-  never start a drag.
-
-The v1 resolver/handler registry (QuerySetting, VizSetting, PanelSetting per chart type) should become a typed map from
-chart type to handler, not a DI container.
+The field drag and drop notes (`shared/field-dnd`) moved to [`CHART_BUILDER.md`](CHART_BUILDER.md).
 
 ### Phase 5: Data warehouse
 
