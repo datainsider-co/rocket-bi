@@ -62,16 +62,18 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
 - **B. Route-level switch.** A reverse proxy sends migrated routes to v2 and the rest to v1 on the same domain, sharing
   the session. Ships earlier, but v1 and v2 must agree on auth storage and URLs.
 
-## Current status (2026-10-26)
+## Current status (2026-10-27)
 
 - **Done**: most of the foundation (left: feature flags, parts of the app header), login and forgot password (left:
-  Google login, Register), the directory listings (left: Duplicate, Copy, Share), the first-run data source setup,
-  and the dashboard through M6: every filter widget, header filters, drilldown, drill through, downloads, permissions,
-  password, full screen and TV mode, auto refresh, View As, embedded route, and edit mode without ChartBuilder.
+  Google login, Register), the directory listings (left: Duplicate, Copy), the first-run data source setup,
+  and the dashboard through M7: every filter widget, header filters, drilldown, drill through, downloads, permissions,
+  password, full screen and TV mode, auto refresh, View As, embedded route, edit mode without ChartBuilder, Share, Relationship (React Flow), and
+  header, settings and widgets that look like v1 (checked with Playwright screenshots against v1).
 - **Next**: the other chart types (stacked, pivot, ...) and ChartBuilder (Phase 4), in an order still to be decided.
   ChartBuilder plugs into edit mode through `ChartBuilderBridge`.
-- **Blocked by the server**: share links (`?token=`), see Phase 3 M5b. MySQL `like` and datetime `between` filters,
-  see Decisions (M3b).
+- **Share links (`?token=`)**: the Share dialog (M7b) creates directory tokens, which the server accepts; opening
+  them without a session still needs client work, see Phase 3 M5b. **Blocked by the server**: MySQL `like` and
+  datetime `between` filters, see Decisions (M3b).
 - **Open decision**: how v2 ships next to v1 (Coexistence above).
 
 ## Phases
@@ -107,8 +109,8 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| My Data, Shared with me, Recent, Starred, Trash | `screens/directory` (routes `/mydata`, `/shared`, `/recent`, `/starred`, `/trash`) | 12 | In progress. Done (`features/directory`, `core/directory`, `core/dashboard`): the five listings at v1's paths (`/` redirects to `/mydata`), folders by `<slug>-<id>`, breadcrumbs, name sort, refresh; New folder/dashboard (in the open My Data folder, otherwise the root; v1 sent the section's virtual id, which the server rejects); rename (dashboards and queries through `dashboards/{id}/rename`), move (folder picker), star, move to trash; restore and delete forever in Trash. Left: Duplicate and Copy (the dashboard model and the password check now exist, in `core/dashboard` and `features/dashboard/access`), Share (row below), share-token (`?token=`) access, which v1 allowed without login (blocked by the server) |
-| Share and permission dialogs | `src/shared/components/SharePermissionManager.vue`, `di-core/share` | – | Not started. Setting a dashboard password lives here (`DiShareModal`, stored in the directory's `data.config`) |
+| My Data, Shared with me, Recent, Starred, Trash | `screens/directory` (routes `/mydata`, `/shared`, `/recent`, `/starred`, `/trash`) | 12 | In progress. Done (`features/directory`, `core/directory`, `core/dashboard`): the five listings at v1's paths (`/` redirects to `/mydata`), folders by `<slug>-<id>`, breadcrumbs, name sort, refresh; New folder/dashboard (in the open My Data folder, otherwise the root; v1 sent the section's virtual id, which the server rejects); rename (dashboards and queries through `dashboards/{id}/rename`), move (folder picker), star, move to trash; restore and delete forever in Trash. Left: Duplicate and Copy (the dashboard model and the password check now exist, in `core/dashboard` and `features/dashboard/access`), share-token (`?token=`) access, which v1 allowed without login (see Phase 3 M5b). Share: done (M7b), row share button (`row-actions/ShareButton`, hidden below sm) |
+| Share and permission dialogs | `src/shared/components/SharePermissionManager.vue`, `di-core/share` | – | Done (M7b): `core/share` (`ShareService`, levels), `features/share` (`ShareModal`: people and groups, Get link, password protection, embed code), used by the directory rows and the dashboard's Options (`features/dashboard/share/useDashboardShare`). Password through `DirectoryService.setPassword` (the whole directory is put back with `data.config` set or dropped). Left: databases and ETL (v1 `ShareDatabaseHandler`, `DataCookShareHandler`) come with their features |
 
 ### Phase 3: Dashboard (view)
 
@@ -117,7 +119,7 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
 | Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | Done (plan below): M0 to M6; share token blocked by the server |
 | Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI, flat table with server sort (M2, M4a); drilldown, date function and export work on them (M4a). Next: stacked, pivot, the rest |
-| Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Left: filters' own style options (active/inactive and choice colors, title style; antd defaults for now), the filter panel's vertical header and active tab background, the date select's min/max dates as calendar bounds |
+| Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Title style, choice colours and v1's sizes done in M7e. Left: the filter panel's vertical header, the date select's min/max dates as calendar bounds |
 | Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Done (M4a, M4b). Left: maps |
 | Embedded dashboard | route `/embedded/dashboard/:name` | – | Done (M5b) with the session cookie; with a share token once the server allows it |
 
@@ -142,7 +144,9 @@ Decisions (2026-10-26):
   with `camelCase(name)`, so v2 does the same (`vizKey`) instead of skipping them, or stored per-series settings
   would stop matching. The result is typed as Highcharts options plus v1's own keys (`affectedByFilter`,
   `background`, ...), and merged over v1's defaults with lodash `merge` like v1.
-- **Share links (`?token=`) are in scope**, but blocked by the backend: the token from `share/dashboard/{id}/anyone`
+- **Share links (`?token=`) are in scope.** Tokens made on the directory (`share/directory/{dirId}/anyone`, what v1's
+  and v2's Share dialog create) hold `directory:view:<dirId>` and do open the dashboard (checked 2026-10-27). Only the
+  token from `share/dashboard/{id}/anyone`
   (and the older `dashboards/{id}/share`) carries `0:dashboard:view:<id>`, while `GET dashboards/{id}` checks
   `directory:view:<directoryId>`, so it answers 401 `not_allowed` (v1 is affected too). Needs a server fix; still so
   in M5b, which lists what the client needs then.
@@ -186,7 +190,16 @@ Decisions (M3b):
 | M5b | RLS View As (`features/dashboard/view-as`: user search via `core/user/UserService` `user/profile/suggest`, charts through `QueryService.queryAs` `chart/view_as`, offered with `rls:view:*`), embedded route (`EmbeddedDashboardPage`, outside the app layout). Left: share token (`?token=`), blocked by the server (see below) | Done, token blocked |
 | M6a | Edit mode (`features/dashboard/edit`): Edit with the `edit` permission (desktop, not embedded, not under View As), grids editable, layout saved on Save (`layoutToSave`: each grid's unplaced widgets placed, z-index from 0), rename the dashboard, Adding (text, image by URL, tab, filter panel, paste), widget menus (edit title, edit text, replace image, copy, duplicate, delete), copy/paste through the clipboard, leave guard. Server writes in `DashboardService` (`widgets/create`, `widgets/{id}/edit`, `DELETE widgets/{id}`, `PUT dashboards/{id}` for the setting), cache updates in `useDashboardEditor`, new widget JSON in `core/dashboard/widgetJson`. `ChartBuilderBridge` adds Add chart / Config chart once ChartBuilder exists | Done |
 | M6b | Tabs and filter panels (`edit/tabEdit.utils`): add, rename, delete and sort tabs, move widgets into a tab and back out, add and remove a filter panel's filters, header style (Config tab), now also rendered by `TabWidgetView` | Done |
-| M6c | Dashboard settings in one dialog (`edit/settings`): theme (with v1's border and background defaults), overlap, auto refresh, the date filter in the header and its default range, size, background, border, widget defaults (padding, card, title, subtitle) | Done |
+| M6c | Dashboard settings in one dialog (`edit/settings`, split again in M7d): theme (with v1's border and background defaults), overlap, auto refresh, the date filter in the header and its default range, size, background, border, widget defaults (padding, card, title, subtitle) | Done |
+| M7a | Header and main date like v1 (`features/dashboard/header`, `controls/main-date`): v1's borderless icon + text buttons (Options, Edit; Adding, Options, Save in edit mode), one Options menu per mode (view: Relationship, Full screen, TV mode, Share, View As; edit: Relationship, Settings; full screen and TV: Relationship, Share), Relationship and Share given as optional `DashboardOptionHandlers`. Main date: a dashboard without a stored setting has the All Time main date (`DashboardSetting.default()`, v1); its own trigger and popover (preset dropdown, Start and End calendars, Cancel / Apply, Remove and Edit Main Date in edit mode); Setup Main Date Filter in the header in edit mode, which replaces the settings dialog's date filter toggle | Done |
+| M7b | Share (`features/share`, `core/share`), one dialog for dashboards and the directory listing: people and groups (user suggest, owner row, Edit / View & Download / View / Remove access, batched until Apply), Get link (`share/{type}/{id}/anyone`), password protection (owner, dashboards and queries, `data.config.hashed_password`), Copy embed code (dashboards). A dashboard is shared through its directory (`share/directory/{dirId}`); Options → Share with the `*` permission, not on mobile or embedded | Done |
+| M7c | Relationship (`features/dashboard/relationship`, `core/relationship`) with React Flow (`@xyflow/react` 12, its own lazy chunk loaded on first open): `GET/POST relationships/{dashboard_id}`, a node per view (sql views under `adhoc_analysis`, columns from `databases/adhoc/tables`), collapsed nodes show id-like and joined columns, drag a column onto another table's column to join, click a line to remove it, positions in `extra_data.table_positions` under v1's keys, zoom / Fit content / Full screen, Discard Changes and Save in edit mode. Options → Relationship in every mode; edits only in edit mode | Done |
+| M7d | Settings split back into v1's entry points (`edit/settings`): Options → Settings (edit mode) opens Themes (v1's thumbnails, Reset to default, Overlap mode); a gear at the canvas corner in edit mode opens Edit Dashboard (Size / Background / Color), Edit Widgets (Primary Text / Secondary Text / Padding and Border / Background color), Themes and Auto Refresh Data (submenu, saved at once). Replaces M6c's single dialog; saving is unchanged (whole stored setting, unknown keys kept). Every key v1 writes was already mapped in `DashboardSetting` | Done |
+| M7e | Widgets and canvas like v1 (measured within 1px on both test dashboards): v1's grid gaps (20px, 16px in tabs and panels), chart background default `#FAFAFB`, widget menu on hover in view mode and v1's gear in edit mode (`widgets/menu`), tab widget with boxed tab headers and per-tab menus (`TabNavView`, no antd Tabs), filter panel without a card, KPI without a theme in v1's plain layout, flat table look (48px rows, sticky header, footer, v1 number format), HTML x-axis labels, resize handles on hover; filter widgets' title style, search box, tab filter boxes and choice colours, slicer, input, date select (opening the main date calendar) and tree filter sizes | Done |
+
+Order: M7a, M7b and M7c in parallel (separate folders; M7b and M7c are wired into the header after M7a), then M7d and
+M7e (both touch the header and the canvas). Each step is checked against v1 with Playwright screenshots of the same
+dashboard on both apps.
 
 Decisions (M4a):
 
@@ -246,11 +259,12 @@ Decisions (M5b):
 - **Embedded** (`/embedded/dashboard/:name`): the page without the app layout, header filter bar, Back and Options;
   the title, Reset Filters and the main date stay (v1). Its name is rewritten to the embedded path; an unknown
   dashboard says "Dashboard not found" in place instead of leaving the iframe.
-- **Share token, still blocked** (checked again 2026-10-26): with `Token-Id`, `chart/query` and
+- **Share token**: a directory token (M7b) gets 200 on `GET dashboards/{id}`, `get_directory_id` and
+  `directories/{id}` (checked 2026-10-27); what follows applies to dashboard tokens only. Checked 2026-10-26: with `Token-Id`, `chart/query` and
   `permission_tokens/{token}/action_permitted` answer, but `GET dashboards/{id}`, `dashboards/{id}/get_directory_id`
   and `directories/{id}` return 401. `DashboardPermissionFilter.requireTokenPermission` builds
-  `directory:view:<directoryId>`, while the token holds `dashboard:view:<dashboardId>`. Once the server is fixed, the
-  client still needs: the route guards to let a token through without a session, no `check_session` without a session
+  `directory:view:<directoryId>`, while the token holds `dashboard:view:<dashboardId>`. To open token links, the client
+  still needs: the route guards to let a token through without a session, no `check_session` without a session
   (its 401 sends the viewer to login), and permissions from `permission_tokens/{token}/action_permitted`.
 
 Decisions (M6):
@@ -278,6 +292,59 @@ Decisions (M6):
 - **ChartBuilder** is not ported: `DashboardPage` takes an optional `ChartBuilderBridge`, and Add chart and Config chart
   appear once it is given. v1's inner filter items (add, update, delete a chart's filter) open ChartBuilder too; they
   come with it.
+
+Decisions (M7a):
+
+- **Main date default**: no stored setting means `DashboardSetting.default()` with an all_time main date (v1); a stored
+  setting without `main_date_filter` has none. `settingJson` is never filled with defaults on read; the first save
+  writes the whole setting, as v1 did.
+- **Main date UI** has its own popover (`controls/main-date`), replacing M3b's preset select + range picker; the date
+  select filter widget keeps `DateRangeModePicker`. The trigger is a button, not v1's typable input. Setup and Remove
+  apply locally first, then save; Remove also clears the viewer's stored choice (`main_filter_mode_<id>`).
+- **Options in full screen and TV** list Relationship and Share (v1 meant Share there, its check was a typo); the
+  button hides when the menu would be empty. Reset Filters is hidden on mobile, like v1.
+
+Decisions (M7b):
+
+- **Only real changes are sent**: a user set back to their level sends nothing, an added user set to Remove access is
+  not shared, and the password is only written when it changed (v1 removed it on every Apply). Turning a stored but
+  disabled password back on enables it. Apply errors are shown and the edits kept.
+- **Server shapes differ from v1's types**: share ids are strings (`"s_1"`); `PUT share/.../edit` answers
+  `{username: true}`; `GET .../anyone` without a link is a 404 with an empty body (read as no link). `share/.../edit`
+  refuses edit for users outside the Editor group (400, shown in the dialog); create does not check it.
+- The user search hides the owner and the users already listed. Copy uses the clipboard with an `execCommand`
+  fallback on plain http, and antd `message` for feedback (v1 a tooltip). Link slugs follow v2's `toSlug`; only the id
+  is read back.
+
+Decisions (M7c):
+
+- **React Flow** instead of v1's Konva (the user's choice). It brings `zustand` as an internal dependency; v2 code still
+  uses no state library. Its attribution link is left visible.
+- **Saved lines are drawn in view mode**, read-only (v1 drew none). A joined column the schema no longer has is still
+  drawn with the field's type; a schema that fails to load gives an empty table, a failed relationship request an error.
+- **Positions** keep v1's keys (`camelCase(dbName + tblName)`) so v1 and v2 read each other's layout; other stored keys
+  are kept. Moving a table back to where it was is not a change. Save sends `views` as loaded.
+- The server fills `alias_name` and the `sql_query` extras when it stores views; v2 sends back only what v1 sent.
+
+Decisions (M7d):
+
+- **Background image** is a URL: the server has no upload endpoint, so v1's Upload Image is not ported.
+- **Picking a theme leaves Overlap mode** as the dialog's switch has it (M6c turned it on with every theme).
+- Dialogs render inside the dashboard page to take the theme's accent, but stay light in dark themes (v1's turned
+  dark). B/I/U, alignment, link and corner icons come from `@ant-design/icons`. A failed save shows in the footer.
+
+Decisions (M7e):
+
+- **Chart menu**: a "⋮" shown on hover in view mode (always on touch screens); v1 had none and used a right click,
+  which v2 keeps for the point menu. Edit mode shows v1's gear on every widget.
+- **Kept on purpose**: a tab filter's selected normal tab keeps an active background (v1 read a misspelled variable
+  and drew white on white); tree filter checkboxes fall back to v1's default inactive colour; the Item type dropdown
+  shows a select (v1's renderer is deprecated and its card empty); a tab widget without a stored header style uses
+  the theme's tab backgrounds, the defaults of the Config tab dialog. Choice labels follow `options.textColor` like v1,
+  so a filter without one shows white labels.
+- **Left**: submenus (date function, drill down) in antd's look, column charts' y-axis steps (v1 20M, v2 25M on
+  Revenue by region), table per-field formatting, conditional colours and totals; a dashboard saved with a dark theme
+  was not checked end to end.
 
 v1 bugs not carried over: resize listener never removed, text edits saved twice, query settings mutated in place,
 inner filters kept after reset, the always-null `mainDateFilterRequest`, unsanitized text widget HTML, data label
