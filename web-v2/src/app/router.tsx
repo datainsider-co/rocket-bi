@@ -67,7 +67,8 @@ export const appRoutes: RouteObject[] = [
               {
                 path: '/dashboard/:name',
                 handle: { fullBleed: true } satisfies AppRouteHandle,
-                ...lazyPage(() => import('@/features/dashboard/detail/DashboardPage'), m => m.DashboardPage)
+                // The dashboard with ChartBuilder for edit mode (the embedded page has no edit mode).
+                ...lazyPage(() => import('@/features/chart-builder/DashboardBuilderPage'), m => m.DashboardBuilderPage)
               },
               { path: '*', element: <NotFoundPage /> }
             ]
