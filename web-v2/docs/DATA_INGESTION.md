@@ -218,13 +218,28 @@ bằng `<password>`). Dữ liệu để lại cho các bước sau: source 1 "DI
 - **Status lạ** đọc thành `Unknown`; schedule lạ đọc thành `none`; ngày của weekly không hợp lệ bị bỏ khi đọc.
 - **Đổi giờ local ↔ UTC** của schedule (kèm dời ngày) chưa làm: thuộc `ScheduleForm` ở DI6a.
 
+## Quyết định ở DI2 (2026-10-29)
+
+- **Feature flag** `VITE_ENABLE_INGESTION` (`src/app/featureFlags.ts`): chỉ chuỗi `true` mới bật, không đặt là tắt; đọc
+  lúc build. `.env.development` bật nó cho `pnpm dev` (Vitest chạy mode `test` nên không đọc), build mặc định tắt. Tắt
+  thì không có route `/data-ingestion/*` (ra Not found) và không có link trên header.
+- **Header**: `HEADER_NAV_ITEMS` thành `headerNavItems(flags)`; container `HeaderBar` truyền `navItems` xuống
+  `HeaderBarView` và `MobileNavDrawer`. Data Ingestion đứng sau Data Warehouse như v1, icon port từ v1 `DatabaseIcon.vue`.
+- **Routes** ở path của v1: `/data-ingestion` → `/data-ingestion/data-source`; `job`, `queued-job` (cùng `JobsPage`, chọn
+  theo path như v1 `JobScreen`), `job-history`. Khai báo trong `app/router.tsx`, page lazy load.
+- **Layout** (`features/ingestion/layout`): `IngestionLayout` (sidebar + `Outlet`), `IngestionSidebar` (giống
+  `DirectorySidebar`, thu gọn dưới `md`), `IngestionPageHeader` (icon, tiêu đề, chỗ cho action). Sidebar không có
+  Streaming. Nút "Add Data Source" / "Add Job" của v1 làm cùng DI4 và DI6, khi đã có modal để mở.
+- Các trang hiện chỉ có header; DI3, DI5, DI7 điền listing. Đã kiểm bằng Playwright trên `pnpm dev`: redirect, chọn
+  section, không lỗi console.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
 |---|---|---|
 | DI0 | **Spike và payload thật.** Trên docker local: tạo MySQL source và job, bấm sync, xem job có chạy thật không. Xác minh `multi_create` nhận tập con bảng, format scheduler server cần (`toSchedulerV2`), luồng CSV mới. Lưu request / response làm fixture | Xong |
 | DI1 | **Core.** `core/schedule`; `core/ingestion` cho 6 loại JDBC và loại "unsupported" giữ JSON gốc; service, `SchedulerClient`, DiModule. Test round-trip với fixture DI0 | Xong |
-| DI2 | **Khung.** Feature flag (`VITE_ENABLE_INGESTION`, kèm mục Feature flags của Phase 0), routes `/data-ingestion/*`, sidebar (Data Sources, Jobs, Queued Jobs, Job History), link trên header | Chưa làm |
+| DI2 | **Khung.** Feature flag (`VITE_ENABLE_INGESTION`, kèm mục Feature flags của Phase 0), routes `/data-ingestion/*`, sidebar (Data Sources, Jobs, Queued Jobs, Job History), link trên header | Xong |
 | DI3 | **Data Sources.** Listing phân trang, search, sort phía server; delete và multi-delete; loại chưa hỗ trợ thì không edit | Chưa làm |
 | DI4 | **Source.** Catalog đủ loại (coming-soon disabled kèm tooltip), `SourceFormModal` cho 6 loại JDBC, Test connection, Properties | Chưa làm |
 | DI5 | **Jobs.** Listing All và Queued (`refetchInterval`), force sync, cancel, delete, multi force sync, multi delete, `JobStatusTag` | Chưa làm |
