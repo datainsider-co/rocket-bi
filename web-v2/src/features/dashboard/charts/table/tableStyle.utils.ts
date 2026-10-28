@@ -46,7 +46,10 @@ export function tableStyleVars(options: VizOptions): CSSProperties {
     '--ft-grid-body-vertical': gridLine(options, 'vertical', 'applyBody'),
     '--ft-grid-body-horizontal': gridLine(options, 'horizontal', 'applyBody'),
     // Under a translucent header, so the sticky header hides the rows scrolling below it (v1 blended the colors).
-    '--ft-card-bg': text(options, 'background')
+    '--ft-card-bg': text(options, 'background'),
+    // A collapse table's plus / minus square.
+    '--ft-toggle-bg': text(options, 'toggleIcon.backgroundColor'),
+    '--ft-toggle-color': text(options, 'toggleIcon.color')
   };
   return Object.fromEntries(Object.entries(vars).filter(([, value]) => value !== undefined)) as CSSProperties;
 }

@@ -153,5 +153,102 @@
    ]
   ],
   "total": 12
+ },
+ "group_table_chart_setting": {
+  "class_name": "json_table_response",
+  "headers": [
+   {
+    "key": "960db2",
+    "label": "region",
+    "is_group_by": true,
+    "is_text_left": true
+   },
+   {
+    "key": "4f5daa",
+    "label": "total_revenue by region",
+    "is_group_by": false,
+    "is_text_left": false
+   },
+   {
+    "key": "84002f",
+    "label": "units_sold by region",
+    "is_group_by": false,
+    "is_text_left": true
+   }
+  ],
+  "records": [
+   {
+    "children": [
+     {
+      "children": [],
+      "960db2": "Bangladesh",
+      "4f5daa": "1948296.96",
+      "84002f": "7632"
+     },
+     {
+      "children": [],
+      "960db2": "Bhutan",
+      "4f5daa": "3454857.21",
+      "84002f": "8189"
+     }
+    ],
+    "960db2": "Asia",
+    "4f5daa": "3.433024325E7",
+    "84002f": "161761"
+   },
+   {
+    "children": [
+     {
+      "children": [],
+      "960db2": "East Timor",
+      "4f5daa": "424435.3",
+      "84002f": "2755"
+     },
+     {
+      "children": [],
+      "960db2": "Federated States of Micronesia",
+      "4f5daa": "62100.06",
+      "84002f": "407"
+     }
+    ],
+    "960db2": "Australia and Oceania",
+    "4f5daa": "1.668843469E7",
+    "84002f": "67840"
+   },
+   {
+    "children": [
+     {
+      "children": [],
+      "960db2": "Antigua and Barbuda ",
+      "4f5daa": "481745.62",
+      "84002f": "3127"
+     },
+     {
+      "children": [],
+      "960db2": "Cuba",
+      "4f5daa": "897755.36",
+      "84002f": "11275"
+     }
+    ],
+    "960db2": "Central America and the Caribbean",
+    "4f5daa": "1.5355475600000001E7",
+    "84002f": "74891"
+   }
+  ],
+  "total": 7,
+  "min_max_values": [
+   {
+    "value_name": "total_revenue",
+    "min": 7273.97,
+    "max": 9107823.06
+   },
+   {
+    "value_name": "units_sold",
+    "min": 89.0,
+    "max": 23807.0
+   }
+  ],
+  "last_query_time": 0,
+  "last_processing_time": 0
  }
 }

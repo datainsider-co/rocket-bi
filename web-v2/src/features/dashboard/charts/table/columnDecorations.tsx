@@ -1,8 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { asArray, asRecord, asString, type JsonObject } from '@/core/json/json';
+import { asRecord, asString } from '@/core/json/json';
 import type { MinMaxValue, TableHeader } from '@/core/query/VisualizationResponse';
 import type { VizOptions } from '@/core/query/vizOptions';
-import type { CellNumberFormat } from './table.utils';
+import type { CellNumberFormat, HeaderColumnOf } from './table.utils';
 import { TableCellContent } from './TableCellContent';
 import {
   cellColor,
@@ -29,18 +29,19 @@ export type DecorateColumn = (header: TableHeader) => ColumnDecoration;
 
 interface DecorationInput {
   options: VizOptions;
-  /** The query's columns (`table_chart_setting.columns`); a header's key is its column's position. */
-  columns: readonly unknown[];
+  /** The query column of a header (`headerColumnOf`). */
+  columnOf: HeaderColumnOf;
   minMaxValues?: readonly MinMaxValue[];
 }
 
 /** The decoration of each column from the table's field formatting and conditional formatting. */
-export function columnDecorationsOf({ options, columns, minMaxValues }: DecorationInput): DecorateColumn {
+export function columnDecorationsOf({ options, columnOf, minMaxValues }: DecorationInput): DecorateColumn {
   return header => {
-    const field = asRecord(asRecord(columns[Number(header.key)])['function'])['field'];
-    const range = columnRangeOf(minMaxValues, header.label);
-    const own = fieldFormattingOf(options, header.label);
-    const conditional = conditionalFormattingOf(options, header.label);
+    const { name, column } = columnOf(header);
+    const field = asRecord(column['function'])['field'];
+    const range = columnRangeOf(minMaxValues, name);
+    const own = fieldFormattingOf(options, name);
+    const conditional = conditionalFormattingOf(options, name);
     const background = ownCellFormatting(conditional, 'backgroundColor', field);
     const color = ownCellFormatting(conditional, 'color', field);
     const icon = ownCellFormatting(conditional, 'icon', field);
@@ -49,7 +50,7 @@ export function columnDecorationsOf({ options, columns, minMaxValues }: Decorati
     const hasCellStyle = valueStyle || background || color;
     const hasContent = icon || dataBar['enabled'] === true;
     return {
-      format: fieldNumberFormat(options, header.label),
+      format: fieldNumberFormat(options, name),
       headerStyle: fieldCellStyle(own, 'header'),
       ...(hasCellStyle && {
         cellStyle: (value: unknown) => {
@@ -72,9 +73,4 @@ export function columnDecorationsOf({ options, columns, minMaxValues }: Decorati
       })
     };
   };
-}
-
-/** The query's columns of a table setting. */
-export function tableColumnsOf(setting: JsonObject): unknown[] {
-  return asArray(setting['columns']);
 }

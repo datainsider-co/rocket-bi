@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type Highcharts from 'highcharts';
-import { getPath, asString } from '@/core/json/json';
+import { asArray, getPath, asString } from '@/core/json/json';
 import type { Paging } from '@/core/query/QueryRequest';
 import type { TableSort } from '@/core/query/tableSort';
 import type { VisualizationResponse } from '@/core/query/VisualizationResponse';
@@ -11,9 +11,11 @@ import { titleText } from './highchartsBase';
 import { buildKpi } from './kpi/kpi.utils';
 import { KpiDateRange, type KpiDateRangeProps } from './kpi/KpiDateRange';
 import { KpiView } from './kpi/KpiView';
-import { tableNumberFormat } from './table/table.utils';
+import { headerColumnOf, tableNumberFormat } from './table/table.utils';
 import { tableLookOf } from './table/tableStyle.utils';
-import { columnDecorationsOf, tableColumnsOf } from './table/columnDecorations';
+import { columnDecorationsOf } from './table/columnDecorations';
+import { isCollapseTableSetting } from './table/collapseTable.utils';
+import { CollapseTable } from './table/CollapseTable';
 import { buildPieChartOptions } from './pie/pieChartOptions';
 import { buildSeriesChartOptions, isTimestampFunction } from './series/seriesChartOptions';
 import { FlattenTableView } from './table/FlattenTableView';
@@ -71,7 +73,7 @@ function Unsupported({ title, type }: { title: string; type: string }) {
 }
 
 /**
- * Picks the renderer for a chart (v1 `ChartComponent`: by viz option class, tables by their response). Charts not
+ * Picks the renderer for a chart (v1 `ChartComponent`: by viz option class, tables by their response and setting). Charts not
  * ported yet say so instead of failing. Filters go through `FilterRenderer`.
  */
 export function ChartRenderer({ widget, viz, response, themeColors, table, crossFilter, kpi }: ChartRendererProps) {
@@ -90,9 +92,10 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
   const tableLook = useMemo(() => tableLookOf(viz.options), [viz.options]);
   const minMaxValues = response.kind === 'json_table' ? response.minMaxValues : undefined;
   const decorate = useMemo(
-    () => columnDecorationsOf({ options: viz.options, columns: tableColumnsOf(widget.setting), minMaxValues }),
+    () => columnDecorationsOf({ options: viz.options, columnOf: headerColumnOf(widget.setting), minMaxValues }),
     [viz.options, widget.setting, minMaxValues]
   );
+  const tableColumns = useMemo(() => asArray(widget.setting['columns']), [widget.setting]);
 
   if (highchartsOptions) {
     return <HighchartsChart options={highchartsOptions} fill onPointContextMenu={(point, position) => onPointMenu(pointValue(point), position)} />;
@@ -102,21 +105,20 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
     return <KpiView kpi={buildKpi(viz.options, response, kpi?.trend)} dateRange={dateRange} />;
   }
   if (response.kind === 'json_table') {
-    return (
-      <FlattenTableView
-        title={titleText(viz.options.title)}
-        subtitle={titleText(viz.options.subtitle)}
-        response={response}
-        paging={table.paging}
-        loading={table.loading}
-        onPageChange={table.onPageChange}
-        sort={table.sort}
-        onSortChange={table.onSortChange}
-        numberFormat={tableFormat}
-        look={tableLook}
-        decorate={decorate}
-      />
-    );
+    const tableProps = {
+      title: titleText(viz.options.title),
+      subtitle: titleText(viz.options.subtitle),
+      response,
+      paging: table.paging,
+      loading: table.loading,
+      onPageChange: table.onPageChange,
+      sort: table.sort,
+      onSortChange: table.onSortChange,
+      numberFormat: tableFormat,
+      look: tableLook,
+      decorate
+    };
+    return isCollapseTableSetting(widget.setting) ? <CollapseTable {...tableProps} columns={tableColumns} /> : <FlattenTableView {...tableProps} />;
   }
   return <Unsupported title={titleText(viz.options.title) ?? widget.name} type={viz.className || asString(widget.setting['class_name'])} />;
 }

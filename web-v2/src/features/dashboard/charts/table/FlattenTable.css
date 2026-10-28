@@ -172,3 +172,26 @@
   gap: 5px;
   max-width: 100%;
 }
+
+/* A collapse table's expanded rows read bold (v1 `tr.expanded`). */
+.flatten-table .flatten-table__row--expanded > td {
+  font-weight: bold;
+}
+
+/* v1's plus / minus square before a row's group; rows without one keep its room. */
+.collapse-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  vertical-align: -3px;
+  cursor: pointer;
+}
+
+.collapse-toggle--leaf {
+  cursor: default;
+}

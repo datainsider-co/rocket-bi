@@ -23,8 +23,15 @@ describe('tableStyleVars', () => {
       '--ft-row-size': '12px',
       '--ft-row-padding': '0px',
       '--ft-grid-body-horizontal': '1px solid var(--table-grid-line-color)',
-      '--ft-card-bg': 'var(--chart-background-color)'
+      '--ft-card-bg': 'var(--chart-background-color)',
+      '--ft-toggle-bg': 'var(--toggle-color)',
+      '--ft-toggle-color': 'var(--text-color)'
     });
+  });
+
+  it("reads a new collapse table's header font and toggle", () => {
+    const vars = tableStyleVars(vizFromSetting({ options: defaultVizOptions(ChartType.CollapseTable) }).options);
+    expect(vars).toMatchObject({ '--ft-header-font': 'var(--widget-secondary-font-family, Roboto)', '--ft-toggle-bg': 'var(--toggle-color)', '--ft-toggle-color': 'var(--text-color)' });
   });
 
   it('sets nothing it has no value for', () => {

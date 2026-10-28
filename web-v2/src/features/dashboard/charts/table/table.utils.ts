@@ -1,12 +1,13 @@
 import type { HTMLAttributes } from 'react';
 import type { TableColumnsType } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
-import type { JsonObject } from '@/core/json/json';
+import { asArray, asRecord, asString, type JsonObject } from '@/core/json/json';
 import type { TableSort } from '@/core/query/tableSort';
 import type { TableHeader } from '@/core/query/VisualizationResponse';
 import type { VizOptions } from '@/core/query/vizOptions';
 import type { DecorateColumn } from './columnDecorations';
 import { createNumberFormat, DisplayUnit } from '../numberFormat';
+import { columnOfLabel, isCollapseTableSetting } from './collapseTable.utils';
 
 /** Formats a number cell. */
 export type CellNumberFormat = (value: number) => string;
@@ -40,6 +41,8 @@ export function tableCellText(value: unknown, header: Pick<TableHeader, 'isTextL
 export interface TableRow {
   key: string;
   record: JsonObject;
+  /** A collapse table's next group, shown when the row is expanded. */
+  children?: TableRow[];
 }
 
 /** Gives a cell its full text, for its tooltip (`TooltipCell`). */
@@ -91,4 +94,25 @@ export function toTableSort(sorter: SorterResult<TableRow> | SorterResult<TableR
 /** Rows have no id; their position in the whole table is enough for React. */
 export function toRows(records: readonly JsonObject[], from: number): TableRow[] {
   return records.map((record, index) => ({ key: String(from + index), record }));
+}
+
+/** The query column a header shows, and the name its formatting is keyed by. */
+export interface HeaderColumn {
+  readonly name: string;
+  readonly column: JsonObject;
+}
+
+export type HeaderColumnOf = (header: TableHeader) => HeaderColumn;
+
+/**
+ * The query column of each header: by position in a flatten table, whose header keys are the columns' indexes; by name
+ * in a collapse table, whose keys are hashes and whose labels can read `<name> by ...`.
+ */
+export function headerColumnOf(setting: JsonObject): HeaderColumnOf {
+  const columns = asArray(setting['columns']);
+  if (!isCollapseTableSetting(setting)) return header => ({ name: header.label, column: asRecord(columns[Number(header.key)]) });
+  return header => {
+    const column = columnOfLabel(columns, header.label);
+    return column ? { name: asString(column['name']), column } : { name: header.label, column: {} };
+  };
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import responses from '@/core/query/queryResponses.fixture.json';
 import { visualizationResponseFromJson, type JsonTableResponse, type TableHeader } from '@/core/query/VisualizationResponse';
 import type { VizOptions } from '@/core/query/vizOptions';
-import { tableCellText, tableNumberFormat, toColumns, toRows, toTableSort } from './table.utils';
+import { headerColumnOf, tableCellText, tableNumberFormat, toColumns, toRows, toTableSort } from './table.utils';
 
 const response = visualizationResponseFromJson(responses.table_chart_setting) as JsonTableResponse;
 
@@ -88,5 +88,27 @@ describe('tableCellText', () => {
   it('shows -- for empty cells', () => {
     expect(tableCellText(null, number, format)).toBe('--');
     expect(tableCellText(undefined, { isTextLeft: true, isGroupBy: false }, format)).toBe('--');
+  });
+});
+
+describe('headerColumnOf', () => {
+  const header = (key: string, label: string): TableHeader => ({ key, label, isGroupBy: false, isTextLeft: false, formatterKey: '', children: [] });
+  const region = { name: 'region', function: { class_name: 'group' } };
+  const revenue = { name: 'total_revenue', function: { class_name: 'sum' } };
+
+  it("reads a flatten table's column by the header's position, named by its label", () => {
+    const columnOf = headerColumnOf({ class_name: 'table_chart_setting', columns: [region, revenue] });
+    expect(columnOf(header('1', 'total_revenue'))).toEqual({ name: 'total_revenue', column: revenue });
+    expect(columnOf(header('5', 'x'))).toEqual({ name: 'x', column: {} });
+  });
+
+  it("reads a collapse table's column by its name in the label", () => {
+    const columnOf = headerColumnOf({ class_name: 'group_table_chart_setting', columns: [region, revenue] });
+    expect(columnOf(header('4f5daa', 'total_revenue by region'))).toEqual({ name: 'total_revenue', column: revenue });
+    expect(columnOf(header('ab12cd', 'profit by region'))).toEqual({ name: 'profit by region', column: {} });
+  });
+
+  it('copes with a setting without columns', () => {
+    expect(headerColumnOf({})(header('0', 'region'))).toEqual({ name: 'region', column: {} });
   });
 });
