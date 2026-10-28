@@ -1,14 +1,8 @@
 import type { KyInstance } from 'ky';
 import { token } from '@/core/di/Container';
 import { asRecord } from '@/core/json/json';
+import type { SortOrder } from '@/core/listing/Listing';
 import { Directory, DirectoryParents, DirectoryType } from './Directory';
-
-export const SortOrder = {
-  Asc: 'ASC',
-  Desc: 'DESC'
-} as const;
-
-export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder];
 
 /** `field` is a backend column name (snake_case), such as `name` or `updated_date`. */
 export interface DirectorySort {

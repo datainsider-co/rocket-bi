@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { dashboardPath, toIdParam } from '@/shared/routing/idParam';
 import { DefaultDirectoryId, DirectoryType } from '@/core/directory/Directory';
 import type { Directory, DirectoryParents } from '@/core/directory/Directory';
-import { SortOrder } from '@/core/directory/DirectoryService';
+import { SortOrder } from '@/core/listing/Listing';
 import type { DirectorySort } from '@/core/directory/DirectoryService';
 
 /** The five listings of v1's directory screen, keyed by their URL segment. */
