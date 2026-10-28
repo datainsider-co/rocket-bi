@@ -1,10 +1,11 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDi } from '@/app/di/DiContext';
 import type { ChartWidget } from '@/core/dashboard/Widget';
 import { canQuerySetting, toQueryRequestJson, type Paging } from '@/core/query/QueryRequest';
 import { QueryService } from '@/core/query/QueryService';
-import type { TableResponse } from '@/core/query/VisualizationResponse';
+import type { JsonObject } from '@/core/json/json';
+import type { TableResponse, VisualizationResponse } from '@/core/query/VisualizationResponse';
 import type { ChartQuery } from '../controls/chartQuery.utils';
 import { dashboardKeys } from '../detail/dashboardQueries';
 import { useViewAsUser } from '../view-as/ViewAsContext';
@@ -23,6 +24,28 @@ export const chartDataKeys = {
     [...chartDataKeys.all(dashboardId), widgetId, request, viewAs ?? null] as const
 };
 
+/** A chart request as TanStack Query options. */
+export interface ChartDataQuery {
+  queryKey: readonly unknown[];
+  queryFn: (context: { signal: AbortSignal }) => Promise<VisualizationResponse>;
+}
+
+/**
+ * Turns a widget's request into its query, keyed by the request, sharing the dashboard's limit on queries at once and
+ * queried as the View As user when there is one.
+ */
+export function useChartDataQuery(dashboardId: number) {
+  const service = useDi(QueryService);
+  const viewAs = useViewAsUser();
+  return useCallback(
+    (widgetId: number, request: JsonObject): ChartDataQuery => ({
+      queryKey: chartDataKeys.request(dashboardId, widgetId, request, viewAs?.profile.username),
+      queryFn: ({ signal }) => limit(() => (viewAs ? service.queryAs(request, viewAs.json, signal) : service.query(request, signal)))
+    }),
+    [service, viewAs, dashboardId]
+  );
+}
+
 interface WidgetDataOptions {
   dashboardId: number;
   /** The widget's query with the dashboard's controls applied (`buildChartQuery`); the stored setting by default. */
@@ -38,8 +61,7 @@ interface WidgetDataOptions {
  * query (an input, a tab control) gets an empty table without a request. Under View As it is queried as that user.
  */
 export function useWidgetData(widget: ChartWidget, { dashboardId, query, paging, enabled = true }: WidgetDataOptions) {
-  const service = useDi(QueryService);
-  const viewAs = useViewAsUser();
+  const queryOf = useChartDataQuery(dashboardId);
   const setting = query?.setting ?? widget.setting;
   const queryable = canQuerySetting(setting);
   const request = useMemo(
@@ -55,12 +77,10 @@ export function useWidgetData(widget: ChartWidget, { dashboardId, query, paging,
       }),
     [setting, query?.filterRequests, query?.parameters, query?.compareRequest, widget.id, paging, dashboardId]
   );
+  const { queryKey, queryFn } = queryOf(widget.id, request);
   return useQuery({
-    queryKey: chartDataKeys.request(dashboardId, widget.id, request, viewAs?.profile.username),
-    queryFn: ({ signal }) => {
-      if (!queryable) return Promise.resolve(EMPTY_TABLE);
-      return limit(() => (viewAs ? service.queryAs(request, viewAs.json, signal) : service.query(request, signal)));
-    },
+    queryKey,
+    queryFn: context => (queryable ? queryFn(context) : Promise.resolve(EMPTY_TABLE)),
     placeholderData: keepPreviousData,
     enabled
   });

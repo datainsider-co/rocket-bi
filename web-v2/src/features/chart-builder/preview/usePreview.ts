@@ -4,6 +4,7 @@ import { widgetFromJson, type ChartWidget } from '@/core/dashboard/Widget';
 import { DEFAULT_PAGE_SIZE, isPagedSetting, type Paging } from '@/core/query/QueryRequest';
 import { vizFromSetting } from '@/core/query/vizOptions';
 import { useKpiTrend } from '@/features/dashboard/chart-data/useKpiTrend';
+import { useSubRowQuery } from '@/features/dashboard/chart-data/useSubRowQuery';
 import type { KpiParts } from '@/features/dashboard/charts/ChartRenderer';
 import { kpiDateRangeOf } from '@/features/dashboard/charts/kpi/kpiDateRange.utils';
 import { useWidgetData } from '@/features/dashboard/chart-data/useWidgetData';
@@ -38,6 +39,7 @@ export function usePreview(json: JsonObject | undefined, dashboardId: number) {
   const paging = page.setting === widget.setting ? page.paging : FIRST_PAGE;
   const data = useWidgetData(widget, { dashboardId, query, paging: isPagedSetting(widget.setting) ? paging : undefined, enabled: chart !== undefined });
   const trend = useKpiTrend(widget, query, dashboardId);
+  const subRows = useSubRowQuery(widget.id, query, dashboardId);
   // The range is only shown here: it is changed in the Date Range tab.
   const dateRange = useMemo(() => kpiDateRangeOf(widget.setting), [widget.setting]);
   const kpi = useMemo<KpiParts>(() => ({ trend, dateRange: dateRange && { value: dateRange } }), [trend, dateRange]);
@@ -52,7 +54,7 @@ export function usePreview(json: JsonObject | undefined, dashboardId: number) {
     query,
     data,
     kpi,
-    table: { paging, loading: data.isFetching, onPageChange: (next: Paging) => setPage({ setting: widget.setting, paging: next }), onSortChange: () => {} },
+    table: { paging, loading: data.isFetching, onPageChange: (next: Paging) => setPage({ setting: widget.setting, paging: next }), onSortChange: () => {}, subRows },
     filter: { entry: entry ?? defaultEntry, onChange: setEntry },
     /** v1 kept Add disabled while the preview failed. */
     failed: data.isError

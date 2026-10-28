@@ -49,9 +49,15 @@ export function collapseRowClassName(key: string, shown: ReadonlyMap<string, num
   return expandedKeys.includes(key) ? `${stripe} flatten-table__row--expanded` : stripe;
 }
 
-/** The keys with `key` expanded or collapsed. */
-export function toggledKeys(keys: readonly string[], key: string): string[] {
-  return keys.includes(key) ? keys.filter(current => current !== key) : [...keys, key];
+/** The expanded rows by key, each with its path (empty for a row without one). */
+export type ExpandedRows = ReadonlyMap<string, readonly string[]>;
+
+/** The expanded rows with `row` expanded or collapsed, in the order they were expanded. */
+export function toggledRows(open: ExpandedRows, row: Pick<TableRow, 'key' | 'path'>): ExpandedRows {
+  const next = new Map(open);
+  if (next.has(row.key)) next.delete(row.key);
+  else next.set(row.key, row.path ?? []);
+  return next;
 }
 
 /**

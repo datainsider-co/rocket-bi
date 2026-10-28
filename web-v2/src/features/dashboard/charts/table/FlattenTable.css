@@ -59,10 +59,16 @@
   overflow: auto;
 }
 
-.flatten-table .ant-table-thead > tr > th {
+/* A wide table scrolls in the same box as its rows, so the header and total row still stick. */
+.flatten-table__body .ant-table-content {
+  overflow: visible !important;
+}
+
+/* The whole header sticks, so a pivot table's header rows stay stacked. */
+.flatten-table .ant-table-thead {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 2;
 }
 
 .flatten-table .ant-table {
@@ -97,6 +103,10 @@
   border-left: var(--ft-grid-header-vertical, none);
 }
 
+.flatten-table .ant-table-thead > tr:not(:first-child) > th {
+  border-top: var(--ft-grid-header-horizontal, none);
+}
+
 .flatten-table .ant-table-thead > tr > th::before {
   display: none;
 }
@@ -116,9 +126,41 @@
   border-left: var(--ft-grid-body-vertical, none);
 }
 
-/* v1 `.hide-footer`: no line under the last row. */
+/* v1 `.hide-footer`: no line under the last row, unless the total row follows. */
 .flatten-table .ant-table-tbody > tr:last-child > td {
   border-bottom: none;
+}
+
+.flatten-table--totals .ant-table-tbody > tr:last-child > td {
+  border-bottom: var(--ft-grid-body-horizontal, none);
+}
+
+/* A pivot table's total row (v1 `tfoot`), kept at the bottom while the rows scroll. */
+.flatten-table .ant-table-summary {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+}
+
+.flatten-table .flatten-table__total > td {
+  height: calc(48px + 2 * var(--ft-row-padding, 0px));
+  padding: var(--ft-row-padding, 0px) 12px !important;
+  border-bottom: var(--ft-grid-total-horizontal, none);
+  background: linear-gradient(var(--ft-total-bg, var(--total-background-color, #f5f5f5)), var(--ft-total-bg, var(--total-background-color, #f5f5f5)))
+    var(--ft-card-bg, var(--chart-background-color, transparent));
+  color: var(--ft-total-color, var(--text-color));
+  font-family: var(--ft-total-font, inherit);
+  font-size: var(--ft-total-size, 12px);
+  font-weight: bold;
+  white-space: var(--ft-total-white-space, nowrap);
+}
+
+.flatten-table .flatten-table__total > td + td {
+  border-left: var(--ft-grid-total-vertical, none);
+}
+
+.flatten-table .flatten-table__total-value {
+  text-align: var(--ft-total-align, right);
 }
 
 .flatten-table .flatten-table__row--even > td {

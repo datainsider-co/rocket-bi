@@ -29,6 +29,14 @@ describe('toColumns', () => {
     const [column] = toColumns([{ ...leaf, key: 'g', label: 'Channel', children: [leaf] }]);
     expect(column).toMatchObject({ key: 'g', title: 'Channel', children: [{ dataIndex: ['record', '1'], title: 'Online' }] });
   });
+
+  it("keys a pivot table's groups, which have no key, by their place", () => {
+    const leaf = (key: string): TableHeader => ({ key, label: 'total_revenue', isGroupBy: false, isTextLeft: false, formatterKey: '', children: [] });
+    const group = (label: string, children: TableHeader[]): TableHeader => ({ ...leaf(''), label, children });
+    const columns = toColumns([group('Offline', [group('C', [leaf('a')])]), group('Online', [leaf('b')])]);
+    expect(columns.map(column => column.key)).toEqual(['group-0', 'group-1']);
+    expect(columns[0]).toMatchObject({ children: [{ key: 'group-0-0', children: [{ key: 'a' }] }] });
+  });
 });
 
 describe('toRows', () => {
@@ -45,6 +53,12 @@ describe('sorting', () => {
   it('marks the sorted column', () => {
     const columns = toColumns([header('region'), header('country')], { column: 'country', direction: 'DESC' });
     expect(columns.map(column => (column as { sortOrder?: unknown }).sortOrder)).toEqual([null, 'descend']);
+  });
+
+  it('sorts only by the headers that can', () => {
+    const columns = toColumns([header('region'), header('country')], { column: 'country', direction: 'DESC' }, String, undefined, item => item.label === 'region');
+    expect(columns.map(column => (column as { sorter?: unknown }).sorter)).toEqual([true, false]);
+    expect(columns.map(column => (column as { sortOrder?: unknown }).sortOrder)).toEqual([null, null]);
   });
 
   it('reads antd sorter as a sort', () => {

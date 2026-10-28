@@ -10,7 +10,7 @@ import {
   shownRowIndexes,
   sortByColumnName,
   sortByLabel,
-  toggledKeys,
+  toggledRows,
   toTreeRows
 } from './collapseTable.utils';
 
@@ -86,12 +86,19 @@ describe('collapseRowClassName', () => {
   });
 });
 
-describe('toggledKeys', () => {
-  it('adds a key or removes it, without changing its input', () => {
-    const keys = ['1'];
-    expect(toggledKeys(keys, '2')).toEqual(['1', '2']);
-    expect(toggledKeys(keys, '1')).toEqual([]);
-    expect(keys).toEqual(['1']);
+describe('toggledRows', () => {
+  it('adds a row with its path or removes it, without changing its input', () => {
+    const open = new Map([['1', ['Asia']]]);
+    expect([...toggledRows(open, { key: '2', path: ['Europe'] })]).toEqual([
+      ['1', ['Asia']],
+      ['2', ['Europe']]
+    ]);
+    expect(toggledRows(open, { key: '1' }).size).toBe(0);
+    expect([...open]).toEqual([['1', ['Asia']]]);
+  });
+
+  it('keeps an empty path for a row without one', () => {
+    expect(toggledRows(new Map(), { key: '0' }).get('0')).toEqual([]);
   });
 });
 

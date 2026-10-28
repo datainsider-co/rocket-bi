@@ -5,6 +5,7 @@ import type { TableSort } from '@/core/query/tableSort';
 import { vizFromSetting } from '@/core/query/vizOptions';
 import { zoomLevelOf, canZoom } from '@/core/query/zoom';
 import { useKpiTrend } from '../../chart-data/useKpiTrend';
+import { useSubRowQuery } from '../../chart-data/useSubRowQuery';
 import { useWidgetData } from '../../chart-data/useWidgetData';
 import type { KpiParts } from '../../charts/ChartRenderer';
 import { kpiDateRangeOf } from '../../charts/kpi/kpiDateRange.utils';
@@ -48,6 +49,7 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
   const query = useMemo(() => buildChartQuery(view.viewed, controls, widgets, appliedRequests), [view.viewed, controls, widgets, appliedRequests]);
   const data = useWidgetData(view.viewed, { dashboardId, query, paging: isPagedSetting(widget.setting) ? paging : undefined });
   const trend = useKpiTrend(view.viewed, query, dashboardId);
+  const subRows = useSubRowQuery(widget.id, query, dashboardId);
   const dateRange = useMemo(() => kpiDateRangeOf(view.viewed.setting), [view.viewed.setting]);
   const { pickDateRange } = view;
   const kpi = useMemo<KpiParts>(() => ({ trend, dateRange: dateRange && { value: dateRange, onChange: pickDateRange } }), [trend, dateRange, pickDateRange]);
@@ -110,7 +112,7 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
     kpi,
     entry,
     setEntry,
-    table: { paging, loading: data.isFetching, onPageChange: setPaging, sort: view.view.sort, onSortChange },
+    table: { paging, loading: data.isFetching, onPageChange: setPaging, sort: view.view.sort, onSortChange, subRows },
     crossFilter: { selected, onSelect, onPointMenu },
     drillPath: { steps: view.view.drills.map(drill => drill.step), onBack: view.back },
     pointMenu: { position: pointMenu?.position, items: pointItems, keepOpenKeys: KEEP_OPEN_KEYS, onClose: close },

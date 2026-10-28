@@ -22,7 +22,9 @@ describe('tableStyleVars', () => {
       '--ft-row-font': 'var(--widget-secondary-font-family, Roboto)',
       '--ft-row-size': '12px',
       '--ft-row-padding': '0px',
+      '--ft-grid-header-horizontal': '1px solid var(--table-grid-line-color)',
       '--ft-grid-body-horizontal': '1px solid var(--table-grid-line-color)',
+      '--ft-grid-total-horizontal': '1px solid var(--table-grid-line-color)',
       '--ft-card-bg': 'var(--chart-background-color)',
       '--ft-toggle-bg': 'var(--toggle-color)',
       '--ft-toggle-color': 'var(--text-color)'
@@ -32,6 +34,23 @@ describe('tableStyleVars', () => {
   it("reads a new collapse table's header font and toggle", () => {
     const vars = tableStyleVars(vizFromSetting({ options: defaultVizOptions(ChartType.CollapseTable) }).options);
     expect(vars).toMatchObject({ '--ft-header-font': 'var(--widget-secondary-font-family, Roboto)', '--ft-toggle-bg': 'var(--toggle-color)', '--ft-toggle-color': 'var(--text-color)' });
+  });
+
+  it("reads a new pivot table's total row", () => {
+    const vars = tableStyleVars(vizFromSetting({ options: defaultVizOptions(ChartType.PivotTable) }).options);
+    expect(vars).toMatchObject({
+      '--ft-total-color': 'var(--text-color)',
+      '--ft-total-bg': 'var(--total-background-color)',
+      '--ft-total-font': 'var(--widget-secondary-font-family, Roboto)',
+      '--ft-total-size': '12px',
+      '--ft-total-align': 'right',
+      '--ft-grid-total-horizontal': '1px solid var(--table-grid-line-color)'
+    });
+    expect(vars).not.toHaveProperty('--ft-grid-total-vertical');
+    expect(tableStyleVars(viz({ total: { label: { style: { isWordWrap: true } } }, grid: { vertical: { applyTotal: true } } }))).toEqual({
+      '--ft-total-white-space': 'normal',
+      '--ft-grid-total-vertical': '1px solid var(--table-grid-line-color)'
+    });
   });
 
   it('sets nothing it has no value for', () => {

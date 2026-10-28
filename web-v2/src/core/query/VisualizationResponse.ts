@@ -48,6 +48,8 @@ export interface TableHeader {
   readonly formatterKey: string;
   /** Grouped headers (pivot, breakdown); leaves have none. */
   readonly children: readonly TableHeader[];
+  /** A pivot table column's total, as the server writes numbers (`"1.27E8"`). */
+  readonly total?: string;
 }
 
 /** Rows as objects keyed by header key (`json_table_response`): tables. */
@@ -95,7 +97,8 @@ function tableHeaderFromJson(value: unknown): TableHeader {
     isGroupBy: asBoolean(json['is_group_by']),
     isTextLeft: asBoolean(json['is_text_left']),
     formatterKey: asString(json['formatter_key']),
-    children: asArray(json['children']).map(tableHeaderFromJson)
+    children: asArray(json['children']).map(tableHeaderFromJson),
+    ...(json['total'] !== undefined && json['total'] !== null && { total: String(json['total']) })
   };
 }
 

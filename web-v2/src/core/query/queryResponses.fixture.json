@@ -250,5 +250,97 @@
   ],
   "last_query_time": 0,
   "last_processing_time": 0
+ },
+ "pivot_table_chart_setting": {
+  "class_name": "json_table_response",
+  "headers": [
+   {
+    "key": "960db2",
+    "label": "region",
+    "is_group_by": true,
+    "is_text_left": true
+   },
+   {
+    "label": "Offline",
+    "children": [
+     {
+      "label": "total_revenue",
+      "total": "1.2792258188999999E8",
+      "is_text_left": false,
+      "key": "e1015b"
+     },
+     {
+      "label": "units_sold",
+      "total": "587060",
+      "is_text_left": false,
+      "key": "d28fcf"
+     }
+    ]
+   },
+   {
+    "label": "Online",
+    "children": [
+     {
+      "label": "total_revenue",
+      "total": "1.2284877647999996E8",
+      "is_text_left": false,
+      "key": "d3cac9"
+     },
+     {
+      "label": "units_sold",
+      "total": "441986",
+      "is_text_left": false,
+      "key": "663c43"
+     }
+    ]
+   }
+  ],
+  "records": [
+   {
+    "children": [],
+    "960db2": "Asia",
+    "4f5daa": "3.433024325E7",
+    "84002f": "161761",
+    "e1015b": "1.7238363319999997E7",
+    "d28fcf": "86427",
+    "d3cac9": "1.709187993E7",
+    "663c43": "75334"
+   },
+   {
+    "children": [],
+    "960db2": "Australia and Oceania",
+    "4f5daa": "1.668843469E7",
+    "84002f": "67840",
+    "e1015b": "8146184.309999999",
+    "d28fcf": "36393",
+    "d3cac9": "8542250.379999999",
+    "663c43": "31447"
+   },
+   {
+    "children": [],
+    "960db2": "Central America and the Caribbean",
+    "4f5daa": "1.5355475600000001E7",
+    "84002f": "74891",
+    "e1015b": "8347059.27",
+    "d28fcf": "47537",
+    "d3cac9": "7008416.33",
+    "663c43": "27354"
+   }
+  ],
+  "total": 7,
+  "min_max_values": [
+   {
+    "value_name": "total_revenue",
+    "min": 852388.4099999999,
+    "max": 55403108.16999999
+   },
+   {
+    "value_name": "units_sold",
+    "min": 12107.0,
+    "max": 198813.0
+   }
+  ],
+  "last_query_time": 0,
+  "last_processing_time": 0
  }
 }

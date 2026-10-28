@@ -6,6 +6,8 @@ import type { TableSort } from '@/core/query/tableSort';
 import type { VisualizationResponse } from '@/core/query/VisualizationResponse';
 import type { ChartViz } from '@/core/query/vizOptions';
 import type { ChartWidget } from '@/core/dashboard/Widget';
+import { isPivotTableSetting } from '@/core/query/pivotQuery';
+import type { SubRowQuery } from '../chart-data/useSubRowQuery';
 import { HighchartsChart } from '@/shared/charts/HighchartsChart';
 import { titleText } from './highchartsBase';
 import { buildKpi } from './kpi/kpi.utils';
@@ -16,6 +18,7 @@ import { tableLookOf } from './table/tableStyle.utils';
 import { columnDecorationsOf } from './table/columnDecorations';
 import { isCollapseTableSetting } from './table/collapseTable.utils';
 import { CollapseTable } from './table/CollapseTable';
+import { PivotTable } from './table/PivotTable';
 import { buildPieChartOptions } from './pie/pieChartOptions';
 import { buildSeriesChartOptions, isTimestampFunction } from './series/seriesChartOptions';
 import { FlattenTableView } from './table/FlattenTableView';
@@ -27,6 +30,8 @@ export interface TablePaging {
   onPageChange: (paging: Paging) => void;
   sort?: TableSort;
   onSortChange: (sort: TableSort | undefined) => void;
+  /** How a pivot table row loads the rows under it (`useSubRowQuery`). */
+  subRows?: SubRowQuery;
 }
 
 /** The chart as a control for others (v1 cross filter). */
@@ -118,6 +123,7 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
       look: tableLook,
       decorate
     };
+    if (isPivotTableSetting(widget.setting)) return <PivotTable {...tableProps} setting={widget.setting} options={viz.options} subRows={table.subRows} />;
     return isCollapseTableSetting(widget.setting) ? <CollapseTable {...tableProps} columns={tableColumns} /> : <FlattenTableView {...tableProps} />;
   }
   return <Unsupported title={titleText(viz.options.title) ?? widget.name} type={viz.className || asString(widget.setting['class_name'])} />;

@@ -20,7 +20,7 @@ function px(value: string | undefined): string | undefined {
 }
 
 /** A grid line when it applies to that part (v1: `<thickness> solid <color>`). */
-function gridLine(options: VizOptions, direction: 'vertical' | 'horizontal', part: 'applyHeader' | 'applyBody'): string | undefined {
+function gridLine(options: VizOptions, direction: 'vertical' | 'horizontal', part: 'applyHeader' | 'applyBody' | 'applyTotal'): string | undefined {
   if (get(options, ['grid', direction, part]) !== true) return undefined;
   return `${px(text(options, `grid.${direction}.thickness`)) ?? '1px'} solid ${text(options, `grid.${direction}.color`) ?? 'var(--table-grid-line-color)'}`;
 }
@@ -41,10 +41,21 @@ export function tableStyleVars(options: VizOptions): CSSProperties {
     '--ft-row-size': px(text(options, 'value.style.fontSize')),
     '--ft-row-white-space': get(options, 'value.style.isWordWrap') === true ? 'normal' : undefined,
     '--ft-row-padding': px(text(options, 'grid.horizontal.rowPadding')),
-    // A flatten table has one header row, so the horizontal header lines (between header rows) never show.
     '--ft-grid-header-vertical': gridLine(options, 'vertical', 'applyHeader'),
+    // Between header rows: only a pivot table's columns across have several.
+    '--ft-grid-header-horizontal': gridLine(options, 'horizontal', 'applyHeader'),
     '--ft-grid-body-vertical': gridLine(options, 'vertical', 'applyBody'),
     '--ft-grid-body-horizontal': gridLine(options, 'horizontal', 'applyBody'),
+    // A pivot table's total row.
+    '--ft-grid-total-vertical': gridLine(options, 'vertical', 'applyTotal'),
+    '--ft-grid-total-horizontal': gridLine(options, 'horizontal', 'applyTotal'),
+    '--ft-total-color': text(options, 'total.label.style.color'),
+    '--ft-total-bg': text(options, 'total.backgroundColor'),
+    '--ft-total-font': text(options, 'total.label.style.fontFamily'),
+    '--ft-total-size': px(text(options, 'total.label.style.fontSize')),
+    '--ft-total-white-space': get(options, 'total.label.style.isWordWrap') === true ? 'normal' : undefined,
+    // v1 aligned the totals by it; the label stays under the row group, on the left.
+    '--ft-total-align': text(options, 'total.label.align'),
     // Under a translucent header, so the sticky header hides the rows scrolling below it (v1 blended the colors).
     '--ft-card-bg': text(options, 'background'),
     // A collapse table's plus / minus square.

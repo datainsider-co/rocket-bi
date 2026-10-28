@@ -7,7 +7,9 @@ import type { TableHeader } from '@/core/query/VisualizationResponse';
 import type { VizOptions } from '@/core/query/vizOptions';
 import type { DecorateColumn } from './columnDecorations';
 import { createNumberFormat, DisplayUnit } from '../numberFormat';
+import { isPivotTableSetting } from '@/core/query/pivotQuery';
 import { columnOfLabel, isCollapseTableSetting } from './collapseTable.utils';
+import { pivotHeaderColumnOf } from './pivotTable.utils';
 
 /** Formats a number cell. */
 export type CellNumberFormat = (value: number) => string;
@@ -41,8 +43,10 @@ export function tableCellText(value: unknown, header: Pick<TableHeader, 'isTextL
 export interface TableRow {
   key: string;
   record: JsonObject;
-  /** A collapse table's next group, shown when the row is expanded. */
+  /** A collapse or pivot table's next group, shown when the row is expanded. */
   children?: TableRow[];
+  /** A pivot table row's value and its parents' (from the top), which query the rows under it. */
+  path?: readonly string[];
 }
 
 /** Gives a cell its full text, for its tooltip (`TooltipCell`). */
@@ -50,18 +54,33 @@ function titled(title: string): HTMLAttributes<HTMLElement> {
   return { 'data-title': title } as HTMLAttributes<HTMLElement>;
 }
 
+/** Whether a header's column sorts the table; every one by default. */
+export type SortableHeader = (header: TableHeader) => boolean;
+
+const ALL_SORTABLE: SortableHeader = () => true;
+
 /**
  * Header tree → antd columns; leaves read the record cell under the header's key. Numbers align right, as in v1
- * (headers align by the table's options). Leaves sort on the server; `sort` marks the sorted one. Each cell carries its
- * full text for its tooltip.
+ * (headers align by the table's options). Sortable leaves sort on the server; `sort` marks the sorted one. Each cell
+ * carries its full text for its tooltip. Groups (a pivot table's columns across) have no key of their own, so they are
+ * keyed by their place.
  */
-export function toColumns(headers: readonly TableHeader[], sort?: TableSort, format: CellNumberFormat = String, decorate?: DecorateColumn): TableColumnsType<TableRow> {
-  return headers.map(header => {
+export function toColumns(
+  headers: readonly TableHeader[],
+  sort?: TableSort,
+  format: CellNumberFormat = String,
+  decorate?: DecorateColumn,
+  sortable: SortableHeader = ALL_SORTABLE,
+  groupKey = 'group'
+): TableColumnsType<TableRow> {
+  return headers.map((header, index) => {
     if (header.children.length > 0) {
-      return { key: header.key, title: header.label, onHeaderCell: () => titled(header.label), children: toColumns(header.children, sort, format, decorate) };
+      const key = header.key || `${groupKey}-${index}`;
+      return { key, title: header.label, onHeaderCell: () => titled(header.label), children: toColumns(header.children, sort, format, decorate, sortable, key) };
     }
     const decoration = decorate?.(header);
     const cellFormat = decoration?.format ?? format;
+    const sorter = sortable(header);
     return {
       key: header.key,
       title: header.label,
@@ -73,8 +92,8 @@ export function toColumns(headers: readonly TableHeader[], sort?: TableSort, for
         const value = row.record[header.key];
         return { ...titled(tableCellText(value, header, cellFormat)), style: decoration?.cellStyle?.(value) };
       },
-      sorter: true,
-      sortOrder: sort?.column === header.label ? (sort.direction === 'ASC' ? 'ascend' : 'descend') : null,
+      sorter,
+      sortOrder: sorter && sort?.column === header.label ? (sort.direction === 'ASC' ? 'ascend' : 'descend') : null,
       render: (value: unknown) => {
         const text = tableCellText(value, header, cellFormat);
         return decoration?.render ? decoration.render(value, text) : text;
@@ -106,9 +125,10 @@ export type HeaderColumnOf = (header: TableHeader) => HeaderColumn;
 
 /**
  * The query column of each header: by position in a flatten table, whose header keys are the columns' indexes; by name
- * in a collapse table, whose keys are hashes and whose labels can read `<name> by ...`.
+ * in a collapse or pivot table, whose keys are hashes and whose labels can read `<name> by ...`.
  */
 export function headerColumnOf(setting: JsonObject): HeaderColumnOf {
+  if (isPivotTableSetting(setting)) return pivotHeaderColumnOf(setting);
   const columns = asArray(setting['columns']);
   if (!isCollapseTableSetting(setting)) return header => ({ name: header.label, column: asRecord(columns[Number(header.key)]) });
   return header => {
