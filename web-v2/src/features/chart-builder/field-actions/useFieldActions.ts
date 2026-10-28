@@ -8,7 +8,7 @@ import { SchemaService, type TableSchema } from '@/core/schema/SchemaService';
 import { databaseQueryOptions } from '@/shared/schema/schemaQueries';
 import { columnNameOfNode, expressionKindOf, type FieldNode, type TreeActions } from '../field-tree/fieldTree.utils';
 import type { TableRef } from '../state/tableSync.utils';
-import { columnsOfKind, deleteColumnMessage, deleteTableMessage, lostColumnsMessage, tableActionsOf, type ColumnAction, type TableAction } from './fieldActions.utils';
+import { columnsOfKind, deleteColumnMessage, lostColumnsMessage, tableActionsOf, type ColumnAction, type TableAction } from './fieldActions.utils';
 import type { FormulaFieldTarget } from './useFormulaFieldForm';
 import { useTableRefresh } from './useTableRefresh';
 import type { ViewQueryUpdate } from './updateViewQuery';
@@ -64,8 +64,7 @@ export function useFieldActions({ disabled, tables, onExpand }: FieldActionsInpu
       const table = tableOf(key);
       if (!table) return;
       if (action === 'addCalculated' || action === 'addMeasure') setDialog({ type: 'formula', target: { kind: action === 'addMeasure' ? 'measure' : 'calculated', table } });
-      else if (action === 'updateQuery') setDialog({ type: 'query', table });
-      else confirmDelete(table, deleteTableMessage(table), () => edit.dropTable(table), error => `Can't delete ${table.displayName || table.name}, cause ${error.message}`);
+      else setDialog({ type: 'query', table });
     };
     const onColumnAction = (node: FieldNode, action: ColumnAction) => {
       const kind = expressionKindOf(node);

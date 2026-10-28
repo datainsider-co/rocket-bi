@@ -5,7 +5,6 @@ import {
   columnActionsOf,
   columnsOfKind,
   deleteColumnMessage,
-  deleteTableMessage,
   expressionColumnOf,
   expressionColumnsOf,
   expressionOf,
@@ -47,10 +46,9 @@ describe('canUpdateByQuery', () => {
 });
 
 describe('tableActionsOf', () => {
-  it('offers the query only on a view', () => {
-    expect(tableActionsOf(view).map(item => item.key)).toEqual(['addCalculated', 'addMeasure', 'updateQuery', 'delete']);
-    expect(tableActionsOf({ dbName: 'db', tableType: 'default' }).map(item => item.key)).toEqual(['addCalculated', 'addMeasure', 'delete']);
-    expect(tableActionsOf(view).at(-1)).toEqual({ key: 'delete', label: 'Delete Table', danger: true });
+  it('offers the query only on a view, and no Delete Table (v1)', () => {
+    expect(tableActionsOf(view).map(item => item.key)).toEqual(['addCalculated', 'addMeasure', 'updateQuery']);
+    expect(tableActionsOf({ dbName: 'db', tableType: 'default' }).map(item => item.key)).toEqual(['addCalculated', 'addMeasure']);
   });
 });
 
@@ -142,11 +140,9 @@ describe('expressionColumnOf', () => {
 });
 
 describe('confirmation messages', () => {
-  it('name the column and the table by display name', () => {
+  it('name the column by display name', () => {
     expect(deleteColumnMessage('measure', measure)).toBe('Are you sure you want to delete measure "Avg Rev"?');
     expect(deleteColumnMessage('calculated', calculated)).toBe('Are you sure you want to delete calculated field "Double Units"?');
-    expect(deleteTableMessage({ name: 'cb8_tmp_view', displayName: 'Tmp' })).toBe("Are you sure to permanently delete table 'Tmp'?");
-    expect(deleteTableMessage({ name: 'cb8_tmp_view' })).toBe("Are you sure to permanently delete table 'cb8_tmp_view'?");
   });
 });
 

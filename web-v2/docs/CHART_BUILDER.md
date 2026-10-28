@@ -53,8 +53,8 @@ Code v1 cần đọc:
   hiện setting đang lưu, và setting chỉ bị thay khi người dùng sửa config. Không dựng ngược configs từ setting.
 - **Preview** áp các control hiện tại của dashboard (`buildChartQuery`), giống v1.
 - **Tạm thời chưa làm trong builder:**
-  - Add Calculated Field, Add Measure, Update Table By Query và Delete table trong cây field. Làm sau khi ChartBuilder
-    xong, đã làm ở CB8.
+  - Add Calculated Field, Add Measure và Update Table By Query trong cây field. Làm sau khi ChartBuilder xong, đã làm
+    ở CB8.
   - Matching location của Map: không port, vì đây là anti-pattern của v1. Map sẽ có thiết kế riêng.
 
 ## Phát hiện ở CB0 (2026-10-27)
@@ -646,7 +646,7 @@ Pivot Table (v1 `ChartType.PivotTable`, type `pivot_table`). Spec lấy từ v1 
 
 ## Quyết định ở CB8 (2026-10-28)
 
-Action trên cây field: measure, calculated field, Update Table By Query, Delete table, và Edit Measure trong menu "..."
+Action trên cây field: measure, calculated field, Update Table By Query, và Edit Measure trong menu "..."
 của item. Spec lấy từ v1 (`DatabaseListing`, `CalculatedFieldModal`, `UpdateTableByQueryModal`, `DatabaseSchemaStore`,
 `SchemaRepository`) và kiểm bằng backend local, trên view tạm `sample_v2.cb8_tmp_view` / `cb8_tmp_drop` (đã xoá).
 
@@ -659,7 +659,8 @@ của item. Spec lấy từ v1 (`DatabaseListing`, `CalculatedFieldModal`, `Upda
     `default_expression: { default_type: "MATERIALIZED", expr }`. Trả về bảng. `PUT` thay cột cùng `name`.
   - Xoá: `DELETE .../calc_column/{name}` hoặc `.../expr_column/{name}`, trả `true`.
   - Update Table By Query: `POST databases/{db}/tables/from_query` với
-    `{ tbl_name, display_name, query, table_type, is_override: true }`. Delete table: `DELETE databases/{db}/tables/{tbl}`.
+    `{ tbl_name, display_name, query, table_type, is_override: true }`. Delete table (`dropTable`, builder không dùng):
+    `DELETE databases/{db}/tables/{tbl}`.
     v1 gửi thêm `adminSecretKey` và header `DI-SERVICE-KEY`; server không cần.
   - Loại data source: `GET connection` → `class_name` (`ConnectionService.getSourceType`, đọc cả loại v2 chưa setup
     được).
@@ -694,14 +695,14 @@ của item. Spec lấy từ v1 (`DatabaseListing`, `CalculatedFieldModal`, `Upda
   - Item dùng cột còn lại nhận `field_type`, `expression` và display name mới; tên item đổi theo nếu người dùng chưa
     đổi tên. Builder thành `touched`, nên setting dựng lại với formula mới khi lưu.
   - Chart đã lưu khác trên dashboard dùng cột đó không bị sửa (như v1).
+- **Không có Delete Table trong builder**, giống v1 (chọn 2026-10-28): builder của v1 dùng `DatabaseListingAs.Normal`,
+  chế độ không có mục này. Xoá bảng thuộc màn Data Management; `SchemaEditService.dropTable` giữ lại cho màn đó.
 - **Khác v1:**
   - Sửa calculated field cũng cập nhật item đang dùng nó; v1 chỉ làm với measure, item calculated giữ expression cũ.
   - Update Table By Query tạo lại các measure và calculated column của view (kiểm lại kiểu); cái nào không chạy được
     với query mới thì báo tên. Gửi `display_name` của bảng; v1 gửi `name`. Không có cây database và phần chạy thử
     query + bảng kết quả (`QueryComponent`) của v1: chỉ có editor, lỗi của server hiện dưới editor (v1 chỉ báo "Can
     not update table with this query").
-  - Delete Table có trong menu bảng của builder (theo kế hoạch CB8). Builder của v1 dùng `DatabaseListingAs.Normal`
-    nên không hiện mục này. Confirm giữ câu của v1.
   - Menu của bảng mở bằng nút "..." (hiện khi hover) hoặc chuột phải; menu của measure / calculated field cũng có cả
     hai. v1 chỉ có chuột phải cho cột. Nhãn: "Edit / Delete Calculated Field" thay "Edit / Delete Column".
   - Lỗi của calculated field hiện message của database; v1 chỉ báo "Formula invalid". Câu confirm xoá cột nêu display
@@ -724,7 +725,7 @@ của item. Spec lấy từ v1 (`DatabaseListing`, `CalculatedFieldModal`, `Upda
 | CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Xong |
 | CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Xong. Tab style của table và tab Comparison của Number làm ở CB7a / CB7b |
 | CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Chia theo thứ tự của `MIGRATION.md` (chọn 2026-10-28): **CB7a** Number: comparison, trend line (tab Comparison), dropdown date range cho người xem, cột ngày nested, xong. **CB7b** Tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer, Collapse Table, Pivot Table: CB7b1 (style), CB7b2 (field và conditional formatting), CB7b3 (Collapse Table), CB7b4 (Pivot Table) xong. **CB7c** Stacked Column / Bar, Circular Bar, Lollipop. **CB7d** Scatter, Bubble, Area Range, Column Range. **CB7e** Funnel, Pyramid, Variable Pie, Parliament, Word Cloud, Tree map, Heat map, Gauges, Bullet. **CB7f** Pareto, Bell curve, Histogram, Spider web, Wind rose, Sankey, Line stock. Map có thiết kế riêng | Đang làm: xong CB7a, CB7b |
-| CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query, Delete table | Xong |
+| CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query. Delete table thuộc Data Management, như v1 | Xong |
 
 ## Ghi chú về field drag and drop
 
@@ -747,3 +748,5 @@ Code ở `shared/field-dnd`, story trong `Shared/FieldDnd`.
   - Vạch ở khe cho thấy field sẽ rơi vào đâu, nhờ vậy vùng nhận vẫn nằm đúng chỗ đang vẽ.
   - Kéo chỉ bắt đầu sau 4px, nên click vào menu của item vẫn hoạt động.
   - Ô nhập text và phần tử có `FIELD_NO_DRAG_CLASS` không bao giờ bắt đầu kéo.
+- **Ảnh kéo** (`renderOverlay`) đi theo con trỏ, với `z-index` 2000, trên modal (1000) và popup (1050) của antd.
+  Default của dnd-kit là 999, nên ảnh kéo từng bị ChartBuilder che mất.

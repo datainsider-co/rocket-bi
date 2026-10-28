@@ -3,8 +3,11 @@ import type { ExpressionColumn, ExpressionColumnKind } from '@/core/schema/Schem
 import { TableType, type SchemaColumn, type TableSchema } from '@/core/schema/SchemaService';
 import { columnNameOf, toExpression, toFormula } from './formula.utils';
 
-/** What the "..." menu of a table offers (v1 `DatabaseListing.tableActions`). */
-export type TableAction = 'addCalculated' | 'addMeasure' | 'updateQuery' | 'delete';
+/**
+ * What the "..." menu of a table offers (v1 `DatabaseListing.tableActions`). v1's builder lists tables as `Normal`, which
+ * has no Delete Table.
+ */
+export type TableAction = 'addCalculated' | 'addMeasure' | 'updateQuery';
 
 /** What the menu of a measure or calculated column offers. */
 export type ColumnAction = 'edit' | 'delete';
@@ -24,8 +27,7 @@ export function tableActionsOf(table: Pick<TableSchema, 'dbName' | 'tableType'>)
   return [
     { key: 'addCalculated', label: 'Add Calculated Field' },
     { key: 'addMeasure', label: 'Add Measure' },
-    ...(canUpdateByQuery(table) ? [{ key: 'updateQuery' as const, label: 'Update Table By Query' }] : []),
-    { key: 'delete', label: 'Delete Table', danger: true }
+    ...(canUpdateByQuery(table) ? [{ key: 'updateQuery' as const, label: 'Update Table By Query' }] : [])
   ];
 }
 
@@ -107,13 +109,9 @@ export function expressionColumnOf(kind: ExpressionColumnKind, values: FormulaFi
   };
 }
 
-/** v1's confirmations, naming the column and table by display name. */
+/** v1's confirmation, naming the column by display name. */
 export function deleteColumnMessage(kind: ExpressionColumnKind, column: Pick<SchemaColumn, 'displayName'>): string {
   return `Are you sure you want to delete ${kind === 'measure' ? 'measure' : 'calculated field'} "${column.displayName}"?`;
-}
-
-export function deleteTableMessage(table: Pick<TableSchema, 'name' | 'displayName'>): string {
-  return `Are you sure to permanently delete table '${table.displayName || table.name}'?`;
 }
 
 /** A measure or calculated column of a table, with its kind. */
