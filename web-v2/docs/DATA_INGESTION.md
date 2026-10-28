@@ -267,6 +267,48 @@ Bốn listing làm song song bằng 4 sub-agent, mỗi agent một thư mục; p
   "Click here" tạo source / job ở trạng thái rỗng của v1 làm cùng DI4b và DI6.
 - Bảng Jobs và History rộng hơn khung ở 1280px, cuộn ngang (`scroll.x`).
 
+## Quyết định ở DI3b, DI4b, DI5b, DI6 (2026-10-29)
+
+- **Dùng chung chuyển lên `shared/`**: `shared/form/fieldErrors.ts` (`requiredError`, `portError`),
+  `shared/properties/` (`PropertiesFields` generic theo form có `properties`, `propertyKeyErrors`, map ↔ hàng) và
+  `shared/schedule/` (`ScheduleFields`, `schedule.utils`). Connector ClickHouse dùng lại các file này.
+- **Lịch chạy** (`schedule.utils`): form ở giờ local; `formValuesToSchedule` / `scheduleToFormValues` đổi sang format
+  của server, kể cả `at_hour` UTC của weekly / monthly và **dời ngày** khi qua nửa đêm (ngày trong tháng dời vòng 1 ↔ 31,
+  gần đúng với tháng ngắn). Múi giờ truyền vào qua `offsetAt` nên test không phụ thuộc máy. Mặc định như v1: chạy một lần,
+  ngay bây giờ. `none_schedule` mở ra thành Daily. Minutely / Hourly bắt đầu lúc lưu (như v1 và mặc định server); Daily,
+  Weekly, Monthly bắt đầu hôm nay ở giờ đã chọn.
+- **Source form** (`source-form/`): một form cho 6 loại, khác nhau ở `JdbcSourceKind` (`sourceKinds.ts`: tên, ảnh, port
+  mặc định, database / Oracle service, có Properties không). Registry này thay hai chỗ khai báo tên loại (listing và
+  catalog). Chưa làm `SourceKind<V>` generic của kế hoạch: MVP chỉ có JDBC, sẽ làm khi có loại thứ hai khác hẳn.
+  - Port điền sẵn mặc định (MySQL 3306, SQL Server 1433, PostgreSQL 5432, Redshift 5439, Oracle 1521), MySQL có sẵn
+    `connectTimeout=30000` như v1. Properties chỉ có ở MySQL và Oracle (như v1).
+  - URL không tách được thành field (Generic JDBC, hoặc URL có tham số khác, ví dụ `?ssl=true` của PostgreSQL) thì sửa
+    dạng text, để lưu không viết lại URL thành thứ khác.
+  - Tạo xong source JDBC thì mở form job khoá vào source đó; lưu job thì sang trang Jobs như v1.
+- **Data Sources** (`sources/`): checkbox + "Delete (n)" trên header, cột Action có Edit (disabled kèm tooltip với loại
+  chưa hỗ trợ) và Delete, confirm theo câu của v1. **Click dòng mở form tạo job trên source đó** (theo kế hoạch; v1 click
+  dòng là edit). Nút "Add Data Source" nằm ở header (v1 ở sidebar). Link "Click here" ở trạng thái rỗng.
+  CSV trong catalog tạm là "Coming soon" tới DI8.
+- **Jobs** (`jobs/`): cột Action có Cancel khi job đang chạy (`canCancelJob`), Force Sync khi không, menu Edit / Delete.
+  Checkbox + "Force Sync (n)" / "Delete (n)", force sync nhiều job thì báo số job lỗi. Click dòng mở Edit (chỉ JDBC; job
+  loại khác không làm gì, v1 báo lỗi). Nút "Add Job" ở header, link "Click here" ở trạng thái rỗng của Jobs và Job History.
+- **Chọn dòng** giữ theo id; chỉ id còn trên trang đang xem mới tính (`selectedOnPage`), thay `updateCheckbox` của v1.
+- **Job form** (`job-form/`): `JobFormModal` nhận `target` (`create` có / không source, `lockSource`; hoặc `edit`). Tạo thì
+  chọn nhiều bảng được (Select tags + "Select all N tables"), sửa luôn một bảng và khoá source.
+  - **Database đích mới không cần gọi API tạo**: đã thử trên stack local, job với `dest_database_name` chưa có thì lần sync
+    đầu tự tạo database (`di6_probe_newdb`). Form chỉ báo "New database: the first sync creates it".
+  - Bảng đích đi theo bảng nguồn tới khi người dùng gõ tên khác (`followDestTableName`); từ hai bảng thì không có ô này.
+  - Gợi ý database / bảng / cột: query theo `[source, db, table]`, chỉ tải bảng khi database có trong danh sách server trả
+    (không gọi theo từng phím gõ), cột chỉ khi chọn đúng một bảng.
+  - `planJobSave` là nơi duy nhất đổi lịch sang format server; request `job/create` khớp từng byte với fixture DI0.
+  - Minutely chỉ cho một bảng (`allowsMinutely`), ẩn khỏi lựa chọn và có lỗi nếu đã chọn.
+  - **Không làm registry `JobKind` và `z.discriminatedUnion`**: `jdbc_job` và `generic_jdbc_job` có cùng form, chỉ khác
+    `class_name` (`jobClassNameFor`). Thêm khi có loại job thứ hai khác form (Mongo, BigQuery). `multi_create_jobs` cũng
+    để sau MVP.
+- Đã chạy cả luồng bằng Playwright trên `pnpm dev` với backend docker: thêm source MySQL, Test connection, job đầu tiên,
+  force sync, sửa job, xem history, xoá job, sửa và xoá source; không lỗi console. Dữ liệu thử đã xoá, còn lại database
+  `di6_probe_newdb` và `di6_e2e` trong warehouse.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -275,13 +317,13 @@ Bốn listing làm song song bằng 4 sub-agent, mỗi agent một thư mục; p
 | DI1 | **Core.** `core/schedule`; `core/ingestion` cho 6 loại JDBC và loại "unsupported" giữ JSON gốc; service, `SchedulerClient`, DiModule. Test round-trip với fixture DI0 | Xong |
 | DI2 | **Khung.** Feature flag (`VITE_ENABLE_INGESTION`, kèm mục Feature flags của Phase 0), routes `/data-ingestion/*`, sidebar (Data Sources, Jobs, Queued Jobs, Job History), link trên header | Xong |
 | DI3a | **Listing Data Sources.** Bảng phân trang, search, sort phía server, refresh; dòng của loại chưa hỗ trợ vẫn hiện | Xong |
-| DI3b | **Action Data Sources.** Delete, multi-delete, edit (mở form DI4b), click dòng → tạo job (DI6); loại chưa hỗ trợ không edit | Chưa làm |
+| DI3b | **Action Data Sources.** Delete, multi-delete, edit (mở form DI4b), click dòng → tạo job (DI6); loại chưa hỗ trợ không edit | Xong |
 | DI4a | **Catalog loại source.** Modal liệt kê đủ loại kèm icon; coming-soon disabled kèm tooltip | Xong |
-| DI4b | **`SourceFormModal`** cho 6 loại JDBC, Test connection, Properties, create / update; nút "Add Data Source" mở catalog | Chưa làm |
+| DI4b | **`SourceFormModal`** cho 6 loại JDBC, Test connection, Properties, create / update; nút "Add Data Source" mở catalog | Xong |
 | DI5a | **Listing Jobs.** All và Queued (lọc `current_statuses`), cả hai auto refresh như v1, `JobStatusTag`, next run | Xong |
-| DI5b | **Action Jobs.** Force sync, cancel, delete, multi force sync, multi delete, edit (DI6) | Chưa làm |
-| DI6a | **Khung `JobFormModal`.** `planJobSave`, `useSaveJob`, `ScheduleForm`, database đích, sync mode | Chưa làm |
-| DI6b | **`JobKind` JDBC.** `jdbc_job`, `generic_jdbc_job`, chọn nhiều bảng | Chưa làm |
+| DI5b | **Action Jobs.** Force sync, cancel, delete, multi force sync, multi delete, edit (DI6) | Xong |
+| DI6a | **Khung `JobFormModal`.** `planJobSave`, `useSaveJob`, `ScheduleForm`, database đích, sync mode | Xong |
+| DI6b | **`JobKind` JDBC.** `jdbc_job`, `generic_jdbc_job`, chọn nhiều bảng | Xong (không có registry, xem DI6) |
 | DI7 | **Job History.** Bảng lịch sử phân trang, search, sort. Link "Click here" tạo job ở trạng thái rỗng làm cùng DI6 | Xong |
 | DI8 | **CSV.** Wizard như phần Quyết định | Chưa làm |
 | Sau MVP | MongoDB, BigQuery → S3 → Hubspot, Mixpanel, Palexy (`'expand'`) → các connector OAuth (popup `/third-party-auth/:type` trong v2, kiểm origin của `postMessage`) | Chưa làm |

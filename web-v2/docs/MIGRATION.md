@@ -72,7 +72,7 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
 - **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 to CB6, CB7a, CB7b, CB7c and CB8 done, CB7d next) for the chart types
   v2 already renders; the other chart types (scatter, area range, ...) follow, each with its builder handler. ChartBuilder
   plugs into edit mode as the `ChartBuilderHost` the dashboard route gives `DashboardPage`.
-- **Data ingestion** (Phase 8, [`DATA_INGESTION.md`](DATA_INGESTION.md)): DI0 to DI2 and the listings (DI3a, DI4a catalog, DI5a, DI7) done; the actions (DI3b, DI4b, DI5b) and the job form (DI6) next.
+- **Data ingestion** (Phase 8, [`DATA_INGESTION.md`](DATA_INGESTION.md)): DI0 to DI7 done (listings, source and job actions, the JDBC source form and the job form); CSV import (DI8) next.
 - **Share links (`?token=`)**: the Share dialog (M7b) creates directory tokens, which the server accepts; opening
   them without a session still needs client work, see Phase 3 M5b. **Blocked by the server**: MySQL `like` and
   datetime `between` filters, see Decisions (M3b).
@@ -428,7 +428,7 @@ MVP: MySQL, PostgreSQL, SQL Server, Oracle, Redshift, Generic JDBC and CSV impor
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| Data sources, jobs, queued jobs, job history, CSV import | `screens/data-ingestion` (`/data-ingestion/*`), `di-core/data-ingestion`, `components/di-upload-document` | 156 + 136 | In progress: DI0 to DI2, DI3a, DI4a, DI5a, DI7 done; DI3b, DI4b, DI5b, DI6 next |
+| Data sources, jobs, queued jobs, job history, CSV import | `screens/data-ingestion` (`/data-ingestion/*`), `di-core/data-ingestion`, `components/di-upload-document` | 156 + 136 | In progress: DI0 to DI7 done; DI8 (CSV) next |
 
 ### Deferred (disabled in v1 by feature flags or unused)
 
