@@ -1,4 +1,5 @@
 import { JdbcDatabaseType } from '@/core/ingestion/DataSource';
+import { JDBC_SOURCE_KINDS } from '../sourceKinds';
 
 /**
  * The source types the "Add Data Source" catalog lists, in v1's order (`ALL_DATASOURCE`). Google Analytics (Universal
@@ -53,8 +54,10 @@ export type SourceCatalogEntry = AvailableSourceEntry | ComingSoonSourceEntry;
 
 const ICON_DIR = '/ingestion/sources';
 
-function jdbc(key: SourceCatalogKey, title: string, icon: string, databaseType: JdbcDatabaseType): AvailableSourceEntry {
-  return { key, title, iconUrl: `${ICON_DIR}/${icon}`, status: 'available', form: { kind: 'jdbc', databaseType } };
+/** Title and image come from the source kind, so the listing and the form name the type the same way. */
+function jdbc(key: SourceCatalogKey, databaseType: JdbcDatabaseType): AvailableSourceEntry {
+  const { label, iconUrl } = JDBC_SOURCE_KINDS[databaseType];
+  return { key, title: label, iconUrl, status: 'available', form: { kind: 'jdbc', databaseType } };
 }
 
 function comingSoon(key: SourceCatalogKey, title: string, icon: string): ComingSoonSourceEntry {
@@ -62,18 +65,19 @@ function comingSoon(key: SourceCatalogKey, title: string, icon: string): ComingS
 }
 
 export const SOURCE_CATALOG: readonly SourceCatalogEntry[] = [
-  jdbc('generic_jdbc', 'Generic JDBC', 'ic_generic_jdbc.png', JdbcDatabaseType.GenericJdbc),
-  jdbc('mysql', 'MySQL', 'ic_mysql.png', JdbcDatabaseType.MySql),
-  jdbc('oracle', 'Oracle', 'ic_oracle.png', JdbcDatabaseType.Oracle),
-  jdbc('sql_server', 'Microsoft SQL', 'ic_sql_server.png', JdbcDatabaseType.SqlServer),
+  jdbc('generic_jdbc', JdbcDatabaseType.GenericJdbc),
+  jdbc('mysql', JdbcDatabaseType.MySql),
+  jdbc('oracle', JdbcDatabaseType.Oracle),
+  jdbc('sql_server', JdbcDatabaseType.SqlServer),
   comingSoon('mongodb', 'MongoDB', 'ic_mongo.png'),
-  jdbc('redshift', 'Redshift', 'ic_redshift.png', JdbcDatabaseType.Redshift),
+  jdbc('redshift', JdbcDatabaseType.Redshift),
   comingSoon('bigquery', 'BigQuery', 'ic_big_query.png'),
-  jdbc('postgresql', 'PostgreSQL', 'ic_postgresql.png', JdbcDatabaseType.Postgres),
+  jdbc('postgresql', JdbcDatabaseType.Postgres),
   comingSoon('ga4', 'Google Analytics 4', 'ic_ga_4.png'),
   comingSoon('google_ads', 'Google Ads', 'ic_gg_ads.png'),
   comingSoon('google_search_console', 'Google Search Console', 'ic_google_search_console.png'),
-  { key: 'csv', title: 'CSV', iconUrl: `${ICON_DIR}/ic_csv.png`, status: 'available', form: { kind: 'csv' } },
+  // Picked from here once the CSV import wizard lands (DI8): `{ status: 'available', form: { kind: 'csv' } }`.
+  comingSoon('csv', 'CSV', 'ic_csv.png'),
   comingSoon('google_sheets', 'Google Sheets', 'ic_google_sheet.png'),
   comingSoon('shopify', 'Shopify', 'ic_shopify.png'),
   comingSoon('s3', 'S3', 'ic_s3.png'),

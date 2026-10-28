@@ -3,6 +3,7 @@ import {
   getIngestionSection,
   INGESTION_SECTIONS,
   ingestionSectionFromPath,
+  toErrorMessage,
   type IngestionSection
 } from './ingestion.utils';
 
@@ -40,5 +41,15 @@ describe('ingestionSectionFromPath', () => {
     ['', 'data-source']
   ])('%j → %s', (pathname, expected) => {
     expect(ingestionSectionFromPath(pathname)).toBe(expected);
+  });
+});
+
+describe('toErrorMessage', () => {
+  it("shows the server's message", () => {
+    expect(toErrorMessage(new Error('unable to connect to data source: refused'))).toBe('unable to connect to data source: refused');
+  });
+
+  it.each([[new Error('')], ['boom'], [undefined]])('falls back for %j', error => {
+    expect(toErrorMessage(error)).toMatch(/^Oops internal error!/);
   });
 });
