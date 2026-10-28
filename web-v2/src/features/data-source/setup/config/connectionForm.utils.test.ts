@@ -8,9 +8,6 @@ import {
   connectionFormSchema,
   defaultFormValues,
   hasSshTunnel,
-  portError,
-  propertyKeyErrors,
-  requiredError,
   toConnection,
   toFormValues
 } from './connectionForm.utils';
@@ -39,34 +36,6 @@ function errorsOf(values: ConnectionFormValues): Record<string, string> {
   return Object.fromEntries(result.error.issues.map(issue => [issue.path.join('.'), issue.message]));
 }
 
-describe('requiredError', () => {
-  it.each([
-    ['', 'Host is required!'],
-    ['   ', 'Host is required!'],
-    ['a', undefined]
-  ])('%j → %s', (value, expected) => {
-    expect(requiredError(value, 'Host')).toBe(expected);
-  });
-});
-
-describe('portError', () => {
-  it.each([
-    ['', 'Port is required!'],
-    [' ', 'Port is required!'],
-    ['0', 'Port must be from 1 to 65535'],
-    ['65536', 'Port must be from 1 to 65535'],
-    ['-1', 'Port must be from 1 to 65535'],
-    ['80.5', 'Port must be from 1 to 65535'],
-    ['1e3', 'Port must be from 1 to 65535'],
-    ['abc', 'Port must be from 1 to 65535'],
-    ['1', undefined],
-    [' 3306 ', undefined],
-    ['65535', undefined]
-  ])('%j → %s', (value, expected) => {
-    expect(portError(value, 'Port')).toBe(expected);
-  });
-});
-
 describe('hasSshTunnel', () => {
   it('is off when host, port and username are blank', () => {
     expect(hasSshTunnel({ host: ' ', port: '', username: '', publicKey: 'key' })).toBe(false);
@@ -74,23 +43,6 @@ describe('hasSshTunnel', () => {
 
   it.each([{ host: 'h' }, { port: '22' }, { username: 'u' }])('is on with %j', field => {
     expect(hasSshTunnel({ ...NO_SSH, ...field })).toBe(true);
-  });
-});
-
-describe('propertyKeyErrors', () => {
-  it('returns no entries for no rows', () => {
-    expect(propertyKeyErrors([])).toEqual([]);
-  });
-
-  it('flags empty keys and repeated keys after the first', () => {
-    expect(
-      propertyKeyErrors([
-        { key: 'a', value: '1' },
-        { key: ' ', value: '2' },
-        { key: ' a ', value: '3' },
-        { key: 'b', value: '' }
-      ])
-    ).toEqual([undefined, 'Key is required!', 'This key is already used', undefined]);
   });
 });
 

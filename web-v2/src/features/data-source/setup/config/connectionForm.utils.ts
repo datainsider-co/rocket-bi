@@ -4,11 +4,11 @@ import type { Connection } from '@/core/connection/Connection';
 import { createConnection } from '@/core/connection/Connection';
 import { ConnectionType } from '@/core/connection/ConnectionType';
 import { DEFAULT_SSH_TIMEOUT_MS, SshConfig } from '@/core/connection/SshConfig';
+import { portError, requiredError } from '@/shared/form/fieldErrors';
+import { fromPropertyRows, propertyKeyErrors, toPropertyRows } from '@/shared/properties/properties.utils';
 
 /** v1 shortened the SSH timeout for "Test connection" so a wrong tunnel fails fast. */
 export const TEST_SSH_TIMEOUT_MS = 30_000;
-
-const MAX_PORT = 65_535;
 
 /**
  * One form for every supported type: fields another type doesn't use stay empty and are ignored by `toConnection`.
@@ -54,35 +54,10 @@ export const connectionFormSchema = z
 
 export type ConnectionFormValues = z.infer<typeof connectionFormSchema>;
 export type SshFormValues = ConnectionFormValues['ssh'];
-export type PropertyRow = ConnectionFormValues['properties'][number];
-
-export function requiredError(value: string, label: string): string | undefined {
-  return value.trim() ? undefined : `${label} is required!`;
-}
-
-/** `undefined` for a whole number from 1 to 65535. */
-export function portError(value: string, label: string): string | undefined {
-  const text = value.trim();
-  if (!text) return `${label} is required!`;
-  const port = Number(text);
-  return /^\d+$/.test(text) && port >= 1 && port <= MAX_PORT ? undefined : `${label} must be from 1 to ${MAX_PORT}`;
-}
 
 /** Like v1, the tunnel is on as soon as one of host, port or username is filled; the key alone doesn't count. */
 export function hasSshTunnel(ssh: SshFormValues): boolean {
   return [ssh.host, ssh.port, ssh.username].some(value => value.trim() !== '');
-}
-
-/** One entry per row: an error for an empty key or a key used by an earlier row, `undefined` otherwise. */
-export function propertyKeyErrors(rows: readonly PropertyRow[]): (string | undefined)[] {
-  const seen = new Set<string>();
-  return rows.map(({ key }) => {
-    const name = key.trim();
-    if (!name) return 'Key is required!';
-    if (seen.has(name)) return 'This key is already used';
-    seen.add(name);
-    return undefined;
-  });
 }
 
 function portText(port: number): string {
@@ -108,7 +83,7 @@ export function toFormValues(connection: Connection): ConnectionFormValues {
       username: tunnel?.username ?? '',
       publicKey: tunnel?.publicKey ?? ''
     },
-    properties: Object.entries(connection.properties).map(([key, value]) => ({ key, value }))
+    properties: toPropertyRows(connection.properties)
   };
 }
 
@@ -132,7 +107,7 @@ export function toConnection(values: ConnectionFormValues, sshTimeoutMs = DEFAUL
   connection.host = values.host.trim();
   connection.username = values.username.trim();
   connection.password = values.password;
-  connection.properties = Object.fromEntries(values.properties.map(row => [row.key.trim(), row.value]));
+  connection.properties = fromPropertyRows(values.properties);
   connection.tunnelConfig = hasSshTunnel(values.ssh) ? toSshConfig(values.ssh, sshTimeoutMs) : undefined;
 
   if (connection instanceof ClickhouseConnection) {

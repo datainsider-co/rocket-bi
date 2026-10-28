@@ -7,7 +7,7 @@ import { connectionFormSchema, hasSshTunnel } from './connectionForm.utils';
 import type { ConnectionFormValues } from './connectionForm.utils';
 import type { ConnectionFieldsFactory } from './fields/ConnectionFieldsFactory';
 import { defaultConnectionFieldsFactory } from './fields/defaultConnectionFieldsFactory';
-import { PropertiesFields } from './PropertiesFields';
+import { PropertiesFields } from '@/shared/properties/PropertiesFields';
 import { SshTunnelFields } from './SshTunnelFields';
 import type { TestResult } from './useConnectorConfig';
 import { usePublicKeyLoader } from './usePublicKeyLoader';
