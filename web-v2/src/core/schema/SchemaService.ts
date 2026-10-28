@@ -15,6 +15,8 @@ export interface SchemaColumn {
   type: string;
   /** A measure's or calculated column's expression (`default_expression.expr`). */
   expression?: string;
+  /** Kept when a measure or calculated column is edited. */
+  description?: string;
   /** A nested column's own columns. */
   nestedColumns?: SchemaColumn[];
 }
@@ -67,6 +69,7 @@ function columnFromJson(value: unknown): SchemaColumn {
     displayName: asString(json['display_name']) || name,
     type: asString(json['class_name']),
     expression: nonEmptyString(asRecord(json['default_expression'])['expr']),
+    description: nonEmptyString(json['description']),
     nestedColumns: columnsFromJson(json['nested_columns'])
   });
 }
