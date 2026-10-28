@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { JsonObject } from '@/core/json/json';
+import { getPath, type JsonObject } from '@/core/json/json';
 import {
   CompareMode,
   compareRangeOf,
@@ -8,7 +8,8 @@ import {
   dateRangeFilterRequests,
   isNestedField,
   numberComparisonOf,
-  trendLineSettingOf
+  trendLineSettingOf,
+  withDateRange
 } from './comparison';
 import { DateMode } from './dateRanges';
 
@@ -226,5 +227,28 @@ describe('a date column inside a nested column', () => {
       filters: [filter, { class_name: 'current_year', field: nestedField, scalar_function: firstElement }],
       sorts: [{ class_name: 'order_by', function: xFunction, order: 'ASC' }]
     });
+  });
+});
+
+describe('withDateRange', () => {
+  it('puts a relative mode in place of the stored one, keeping the stored dates', () => {
+    const setting = kpi({ data_range: dataRange('custom', { date_range: customRange }), precision: 2 });
+    const viewed = withDateRange(setting, { mode: DateMode.LastMonth });
+    expect(getPath(viewed, ['options', 'options', 'data_range'])).toEqual(dataRange('last_month', { date_range: customRange }));
+    expect(getPath(viewed, ['options', 'options', 'precision'])).toBe(2);
+    expect(dateRangeFilterRequests(viewed)[0]?.condition).toEqual({ class_name: 'last_n_month', n_month: '1', field });
+  });
+
+  it('puts a custom range with its dates', () => {
+    const viewed = withDateRange(kpi({ data_range: dataRange('this_year') }), { mode: DateMode.Custom, range: [local(2026, 2, 1), local(2026, 2, 28)] });
+    expect(dateRangeFilterRequests(viewed)[0]?.condition).toMatchObject({ min: '2026-02-01 00:00:00', max: '2026-02-28 23:59:59' });
+  });
+
+  it('leaves a chart without a date range, and the stored setting, as they are', () => {
+    const off = kpi({ data_range: { enabled: false } });
+    expect(withDateRange(off, { mode: DateMode.ThisYear })).toBe(off);
+    const setting = kpi({ data_range: dataRange('this_year') });
+    withDateRange(setting, { mode: DateMode.AllTime });
+    expect(getPath(setting, ['options', 'options', 'data_range', 'mode'])).toBe('this_year');
   });
 });

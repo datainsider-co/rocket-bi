@@ -83,6 +83,28 @@ export function numberComparisonOf(setting: JsonObject): NumberComparison | unde
   };
 }
 
+/** A range the viewer picked on the card (v1 `DateRangeDropdown`): a mode, with its dates when custom. */
+export interface DateRangeChoice {
+  mode: DateMode;
+  range?: StoredRange;
+}
+
+/**
+ * The setting with the viewer's range in place of the stored one (v1 `NumberQuerySetting.setDateRange`), so the
+ * value, the comparison and the trend line all follow it. A chart without a date range is left as is.
+ */
+export function withDateRange(setting: JsonObject, { mode, range }: DateRangeChoice): JsonObject {
+  if (!numberComparisonOf(setting)) return setting;
+  const options = asRecord(setting['options']);
+  const inner = asRecord(options['options']);
+  const dataRange = {
+    ...asRecord(inner['data_range']),
+    mode,
+    ...(range && { date_range: { start: range[0].toISOString(), end: range[1].toISOString() } })
+  };
+  return { ...setting, options: { ...options, options: { ...inner, data_range: dataRange } } };
+}
+
 /** v1 `GetArrayElement`: a column inside a nested column is read by its first element. */
 const NESTED_SCALAR: JsonObject = { class_name: 'get_array_element', index: 1 };
 

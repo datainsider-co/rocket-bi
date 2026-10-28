@@ -64,6 +64,37 @@
   text-overflow: ellipsis;
 }
 
+/* v1 DateRangeDropdown (`.comparison-title`, `.date-range-dropdown`): the range in secondary text, a down arrow after. */
+.kpi__date-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 4px var(--widget-padding, 8px);
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 0.23px;
+  white-space: nowrap;
+}
+
+.kpi__date-range--picker {
+  cursor: pointer;
+}
+
+.kpi__date-range--picker:hover,
+.kpi__date-range--picker:focus-visible,
+.kpi__date-range--picker[aria-expanded='true'] {
+  background-color: var(--hover-color);
+}
+
+.kpi__date-range .anticon {
+  font-size: 12px;
+}
+
 /* v1 PercentageBar (`default` style): the icon, the change without sign and the compared value. */
 .kpi__bar {
   display: flex;

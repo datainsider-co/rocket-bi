@@ -31,5 +31,5 @@ export function PreviewView({ preview, dashboardId, themeColors }: PreviewViewPr
   if (isFilterViz(viz)) {
     return <FilterRenderer widget={chart} viz={viz} response={data.data} query={preview.query} dashboardId={dashboardId} entry={preview.filter.entry} onChange={preview.filter.onChange} />;
   }
-  return <ChartRenderer widget={chart} viz={viz} response={data.data} themeColors={themeColors} table={preview.table} crossFilter={noSelection} trend={preview.trend} />;
+  return <ChartRenderer widget={chart} viz={viz} response={data.data} themeColors={themeColors} table={preview.table} crossFilter={noSelection} kpi={preview.kpi} />;
 }
