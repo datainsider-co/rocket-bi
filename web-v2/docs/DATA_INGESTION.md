@@ -233,6 +233,40 @@ bằng `<password>`). Dữ liệu để lại cho các bước sau: source 1 "DI
 - Các trang hiện chỉ có header; DI3, DI5, DI7 điền listing. Đã kiểm bằng Playwright trên `pnpm dev`: redirect, chọn
   section, không lỗi console.
 
+## Quyết định ở DI3a, DI4a, DI5a, DI7 (2026-10-29)
+
+Bốn listing làm song song bằng 4 sub-agent, mỗi agent một thư mục; phần dùng chung làm trước rồi gom lại sau.
+
+- **Dùng chung** (`features/ingestion/`):
+  - `listing/`: `ListingState` (trang, cỡ trang, từ khoá, sort; đổi từ khoá / sort / cỡ trang thì về trang 1),
+    `useListingState`, `useDebouncedCallback` / `useDebouncedSearch` (400ms như v1), `useKeepPageInRange` (khi `total` giảm,
+    ví dụ job rời khỏi Queued lúc auto refresh, kéo trang về trang cuối thay vì hiện trang rỗng), `listingPagination`
+    (luôn hiện "Total: N", cỡ trang 20/30/50/100/200 như `ListingFooter` của v1), `formatDateTime` (`MMM DD, YYYY HH:mm:ss`).
+  - `ingestionQueries.ts` (key và query options, giữ trang cũ trên màn hình khi tải trang mới), `status/JobStatusTag`
+    (icon v1 trong `public/ingestion/status/`), `testing.ts` (fake service), `renderIngestionPage.tsx` (render trang
+    với provider; route thật nằm sau feature flag nên test không dùng `renderAppAt`).
+  - Sort chỉ trên cột có trong whitelist DI0; mỗi cột map tường minh sang tên cột DB.
+- **Data Sources** (`sources/`): cột Name, Owner, Type, Last Modified như v1, cả 4 sort được. Type hiện tên dễ đọc
+  (MySQL, Microsoft SQL, PostgreSQL, …; v1 hiện `SqlServer`, `Postgres`), loại chưa hỗ trợ đặt tên theo `class_name`. Tên
+  loại hiện khai báo cả ở đây và ở catalog: gộp khi dựng registry `SourceKind` ở DI4b. Chưa có icon theo loại.
+- **Catalog** (`catalog/`): `SourceCatalogModal` (tiêu đề "Add Data Source"), 20 loại theo thứ tự v1; entry
+  `available` có `form` (`{ kind: 'jdbc', databaseType }` | `{ kind: 'csv' }`) để DI4b mở đúng form, entry `coming-soon`
+  không bấm được, có tooltip "Coming soon". Sửa cách viết của v1: MySQL, CSV. Icon trong `public/ingestion/sources/`;
+  5 file SVG của v1 thực ra bọc ảnh raster (riêng Facebook 680 KB) nên render lại thành PNG 236×160 (2x), cả thư mục
+  còn 192 KB. Chưa gắn vào trang: nút "Add Data Source" làm ở DI4b.
+- **Jobs** (`jobs/`): một listing cho Jobs và Queued Jobs (`key` theo section nên đổi trang thì reset search / sort).
+  **Cả hai trang đều auto refresh như v1** (v1 tạo cả hai handler với `isAutoRefresh = true`), mặc định 5s, có các lựa
+  chọn 15s / 30s / 1m / Manual; dùng `refetchInterval` nên dừng khi tab bị ẩn. Cột Name, Source Name (không sort được:
+  `source_name` là 500), Sync Mode, Last Sync (status kèm thời điểm sync thành công gần nhất), Next Sync (`--` khi
+  không có lần chạy tới), Current Status. Không mang sang: sort Source, crash khi source đã bị xoá, năm 5138, Last Sync
+  ẩn status khi chưa từng thành công.
+- **Job History** (`history/`): cột Sync Id, Job Name, Last Sync Time, Total Synced Time, Status, Message, Total
+  Inserted Rows như v1, mặc định `id` DESC. Thời gian dưới 1s hiện theo ms (v1 hiện `0s`), số dòng có dấu phân cách,
+  message dài cắt một dòng kèm tooltip.
+- Trạng thái lỗi có Retry (cả khi Refresh lỗi); rỗng và không có kết quả tìm kiếm là hai thông báo khác nhau. Các link
+  "Click here" tạo source / job ở trạng thái rỗng của v1 làm cùng DI4b và DI6.
+- Bảng Jobs và History rộng hơn khung ở 1280px, cuộn ngang (`scroll.x`).
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -240,11 +274,14 @@ bằng `<password>`). Dữ liệu để lại cho các bước sau: source 1 "DI
 | DI0 | **Spike và payload thật.** Trên docker local: tạo MySQL source và job, bấm sync, xem job có chạy thật không. Xác minh `multi_create` nhận tập con bảng, format scheduler server cần (`toSchedulerV2`), luồng CSV mới. Lưu request / response làm fixture | Xong |
 | DI1 | **Core.** `core/schedule`; `core/ingestion` cho 6 loại JDBC và loại "unsupported" giữ JSON gốc; service, `SchedulerClient`, DiModule. Test round-trip với fixture DI0 | Xong |
 | DI2 | **Khung.** Feature flag (`VITE_ENABLE_INGESTION`, kèm mục Feature flags của Phase 0), routes `/data-ingestion/*`, sidebar (Data Sources, Jobs, Queued Jobs, Job History), link trên header | Xong |
-| DI3 | **Data Sources.** Listing phân trang, search, sort phía server; delete và multi-delete; loại chưa hỗ trợ thì không edit | Chưa làm |
-| DI4 | **Source.** Catalog đủ loại (coming-soon disabled kèm tooltip), `SourceFormModal` cho 6 loại JDBC, Test connection, Properties | Chưa làm |
-| DI5 | **Jobs.** Listing All và Queued (`refetchInterval`), force sync, cancel, delete, multi force sync, multi delete, `JobStatusTag` | Chưa làm |
+| DI3a | **Listing Data Sources.** Bảng phân trang, search, sort phía server, refresh; dòng của loại chưa hỗ trợ vẫn hiện | Xong |
+| DI3b | **Action Data Sources.** Delete, multi-delete, edit (mở form DI4b), click dòng → tạo job (DI6); loại chưa hỗ trợ không edit | Chưa làm |
+| DI4a | **Catalog loại source.** Modal liệt kê đủ loại kèm icon; coming-soon disabled kèm tooltip | Xong |
+| DI4b | **`SourceFormModal`** cho 6 loại JDBC, Test connection, Properties, create / update; nút "Add Data Source" mở catalog | Chưa làm |
+| DI5a | **Listing Jobs.** All và Queued (lọc `current_statuses`), cả hai auto refresh như v1, `JobStatusTag`, next run | Xong |
+| DI5b | **Action Jobs.** Force sync, cancel, delete, multi force sync, multi delete, edit (DI6) | Chưa làm |
 | DI6a | **Khung `JobFormModal`.** `planJobSave`, `useSaveJob`, `ScheduleForm`, database đích, sync mode | Chưa làm |
 | DI6b | **`JobKind` JDBC.** `jdbc_job`, `generic_jdbc_job`, chọn nhiều bảng | Chưa làm |
-| DI7 | **Job History.** Bảng lịch sử phân trang, sort | Chưa làm |
+| DI7 | **Job History.** Bảng lịch sử phân trang, search, sort. Link "Click here" tạo job ở trạng thái rỗng làm cùng DI6 | Xong |
 | DI8 | **CSV.** Wizard như phần Quyết định | Chưa làm |
 | Sau MVP | MongoDB, BigQuery → S3 → Hubspot, Mixpanel, Palexy (`'expand'`) → các connector OAuth (popup `/third-party-auth/:type` trong v2, kiểm origin của `postMessage`) | Chưa làm |
