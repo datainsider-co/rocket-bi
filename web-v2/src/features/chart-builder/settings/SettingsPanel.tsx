@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { ChartType } from '@/core/chart-builder/chartType';
 import { asArray } from '@/core/json/json';
 import type { VisualizationResponse } from '@/core/query/VisualizationResponse';
 import { slicerKind } from '@/features/dashboard/charts/filter/slicerFilter.utils';
@@ -6,7 +7,8 @@ import type { ControlEntry } from '@/features/dashboard/controls/controls.utils'
 import { useFieldChoices } from '../config-panel/FieldChoicesContext';
 import { filterControlKindOf } from './filter/filterTabs.utils';
 import { dateFieldChoicesOf } from './number/comparisonTab.utils';
-import { columnChoicesOf } from './table/formattingTabs.utils';
+import { columnChoicesOf, shownColumnsOf } from './table/formattingTabs.utils';
+import { hasCollapseTab } from './table/tableTabs.utils';
 import { FilterSettingsView } from './FilterSettingsView';
 import { NumberSettingsView } from './NumberSettingsView';
 import { PieSettingsView } from './PieSettingsView';
@@ -33,7 +35,8 @@ export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPa
   const defaultValue = useFilterDefault(setting, viz, filterEntry, onChange);
   const tables = useFieldChoices();
   const dateFields = useMemo(() => dateFieldChoicesOf(tables), [tables]);
-  const columns = useMemo(() => columnChoicesOf(asArray(setting?.['columns'])), [setting]);
+  const queryColumns = useMemo(() => asArray(setting?.['columns']), [setting]);
+  const columns = useMemo(() => columnChoicesOf(shownColumnsOf(chartType === ChartType.CollapseTable, queryColumns)), [chartType, queryColumns]);
   const tab = { viz, onChange, chartType };
 
   const filterKind = filterControlKindOf(chartType);
@@ -45,7 +48,7 @@ export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPa
     case 'number':
       return <NumberSettingsView {...tab} dateFields={dateFields} />;
     case 'table':
-      return <TableSettingsView {...tab} columns={columns} />;
+      return <TableSettingsView {...tab} columns={columns} collapsible={hasCollapseTab(chartType, queryColumns)} />;
     case 'filter':
       return filterKind && <FilterSettingsView {...tab} kind={filterKind} hasStep={setting !== undefined && slicerKind(setting) !== 'date'} defaultValue={defaultValue} />;
     default:

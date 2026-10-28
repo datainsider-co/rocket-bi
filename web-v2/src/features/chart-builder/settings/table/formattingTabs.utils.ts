@@ -30,6 +30,18 @@ export function columnChoicesOf(columns: readonly unknown[]): ColumnChoice[] {
   });
 }
 
+/**
+ * The columns a table shows as headers, for its formatting tabs (v1 `TableSetting.columns`): a collapse table that
+ * groups shows its first group by column, which holds every group, then its aggregated columns; other tables show
+ * every column.
+ */
+export function shownColumnsOf(collapse: boolean, columns: readonly unknown[]): unknown[] {
+  const classOf = (column: unknown) => asString(asRecord(asRecord(column)['function'])['class_name']);
+  const firstGroup = columns.find(column => classOf(column) === 'group');
+  if (!collapse || !firstGroup) return [...columns];
+  return [firstGroup, ...columns.filter(column => !NOT_AGGREGATE.has(classOf(column)))];
+}
+
 // Field formatting
 
 export const FIELD_DEFAULTS = { color: TEXT_COLOR, backgroundColor: '#fff', align: 'left', precision: 2 } as const;

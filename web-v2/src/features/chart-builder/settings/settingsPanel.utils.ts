@@ -13,7 +13,7 @@ export function settingsKindOf(chartType: string): SettingsKind | undefined {
   if (SERIES.has(chartType)) return 'series';
   if (PIES.has(chartType)) return 'pie';
   if (chartType === ChartType.Number) return 'number';
-  if (chartType === ChartType.Table) return 'table';
+  if (chartType === ChartType.Table || chartType === ChartType.CollapseTable) return 'table';
   return filterControlKindOf(chartType) ? 'filter' : undefined;
 }
 

@@ -23,9 +23,11 @@ export function titleRevert(key: TitleKey): VizChanges {
   };
 }
 
+const TABLES = new Set<string>([ChartType.Table, ChartType.CollapseTable]);
+
 /** v1 shows the title and subtitle toggles on tables only; other charts always show them. */
 export function hasTitleToggle(chartType: string): boolean {
-  return chartType === ChartType.Table;
+  return TABLES.has(chartType);
 }
 
 /**
@@ -101,12 +103,12 @@ export function otherSettingsOf(chartType: string) {
  */
 export function displayUnitPath(chartType: string): string {
   if (PIES.has(chartType)) return 'plotOptions.pie.dataLabels.displayUnit';
-  if (chartType === ChartType.Table) return 'plotOptions.table.dataLabels.displayUnit';
+  if (TABLES.has(chartType)) return 'plotOptions.table.dataLabels.displayUnit';
   if (chartType === ChartType.Number) return 'plotOptions.kpi.dataLabels.displayUnit';
   return 'plotOptions.series.dataLabels.displayUnit';
 }
 
 /** v1: tables show plain numbers unless told otherwise. */
 export function defaultDisplayUnit(chartType: string): string {
-  return chartType === ChartType.Table ? 'none' : 'default';
+  return TABLES.has(chartType) ? 'none' : 'default';
 }

@@ -14,6 +14,7 @@ import {
   invalidBounds,
   invalidRules,
   newRule,
+  shownColumnsOf,
   withValue
 } from './formattingTabs.utils';
 
@@ -34,6 +35,22 @@ describe('columnChoicesOf', () => {
       { label: 'total_revenue', value: 'totalRevenue', functionClass: 'select', numeric: true },
       { label: 'Count of orders', value: 'countOfOrders', functionClass: 'count', numeric: true }
     ]);
+  });
+});
+
+describe('shownColumnsOf', () => {
+  const column = (name: string, className: string) => ({ name, function: { class_name: className } });
+  const grouped = [column('region', 'group'), column('country', 'group'), column('revenue', 'sum'), column('units', 'count')];
+
+  it("gives a grouping collapse table's first group by column and its aggregations", () => {
+    expect(shownColumnsOf(true, grouped)).toEqual([grouped[0], grouped[2], grouped[3]]);
+  });
+
+  it('gives every column of a flatten table, or of a collapse table that lists rows', () => {
+    expect(shownColumnsOf(false, grouped)).toEqual(grouped);
+    const listed = [column('region', 'select'), column('revenue', 'select')];
+    expect(shownColumnsOf(true, listed)).toEqual(listed);
+    expect(shownColumnsOf(true, [])).toEqual([]);
   });
 });
 

@@ -15,6 +15,7 @@ describe('settingsKindOf', () => {
   it('gives number charts and tables their settings', () => {
     expect(settingsKindOf(ChartType.Number)).toBe('number');
     expect(settingsKindOf(ChartType.Table)).toBe('table');
+    expect(settingsKindOf(ChartType.CollapseTable)).toBe('table');
   });
 
   it.each([ChartType.DropDown, ChartType.DropDownInnerFilter, ChartType.SlicerFilter, ChartType.MultiTreeFilter])('gives %s the filter settings', chartType => {

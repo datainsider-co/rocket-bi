@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChartType } from '@/core/chart-builder/chartType';
 import type { SeriesOneResponse } from '@/core/query/VisualizationResponse';
 import stored from '@/core/chart-builder/builder.fixture.json';
+import sent from '@/core/chart-builder/builderRequests.fixture.json';
 import type { ControlEntry } from '@/features/dashboard/controls/controls.utils';
 import { BuilderProvider, useBuilder } from '../state/BuilderContext';
 import type { BuilderStart } from '../state/useBuilderState';
@@ -70,6 +71,20 @@ describe('SettingsPanel', () => {
     renderPanel(ChartType.Table);
     await userEvent.click(screen.getByRole('switch', { name: 'Title' }));
     expect(options()['title']).toMatchObject({ enabled: false });
+  });
+
+  it("colors a collapse table's toggle once its rows expand, and formats its shown columns", async () => {
+    renderPanel({ widget: sent.collapse_table });
+    const collapseTab = screen.getByText('Collapsed And Expanded');
+    await userEvent.click(collapseTab);
+    const panel = collapseTab.closest<HTMLElement>('.ant-collapse-item');
+    if (!panel) throw new Error('no panel');
+    await userEvent.click(within(panel).getByRole('button', { name: 'Revert to default' }));
+    expect(options()['toggle_icon']).toEqual({ background_color: 'var(--toggle-color)', color: 'var(--text-color)' });
+    await userEvent.click(screen.getByText('Field formatting'));
+    await userEvent.click(screen.getByRole('combobox', { name: /Select field/ }));
+    expect(screen.getByTitle('units_sold')).toBeInTheDocument();
+    expect(screen.queryByTitle('country')).not.toBeInTheDocument();
   });
 
   it("saves a filter's selection in the preview as its default, and resets it", async () => {

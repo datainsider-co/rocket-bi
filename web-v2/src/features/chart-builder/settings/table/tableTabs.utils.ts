@@ -1,4 +1,6 @@
+import { ChartType } from '@/core/chart-builder/chartType';
 import type { VizChanges } from '@/core/chart-builder/vizChanges';
+import { asRecord, isRecord } from '@/core/json/json';
 import type { VizOptions } from '@/core/query/vizOptions';
 import { PRIMARY_FONT, SECONDARY_FONT, TEXT_COLOR, type SettingOption } from '../settingOptions';
 import themes from './tableThemes.json';
@@ -116,4 +118,18 @@ export const TABLE_TOOLTIP_DEFAULTS = { valueColor: 'var(--secondary-text-color)
 export function tableTooltipRevert(): VizChanges {
   const { valueColor, backgroundColor, fontFamily } = TABLE_TOOLTIP_DEFAULTS;
   return { 'tooltip.valueColor': valueColor, 'tooltip.backgroundColor': backgroundColor, 'tooltip.fontFamily': fontFamily };
+}
+
+/** A new collapse table's plus / minus square (v1 `CollapseTab.defaultValue`). */
+export const TOGGLE_ICON_DEFAULTS = { backgroundColor: 'var(--toggle-color)', color: TEXT_COLOR } as const;
+
+export function toggleIconRevert(): VizChanges {
+  return { 'toggleIcon.backgroundColor': TOGGLE_ICON_DEFAULTS.backgroundColor, 'toggleIcon.color': TOGGLE_ICON_DEFAULTS.color };
+}
+
+const isGroupColumn = (column: unknown) => isRecord(column) && asRecord(column['function'])['class_name'] === 'group';
+
+/** v1 `TableSetting.enableCollapseTab`: only a collapse table with rows to expand, two group by columns or more. */
+export function hasCollapseTab(chartType: string, columns: readonly unknown[]): boolean {
+  return chartType === ChartType.CollapseTable && columns.filter(isGroupColumn).length > 1;
 }

@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import type { VizOptions } from '@/core/query/vizOptions';
-import { gridRevert, headerRevert, TABLE_THEME_OPTIONS, tableThemeChanges, tableThemeOf, tableTooltipRevert, THICKNESSES, valuesRevert } from './tableTabs.utils';
+import { ChartType } from '@/core/chart-builder/chartType';
+import {
+  gridRevert,
+  hasCollapseTab,
+  headerRevert,
+  TABLE_THEME_OPTIONS,
+  tableThemeChanges,
+  tableThemeOf,
+  tableTooltipRevert,
+  THICKNESSES,
+  toggleIconRevert,
+  valuesRevert
+} from './tableTabs.utils';
 
 const viz = (options: object) => options as VizOptions;
 
@@ -63,5 +75,23 @@ describe('reverts', () => {
       'tooltip.backgroundColor': 'var(--tooltip-background-color)',
       'tooltip.fontFamily': 'var(--widget-secondary-font-family, Roboto)'
     });
+  });
+});
+
+describe('hasCollapseTab', () => {
+  const group = (name: string) => ({ name, function: { class_name: 'group' } });
+  const sum = { name: 'revenue', function: { class_name: 'sum' } };
+
+  it('shows on a collapse table with two group by columns or more', () => {
+    expect(hasCollapseTab(ChartType.CollapseTable, [group('region'), group('country'), sum])).toBe(true);
+    expect(hasCollapseTab(ChartType.CollapseTable, [group('region'), sum])).toBe(false);
+    expect(hasCollapseTab(ChartType.CollapseTable, [])).toBe(false);
+    expect(hasCollapseTab(ChartType.Table, [group('region'), group('country')])).toBe(false);
+  });
+});
+
+describe('toggleIconRevert', () => {
+  it("goes back to a new collapse table's colors", () => {
+    expect(toggleIconRevert()).toEqual({ 'toggleIcon.backgroundColor': 'var(--toggle-color)', 'toggleIcon.color': 'var(--text-color)' });
   });
 });

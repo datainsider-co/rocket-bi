@@ -35,6 +35,7 @@ describe('titleRevert', () => {
 describe('hasTitleToggle', () => {
   it.each([
     [ChartType.Table, true],
+    [ChartType.CollapseTable, true],
     [ChartType.Column, false],
     [ChartType.Pie, false]
   ])('%s → %s', (chartType, expected) => {
@@ -109,6 +110,7 @@ describe('displayUnitPath', () => {
     [ChartType.Column, 'plotOptions.series.dataLabels.displayUnit'],
     [ChartType.Donut, 'plotOptions.pie.dataLabels.displayUnit'],
     [ChartType.Table, 'plotOptions.table.dataLabels.displayUnit'],
+    [ChartType.CollapseTable, 'plotOptions.table.dataLabels.displayUnit'],
     [ChartType.Number, 'plotOptions.kpi.dataLabels.displayUnit']
   ])('%s → %s', (chartType, path) => {
     expect(displayUnitPath(chartType)).toBe(path);
@@ -118,6 +120,7 @@ describe('displayUnitPath', () => {
 describe('defaultDisplayUnit', () => {
   it('shows plain numbers in tables', () => {
     expect(defaultDisplayUnit(ChartType.Table)).toBe('none');
+    expect(defaultDisplayUnit(ChartType.CollapseTable)).toBe('none');
     expect(defaultDisplayUnit(ChartType.Line)).toBe('default');
   });
 });
