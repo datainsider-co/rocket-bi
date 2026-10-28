@@ -49,7 +49,8 @@ describe('CHART_TYPES', () => {
 describe('chartIconOf', () => {
   it.each([
     [ChartType.Donut, 'ic_donut.svg'],
-    ['pivot_table', 'ic_pivot_table.svg'],
+    [ChartType.PivotTable, 'ic_pivot_table.svg'],
+    ['arearange', 'ic_chart_area.svg'],
     ['unknown', 'chart_control.svg']
   ])('%s has %s', (chartType, icon) => {
     expect(chartIconOf(chartType)).toBe(icon);
@@ -66,6 +67,9 @@ describe('defaultFunctionOf', () => {
     [ChartType.CollapseTable, 'columns', 'string', 'Group By', ''],
     [ChartType.CollapseTable, 'columns', 'double', 'Aggregation', 'Sum'],
     [ChartType.CollapseTable, 'columns', 'datetime', 'Date histogram', 'Year'],
+    [ChartType.PivotTable, 'columns', 'int32', 'Group By', ''],
+    [ChartType.PivotTable, 'rows', 'datetime', 'Date histogram', 'Year'],
+    [ChartType.PivotTable, 'values', 'datetime', 'Aggregation', 'Count all'],
     [ChartType.TabFilter, 'values', 'int64', 'Aggregation', 'Sum'],
     [ChartType.SlicerFilter, 'value', 'int32', 'None', '']
   ])('%s %s starts a %s column as %s %s', (chartType, key, type, family, functionType) => {
@@ -136,7 +140,8 @@ describe('pickerItemsOf', () => {
     expect(items).toHaveLength(39 + 9);
     expect(items[0]).toEqual({ type: 'flatten_table', title: 'Table', icon: 'ic_table.svg', buildable: true });
     expect(items[1]).toEqual({ type: 'table', title: 'Collapse Table', icon: 'ic_collapse_table.svg', buildable: true });
-    expect(items[2]).toMatchObject({ type: 'pivot_table', buildable: false });
+    expect(items[2]).toEqual({ type: 'pivot_table', title: 'Pivot Table', icon: 'ic_pivot_table.svg', buildable: true });
+    expect(items.find(item => item.type === 'arearange')).toMatchObject({ buildable: false });
     expect(items.at(-1)).toMatchObject({ type: 'multi_tree_filter', buildable: true });
     expect(items.filter(item => item.buildable)).toHaveLength(CHART_TYPES.length - 2);
   });

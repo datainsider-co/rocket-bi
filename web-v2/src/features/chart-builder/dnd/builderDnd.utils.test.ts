@@ -71,8 +71,8 @@ describe('configZonesOf and hasFilterZone', () => {
   });
 
   it('has no zones for a type v2 does not build', () => {
-    expect(configZonesOf('pivot_table')).toEqual([]);
-    expect(hasFilterZone('pivot_table')).toBe(false);
+    expect(configZonesOf('arearange')).toEqual([]);
+    expect(hasFilterZone('arearange')).toBe(false);
   });
 });
 

@@ -35,7 +35,20 @@ describe('buildSetting', () => {
   });
 
   it('is undefined for a chart type v2 does not build', () => {
-    expect(buildSetting(data('pivot_table', { columns: [item({})] }), { options: {} })).toBeUndefined();
+    expect(buildSetting(data('arearange', { columns: [item({})] }), { options: {} })).toBeUndefined();
+  });
+
+  it('builds a pivot table from any one of its zones', () => {
+    const rowsOnly = buildSetting(data(ChartType.PivotTable, { rows: [item({})] }), { options: {} });
+    expect(rowsOnly).toMatchObject({ class_name: 'pivot_table_chart_setting', columns: [], values: [], formatters: [] });
+    expect(asArray(rowsOnly?.['rows']).map(row => asRecord(row)['is_calc_group_total'])).toEqual([false]);
+    expect(canBuildSetting(data(ChartType.PivotTable, { values: [item({})] }))).toBe(true);
+    expect(canBuildSetting(data(ChartType.PivotTable, { sorting: [item({})] }))).toBe(false);
+  });
+
+  it('turns on min and max for every pivot value, whatever its type', () => {
+    const built = buildSetting(data(ChartType.PivotTable, { values: [item({ function_family: 'Aggregation', function_type: 'Count all' })] }), { options: {} });
+    expect(asArray(built?.['values']).map(value => asRecord(value)['is_calc_min_max'])).toEqual([true]);
   });
 
   it('adds the SQL of the ad hoc views the fields use, each once', () => {

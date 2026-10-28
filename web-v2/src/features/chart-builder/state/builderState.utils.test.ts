@@ -49,7 +49,7 @@ describe('newBuilderState', () => {
   });
 
   it('has no options for a type v2 does not build', () => {
-    expect(newBuilderState('pivot_table').options).toEqual({});
+    expect(newBuilderState('arearange').options).toEqual({});
   });
 });
 
@@ -222,7 +222,7 @@ describe('chartType', () => {
   it('ignores the same type and a type v2 does not build', () => {
     const state = column();
     expect(run(state, { type: 'chartType', chartType: ChartType.Column })).toBe(state);
-    expect(run(state, { type: 'chartType', chartType: 'pivot_table' })).toBe(state);
+    expect(run(state, { type: 'chartType', chartType: 'arearange' })).toBe(state);
   });
 
   it('leaves out the sorting and filters of a type without those zones', () => {

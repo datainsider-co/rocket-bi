@@ -15,6 +15,7 @@ const BACKGROUND = 'var(--chart-background-color)';
 const TOOLTIP_BACKGROUND = 'var(--tooltip-background-color)';
 const GRID_LINE_COLOR = 'var(--grid-line-color)';
 const TABLE_GRID_LINE_COLOR = 'var(--table-grid-line-color)';
+const TOTAL_BACKGROUND = 'var(--total-background-color)';
 const PRIMARY_FONT = 'var(--widget-primary-font-family, Roboto)';
 const PRIMARY_WEIGHT = 'var(--widget-primary-font-weight, 500)';
 const PRIMARY_STYLE = 'var(--widget-primary-font-style, normal)';
@@ -210,6 +211,26 @@ const collapseTable = () => {
   return { ...base, header: { ...base.header, style: { ...secondaryStyle(), color: TEXT_COLOR, isWordWrap: false, fontSize: '12px' } } };
 };
 
+/**
+ * v1 `PivotTableChartOption.getDefaultChartOption`: the collapse table's, with a total row (v1's running build sends
+ * the same).
+ */
+const pivotTable = () => ({
+  ...collapseTable(),
+  total: {
+    enabled: true,
+    backgroundColor: TOTAL_BACKGROUND,
+    label: {
+      text: 'Total',
+      enabled: true,
+      align: 'right',
+      isWordWrap: false,
+      backgroundColor: TOTAL_BACKGROUND,
+      style: { ...secondaryStyle('12px'), color: TEXT_COLOR, isWordWrap: false }
+    }
+  }
+});
+
 const noDefault = { enabled: true, setting: { value: null } };
 
 /** v1 `TabFilterOption.getDefaultWidgetOptions`. */
@@ -320,6 +341,7 @@ const DEFAULTS: Readonly<Record<ChartType, Defaults>> = {
   [T.Number]: { className: 'number_chart_setting', options: number },
   [T.Table]: { className: 'flatten_table_setting', options: table },
   [T.CollapseTable]: { className: 'table_chart_setting', options: collapseTable },
+  [T.PivotTable]: { className: 'pivot_table_chart_setting', options: pivotTable },
   [T.TabFilter]: { className: 'tab_filter_chart_setting', options: () => tabFilter('normal') },
   [T.SingleChoice]: { className: 'tab_filter_chart_setting', options: () => tabFilter('single_choice') },
   [T.MultiChoice]: { className: 'tab_filter_chart_setting', options: () => tabFilter('multi_choice') },

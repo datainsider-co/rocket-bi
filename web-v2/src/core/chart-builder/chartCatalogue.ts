@@ -59,6 +59,12 @@ const NUMBER_ZONES = [aggregationZone('value', 'Value', { maxItems: 1 })];
 const TABLE_ZONES = [zone('columns', 'Columns', [F.GroupBy, F.DateHistogram, F.Aggregation, F.None], NONE_DEFAULTS)];
 /** v1 `COLLAPSE_TABLE_CONFIGS`: the same zone, grouping text and dates and summing numbers by default. */
 const COLLAPSE_TABLE_ZONES = [zone('columns', 'Columns', [F.GroupBy, F.DateHistogram, F.Aggregation, F.None], { text: groupBy, number: sum, date: byYear })];
+/** v1 `PIVOT_TABLE_CONFIGS`: groups across, groups down, and the values of each cell. */
+const PIVOT_TABLE_ZONES = [
+  zone('columns', 'Columns', [F.GroupBy, F.DateHistogram], GROUP_DEFAULTS),
+  zone('rows', 'Rows', [F.GroupBy, F.DateHistogram], GROUP_DEFAULTS),
+  aggregationZone('values', 'Values')
+];
 /** v1 `DROP_DOWN_CONFIGS`, for tab, choice, dropdown and tree filters. */
 const VALUES_ZONES = [zone('values', 'Values', [F.GroupBy, F.Aggregation, F.DateHistogram], { text: groupBy, number: sum, date: byYear })];
 /** v1 `VALUE_FILTER_CONFIGS`, for slicer, date select and input filters. */
@@ -101,6 +107,7 @@ const filter = (type: ChartType, title: string, icon: string, zones: readonly Zo
 export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.Table, 'Table', 'ic_table.svg', TABLE_ZONES),
   chart(T.CollapseTable, 'Collapse Table', 'ic_collapse_table.svg', COLLAPSE_TABLE_ZONES),
+  chart(T.PivotTable, 'Pivot Table', 'ic_pivot_table.svg', PIVOT_TABLE_ZONES),
   chart(T.Number, 'Number', 'ic_number.svg', NUMBER_ZONES),
   chart(T.Line, 'Line', 'ic_line_chart.svg', seriesZones()),
   chart(T.Spline, 'Spline', 'ic_line_chart.svg', seriesZones()),
@@ -133,7 +140,6 @@ export function chartTypeInfoOf(chartType: string): ChartTypeInfo | undefined {
 
 /** v1's icons (`ALL_ICON_MAP`) for the chart types v2 doesn't build yet, which dashboards still hold. */
 const OTHER_ICONS: Readonly<Record<string, string>> = {
-  pivot_table: 'ic_pivot_table.svg',
   flatten_pivot_table: 'ic_pivot_table.svg',
   arearange: 'ic_chart_area.svg',
   column_range: 'ic_column.svg',
@@ -174,7 +180,7 @@ export interface PickerItem {
 const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   [T.Table, 'Table'],
   [T.CollapseTable, 'Collapse Table'],
-  ['pivot_table', 'Pivot Table'],
+  [T.PivotTable, 'Pivot Table'],
   [T.Number, 'Number'],
   [T.Line, 'Line'],
   [T.Spline, 'Spline'],

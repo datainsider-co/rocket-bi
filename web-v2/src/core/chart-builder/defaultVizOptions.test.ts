@@ -19,7 +19,7 @@ describe('defaultVizOptions', () => {
   });
 
   it('has none for a type v2 does not build', () => {
-    expect(defaultVizOptions('pivot_table')).toBeUndefined();
+    expect(defaultVizOptions('arearange')).toBeUndefined();
   });
 
   it('builds the types v1 lacked from its source', () => {

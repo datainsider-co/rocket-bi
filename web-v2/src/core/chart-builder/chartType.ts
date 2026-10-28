@@ -6,6 +6,8 @@ export const ChartType = {
   Table: 'flatten_table',
   /** v1's "Collapse Table": rows grouped by the first group by column, its groups expanding into the next. */
   CollapseTable: 'table',
+  /** Rows by the Rows zone's groups, columns by the Columns zone's, a cell per value of each. */
+  PivotTable: 'pivot_table',
   Number: 'kpi',
   Line: 'line',
   Spline: 'spline',

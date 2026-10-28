@@ -3790,5 +3790,374 @@
       "formatters": [],
       "class_name": "group_table_chart_setting"
     }
+  },
+  "pivot_table": {
+    "class_name": "chart_v3",
+    "id": -1,
+    "name": "Untitled chart",
+    "description": "",
+    "background_color": "var(--chart-background-color)",
+    "extra_data": {
+      "configs": {
+        "columns": [
+          {
+            "id": 2953,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "sales_channel",
+              "field_type": "string"
+            },
+            "function_family": "Group By",
+            "function_type": "",
+            "name": "sales_channel",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "sales_channel",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ],
+        "rows": [
+          {
+            "id": 1165,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "region",
+              "field_type": "string"
+            },
+            "function_family": "Group By",
+            "function_type": "",
+            "name": "region",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "region",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          },
+          {
+            "id": 3648,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "country",
+              "field_type": "string"
+            },
+            "function_family": "Group By",
+            "function_type": "",
+            "name": "country",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "country",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ],
+        "values": [
+          {
+            "id": 4114,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_revenue",
+              "field_type": "double"
+            },
+            "function_family": "Aggregation",
+            "function_type": "Sum",
+            "name": "total_revenue",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "total_revenue",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          },
+          {
+            "id": 2702,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "units_sold",
+              "field_type": "int32"
+            },
+            "function_family": "Aggregation",
+            "function_type": "Sum",
+            "name": "units_sold",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "units_sold",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ],
+        "sorting": [
+          {
+            "id": 3598,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "region",
+              "field_type": "string"
+            },
+            "function_family": "Group By",
+            "function_type": "",
+            "name": "region",
+            "sorting": "Ascending",
+            "table_name": "sales",
+            "column_name": "region",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ]
+      },
+      "filters": {},
+      "current_chart_type": "pivot_table"
+    },
+    "text_color": "#fff",
+    "setting": {
+      "filters": [],
+      "sorts": [
+        {
+          "class_name": "order_by",
+          "order": "ASC",
+          "function": {
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "region",
+              "field_type": "string"
+            },
+            "class_name": "group"
+          }
+        }
+      ],
+      "options": {
+        "options": {
+          "title": {
+            "align": "center",
+            "enabled": true,
+            "text": "Untitled chart",
+            "style": {
+              "color": "var(--text-color)",
+              "font_family": "var(--widget-primary-font-family, Roboto)",
+              "font_size": "20px",
+              "font_weight": "var(--widget-primary-font-weight, 500)",
+              "font_style": "var(--widget-primary-font-style, normal)"
+            }
+          },
+          "subtitle": {
+            "align": "center",
+            "enabled": true,
+            "text": "",
+            "style": {
+              "color": "var(--secondary-text-color)",
+              "font_family": "var(--widget-secondary-font-family, Roboto)",
+              "font_size": "11px",
+              "font_weight": "var(--widget-secondary-font-weight, 400)",
+              "font_style": "var(--widget-secondary-font-style, normal)",
+              "text_decoration": "var(--widget-secondary-font-underlined, underline)"
+            }
+          },
+          "grid": {
+            "horizontal": {
+              "color": "var(--table-grid-line-color)",
+              "thickness": "1px",
+              "row_padding": "0px",
+              "apply_body": true,
+              "apply_header": true,
+              "apply_total": true
+            },
+            "vertical": {
+              "color": "var(--table-grid-line-color)",
+              "thickness": "1px",
+              "apply_body": false,
+              "apply_header": false,
+              "apply_total": false
+            }
+          },
+          "affected_by_filter": true,
+          "tooltip": {
+            "font_family": "var(--widget-secondary-font-family, Roboto)",
+            "background_color": "var(--tooltip-background-color)",
+            "value_color": "var(--secondary-text-color)"
+          },
+          "value": {
+            "color": "var(--text-color)",
+            "background_color": "var(--row-even-background-color)",
+            "align": "left",
+            "alternate_background_color": "var(--row-odd-background-color)",
+            "alternate_color": "var(--text-color)",
+            "enable_url_icon": false,
+            "style": {
+              "color": "var(--secondary-text-color)",
+              "font_family": "var(--widget-secondary-font-family, Roboto)",
+              "font_size": "12px",
+              "font_weight": "var(--widget-secondary-font-weight, 400)",
+              "font_style": "var(--widget-secondary-font-style, normal)",
+              "is_word_wrap": false
+            }
+          },
+          "header": {
+            "align": "left",
+            "background_color": "var(--header-background-color)",
+            "color": "var(--text-color)",
+            "is_word_wrap": false,
+            "is_auto_width_size": false,
+            "style": {
+              "color": "var(--text-color)",
+              "font_family": "var(--widget-secondary-font-family, Roboto)",
+              "font_size": "12px",
+              "font_weight": "var(--widget-secondary-font-weight, 400)",
+              "font_style": "var(--widget-secondary-font-style, normal)",
+              "is_word_wrap": false
+            }
+          },
+          "total": {
+            "enabled": true,
+            "background_color": "var(--total-background-color)",
+            "label": {
+              "text": "Total",
+              "enabled": true,
+              "align": "right",
+              "is_word_wrap": false,
+              "background_color": "var(--total-background-color)",
+              "style": {
+                "color": "var(--text-color)",
+                "font_family": "var(--widget-secondary-font-family, Roboto)",
+                "font_size": "12px",
+                "font_weight": "var(--widget-secondary-font-weight, 400)",
+                "font_style": "var(--widget-secondary-font-style, normal)",
+                "is_word_wrap": false
+              }
+            }
+          },
+          "toggle_icon": {
+            "color": "var(--text-color)",
+            "background_color": "var(--toggle-color)"
+          },
+          "background": "var(--chart-background-color)"
+        },
+        "class_name": "pivot_table_chart_setting"
+      },
+      "sql_views": [],
+      "parameters": {},
+      "columns": [
+        {
+          "name": "sales_channel",
+          "function": {
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "sales_channel",
+              "field_type": "string"
+            },
+            "class_name": "group"
+          },
+          "is_horizontal_view": false,
+          "is_collapse": false,
+          "is_calc_group_total": true,
+          "is_calc_min_max": false,
+          "is_dynamic_function": false
+        }
+      ],
+      "rows": [
+        {
+          "name": "region",
+          "function": {
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "region",
+              "field_type": "string"
+            },
+            "class_name": "group"
+          },
+          "is_horizontal_view": false,
+          "is_collapse": false,
+          "is_calc_group_total": false,
+          "is_calc_min_max": false,
+          "is_dynamic_function": false
+        },
+        {
+          "name": "country",
+          "function": {
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "country",
+              "field_type": "string"
+            },
+            "class_name": "group"
+          },
+          "is_horizontal_view": false,
+          "is_collapse": false,
+          "is_calc_group_total": false,
+          "is_calc_min_max": false,
+          "is_dynamic_function": false
+        }
+      ],
+      "values": [
+        {
+          "name": "total_revenue",
+          "function": {
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_revenue",
+              "field_type": "double"
+            },
+            "class_name": "sum"
+          },
+          "is_horizontal_view": false,
+          "is_collapse": false,
+          "is_calc_group_total": true,
+          "is_calc_min_max": true,
+          "is_dynamic_function": false
+        },
+        {
+          "name": "units_sold",
+          "function": {
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "units_sold",
+              "field_type": "int32"
+            },
+            "class_name": "sum"
+          },
+          "is_horizontal_view": false,
+          "is_collapse": false,
+          "is_calc_group_total": true,
+          "is_calc_min_max": true,
+          "is_dynamic_function": false
+        }
+      ],
+      "formatters": [],
+      "class_name": "pivot_table_chart_setting"
+    }
   }
 }

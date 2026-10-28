@@ -7,19 +7,18 @@ import { applyVizChanges, vizOptionsOf, type VizChanges } from './vizChanges';
 
 type Configs = Readonly<Record<string, readonly FunctionData[]>>;
 
-/**
- * What a chart type's viz options lose when its columns change (v1 `ChartOptionResolver`, `ChartOptionHandler`). Only
- * the collapse table has it so far; the pivot table comes with its type.
- */
+/** What a chart type's viz options lose when its columns change (v1 `ChartOptionResolver`, `ChartOptionHandler`). */
 interface OptionCleanup {
-  /** The zone whose columns own formatting. */
-  readonly zone: string;
+  /** The zones whose columns own formatting. */
+  readonly zones: readonly string[];
   /** Whether the whole conditional formatting goes when the columns switch between grouping and listing rows. */
   readonly clearOnConvert: boolean;
 }
 
 const CLEANUPS: Readonly<Partial<Record<string, OptionCleanup>>> = {
-  [ChartType.CollapseTable]: { zone: 'columns', clearOnConvert: true }
+  [ChartType.CollapseTable]: { zones: ['columns'], clearOnConvert: true },
+  /** The pivot table formats its rows and values; its Columns zone names no column of its own. */
+  [ChartType.PivotTable]: { zones: ['rows', 'values'], clearOnConvert: false }
 };
 
 /** The changes whose path exists, so options without them stay as they are. */
@@ -34,15 +33,16 @@ function withChanges(options: JsonObject, changes: VizChanges): JsonObject {
 }
 
 /**
- * The options once `removed` left `zone` (v1 `TableChartOptionHandler.handleFunctionRemoved`): its field formatting and
- * conditional formatting go, unless another column of the zone still has the same name. v1 also cleared them when an
- * item of the Sorting zone was removed, which took the formatting of a column still shown.
+ * The options once `removed` left `zone` (v1 `TableChartOptionHandler` / `PivotTableChartOptionHandler`
+ * `.handleFunctionRemoved`): its field formatting and conditional formatting go, unless another column of those zones
+ * still has the same name. v1 also cleared them when an item of the Sorting zone was removed, which took the formatting
+ * of a column still shown.
  */
 export function optionsAfterRemove(chartType: string, zone: string, options: JsonObject, removed: FunctionData, configs: Configs): JsonObject {
   const cleanup = CLEANUPS[chartType];
-  if (!cleanup || cleanup.zone !== zone) return options;
+  if (!cleanup?.zones.includes(zone)) return options;
   const key = vizKey(removed.name);
-  if ((configs[zone] ?? []).some(item => vizKey(item.name) === key)) return options;
+  if (cleanup.zones.some(owner => (configs[owner] ?? []).some(item => vizKey(item.name) === key))) return options;
   return withChanges(options, { [`fieldFormatting.${key}`]: undefined, [`conditionalFormatting.${key}`]: undefined });
 }
 

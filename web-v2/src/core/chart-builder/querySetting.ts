@@ -59,6 +59,21 @@ const table = tableOf('table_chart_setting');
 /** The collapse table: the same columns; the server nests the rows by its group by columns. */
 const groupTable = tableOf('group_table_chart_setting');
 
+/**
+ * The pivot table (v1 `PivotQuerySettingHandler`): any zone filled is enough. Rows go without their group totals, values
+ * with their min and max, whatever their type.
+ */
+const pivot: SettingBuilder = {
+  className: 'pivot_table_chart_setting',
+  canBuild: configs => ['columns', 'rows', 'values'].some(key => filled(configs, key)),
+  build: configs => ({
+    columns: columns(configs, 'columns'),
+    rows: columns(configs, 'rows').map(column => ({ ...column, is_calc_group_total: false })),
+    values: columns(configs, 'values').map(column => ({ ...column, is_calc_min_max: true })),
+    formatters: []
+  })
+};
+
 /** Tab, choice, dropdown and tree filters, and inner filters (v1 `TabFilterQuerySettingHandler`, `TreeFilterQuerySettingHandler`). */
 const tabControl: SettingBuilder = {
   className: 'tab_control_chart_setting',
@@ -115,6 +130,7 @@ const BUILDERS: Readonly<Record<ChartType, SettingBuilder>> = {
   [T.Number]: number,
   [T.Table]: table,
   [T.CollapseTable]: groupTable,
+  [T.PivotTable]: pivot,
   [T.TabFilter]: tabControl,
   [T.SingleChoice]: tabControl,
   [T.MultiChoice]: tabControl,

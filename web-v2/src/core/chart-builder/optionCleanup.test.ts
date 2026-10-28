@@ -41,6 +41,16 @@ describe('optionsAfterRemove', () => {
     expect(optionsAfterRemove(ChartType.CollapseTable, 'columns', options, item(4, 'units_sold'), {})).toBe(options);
   });
 
+  it("drops a pivot table's formatting when a row or value goes, not a column across", () => {
+    const result = optionsAfterRemove(ChartType.PivotTable, 'values', options, item(2, 'total_revenue'), { values: [] });
+    expect(stored(result)).toEqual({ title: { text: 'Sales' }, field_formatting: { region: { align: 'right' } }, conditional_formatting: {} });
+    expect(optionsAfterRemove(ChartType.PivotTable, 'columns', options, item(2, 'total_revenue'), {})).toBe(options);
+  });
+
+  it("keeps a pivot table's formatting while the other zone has a column of that name", () => {
+    expect(optionsAfterRemove(ChartType.PivotTable, 'rows', options, item(1, 'total_revenue'), { values: [item(2, 'total_revenue')] })).toBe(options);
+  });
+
   it('does not change its input', () => {
     const before = structuredClone(options);
     optionsAfterRemove(ChartType.CollapseTable, 'columns', options, revenue, {});
@@ -58,6 +68,7 @@ describe('optionsAfterConvert', () => {
 
   it('leaves other chart types and tables without conditional formatting alone', () => {
     expect(optionsAfterConvert(ChartType.Table, options)).toBe(options);
+    expect(optionsAfterConvert(ChartType.PivotTable, options)).toBe(options);
     const plain = { class_name: 'table_chart_setting', options: { title: { text: 'Sales' } } };
     expect(optionsAfterConvert(ChartType.CollapseTable, plain)).toBe(plain);
   });
