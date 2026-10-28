@@ -55,6 +55,9 @@ export const NEW_JOB_ID: JobId = -1;
 /** `next_run_time` of a job that will not run again, such as a `schedule_once` job that already ran. */
 export const NEVER_RUNS = 99999999999999;
 
+/** `last_synced_value` of a new job: incremental sync starts after it, and v1 sent `"0"` by default. */
+export const DEFAULT_LAST_SYNCED_VALUE = '0';
+
 interface JobBase {
   readonly id: JobId;
   readonly displayName: string;
@@ -129,7 +132,7 @@ export function jobFromJson(value: unknown): Job {
     databaseName: asString(json['database_name']),
     tableName: asString(json['table_name']),
     incrementalColumn: typeof incrementalColumn === 'string' && incrementalColumn ? incrementalColumn : undefined,
-    lastSyncedValue: asString(json['last_synced_value'], '0')
+    lastSyncedValue: asString(json['last_synced_value'], DEFAULT_LAST_SYNCED_VALUE)
   };
 }
 
@@ -144,6 +147,7 @@ export type JdbcJobValues = Pick<
   | 'destDatabaseName'
   | 'destTableName'
   | 'incrementalColumn'
+  | 'lastSyncedValue'
   | 'scheduleTime'
 >;
 
@@ -154,7 +158,6 @@ export function newJdbcJob(values: JdbcJobValues): JdbcJob {
     kind: 'jdbc',
     id: NEW_JOB_ID,
     jobType: JOB_TYPE[values.className],
-    lastSyncedValue: '0',
     lastSuccessfulSync: 0,
     nextRunTime: 0,
     lastSyncStatus: JobStatus.Initialized,

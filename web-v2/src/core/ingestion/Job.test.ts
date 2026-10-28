@@ -112,6 +112,7 @@ describe('jdbcJobToJson', () => {
       destDatabaseName: 'di0_ingest',
       destTableName: 'sales',
       incrementalColumn: undefined,
+      lastSyncedValue: '0',
       scheduleTime: { kind: 'once', startTime: 1793208055000 }
     });
 
