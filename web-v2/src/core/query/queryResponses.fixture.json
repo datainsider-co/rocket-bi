@@ -342,5 +342,53 @@
   ],
   "last_query_time": 0,
   "last_processing_time": 0
+ },
+ "stacked_series_chart_setting": {
+  "class_name": "series_one_response",
+  "series": [
+   {
+    "name": "Offline.C",
+    "data": [
+     2192780.31,
+     424435.3,
+     256609.6
+    ],
+    "stack": "Offline"
+   },
+   {
+    "name": "Offline.H",
+    "data": [
+     2516005.77,
+     888563.52,
+     6180780.8
+    ],
+    "stack": "Offline"
+   },
+   {
+    "name": "Online.C",
+    "data": [
+     1951377.4700000002,
+     62100.06,
+     228218.4
+    ],
+    "stack": "Online"
+   },
+   {
+    "name": "Online.H",
+    "data": [
+     11707747.84,
+     256152.32,
+     5032243.72
+    ],
+    "stack": "Online"
+   }
+  ],
+  "x_axis": [
+   "Asia",
+   "Australia and Oceania",
+   "Central America and the Caribbean"
+  ],
+  "last_query_time": 0,
+  "last_processing_time": 0
  }
 }

@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReactModule, { type HighchartsReactRefObject } from 'highcharts-react-official';
+// Polar panes (circular bar) and the lollipop series, which builds on the dumbbell; each registers itself on import.
+import 'highcharts/highcharts-more';
+import 'highcharts/modules/dumbbell';
+import 'highcharts/modules/lollipop';
 
 /**
  * The package ships CommonJS only (`module.exports = { HighchartsReact, default }`). Vite's pre-bundle hands that whole

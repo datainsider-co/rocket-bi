@@ -1,6 +1,10 @@
 /** v1 `ChartOptionClassName` values v2 renders so far (`setting.options.class_name`). */
 export const ChartVizClass = {
   Series: 'highcharts_series_chart_setting',
+  /** Stacked column and bar (v1 `StackedChartOption`). */
+  StackedSeries: 'stacking_series_chart_setting',
+  /** Drawn like the stacked charts, on a polar pane (v1 `CircularChartOption`). */
+  CircularBar: 'circular_bar_chart_setting',
   Pie: 'highcharts_pie_chart_setting',
   /** Drawn as a pie: v1 `DonutChart` is `PieChart` with a hole (`innerSize` in its options). */
   Donut: 'donut_chart_setting',

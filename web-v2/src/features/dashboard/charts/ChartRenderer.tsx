@@ -21,6 +21,7 @@ import { CollapseTable } from './table/CollapseTable';
 import { PivotTable } from './table/PivotTable';
 import { buildPieChartOptions } from './pie/pieChartOptions';
 import { buildSeriesChartOptions, isTimestampFunction } from './series/seriesChartOptions';
+import { buildStackedChartOptions } from './series/stackedChartOptions';
 import { FlattenTableView } from './table/FlattenTableView';
 import { ChartVizClass } from './vizClass';
 
@@ -66,6 +67,8 @@ export interface KpiParts {
   dateRange?: KpiDateRangeProps;
 }
 
+const SERIES_CLASSES = new Set<string>([ChartVizClass.Series, ChartVizClass.StackedSeries, ChartVizClass.CircularBar]);
+
 function Unsupported({ title, type }: { title: string; type: string }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-1 text-center">
@@ -84,9 +87,10 @@ function Unsupported({ title, type }: { title: string; type: string }) {
 export function ChartRenderer({ widget, viz, response, themeColors, table, crossFilter, kpi }: ChartRendererProps) {
   const { selected, onSelect, onPointMenu } = crossFilter;
   const highchartsOptions = useMemo(() => {
-    if (viz.className === ChartVizClass.Series && response.kind === 'series_one') {
+    if (SERIES_CLASSES.has(viz.className) && response.kind === 'series_one') {
       const scalarFunction = asString(getPath(widget.setting, ['x_axis', 'function', 'scalar_function', 'class_name']));
-      return buildSeriesChartOptions({ options: viz.options, response, themeColors, timestampXAxis: isTimestampFunction(scalarFunction), onPointClick: onPointMenu });
+      const input = { options: viz.options, response, themeColors, timestampXAxis: isTimestampFunction(scalarFunction), onPointClick: onPointMenu };
+      return viz.className === ChartVizClass.Series ? buildSeriesChartOptions(input) : buildStackedChartOptions(input);
     }
     if ((viz.className === ChartVizClass.Pie || viz.className === ChartVizClass.Donut) && response.kind === 'series_two') {
       return buildPieChartOptions({ options: viz.options, response, themeColors, selected, onSelect });
