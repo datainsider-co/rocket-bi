@@ -1,7 +1,17 @@
-import { getIngestionSection, IngestionSection } from '../ingestion.utils';
-import { IngestionPageHeader } from '../layout/IngestionPageHeader';
+import { JobHistoryView } from './JobHistoryView';
+import { useJobHistory } from './useJobHistory';
 
-/** `/data-ingestion/job-history` (v1 `JobHistoryScreen.vue`). The listing lands in DI7. */
+/** `/data-ingestion/job-history` (v1 `JobHistoryScreen.vue`). */
 export function JobHistoryPage() {
-  return <IngestionPageHeader section={getIngestionSection(IngestionSection.JobHistory)} />;
+  const { search, content, table, isFetching, reload } = useJobHistory();
+  return (
+    <JobHistoryView
+      searchText={search.text}
+      onSearchChange={search.onChange}
+      content={content}
+      table={table}
+      isFetching={isFetching}
+      onReload={reload}
+    />
+  );
 }
