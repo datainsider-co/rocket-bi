@@ -94,3 +94,17 @@ export function columnSortOrder<Field extends string>(
 export function formatDateTime(epochMillis: number): string {
   return epochMillis > 0 ? dayjs(epochMillis).format('MMM DD, YYYY HH:mm:ss') : '--';
 }
+
+/**
+ * The selected rows that are on the page shown. Selection is kept as ids; rows leave the page when it changes or when a
+ * refresh drops them (v1 `updateCheckbox`), and the bulk actions only ever act on what the user sees checked.
+ */
+export function selectedOnPage<Id>(selected: readonly Id[], pageIds: readonly Id[]): Id[] {
+  const onPage = new Set(pageIds);
+  return selected.filter(id => onPage.has(id));
+}
+
+/** v1's confirm and toast wording: "1 job", "3 jobs". */
+export function countLabel(count: number, singular: string, plural: string): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}

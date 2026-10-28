@@ -1,17 +1,21 @@
+import { DataSourcesDialogs } from './DataSourcesDialogs';
 import { DataSourcesView } from './DataSourcesView';
-import { useDataSources } from './useDataSources';
+import { useDataSourcesPage } from './useDataSourcesPage';
 
-/** `/data-ingestion/data-source` (v1 `DataSourceScreen.vue`): the listing. Row actions and Add come with DI3b, DI4b. */
+/** `/data-ingestion/data-source` (v1 `DataSourceScreen.vue`): the listing and its modals. */
 export function DataSourcesPage() {
-  const { listing, search, refresh, setPage, sortOn } = useDataSources();
+  const { listing, handlers, selection, rowActions, dialogs } = useDataSourcesPage();
 
   return (
-    <DataSourcesView
-      listing={listing}
-      onSearch={search}
-      onRefresh={refresh}
-      onPageChange={setPage}
-      onSortOn={sortOn}
-    />
+    <>
+      <DataSourcesView listing={listing} handlers={handlers} selection={selection} rowActions={rowActions} />
+      <DataSourcesDialogs
+        dialog={dialogs.dialog}
+        onSelectType={dialogs.selectType}
+        onSourceSaved={dialogs.sourceSaved}
+        onJobSaved={dialogs.jobSaved}
+        onClose={dialogs.close}
+      />
+    </>
   );
 }

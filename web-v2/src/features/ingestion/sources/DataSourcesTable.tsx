@@ -1,72 +1,31 @@
-import { Table, Typography } from 'antd';
-import type { TableColumnsType, TableProps } from 'antd';
+import { Table } from 'antd';
+import type { TableProps } from 'antd';
+import type { SourceId } from '@/core/ingestion/DataSource';
 import type { SourceInfo, SourceSortField } from '@/core/ingestion/DataSourceService';
-import { columnSortOrder, formatDateTime, listingPagination, type ListingState } from '../listing/listing.utils';
-import { SourceOwnerCell } from './SourceOwnerCell';
-import { sortFieldOfColumn, SourceColumn, sourceRowKey, sourceTypeLabel } from './sources.utils';
+import { listingPagination } from '../listing/listing.utils';
+import type { SourceRowActions } from './SourceActionsCell';
+import { sourceColumns } from './sourceColumns';
+import { isEditableSource, sortFieldOfColumn, sourceRowKey, type DataSourcesListing } from './sources.utils';
+
+export interface SourceSelection {
+  readonly selectedIds: readonly SourceId[];
+  readonly onChange: (ids: SourceId[]) => void;
+}
 
 interface DataSourcesTableProps {
-  rows: readonly SourceInfo[];
-  total: number;
-  state: ListingState<SourceSortField>;
-  isLoading: boolean;
+  listing: Pick<DataSourcesListing, 'rows' | 'total' | 'state' | 'isFetching'>;
+  selection: SourceSelection;
+  actions: SourceRowActions;
   onPageChange: (page: number, pageSize: number) => void;
   onSortOn: (field: SourceSortField) => void;
 }
 
-/** Headers flip between ascending and descending; the order shown is the one the server sorted by. */
-const SORT_DIRECTIONS: ('ascend' | 'descend')[] = ['ascend', 'descend', 'ascend'];
-
-function sortable(state: ListingState<SourceSortField>, column: SourceColumn) {
-  const field = sortFieldOfColumn(column);
-  return field === undefined
-    ? {}
-    : { sorter: true, sortOrder: columnSortOrder(state.sort, field), sortDirections: SORT_DIRECTIONS };
-}
-
 /**
- * v1 `DataSourceScreen` table: Name, Owner, Type, Last Modified, paged and sorted on the server. Owner shows from
- * `md`, Last Modified from `sm`. Rows are keyed by source id for the selection and row actions of DI3b.
+ * v1 `DataSourceScreen` table, paged and sorted on the server, with checkboxes for the bulk Delete. Clicking a row of
+ * a JDBC source starts a job on it.
  */
-export function DataSourcesTable({ rows, total, state, isLoading, onPageChange, onSortOn }: DataSourcesTableProps) {
-  const columns: TableColumnsType<SourceInfo> = [
-    {
-      key: SourceColumn.Name,
-      title: 'Name',
-      ellipsis: true,
-      ...sortable(state, SourceColumn.Name),
-      render: (_, { source }) => (
-        <Typography.Text strong title={source.displayName}>
-          {source.displayName}
-        </Typography.Text>
-      )
-    },
-    {
-      key: SourceColumn.Owner,
-      title: 'Owner',
-      width: 200,
-      responsive: ['md'],
-      ...sortable(state, SourceColumn.Owner),
-      render: (_, info) => <SourceOwnerCell info={info} />
-    },
-    {
-      key: SourceColumn.Type,
-      title: 'Type',
-      width: 180,
-      ellipsis: true,
-      ...sortable(state, SourceColumn.Type),
-      render: (_, { source }) => sourceTypeLabel(source)
-    },
-    {
-      key: SourceColumn.LastModified,
-      title: 'Last Modified',
-      width: 200,
-      responsive: ['sm'],
-      className: 'whitespace-nowrap',
-      ...sortable(state, SourceColumn.LastModified),
-      render: (_, { source }) => formatDateTime(source.lastModify)
-    }
-  ];
+export function DataSourcesTable({ listing, selection, actions, onPageChange, onSortOn }: DataSourcesTableProps) {
+  const { rows, total, state, isFetching } = listing;
 
   const handleChange: TableProps<SourceInfo>['onChange'] = (_pagination, _filters, sorter, { action }) => {
     if (action !== 'sort') return;
@@ -78,11 +37,20 @@ export function DataSourcesTable({ rows, total, state, isLoading, onPageChange, 
     <div className="min-h-0 flex-1 overflow-auto">
       <Table<SourceInfo>
         rowKey={sourceRowKey}
-        columns={columns}
+        columns={sourceColumns(state, actions)}
         dataSource={rows}
-        loading={isLoading}
+        loading={isFetching}
         showSorterTooltip={false}
         locale={{ emptyText: ' ' }}
+        rowSelection={{
+          selectedRowKeys: [...selection.selectedIds],
+          onChange: keys => selection.onChange(keys.map(Number))
+        }}
+        onRow={({ source }) =>
+          isEditableSource(source)
+            ? { onClick: () => actions.onCreateJob(source), className: 'cursor-pointer', title: 'Create a job from this source' }
+            : {}
+        }
         onChange={handleChange}
         pagination={{ ...listingPagination(state.page, state.pageSize, total), onChange: onPageChange }}
       />

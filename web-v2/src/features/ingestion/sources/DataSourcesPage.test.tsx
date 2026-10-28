@@ -72,7 +72,7 @@ describe('DataSourcesPage', () => {
       sorts: [{ field: 'last_modified', order: 'DESC' }]
     });
     expect(screen.getByRole('columnheader', { name: /Last Modified/ })).toHaveAttribute('aria-sort', 'descending');
-    expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Delete \(/ })).not.toBeInTheDocument();
   });
 
   it('searches once typing pauses', async () => {

@@ -2,12 +2,14 @@ import dayjs from 'dayjs';
 import { describe, expect, it } from 'vitest';
 import {
   columnSortOrder,
+  countLabel,
   DEFAULT_PAGE_SIZE,
   formatDateTime,
   initialListingState,
   lastPage,
   listingPagination,
   PAGE_SIZE_OPTIONS,
+  selectedOnPage,
   toListingRequest,
   withKeyword,
   withPage,
@@ -137,5 +139,26 @@ describe('listingPagination', () => {
 
   it('copies the page sizes', () => {
     expect(listingPagination(1, 20, 0).pageSizeOptions).not.toBe(PAGE_SIZE_OPTIONS);
+  });
+});
+
+describe('selectedOnPage', () => {
+  it('keeps the selected ids shown, in selection order', () => {
+    expect(selectedOnPage([3, 1, 9], [1, 2, 3])).toEqual([3, 1]);
+  });
+
+  it('is empty when nothing is selected or the page is empty', () => {
+    expect(selectedOnPage([], [1])).toEqual([]);
+    expect(selectedOnPage([1], [])).toEqual([]);
+  });
+});
+
+describe('countLabel', () => {
+  it.each([
+    [0, '0 jobs'],
+    [1, '1 job'],
+    [2, '2 jobs']
+  ])('%i → %s', (count, label) => {
+    expect(countLabel(count, 'job', 'jobs')).toBe(label);
   });
 });

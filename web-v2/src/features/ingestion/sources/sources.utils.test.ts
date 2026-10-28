@@ -5,6 +5,9 @@ import type { SourceInfo } from '@/core/ingestion/DataSourceService';
 import { UserProfile } from '@/core/user/UserProfile';
 import {
   DEFAULT_SOURCE_SORT,
+  deleteSourcesText,
+  dialogAfterSourceSaved,
+  isEditableSource,
   ownerName,
   sortFieldOfColumn,
   SourceColumn,
@@ -133,5 +136,34 @@ describe('sourcesBody', () => {
 
   it('shows no match for an empty search', () => {
     expect(sourcesBody({ ...loaded, total: 0, keyword: 'sales' })).toBe('no-match');
+  });
+});
+
+describe('isEditableSource', () => {
+  it('edits JDBC sources only', () => {
+    expect(isEditableSource(jdbc('MySql'))).toBe(true);
+    expect(isEditableSource(unsupported('mongo_db_source'))).toBe(false);
+  });
+});
+
+describe('deleteSourcesText', () => {
+  it('names a single source like v1', () => {
+    expect(deleteSourcesText([{ displayName: 'Sales' }])).toBe("Are you sure to delete data source 'Sales'?");
+  });
+
+  it('counts several sources', () => {
+    expect(deleteSourcesText([{ displayName: 'a' }, { displayName: 'b' }])).toBe('Are you sure to delete 2 data sources?');
+  });
+});
+
+describe('dialogAfterSourceSaved', () => {
+  it('opens the job form on a new JDBC source, locked to it', () => {
+    const source = jdbc('MySql');
+    expect(dialogAfterSourceSaved(source, true)).toEqual({ kind: 'job', target: { mode: 'create', source, lockSource: true } });
+  });
+
+  it('closes after an edit, or for a source v2 can not make jobs for', () => {
+    expect(dialogAfterSourceSaved(jdbc('MySql'), false)).toEqual({ kind: 'none' });
+    expect(dialogAfterSourceSaved(unsupported('mongo_db_source'), true)).toEqual({ kind: 'none' });
   });
 });
