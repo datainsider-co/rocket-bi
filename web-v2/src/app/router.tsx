@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import { Outlet, createBrowserRouter, redirect } from 'react-router';
 import type { RouteObject } from 'react-router';
 import { NotFoundPage } from '@/app/error/NotFoundPage';
+import { featureFlags } from '@/app/featureFlags';
 import { RouteErrorPage } from '@/app/error/RouteErrorPage';
 import { AppLayout, type AppRouteHandle } from '@/app/layout/AppLayout';
 import { PageLoading } from '@/app/layout/PageLoading';
@@ -15,6 +16,31 @@ import { AuthLayout } from '@/features/auth/AuthLayout';
 function lazyPage<M>(load: () => Promise<M>, pick: (module: M) => ComponentType): Pick<RouteObject, 'lazy'> {
   return { lazy: async () => ({ Component: pick(await load()) }) };
 }
+
+/** Data Ingestion at v1's paths, behind its feature flag (`VITE_ENABLE_INGESTION`); off, the paths are Not found. */
+const ingestionRoutes: RouteObject[] = featureFlags.ingestion
+  ? [
+      {
+        path: '/data-ingestion',
+        ...lazyPage(() => import('@/features/ingestion/layout/IngestionLayout'), m => m.IngestionLayout),
+        children: [
+          { index: true, loader: () => redirect('/data-ingestion/data-source') },
+          {
+            path: 'data-source',
+            ...lazyPage(() => import('@/features/ingestion/sources/DataSourcesPage'), m => m.DataSourcesPage)
+          },
+          ...['job', 'queued-job'].map(path => ({
+            path,
+            ...lazyPage(() => import('@/features/ingestion/jobs/JobsPage'), m => m.JobsPage)
+          })),
+          {
+            path: 'job-history',
+            ...lazyPage(() => import('@/features/ingestion/history/JobHistoryPage'), m => m.JobHistoryPage)
+          }
+        ]
+      }
+    ]
+  : [];
 
 /** Every route of the app. Add a feature's page here; keep the page component in its feature folder. */
 export const appRoutes: RouteObject[] = [
@@ -70,6 +96,7 @@ export const appRoutes: RouteObject[] = [
                 // The dashboard with ChartBuilder for edit mode (the embedded page has no edit mode).
                 ...lazyPage(() => import('@/features/chart-builder/DashboardBuilderPage'), m => m.DashboardBuilderPage)
               },
+              ...ingestionRoutes,
               { path: '*', element: <NotFoundPage /> }
             ]
           }
