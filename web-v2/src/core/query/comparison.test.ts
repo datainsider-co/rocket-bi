@@ -163,10 +163,26 @@ describe('trendLineSettingOf', () => {
       class_name: 'series_chart_setting',
       x_axis: { name: 'order_date', function: xFunction },
       y_axis: [value],
-      filters: [filter, { class_name: 'current_year', field }],
+      filters: [{ class_name: 'and', conditions: [filter, { class_name: 'current_year', field }] }],
       sorts: [{ class_name: 'order_by', function: xFunction, order: 'ASC' }],
       options: {}
     });
+  });
+
+  it('keeps every OR group of the chart in the range', () => {
+    const other = { ...filter, possible_values: ['Cereal'] };
+    const range = { class_name: 'current_year', field };
+    const setting = trendLineSettingOf({ ...kpi({ data_range: dataRange('this_year'), trend_line: { enabled: true } }), filters: [filter, other] });
+    expect(setting?.['filters']).toEqual([
+      { class_name: 'and', conditions: [filter, range] },
+      { class_name: 'and', conditions: [other, range] }
+    ]);
+  });
+
+  it('filters by the range alone without chart filters, and by the chart filters alone for all time', () => {
+    const trendOn = { enabled: true };
+    expect(trendLineSettingOf({ ...kpi({ data_range: dataRange('this_year'), trend_line: trendOn }), filters: [] })?.['filters']).toEqual([{ class_name: 'current_year', field }]);
+    expect(trendLineSettingOf(kpi({ data_range: dataRange('all_time'), trend_line: trendOn }))?.['filters']).toEqual([filter]);
   });
 
   it('has none without a trend line or a value', () => {
@@ -224,7 +240,7 @@ describe('a date column inside a nested column', () => {
     const xFunction = { class_name: 'group', field: nestedField, scalar_function: { class_name: 'to_month_num', inner_fn: firstElement } };
     expect(setting).toMatchObject({
       x_axis: { name: '`orders.created_at`', function: xFunction },
-      filters: [filter, { class_name: 'current_year', field: nestedField, scalar_function: firstElement }],
+      filters: [{ class_name: 'and', conditions: [filter, { class_name: 'current_year', field: nestedField, scalar_function: firstElement }] }],
       sorts: [{ class_name: 'order_by', function: xFunction, order: 'ASC' }]
     });
   });

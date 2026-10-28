@@ -268,6 +268,14 @@ const TREND_SCALARS: Readonly<Record<string, string>> = {
 export const TREND_BY_OPTIONS: readonly string[] = Object.keys(TREND_SCALARS);
 
 /**
+ * A setting's filters, each kept in the range. The server ORs a setting's filters (one per group of the Filters zone),
+ * so the range goes into each of them; on its own it would widen them.
+ */
+function inRange(filters: readonly unknown[], condition: JsonObject): unknown[] {
+  return filters.length === 0 ? [condition] : filters.map(filter => ({ class_name: 'and', conditions: [filter, condition] }));
+}
+
+/**
  * The trend line's series query (v1 `ComparisonUtils.buildTrendLineQuerySetting`): the value over time, in the range.
  * v1 dropped the chart's own filters; v2 keeps them. A date column inside a nested column is read by its first element
  * under the date function, as v1's builder does for zone items (`DiFunctionResolver`); v1's trend line didn't.
@@ -290,7 +298,7 @@ export function trendLineSettingOf(setting: JsonObject): JsonObject | undefined 
     class_name: 'series_chart_setting',
     x_axis: { name: asString(comparison.field['field_name']), function: xFunction },
     y_axis: [value],
-    filters: condition ? [...filters, condition] : filters,
+    filters: condition ? inRange(filters, condition) : filters,
     sorts: [{ class_name: 'order_by', function: xFunction, order: 'ASC' }],
     options: {}
   };
