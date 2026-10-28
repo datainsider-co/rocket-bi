@@ -515,6 +515,63 @@ Field formatting và Conditional formatting của table phẳng.
   - Icon là chữ trong React; v1 chèn emoji bằng HTML (có thể bị XSS từ setting).
   - Danh sách icon cho rule gồm icon của 6 style; v1 có khoảng 300 emoji.
 
+## Quyết định ở CB7b3 (2026-10-28)
+
+Collapse Table (v1 `ChartType.Table`, type `table`). Spec lấy từ v1 và kiểm bằng backend local.
+
+- **Phát hiện:**
+  - Query setting là `group_table_chart_setting`, viz options là `table_chart_setting`. Handler giống table phẳng: cột
+    số / aggregate có `is_calc_min_max`, `formatters: []` (v1 `TableQuerySettingHandler`).
+  - Zone Columns như Table, nhưng field mới mặc định group by text, Sum số, Year ngày (v1 `COLLAPSE_TABLE_CONFIGS`).
+  - Viz options mặc định khác table phẳng ở hai chỗ: title `Untitled chart`, header dùng secondary font (weight 400). v1
+    đang chạy gửi đúng như source.
+  - Response vẫn là `json_table_response`, nhưng key của header là hash (`960db2`), không phải vị trí cột. Mọi cột
+    group by chung một header (của cột đầu). Group tiếp theo nằm trong `children` của record, cấp cuối có
+    `children: []`. Có từ 2 cột group by thì label cột aggregate là `<name> by <cột group đầu>`. Giá trị là chuỗi
+    (`"3.433024325E7"`).
+  - Server phân trang và đếm `total` theo dòng cấp trên cùng; sort áp ở mọi cấp. `min_max_values` tính ở cấp cuối,
+    nên giá trị của dòng cha có thể vượt max.
+  - Không có dòng total: `isShowFooter` của v1 `DefaultTable` luôn false. Toggle Total và Header của đường ngang ở tab
+    Grid vì vậy vẫn không có tác dụng (một dòng header), nên không thêm.
+- **Fixture:**
+  - `collapse_table` trong `builderRequests.fixture.json`: region, country, Sum total_revenue, Sum units_sold, sort
+    theo region. Đây là body v1 gửi khi Add. Widget đã xoá khỏi dashboard 3 sau đó, nên `builder.fixture.json` không
+    đổi.
+  - `group_table_chart_setting` trong `queryResponses.fixture.json`: response thật của setting đó, giữ 2 nước mỗi
+    region.
+  - Builder v2 tạo cùng chart qua Playwright gửi body giống v1 (trừ id).
+- **Builder:**
+  - `ChartType.CollapseTable`, catalogue, handler `groupTable`, default options. Picker bật Collapse Table.
+  - Function convertor của Table áp cả cho Collapse Table (v1 dùng chung `TableFunctionConvertor`).
+- **Dọn options** (`core/chart-builder/optionCleanup.ts`, v1 `ChartOptionResolver`), reducer gọi trong `removeItem` và
+  `updateItem`:
+  - Xoá một cột khỏi Columns thì xoá `field_formatting` và `conditional_formatting` của cột đó (key `vizKey(name)`).
+  - Cột chuyển giữa nhóm và không nhóm thì xoá toàn bộ conditional formatting.
+  - Hiện chỉ Collapse Table có; Pivot Table thêm ở CB7b4.
+- **Renderer** (`charts/table/CollapseTable.tsx`, `collapseTable.utils.ts`):
+  - `CollapseTable` bọc `FlattenTableView` với prop `collapse`: tree rows của antd, expanded keys do `useRowExpansion`
+    giữ. Dữ liệu mới (trang khác, sort, refresh) thì đóng hết, như v1 dựng lại dòng.
+  - Toggle là ô vuông +/− của v1, màu theo `toggle_icon` (`--ft-toggle-bg`, `--ft-toggle-color`). Mỗi cấp thụt 12px.
+    Dòng đang mở in đậm. Màu chẵn / lẻ theo thứ tự các dòng đang hiện (v1 `getExpandedRows`).
+  - Header ↔ cột (`headerColumnOf`): table phẳng theo vị trí, collapse table theo tên. Tên cột là label, hoặc label
+    bắt đầu bằng `<name> by `; tên dài nhất thắng. Formatting, min / max và sort đều dùng tên cột.
+- **Tab Settings:**
+  - Bộ tab của table, thêm "Collapsed And Expanded" sau Values (màu nền và màu icon của toggle, Revert) khi có từ 2
+    cột group by (v1 `TableSetting.enableCollapseTab`).
+  - Field / Conditional formatting liệt kê các cột thành header: cột group by đầu và các cột aggregate khi có nhóm,
+    mọi cột khi không (v1 `TableSetting.columns`).
+  - Toggle bật / tắt title, display unit mặc định None, như table phẳng.
+- **Khác v1:**
+  - Bấm header để sort: v1 sort theo label. Label `<name> by ...` không khớp cột nào, nên table mất luôn sort đã lưu.
+    v2 sort theo tên cột.
+  - Formatting khớp đúng tên cột. v1 cắt label ở chữ `by` (kể cả trong tên, như "Baby") rồi khớp theo tiền tố.
+  - Chỉ dọn options khi xoá khỏi Columns và không còn cột cùng tên. v1 dọn cả khi bỏ một item của Sorting, làm mất
+    formatting của cột vẫn đang hiện.
+  - Thụt lề chỉ ở cột đầu; v1 thêm padding trái cho mọi ô của dòng con.
+  - Footer (số dòng, trang) luôn hiện như table phẳng của v2. v1 ẩn khi đã có đủ dòng và không quá 20.
+- **Chưa làm:** menu chuột phải trên ô (v1 `ClickDataPoint`, table phẳng cũng chưa có), Forecast / Summarize của
+  assistant.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
