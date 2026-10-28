@@ -572,6 +572,78 @@ Collapse Table (v1 `ChartType.Table`, type `table`). Spec lấy từ v1 và ki�
 - **Chưa làm:** menu chuột phải trên ô (v1 `ClickDataPoint`, table phẳng cũng chưa có), Forecast / Summarize của
   assistant.
 
+## Quyết định ở CB7b4 (2026-10-28)
+
+Pivot Table (v1 `ChartType.PivotTable`, type `pivot_table`). Spec lấy từ v1 và kiểm bằng backend local.
+
+- **Phát hiện:**
+  - Query setting là `pivot_table_chart_setting` gồm `columns`, `rows`, `values`, `formatters: []`; viz options cùng tên
+    class. Handler (v1 `PivotQuerySettingHandler`): dựng được khi có một zone bất kỳ; rows có
+    `is_calc_group_total: false`, values có `is_calc_min_max: true` với mọi kiểu.
+  - Zone theo v1 `PIVOT_TABLE_CONFIGS`: Columns và Rows (group by / date histogram, mặc định group by, ngày theo Year),
+    Values (aggregation, Sum số, Count all chữ và ngày), không giới hạn số item.
+  - Viz options mặc định là của collapse table thêm khối `total` (bật, nhãn `Total`, nền
+    `var(--total-background-color)`, căn phải). v1 đang chạy gửi đúng như source.
+  - v1 không có function convertor cho pivot. Dọn options (v1 `PivotTableChartOptionHandler`) chỉ khi xoá function.
+  - **Response** vẫn là `json_table_response`:
+    - Header đầu là row group đầu (`is_group_by`), key là hash.
+    - Không có columns: các header còn lại là `<value> by <row đầu>`, row group tiếp theo nằm trong `children` như
+      collapse table.
+    - Có columns: mỗi giá trị của columns là một header nhóm không có key, bên dưới là một header cho mỗi value (tên
+      value), hoặc chính giá trị đó khi chỉ có một value. Nhiều tầng columns thì nhiều tầng nhóm.
+    - Header lá có `total` (chuỗi số), là dòng total. Record còn chứa key tổng theo dòng không có header; bỏ qua.
+  - **Server lỗi 500 (`key not found`) khi có columns và từ 2 rows.** Vì vậy v1 chỉ gửi row đầu
+    (`getCurrentQuery`), còn dòng mở ra thì query riêng (`loadSubRows`): filter `equal` theo giá trị của dòng và các
+    dòng cha, `rows` là row tiếp theo đổi tên thành tên row đầu (để key header giữ nguyên), lấy hết dòng (`-1`).
+  - Display as column: dialog Config của v1 không có, và server tự đặt `is_horizontal_view` cho zone Columns. Với pivot
+    thì zone Columns chính là "display as column", nên v2 không làm (đóng ghi chú ở CB4).
+- **Fixture:**
+  - `pivot_table` trong `builderRequests.fixture.json`: columns sales_channel, rows region và country, values Sum
+    total_revenue và Sum units_sold, sort theo region. Đây là body v1 gửi khi Add. Widget (id 53) đã xoá khỏi dashboard
+    3 sau đó.
+  - `pivot_table_chart_setting` trong `queryResponses.fixture.json`: response thật của setting đó (row đầu), giữ 3
+    region.
+  - Builder v2 tạo cùng chart qua Playwright gửi body giống v1 (trừ id).
+- **Builder:** `ChartType.PivotTable`, catalogue, handler `pivot`, default options. Picker bật Pivot Table (loại disabled
+  kế tiếp là Area Range). Dọn options mở rộng cho nhiều zone: pivot dọn khi xoá khỏi Rows hoặc Values, trừ khi zone còn
+  lại có cột cùng tên.
+- **Query** (`core/query/pivotQuery.ts`):
+  - `toQueryRequestJson` chỉ gửi row đầu khi có columns, nên dashboard, preview và export đều đi qua.
+  - `pivotSubRowSetting` dựng query cho dòng con. `useSubRowQuery` (chart-data) gắn filter request, tham số và View As
+    của chart; `useChartWidget` và preview truyền nó qua `TablePaging.subRows`.
+  - `applyTableSort` tìm cột cả trong `rows` và `values`.
+- **Renderer** (`charts/table/PivotTable.tsx`, `pivotTable.utils.ts`, `usePivotRows.ts`), bọc `FlattenTableView`:
+  - Header nhiều tầng là cột nhóm của antd; nhóm không có key nên được đặt key theo vị trí. Cả `thead` dính khi cuộn.
+  - Dòng: không có columns thì lồng sẵn như collapse table; có columns thì dòng (trừ row cuối) có toggle, mở ra thì
+    query dòng con bằng `useQueries` (cache theo path). `useRowExpansion` nay giữ path của mỗi dòng mở.
+  - Dòng total (antd `summary`, dính đáy): khi có rows, `total.enabled` khác false và có cột có total. Nhãn dưới header
+    row, total dưới cột của nó, định dạng như cột.
+  - Formatting theo tên cột: header row → row đầu; có columns với một value → value đó; có columns → tên value; không có
+    columns → `<value> by ...`. Min / max theo tên value.
+  - Sort: không có columns thì mọi header (row và value, theo tên cột như collapse table); có columns thì chỉ header row.
+  - Cột rộng theo nội dung, cuộn ngang (`scroll.x`), vì pivot có thể nhiều cột. Không có rows thì không phân trang.
+  - Style thêm: đường ngang giữa các tầng header, đường dọc / ngang của dòng total, màu / font / cỡ / nền của total.
+    Dòng cuối của body giữ đường kẻ khi có dòng total (v1 `hide-footer`).
+- **Tab Settings** (v1 `PivotSetting`): bộ tab của table, thêm Total (bật / tắt, nhãn, font, màu, cỡ, căn lề, nền,
+  Revert) sau Collapsed And Expanded. Collapsed And Expanded hiện khi có từ 2 rows. Grid có thêm Header (ngang) và
+  Total (dọc, ngang). Field formatting liệt kê row đầu và các value; Conditional formatting như vậy khi không có
+  columns, chỉ các value khi có columns.
+- **Khác v1:**
+  - Dòng con: v1 thêm điều kiện thành một nhóm OR mới trong `filters` (server OR các nhóm), nên chart có filter lấy cả
+    dòng của cha khác. v2 `and` điều kiện với filter của chart.
+  - Sort theo value khi không có columns (v1 sort theo label `<value> by ...`, không khớp cột nào). Có columns thì header
+    value không sort được (v1 hiện như sort được nhưng không có tác dụng).
+  - Căn lề của total áp cho các ô total; nhãn luôn bên trái. Ở v1 cột đầu bị ghim (`text-align: left !important`) nên
+    thực tế cũng vậy.
+  - Không hiện dòng total khi không cột nào có total (ví dụ không có values); v1 hiện dòng chỉ có nhãn.
+  - Style ghi `total.*` của theme chỉ cho pivot, và không ghi `total.enabled` (style không bật / tắt total). v1 ghi cho
+    mọi table.
+  - Conditional formatting tính ở client từ giá trị ô và min / max theo value, như CB7b2; không gửi `formatters`, nên
+    "Format by field value" và "Based on field" khác vẫn không có.
+  - Footer (số dòng, trang) luôn hiện khi có rows, như table phẳng.
+- **Chưa làm:** ghim cột đầu khi cuộn ngang (v1 `pinned`), menu chuột phải trên ô, Forecast / Summarize, Flatten
+  Pivot Table (v1 ẩn khỏi picker), conditional formatting cho dòng total (`applyTo` values and totals).
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
