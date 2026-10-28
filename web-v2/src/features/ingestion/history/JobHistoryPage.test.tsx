@@ -6,7 +6,7 @@ import { jobHistoryFromJson, type JobHistory } from '@/core/ingestion/JobHistory
 import type { JobHistoryService } from '@/core/ingestion/JobHistoryService';
 import type { ListingPage } from '@/core/listing/Listing';
 import { formatDateTime } from '../listing/listing.utils';
-import { renderIngestionPage } from '../renderIngestionPage';
+import { findDialog, renderIngestionPage } from '../renderIngestionPage';
 import { fakeJobHistoryService } from '../testing';
 import { JobHistoryPage } from './JobHistoryPage';
 
@@ -124,10 +124,13 @@ describe('JobHistoryPage', () => {
     expect(vi.mocked(service.list).mock.calls[1]?.[0]).toEqual(vi.mocked(service.list).mock.calls[0]?.[0]);
   });
 
-  it('shows No data yet without runs', async () => {
+  it('shows No data yet without runs, with a link to add a job', async () => {
     renderPage(serviceWith({ total: 0, data: [] }));
     expect(await screen.findByText('No data yet')).toBeInTheDocument();
-    expect(screen.queryByText(/Click here/)).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Click here' }));
+
+    expect(await findDialog('Add Job')).toBeInTheDocument();
   });
 
   it('says when a search matches nothing', async () => {

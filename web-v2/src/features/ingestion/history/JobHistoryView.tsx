@@ -17,10 +17,11 @@ interface JobHistoryViewProps {
   isFetching: boolean;
   /** Refresh in the header, and Retry after an error. */
   onReload: () => void;
+  onAddJob: () => void;
 }
 
 /** Job History: header with search and Refresh, then the runs, the error or the empty state. */
-export function JobHistoryView({ searchText, onSearchChange, content, table, isFetching, onReload }: JobHistoryViewProps) {
+export function JobHistoryView({ searchText, onSearchChange, content, table, isFetching, onReload, onAddJob }: JobHistoryViewProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <IngestionPageHeader
@@ -55,7 +56,7 @@ export function JobHistoryView({ searchText, onSearchChange, content, table, isF
             }
           />
         )}
-        {content.kind === 'empty' && <HistoryEmptyState isSearching={content.isSearching} />}
+        {content.kind === 'empty' && <HistoryEmptyState isSearching={content.isSearching} onAddJob={onAddJob} />}
         {content.kind === 'table' && <JobHistoryTable {...table} />}
       </div>
     </div>
