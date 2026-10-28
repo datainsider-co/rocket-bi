@@ -7,6 +7,7 @@ import { defaultVizOptions, vizOptionsForType } from '@/core/chart-builder/defau
 import { convertRowMode } from '@/core/chart-builder/functionConvertor';
 import { SortType, type FunctionData } from '@/core/chart-builder/FunctionData';
 import { isSameFieldKind } from '@/core/chart-builder/functions';
+import { optionsAfterConvert, optionsAfterRemove } from '@/core/chart-builder/optionCleanup';
 import { buildSetting } from '@/core/chart-builder/querySetting';
 import { applyVizChanges, type VizChanges } from '@/core/chart-builder/vizChanges';
 import { applyDrop, type DropAction } from '@/shared/field-dnd/fieldDnd.utils';
@@ -161,13 +162,18 @@ function updateItem(state: BuilderState, zone: string, item: FunctionData): Buil
   const previous = items.find(current => current.id === item.id);
   if (!previous) return state;
   const updated = { ...configs, [zone]: items.map(current => (current.id === item.id ? item : current)) };
-  return withConfigs(state, convertRowMode(chartType, zone, updated, item, previous));
+  const converted = convertRowMode(chartType, zone, updated, item, previous);
+  const options = converted === updated ? state.options : optionsAfterConvert(chartType, state.options);
+  return withConfigs({ ...state, options }, converted);
 }
 
+/** The item leaves its zone, and the options what belonged to it (v1 `ConfigBuilderStore.onFunctionRemoved`). */
 function removeItem(state: BuilderState, zone: string, id: number): BuilderState {
   const items = state.data.configs[zone];
-  if (!items?.some(item => item.id === id)) return state;
-  return withConfigs(state, { ...state.data.configs, [zone]: items.filter(item => item.id !== id) });
+  const removed = items?.find(item => item.id === id);
+  if (!items || !removed) return state;
+  const configs = { ...state.data.configs, [zone]: items.filter(item => item.id !== id) };
+  return withConfigs({ ...state, options: optionsAfterRemove(state.data.chartType, zone, state.options, removed, configs) }, configs);
 }
 
 /**

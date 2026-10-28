@@ -40,18 +40,24 @@ const number: SettingBuilder = {
 
 const AGGREGATE_FUNCTIONS = new Set(['avg', 'sum', 'max', 'min', 'count', 'count_distinct', 'select_expression']);
 
-/** Number and aggregated columns get their min and max (v1 `FlattenTableQuerySettingHandler.forceTurnOnCalcMinMax`). */
+/** Number and aggregated columns get their min and max (v1 `forceTurnOnCalcMinMax` of both table handlers). */
 function withMinMax(column: JsonObject): JsonObject {
   const func = asRecord(column['function']);
   const isNumber = isNumberType(asString(asRecord(func['field'])['field_type']));
   return AGGREGATE_FUNCTIONS.has(asString(func['class_name'])) || isNumber ? { ...column, is_calc_min_max: true } : column;
 }
 
-const table: SettingBuilder = {
-  className: 'table_chart_setting',
+/** Tables list their columns, number and aggregated ones with min / max (v1 `FlattenTableQuerySettingHandler`, `TableQuerySettingHandler`). */
+const tableOf = (className: string): SettingBuilder => ({
+  className,
   canBuild: configs => filled(configs, 'columns'),
   build: configs => ({ columns: columns(configs, 'columns').map(withMinMax), formatters: [] })
-};
+});
+
+const table = tableOf('table_chart_setting');
+
+/** The collapse table: the same columns; the server nests the rows by its group by columns. */
+const groupTable = tableOf('group_table_chart_setting');
 
 /** Tab, choice, dropdown and tree filters, and inner filters (v1 `TabFilterQuerySettingHandler`, `TreeFilterQuerySettingHandler`). */
 const tabControl: SettingBuilder = {
@@ -108,6 +114,7 @@ const BUILDERS: Readonly<Record<ChartType, SettingBuilder>> = {
   [T.Donut]: pie,
   [T.Number]: number,
   [T.Table]: table,
+  [T.CollapseTable]: groupTable,
   [T.TabFilter]: tabControl,
   [T.SingleChoice]: tabControl,
   [T.MultiChoice]: tabControl,

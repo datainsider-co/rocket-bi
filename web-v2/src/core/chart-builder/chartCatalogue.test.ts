@@ -63,6 +63,9 @@ describe('defaultFunctionOf', () => {
     [ChartType.Column, 'y_axis', 'double', 'Aggregation', 'Sum'],
     [ChartType.Column, 'y_axis', 'string', 'Aggregation', 'Count all'],
     [ChartType.Table, 'columns', 'int32', 'None', ''],
+    [ChartType.CollapseTable, 'columns', 'string', 'Group By', ''],
+    [ChartType.CollapseTable, 'columns', 'double', 'Aggregation', 'Sum'],
+    [ChartType.CollapseTable, 'columns', 'datetime', 'Date histogram', 'Year'],
     [ChartType.TabFilter, 'values', 'int64', 'Aggregation', 'Sum'],
     [ChartType.SlicerFilter, 'value', 'int32', 'None', '']
   ])('%s %s starts a %s column as %s %s', (chartType, key, type, family, functionType) => {
@@ -132,7 +135,8 @@ describe('pickerItemsOf', () => {
     const items = pickerItemsOf(ChartKind.Chart);
     expect(items).toHaveLength(39 + 9);
     expect(items[0]).toEqual({ type: 'flatten_table', title: 'Table', icon: 'ic_table.svg', buildable: true });
-    expect(items[1]).toEqual({ type: 'table', title: 'Collapse Table', icon: 'ic_collapse_table.svg', buildable: false });
+    expect(items[1]).toEqual({ type: 'table', title: 'Collapse Table', icon: 'ic_collapse_table.svg', buildable: true });
+    expect(items[2]).toMatchObject({ type: 'pivot_table', buildable: false });
     expect(items.at(-1)).toMatchObject({ type: 'multi_tree_filter', buildable: true });
     expect(items.filter(item => item.buildable)).toHaveLength(CHART_TYPES.length - 2);
   });

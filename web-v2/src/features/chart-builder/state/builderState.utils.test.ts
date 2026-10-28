@@ -156,6 +156,21 @@ describe('updateItem and removeItem', () => {
     expect(items(grouped, 'columns').map(item => item.functionFamily)).toEqual(['Group By', 'Group By']);
   });
 
+  it("drops a removed collapse table column's formatting, and all conditional formatting when the columns stop grouping", () => {
+    const formatted = (state: BuilderState) =>
+      ({ ...state, options: applyVizChanges(state.options, { 'fieldFormatting.totalRevenue.precision': 3, 'conditionalFormatting.totalRevenue.dataBar.enabled': true }) });
+    const table = formatted(run(newBuilderState(ChartType.CollapseTable), insert('columns', region), insert('columns', revenue, 1)));
+    const removed = run(table, { type: 'removeItem', zone: 'columns', id: 2 });
+    expect(asRecord(removed.options['options'])).not.toHaveProperty('field_formatting.total_revenue');
+    expect(asRecord(removed.options['options'])).not.toHaveProperty('conditional_formatting.total_revenue');
+    expect(removed.latest?.options).toBe(removed.options);
+    const [first] = items(table, 'columns');
+    if (!first) throw new Error('no item');
+    const listed = run(table, { type: 'updateItem', zone: 'columns', item: { ...first, functionFamily: 'None' } });
+    expect(asRecord(listed.options['options'])).not.toHaveProperty('conditional_formatting');
+    expect(asRecord(listed.options['options'])).toHaveProperty('field_formatting.total_revenue.precision', 3);
+  });
+
   it('removes an item, and does nothing for an unknown one', () => {
     const state = column();
     expect(items(run(state, { type: 'removeItem', zone: 'x_axis', id: 1 }), 'x_axis')).toEqual([]);

@@ -57,6 +57,8 @@ const seriesZones = (xTitle = 'X-Axis', yTitle = 'Y-Axis'): ZoneConfig[] => [
 const PIE_ZONES = [groupZone('legend', 'Legend'), aggregationZone('value', 'Value', { maxItems: 1 })];
 const NUMBER_ZONES = [aggregationZone('value', 'Value', { maxItems: 1 })];
 const TABLE_ZONES = [zone('columns', 'Columns', [F.GroupBy, F.DateHistogram, F.Aggregation, F.None], NONE_DEFAULTS)];
+/** v1 `COLLAPSE_TABLE_CONFIGS`: the same zone, grouping text and dates and summing numbers by default. */
+const COLLAPSE_TABLE_ZONES = [zone('columns', 'Columns', [F.GroupBy, F.DateHistogram, F.Aggregation, F.None], { text: groupBy, number: sum, date: byYear })];
 /** v1 `DROP_DOWN_CONFIGS`, for tab, choice, dropdown and tree filters. */
 const VALUES_ZONES = [zone('values', 'Values', [F.GroupBy, F.Aggregation, F.DateHistogram], { text: groupBy, number: sum, date: byYear })];
 /** v1 `VALUE_FILTER_CONFIGS`, for slicer, date select and input filters. */
@@ -98,6 +100,7 @@ const filter = (type: ChartType, title: string, icon: string, zones: readonly Zo
 /** The chart types v2 builds, in v1's picker order (v1 `ALL_CHARTS`, `ALL_FILTERS`, `ALL_INNER_FILTERS`). */
 export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.Table, 'Table', 'ic_table.svg', TABLE_ZONES),
+  chart(T.CollapseTable, 'Collapse Table', 'ic_collapse_table.svg', COLLAPSE_TABLE_ZONES),
   chart(T.Number, 'Number', 'ic_number.svg', NUMBER_ZONES),
   chart(T.Line, 'Line', 'ic_line_chart.svg', seriesZones()),
   chart(T.Spline, 'Spline', 'ic_line_chart.svg', seriesZones()),
@@ -130,7 +133,6 @@ export function chartTypeInfoOf(chartType: string): ChartTypeInfo | undefined {
 
 /** v1's icons (`ALL_ICON_MAP`) for the chart types v2 doesn't build yet, which dashboards still hold. */
 const OTHER_ICONS: Readonly<Record<string, string>> = {
-  table: 'ic_collapse_table.svg',
   pivot_table: 'ic_pivot_table.svg',
   flatten_pivot_table: 'ic_pivot_table.svg',
   arearange: 'ic_chart_area.svg',
@@ -171,7 +173,7 @@ export interface PickerItem {
 /** v1 `ALL_CHARTS` without its hidden items, in its order, by type and title. */
 const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   [T.Table, 'Table'],
-  ['table', 'Collapse Table'],
+  [T.CollapseTable, 'Collapse Table'],
   ['pivot_table', 'Pivot Table'],
   [T.Number, 'Number'],
   [T.Line, 'Line'],

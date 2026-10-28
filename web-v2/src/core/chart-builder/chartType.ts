@@ -4,6 +4,8 @@
  */
 export const ChartType = {
   Table: 'flatten_table',
+  /** v1's "Collapse Table": rows grouped by the first group by column, its groups expanding into the next. */
+  CollapseTable: 'table',
   Number: 'kpi',
   Line: 'line',
   Spline: 'spline',

@@ -39,6 +39,16 @@ describe('convertRowMode', () => {
     ]);
   });
 
+  it('converts the collapse table the same way', () => {
+    const before = item(1, 'Group By');
+    const updated = { ...before, functionFamily: 'None' };
+    const configs = { columns: [updated, item(2, 'Aggregation', 'double')] };
+    expect(families(convertRowMode(ChartType.CollapseTable, 'columns', configs, updated, before))['columns']).toEqual([
+      ['None', ''],
+      ['None', '']
+    ]);
+  });
+
   it('changes nothing when the column stays in the same mode, in another zone or another chart type', () => {
     const before = item(1, 'Group By');
     const updated = { ...before, functionFamily: 'Aggregation' };

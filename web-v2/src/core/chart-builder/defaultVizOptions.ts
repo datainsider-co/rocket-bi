@@ -167,9 +167,9 @@ const number = () => ({
 
 const gridLine = (applied: boolean) => ({ color: TABLE_GRID_LINE_COLOR, thickness: '1px', applyBody: applied, applyHeader: applied, applyTotal: applied });
 
-/** v1 `FlattenTableChartOption.getDefaultChartOption`. */
-const table = () => ({
-  title: title({ text: 'Untitled Chart' }),
+/** What both tables start with (v1 `FlattenTableChartOption` and `TableChartOption`). */
+const tableBase = () => ({
+  title: title(),
   subtitle: subtitle(),
   grid: { horizontal: { ...gridLine(true), rowPadding: '0px' }, vertical: gridLine(false) },
   affectedByFilter: true,
@@ -194,6 +194,21 @@ const table = () => ({
   toggleIcon: { color: TEXT_COLOR, backgroundColor: 'var(--toggle-color)' },
   background: BACKGROUND
 });
+
+/** v1 `FlattenTableChartOption.getDefaultChartOption`. */
+const table = () => ({
+  ...tableBase(),
+  title: title({ text: 'Untitled Chart' })
+});
+
+/**
+ * v1 `TableChartOption.getDefaultChartOption`, the collapse table's: like the flatten table's, with the default title
+ * text and its header in the secondary font.
+ */
+const collapseTable = () => {
+  const base = tableBase();
+  return { ...base, header: { ...base.header, style: { ...secondaryStyle(), color: TEXT_COLOR, isWordWrap: false, fontSize: '12px' } } };
+};
 
 const noDefault = { enabled: true, setting: { value: null } };
 
@@ -304,6 +319,7 @@ const DEFAULTS: Readonly<Record<ChartType, Defaults>> = {
   [T.Donut]: { className: 'donut_chart_setting', options: donut },
   [T.Number]: { className: 'number_chart_setting', options: number },
   [T.Table]: { className: 'flatten_table_setting', options: table },
+  [T.CollapseTable]: { className: 'table_chart_setting', options: collapseTable },
   [T.TabFilter]: { className: 'tab_filter_chart_setting', options: () => tabFilter('normal') },
   [T.SingleChoice]: { className: 'tab_filter_chart_setting', options: () => tabFilter('single_choice') },
   [T.MultiChoice]: { className: 'tab_filter_chart_setting', options: () => tabFilter('multi_choice') },
