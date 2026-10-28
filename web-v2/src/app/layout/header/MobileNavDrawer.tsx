@@ -1,7 +1,8 @@
 import { ConfigProvider, Drawer, Menu } from 'antd';
 import { Link } from 'react-router';
 import { CompanyBrand } from './CompanyBrand';
-import { HEADER_NAV_ITEMS, activeNavKeys } from './header.utils';
+import { activeNavKeys } from './header.utils';
+import type { HeaderNavItem } from './header.utils';
 import type { HeaderAccount, HeaderBrand, HeaderTheme } from './header.types';
 import { handleSettingsClick, linkMenuItems, settingsMenuItems } from './headerMenuItems';
 import type { MenuItems } from './headerMenuItems';
@@ -12,6 +13,7 @@ interface MobileNavDrawerProps {
   open: boolean;
   onClose: () => void;
   brand: HeaderBrand;
+  navItems: readonly HeaderNavItem[];
   pathname: string;
   account: HeaderAccount;
   theme: HeaderTheme;
@@ -35,9 +37,9 @@ const MENU_THEME = {
 };
 
 /** v1's menu below `sm`: the header entries in a drawer from the left, groups expand in place. */
-export function MobileNavDrawer({ open, onClose, brand, pathname, account, theme }: MobileNavDrawerProps) {
+export function MobileNavDrawer({ open, onClose, brand, navItems, pathname, account, theme }: MobileNavDrawerProps) {
   const items: MenuItems = [
-    ...HEADER_NAV_ITEMS.map(item =>
+    ...navItems.map(item =>
       item.children
         ? { key: item.key, icon: NAV_ICONS[item.key], label: item.label, children: linkMenuItems(item.children) }
         : { key: item.key, icon: NAV_ICONS[item.key], label: <Link to={item.to}>{item.label}</Link> }
@@ -63,7 +65,7 @@ export function MobileNavDrawer({ open, onClose, brand, pathname, account, theme
           theme="dark"
           mode="inline"
           items={items}
-          selectedKeys={activeNavKeys(pathname, HEADER_NAV_ITEMS)}
+          selectedKeys={activeNavKeys(pathname, navItems)}
           onClick={({ key }) => {
             handleSettingsClick(key, account, theme);
             onClose();

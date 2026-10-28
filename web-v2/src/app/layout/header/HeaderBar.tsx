@@ -1,9 +1,12 @@
 import { useLocation } from 'react-router';
+import { featureFlags } from '@/app/featureFlags';
 import { useTheme } from '@/app/theme/ThemeContext';
 import { useCurrentUser } from '@/features/auth/current-user/useCurrentUser';
 import { useLogout } from '@/features/auth/current-user/useLogout';
 import { HeaderBarView } from './HeaderBarView';
-import { brandName } from './header.utils';
+import { brandName, headerNavItems } from './header.utils';
+
+const NAV_ITEMS = headerNavItems(featureFlags);
 
 export function HeaderBar() {
   const { data } = useCurrentUser();
@@ -15,6 +18,7 @@ export function HeaderBar() {
   return (
     <HeaderBarView
       brand={{ name: brandName(organization?.name ?? ''), logoUrl: organization?.thumbnailUrl ?? '' }}
+      navItems={NAV_ITEMS}
       pathname={pathname}
       account={{
         displayName: data?.userProfile.displayName ?? '',

@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_BRAND_NAME, activeLinkKeys, activeNavKeys, avatarInitial, brandName, isPathActive } from './header.utils';
+import {
+  DEFAULT_BRAND_NAME,
+  activeLinkKeys,
+  activeNavKeys,
+  avatarInitial,
+  brandName,
+  headerNavItems,
+  isPathActive
+} from './header.utils';
 import type { HeaderLink, HeaderNavItem } from './header.utils';
 
 describe('isPathActive', () => {
@@ -79,5 +87,19 @@ describe('activeNavKeys', () => {
 
   it('selects nothing elsewhere', () => {
     expect(activeNavKeys('/', items)).toEqual([]);
+  });
+});
+
+describe('headerNavItems', () => {
+  it('lists Dashboards and Data Warehouse', () => {
+    expect(headerNavItems({ ingestion: false }).map(item => item.key)).toEqual(['dashboards', 'data-warehouse']);
+  });
+
+  it('adds Data Ingestion last when its flag is on', () => {
+    expect(headerNavItems({ ingestion: true }).map(item => item.key)).toEqual([
+      'dashboards',
+      'data-warehouse',
+      'data-ingestion'
+    ]);
   });
 });
