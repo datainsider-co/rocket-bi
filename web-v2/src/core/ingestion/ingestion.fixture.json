@@ -1,0 +1,972 @@
+{
+  "_comment": "DI0 (2026-10-29): real requests and responses from the local docker backend. Passwords replaced by <password>.",
+  "sourceTest": {
+    "method": "POST",
+    "path": "source/test",
+    "request": {
+      "class_name": "jdbc_source",
+      "id": -1,
+      "org_id": "0",
+      "database_type": "MySql",
+      "display_name": "DI0 MySQL",
+      "jdbc_url": "jdbc:mysql://rocket-bi-mysql:3306",
+      "username": "root",
+      "password": "<password>",
+      "last_modify": 0
+    },
+    "response": {
+      "success": true
+    }
+  },
+  "sourceTestFailed": {
+    "method": "POST",
+    "path": "source/test",
+    "request": {
+      "class_name": "jdbc_source",
+      "id": -1,
+      "org_id": "0",
+      "database_type": "Postgres",
+      "display_name": "DI0 throwaway",
+      "jdbc_url": "jdbc:postgresql://nowhere:5432/x",
+      "username": "u",
+      "password": "<password>",
+      "last_modify": 0
+    },
+    "response": {
+      "code": 400,
+      "reason": "bad_request",
+      "message": "unable to connect to data source: org.postgresql.util.PSQLException: The connection attempt failed."
+    }
+  },
+  "sourceCreate": {
+    "method": "POST",
+    "path": "source/create",
+    "request": {
+      "data_source": {
+        "class_name": "jdbc_source",
+        "id": -1,
+        "org_id": "0",
+        "database_type": "MySql",
+        "display_name": "DI0 MySQL",
+        "jdbc_url": "jdbc:mysql://rocket-bi-mysql:3306",
+        "username": "root",
+        "password": "<password>",
+        "last_modify": 0
+      }
+    },
+    "response": {
+      "class_name": "jdbc_source",
+      "org_id": 0,
+      "id": 1,
+      "display_name": "DI0 MySQL",
+      "database_type": "MySql",
+      "jdbc_url": "jdbc:mysql://rocket-bi-mysql:3306",
+      "username": "root",
+      "password": "<password>",
+      "creator_id": "root",
+      "last_modify": 1793208012201
+    }
+  },
+  "sourceGet": {
+    "method": "GET",
+    "path": "source/1",
+    "response": {
+      "class_name": "jdbc_source",
+      "org_id": 0,
+      "id": 1,
+      "display_name": "DI0 MySQL",
+      "database_type": "MySql",
+      "jdbc_url": "jdbc:mysql://rocket-bi-mysql:3306",
+      "username": "root",
+      "password": "<password>",
+      "creator_id": "root",
+      "last_modify": 1793208012201
+    }
+  },
+  "sourceUpdate": {
+    "method": "PUT",
+    "path": "source/1",
+    "request": {
+      "data_source": {
+        "class_name": "jdbc_source",
+        "org_id": 0,
+        "id": 1,
+        "display_name": "DI0 MySQL (edited)",
+        "database_type": "MySql",
+        "jdbc_url": "jdbc:mysql://rocket-bi-mysql:3306",
+        "username": "root",
+        "password": "<password>",
+        "creator_id": "root",
+        "last_modify": 1793208012201
+      }
+    },
+    "response": {
+      "success": true
+    }
+  },
+  "sourceList": {
+    "method": "POST",
+    "path": "source/list",
+    "request": {
+      "from": 0,
+      "size": 10
+    },
+    "response": {
+      "data": [
+        {
+          "data_source": {
+            "class_name": "jdbc_source",
+            "org_id": 0,
+            "id": 1,
+            "display_name": "DI0 MySQL",
+            "database_type": "MySql",
+            "jdbc_url": "jdbc:mysql://rocket-bi-mysql:3306",
+            "username": "root",
+            "password": "<password>",
+            "creator_id": "root",
+            "last_modify": 1793208012201
+          },
+          "creator": {
+            "username": "root",
+            "full_name": "root",
+            "gender": 0
+          }
+        }
+      ],
+      "total": 1
+    }
+  },
+  "sourceDatabases": {
+    "method": "POST",
+    "path": "source/1/database",
+    "request": {
+      "extra_data": "{\"projectName\":\"\",\"location\":\"\"}"
+    },
+    "response": [
+      "information_schema",
+      "bi_service_schema",
+      "caas",
+      "di_schema",
+      "etl",
+      "ingestion_schema",
+      "job_scheduler_schema",
+      "mysql",
+      "performance_schema",
+      "sample_v2",
+      "sys"
+    ]
+  },
+  "sourceTables": {
+    "method": "POST",
+    "path": "source/table",
+    "request": {
+      "source_id": 1,
+      "database_name": "caas",
+      "extra_data": "{\"projectName\":\"\",\"location\":\"\"}"
+    },
+    "response": [
+      "api_key",
+      "login_method_provider",
+      "organization",
+      "organization_members",
+      "role",
+      "role_permissions",
+      "user",
+      "user_permissions",
+      "user_profile",
+      "user_roles"
+    ]
+  },
+  "sourceColumns": {
+    "method": "POST",
+    "path": "source/column",
+    "request": {
+      "source_id": 1,
+      "database_name": "caas",
+      "table_name": "user",
+      "extra_data": "{\"projectName\":\"\",\"location\":\"\"}"
+    },
+    "response": [
+      "organization_id",
+      "username",
+      "password",
+      "is_active",
+      "created_time",
+      "user_type"
+    ]
+  },
+  "sourceMultiDelete": {
+    "method": "DELETE",
+    "path": "source/multi_delete",
+    "request": {
+      "ids": [
+        2
+      ]
+    },
+    "response": {
+      "success": true
+    }
+  },
+  "jobCreate": {
+    "method": "POST",
+    "path": "job/create",
+    "request": {
+      "job": {
+        "class_name": "jdbc_job",
+        "job_id": -1,
+        "org_id": "-1",
+        "job_type": "Jdbc",
+        "display_name": "DI0 sales",
+        "source_id": 1,
+        "sync_mode": "FullSync",
+        "last_successful_sync": 0,
+        "sync_interval_in_mn": 60,
+        "schedule_time": {
+          "class_name": "schedule_once",
+          "start_time": 1793208055000
+        },
+        "next_run_time": 0,
+        "last_sync_status": "Initialized",
+        "current_sync_status": "Initialized",
+        "database_name": "sample_v2",
+        "table_name": "sales",
+        "dest_database_name": "di0_ingest",
+        "dest_table_name": "sales",
+        "destinations": [
+          "Clickhouse"
+        ],
+        "max_fetch_size": 0,
+        "last_synced_value": "0"
+      }
+    },
+    "response": {
+      "job": {
+        "class_name": "jdbc_job",
+        "org_id": 0,
+        "job_id": 1,
+        "display_name": "DI0 sales",
+        "job_type": "Jdbc",
+        "creator_id": "root",
+        "last_modified": 1793208055825,
+        "sync_mode": "FullSync",
+        "source_id": 1,
+        "last_successful_sync": 0,
+        "sync_interval_in_mn": 60,
+        "next_run_time": 1793208055000,
+        "last_sync_status": "Initialized",
+        "current_sync_status": "Initialized",
+        "schedule_time": {
+          "class_name": "schedule_once",
+          "start_time": 1793208055000
+        },
+        "dest_database_name": "di0_ingest",
+        "dest_table_name": "sales",
+        "destinations": [
+          "Clickhouse"
+        ],
+        "database_name": "sample_v2",
+        "table_name": "sales",
+        "query_statement": null,
+        "incremental_column": null,
+        "last_synced_value": "0",
+        "max_fetch_size": 0
+      },
+      "source": {
+        "class_name": "jdbc_source",
+        "org_id": 0,
+        "id": 1,
+        "display_name": "DI0 MySQL",
+        "database_type": "MySql",
+        "jdbc_url": "jdbc:mysql://rocket-bi-mysql:3306",
+        "username": "root",
+        "password": "<password>",
+        "creator_id": "root",
+        "last_modify": 1793208012201
+      },
+      "creator": {
+        "username": "root",
+        "full_name": "root",
+        "gender": 0
+      }
+    }
+  },
+  "jobMultiCreate": {
+    "method": "POST",
+    "path": "job/multi_create",
+    "request": {
+      "base_job": {
+        "class_name": "jdbc_job",
+        "job_id": -1,
+        "org_id": "-1",
+        "job_type": "Jdbc",
+        "display_name": "DI0 multi",
+        "source_id": 1,
+        "sync_mode": "FullSync",
+        "last_successful_sync": 0,
+        "sync_interval_in_mn": 60,
+        "schedule_time": {
+          "class_name": "schedule_daily",
+          "recur_every": 1,
+          "start_time": 1793208077000
+        },
+        "next_run_time": 0,
+        "last_sync_status": "Initialized",
+        "current_sync_status": "Initialized",
+        "database_name": "caas",
+        "table_name": "",
+        "dest_database_name": "di0_multi",
+        "dest_table_name": "",
+        "destinations": [
+          "Clickhouse"
+        ],
+        "max_fetch_size": 0,
+        "last_synced_value": "0"
+      },
+      "table_names": [
+        "organization",
+        "role"
+      ]
+    },
+    "response": true
+  },
+  "jobList": {
+    "method": "POST",
+    "path": "job/list",
+    "request": {
+      "from": 0,
+      "size": 10
+    },
+    "response": {
+      "data": [
+        {
+          "job": {
+            "class_name": "jdbc_job",
+            "org_id": 0,
+            "job_id": 1,
+            "display_name": "DI0 sales",
+            "job_type": "Jdbc",
+            "creator_id": "root",
+            "last_modified": 1793208071793,
+            "sync_mode": "FullSync",
+            "source_id": 1,
+            "last_successful_sync": 1793208071771,
+            "sync_interval_in_mn": 60,
+            "next_run_time": 99999999999999,
+            "last_sync_status": "Synced",
+            "current_sync_status": "Synced",
+            "schedule_time": {
+              "class_name": "schedule_once",
+              "start_time": 1793208055000
+            },
+            "dest_database_name": "di0_ingest",
+            "dest_table_name": "sales",
+            "destinations": [
+              "Clickhouse"
+            ],
+            "database_name": "sample_v2",
+            "table_name": "sales",
+            "query_statement": null,
+            "incremental_column": null,
+            "last_synced_value": "1000",
+            "max_fetch_size": 0
+          },
+          "source": {
+            "class_name": "jdbc_source",
+            "org_id": 0,
+            "id": 1,
+            "display_name": "DI0 MySQL",
+            "database_type": "MySql",
+            "jdbc_url": "jdbc:mysql://rocket-bi-mysql:3306",
+            "username": "root",
+            "password": "<password>",
+            "creator_id": "root",
+            "last_modify": 1793208012201
+          },
+          "creator": {
+            "username": "root",
+            "full_name": "root",
+            "gender": 0
+          }
+        },
+        {
+          "job": {
+            "class_name": "jdbc_job",
+            "org_id": 0,
+            "job_id": 2,
+            "display_name": "DI0 multi (database: caas, table: organization)",
+            "job_type": "Jdbc",
+            "creator_id": "root",
+            "last_modified": 1793208133166,
+            "sync_mode": "FullSync",
+            "source_id": 1,
+            "last_successful_sync": 0,
+            "sync_interval_in_mn": 60,
+            "next_run_time": 1893463200165,
+            "last_sync_status": "Initialized",
+            "current_sync_status": "Initialized",
+            "schedule_time": {
+              "class_name": "schedule_monthly",
+              "recur_on_days": [
+                1,
+                15
+              ],
+              "recur_every_month": 1,
+              "at_hour": 2,
+              "at_minute": 0,
+              "at_second": 0,
+              "start_time": 1893456000000
+            },
+            "dest_database_name": "di0_multi",
+            "dest_table_name": "organization",
+            "destinations": [
+              "Clickhouse"
+            ],
+            "database_name": "caas",
+            "table_name": "organization",
+            "query_statement": null,
+            "incremental_column": null,
+            "last_synced_value": "0",
+            "max_fetch_size": 0
+          },
+          "source": {
+            "class_name": "jdbc_source",
+            "org_id": 0,
+            "id": 1,
+            "display_name": "DI0 MySQL",
+            "database_type": "MySql",
+            "jdbc_url": "jdbc:mysql://rocket-bi-mysql:3306",
+            "username": "root",
+            "password": "<password>",
+            "creator_id": "root",
+            "last_modify": 1793208012201
+          },
+          "creator": {
+            "username": "root",
+            "full_name": "root",
+            "gender": 0
+          }
+        },
+        {
+          "job": {
+            "class_name": "jdbc_job",
+            "org_id": 0,
+            "job_id": 3,
+            "display_name": "DI0 multi (database: caas, table: role)",
+            "job_type": "Jdbc",
+            "creator_id": "root",
+            "last_modified": 1793208140347,
+            "sync_mode": "FullSync",
+            "source_id": 1,
+            "last_successful_sync": 0,
+            "sync_interval_in_mn": 60,
+            "next_run_time": 1893742200000,
+            "last_sync_status": "Initialized",
+            "current_sync_status": "Initialized",
+            "schedule_time": {
+              "class_name": "schedule_weekly",
+              "recur_every": 1,
+              "at_hour": 7,
+              "at_minute": 30,
+              "at_second": 0,
+              "include_days": [
+                "MONDAY",
+                "FRIDAY"
+              ],
+              "start_time": 1893456000000
+            },
+            "dest_database_name": "di0_multi",
+            "dest_table_name": "role",
+            "destinations": [
+              "Clickhouse"
+            ],
+            "database_name": "caas",
+            "table_name": "role",
+            "query_statement": null,
+            "incremental_column": null,
+            "last_synced_value": "0",
+            "max_fetch_size": 0
+          },
+          "source": {
+            "class_name": "jdbc_source",
+            "org_id": 0,
+            "id": 1,
+            "display_name": "DI0 MySQL",
+            "database_type": "MySql",
+            "jdbc_url": "jdbc:mysql://rocket-bi-mysql:3306",
+            "username": "root",
+            "password": "<password>",
+            "creator_id": "root",
+            "last_modify": 1793208012201
+          },
+          "creator": {
+            "username": "root",
+            "full_name": "root",
+            "gender": 0
+          }
+        }
+      ],
+      "total": 3
+    }
+  },
+  "jobListQueued": {
+    "method": "POST",
+    "path": "job/list",
+    "request": {
+      "from": 0,
+      "size": 10,
+      "current_statuses": [
+        "Queued",
+        "Initialized",
+        "Syncing"
+      ]
+    },
+    "response": {
+      "data": [
+        {
+          "job": {
+            "class_name": "jdbc_job",
+            "org_id": 0,
+            "job_id": 1,
+            "display_name": "DI0 sales",
+            "job_type": "Jdbc",
+            "creator_id": "root",
+            "last_modified": 1793208065247,
+            "sync_mode": "FullSync",
+            "source_id": 1,
+            "last_successful_sync": 1793208061842,
+            "sync_interval_in_mn": 60,
+            "next_run_time": 1793208065246,
+            "last_sync_status": "Synced",
+            "current_sync_status": "Initialized",
+            "schedule_time": {
+              "class_name": "schedule_once",
+              "start_time": 1793208055000
+            },
+            "dest_database_name": "di0_ingest",
+            "dest_table_name": "sales",
+            "destinations": [
+              "Clickhouse"
+            ],
+            "database_name": "sample_v2",
+            "table_name": "sales",
+            "query_statement": null,
+            "incremental_column": null,
+            "last_synced_value": "1000",
+            "max_fetch_size": 0
+          },
+          "source": {
+            "class_name": "jdbc_source",
+            "org_id": 0,
+            "id": 1,
+            "display_name": "DI0 MySQL",
+            "database_type": "MySql",
+            "jdbc_url": "jdbc:mysql://rocket-bi-mysql:3306",
+            "username": "root",
+            "password": "<password>",
+            "creator_id": "root",
+            "last_modify": 1793208012201
+          },
+          "creator": {
+            "username": "root",
+            "full_name": "root",
+            "gender": 0
+          }
+        }
+      ],
+      "total": 1
+    }
+  },
+  "jobUpdateWeekly": {
+    "method": "PUT",
+    "path": "job/3",
+    "request": {
+      "job": {
+        "class_name": "jdbc_job",
+        "org_id": 0,
+        "job_id": 3,
+        "display_name": "DI0 multi (database: caas, table: role)",
+        "job_type": "Jdbc",
+        "creator_id": "root",
+        "last_modified": 1793208121909,
+        "sync_mode": "FullSync",
+        "source_id": 1,
+        "last_successful_sync": 0,
+        "sync_interval_in_mn": 60,
+        "next_run_time": 1793380921908,
+        "last_sync_status": "Initialized",
+        "current_sync_status": "Initialized",
+        "schedule_time": {
+          "class_name": "schedule_weekly",
+          "recur_every": 1,
+          "at_hour": 7,
+          "at_minute": 30,
+          "at_second": 0,
+          "include_days": [
+            "MONDAY",
+            "FRIDAY"
+          ],
+          "start_time": 1893456000000
+        },
+        "dest_database_name": "di0_multi",
+        "dest_table_name": "role",
+        "destinations": [
+          "Clickhouse"
+        ],
+        "database_name": "caas",
+        "table_name": "role",
+        "query_statement": null,
+        "incremental_column": null,
+        "last_synced_value": "0",
+        "max_fetch_size": 0
+      }
+    },
+    "response": {
+      "success": true
+    }
+  },
+  "jobUpdateMonthly": {
+    "method": "PUT",
+    "path": "job/2",
+    "request": {
+      "job": {
+        "class_name": "jdbc_job",
+        "org_id": 0,
+        "job_id": 2,
+        "display_name": "DI0 multi (database: caas, table: organization)",
+        "job_type": "Jdbc",
+        "creator_id": "root",
+        "last_modified": 1793208077985,
+        "sync_mode": "FullSync",
+        "source_id": 1,
+        "last_successful_sync": 0,
+        "sync_interval_in_mn": 60,
+        "next_run_time": 1793294477000,
+        "last_sync_status": "Initialized",
+        "current_sync_status": "Initialized",
+        "schedule_time": {
+          "class_name": "schedule_monthly",
+          "recur_on_days": [
+            1,
+            15
+          ],
+          "recur_every_month": 1,
+          "at_hour": 2,
+          "at_minute": 0,
+          "at_second": 0,
+          "start_time": 1893456000000
+        },
+        "dest_database_name": "di0_multi",
+        "dest_table_name": "organization",
+        "destinations": [
+          "Clickhouse"
+        ],
+        "database_name": "caas",
+        "table_name": "organization",
+        "query_statement": null,
+        "incremental_column": null,
+        "last_synced_value": "0",
+        "max_fetch_size": 0
+      }
+    },
+    "response": {
+      "success": true
+    }
+  },
+  "jobSyncNow": {
+    "method": "PUT",
+    "path": "schedule/job/1/now",
+    "request": {
+      "at_time": 1793208065000,
+      "mode": "Continuous"
+    },
+    "response": {
+      "success": true
+    }
+  },
+  "jobMultiSyncNow": {
+    "method": "PUT",
+    "path": "schedule/job/multi_sync/now",
+    "request": {
+      "at_time": 1793208175000,
+      "mode": "Continuous",
+      "ids": [
+        2,
+        3
+      ]
+    },
+    "response": {
+      "2": true,
+      "3": true
+    }
+  },
+  "jobKill": {
+    "method": "PUT",
+    "path": "schedule/job/3/kill",
+    "request": {},
+    "response": {
+      "success": false
+    }
+  },
+  "jobDelete": {
+    "method": "DELETE",
+    "path": "job/3",
+    "response": {
+      "success": true
+    }
+  },
+  "jobMultiDelete": {
+    "method": "DELETE",
+    "path": "job/multi_delete",
+    "request": {
+      "ids": [
+        999
+      ]
+    },
+    "response": {
+      "success": true
+    }
+  },
+  "historyList": {
+    "method": "POST",
+    "path": "history/list",
+    "request": {
+      "from": 0,
+      "size": 10,
+      "sorts": [
+        {
+          "field": "id",
+          "order": "DESC"
+        }
+      ]
+    },
+    "response": {
+      "data": [
+        {
+          "sync_id": 2,
+          "job_id": 1,
+          "job_name": "DI0 sales",
+          "last_sync_time": 1793208071771,
+          "total_synced_time": 391,
+          "sync_status": "Synced",
+          "total_rows_inserted": 200,
+          "message": ""
+        },
+        {
+          "sync_id": 1,
+          "job_id": 1,
+          "job_name": "DI0 sales",
+          "last_sync_time": 1793208061842,
+          "total_synced_time": 460,
+          "sync_status": "Synced",
+          "total_rows_inserted": 200,
+          "message": ""
+        }
+      ],
+      "total": 2
+    }
+  },
+  "csvDetect": {
+    "method": "POST",
+    "path": "ingestion/csv/detect",
+    "request": {
+      "sample": "id,name,price,created_at\n1,Apple,1.5,2024-01-02 10:00:00\n2,\"Banana, ripe\",0.25,2024-01-03 11:30:00\n3,\"Multi\nline\",3,2024-02-01 00:00:00",
+      "csv_setting": {
+        "include_header": true,
+        "delimiter": ",",
+        "add_batch_info": false
+      }
+    },
+    "response": {
+      "schema": {
+        "name": "",
+        "db_name": "",
+        "organization_id": 0,
+        "display_name": "",
+        "columns": [
+          {
+            "class_name": "string",
+            "name": "id",
+            "display_name": "id",
+            "is_nullable": true,
+            "is_encrypted": false
+          },
+          {
+            "class_name": "string",
+            "name": "name",
+            "display_name": "name",
+            "is_nullable": true,
+            "is_encrypted": false
+          },
+          {
+            "class_name": "string",
+            "name": "price",
+            "display_name": "price",
+            "is_nullable": true,
+            "is_encrypted": false
+          },
+          {
+            "class_name": "datetime",
+            "name": "created_at",
+            "display_name": "created_at",
+            "input_as_timestamp": false,
+            "input_formats": [
+              "yyyy-MM-dd HH:mm:ss"
+            ],
+            "is_nullable": true,
+            "is_encrypted": false
+          }
+        ],
+        "primary_keys": [],
+        "partition_by": [],
+        "order_bys": [],
+        "table_type": "default",
+        "expression_columns": [],
+        "calculated_columns": [],
+        "temporary": false
+      },
+      "csv_setting": {
+        "include_header": true,
+        "delimiter": ",",
+        "add_batch_info": false
+      },
+      "records": [
+        [
+          "1",
+          "Apple",
+          "1.5",
+          "2024-01-02T10:00:00.000+00:00"
+        ],
+        [
+          "2",
+          "Banana, ripe",
+          "0.25",
+          "2024-01-03T11:30:00.000+00:00"
+        ],
+        [
+          "3",
+          "Multi\nline",
+          "3",
+          "2024-02-01T00:00:00.000+00:00"
+        ]
+      ]
+    }
+  },
+  "csvSchema": {
+    "method": "POST",
+    "path": "ingestion/csv/schema",
+    "request": {
+      "schema": {
+        "name": "products",
+        "db_name": "di0_csv",
+        "organization_id": 0,
+        "display_name": "Products",
+        "columns": [
+          {
+            "class_name": "int64",
+            "name": "id",
+            "display_name": "id",
+            "is_nullable": true,
+            "is_encrypted": false
+          },
+          {
+            "class_name": "string",
+            "name": "name",
+            "display_name": "name",
+            "is_nullable": true,
+            "is_encrypted": false
+          },
+          {
+            "class_name": "double",
+            "name": "price",
+            "display_name": "price",
+            "is_nullable": true,
+            "is_encrypted": false
+          },
+          {
+            "class_name": "datetime",
+            "name": "created_at",
+            "display_name": "created_at",
+            "input_as_timestamp": false,
+            "input_formats": [
+              "yyyy-MM-dd HH:mm:ss"
+            ],
+            "is_nullable": true,
+            "is_encrypted": false
+          }
+        ],
+        "primary_keys": [],
+        "partition_by": [],
+        "order_bys": [],
+        "table_type": "default",
+        "expression_columns": [],
+        "calculated_columns": [],
+        "temporary": false
+      }
+    },
+    "response": {
+      "name": "products",
+      "db_name": "di0_csv",
+      "organization_id": 0,
+      "display_name": "Products",
+      "columns": [
+        {
+          "class_name": "int64",
+          "name": "id",
+          "display_name": "id",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "name",
+          "display_name": "name",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "double",
+          "name": "price",
+          "display_name": "price",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "datetime",
+          "name": "created_at",
+          "display_name": "created_at",
+          "input_as_timestamp": false,
+          "input_formats": [
+            "yyyy-MM-dd HH:mm:ss"
+          ],
+          "is_nullable": true,
+          "is_encrypted": false
+        }
+      ],
+      "primary_keys": [],
+      "partition_by": [],
+      "order_bys": [],
+      "table_type": "default",
+      "expression_columns": [],
+      "calculated_columns": [],
+      "temporary": false
+    }
+  },
+  "csvIngest": {
+    "method": "POST",
+    "path": "ingestion/csv",
+    "request": {
+      "db_name": "di0_csv",
+      "tbl_name": "products",
+      "csv_setting": {
+        "include_header": false,
+        "delimiter": ",",
+        "add_batch_info": false
+      },
+      "data": "3,\"Multi\nline\",3,2024-02-01 00:00:00\n4,Durian,abc,not-a-date"
+    },
+    "response": {
+      "succeed": true,
+      "row_inserted": 2
+    }
+  }
+}
