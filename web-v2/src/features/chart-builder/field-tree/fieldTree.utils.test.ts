@@ -5,7 +5,9 @@ import stored from '@/core/chart-builder/builder.fixture.json';
 import {
   columnNameOfNode,
   controlIconOf,
+  controlLookOf,
   expressionKindOf,
+  fieldLookOf,
   fieldRefsOf,
   initialExpanded,
   opened,
@@ -104,6 +106,24 @@ describe('chart controls', () => {
   it("shows a chart type's icon, the generic one for a function controller", () => {
     expect(controlIconOf(control('a', 'Normal', 'Donut'))).toBe('/chart-builder/charts/ic_donut.svg');
     expect(controlIconOf(control('a', 'FunctionController', 'tab_filter'))).toBe('/chart-builder/charts/chart_control.svg');
+  });
+
+  it('shows a control as the tree shows it', () => {
+    expect(controlLookOf(control('Donut', 'Normal', 'Donut'))).toEqual({ title: 'Donut', icon: { kind: 'image', src: '/chart-builder/charts/ic_donut.svg' }, italic: false });
+  });
+});
+
+describe('fieldLookOf', () => {
+  const field = (className: string, type = 'Int32') => ({ class_name: className, field_name: 'f', field_type: type });
+
+  it('shows a column by its type, measures and calculated columns in italics', () => {
+    expect(fieldLookOf(field('table_field'), 'Units')).toEqual({ title: 'Units', icon: { kind: 'type', type: 'Int32' }, italic: false });
+    expect(fieldLookOf(field('calculated_field'), 'Double')).toEqual({ title: 'Double', icon: { kind: 'type', type: 'Int32' }, italic: true });
+    expect(fieldLookOf(field('expression_field'), 'Avg')).toEqual({ title: 'Avg', icon: { kind: 'measure' }, italic: true });
+  });
+
+  it('shows a chart control dropped as a field by the generic control icon', () => {
+    expect(fieldLookOf(field('chart_control_field', ''), 'Tab')).toEqual({ title: 'Tab', icon: { kind: 'image', src: '/chart-builder/charts/chart_control.svg' }, italic: false });
   });
 });
 

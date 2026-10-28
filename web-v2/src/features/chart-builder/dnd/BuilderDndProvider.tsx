@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { Tag } from 'antd';
 import { FieldDndProvider } from '@/shared/field-dnd/FieldDndProvider';
+import { FieldLabelView } from '../field-tree/FieldLabelView';
 import { useBuilderDnd } from './useBuilderDnd';
 
 /**
@@ -8,15 +8,14 @@ import { useBuilderDnd } from './useBuilderDnd';
  * through the builder's rules (v1 `ConfigDraggable`, `FilterDraggable`) into its state.
  */
 export function BuilderDndProvider({ children }: { children: ReactNode }) {
-  const { labelOf, ...options } = useBuilderDnd();
+  const { lookOf, ...options } = useBuilderDnd();
   return (
     <FieldDndProvider
       {...options}
-      renderOverlay={source => (
-        <Tag color="blue" className="cursor-grabbing shadow">
-          {labelOf(source)}
-        </Tag>
-      )}
+      renderOverlay={source => {
+        const look = lookOf(source);
+        return look && <FieldLabelView look={look} dragging />;
+      }}
     >
       {children}
     </FieldDndProvider>

@@ -6,7 +6,7 @@ import type { ConditionData } from '@/core/chart-builder/ConditionData';
 import type { FunctionData } from '@/core/chart-builder/FunctionData';
 import { FieldKind, fieldKindOf } from '@/core/chart-builder/functions';
 import type { DragSource, DropAction, TransferModeOf, ZoneId, ZoneRules } from '@/shared/field-dnd/fieldDnd.utils';
-import type { FieldTreePayload } from '../field-tree/fieldTree.utils';
+import { controlLookOf, fieldLookOf, type FieldLook, type FieldTreePayload } from '../field-tree/fieldTree.utils';
 import type { BuilderAction, DroppedField } from '../state/builderState.utils';
 
 /**
@@ -171,8 +171,13 @@ export function builderActionOf(action: DropAction, source: DragSource, data: Bu
   }
 }
 
-/** What follows the pointer: the dragged column, control, item or condition's name. */
-export function dragLabelOf(source: DragSource, data: BuilderData): string {
-  if (source.kind === 'external') return droppedOf(source)?.columnName ?? '';
-  return itemAt(data, source.zoneId, source.index)?.name ?? conditionAt(data, source.zoneId, source.index)?.columnName ?? '';
+/** What follows the pointer: the dragged column, control, item or condition, as the tree shows a field. */
+export function dragLookOf(source: DragSource, data: BuilderData): FieldLook | undefined {
+  const payload = treePayloadOf(source);
+  if (payload) return payload.kind === 'control' ? controlLookOf(payload.control) : fieldLookOf(payload.field.field, payload.field.columnName);
+  if (source.kind === 'external') return undefined;
+  const item = itemAt(data, source.zoneId, source.index);
+  if (item) return fieldLookOf(item.field, item.name);
+  const condition = conditionAt(data, source.zoneId, source.index);
+  return condition && fieldLookOf(condition.field, condition.columnName ?? '');
 }

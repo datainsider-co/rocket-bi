@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import type { DragSource, DropAction } from '@/shared/field-dnd/fieldDnd.utils';
 import { useBuilder } from '../state/BuilderContext';
-import { builderActionOf, builderTransferMode, builderZoneRules, dragLabelOf } from './builderDnd.utils';
+import { builderActionOf, builderTransferMode, builderZoneRules, dragLookOf } from './builderDnd.utils';
 
 /** The builder's drop rules and what a drop does to its state, for `FieldDndProvider`. */
 export function useBuilderDnd() {
@@ -15,6 +15,6 @@ export function useBuilderDnd() {
     },
     [data, dispatch]
   );
-  const labelOf = useCallback((source: DragSource) => dragLabelOf(source, data), [data]);
-  return { zones, transferModeOf: builderTransferMode, onDrop, labelOf };
+  const lookOf = useCallback((source: DragSource) => dragLookOf(source, data), [data]);
+  return { zones, transferModeOf: builderTransferMode, onDrop, lookOf };
 }

@@ -165,6 +165,29 @@ export function controlIconOf(control: ChartControl): string {
   return CHART_ICON_PATH + (control.infoType === ChartInfoType.FunctionController ? CONTROL_ICON : chartIconOf(control.chartType));
 }
 
+/** The icon of a field as the tree shows it: its column type, a function for a measure, or a chart icon. */
+export type FieldIcon = { readonly kind: 'type'; readonly type: string } | { readonly kind: 'measure' } | { readonly kind: 'image'; readonly src: string };
+
+/** A field as the tree shows it; the tree rows and the drag image share it (v1's drag image: icon and name). */
+export interface FieldLook {
+  readonly title: string;
+  readonly icon: FieldIcon;
+  /** Measures and calculated columns are in italics. */
+  readonly italic: boolean;
+}
+
+/** How the tree shows a field (`class_name` and `field_type` as stored), under `title`. */
+export function fieldLookOf(field: JsonObject, title: string): FieldLook {
+  const className = asString(field['class_name']);
+  if (className === 'chart_control_field') return { title, icon: { kind: 'image', src: CHART_ICON_PATH + CONTROL_ICON }, italic: false };
+  if (className === 'expression_field') return { title, icon: { kind: 'measure' }, italic: true };
+  return { title, icon: { kind: 'type', type: asString(field['field_type']) }, italic: className === 'calculated_field' };
+}
+
+export function controlLookOf(control: ChartControl): FieldLook {
+  return { title: control.title, icon: { kind: 'image', src: controlIconOf(control) }, italic: false };
+}
+
 /** The chart controls whose title matches `keyword` (v1 `filterChartControls`). */
 export function searchControls(controls: readonly ChartControl[], keyword: string): readonly ChartControl[] {
   const word = keyword.trim().toLocaleLowerCase();

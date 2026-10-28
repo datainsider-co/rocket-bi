@@ -12,7 +12,7 @@ import {
   builderTransferMode,
   builderZoneRules,
   configZonesOf,
-  dragLabelOf,
+  dragLookOf,
   droppedControl,
   FILTER_ZONE,
   filterGroupsOf,
@@ -222,13 +222,16 @@ describe('builderActionOf', () => {
   });
 });
 
-describe('dragLabelOf', () => {
-  it('names what is dragged', () => {
-    expect(dragLabelOf(column(region), data)).toBe('region');
-    expect(dragLabelOf(fromTree({ kind: 'control', control: control('Normal') }), data)).toBe('Group by');
-    expect(dragLabelOf({ kind: 'zone', zoneId: 'y_axis', index: 0 }, data)).toBe('revenue');
-    expect(dragLabelOf({ kind: 'zone', zoneId: 'filters:4', index: 1 }, data)).toBe('city');
-    expect(dragLabelOf({ kind: 'zone', zoneId: 'x_axis', index: 9 }, data)).toBe('');
-    expect(dragLabelOf({ kind: 'external', payload: 1 }, data)).toBe('');
+describe('dragLookOf', () => {
+  it('shows what is dragged as the tree shows it', () => {
+    expect(dragLookOf(column(region), data)).toEqual({ title: 'region', icon: { kind: 'type', type: 'string' }, italic: false });
+    expect(dragLookOf(fromTree({ kind: 'control', control: control('Normal') }), data)?.title).toBe('Group by');
+    expect(dragLookOf({ kind: 'zone', zoneId: 'y_axis', index: 0 }, data)).toEqual({ title: 'revenue', icon: { kind: 'type', type: 'double' }, italic: false });
+    expect(dragLookOf({ kind: 'zone', zoneId: 'filters:4', index: 1 }, data)?.title).toBe('city');
+  });
+
+  it('shows nothing for what is not there', () => {
+    expect(dragLookOf({ kind: 'zone', zoneId: 'x_axis', index: 9 }, data)).toBeUndefined();
+    expect(dragLookOf({ kind: 'external', payload: 1 }, data)).toBeUndefined();
   });
 });

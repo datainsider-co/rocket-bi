@@ -749,4 +749,6 @@ Code ở `shared/field-dnd`, story trong `Shared/FieldDnd`.
   - Kéo chỉ bắt đầu sau 4px, nên click vào menu của item vẫn hoạt động.
   - Ô nhập text và phần tử có `FIELD_NO_DRAG_CLASS` không bao giờ bắt đầu kéo.
 - **Ảnh kéo** (`renderOverlay`) đi theo con trỏ, với `z-index` 2000, trên modal (1000) và popup (1050) của antd.
-  Default của dnd-kit là 999, nên ảnh kéo từng bị ChartBuilder che mất.
+  Default của dnd-kit là 999, nên ảnh kéo từng bị ChartBuilder che mất. Trong builder, ảnh kéo là chính dòng field
+  của cây (`FieldLabelView`: icon theo kiểu cột, measure hay chart control, và tên), nổi lên bằng nền trắng và bóng;
+  item và condition kéo từ zone cũng vẽ như vậy (v1 drag image).

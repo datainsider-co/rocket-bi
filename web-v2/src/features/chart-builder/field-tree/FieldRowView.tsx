@@ -1,9 +1,8 @@
-import { FunctionOutlined } from '@ant-design/icons';
 import { FieldDraggable } from '@/shared/field-dnd/FieldDraggable';
-import { ColumnTypeIcon } from '@/shared/schema/ColumnTypeIcon';
 import { columnActionsOf } from '../field-actions/fieldActions.utils';
 import { ActionMenuView } from './ActionMenuView';
-import { expressionKindOf, type FieldNode, type FieldTreePayload, type TreeActions } from './fieldTree.utils';
+import { FieldLabelView } from './FieldLabelView';
+import { expressionKindOf, fieldLookOf, type FieldNode, type FieldTreePayload, type TreeActions } from './fieldTree.utils';
 
 /**
  * A column of the tree, dragged into the zones. Measures show a function icon (v1 `FunctionIcon`); measures and
@@ -14,10 +13,7 @@ export function FieldRowView({ node, actions }: { node: FieldNode; actions?: Tre
   const kind = expressionKindOf(node);
   const row = (
     <FieldDraggable id={`field:${node.key}`} payload={payload}>
-      <div className="flex cursor-grab items-center gap-2 rounded px-2 py-1.5 hover:bg-black/5" title={node.title}>
-        {node.role === 'measure' ? <FunctionOutlined className="shrink-0 text-[var(--color-brand)]" aria-hidden /> : <ColumnTypeIcon type={node.type} />}
-        <span className={`truncate ${node.role === 'column' ? '' : 'italic'}`}>{node.title}</span>
-      </div>
+      <FieldLabelView look={fieldLookOf(node.dropped.field, node.title)} />
     </FieldDraggable>
   );
   if (!actions || !kind) return row;
