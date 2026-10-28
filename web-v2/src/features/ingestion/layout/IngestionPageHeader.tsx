@@ -11,12 +11,12 @@ interface IngestionPageHeaderProps {
 /** v1 `LayoutHeader`: the section's icon and title, actions on the right. */
 export function IngestionPageHeader({ section, actions }: IngestionPageHeaderProps) {
   return (
-    <header className="mb-4 flex min-w-0 shrink-0 items-center gap-3">
+    <header className="mb-4 flex min-w-0 shrink-0 flex-wrap items-center gap-3">
       <Typography.Title level={4} className="!m-0 flex shrink-0 items-center gap-2">
         <i className={section.icon} />
         <span>{section.title}</span>
       </Typography.Title>
-      {actions && <div className="ml-auto flex items-center gap-2">{actions}</div>}
+      {actions && <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div>}
     </header>
   );
 }
