@@ -53,8 +53,8 @@ Code v1 cần đọc:
   hiện setting đang lưu, và setting chỉ bị thay khi người dùng sửa config. Không dựng ngược configs từ setting.
 - **Preview** áp các control hiện tại của dashboard (`buildChartQuery`), giống v1.
 - **Tạm thời chưa làm trong builder:**
-  - Add Calculated Field, Add Measure, Update Table By Query và Delete table trong cây field. Phần này phải làm
-    sau khi ChartBuilder xong (CB8).
+  - Add Calculated Field, Add Measure, Update Table By Query và Delete table trong cây field. Làm sau khi ChartBuilder
+    xong, đã làm ở CB8.
   - Matching location của Map: không port, vì đây là anti-pattern của v1. Map sẽ có thiết kế riêng.
 
 ## Phát hiện ở CB0 (2026-10-27)
@@ -182,7 +182,7 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
     thì bỏ qua.
 - **Icon chart của v1** được copy sang `public/chart-builder/charts`, gồm cả type chưa build được, vì control và
   picker (CB5) cần dùng.
-- **Chưa làm ở bước này:** action trên bảng và cột (CB8). Cây field chưa được gắn vào builder; việc này làm ở CB4 và
+- **Chưa làm ở bước này:** action trên bảng và cột (đã làm ở CB8). Cây field chưa được gắn vào builder; việc này làm ở CB4 và
   CB5.
 
 ## Quyết định ở CB4 (2026-10-27)
@@ -231,7 +231,7 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
 - **Chưa làm ở bước này:**
   - Chọn field bằng menu bảng / cột (v1 `SelectFieldContext`): link "click here" của zone và click tên item hoặc
     condition để đổi field. Đã làm ở CB5.
-  - Edit Measure trong menu của item: CB8.
+  - Edit Measure trong menu của item. Đã làm ở CB8.
 
 ## Quyết định ở CB5 (2026-10-27)
 
@@ -643,6 +643,74 @@ Pivot Table (v1 `ChartType.PivotTable`, type `pivot_table`). Spec lấy từ v1 
   - Footer (số dòng, trang) luôn hiện khi có rows, như table phẳng.
 - **Chưa làm:** ghim cột đầu khi cuộn ngang (v1 `pinned`), menu chuột phải trên ô, Forecast / Summarize, Flatten
   Pivot Table (v1 ẩn khỏi picker), conditional formatting cho dòng total (`applyTo` values and totals).
+
+## Quyết định ở CB8 (2026-10-28)
+
+Action trên cây field: measure, calculated field, Update Table By Query, Delete table, và Edit Measure trong menu "..."
+của item. Spec lấy từ v1 (`DatabaseListing`, `CalculatedFieldModal`, `UpdateTableByQueryModal`, `DatabaseSchemaStore`,
+`SchemaRepository`) và kiểm bằng backend local, trên view tạm `sample_v2.cb8_tmp_view` / `cb8_tmp_drop` (đã xoá).
+
+- **Endpoint** (`core/schema/SchemaEditService`, key snake_case như server):
+  - Kiểm formula: `POST databases/{db}/tables/{tbl}/expression` (calculated) hoặc `.../aggregate_expression`
+    (measure), body `{ expression }`. Server chạy thử expression và trả **text thuần** là `class_name` (`int64`,
+    `double`, ...); sai thì 500 kèm message của database.
+  - Tạo / sửa: `POST` / `PUT .../calc_column` hoặc `.../expr_column`, body `{ column }` với `class_name` (kiểu vừa
+    kiểm), `name`, `display_name`, `description`, `is_nullable: true`,
+    `default_expression: { default_type: "MATERIALIZED", expr }`. Trả về bảng. `PUT` thay cột cùng `name`.
+  - Xoá: `DELETE .../calc_column/{name}` hoặc `.../expr_column/{name}`, trả `true`.
+  - Update Table By Query: `POST databases/{db}/tables/from_query` với
+    `{ tbl_name, display_name, query, table_type, is_override: true }`. Delete table: `DELETE databases/{db}/tables/{tbl}`.
+    v1 gửi thêm `adminSecretKey` và header `DI-SERVICE-KEY`; server không cần.
+  - Loại data source: `GET connection` → `class_name` (`ConnectionService.getSourceType`, đọc cả loại v2 chưa setup
+    được).
+- **Phát hiện ở backend:**
+  - Ghi đè view (`from_query`) là xoá rồi tạo lại bảng, nên **mất hết measure và calculated column**. v1 mất im lặng.
+  - Server chỉ chặn trùng tên giữa các expression, không chặn trùng với cột thường (tạo được calculated `Region` trên
+    bảng có cột `Region`).
+  - Response của `from_query` và `GET .../tables/{tbl}` ghi `display_name` bằng `name`.
+  - Delete table drop **bảng thật** trong database nếu có (DDL của connector), rồi xoá metadata. View tạo từ query
+    (như hai bảng tạm ở trên) chỉ có metadata, nên không đụng tới database.
+- **Formula** (`field-actions/formula.utils.ts`, v1 `ExpressionParser`):
+  - Calculated field viết cột bằng `[Display Name]`, lưu bằng tên cột. Measure viết và lưu bằng tên cột như v1.
+  - Đổi expression thành formula trong một lượt, bỏ qua chuỗi trong nháy và tên đứng trước `(`; khớp đúng tên trước,
+    rồi không phân biệt hoa thường.
+  - Tên cột mới lấy từ display name (`snakeCase` như v1, bỏ dấu, chỉ giữ ký tự ASCII vì route của server chỉ nhận
+    `\w+`). Form (zod) chặn tên rỗng và tên đã có trong bảng, kể cả cột thường. Sửa cột thì giữ `name`.
+- **Gợi ý hàm theo data source:** danh sách hàm của v1 (`*Syntax.ts`, 6 connector) chuyển thành
+  `field-actions/catalogues/<source>.json`, mỗi file một chunk riêng, tải khi dialog mở. Không đọc được connection thì
+  dùng ClickHouse như v1. Calculated field bỏ nhóm Keyword(s). Danh sách bên phải: chọn nhóm (All đứng đầu), click
+  hàm hoặc đặt con trỏ lên tên hàm trong editor để xem mô tả và ví dụ.
+- **Editor Monaco** (`field-actions/editor`): `monaco-editor` 0.57 + `@monaco-editor/react` (`loader.config` dùng bản
+  trong bundle, không CDN), chỉ nạp `editor.api` và các contrib cần (suggest, snippet, hover, bracket, ...), cùng
+  editor worker. Tất cả nằm trong chunk lazy `CodeEditor` (~3,3 MB, gzip ~850 KB; core của Monaco 0.57 đã ~2,5 MB),
+  chunk của builder không chứa Monaco. Một tokenizer Monarch chung cho mọi connector: tô hàm, cột, `[...]`, chuỗi,
+  số, comment. Gợi ý: hàm, rồi cột (`[Display Name]` cho calculated, tên cột cho measure); Update Table By Query gợi
+  ý thêm bảng `db.table` và cột của database.
+- **Sau mỗi action** (`useTableRefresh`): tải lại database bằng query `schemaKeys.database(db)` (cây field và mọi nơi
+  đọc schema cập nhật), mở bảng vừa sửa, rồi đồng bộ builder với bảng mới (`state/tableSync.utils.ts`, action
+  `syncTable`):
+  - Item và condition dùng cột không còn trong bảng (measure / calculated bị xoá, cột mất sau Update Table By Query,
+    bảng bị xoá) bị bỏ khỏi builder, nhóm filter rỗng cũng bỏ; báo số field đã bỏ.
+  - Item dùng cột còn lại nhận `field_type`, `expression` và display name mới; tên item đổi theo nếu người dùng chưa
+    đổi tên. Builder thành `touched`, nên setting dựng lại với formula mới khi lưu.
+  - Chart đã lưu khác trên dashboard dùng cột đó không bị sửa (như v1).
+- **Khác v1:**
+  - Sửa calculated field cũng cập nhật item đang dùng nó; v1 chỉ làm với measure, item calculated giữ expression cũ.
+  - Update Table By Query tạo lại các measure và calculated column của view (kiểm lại kiểu); cái nào không chạy được
+    với query mới thì báo tên. Gửi `display_name` của bảng; v1 gửi `name`. Không có cây database và phần chạy thử
+    query + bảng kết quả (`QueryComponent`) của v1: chỉ có editor, lỗi của server hiện dưới editor (v1 chỉ báo "Can
+    not update table with this query").
+  - Delete Table có trong menu bảng của builder (theo kế hoạch CB8). Builder của v1 dùng `DatabaseListingAs.Normal`
+    nên không hiện mục này. Confirm giữ câu của v1.
+  - Menu của bảng mở bằng nút "..." (hiện khi hover) hoặc chuột phải; menu của measure / calculated field cũng có cả
+    hai. v1 chỉ có chuột phải cho cột. Nhãn: "Edit / Delete Calculated Field" thay "Edit / Delete Column".
+  - Lỗi của calculated field hiện message của database; v1 chỉ báo "Formula invalid". Câu confirm xoá cột nêu display
+    name; v1 nêu `name`.
+  - Chặn tên trùng với mọi cột của bảng ở client (server không chặn với cột thường).
+  - Bỏ ô textarea ẩn cho tài khoản test của v1.
+- **Chưa làm:** gợi ý theo ngữ cảnh của v1 trong query (`DiCompletionItemProvider`: gõ `db.` thì chỉ gợi ý bảng của
+  db đó), action trên cột thường và cột nested (v1 cũng không có), quyền: menu hiện cho mọi người, server từ chối nếu
+  thiếu quyền `database:edit` và message hiện ra.
 
 ## Các bước
 
