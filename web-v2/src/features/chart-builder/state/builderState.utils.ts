@@ -10,7 +10,9 @@ import { isSameFieldKind } from '@/core/chart-builder/functions';
 import { optionsAfterConvert, optionsAfterRemove } from '@/core/chart-builder/optionCleanup';
 import { buildSetting } from '@/core/chart-builder/querySetting';
 import { applyVizChanges, type VizChanges } from '@/core/chart-builder/vizChanges';
+import type { TableSchema } from '@/core/schema/SchemaService';
 import { applyDrop, type DropAction } from '@/shared/field-dnd/fieldDnd.utils';
+import { syncTableFields, type TableRef } from './tableSync.utils';
 
 type Configs = Readonly<Record<string, readonly FunctionData[]>>;
 
@@ -68,7 +70,9 @@ export type BuilderAction =
   /** Another column picked for a condition (v1 `FilterItem.handleOnChangedField`). */
   | { type: 'changeConditionField'; groupId: number; id: number; field: DroppedField }
   /** Edits from the Settings tab. */
-  | { type: 'vizChanges'; changes: VizChanges };
+  | { type: 'vizChanges'; changes: VizChanges }
+  /** `table` changed in the schema (`schema` is its new state, none once dropped): see `syncTableFields`. */
+  | { type: 'syncTable'; table: TableRef; schema?: TableSchema };
 
 /** A builder for a new chart of `chartType` (v1 `ConfigBuilderStore.initDefaultState` + `setItemSelected`). */
 export function newBuilderState(chartType: string): BuilderState {
@@ -264,6 +268,13 @@ function removeCondition(state: BuilderState, groupId: number, id: number): Buil
   return withFilters(state, rest.length > 0 ? { ...filters, [groupId]: rest } : withoutKey(filters, String(groupId)));
 }
 
+function syncTable(state: BuilderState, table: TableRef, schema: TableSchema | undefined): BuilderState {
+  const { data } = syncTableFields(state.data, table, schema);
+  if (data === state.data) return state;
+  const synced = data.configs === state.data.configs ? state : withConfigs(state, data.configs);
+  return data.filters === state.data.filters ? synced : withFilters(synced, data.filters);
+}
+
 export function builderReducer(state: BuilderState, action: BuilderAction): BuilderState {
   switch (action.type) {
     case 'chartType':
@@ -288,6 +299,8 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
       return changeConditionField(state, action.groupId, action.id, action.field);
     case 'vizChanges':
       return { ...state, options: applyVizChanges(state.options, action.changes) };
+    case 'syncTable':
+      return syncTable(state, action.table, action.schema);
   }
 }
 

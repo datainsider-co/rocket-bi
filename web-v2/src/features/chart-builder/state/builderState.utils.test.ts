@@ -318,6 +318,32 @@ describe('conditions', () => {
   });
 });
 
+describe('syncTable', () => {
+  const sales = { dbName: 'sample_v2', name: 'sales' };
+
+  it('drops the items and conditions of a dropped table, and the stored setting with them', () => {
+    const state = run(column(), { type: 'addCondition', field: region });
+    const synced = run({ ...state, touched: false, storedSetting: {} }, { type: 'syncTable', table: sales });
+    expect(synced.data.configs).toEqual({ x_axis: [], y_axis: [] });
+    expect(synced.data.filters).toEqual({});
+    expect(synced.touched).toBe(true);
+    expect(synced.latest?.configs).toEqual({ x_axis: [], y_axis: [] });
+  });
+
+  it('keeps the state when the table is not used', () => {
+    const state = column();
+    expect(run(state, { type: 'syncTable', table: { dbName: 'sample_v2', name: 'other' } })).toBe(state);
+  });
+
+  it('only touches the filters when no item changes', () => {
+    const state = { ...run(newBuilderState(ChartType.Column), { type: 'addCondition', field: region }), touched: false };
+    const synced = run(state, { type: 'syncTable', table: sales });
+    expect(synced.data.filters).toEqual({});
+    expect(synced.data.configs).toBe(state.data.configs);
+    expect(synced.touched).toBe(true);
+  });
+});
+
 describe('builderReducer', () => {
   it('does not change the state it is given', () => {
     const state = column();
