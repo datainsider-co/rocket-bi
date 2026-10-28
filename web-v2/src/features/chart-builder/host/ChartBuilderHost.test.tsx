@@ -64,7 +64,7 @@ describe('ChartBuilderHost', () => {
     const user = userEvent.setup();
     renderHost({ kind: 'addChart' });
     const types = screen.getByRole('list', { name: 'Chart types' });
-    expect(within(types).getByRole('button', { name: 'Collapse Table' })).toBeDisabled();
+    expect(within(types).getByRole('button', { name: 'Pivot Table' })).toBeDisabled();
     await user.click(within(types).getByRole('button', { name: 'Pie' }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByRole('region', { name: 'Legend' })).toBeInTheDocument();
