@@ -26,6 +26,16 @@ const series: SettingBuilder = {
   build: configs => ({ x_axis: firstColumn(configs, 'x_axis'), y_axis: columns(configs, 'y_axis'), legend: firstColumn(configs, 'legend_optional') })
 };
 
+/**
+ * Stacked charts (v1 `StackingSeriesQuerySettingHandler`, `StackedQuerySetting`): the series setting with a breakdown,
+ * under the same class name.
+ */
+const stacked: SettingBuilder = {
+  className: series.className,
+  canBuild: series.canBuild,
+  build: configs => ({ ...series.build(configs), breakdown: firstColumn(configs, 'breakdown_optional') })
+};
+
 const pie: SettingBuilder = {
   className: 'pie_chart_setting',
   canBuild: configs => filled(configs, 'legend') && filled(configs, 'value'),
@@ -124,6 +134,10 @@ const BUILDERS: Readonly<Record<ChartType, SettingBuilder>> = {
   [T.AreaInverted]: series,
   [T.Column]: series,
   [T.Bar]: series,
+  [T.Lollipop]: series,
+  [T.StackedColumn]: stacked,
+  [T.StackedBar]: stacked,
+  [T.CircularBar]: stacked,
   [T.Pie]: pie,
   [T.SemiPie]: pie,
   [T.Donut]: pie,

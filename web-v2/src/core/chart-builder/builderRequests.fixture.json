@@ -4159,5 +4159,1094 @@
       "formatters": [],
       "class_name": "pivot_table_chart_setting"
     }
+  },
+  "stack_column": {
+    "class_name": "chart_v3",
+    "id": -1,
+    "name": "Untitled chart",
+    "description": "",
+    "background_color": "var(--chart-background-color)",
+    "extra_data": {
+      "configs": {
+        "x_axis": [
+          {
+            "id": 3605,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "region",
+              "field_type": "string"
+            },
+            "function_family": "Group By",
+            "function_type": "",
+            "name": "region",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "region",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ],
+        "y_axis": [
+          {
+            "id": 4956,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_revenue",
+              "field_type": "double"
+            },
+            "function_family": "Aggregation",
+            "function_type": "Sum",
+            "name": "total_revenue",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "total_revenue",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ],
+        "legend_optional": [
+          {
+            "id": 4450,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "sales_channel",
+              "field_type": "string"
+            },
+            "function_family": "Group By",
+            "function_type": "",
+            "name": "sales_channel",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "sales_channel",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ],
+        "breakdown_optional": [
+          {
+            "id": 4235,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "order_priority",
+              "field_type": "string"
+            },
+            "function_family": "Group By",
+            "function_type": "",
+            "name": "order_priority",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "order_priority",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ]
+      },
+      "filters": {},
+      "current_chart_type": "stack_column"
+    },
+    "text_color": "#fff",
+    "setting": {
+      "filters": [],
+      "sorts": [],
+      "options": {
+        "options": {
+          "chart": {
+            "type": "column"
+          },
+          "legend": {
+            "enabled": true,
+            "vertical_align": "bottom",
+            "layout": "horizontal",
+            "item_style": {
+              "color": "var(--text-color)"
+            },
+            "title": {
+              "text": "",
+              "enabled": true,
+              "style": {
+                "color": "var(--text-color)"
+              }
+            }
+          },
+          "title": {
+            "align": "center",
+            "enabled": true,
+            "text": "Untitled chart",
+            "style": {
+              "color": "var(--text-color)",
+              "font_family": "var(--widget-primary-font-family, Roboto)",
+              "font_size": "20px",
+              "font_weight": "var(--widget-primary-font-weight, 500)",
+              "font_style": "var(--widget-primary-font-style, normal)"
+            }
+          },
+          "subtitle": {
+            "align": "center",
+            "enabled": true,
+            "text": "",
+            "style": {
+              "color": "var(--secondary-text-color)",
+              "font_family": "var(--widget-secondary-font-family, Roboto)",
+              "font_size": "11px",
+              "font_weight": "var(--widget-secondary-font-weight, 400)",
+              "font_style": "var(--widget-secondary-font-style, normal)",
+              "text_decoration": "var(--widget-secondary-font-underlined, underline)"
+            }
+          },
+          "affected_by_filter": true,
+          "theme_color": {
+            "enabled": true
+          },
+          "background": "var(--chart-background-color)",
+          "plot_options": {
+            "series": {
+              "stacking": "normal",
+              "line_width": 2,
+              "dash_style": "Solid",
+              "marker": {
+                "enabled": true
+              },
+              "data_labels": {
+                "enabled": false,
+                "style": {
+                  "color": "var(--secondary-text-color)",
+                  "font_family": "var(--widget-secondary-font-family, Roboto)",
+                  "font_size": "11px",
+                  "font_weight": "var(--widget-secondary-font-weight, 400)",
+                  "font_style": "var(--widget-secondary-font-style, normal)"
+                }
+              }
+            }
+          },
+          "x_axis": [
+            {
+              "visible": true,
+              "labels": {
+                "style": {
+                  "color": "var(--text-color)"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "style": {
+                  "color": "var(--text-color)"
+                },
+                "text": ""
+              },
+              "grid_line_width": "0",
+              "grid_line_color": "var(--grid-line-color)"
+            }
+          ],
+          "y_axis": [
+            {
+              "visible": true,
+              "labels": {
+                "style": {
+                  "color": "var(--text-color)"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "style": {
+                  "color": "var(--text-color)"
+                },
+                "text": ""
+              },
+              "grid_line_width": "0.5",
+              "grid_line_color": "var(--grid-line-color)"
+            }
+          ],
+          "tooltip": {
+            "background_color": "var(--tooltip-background-color)",
+            "style": {
+              "color": "var(--secondary-text-color)",
+              "font_family": "var(--widget-secondary-font-family, Roboto)",
+              "font_size": "11px",
+              "font_weight": "var(--widget-secondary-font-weight, 400)",
+              "font_style": "var(--widget-secondary-font-style, normal)"
+            }
+          }
+        },
+        "class_name": "stacking_series_chart_setting",
+        "stacking_group": {},
+        "series_types_by_label_map": {}
+      },
+      "sql_views": [],
+      "parameters": {},
+      "x_axis": {
+        "name": "region",
+        "function": {
+          "field": {
+            "class_name": "table_field",
+            "db_name": "sample_v2",
+            "tbl_name": "sales",
+            "field_name": "region",
+            "field_type": "string"
+          },
+          "class_name": "group"
+        },
+        "is_horizontal_view": false,
+        "is_collapse": false,
+        "is_calc_group_total": true,
+        "is_calc_min_max": false,
+        "is_dynamic_function": false
+      },
+      "y_axis": [
+        {
+          "name": "total_revenue",
+          "function": {
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_revenue",
+              "field_type": "double"
+            },
+            "class_name": "sum"
+          },
+          "is_horizontal_view": false,
+          "is_collapse": false,
+          "is_calc_group_total": true,
+          "is_calc_min_max": false,
+          "is_dynamic_function": false
+        }
+      ],
+      "legend": {
+        "name": "sales_channel",
+        "function": {
+          "field": {
+            "class_name": "table_field",
+            "db_name": "sample_v2",
+            "tbl_name": "sales",
+            "field_name": "sales_channel",
+            "field_type": "string"
+          },
+          "class_name": "group"
+        },
+        "is_horizontal_view": false,
+        "is_collapse": false,
+        "is_calc_group_total": true,
+        "is_calc_min_max": false,
+        "is_dynamic_function": false
+      },
+      "breakdown": {
+        "name": "order_priority",
+        "function": {
+          "field": {
+            "class_name": "table_field",
+            "db_name": "sample_v2",
+            "tbl_name": "sales",
+            "field_name": "order_priority",
+            "field_type": "string"
+          },
+          "class_name": "group"
+        },
+        "is_horizontal_view": false,
+        "is_collapse": false,
+        "is_calc_group_total": true,
+        "is_calc_min_max": false,
+        "is_dynamic_function": false
+      },
+      "class_name": "series_chart_setting"
+    }
+  },
+  "stack_bar": {
+    "class_name": "chart_v3",
+    "id": -1,
+    "name": "Untitled chart",
+    "description": "",
+    "background_color": "var(--chart-background-color)",
+    "extra_data": {
+      "configs": {
+        "x_axis": [
+          {
+            "id": 2220,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "item_type",
+              "field_type": "string"
+            },
+            "function_family": "Group By",
+            "function_type": "",
+            "name": "item_type",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "item_type",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ],
+        "y_axis": [
+          {
+            "id": 4981,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_revenue",
+              "field_type": "double"
+            },
+            "function_family": "Aggregation",
+            "function_type": "Sum",
+            "name": "total_revenue",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "total_revenue",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          },
+          {
+            "id": 4043,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_cost",
+              "field_type": "double"
+            },
+            "function_family": "Aggregation",
+            "function_type": "Sum",
+            "name": "total_cost",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "total_cost",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ]
+      },
+      "filters": {},
+      "current_chart_type": "stack_bar"
+    },
+    "text_color": "#fff",
+    "setting": {
+      "filters": [],
+      "sorts": [],
+      "options": {
+        "options": {
+          "chart": {
+            "type": "bar"
+          },
+          "legend": {
+            "enabled": true,
+            "vertical_align": "bottom",
+            "layout": "horizontal",
+            "item_style": {
+              "color": "var(--text-color)"
+            },
+            "title": {
+              "text": "",
+              "enabled": true,
+              "style": {
+                "color": "var(--text-color)"
+              }
+            }
+          },
+          "title": {
+            "align": "center",
+            "enabled": true,
+            "text": "Untitled chart",
+            "style": {
+              "color": "var(--text-color)",
+              "font_family": "var(--widget-primary-font-family, Roboto)",
+              "font_size": "20px",
+              "font_weight": "var(--widget-primary-font-weight, 500)",
+              "font_style": "var(--widget-primary-font-style, normal)"
+            }
+          },
+          "subtitle": {
+            "align": "center",
+            "enabled": true,
+            "text": "",
+            "style": {
+              "color": "var(--secondary-text-color)",
+              "font_family": "var(--widget-secondary-font-family, Roboto)",
+              "font_size": "11px",
+              "font_weight": "var(--widget-secondary-font-weight, 400)",
+              "font_style": "var(--widget-secondary-font-style, normal)",
+              "text_decoration": "var(--widget-secondary-font-underlined, underline)"
+            }
+          },
+          "affected_by_filter": true,
+          "theme_color": {
+            "enabled": true
+          },
+          "background": "var(--chart-background-color)",
+          "plot_options": {
+            "series": {
+              "stacking": "normal",
+              "line_width": 2,
+              "dash_style": "Solid",
+              "marker": {
+                "enabled": true
+              },
+              "data_labels": {
+                "enabled": false,
+                "style": {
+                  "color": "var(--secondary-text-color)",
+                  "font_family": "var(--widget-secondary-font-family, Roboto)",
+                  "font_size": "11px",
+                  "font_weight": "var(--widget-secondary-font-weight, 400)",
+                  "font_style": "var(--widget-secondary-font-style, normal)"
+                }
+              }
+            }
+          },
+          "x_axis": [
+            {
+              "visible": true,
+              "labels": {
+                "style": {
+                  "color": "var(--text-color)"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "style": {
+                  "color": "var(--text-color)"
+                },
+                "text": ""
+              },
+              "grid_line_width": "0",
+              "grid_line_color": "var(--grid-line-color)"
+            }
+          ],
+          "y_axis": [
+            {
+              "visible": true,
+              "labels": {
+                "style": {
+                  "color": "var(--text-color)"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "style": {
+                  "color": "var(--text-color)"
+                },
+                "text": ""
+              },
+              "grid_line_width": "0.5",
+              "grid_line_color": "var(--grid-line-color)"
+            }
+          ],
+          "tooltip": {
+            "background_color": "var(--tooltip-background-color)",
+            "style": {
+              "color": "var(--secondary-text-color)",
+              "font_family": "var(--widget-secondary-font-family, Roboto)",
+              "font_size": "11px",
+              "font_weight": "var(--widget-secondary-font-weight, 400)",
+              "font_style": "var(--widget-secondary-font-style, normal)"
+            }
+          }
+        },
+        "class_name": "stacking_series_chart_setting",
+        "stacking_group": {},
+        "series_types_by_label_map": {}
+      },
+      "sql_views": [],
+      "parameters": {},
+      "x_axis": {
+        "name": "item_type",
+        "function": {
+          "field": {
+            "class_name": "table_field",
+            "db_name": "sample_v2",
+            "tbl_name": "sales",
+            "field_name": "item_type",
+            "field_type": "string"
+          },
+          "class_name": "group"
+        },
+        "is_horizontal_view": false,
+        "is_collapse": false,
+        "is_calc_group_total": true,
+        "is_calc_min_max": false,
+        "is_dynamic_function": false
+      },
+      "y_axis": [
+        {
+          "name": "total_revenue",
+          "function": {
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_revenue",
+              "field_type": "double"
+            },
+            "class_name": "sum"
+          },
+          "is_horizontal_view": false,
+          "is_collapse": false,
+          "is_calc_group_total": true,
+          "is_calc_min_max": false,
+          "is_dynamic_function": false
+        },
+        {
+          "name": "total_cost",
+          "function": {
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_cost",
+              "field_type": "double"
+            },
+            "class_name": "sum"
+          },
+          "is_horizontal_view": false,
+          "is_collapse": false,
+          "is_calc_group_total": true,
+          "is_calc_min_max": false,
+          "is_dynamic_function": false
+        }
+      ],
+      "class_name": "series_chart_setting"
+    }
+  },
+  "circular_bar": {
+    "class_name": "chart_v3",
+    "id": -1,
+    "name": "Untitled chart",
+    "description": "",
+    "background_color": "var(--chart-background-color)",
+    "extra_data": {
+      "configs": {
+        "x_axis": [
+          {
+            "id": 256,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "region",
+              "field_type": "string"
+            },
+            "function_family": "Group By",
+            "function_type": "",
+            "name": "region",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "region",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ],
+        "y_axis": [
+          {
+            "id": 4032,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_revenue",
+              "field_type": "double"
+            },
+            "function_family": "Aggregation",
+            "function_type": "Sum",
+            "name": "total_revenue",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "total_revenue",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ],
+        "legend_optional": [
+          {
+            "id": 2289,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "sales_channel",
+              "field_type": "string"
+            },
+            "function_family": "Group By",
+            "function_type": "",
+            "name": "sales_channel",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "sales_channel",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ]
+      },
+      "filters": {},
+      "current_chart_type": "circular_bar"
+    },
+    "text_color": "#fff",
+    "setting": {
+      "filters": [],
+      "sorts": [],
+      "options": {
+        "options": {
+          "chart": {
+            "type": "column",
+            "polar": true,
+            "inverted": true
+          },
+          "legend": {
+            "enabled": true,
+            "vertical_align": "bottom",
+            "layout": "horizontal",
+            "item_style": {
+              "color": "var(--text-color)"
+            },
+            "title": {
+              "text": "",
+              "enabled": true,
+              "style": {
+                "color": "var(--text-color)"
+              }
+            }
+          },
+          "title": {
+            "align": "center",
+            "enabled": true,
+            "text": "Untitled chart",
+            "style": {
+              "color": "var(--text-color)",
+              "font_family": "var(--widget-primary-font-family, Roboto)",
+              "font_size": "20px",
+              "font_weight": "var(--widget-primary-font-weight, 500)",
+              "font_style": "var(--widget-primary-font-style, normal)"
+            }
+          },
+          "subtitle": {
+            "align": "center",
+            "enabled": true,
+            "text": "",
+            "style": {
+              "color": "var(--secondary-text-color)",
+              "font_family": "var(--widget-secondary-font-family, Roboto)",
+              "font_size": "11px",
+              "font_weight": "var(--widget-secondary-font-weight, 400)",
+              "font_style": "var(--widget-secondary-font-style, normal)",
+              "text_decoration": "var(--widget-secondary-font-underlined, underline)"
+            }
+          },
+          "affected_by_filter": true,
+          "theme_color": {
+            "enabled": true
+          },
+          "background": "var(--chart-background-color)",
+          "plot_options": {
+            "series": {
+              "stacking": "normal",
+              "point_padding": 0,
+              "group_padding": 0.15,
+              "dash_style": "Solid",
+              "marker": {
+                "enabled": true
+              },
+              "data_labels": {
+                "enabled": false,
+                "style": {
+                  "color": "var(--secondary-text-color)",
+                  "font_family": "var(--widget-secondary-font-family, Roboto)",
+                  "font_size": "11px",
+                  "font_weight": "var(--widget-secondary-font-weight, 400)",
+                  "font_style": "var(--widget-secondary-font-style, normal)"
+                }
+              }
+            }
+          },
+          "pane": {
+            "size": "85%",
+            "inner_size": "20%",
+            "end_angle": 270
+          },
+          "x_axis": [
+            {
+              "visible": true,
+              "labels": {
+                "style": {
+                  "color": "var(--text-color)"
+                },
+                "y": 6
+              },
+              "title": {
+                "enabled": true,
+                "style": {
+                  "color": "var(--text-color)"
+                },
+                "text": ""
+              },
+              "grid_line_width": "0.5",
+              "grid_line_color": "var(--grid-line-color)"
+            }
+          ],
+          "y_axis": [
+            {
+              "visible": true,
+              "end_on_tick": true,
+              "labels": {
+                "style": {
+                  "color": "var(--text-color)"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "style": {
+                  "color": "var(--text-color)"
+                },
+                "text": ""
+              },
+              "grid_line_width": "0.5",
+              "grid_line_color": "var(--grid-line-color)"
+            }
+          ],
+          "tooltip": {
+            "background_color": "var(--tooltip-background-color)",
+            "style": {
+              "color": "var(--secondary-text-color)",
+              "font_family": "var(--widget-secondary-font-family, Roboto)",
+              "font_size": "11px",
+              "font_weight": "var(--widget-secondary-font-weight, 400)",
+              "font_style": "var(--widget-secondary-font-style, normal)"
+            }
+          }
+        },
+        "class_name": "circular_bar_chart_setting",
+        "stacking_group": {},
+        "series_types_by_label_map": {}
+      },
+      "sql_views": [],
+      "parameters": {},
+      "x_axis": {
+        "name": "region",
+        "function": {
+          "field": {
+            "class_name": "table_field",
+            "db_name": "sample_v2",
+            "tbl_name": "sales",
+            "field_name": "region",
+            "field_type": "string"
+          },
+          "class_name": "group"
+        },
+        "is_horizontal_view": false,
+        "is_collapse": false,
+        "is_calc_group_total": true,
+        "is_calc_min_max": false,
+        "is_dynamic_function": false
+      },
+      "y_axis": [
+        {
+          "name": "total_revenue",
+          "function": {
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_revenue",
+              "field_type": "double"
+            },
+            "class_name": "sum"
+          },
+          "is_horizontal_view": false,
+          "is_collapse": false,
+          "is_calc_group_total": true,
+          "is_calc_min_max": false,
+          "is_dynamic_function": false
+        }
+      ],
+      "legend": {
+        "name": "sales_channel",
+        "function": {
+          "field": {
+            "class_name": "table_field",
+            "db_name": "sample_v2",
+            "tbl_name": "sales",
+            "field_name": "sales_channel",
+            "field_type": "string"
+          },
+          "class_name": "group"
+        },
+        "is_horizontal_view": false,
+        "is_collapse": false,
+        "is_calc_group_total": true,
+        "is_calc_min_max": false,
+        "is_dynamic_function": false
+      },
+      "class_name": "series_chart_setting"
+    }
+  },
+  "lollipop": {
+    "class_name": "chart_v3",
+    "id": -1,
+    "name": "Untitled chart",
+    "description": "",
+    "background_color": "var(--chart-background-color)",
+    "extra_data": {
+      "configs": {
+        "x_axis": [
+          {
+            "id": 621,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "region",
+              "field_type": "string"
+            },
+            "function_family": "Group By",
+            "function_type": "",
+            "name": "region",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "region",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ],
+        "y_axis": [
+          {
+            "id": 3446,
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_profit",
+              "field_type": "double"
+            },
+            "function_family": "Aggregation",
+            "function_type": "Sum",
+            "name": "total_profit",
+            "sorting": "Unsorted",
+            "table_name": "sales",
+            "column_name": "total_profit",
+            "display_as_column": false,
+            "is_nested": false,
+            "num_elems_shown": 10,
+            "is_show_n_elements": false
+          }
+        ]
+      },
+      "filters": {},
+      "current_chart_type": "lollipop"
+    },
+    "text_color": "#fff",
+    "setting": {
+      "filters": [],
+      "sorts": [],
+      "options": {
+        "options": {
+          "chart": {
+            "type": "lollipop"
+          },
+          "legend": {
+            "enabled": true,
+            "vertical_align": "bottom",
+            "layout": "horizontal",
+            "item_style": {
+              "color": "var(--text-color)"
+            },
+            "title": {
+              "text": "",
+              "enabled": true,
+              "style": {
+                "color": "var(--text-color)"
+              }
+            }
+          },
+          "title": {
+            "align": "center",
+            "enabled": true,
+            "text": "Untitled chart",
+            "style": {
+              "color": "var(--text-color)",
+              "font_family": "var(--widget-primary-font-family, Roboto)",
+              "font_size": "20px",
+              "font_weight": "var(--widget-primary-font-weight, 500)",
+              "font_style": "var(--widget-primary-font-style, normal)"
+            }
+          },
+          "subtitle": {
+            "align": "center",
+            "enabled": true,
+            "text": "",
+            "style": {
+              "color": "var(--secondary-text-color)",
+              "font_family": "var(--widget-secondary-font-family, Roboto)",
+              "font_size": "11px",
+              "font_weight": "var(--widget-secondary-font-weight, 400)",
+              "font_style": "var(--widget-secondary-font-style, normal)",
+              "text_decoration": "var(--widget-secondary-font-underlined, underline)"
+            }
+          },
+          "affected_by_filter": true,
+          "theme_color": {
+            "enabled": true
+          },
+          "background": "var(--chart-background-color)",
+          "plot_options": {
+            "area": {
+              "stacking": "value"
+            },
+            "series": {
+              "line_width": 2,
+              "dash_style": "Solid",
+              "marker": {
+                "enabled": true
+              },
+              "data_labels": {
+                "enabled": false,
+                "style": {
+                  "color": "var(--text-color)",
+                  "font_family": "var(--widget-secondary-font-family, Roboto)",
+                  "font_size": "11px",
+                  "font_weight": "var(--widget-secondary-font-weight, 400)",
+                  "font_style": "var(--widget-secondary-font-style, normal)",
+                  "text_outline": 0
+                }
+              }
+            }
+          },
+          "x_axis": [
+            {
+              "visible": true,
+              "labels": {
+                "style": {
+                  "color": "var(--text-color)"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "style": {
+                  "color": "var(--text-color)"
+                },
+                "text": ""
+              },
+              "grid_line_width": "0",
+              "grid_line_color": "var(--grid-line-color)"
+            }
+          ],
+          "y_axis": [
+            {
+              "visible": true,
+              "labels": {
+                "style": {
+                  "color": "var(--text-color)"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "style": {
+                  "color": "var(--text-color)"
+                },
+                "text": ""
+              },
+              "grid_line_width": "0.5",
+              "grid_line_color": "var(--grid-line-color)"
+            },
+            {
+              "visible": false,
+              "labels": {
+                "style": {
+                  "color": "var(--text-color)"
+                }
+              },
+              "title": {
+                "enabled": true,
+                "style": {
+                  "color": "var(--text-color)"
+                },
+                "text": "Dual axis title"
+              },
+              "grid_line_width": "0.5",
+              "grid_line_color": "var(--grid-line-color)"
+            }
+          ],
+          "tooltip": {
+            "background_color": "var(--tooltip-background-color)",
+            "style": {
+              "color": "var(--text-color)",
+              "font_family": "var(--widget-secondary-font-family, Roboto)"
+            }
+          }
+        },
+        "class_name": "highcharts_series_chart_setting",
+        "stacking_group": {},
+        "series_types_by_label_map": {}
+      },
+      "sql_views": [],
+      "parameters": {},
+      "x_axis": {
+        "name": "region",
+        "function": {
+          "field": {
+            "class_name": "table_field",
+            "db_name": "sample_v2",
+            "tbl_name": "sales",
+            "field_name": "region",
+            "field_type": "string"
+          },
+          "class_name": "group"
+        },
+        "is_horizontal_view": false,
+        "is_collapse": false,
+        "is_calc_group_total": true,
+        "is_calc_min_max": false,
+        "is_dynamic_function": false
+      },
+      "y_axis": [
+        {
+          "name": "total_profit",
+          "function": {
+            "field": {
+              "class_name": "table_field",
+              "db_name": "sample_v2",
+              "tbl_name": "sales",
+              "field_name": "total_profit",
+              "field_type": "double"
+            },
+            "class_name": "sum"
+          },
+          "is_horizontal_view": false,
+          "is_collapse": false,
+          "is_calc_group_total": true,
+          "is_calc_min_max": false,
+          "is_dynamic_function": false
+        }
+      ],
+      "class_name": "series_chart_setting"
+    }
   }
 }

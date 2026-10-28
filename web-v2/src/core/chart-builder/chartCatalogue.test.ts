@@ -39,6 +39,19 @@ describe('CHART_TYPES', () => {
     ]);
   });
 
+  it('adds an optional Breakdown to the stacked charts, bars and the circular bar with the axes swapped', () => {
+    expect(chartTypeInfoOf(ChartType.StackedColumn)?.zones.map(zone => [zone.key, zone.title, zone.optional])).toEqual([
+      ['x_axis', 'X-Axis', false],
+      ['y_axis', 'Y-Axis', false],
+      ['legend_optional', 'Legend', true],
+      ['breakdown_optional', 'Breakdown', true]
+    ]);
+    for (const chartType of [ChartType.StackedBar, ChartType.CircularBar]) {
+      expect(chartTypeInfoOf(chartType)?.zones.map(zone => zone.title)).toEqual(['Y-Axis', 'X-Axis', 'Legend', 'Breakdown']);
+    }
+    expect(zoneOf(ChartType.StackedColumn, 'breakdown_optional')).toMatchObject({ maxItems: 1, families: ['Group By', 'Date histogram'] });
+  });
+
   it('tells the inner filters and the input filters without Sorting and Filters apart', () => {
     expect(chartTypeInfoOf(ChartType.DropDownInnerFilter)?.kind).toBe(ChartKind.InnerFilter);
     expect(chartTypeInfoOf(ChartType.SlicerFilter)?.extraZones).toBe(false);
@@ -50,6 +63,7 @@ describe('chartIconOf', () => {
   it.each([
     [ChartType.Donut, 'ic_donut.svg'],
     [ChartType.PivotTable, 'ic_pivot_table.svg'],
+    [ChartType.CircularBar, 'ic_circular_bar.svg'],
     ['arearange', 'ic_chart_area.svg'],
     ['unknown', 'chart_control.svg']
   ])('%s has %s', (chartType, icon) => {

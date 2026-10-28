@@ -54,6 +54,15 @@ const seriesZones = (xTitle = 'X-Axis', yTitle = 'Y-Axis'): ZoneConfig[] => [
   groupZone('legend_optional', 'Legend', { optional: true })
 ];
 
+/**
+ * v1 `STACKING_SERIES_CONFIGS` (`BAR_STACKING_SERIES_CONFIGS` for bars, titles swapped): the series zones and a Breakdown,
+ * whose values stack inside each legend value's column.
+ */
+const stackedZones = (xTitle?: string, yTitle?: string): ZoneConfig[] => [
+  ...seriesZones(xTitle, yTitle),
+  groupZone('breakdown_optional', 'Breakdown', { optional: true })
+];
+
 const PIE_ZONES = [groupZone('legend', 'Legend'), aggregationZone('value', 'Value', { maxItems: 1 })];
 const NUMBER_ZONES = [aggregationZone('value', 'Value', { maxItems: 1 })];
 const TABLE_ZONES = [zone('columns', 'Columns', [F.GroupBy, F.DateHistogram, F.Aggregation, F.None], NONE_DEFAULTS)];
@@ -116,9 +125,13 @@ export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.AreaInverted, 'Area Inverted Axes', 'ic_chart_area.svg', seriesZones()),
   chart(T.Column, 'Column', 'ic_column.svg', seriesZones()),
   chart(T.Bar, 'Bar', 'ic_bar.svg', seriesZones('Y-Axis', 'X-Axis')),
+  chart(T.Lollipop, 'Lollipop', 'ic_lollipop.svg', seriesZones()),
   chart(T.Pie, 'Pie', 'ic_pie.svg', PIE_ZONES),
   chart(T.SemiPie, 'Semi Pie', 'ic_pie.svg', PIE_ZONES),
   chart(T.Donut, 'Donut', 'ic_donut.svg', PIE_ZONES),
+  chart(T.StackedColumn, 'Stacked Column', 'ic_stack_column.svg', stackedZones()),
+  chart(T.StackedBar, 'Stacked Bar', 'ic_stack_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
+  chart(T.CircularBar, 'Circular Bar', 'ic_circular_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
   filter(T.TabFilter, 'Tab', 'ic_tab_filter.svg', VALUES_ZONES),
   filter(T.SingleChoice, 'Single choice', 'ic_single_choice.svg', VALUES_ZONES),
   filter(T.MultiChoice, 'Multi choice', 'ic_multi_choice.svg', VALUES_ZONES),
@@ -143,7 +156,6 @@ const OTHER_ICONS: Readonly<Record<string, string>> = {
   flatten_pivot_table: 'ic_pivot_table.svg',
   arearange: 'ic_chart_area.svg',
   column_range: 'ic_column.svg',
-  lollipop: 'ic_lollipop.svg',
   Parliament: 'ic_parliament.svg',
   variablepie: 'ic_variable_pie.svg',
   scatter: 'ic_scatter.svg',
@@ -157,9 +169,6 @@ const OTHER_ICONS: Readonly<Record<string, string>> = {
   heatmap: 'ic_heatmap.svg',
   wordcloud: 'ic_word_cloud.svg',
   tree_map: 'ic_tree_map.svg',
-  stack_column: 'ic_stack_column.svg',
-  stack_bar: 'ic_stack_bar.svg',
-  circular_bar: 'ic_circular_bar.svg',
   histogram: 'ic_histogram.svg',
   map: 'ic_map.svg',
   spider_web: 'ic-spider-chart.svg',
@@ -191,7 +200,7 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   [T.Column, 'Column'],
   ['column_range', 'Column Range'],
   [T.Bar, 'Bar'],
-  ['lollipop', 'Lollipop'],
+  [T.Lollipop, 'Lollipop'],
   ['Parliament', 'Parliament'],
   [T.Pie, 'Pie'],
   [T.SemiPie, 'Semi Pie'],
@@ -208,9 +217,9 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   ['heatmap', 'Heat maps'],
   ['wordcloud', 'Word Cloud'],
   ['tree_map', 'Tree maps'],
-  ['stack_column', 'Stacked Column'],
-  ['stack_bar', 'Stacked Bar'],
-  ['circular_bar', 'Circular Bar'],
+  [T.StackedColumn, 'Stacked Column'],
+  [T.StackedBar, 'Stacked Bar'],
+  [T.CircularBar, 'Circular Bar'],
   ['histogram', 'Histogram'],
   ['map', 'Map'],
   ['spider_web', 'Spider Web'],

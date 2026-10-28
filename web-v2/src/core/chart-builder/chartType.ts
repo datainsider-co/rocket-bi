@@ -16,6 +16,13 @@ export const ChartType = {
   AreaInverted: 'area_inverted',
   Column: 'column',
   Bar: 'bar',
+  /** A series chart drawn with Highcharts' lollipop series (v1 `SeriesChartOption`, chart type `lollipop`). */
+  Lollipop: 'lollipop',
+  /** Stacked series: the legend's values side by side, each stacking its breakdown's values (v1 `StackedChartOption`). */
+  StackedColumn: 'stack_column',
+  StackedBar: 'stack_bar',
+  /** The stacked bar on a polar pane (v1 `CircularChartOption`). */
+  CircularBar: 'circular_bar',
   Pie: 'pie',
   SemiPie: 'semi_pie',
   Donut: 'Donut',

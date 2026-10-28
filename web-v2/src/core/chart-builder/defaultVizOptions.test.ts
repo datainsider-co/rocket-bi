@@ -29,6 +29,17 @@ describe('defaultVizOptions', () => {
     expect(vizFromSetting({ options: defaultVizOptions(ChartType.TabInnerFilter) }).options).toMatchObject({ displayAs: 'normal', search: { enabled: true } });
   });
 
+  it('turns markers on for the lollipop only, like the running v1', () => {
+    const marker = (chartType: string) => vizFromSetting({ options: defaultVizOptions(chartType) }).options.plotOptions?.series?.marker;
+    expect(marker(ChartType.Lollipop)).toEqual({ enabled: true });
+    expect(marker(ChartType.Column)).toEqual({ enabled: false });
+  });
+
+  it('gives the stacked charts their own classes', () => {
+    expect(defaultVizOptions(ChartType.StackedBar)).toMatchObject({ class_name: 'stacking_series_chart_setting', options: { chart: { type: 'bar' } } });
+    expect(defaultVizOptions(ChartType.CircularBar)).toMatchObject({ class_name: 'circular_bar_chart_setting', options: { chart: { polar: true, inverted: true } } });
+  });
+
   it('gives a fresh object each time', () => {
     const first = defaultVizOptions(ChartType.Column);
     expect(first).not.toBe(defaultVizOptions(ChartType.Column));
