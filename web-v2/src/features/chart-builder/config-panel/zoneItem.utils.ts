@@ -83,3 +83,8 @@ export function withItemConfig(item: FunctionData, config: ItemConfig): Function
     ...(familyChanged && { displayAsColumn: false })
   };
 }
+
+/** An item on a measure, whose formula its menu edits. */
+export function isMeasureItem(item: Pick<FunctionData, 'field'>): boolean {
+  return item.field['class_name'] === 'expression_field';
+}

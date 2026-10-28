@@ -8,6 +8,14 @@ import { FieldMenuView } from './FieldMenuView';
 import { MenuLinkView } from './MenuLinkView';
 import { showsFamily, showsType, SORT_OPTIONS, topNLabel, withFamily } from './zoneItem.utils';
 
+/** The item's "..." menu. */
+export interface ItemMenu {
+  onConfig: () => void;
+  onRemove: () => void;
+  /** On a measure: edits its formula (v1 `ConfigDraggable.editExpression`). */
+  onEditMeasure?: () => void;
+}
+
 interface ZoneItemViewProps {
   item: FunctionData;
   /** In the Sorting zone, the item shows its sorting and top N. */
@@ -16,14 +24,13 @@ interface ZoneItemViewProps {
   tables: readonly TableNode[];
   onChange: (item: FunctionData) => void;
   onPickField: (field: DroppedField) => void;
-  onConfig: () => void;
-  onRemove: () => void;
+  menu: ItemMenu;
 }
 
 const asItems = (keys: readonly string[]): NonNullable<MenuProps['items']> => keys.map(key => ({ key, label: key }));
 
 /** An item of a zone (v1 `DraggableItem`): its family, type and sorting as menus, its name, and a menu to config or remove it. */
-export function ZoneItemView({ item, sorting, tables, onChange, onPickField, onConfig, onRemove }: ZoneItemViewProps) {
+export function ZoneItemView({ item, sorting, tables, onChange, onPickField, menu }: ZoneItemViewProps) {
   const typeItems = typeOptionsOf(item.field, item.functionFamily).map((group, index) =>
     group.label ? { type: 'group' as const, key: group.label, label: group.label, children: asItems(group.types) } : { type: 'group' as const, key: `types-${index}`, children: asItems(group.types) }
   );
@@ -69,11 +76,8 @@ export function ZoneItemView({ item, sorting, tables, onChange, onPickField, onC
       <Dropdown
         trigger={['click']}
         menu={{
-          items: [
-            { key: 'config', label: 'Config' },
-            { key: 'remove', label: 'Remove', danger: true }
-          ],
-          onClick: ({ key }) => (key === 'config' ? onConfig() : onRemove())
+          items: [...(menu.onEditMeasure ? [{ key: 'measure', label: 'Edit Measure' }] : []), { key: 'config', label: 'Config' }, { key: 'remove', label: 'Remove', danger: true }],
+          onClick: ({ key }) => (key === 'measure' ? menu.onEditMeasure?.() : key === 'config' ? menu.onConfig() : menu.onRemove())
         }}
       >
         <Button type="text" size="small" icon={<MoreOutlined />} aria-label={`More actions for ${item.name}`} />

@@ -1,17 +1,19 @@
 import { SORTING_ZONE, type ZoneConfig } from '@/core/chart-builder/chartCatalogue';
 import type { FunctionData } from '@/core/chart-builder/FunctionData';
+import type { JsonObject } from '@/core/json/json';
 import { FieldDropZone } from '@/shared/field-dnd/FieldDropZone';
 import type { TableNode } from '../field-tree/fieldTree.utils';
 import type { DroppedField } from '../state/builderState.utils';
 import { DropHintView } from './DropHintView';
+import { isMeasureItem } from './zoneItem.utils';
 import { ZoneItemView } from './ZoneItemView';
 import { ZoneTitleView } from './ZoneTitleView';
 
 interface ZoneViewProps {
   zone: ZoneConfig;
   items: readonly FunctionData[];
-  /** Picking fields by click: the tables, adding one at the end, swapping an item's. */
-  fields: { tables: readonly TableNode[]; onAdd: (field: DroppedField) => void; onSwap: (id: number, field: DroppedField) => void };
+  /** Picking fields by click: the tables, adding one at the end, swapping an item's; editing a measure. */
+  fields: { tables: readonly TableNode[]; onAdd: (field: DroppedField) => void; onSwap: (id: number, field: DroppedField) => void; onEditMeasure?: (field: JsonObject) => void };
   onChange: (item: FunctionData) => void;
   onConfig: (item: FunctionData) => void;
   onRemove: (id: number) => void;
@@ -37,8 +39,11 @@ export function ZoneView({ zone, items, fields, onChange, onConfig, onRemove }: 
                 tables={fields.tables}
                 onChange={onChange}
                 onPickField={field => fields.onSwap(item.id, field)}
-                onConfig={() => onConfig(item)}
-                onRemove={() => onRemove(item.id)}
+                menu={{
+                  onConfig: () => onConfig(item),
+                  onRemove: () => onRemove(item.id),
+                  onEditMeasure: fields.onEditMeasure && isMeasureItem(item) ? () => fields.onEditMeasure?.(item.field) : undefined
+                }}
               />
             )
           );

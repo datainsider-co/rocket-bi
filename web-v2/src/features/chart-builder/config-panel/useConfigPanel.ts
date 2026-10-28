@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import type { ConditionData } from '@/core/chart-builder/ConditionData';
 import type { FunctionData } from '@/core/chart-builder/FunctionData';
+import { useEditMeasure } from '../field-actions/EditMeasureContext';
 import { useBuilder } from '../state/BuilderContext';
 import type { DroppedField } from '../state/builderState.utils';
 import { useFieldChoices } from './FieldChoicesContext';
@@ -10,6 +11,7 @@ import { conditionChips } from './filter/conditionEditor.utils';
 export function useConfigPanel() {
   const { state, dispatch, controls } = useBuilder();
   const tables = useFieldChoices();
+  const onEditMeasure = useEditMeasure();
   const items = state.data.configs;
   const onItemChange = useCallback((zone: string, item: FunctionData) => dispatch({ type: 'updateItem', zone, item }), [dispatch]);
   const onItemRemove = useCallback((zone: string, id: number) => dispatch({ type: 'removeItem', zone, id }), [dispatch]);
@@ -18,9 +20,10 @@ export function useConfigPanel() {
       tables,
       // v1 `ConfigDraggable.handleSelectColumn`: a field picked by click goes last.
       onAdd: (zone: string, field: DroppedField) => dispatch({ type: 'drop', drop: { type: 'insert', zoneId: zone, index: items[zone]?.length ?? 0 }, field }),
-      onSwap: (zone: string, id: number, field: DroppedField) => dispatch({ type: 'changeItemField', zone, id, field })
+      onSwap: (zone: string, id: number, field: DroppedField) => dispatch({ type: 'changeItemField', zone, id, field }),
+      onEditMeasure
     }),
-    [tables, items, dispatch]
+    [tables, items, dispatch, onEditMeasure]
   );
   const filter = useMemo(
     () => ({

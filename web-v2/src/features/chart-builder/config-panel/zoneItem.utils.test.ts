@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { functionDataFromJson, type FunctionData } from '@/core/chart-builder/FunctionData';
-import { canSort, configWithFamily, itemConfigOf, itemConfigSchema, showsFamily, showsType, topNLabel, withFamily, withItemConfig, type ItemConfig } from './zoneItem.utils';
+import { canSort, configWithFamily, isMeasureItem, itemConfigOf, itemConfigSchema, showsFamily, showsType, topNLabel, withFamily, withItemConfig, type ItemConfig } from './zoneItem.utils';
 
 const field = (type: string, className = 'table_field') => ({ class_name: className, db_name: 'db', tbl_name: 'sales', field_name: 'col', field_type: type });
 
@@ -132,5 +132,13 @@ describe('withItemConfig', () => {
 
   it('stops showing as a column when the family changes', () => {
     expect(withItemConfig(item(), { ...itemConfigOf(item()), family: 'Group By', type: '' }).displayAsColumn).toBe(false);
+  });
+});
+
+describe('isMeasureItem', () => {
+  it('tells measures from other fields', () => {
+    expect(isMeasureItem({ field: { class_name: 'expression_field' } })).toBe(true);
+    expect(isMeasureItem({ field: { class_name: 'calculated_field' } })).toBe(false);
+    expect(isMeasureItem({ field: {} })).toBe(false);
   });
 });
