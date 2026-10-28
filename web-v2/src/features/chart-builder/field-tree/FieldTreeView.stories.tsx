@@ -4,7 +4,8 @@ import type { ChartControl } from '@/core/chart-builder/chartControls';
 import { databaseSchemaFromJson } from '@/core/schema/SchemaService';
 import schemaJson from '@/core/schema/database.fixture.json';
 import { FieldDndProvider } from '@/shared/field-dnd/FieldDndProvider';
-import { searchControls, searchTableNodes, tableNodesOf, toggled } from './fieldTree.utils';
+import { tableActionsOf } from '../field-actions/fieldActions.utils';
+import { searchControls, searchTableNodes, tableNodesOf, toggled, type TreeActions } from './fieldTree.utils';
 import { FieldTreeView } from './FieldTreeView';
 
 const nodes = tableNodesOf(databaseSchemaFromJson(schemaJson).tables);
@@ -14,6 +15,13 @@ const CONTROLS: ChartControl[] = [
   { id: 39, title: 'Region', chartType: 'tab_filter', infoType: 'Normal', data: {} },
   { id: 50, title: 'Group by', chartType: 'tab_filter', infoType: 'FunctionController', data: {} }
 ];
+
+/** The table and column menus; the actions only log here. */
+const ACTIONS: TreeActions = {
+  tableActionsOf: () => tableActionsOf({ dbName: 'sample_v2', tableType: 'view' }),
+  onTableAction: (table, action) => console.info('table action', table, action),
+  onColumnAction: (node, action) => console.info('column action', node.title, action)
+};
 
 /** The view with its state kept here, the way `useFieldTree` keeps it. */
 function Playground({ adhoc, status }: { adhoc: boolean; status: 'loading' | 'error' | 'ready' }) {
@@ -26,7 +34,7 @@ function Playground({ adhoc, status }: { adhoc: boolean; status: 'loading' | 'er
         <FieldTreeView
           databases={adhoc ? undefined : { options: [{ name: 'sample_v2', displayName: 'sample_v2' }], value: 'sample_v2', onChange: () => {} }}
           search={{ keyword, onChange: setKeyword }}
-          tables={{ nodes: shown, expanded, onToggle: key => setExpanded(current => toggled(current, key)), status, error: 'Loading the sample_v2 database has failed' }}
+          tables={{ nodes: shown, expanded, onToggle: key => setExpanded(current => toggled(current, key)), status, error: 'Loading the sample_v2 database has failed', actions: adhoc ? undefined : ACTIONS }}
           controls={adhoc ? undefined : searchControls(CONTROLS, keyword)}
         />
       </div>

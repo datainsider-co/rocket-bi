@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { dashboardFromJson } from '@/core/dashboard/Dashboard';
 import { widgetFromJson } from '@/core/dashboard/Widget';
-import { ChartInfoType, chartControlsOf } from './chartControls';
+import { ChartInfoType, chartControlsOf, controlValuesOf } from './chartControls';
 import stored from './builder.fixture.json';
 
 const widgets = dashboardFromJson(stored).widgets;
@@ -52,5 +52,23 @@ describe('chartControlsOf', () => {
     const untitled = widgetFromJson({ class_name: 'chart_v3', id: 5, name: 'Sales', extra_data: { current_chart_type: 'pie' }, setting: { class_name: 'pie_chart_setting' } });
     const text = widgetFromJson({ class_name: 'text_widget', id: 6, name: 'Note', content: '' });
     expect(chartControlsOf([untitled, text], { mainDate: false }).map(control => control.title)).toEqual(['Sales']);
+  });
+});
+
+describe('controlValuesOf', () => {
+  it('gives the range of a date select and a slicer', () => {
+    expect(controlValuesOf('date_select_filter')).toEqual([
+      { type: 'min_value', label: 'Start date' },
+      { type: 'max_value', label: 'End date' }
+    ]);
+    expect(controlValuesOf('slicer_filter').map(value => value.label)).toEqual(['Start value', 'End value']);
+  });
+
+  it.each(['tab_filter', 'column', 'pie', ''])('gives the selected value of %s', chartType => {
+    expect(controlValuesOf(chartType)).toEqual([{ type: 'selected_value', label: 'Selected value' }]);
+  });
+
+  it.each(['kpi', 'flatten_table', 'table', 'pivot_table', 'flatten_pivot_table'])('gives nothing for %s', chartType => {
+    expect(controlValuesOf(chartType)).toEqual([]);
   });
 });

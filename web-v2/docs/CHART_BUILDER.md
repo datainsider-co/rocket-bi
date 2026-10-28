@@ -53,8 +53,8 @@ Code v1 cần đọc:
   hiện setting đang lưu, và setting chỉ bị thay khi người dùng sửa config. Không dựng ngược configs từ setting.
 - **Preview** áp các control hiện tại của dashboard (`buildChartQuery`), giống v1.
 - **Tạm thời chưa làm trong builder:**
-  - Add Calculated Field, Add Measure, Update Table By Query và Delete table trong cây field. Phần này phải làm
-    sau khi ChartBuilder xong (CB8).
+  - Add Calculated Field, Add Measure và Update Table By Query trong cây field. Làm sau khi ChartBuilder xong, đã làm
+    ở CB8.
   - Matching location của Map: không port, vì đây là anti-pattern của v1. Map sẽ có thiết kế riêng.
 
 ## Phát hiện ở CB0 (2026-10-27)
@@ -182,8 +182,585 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
     thì bỏ qua.
 - **Icon chart của v1** được copy sang `public/chart-builder/charts`, gồm cả type chưa build được, vì control và
   picker (CB5) cần dùng.
-- **Chưa làm ở bước này:** action trên bảng và cột (CB8). Cây field chưa được gắn vào builder; việc này làm ở CB4 và
+- **Chưa làm ở bước này:** action trên bảng và cột (đã làm ở CB8). Cây field chưa được gắn vào builder; việc này làm ở CB4 và
   CB5.
+
+## Quyết định ở CB4 (2026-10-27)
+
+- **Context của builder** (`state/BuilderContext.tsx`): `BuilderProvider` giữ state, setting và `dispatch`, cùng chart
+  control của dashboard, `sqlQueryOf` và `dashboardId`. Các panel đọc nó qua `useBuilder`.
+- **Kéo thả** (`features/chart-builder/dnd`): `BuilderDndProvider` bọc cây field và config panel trong một
+  `FieldDndProvider`.
+  - Zone id là key đã lưu (`x_axis`, `sorting`, ...). Zone Filters có id `filters`, thả vào đó thì tạo nhóm OR mới.
+    Mỗi nhóm AND là một zone `filters:<groupId>` nằm trong zone Filters, và được ưu tiên vì là zone trong cùng.
+  - Zone config nhận cột, item và condition. Trong các chart control, nó chỉ nhận function controller (v1
+    `disabledDropConfig`).
+  - Zone Filters nhận cột, item và condition, nhưng không nhận measure và chart control.
+  - Item chuyển giữa hai zone config thì move. Kéo vào / ra Sorting, và giữa zone config với Filters thì copy.
+    Condition kéo sang nhóm khác thì move, giữ id; nhóm bị rỗng thì xoá.
+  - `builderActionOf` đổi `DropAction` thành action của reducer: condition kéo vào zone config thành item mới, item
+    kéo vào Filters thành condition mới.
+- **Reducer bổ sung:**
+  - Thả lên item của zone một item đã đầy thì thay item đó: giữ id, và giữ function nếu cột cùng loại (v1
+    `mergeConfig` + `isDiffFieldType`). Measure và chart control luôn lấy function mặc định.
+  - Function controller thả vào zone thành item `Dynamic`: field là `chart_control_field` như v1, `dynamic_function`
+    là data của control.
+  - `addCondition` nhận vị trí trong nhóm. Thêm `moveCondition`.
+- **Item của zone** (v1 `DraggableItem`): function family, type và sorting (chỉ ở zone Sorting) là các link mở menu.
+  Family lấy theo kiểu cột (`core/chart-builder/functionOptions`), không theo zone, như v1. Measure và chart control
+  không có menu family. Menu "..." gồm Config và Remove.
+- **Dialog Config** (v1 `ConfigModal`) gồm display name, function, sorting và top N. Sorting chỉ có ở zone Sorting
+  hoặc với aggregation; top N chỉ có khi đã sort. Validate bằng zod như v1: display name bắt buộc, top N là số nguyên
+  dương khi đang bật. Khác v1:
+  - Đổi family trong dialog thì lấy type đầu tiên theo kiểu cột, giống menu nhanh. Dialog v1 luôn lấy Count all cho
+    aggregation, kể cả cột số.
+  - Top N lưu dạng số; v1 lưu chuỗi đã gõ. v1 đọc được cả hai.
+  - Display as column: v1 không có UI cho nó, nên làm cùng Pivot Table ở CB7.
+- **Trình sửa condition** (v1 `InternalFilterPopover`):
+  - Một danh sách condition chung, thay cho hai chế độ Range / Selection của v1. Khi lưu `in` / `not in` trên cột số
+    hoặc ngày, `filter_mode_selected` là `selection` để v1 mở lại đúng.
+  - Manual Input: condition dạng danh sách lấy giá trị cột từ server như v1 `SelectionFilter` (`select_distinct`, sort
+    ASC, 80 dòng mỗi trang, nút Load more). Giá trị rỗng và null không hiện, vì condition danh sách bỏ qua chúng.
+    Condition khác dùng `FilterValueInput`, chuyển từ header filter sang `shared/filter-input`.
+  - Chart Control: chọn control, rồi chọn giá trị của control cho condition: `selected_value`, hoặc start / end với
+    date select, slicer và main date filter. Number và table không làm control được (v1 `isEnableControl`).
+  - Đổi chế độ hoặc đổi control thì xoá giá trị đã chọn. v1 nhớ lại giá trị của chế độ trước.
+  - Condition không nhận giá trị (`is null`, ...) không có chế độ Chart Control.
+- **Không mang sang:** thả chart control vào zone Filters. v1 tạo condition chưa có field rồi hỏi field; v2 làm việc
+  này bằng chế độ Chart Control của trình sửa.
+- **Chưa làm ở bước này:**
+  - Chọn field bằng menu bảng / cột (v1 `SelectFieldContext`): link "click here" của zone và click tên item hoặc
+    condition để đổi field. Đã làm ở CB5.
+  - Edit Measure trong menu của item. Đã làm ở CB8.
+
+## Quyết định ở CB5 (2026-10-27)
+
+- **Gắn vào dashboard qua một host component:**
+  - Route `/dashboard/:name` dùng `DashboardBuilderPage` (`features/chart-builder`). Trang này truyền
+    `ChartBuilderHost` cho `DashboardPage`, và host là một lazy chunk riêng. Dashboard không import ChartBuilder;
+    route embedded vẫn dùng `DashboardPage` không có builder.
+  - Trang dashboard giữ request đang mở (`ChartBuilderRequest`: `addChart`, `configChart`, `addInnerFilter`,
+    `configInnerFilter`). `ChartBuilderBridge` chỉ còn `open(request)`.
+  - Host được render bên trong `DashboardControlsProvider`, nên preview áp các control hiện tại của dashboard và các
+    header filter (nếu chart bị ảnh hưởng bởi filter), giống v1.
+- **Luồng:**
+  - Add chart: picker trước (lưới 39 chart + 9 filter như v1). Loại chưa build được thì disabled.
+  - Config chart: mở thẳng builder trên chart.
+  - Add chart filter: bắt đầu bằng Dropdown, loại inner filter đầu tiên của v1.
+  - Builder có ô chọn loại chart để đổi type, gồm các loại cùng nhóm (chart + filter, hoặc inner filter). v1 dùng hàng
+    icon kèm "View all".
+- **Lưu** (`host/builderSession.utils.ts`, JSON trong `core/chart-builder/chartWidget.ts`):
+  - JSON widget giống v1 `getFinalChartInfo`: name là title, description là subtitle, `background_color` /
+    `text_color` lấy từ options (key snake_case đã lưu), nếu thiếu thì dùng `#0000001A` / `#fff`. Kiểm bằng
+    `builderRequests.fixture.json`: dựng lại đúng 19 body mà v1 gửi.
+  - Chart sửa giữ các key của nó, kể cả `chart_filter`. `extra_data` của builder được ghi đè lên `extra_data` đã lưu.
+  - Chart mới được tạo ở -1/-1 với kích thước v1 `getDefaultSize` theo setting (`chartSizeOf`). Grid sẽ tìm chỗ
+    trống, như M6.
+  - Inner filter được lưu bằng cách sửa chart cha, với `chart_filter.id = -(id + 10)`. "Delete chart filter" bỏ
+    `chart_filter` mà không mở builder.
+  - Lưu qua `useDashboardEditor` (cập nhật cả cache). Lỗi thì báo bằng message của server và giữ builder mở.
+- **Nút Add / Update** bị disabled khi zone chưa dựng được setting hoặc preview lỗi (v1 `isDisableAddOrUpdate`).
+- **Rời builder:** chỉ hỏi xác nhận khi đã sửa gì đó. `dirty` nghĩa là state khác state lúc mở, vì reducer trả lại đúng
+  state cũ với action không đổi gì.
+- **Control trong builder:** mọi chart khác của dashboard cùng main date filter. Inner filter không có control nào,
+  như v1.
+- **Chart ad hoc** (setting có `sql_views`): cây field chỉ hiện bảng của view, đọc bằng `databases/adhoc/tables` với
+  câu SQL đã thay tham số. Không có tab Chart Control. Nếu đọc lỗi thì mở builder trên database như v1.
+  - **Khác v1:** tham số lấy theo giá trị đã lưu của chart. v1 lấy giá trị hiện tại của các input.
+- **Preview** dùng `ChartRenderer` / `FilterRenderer` và `useWidgetData` (thêm cờ `enabled`) của dashboard:
+  - Id là id của widget đang sửa (chart mới là -1), để inner filter và selection của chính nó vẫn có tác dụng.
+  - Filter widget giữ selection riêng của preview.
+  - Không query dưới quyền View As (host bọc `ViewAsProvider` không có user).
+  - Sort của table trong preview chưa làm.
+- **Modal render tại chỗ** (`getContainer={false}`), không qua portal, để biến CSS theme của dashboard áp được lên
+  preview.
+- **Chọn field bằng menu** (v1 `SelectFieldContext`, `config-panel/FieldMenuView`):
+  - "click here" của mỗi zone thêm field vào cuối zone; ở zone Filters thì tạo nhóm mới.
+  - Click tên item hoặc tên condition để đổi field: cùng loại cột thì giữ function / condition, khác loại thì về mặc
+    định (`changeItemField`, `changeConditionField`).
+  - Menu của Filters không có measure. Item là chart control thì không đổi field được: v1 mở danh sách control, v2
+    chưa làm.
+  - Bảng lấy từ `useFieldTree` qua `FieldChoicesContext`.
+- **Donut:** renderer của dashboard vẽ `donut_chart_setting` bằng code của pie. v1 `DonutChart` chỉ khác `PieChart`
+  ở `innerSize` trong options. Trước bước này Donut đã build được nhưng hiện "not supported".
+- **Tab Settings** chưa có nội dung; làm ở CB6.
+
+## Quyết định ở CB6a (2026-10-28)
+
+- **Sửa options như v1** (`core/chart-builder/vizChanges.ts`):
+  - Mỗi thay đổi là một lodash path theo camelCase của v1 (`title.style.fontSize`, `yAxis[1].visible`,
+    `plotOptions.series.response.<vizKey(name)>.name`), giống `ChartOption.setOption`.
+  - `applyVizChanges` đổi options đã lưu sang camelCase, áp các path rồi đổi lại bằng `toStoredKeys`, nên v1 đọc được.
+    Giá trị `undefined` thì xoá key (khi gửi đi, `undefined` của v1 cũng mất).
+  - Reducer có action `vizChanges` thay cho `options`. Sửa options không đổi `touched`, nên chart chưa có builder data
+    vẫn giữ setting đã lưu, chỉ thay phần options (quyết định D2).
+  - Query không gửi options, nên sửa setting không query lại; preview vẽ lại ngay.
+- **Code** ở `features/chart-builder/settings`:
+  - `fields/`: control dùng chung (text và number áp dụng khi Enter hoặc mất focus như v1 `InputSetting`, select,
+    color, toggle, align, Revert to default).
+  - `tabs/`: mỗi tab một view. Giá trị mặc định và các thay đổi gồm nhiều key nằm trong `commonTabs.utils.ts` và
+    `seriesTabs.utils.ts`.
+  - `SettingsPanel` chọn bộ tab theo loại chart. Ở bước này chỉ chart series (Column, Bar, Line, Spline, Area và các
+    biến thể inverted) có tab; các loại khác vẫn báo chưa có (CB6b, CB6c).
+- **Bố cục:** các tab là panel thu gọn được theo thứ tự của v1, mở sẵn Title & Subtitle. Tab Settings chiếm chỗ của
+  cây field và config panel, preview giữ nguyên kích thước. Nền của preview lấy theo `background` của options.
+- **Màu là biến theme** (`var(--text-color)`, ...): ô màu hiện "Theme" với màu hiện tại; chọn màu thì lưu hex.
+- **Display:** chọn từng series theo response của preview (key `vizKey`, sắp theo tên như v1). Chưa có data thì báo
+  là series sẽ hiện khi chart có data.
+- **Dual Y Axis:** bật thì chuyển series thứ hai sang trục phải, tắt thì đưa mọi series về trục chính và bỏ min /
+  max của trục phải, như v1. Series nào dùng trục phải thì chọn ở Display.
+- **Khác v1:**
+  - Tooltip: v1 lưu font vào `tooltip.fontFamily`, nhưng cả tab lẫn chart đều không đọc key này. v2 lưu vào
+    `tooltip.style.fontFamily`. Revert về màu của theme, không về tooltip tối `#333645`.
+  - Background: v1 luôn hiện trắng (truyền nhầm prop); v2 hiện màu của chart.
+  - Gridlines: v1 coi `'0'` (đã tắt) là vẫn bật; v2 đọc theo số.
+  - Display: bỏ hai ô Type và Line width vì v1 luôn disable chúng. Revert bỏ `type` riêng của series thay vì ghi chart
+    type, vì `line_inverted` không phải type của Highcharts. Marker và dash theo type Highcharts của series, nên Spline
+    cũng có dash.
+  - Data label condition: bật Min / Max thì lưu luôn giá trị đang hiện. v1 ghi `condition.min = 0` (số, không phải
+    object), và khi bật Max lại ghi nhầm vào Min.
+  - Display unit của Donut lưu dưới `plot_options.pie`, nơi renderer đọc. v1 ghi vào `series`.
+  - Không ghi default lúc mở tab. Các tab trục của v1 tự revert khi trục chưa có setting (`created`).
+- **Lưu nhưng v2 chưa dùng:** `is_enable_drilldown` (menu của v2 chưa đọc cờ này) và `legend.max_height`. Các key này
+  vẫn được lưu để v1 dùng.
+- **Data label của pie** (label format, distance) và các tab của pie, number, table: CB6b.
+
+## Quyết định ở CB6b (2026-10-28)
+
+- **Pie, Semi pie, Donut** (v1 `PieSetting` / `DonutSetting`): Legend, Title & Subtitle, Data Color, Data Label,
+  Background, Tooltip, Other, theo thứ tự của v1 (Legend đứng đầu). Data Label có thêm Label style
+  (`name_and_value`, `name_and_percent`, `name`) và Label position (`distance`, -100 đến 60, slider áp dụng khi thả
+  tay), lưu dưới `plot_options.pie.data_labels`.
+- **Number** (v1 `NumberSetting`): Title & Subtitle, Theme, Icon, Data Label, Tooltip, Background, Other.
+  - Theme: 6 theme v1 cho chọn (`style_1` đến `style_5`, `style_area_1`), ảnh ở `public/chart-builder/kpi-themes`,
+    preset ở `settings/number/kpiThemes.json`. Chọn theme thì thay nguyên từng key của theme, giữ text của title,
+    subtitle, prefix, postfix, icon đang chọn và lựa chọn trend line (v1 `ThemeTab`).
+  - Icon: lưới icon `setting-icon-*` của v1 theo nhóm (`kpiIcons.json`), lọc theo tên, cùng màu icon, màu nền và
+    hình dạng (bo góc). v1 có nhóm Recent lưu trong local storage; v2 chưa làm.
+  - **Khác v1:** chart chưa có icon mà tắt Show icon thì v1 lại bật icon của theme; v2 giữ đúng lựa chọn. Revert của
+    Data Label không ghi `displayUnit` ở gốc options (key mà không ai đọc).
+  - **Chưa làm:** tab Comparison, vì renderer KPI của v2 chưa vẽ phần so sánh và trend line. Tab Tooltip giữ như v1
+    nhưng KPI không có tooltip để áp.
+- **Table** (theo lựa chọn 2026-10-28): chỉ các tab mà renderer table của v2 đọc: Title & Subtitle (có toggle bật /
+  tắt như v1), Background và Other (display unit mặc định None, precision, dấu thập phân, dấu phân cách hàng nghìn).
+  Style, Grid, Header, Values, Field formatting, Conditional formatting và Tooltip của v1 làm cùng renderer table vẽ
+  được các style đó (CB7). Font, màu và căn lề của title trong table hiện chưa được renderer áp.
+
+## Quyết định ở CB6c (2026-10-28)
+
+- **Tab của filter** (v1 `TabFilterSetting`, `SlicerFilterSetting`, `DateFilterSetting`, `InputFilterSetting`,
+  `TreeFilterSetting`): Title (chỉ title, không subtitle và căn lề, như v1 `FilterTitleTab`), tab control theo loại
+  filter, Background, Other. Inner filter (Dropdown, Tab của chart) không có Title và Background.
+  - Tab, Single / Multi choice, Dropdown: Position (row / column), màu active / inactive, search box và placeholder.
+    Dropdown không có các mục này; inner filter không có Position. Choice dùng `choice_active_color` /
+    `choice_de_active_color` như v1. Ô màu hiện màu mà renderer đang vẽ (`tabFilterColors`).
+  - Slicer: Step (trừ slicer theo ngày), giá trị mặc định, so sánh From / To (`from.equal`, `to.equal`).
+  - Date select, Input: chỉ giá trị mặc định.
+  - Tree: màu active / inactive, giá trị mặc định.
+- **Giá trị mặc định** (`settings/filter/filterDefault.utils.ts`, v1 `DefaultValueSetting`):
+  - Nút "Use the preview's selection" lưu selection hiện tại của filter trong preview vào `default.setting`; Reset ghi
+    `null` như v1. Tab hiện giá trị đang lưu, và nút chỉ bật khi selection khác giá trị đó.
+  - Preview của filter bắt đầu từ giá trị mặc định đang lưu (`defaultControlValues`), như trên dashboard.
+  - `value` có dạng mà dashboard đọc lại: danh sách giá trị (tab, dropdown, key cột với function control), cặp
+    `[from, to]` (slicer), `{ mode, dates }` (date select), `{ selected_keys, expanded_keys }` (tree, giữ
+    `expanded_keys` đã lưu), chuỗi (input). Test khứ hồi: giá trị ghi ra được `defaultControlValues` đọc lại đúng
+    selection.
+  - Filter theo giá trị (tab, dropdown) lưu thêm `conditions` là condition `in` của v1, vì dashboard v1 dùng nó để áp
+    giá trị mặc định cho inner filter. Các loại khác v1 không đọc `conditions` (`isEnableFilter` luôn false), nên v2
+    không ghi.
+  - Chọn All (không chọn gì) thì không có giá trị mặc định (`null`).
+- **Khác v1:**
+  - v1 lưu màu inactive vào `de_active_color` nhưng đọc `deactivate_color`; v2 đọc và ghi `de_active_color`, key mà
+    renderer đọc.
+  - Revert của Tab controls giữ giá trị mặc định; v1 xoá luôn nó. Giá trị mặc định có nút Reset riêng.
+  - Ô placeholder bị disable khi tắt search box (v1 viết sai tên prop nên ô này không bao giờ bị disable).
+  - Slicer lưu giá trị mặc định là cặp `[from, to]`. Slicer thường của v1 lưu object range, trong khi chính dashboard
+    v1 lại đọc theo cặp.
+- **Chưa làm:** setting của slicer không có cột (v1 `DynamicSettingTab`: min / max, dùng với ngày), vì builder v2 chưa
+  tạo được slicer không cột.
+
+## Quyết định ở CB7a (2026-10-28)
+
+Number: date range, comparison và trend line (v1 `ComparisonUtils`, `NumberWidget`, tab Comparison). Spec lấy từ v1 và
+kiểm bằng backend local.
+
+- **Lõi thuần** `core/query/comparison.ts`, đọc `data_range`, `comparison`, `trend_line` trong options đã lưu:
+  - Điều kiện theo mode: `this_*` → `current_*`, `last_day/week/month/quarter/year` → `last_n_*` = 1,
+    `last_7_days` / `last_30_days` → `last_n_day` 7 / 30, `custom` → `between_and_including` theo range đã lưu,
+    `all_time` → không có điều kiện.
+  - Comparison bật: gửi `compare_request` ở gốc body (`mode: "RawValues"`, server chỉ nhận PascalCase). Kỳ so sánh của
+    mode tương đối là cùng điều kiện kèm `interval_function` (`past_n_*`); của range custom là range tính sẵn (kỳ
+    trước có cùng số ngày, hoặc lùi 1 tháng / quý / năm); comparison custom dùng range riêng của nó. All time so với
+    không gì cả, nên giá trị so sánh là tổng.
+  - Chỉ bật date range: thêm một filter request trên cột ngày.
+  - `buildChartQuery` gắn cả hai, nên dashboard, preview và export đều dùng. Response đọc
+    `compare_responses.RawValues` thành `compareValue`.
+- **Trend line:** một query series thứ hai (`useKpiTrend`), giá trị theo thời gian (`Trend by` → `to_*_num`), sắp
+  tăng dần, trong range. Vẽ bằng spline / areaspline trơn: không trục, legend, tooltip.
+  - Server OR các phần tử của `filters` (mỗi nhóm của zone Filters là một `and`; đã thử trên backend local). Vì vậy
+    điều kiện range được `and` vào từng nhóm, không thêm thành phần tử riêng. Bản đầu của CB7a thêm riêng, nên chart có
+    filter thì trend line bỏ qua range.
+- **Cột ngày trong cột nested** (`` `nested.inner` ``, hoặc bảng tên có dấu chấm như v1 `SchemaUtils.isNested`):
+  - Mọi điều kiện trên cột ngày có `scalar_function: get_array_element` (index 1): range, hai kỳ của
+    `compare_request`, filter request, filter của trend line.
+  - Trục và sort của trend line có `get_array_element` làm `inner_fn` của `to_*_num`, như v1 làm với item của zone
+    (`DiFunctionResolver`).
+  - Tab Date Range liệt kê cả cột ngày trong cột nested, nhãn `bảng.nested.cột`.
+  - Backend local: server nhận shape này (scalar lạ thì lỗi 400 khi parse), nhưng MySQL không có `get_array_element`
+    (500 `an implementation is missing`). Cột nested chỉ có trên ClickHouse, nên chưa chạy được trên stack local.
+- **Dropdown range cho người xem** (v1 `DateRangeDropdown`): trên layout không theme, khi bật date range, nằm giữa
+  header và giá trị.
+  - Nhãn là range dạng `MMM D, YYYY - MMM D, YYYY` (mode tương đối tính theo hôm nay), `All Time` khi không có range.
+  - Mở đúng popover của main date (`MainDateCalendarView`): 14 mode của v1 kể cả Custom và All Time, hai lịch,
+    Cancel / Apply.
+  - Lựa chọn chỉ nằm trong view của chart (`ChartView.dateRange`, cùng chỗ với drill / zoom / sort), không lưu, mất khi
+    reload, như v1. `viewedSetting` ghi `data_range.mode` / `date_range` lên setting đang xem (`withDateRange`), nên
+    giá trị, comparison, trend line và export đều đi qua `buildChartQuery` như cũ.
+  - Preview của builder chỉ hiện nhãn, không mở popover: range sửa ở tab Date Range.
+  - Đã kiểm trên dashboard: chọn Last Month thì `compare_request` và filter của trend line đổi sang `last_n_month`.
+- **Layout của KPI** theo v1:
+  - Không theme: PercentageBar dưới giá trị (icon lên / xuống, % không dấu, giá trị so sánh; xanh `#4dcf36` / đỏ
+    `#ea6b6b`), trend line xanh / đỏ phía dưới.
+  - `style_area_1`: icon lớn bên trái, giá trị và % trên một hàng, trend line dọc đáy card cao 126px.
+  - Theme khác có trend line: trend line bên phải (70%, tối đa 296px), mờ dần sang trái.
+  - Theme khác không có trend line: % dạng pill ở góc trên phải.
+  - Màu của %: màu của giá trị (`color_by_inherit`), hoặc màu tăng / giảm. Màu trend line: màu riêng, hoặc màu của
+    % (`color_by_percentage`).
+- **Tab Date Range** (v1 Comparison tab): bật date range, cột ngày (mọi cột ngày của các bảng trong builder, như
+  v1), mode, ngày custom, Compare with với kỳ so sánh, Trend line (Display as, màu, Trend by), Revert tắt cả ba. Chỉ
+  hiện khi có cột ngày. Đổi mode thì lưu luôn range như v1, và range của comparison preset đi theo.
+- **Khác v1:**
+  - Chỉ bật date range: v1 lọc theo range đã lưu, nên "last 30 days" đứng yên ở ngày lưu chart. v2 để server tính mode
+    tương đối, như v1 vẫn làm với comparison.
+  - Previous period của last 7 / 30 days: v1 chỉ lùi 1 ngày; v2 lùi đúng 7 / 30 ngày.
+  - Trend line giữ filter của chart và filter của dashboard; v1 bỏ hết.
+  - Layout có theme: v1 hiện giá trị so sánh chưa định dạng khi `display` là value; v2 định dạng như giá trị.
+  - Bật trend line không reset màu, và không ghi `comparison.trend_by` thừa.
+  - Default của tab không được ghi khi mở tab (v1 merge vào props mà không emit).
+  - Dropdown của người xem: v1 sửa thẳng object setting của chart (`NumberQuerySetting.setDateRange`), nên lựa chọn
+    có thể lọt vào lần lưu sau và vào builder. v2 giữ nó riêng trong view.
+  - Dropdown luôn nằm trên giá trị. v1 đặt nó ở góc phải, dưới PercentageBar, khi có trend line.
+  - Cột nested: v1 chỉ thêm `get_array_element` cho điều kiện của range (`buildDateFilterCondition`), không cho range
+    custom của comparison, filter request và trend line; tab của v1 cũng không liệt kê được cột ngày trong cột nested.
+    v1 nhận ra cột nested theo tên bảng có dấu chấm, nên cột chọn từ cây field hiện tại không bao giờ được thêm.
+- **Backend local:** MySQL lỗi 500 (`No database selected`) với `between_and_including` trên cột datetime
+  (`MySqlParser` sinh `toDateTime(...)` của ClickHouse). Range custom và comparison custom vì vậy chưa chạy được trên
+  stack local; các mode tương đối chạy được.
+
+## Quyết định ở CB7b1 (2026-10-28)
+
+CB7b chia thành: **CB7b1** style của table (Style, Grid, Header, Values, Tooltip) cùng renderer; **CB7b2** Field
+formatting và Conditional formatting; **CB7b3** Collapse Table; **CB7b4** Pivot Table.
+
+- **Renderer** (`features/dashboard/charts/table/tableStyle.utils.ts`, v1 `TableStyleUtils.getTableSettingStyle`):
+  options thành biến CSS trên table. Màu đã lưu thường chính là biến của theme (`var(--header-background-color)`), nên
+  v2 đặt tên biến riêng (`--ft-*`) thay vì đổi sang hex như v1 (`parseColor`). Đọc: font, màu, cỡ, căn lề, nền và text
+  wrap của header; màu và nền của dòng chẵn / lẻ, font, cỡ, text wrap của dòng; đường grid dọc (header, body), ngang
+  (body), row padding; nền card; title và subtitle (font, màu, cỡ, căn lề, trước đây chưa áp).
+  - Header căn lề theo option như v1, không theo kiểu cột; ô số trong body vẫn căn phải.
+  - Header dính có màu trong suốt thì vẽ đè lên nền card, để dòng cuộn bên dưới không lộ ra. v1 trộn màu
+    (`combineColor`).
+  - Phân trang lấy màu chữ của header như v1.
+- **Tooltip của ô** (v1 `TableTooltipUtils`): mọi ô header và body có chữ hiện toàn bộ nội dung sau 1 giây, màu và
+  font theo `tooltip.*`. Tooltip mở trong `.dashboard-theme`, nên màu là biến theme vẫn có tác dụng.
+- **Tab Settings** theo thứ tự v1: Title, Style, Grid, Column headers, Values, Background, Tooltip, Other.
+  - Style: 6 theme của v1 (bản light, `settings/table/tableThemes.json`). Chọn theme ghi tên theme và mọi setting của
+    nó; Revert về Default.
+  - Grid: màu, độ dày, bật ở Header / Body cho đường dọc, Body cho đường ngang.
+- **Khác v1:**
+  - Bỏ các toggle Total và Header của đường ngang: table phẳng không có dòng total và chỉ có một dòng header, nên
+    trong v1 chúng không có tác dụng.
+  - Theme không ghi các key mà không ai đọc (`total.*`, `value.is_word_wrap`, `value.style.align`,
+    `value.style.color`); font `Arial` ghi thành `Arial, sans-serif` cho khớp lựa chọn.
+  - Revert của Values ghi đúng biến theme. v1 ghi `var(----row-even-background-color)` (dòng thành trắng) và
+    `--row-odd-background-color` (dòng trong suốt).
+  - Revert của Grid và Tooltip về giá trị của table mới. v1 về grid của theme tối và màu chữ khác.
+  - Danh sách theme không phụ thuộc theme sáng / tối của dashboard (v1 lấy theo base theme; với custom thì rỗng). Hai
+    bản chỉ khác grid của Default.
+
+## Quyết định ở CB7b2 (2026-10-28)
+
+Field formatting và Conditional formatting của table phẳng.
+
+- **Phát hiện:** trên table phẳng, v1 không bao giờ vẽ Background, Font color và Icon. v1 xin server các cột phụ
+  (`formatters`), nhưng `table_chart_setting` bỏ qua chúng (đã thử trên backend local). Chỉ Data bar chạy, vì nó chỉ
+  cần min / max của cột (`min_max_values`, theo tên cột, tính trên toàn bộ kết quả). v2 nay đọc `min_max_values`.
+- **Lựa chọn (2026-10-28):** v2 tính Background, Font color và Icon ở client, từ giá trị của chính ô và min / max của
+  cột, khi formatting bật, trên field của chính cột, theo color scale hoặc rules, và áp cho values. Formatting theo
+  field khác hoặc theo Field value vẫn không vẽ được.
+- **Renderer** (`charts/table/tableFormatting.utils.ts`, `columnDecorations.tsx`):
+  - Formatting tìm theo `vizKey(tên cột)`, đúng key v1 ghi. v1 còn khớp theo tiền tố, nên cột "sales" lấy formatting
+    của "salesAmount"; v2 chỉ khớp đúng tên.
+  - Field formatting: display unit và precision riêng của cột, đè lên của table; màu, nền, căn lề cho values / header
+    khi bật Apply to.
+  - Color scale: trộn RGB tuyến tính giữa min, center (nếu bật) và max, với giá trị custom; ô trống theo Default
+    formatting. Màu không phải hex (biến theme) thì lấy màu gần hơn.
+  - Rules: rule đầu tiên khớp thắng; `>` / `>=` cần thêm `<` / `<=`; `=` so một giá trị; percent so vị trí trong
+    min / max; `blank` khớp chữ, còn ô trống tính là 0 như v1.
+  - Data bar: thanh âm và dương hai phía trục, theo min / max (hoặc custom), trái sang phải hoặc ngược lại; trục chỉ vẽ
+    khi màu không trong suốt. Icon: theo rules, bên trái, phải hoặc chỉ icon, căn trên / giữa / dưới.
+- **Tab Settings** (sau Values, như v1):
+  - Field formatting: chọn cột, màu chữ, nền, căn lề, Apply to header / values (bật thì lưu luôn màu và căn lề đang
+    hiện, như v1), display unit, precision.
+  - Conditional formatting: chọn cột số; bật / tắt Background color, Font color, Data bars, Icons; "Advanced controls"
+    mở dialog: color scale hoặc rules, data bar, icon (6 style của v1 đặt sẵn rules). Lưu khi các số hợp lệ.
+  - Bật một formatting chưa có thì dùng default trên field của chính cột (v1 làm vậy với cột số / aggregate).
+- **Khác v1:**
+  - Chỉ cột số (số hoặc aggregate) có conditional formatting, vì chỉ chúng có min / max. Bỏ "Format by field value" và
+    "Based on field" khác: không vẽ được trên table phẳng.
+  - Bỏ Apply to total của Field formatting: table phẳng không có dòng total.
+  - Revert của Field formatting xoá display unit và precision của cột để theo table; v1 ghi None và 2.
+  - Bật lại Data bar giữ setting cũ; v1 reset về default.
+  - Renderer kiểm `enabled`; v1 dựa vào việc formatter tắt không được gửi.
+  - Icon là chữ trong React; v1 chèn emoji bằng HTML (có thể bị XSS từ setting).
+  - Danh sách icon cho rule gồm icon của 6 style; v1 có khoảng 300 emoji.
+
+## Quyết định ở CB7b3 (2026-10-28)
+
+Collapse Table (v1 `ChartType.Table`, type `table`). Spec lấy từ v1 và kiểm bằng backend local.
+
+- **Phát hiện:**
+  - Query setting là `group_table_chart_setting`, viz options là `table_chart_setting`. Handler giống table phẳng: cột
+    số / aggregate có `is_calc_min_max`, `formatters: []` (v1 `TableQuerySettingHandler`).
+  - Zone Columns như Table, nhưng field mới mặc định group by text, Sum số, Year ngày (v1 `COLLAPSE_TABLE_CONFIGS`).
+  - Viz options mặc định khác table phẳng ở hai chỗ: title `Untitled chart`, header dùng secondary font (weight 400). v1
+    đang chạy gửi đúng như source.
+  - Response vẫn là `json_table_response`, nhưng key của header là hash (`960db2`), không phải vị trí cột. Mọi cột
+    group by chung một header (của cột đầu). Group tiếp theo nằm trong `children` của record, cấp cuối có
+    `children: []`. Có từ 2 cột group by thì label cột aggregate là `<name> by <cột group đầu>`. Giá trị là chuỗi
+    (`"3.433024325E7"`).
+  - Server phân trang và đếm `total` theo dòng cấp trên cùng; sort áp ở mọi cấp. `min_max_values` tính ở cấp cuối,
+    nên giá trị của dòng cha có thể vượt max.
+  - Không có dòng total: `isShowFooter` của v1 `DefaultTable` luôn false. Toggle Total và Header của đường ngang ở tab
+    Grid vì vậy vẫn không có tác dụng (một dòng header), nên không thêm.
+- **Fixture:**
+  - `collapse_table` trong `builderRequests.fixture.json`: region, country, Sum total_revenue, Sum units_sold, sort
+    theo region. Đây là body v1 gửi khi Add. Widget đã xoá khỏi dashboard 3 sau đó, nên `builder.fixture.json` không
+    đổi.
+  - `group_table_chart_setting` trong `queryResponses.fixture.json`: response thật của setting đó, giữ 2 nước mỗi
+    region.
+  - Builder v2 tạo cùng chart qua Playwright gửi body giống v1 (trừ id).
+- **Builder:**
+  - `ChartType.CollapseTable`, catalogue, handler `groupTable`, default options. Picker bật Collapse Table.
+  - Function convertor của Table áp cả cho Collapse Table (v1 dùng chung `TableFunctionConvertor`).
+- **Dọn options** (`core/chart-builder/optionCleanup.ts`, v1 `ChartOptionResolver`), reducer gọi trong `removeItem` và
+  `updateItem`:
+  - Xoá một cột khỏi Columns thì xoá `field_formatting` và `conditional_formatting` của cột đó (key `vizKey(name)`).
+  - Cột chuyển giữa nhóm và không nhóm thì xoá toàn bộ conditional formatting.
+  - Hiện chỉ Collapse Table có; Pivot Table thêm ở CB7b4.
+- **Renderer** (`charts/table/CollapseTable.tsx`, `collapseTable.utils.ts`):
+  - `CollapseTable` bọc `FlattenTableView` với prop `collapse`: tree rows của antd, expanded keys do `useRowExpansion`
+    giữ. Dữ liệu mới (trang khác, sort, refresh) thì đóng hết, như v1 dựng lại dòng.
+  - Toggle là ô vuông +/− của v1, màu theo `toggle_icon` (`--ft-toggle-bg`, `--ft-toggle-color`). Mỗi cấp thụt 12px.
+    Dòng đang mở in đậm. Màu chẵn / lẻ theo thứ tự các dòng đang hiện (v1 `getExpandedRows`).
+  - Header ↔ cột (`headerColumnOf`): table phẳng theo vị trí, collapse table theo tên. Tên cột là label, hoặc label
+    bắt đầu bằng `<name> by `; tên dài nhất thắng. Formatting, min / max và sort đều dùng tên cột.
+- **Tab Settings:**
+  - Bộ tab của table, thêm "Collapsed And Expanded" sau Values (màu nền và màu icon của toggle, Revert) khi có từ 2
+    cột group by (v1 `TableSetting.enableCollapseTab`).
+  - Field / Conditional formatting liệt kê các cột thành header: cột group by đầu và các cột aggregate khi có nhóm,
+    mọi cột khi không (v1 `TableSetting.columns`).
+  - Toggle bật / tắt title, display unit mặc định None, như table phẳng.
+- **Khác v1:**
+  - Bấm header để sort: v1 sort theo label. Label `<name> by ...` không khớp cột nào, nên table mất luôn sort đã lưu.
+    v2 sort theo tên cột.
+  - Formatting khớp đúng tên cột. v1 cắt label ở chữ `by` (kể cả trong tên, như "Baby") rồi khớp theo tiền tố.
+  - Chỉ dọn options khi xoá khỏi Columns và không còn cột cùng tên. v1 dọn cả khi bỏ một item của Sorting, làm mất
+    formatting của cột vẫn đang hiện.
+  - Thụt lề chỉ ở cột đầu; v1 thêm padding trái cho mọi ô của dòng con.
+  - Footer (số dòng, trang) luôn hiện như table phẳng của v2. v1 ẩn khi đã có đủ dòng và không quá 20.
+- **Chưa làm:** menu chuột phải trên ô (v1 `ClickDataPoint`, table phẳng cũng chưa có), Forecast / Summarize của
+  assistant.
+
+## Quyết định ở CB7b4 (2026-10-28)
+
+Pivot Table (v1 `ChartType.PivotTable`, type `pivot_table`). Spec lấy từ v1 và kiểm bằng backend local.
+
+- **Phát hiện:**
+  - Query setting là `pivot_table_chart_setting` gồm `columns`, `rows`, `values`, `formatters: []`; viz options cùng tên
+    class. Handler (v1 `PivotQuerySettingHandler`): dựng được khi có một zone bất kỳ; rows có
+    `is_calc_group_total: false`, values có `is_calc_min_max: true` với mọi kiểu.
+  - Zone theo v1 `PIVOT_TABLE_CONFIGS`: Columns và Rows (group by / date histogram, mặc định group by, ngày theo Year),
+    Values (aggregation, Sum số, Count all chữ và ngày), không giới hạn số item.
+  - Viz options mặc định là của collapse table thêm khối `total` (bật, nhãn `Total`, nền
+    `var(--total-background-color)`, căn phải). v1 đang chạy gửi đúng như source.
+  - v1 không có function convertor cho pivot. Dọn options (v1 `PivotTableChartOptionHandler`) chỉ khi xoá function.
+  - **Response** vẫn là `json_table_response`:
+    - Header đầu là row group đầu (`is_group_by`), key là hash.
+    - Không có columns: các header còn lại là `<value> by <row đầu>`, row group tiếp theo nằm trong `children` như
+      collapse table.
+    - Có columns: mỗi giá trị của columns là một header nhóm không có key, bên dưới là một header cho mỗi value (tên
+      value), hoặc chính giá trị đó khi chỉ có một value. Nhiều tầng columns thì nhiều tầng nhóm.
+    - Header lá có `total` (chuỗi số), là dòng total. Record còn chứa key tổng theo dòng không có header; bỏ qua.
+  - **Server lỗi 500 (`key not found`) khi có columns và từ 2 rows.** Vì vậy v1 chỉ gửi row đầu
+    (`getCurrentQuery`), còn dòng mở ra thì query riêng (`loadSubRows`): filter `equal` theo giá trị của dòng và các
+    dòng cha, `rows` là row tiếp theo đổi tên thành tên row đầu (để key header giữ nguyên), lấy hết dòng (`-1`).
+  - Display as column: dialog Config của v1 không có, và server tự đặt `is_horizontal_view` cho zone Columns. Với pivot
+    thì zone Columns chính là "display as column", nên v2 không làm (đóng ghi chú ở CB4).
+- **Fixture:**
+  - `pivot_table` trong `builderRequests.fixture.json`: columns sales_channel, rows region và country, values Sum
+    total_revenue và Sum units_sold, sort theo region. Đây là body v1 gửi khi Add. Widget (id 53) đã xoá khỏi dashboard
+    3 sau đó.
+  - `pivot_table_chart_setting` trong `queryResponses.fixture.json`: response thật của setting đó (row đầu), giữ 3
+    region.
+  - Builder v2 tạo cùng chart qua Playwright gửi body giống v1 (trừ id).
+- **Builder:** `ChartType.PivotTable`, catalogue, handler `pivot`, default options. Picker bật Pivot Table (loại disabled
+  kế tiếp là Area Range). Dọn options mở rộng cho nhiều zone: pivot dọn khi xoá khỏi Rows hoặc Values, trừ khi zone còn
+  lại có cột cùng tên.
+- **Query** (`core/query/pivotQuery.ts`):
+  - `toQueryRequestJson` chỉ gửi row đầu khi có columns, nên dashboard, preview và export đều đi qua.
+  - `pivotSubRowSetting` dựng query cho dòng con. `useSubRowQuery` (chart-data) gắn filter request, tham số và View As
+    của chart; `useChartWidget` và preview truyền nó qua `TablePaging.subRows`.
+  - `applyTableSort` tìm cột cả trong `rows` và `values`.
+- **Renderer** (`charts/table/PivotTable.tsx`, `pivotTable.utils.ts`, `usePivotRows.ts`), bọc `FlattenTableView`:
+  - Header nhiều tầng là cột nhóm của antd; nhóm không có key nên được đặt key theo vị trí. Cả `thead` dính khi cuộn.
+  - Dòng: không có columns thì lồng sẵn như collapse table; có columns thì dòng (trừ row cuối) có toggle, mở ra thì
+    query dòng con bằng `useQueries` (cache theo path). `useRowExpansion` nay giữ path của mỗi dòng mở.
+  - Dòng total (antd `summary`, dính đáy): khi có rows, `total.enabled` khác false và có cột có total. Nhãn dưới header
+    row, total dưới cột của nó, định dạng như cột.
+  - Formatting theo tên cột: header row → row đầu; có columns với một value → value đó; có columns → tên value; không có
+    columns → `<value> by ...`. Min / max theo tên value.
+  - Sort: không có columns thì mọi header (row và value, theo tên cột như collapse table); có columns thì chỉ header row.
+  - Cột rộng theo nội dung, cuộn ngang (`scroll.x`), vì pivot có thể nhiều cột. Không có rows thì không phân trang.
+  - Style thêm: đường ngang giữa các tầng header, đường dọc / ngang của dòng total, màu / font / cỡ / nền của total.
+    Dòng cuối của body giữ đường kẻ khi có dòng total (v1 `hide-footer`).
+- **Tab Settings** (v1 `PivotSetting`): bộ tab của table, thêm Total (bật / tắt, nhãn, font, màu, cỡ, căn lề, nền,
+  Revert) sau Collapsed And Expanded. Collapsed And Expanded hiện khi có từ 2 rows. Grid có thêm Header (ngang) và
+  Total (dọc, ngang). Field formatting liệt kê row đầu và các value; Conditional formatting như vậy khi không có
+  columns, chỉ các value khi có columns.
+- **Khác v1:**
+  - Dòng con: v1 thêm điều kiện thành một nhóm OR mới trong `filters` (server OR các nhóm), nên chart có filter lấy cả
+    dòng của cha khác. v2 `and` điều kiện với filter của chart.
+  - Sort theo value khi không có columns (v1 sort theo label `<value> by ...`, không khớp cột nào). Có columns thì header
+    value không sort được (v1 hiện như sort được nhưng không có tác dụng).
+  - Căn lề của total áp cho các ô total; nhãn luôn bên trái. Ở v1 cột đầu bị ghim (`text-align: left !important`) nên
+    thực tế cũng vậy.
+  - Không hiện dòng total khi không cột nào có total (ví dụ không có values); v1 hiện dòng chỉ có nhãn.
+  - Style ghi `total.*` của theme chỉ cho pivot, và không ghi `total.enabled` (style không bật / tắt total). v1 ghi cho
+    mọi table.
+  - Conditional formatting tính ở client từ giá trị ô và min / max theo value, như CB7b2; không gửi `formatters`, nên
+    "Format by field value" và "Based on field" khác vẫn không có.
+  - Footer (số dòng, trang) luôn hiện khi có rows, như table phẳng.
+- **Chưa làm:** ghim cột đầu khi cuộn ngang (v1 `pinned`), menu chuột phải trên ô, Forecast / Summarize, Flatten
+  Pivot Table (v1 ẩn khỏi picker), conditional formatting cho dòng total (`applyTo` values and totals).
+
+## Quyết định ở CB7c (2026-10-28)
+
+Stacked Column (`stack_column`), Stacked Bar (`stack_bar`), Circular Bar (`circular_bar`), Lollipop (`lollipop`). Spec
+lấy từ v1 và kiểm bằng backend local.
+
+- **Phát hiện:**
+  - Ba loại stacked dùng chung handler (v1 `StackingSeriesQuerySettingHandler`): vẫn là `series_chart_setting` như chart
+    series, thêm `breakdown` (zone `breakdown_optional`, tối đa 1, group by / date histogram). Dựng được khi có X và Y
+    như series. Lollipop dùng đúng handler series.
+  - Zone (v1 `STACKING_SERIES_CONFIGS`): zone của series cùng Breakdown. Stacked Bar và Circular Bar hiện Y-Axis trước
+    X-Axis như Bar (`BAR_STACKING_SERIES_CONFIGS`), key giữ nguyên.
+  - Viz options: `stacking_series_chart_setting` (stacked column / bar), `circular_bar_chart_setting` (column trên pane
+    polar, `inverted`, `pane.end_angle: 270`), cả hai có `stacking: normal`, marker bật, chỉ một trục Y, không có
+    `plot_options.area`. Lollipop là `highcharts_series_chart_setting` với `chart.type: lollipop`; v1 đang chạy bật
+    marker cho lollipop (source thì không). Default theo v1 đang chạy.
+  - **Response** vẫn là `series_one_response`. Có Legend thì mỗi series có `stack` là giá trị legend của nó. Có thêm
+    Breakdown thì series tên `<legend>.<breakdown>` (`Offline.C`), `stack` là giá trị legend. Không có Legend thì không
+    có `stack`.
+  - Renderer v1 (`StackingSeriesChart`): stack của series là nhóm chọn ở tab Stack (`stacking_group`, key `vizKey`),
+    nếu không thì `stack` của server, nếu không thì `unGroup`. Vì vậy chỉ có Legend thì các giá trị legend đứng cạnh
+    nhau (mỗi giá trị một stack); nhiều giá trị Y không có Legend thì chồng lên nhau; có Breakdown thì breakdown chồng
+    trong cột của từng giá trị legend. Đã xem trên v1.
+- **Fixture:** `stack_column` (region, Sum total_revenue, legend sales_channel, breakdown order_priority), `stack_bar`
+  (item_type, Sum total_revenue và Sum total_cost), `circular_bar` (region, Sum total_revenue, legend sales_channel),
+  `lollipop` (region, Sum total_profit) trong `builderRequests.fixture.json`: body v1 gửi khi Add. `queryResponses`
+  thêm `stacked_series_chart_setting`: response thật của stacked column có breakdown, giữ 4 series và 3 region. Các
+  widget (54–57) đã xoá khỏi dashboard 3. Builder v2 tạo cùng 4 chart qua Playwright gửi body giống hệt v1 (trừ id),
+  các widget đó (58–61) cũng đã xoá.
+- **Builder:** 4 type mới trong catalogue, handler `stacked`, default options. Picker bật cả 4 (loại disabled đầu tiên
+  vẫn là Area Range).
+- **Renderer** (`charts/series/stackedChartOptions.ts`): `ChartRenderer` vẽ hai viz class mới bằng chart series
+  (`buildSeriesChartOptions`), rồi thay series (stack như v1, type theo `typesByLabel` nếu có) và tooltip chung cho cả
+  category. Circular Bar đọc `chart.polar`, `pane` từ options. Lollipop đi qua renderer series như cũ.
+  `HighchartsChart` nạp `highcharts-more` (polar), `dumbbell` và `lollipop`.
+- **Tab Settings:**
+  - Lollipop dùng bộ tab series (Display có marker, không dash).
+  - Stacked (v1 `StackSeriesSetting`, `CircularBarSetting`): Title, Display (chỉ tên series, v1 `LegendNameTab`), Stack
+    (khi có từ 2 series: Value / Percentage ở `plot_options.series.stacking`, ô nhóm stack cho từng series), Legend, trục
+    X, trục Y, Data Color, Data Label, Background, Tooltip, Other. Stacked Bar đổi tên tab trục như Bar. Circular Bar có
+    gridline trục X, không có min / max trục Y (v1). Drilldown và zoom cho Stacked Column / Bar (v1
+    `VisualHeaderConfigs`).
+- **Khác v1:**
+  - Xoá trống ô nhóm stack thì series về stack của server. v1 lưu chuỗi rỗng, nên mọi series xoá trống bị chồng chung.
+  - Tooltip có tên category ở đầu; v1 chỉ liệt kê series.
+  - Data label của stacked có điều kiện min / max như chart series (v1 không truyền chart type cho tab nên ẩn, dù
+    renderer có đọc). Lọc theo điều kiện dùng `isInsideCondition` như CB6a, không theo logic lỗi của v1.
+  - Revert trục X của Circular Bar giữ gridline mặc định (0.5); v1 tắt.
+- **Chưa làm:** Stacked Line (v1 ẩn khỏi picker), dual axis cho stacked (v1 không có tab).
+
+## Quyết định ở CB8 (2026-10-28)
+
+Action trên cây field: measure, calculated field, Update Table By Query, và Edit Measure trong menu "..."
+của item. Spec lấy từ v1 (`DatabaseListing`, `CalculatedFieldModal`, `UpdateTableByQueryModal`, `DatabaseSchemaStore`,
+`SchemaRepository`) và kiểm bằng backend local, trên view tạm `sample_v2.cb8_tmp_view` / `cb8_tmp_drop` (đã xoá).
+
+- **Endpoint** (`core/schema/SchemaEditService`, key snake_case như server):
+  - Kiểm formula: `POST databases/{db}/tables/{tbl}/expression` (calculated) hoặc `.../aggregate_expression`
+    (measure), body `{ expression }`. Server chạy thử expression và trả **text thuần** là `class_name` (`int64`,
+    `double`, ...); sai thì 500 kèm message của database.
+  - Tạo / sửa: `POST` / `PUT .../calc_column` hoặc `.../expr_column`, body `{ column }` với `class_name` (kiểu vừa
+    kiểm), `name`, `display_name`, `description`, `is_nullable: true`,
+    `default_expression: { default_type: "MATERIALIZED", expr }`. Trả về bảng. `PUT` thay cột cùng `name`.
+  - Xoá: `DELETE .../calc_column/{name}` hoặc `.../expr_column/{name}`, trả `true`.
+  - Update Table By Query: `POST databases/{db}/tables/from_query` với
+    `{ tbl_name, display_name, query, table_type, is_override: true }`. Delete table (`dropTable`, builder không dùng):
+    `DELETE databases/{db}/tables/{tbl}`.
+    v1 gửi thêm `adminSecretKey` và header `DI-SERVICE-KEY`; server không cần.
+  - Loại data source: `GET connection` → `class_name` (`ConnectionService.getSourceType`, đọc cả loại v2 chưa setup
+    được).
+- **Phát hiện ở backend:**
+  - Ghi đè view (`from_query`) là xoá rồi tạo lại bảng, nên **mất hết measure và calculated column**. v1 mất im lặng.
+  - Server chỉ chặn trùng tên giữa các expression, không chặn trùng với cột thường (tạo được calculated `Region` trên
+    bảng có cột `Region`).
+  - Response của `from_query` và `GET .../tables/{tbl}` ghi `display_name` bằng `name`.
+  - Delete table drop **bảng thật** trong database nếu có (DDL của connector), rồi xoá metadata. View tạo từ query
+    (như hai bảng tạm ở trên) chỉ có metadata, nên không đụng tới database.
+- **Formula** (`field-actions/formula.utils.ts`, v1 `ExpressionParser`):
+  - Calculated field viết cột bằng `[Display Name]`, lưu bằng tên cột. Measure viết và lưu bằng tên cột như v1.
+  - Đổi expression thành formula trong một lượt, bỏ qua chuỗi trong nháy và tên đứng trước `(`; khớp đúng tên trước,
+    rồi không phân biệt hoa thường.
+  - Tên cột mới lấy từ display name (`snakeCase` như v1, bỏ dấu, chỉ giữ ký tự ASCII vì route của server chỉ nhận
+    `\w+`). Form (zod) chặn tên rỗng và tên đã có trong bảng, kể cả cột thường. Sửa cột thì giữ `name`.
+- **Gợi ý hàm theo data source:** danh sách hàm của v1 (`*Syntax.ts`, 6 connector) chuyển thành
+  `field-actions/catalogues/<source>.json`, mỗi file một chunk riêng, tải khi dialog mở. Không đọc được connection thì
+  dùng ClickHouse như v1. Calculated field bỏ nhóm Keyword(s). Danh sách bên phải: chọn nhóm (All đứng đầu), click
+  hàm hoặc đặt con trỏ lên tên hàm trong editor để xem mô tả và ví dụ.
+- **Editor Monaco** (`field-actions/editor`): `monaco-editor` 0.57 + `@monaco-editor/react` (`loader.config` dùng bản
+  trong bundle, không CDN), chỉ nạp `editor.api` và các contrib cần (suggest, snippet, hover, bracket, ...), cùng
+  editor worker. Tất cả nằm trong chunk lazy `CodeEditor` (~3,3 MB, gzip ~850 KB; core của Monaco 0.57 đã ~2,5 MB),
+  chunk của builder không chứa Monaco. Một tokenizer Monarch chung cho mọi connector: tô hàm, cột, `[...]`, chuỗi,
+  số, comment. Gợi ý: hàm, rồi cột (`[Display Name]` cho calculated, tên cột cho measure); Update Table By Query gợi
+  ý thêm bảng `db.table` và cột của database.
+- **Sau mỗi action** (`useTableRefresh`): tải lại database bằng query `schemaKeys.database(db)` (cây field và mọi nơi
+  đọc schema cập nhật), mở bảng vừa sửa, rồi đồng bộ builder với bảng mới (`state/tableSync.utils.ts`, action
+  `syncTable`):
+  - Item và condition dùng cột không còn trong bảng (measure / calculated bị xoá, cột mất sau Update Table By Query,
+    bảng bị xoá) bị bỏ khỏi builder, nhóm filter rỗng cũng bỏ; báo số field đã bỏ.
+  - Item dùng cột còn lại nhận `field_type`, `expression` và display name mới; tên item đổi theo nếu người dùng chưa
+    đổi tên. Builder thành `touched`, nên setting dựng lại với formula mới khi lưu.
+  - Chart đã lưu khác trên dashboard dùng cột đó không bị sửa (như v1).
+- **Không có Delete Table trong builder**, giống v1 (chọn 2026-10-28): builder của v1 dùng `DatabaseListingAs.Normal`,
+  chế độ không có mục này. Xoá bảng thuộc màn Data Management; `SchemaEditService.dropTable` giữ lại cho màn đó.
+- **Khác v1:**
+  - Sửa calculated field cũng cập nhật item đang dùng nó; v1 chỉ làm với measure, item calculated giữ expression cũ.
+  - Update Table By Query tạo lại các measure và calculated column của view (kiểm lại kiểu); cái nào không chạy được
+    với query mới thì báo tên. Gửi `display_name` của bảng; v1 gửi `name`. Không có cây database và phần chạy thử
+    query + bảng kết quả (`QueryComponent`) của v1: chỉ có editor, lỗi của server hiện dưới editor (v1 chỉ báo "Can
+    not update table with this query").
+  - Menu của bảng mở bằng nút "..." (hiện khi hover) hoặc chuột phải; menu của measure / calculated field cũng có cả
+    hai. v1 chỉ có chuột phải cho cột. Nhãn: "Edit / Delete Calculated Field" thay "Edit / Delete Column".
+  - Lỗi của calculated field hiện message của database; v1 chỉ báo "Formula invalid". Câu confirm xoá cột nêu display
+    name; v1 nêu `name`.
+  - Chặn tên trùng với mọi cột của bảng ở client (server không chặn với cột thường).
+  - Bỏ ô textarea ẩn cho tài khoản test của v1.
+- **Chưa làm:** gợi ý theo ngữ cảnh của v1 trong query (`DiCompletionItemProvider`: gõ `db.` thì chỉ gợi ý bảng của
+  db đó), action trên cột thường và cột nested (v1 cũng không có), quyền: menu hiện cho mọi người, server từ chối nếu
+  thiếu quyền `database:edit` và message hiện ra.
 
 ## Các bước
 
@@ -193,11 +770,11 @@ Test so với **fixture thứ hai**. Lý do là server chuẩn hoá lại settin
 | CB1 | **`core/chart-builder`.** Entity `FunctionData`, `ConditionData`, `extra_data`. Danh mục chart (v1 `DataBuilderConstantsV35`: zone, số item tối đa, function mặc định theo kiểu field). Builder cho function (function, table column, order by, top N, dynamic function), condition và query setting. Viz options mặc định và cách merge khi đổi loại chart. Test bằng CB0: từ `extra_data` của 19 widget, dựng lại `setting` và default options phải khớp hoàn toàn (`toStrictEqual`) với body mà v1 đã gửi | Xong |
 | CB2 | **Reducer của builder** (`features/chart-builder`). Khởi tạo từ widget hoặc rỗng. Đổi loại chart (`latestState` và chuyển config như v1). Thêm / sửa / xoá / đổi thứ tự config. Filter theo nhóm. Function convertor (table; scatter và bubble đi cùng type của chúng ở CB7). Setting dẫn xuất từ state. Dọn options khi xoá function để lại CB7 | Xong |
 | CB3 | **Cây field** (chỉ đọc). Chọn database (`GET databases`), bảng và cột có search và icon theo kiểu, mở sẵn các bảng đang dùng, cột kéo được, các chart control của dashboard | Xong |
-| CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control) | Chưa làm |
-| CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. So với v1 bằng screenshot Playwright | Chưa làm |
-| CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Chưa làm |
-| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3 | Chưa làm |
-| CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query, Delete table | Chưa làm |
+| CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control). Display as column để lại CB7 | Xong |
+| CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Xong |
+| CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Xong. Tab style của table và tab Comparison của Number làm ở CB7a / CB7b |
+| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Chia theo thứ tự của `MIGRATION.md` (chọn 2026-10-28): **CB7a** Number: comparison, trend line (tab Comparison), dropdown date range cho người xem, cột ngày nested, xong. **CB7b** Tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer, Collapse Table, Pivot Table: CB7b1 (style), CB7b2 (field và conditional formatting), CB7b3 (Collapse Table), CB7b4 (Pivot Table) xong. **CB7c** Stacked Column / Bar, Circular Bar, Lollipop, xong. **CB7d** Scatter, Bubble, Area Range, Column Range. **CB7e** Funnel, Pyramid, Variable Pie, Parliament, Word Cloud, Tree map, Heat map, Gauges, Bullet. **CB7f** Pareto, Bell curve, Histogram, Spider web, Wind rose, Sankey, Line stock. Map có thiết kế riêng | Đang làm: xong CB7a, CB7b, CB7c |
+| CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query. Delete table thuộc Data Management, như v1 | Xong |
 
 ## Ghi chú về field drag and drop
 
@@ -220,3 +797,7 @@ Code ở `shared/field-dnd`, story trong `Shared/FieldDnd`.
   - Vạch ở khe cho thấy field sẽ rơi vào đâu, nhờ vậy vùng nhận vẫn nằm đúng chỗ đang vẽ.
   - Kéo chỉ bắt đầu sau 4px, nên click vào menu của item vẫn hoạt động.
   - Ô nhập text và phần tử có `FIELD_NO_DRAG_CLASS` không bao giờ bắt đầu kéo.
+- **Ảnh kéo** (`renderOverlay`) đi theo con trỏ, với `z-index` 2000, trên modal (1000) và popup (1050) của antd.
+  Default của dnd-kit là 999, nên ảnh kéo từng bị ChartBuilder che mất. Trong builder, ảnh kéo là chính dòng field
+  của cây (`FieldLabelView`: icon theo kiểu cột, measure hay chart control, và tên), nổi lên bằng nền trắng và bóng;
+  item và condition kéo từ zone cũng vẽ như vậy (v1 drag image).

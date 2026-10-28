@@ -1,5 +1,6 @@
 import { snakeCase } from 'lodash-es';
 import { asString, getPath, type JsonObject } from '@/core/json/json';
+import { withDateRange, type DateRangeChoice } from '@/core/query/comparison';
 import { drilldownSetting, isDrilledField, type DrilldownStep } from '@/core/query/drilldown';
 import type { TableSort } from '@/core/query/tableSort';
 import { applyTableSort } from '@/core/query/tableSort';
@@ -9,8 +10,8 @@ import { tableField, type DatabaseSchema } from '@/core/schema/SchemaService';
 
 /**
  * How the viewer changed one chart without saving it (v1 `DrilldownDataStore`, `ZoomStore`, the table's sort, the
- * filter icon's toggle): the drill down steps with the setting each one produced, the date function picked, the
- * column sorted on, whether the header's filters apply.
+ * filter icon's toggle, the number chart's `DateRangeDropdown`): the drill down steps with the setting each one
+ * produced, the date function picked, the column sorted on, whether the header's filters apply, the date range picked.
  */
 export interface ChartView {
   drills: readonly { step: DrilldownStep; setting: JsonObject }[];
@@ -18,6 +19,8 @@ export interface ChartView {
   sort?: TableSort;
   /** Set once the viewer toggled the header's filters for this chart; until then the chart's setting decides. */
   filtersOn?: boolean;
+  /** A number chart's date range picked on the card; until then the stored one. */
+  dateRange?: DateRangeChoice;
 }
 
 export const INITIAL_VIEW: ChartView = { drills: [] };
@@ -30,7 +33,8 @@ function unsortedSetting(stored: JsonObject, view: ChartView): JsonObject {
 
 /** What the chart queries with. */
 export function viewedSetting(stored: JsonObject, view: ChartView): JsonObject {
-  return applyTableSort(unsortedSetting(stored, view), view.sort);
+  const sorted = applyTableSort(unsortedSetting(stored, view), view.sort);
+  return view.dateRange ? withDateRange(sorted, view.dateRange) : sorted;
 }
 
 export type ChartViewAction =
@@ -39,6 +43,7 @@ export type ChartViewAction =
   | { type: 'zoom'; level: string }
   | { type: 'sort'; sort?: TableSort }
   | { type: 'filters'; on: boolean }
+  | { type: 'dateRange'; choice: DateRangeChoice }
   | { type: 'reset' };
 
 export function chartViewReducer(view: ChartView, action: ChartViewAction): ChartView {
@@ -56,6 +61,8 @@ export function chartViewReducer(view: ChartView, action: ChartViewAction): Char
       return { ...view, sort: action.sort };
     case 'filters':
       return { ...view, filtersOn: action.on };
+    case 'dateRange':
+      return { ...view, dateRange: action.choice };
     case 'reset':
       return { ...view, drills: [], zoom: undefined };
   }

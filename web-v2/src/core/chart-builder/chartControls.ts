@@ -1,6 +1,7 @@
 import { asArray, asRecord, asString, getPath, type JsonObject } from '@/core/json/json';
 import { MainDateFilterSetting } from '@/core/dashboard/DashboardSetting';
 import type { Widget } from '@/core/dashboard/Widget';
+import { ValueControlType } from '@/core/query/controlValues';
 import { functionColumns, isFunctionControl } from '@/core/query/dynamicFunctions';
 import { ChartType } from './chartType';
 import { vizTitleOf } from './defaultVizOptions';
@@ -73,4 +74,33 @@ export function chartControlsOf(widgets: readonly Widget[], { mainDate, excludeI
   });
   const date = mainDate ? [controlOf(MainDateFilterSetting.ID, 'Main Date Filter', ChartType.DateSelectFilter)] : [];
   return [...date, ...charts].sort((a, b) => a.title.localeCompare(b.title));
+}
+
+/** One value a control hands to a filter on it (v1 `ValueControlInfo`). */
+export interface ControlValueInfo {
+  readonly type: ValueControlType;
+  readonly label: string;
+}
+
+/** Chart types whose options are no value controller (v1 `isEnableControl` false): number and tables. */
+const NOT_CONTROLS = new Set<string>([ChartType.Number, ChartType.Table, 'table', 'pivot_table', 'flatten_pivot_table']);
+
+const RANGE_TYPES: Readonly<Record<string, readonly [string, string]>> = {
+  [ChartType.DateSelectFilter]: ['Start date', 'End date'],
+  [ChartType.SlicerFilter]: ['Start value', 'End value']
+};
+
+/**
+ * The values a chart control offers to a filter condition (v1 `getSupportedControls`): a date select (also the main
+ * date filter) and a slicer give their range, any other chart its selected value. Numbers and tables give none, so
+ * they are no controls there.
+ */
+export function controlValuesOf(chartType: string): readonly ControlValueInfo[] {
+  if (NOT_CONTROLS.has(chartType)) return [];
+  const range = RANGE_TYPES[chartType];
+  if (!range) return [{ type: ValueControlType.SelectedValue, label: 'Selected value' }];
+  return [
+    { type: ValueControlType.MinValue, label: range[0] },
+    { type: ValueControlType.MaxValue, label: range[1] }
+  ];
 }

@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { ChartControl } from '@/core/chart-builder/chartControls';
 import { FieldDndProvider } from '@/shared/field-dnd/FieldDndProvider';
-import { tableNodesOf, type TreeTables } from './fieldTree.utils';
+import { tableActionsOf } from '../field-actions/fieldActions.utils';
+import { tableNodesOf, type TreeActions, type TreeTables } from './fieldTree.utils';
 import { FieldTreeView, type FieldTreeViewProps } from './FieldTreeView';
 
 const nodes = tableNodesOf([
@@ -74,5 +75,33 @@ describe('FieldTreeView', () => {
   it('says when there is nothing to list', () => {
     renderTree({ tables: tables({ nodes: [] }) });
     expect(screen.getByText('No fields available')).toBeInTheDocument();
+  });
+
+  it('opens a table menu and a measure menu, also on right click', async () => {
+    const withMeasure = tableNodesOf([
+      {
+        dbName: 'sample_v2',
+        name: 'sales',
+        tableType: 'view',
+        columns: [{ name: 'region', displayName: 'region', type: 'string' }],
+        expressionColumns: [{ name: 'revenue', displayName: 'Revenue', type: 'double', expression: 'sum(price)' }]
+      }
+    ]);
+    const actions: TreeActions = {
+      tableActionsOf: () => tableActionsOf({ dbName: 'sample_v2', tableType: 'view' }),
+      onTableAction: vi.fn<TreeActions['onTableAction']>(),
+      onColumnAction: vi.fn<TreeActions['onColumnAction']>()
+    };
+    renderTree({ tables: tables({ nodes: withMeasure, actions }) });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions of sales' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Update Table By Query' }));
+    expect(actions.onTableAction).toHaveBeenCalledWith('sales', 'updateQuery');
+
+    // Plain columns have no menu.
+    expect(screen.queryByRole('button', { name: 'Actions of region' })).not.toBeInTheDocument();
+    await userEvent.pointer({ keys: '[MouseRight]', target: screen.getByText('Revenue') });
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Delete Measure' }));
+    expect(actions.onColumnAction).toHaveBeenCalledWith(expect.objectContaining({ title: 'Revenue', role: 'measure' }), 'delete');
   });
 });

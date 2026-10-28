@@ -8,6 +8,7 @@ export function fakeConnectionService(overrides: Partial<ConnectionService> = {}
   return {
     exists: vi.fn<ConnectionService['exists']>(async () => true),
     get: vi.fn<ConnectionService['get']>(async () => undefined),
+    getSourceType: vi.fn<ConnectionService['getSourceType']>(async () => 'clickhouse_connection'),
     save: vi.fn<ConnectionService['save']>(async () => {}),
     test: vi.fn<ConnectionService['test']>(async () => {}),
     refreshSchema: vi.fn<ConnectionService['refreshSchema']>(async () => {}),

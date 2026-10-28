@@ -38,6 +38,16 @@ describe('HttpConnectionService', () => {
     await expect(service.get()).resolves.toMatchObject({ host: 'db', port: 3306 });
   });
 
+  it.each([
+    [{ class_name: 'bigquery_connection', project_id: 'p' }, 'bigquery_connection'],
+    [{}, '']
+  ])('reads the source type of %j, whatever the type', async (reply, expected) => {
+    const { service, requests } = setup({ body: reply });
+
+    await expect(service.getSourceType()).resolves.toBe(expected);
+    expect(requests[0]).toMatchObject({ method: 'GET', url: 'http://api.test/connection' });
+  });
+
   it('fails when there is no connection', async () => {
     const { service } = setup({ status: 404, body: { code: 404, reason: 'not_found', message: 'not found' } });
 

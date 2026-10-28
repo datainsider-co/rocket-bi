@@ -19,7 +19,7 @@ describe('defaultVizOptions', () => {
   });
 
   it('has none for a type v2 does not build', () => {
-    expect(defaultVizOptions('pivot_table')).toBeUndefined();
+    expect(defaultVizOptions('arearange')).toBeUndefined();
   });
 
   it('builds the types v1 lacked from its source', () => {
@@ -27,6 +27,17 @@ describe('defaultVizOptions', () => {
     expect(vizFromSetting({ options: defaultVizOptions(ChartType.LineInverted) }).options.chart).toEqual({ type: 'line', inverted: true });
     expect(vizFromSetting({ options: defaultVizOptions(ChartType.SemiPie) }).options).toMatchObject({ isSemiPie: true, legend: { enabled: false } });
     expect(vizFromSetting({ options: defaultVizOptions(ChartType.TabInnerFilter) }).options).toMatchObject({ displayAs: 'normal', search: { enabled: true } });
+  });
+
+  it('turns markers on for the lollipop only, like the running v1', () => {
+    const marker = (chartType: string) => vizFromSetting({ options: defaultVizOptions(chartType) }).options.plotOptions?.series?.marker;
+    expect(marker(ChartType.Lollipop)).toEqual({ enabled: true });
+    expect(marker(ChartType.Column)).toEqual({ enabled: false });
+  });
+
+  it('gives the stacked charts their own classes', () => {
+    expect(defaultVizOptions(ChartType.StackedBar)).toMatchObject({ class_name: 'stacking_series_chart_setting', options: { chart: { type: 'bar' } } });
+    expect(defaultVizOptions(ChartType.CircularBar)).toMatchObject({ class_name: 'circular_bar_chart_setting', options: { chart: { polar: true, inverted: true } } });
   });
 
   it('gives a fresh object each time', () => {

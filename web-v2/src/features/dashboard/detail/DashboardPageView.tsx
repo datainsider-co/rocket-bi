@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { InternalFilter } from '@/core/query/internalFilter';
 import type { DashboardAccess } from '../access/useDashboardAccess';
@@ -47,6 +48,8 @@ export interface DashboardPageViewProps {
   layout: DashboardLayout;
   /** Relationship and Share in the Options menu, from their own features. */
   options?: DashboardOptionHandlers;
+  /** ChartBuilder while it is open, inside the dashboard's controls so its preview applies them. */
+  builder?: ReactNode;
   onBack: () => void;
 }
 
@@ -58,7 +61,7 @@ const NO_OPTIONS: DashboardOptionHandlers = {};
  * and the date filter stay. The theme's CSS variables are scoped to this page, where v1 set them on `<body>`.
  */
 export function DashboardPageView(props: DashboardPageViewProps) {
-  const { dashboard, headerFilters, state, layout, options = NO_OPTIONS, onBack } = props;
+  const { dashboard, headerFilters, state, layout, options = NO_OPTIONS, builder, onBack } = props;
   const { display, viewAs, editing } = state;
   const { mode, viewportRef, contentRef, scale } = display;
   const theme = getDashboardTheme(dashboard?.setting.themeName ?? '');
@@ -86,6 +89,7 @@ export function DashboardPageView(props: DashboardPageViewProps) {
       </div>
       {viewAs.picking && <ViewAsModal onPick={viewAs.onPick} onCancel={viewAs.onCancel} />}
       <EditDialogsView dialogs={editing.dialogs} dashboard={dashboard} />
+      {builder}
     </div>
   );
   // A new dashboard starts from its own filter defaults; so does one whose date filter was set up or removed.

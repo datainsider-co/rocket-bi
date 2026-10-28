@@ -20,6 +20,8 @@ export interface SeriesOneResponse {
   readonly series: readonly SeriesItem[];
   readonly xAxis: readonly string[];
   readonly yAxis: readonly string[];
+  /** A number chart's compared value (`compare_responses.RawValues`), when it asked for a comparison. */
+  readonly compareValue?: number;
 }
 
 /** Pie and other name/value charts (`series_two_response`): each point is `[name, value]`. */
@@ -46,6 +48,8 @@ export interface TableHeader {
   readonly formatterKey: string;
   /** Grouped headers (pivot, breakdown); leaves have none. */
   readonly children: readonly TableHeader[];
+  /** A pivot table column's total, as the server writes numbers (`"1.27E8"`). */
+  readonly total?: string;
 }
 
 /** Rows as objects keyed by header key (`json_table_response`): tables. */
@@ -54,6 +58,14 @@ export interface JsonTableResponse {
   readonly headers: readonly TableHeader[];
   readonly records: readonly JsonObject[];
   readonly total: number;
+  /** Per column (by name) with `is_calc_min_max`, over the whole result, not the page (`min_max_values`). */
+  readonly minMaxValues?: readonly MinMaxValue[];
+}
+
+export interface MinMaxValue {
+  readonly valueName: string;
+  readonly min: number;
+  readonly max: number;
 }
 
 export interface UnsupportedResponse {
@@ -85,8 +97,27 @@ function tableHeaderFromJson(value: unknown): TableHeader {
     isGroupBy: asBoolean(json['is_group_by']),
     isTextLeft: asBoolean(json['is_text_left']),
     formatterKey: asString(json['formatter_key']),
-    children: asArray(json['children']).map(tableHeaderFromJson)
+    children: asArray(json['children']).map(tableHeaderFromJson),
+    ...(json['total'] !== undefined && json['total'] !== null && { total: String(json['total']) })
   };
+}
+
+/** The first value of the raw compared response; the server keys it by the PascalCase mode. */
+function compareValueOf(value: unknown): { compareValue?: number } {
+  const series = asArray(asRecord(asRecord(value)['RawValues'])['series'])[0];
+  const compared = toNullableNumber(asArray(asRecord(series)['data'])[0]);
+  return compared === null ? {} : { compareValue: compared };
+}
+
+function minMaxValuesOf(value: unknown): { minMaxValues?: MinMaxValue[] } {
+  const values = asArray(value)
+    .filter(isRecord)
+    .flatMap(item => {
+      const min = toNullableNumber(item['min']);
+      const max = toNullableNumber(item['max']);
+      return min === null || max === null ? [] : [{ valueName: asString(item['value_name']), min, max }];
+    });
+  return values.length > 0 ? { minMaxValues: values } : {};
 }
 
 function stringList(value: unknown): string[] {
@@ -102,7 +133,8 @@ export function visualizationResponseFromJson(value: unknown): VisualizationResp
         kind: 'series_one',
         series: asArray(json['series']).map(seriesItemFromJson),
         xAxis: stringList(json['x_axis']),
-        yAxis: stringList(json['y_axis'])
+        yAxis: stringList(json['y_axis']),
+        ...compareValueOf(json['compare_responses'])
       };
     case 'series_two_response':
       return {
@@ -131,7 +163,8 @@ export function visualizationResponseFromJson(value: unknown): VisualizationResp
         kind: 'json_table',
         headers: asArray(json['headers']).map(tableHeaderFromJson),
         records: asArray(json['records']).filter(isRecord),
-        total: asNumber(json['total'], asArray(json['records']).length)
+        total: asNumber(json['total'], asArray(json['records']).length),
+        ...minMaxValuesOf(json['min_max_values'])
       };
     default:
       return { kind: 'unsupported', className };

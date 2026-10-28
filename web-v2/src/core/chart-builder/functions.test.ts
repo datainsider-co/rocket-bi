@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { JsonObject } from '@/core/json/json';
 import { functionDataFromJson } from './FunctionData';
-import { FieldKind, fieldKindOf, functionOf, sortsOf, tableColumnsOf } from './functions';
+import { FieldKind, fieldKindOf, functionOf, isSameFieldKind, sortsOf, tableColumnsOf } from './functions';
 
 const field = (type: string, className = 'table_field') => ({ class_name: className, db_name: 'db', tbl_name: 'tbl', field_name: 'col', field_type: type });
 
@@ -23,6 +23,24 @@ describe('fieldKindOf', () => {
     [field('', 'chart_control_field'), FieldKind.Control]
   ])('%j is %s', (value, kind) => {
     expect(fieldKindOf(value)).toBe(kind);
+  });
+});
+
+describe('isSameFieldKind', () => {
+  it.each([
+    ['String', 'string'],
+    ['int32', 'double'],
+    ['date', 'datetime64']
+  ])('%s and %s are the same kind', (first, second) => {
+    expect(isSameFieldKind(field(first), field(second))).toBe(true);
+  });
+
+  it('tells different kinds apart', () => {
+    expect(isSameFieldKind(field('string'), field('int32'))).toBe(false);
+  });
+
+  it.each(['expression_field', 'chart_control_field'])('never keeps the function of a %s', className => {
+    expect(isSameFieldKind(field('double', className), field('double', className))).toBe(false);
   });
 });
 

@@ -1,5 +1,6 @@
 import type { ChartWidget, Widget } from '@/core/dashboard/Widget';
 import { getPath, type JsonObject } from '@/core/json/json';
+import { compareRequestOf, dateRangeFilterRequests } from '@/core/query/comparison';
 import { applyControlValues, controlsFor, ValueControlType } from '@/core/query/controlValues';
 import { applyDynamicFunctions, isFunctionControl, referencedFunctionIds, selectedColumns, type FunctionSelection } from '@/core/query/dynamicFunctions';
 import { innerFilterRequest } from '@/core/query/filterRequests';
@@ -12,6 +13,8 @@ export interface ChartQuery {
   setting: JsonObject;
   filterRequests: FilterRequestJson[];
   parameters: Record<string, string>;
+  /** A number chart's comparison, sent beside the query. */
+  compareRequest?: JsonObject;
 }
 
 function selected(controls: ControlEntryMap, id: number): readonly string[] {
@@ -52,8 +55,8 @@ export function isAffectedByFilter(setting: JsonObject): boolean {
 /**
  * A chart's query with the dashboard's controls applied: filter values into its dynamic conditions, tab control picks
  * into its columns, its inner filter and the header's filters (`headerRequests`, those that reach it) as filter
- * requests and its inputs' values as parameters. Only the controls the chart depends on are read, so other changes
- * leave the result equal (and the chart's query key unchanged).
+ * requests, its inputs' values as parameters, and a number chart's date range and comparison. Only the controls the
+ * chart depends on are read, so other changes leave the result equal (and the chart's query key unchanged).
  */
 export function buildChartQuery(
   widget: ChartWidget,
@@ -64,9 +67,11 @@ export function buildChartQuery(
   const withValues = applyControlValues(widget.setting, controlsFor(widget.setting, widget.id, controls));
   const setting = applyDynamicFunctions(withValues, functionSelection(widget.setting, controls, widgets));
   const inner = widget.chartFilter && innerFilterRequest(widget.id, widget.chartFilter.setting, selected(controls, widget.chartFilter.id));
+  const compareRequest = compareRequestOf(setting);
   return {
     setting,
-    filterRequests: inner ? [inner, ...headerRequests] : [...headerRequests],
-    parameters: queryParameters(widget.setting, parameterInputs(widget.setting, controls, widgets))
+    filterRequests: [...(inner ? [inner] : []), ...headerRequests, ...dateRangeFilterRequests(setting)],
+    parameters: queryParameters(widget.setting, parameterInputs(widget.setting, controls, widgets)),
+    ...(compareRequest && { compareRequest })
   };
 }

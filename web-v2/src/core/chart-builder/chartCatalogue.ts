@@ -54,9 +54,26 @@ const seriesZones = (xTitle = 'X-Axis', yTitle = 'Y-Axis'): ZoneConfig[] => [
   groupZone('legend_optional', 'Legend', { optional: true })
 ];
 
+/**
+ * v1 `STACKING_SERIES_CONFIGS` (`BAR_STACKING_SERIES_CONFIGS` for bars, titles swapped): the series zones and a Breakdown,
+ * whose values stack inside each legend value's column.
+ */
+const stackedZones = (xTitle?: string, yTitle?: string): ZoneConfig[] => [
+  ...seriesZones(xTitle, yTitle),
+  groupZone('breakdown_optional', 'Breakdown', { optional: true })
+];
+
 const PIE_ZONES = [groupZone('legend', 'Legend'), aggregationZone('value', 'Value', { maxItems: 1 })];
 const NUMBER_ZONES = [aggregationZone('value', 'Value', { maxItems: 1 })];
 const TABLE_ZONES = [zone('columns', 'Columns', [F.GroupBy, F.DateHistogram, F.Aggregation, F.None], NONE_DEFAULTS)];
+/** v1 `COLLAPSE_TABLE_CONFIGS`: the same zone, grouping text and dates and summing numbers by default. */
+const COLLAPSE_TABLE_ZONES = [zone('columns', 'Columns', [F.GroupBy, F.DateHistogram, F.Aggregation, F.None], { text: groupBy, number: sum, date: byYear })];
+/** v1 `PIVOT_TABLE_CONFIGS`: groups across, groups down, and the values of each cell. */
+const PIVOT_TABLE_ZONES = [
+  zone('columns', 'Columns', [F.GroupBy, F.DateHistogram], GROUP_DEFAULTS),
+  zone('rows', 'Rows', [F.GroupBy, F.DateHistogram], GROUP_DEFAULTS),
+  aggregationZone('values', 'Values')
+];
 /** v1 `DROP_DOWN_CONFIGS`, for tab, choice, dropdown and tree filters. */
 const VALUES_ZONES = [zone('values', 'Values', [F.GroupBy, F.Aggregation, F.DateHistogram], { text: groupBy, number: sum, date: byYear })];
 /** v1 `VALUE_FILTER_CONFIGS`, for slicer, date select and input filters. */
@@ -98,6 +115,8 @@ const filter = (type: ChartType, title: string, icon: string, zones: readonly Zo
 /** The chart types v2 builds, in v1's picker order (v1 `ALL_CHARTS`, `ALL_FILTERS`, `ALL_INNER_FILTERS`). */
 export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.Table, 'Table', 'ic_table.svg', TABLE_ZONES),
+  chart(T.CollapseTable, 'Collapse Table', 'ic_collapse_table.svg', COLLAPSE_TABLE_ZONES),
+  chart(T.PivotTable, 'Pivot Table', 'ic_pivot_table.svg', PIVOT_TABLE_ZONES),
   chart(T.Number, 'Number', 'ic_number.svg', NUMBER_ZONES),
   chart(T.Line, 'Line', 'ic_line_chart.svg', seriesZones()),
   chart(T.Spline, 'Spline', 'ic_line_chart.svg', seriesZones()),
@@ -106,9 +125,13 @@ export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.AreaInverted, 'Area Inverted Axes', 'ic_chart_area.svg', seriesZones()),
   chart(T.Column, 'Column', 'ic_column.svg', seriesZones()),
   chart(T.Bar, 'Bar', 'ic_bar.svg', seriesZones('Y-Axis', 'X-Axis')),
+  chart(T.Lollipop, 'Lollipop', 'ic_lollipop.svg', seriesZones()),
   chart(T.Pie, 'Pie', 'ic_pie.svg', PIE_ZONES),
   chart(T.SemiPie, 'Semi Pie', 'ic_pie.svg', PIE_ZONES),
   chart(T.Donut, 'Donut', 'ic_donut.svg', PIE_ZONES),
+  chart(T.StackedColumn, 'Stacked Column', 'ic_stack_column.svg', stackedZones()),
+  chart(T.StackedBar, 'Stacked Bar', 'ic_stack_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
+  chart(T.CircularBar, 'Circular Bar', 'ic_circular_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
   filter(T.TabFilter, 'Tab', 'ic_tab_filter.svg', VALUES_ZONES),
   filter(T.SingleChoice, 'Single choice', 'ic_single_choice.svg', VALUES_ZONES),
   filter(T.MultiChoice, 'Multi choice', 'ic_multi_choice.svg', VALUES_ZONES),
@@ -130,12 +153,9 @@ export function chartTypeInfoOf(chartType: string): ChartTypeInfo | undefined {
 
 /** v1's icons (`ALL_ICON_MAP`) for the chart types v2 doesn't build yet, which dashboards still hold. */
 const OTHER_ICONS: Readonly<Record<string, string>> = {
-  table: 'ic_collapse_table.svg',
-  pivot_table: 'ic_pivot_table.svg',
   flatten_pivot_table: 'ic_pivot_table.svg',
   arearange: 'ic_chart_area.svg',
   column_range: 'ic_column.svg',
-  lollipop: 'ic_lollipop.svg',
   Parliament: 'ic_parliament.svg',
   variablepie: 'ic_variable_pie.svg',
   scatter: 'ic_scatter.svg',
@@ -149,9 +169,6 @@ const OTHER_ICONS: Readonly<Record<string, string>> = {
   heatmap: 'ic_heatmap.svg',
   wordcloud: 'ic_word_cloud.svg',
   tree_map: 'ic_tree_map.svg',
-  stack_column: 'ic_stack_column.svg',
-  stack_bar: 'ic_stack_bar.svg',
-  circular_bar: 'ic_circular_bar.svg',
   histogram: 'ic_histogram.svg',
   map: 'ic_map.svg',
   spider_web: 'ic-spider-chart.svg',
@@ -159,6 +176,69 @@ const OTHER_ICONS: Readonly<Record<string, string>> = {
   wind_rose: 'ic_win_rose_chart.svg',
   line_stock: 'ic_linestock.svg'
 };
+
+/** One choice of the chart type picker; v2 offers the types it doesn't build yet disabled. */
+export interface PickerItem {
+  readonly type: string;
+  readonly title: string;
+  readonly icon: string;
+  readonly buildable: boolean;
+}
+
+/** v1 `ALL_CHARTS` without its hidden items, in its order, by type and title. */
+const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
+  [T.Table, 'Table'],
+  [T.CollapseTable, 'Collapse Table'],
+  [T.PivotTable, 'Pivot Table'],
+  [T.Number, 'Number'],
+  [T.Line, 'Line'],
+  [T.Spline, 'Spline'],
+  [T.LineInverted, 'Line Inverted Axes'],
+  [T.Area, 'Area'],
+  [T.AreaInverted, 'Area Inverted Axes'],
+  ['arearange', 'Area Range'],
+  [T.Column, 'Column'],
+  ['column_range', 'Column Range'],
+  [T.Bar, 'Bar'],
+  [T.Lollipop, 'Lollipop'],
+  ['Parliament', 'Parliament'],
+  [T.Pie, 'Pie'],
+  [T.SemiPie, 'Semi Pie'],
+  ['variablepie', 'Variable Pie'],
+  [T.Donut, 'Donut'],
+  ['scatter', 'Scatter'],
+  ['bubble_chart', 'Bubble'],
+  ['funnel', 'Funnel'],
+  ['pyramid', 'Pyramid'],
+  ['pareto', 'Pareto'],
+  ['bell_curve', 'Bell curve'],
+  ['gauge', 'Gauges'],
+  ['bullet', 'Bullet Graph'],
+  ['heatmap', 'Heat maps'],
+  ['wordcloud', 'Word Cloud'],
+  ['tree_map', 'Tree maps'],
+  [T.StackedColumn, 'Stacked Column'],
+  [T.StackedBar, 'Stacked Bar'],
+  [T.CircularBar, 'Circular Bar'],
+  ['histogram', 'Histogram'],
+  ['map', 'Map'],
+  ['spider_web', 'Spider Web'],
+  ['sankey', 'Sankey Diagram'],
+  ['wind_rose', 'Wind Rose'],
+  ['line_stock', 'Line Stock']
+];
+
+const pickerItem = ([type, title]: readonly [string, string]): PickerItem => ({ type, title, icon: chartIconOf(type), buildable: chartTypeInfoOf(type) !== undefined });
+
+/**
+ * What the picker offers (v1 `ChartBuilderConfig.vizItems`): every chart then every filter widget for a chart, the
+ * inner filter types for a chart's inner filter.
+ */
+export function pickerItemsOf(kind: typeof ChartKind.Chart | typeof ChartKind.InnerFilter): PickerItem[] {
+  if (kind === K.InnerFilter) return CHART_TYPES.filter(info => info.kind === K.InnerFilter).map(info => pickerItem([info.type, info.title]));
+  const filters = CHART_TYPES.filter(info => info.kind === K.Filter).map(info => [info.type, info.title] as const);
+  return [...V1_CHARTS, ...filters].map(pickerItem);
+}
 
 /** v1's generic icon, for chart controls and unknown types (v1 `ChartUtils.getControlIconSrc`). */
 export const CONTROL_ICON = 'chart_control.svg';
@@ -206,11 +286,13 @@ export interface NewItemInput {
   readonly columnName: string;
   readonly tableName: string;
   readonly isNested?: boolean;
+  /** A chart control's data (v1 `ChartControlData`), when the field is that control. */
+  readonly dynamicFunction?: JsonObject;
   readonly zone: ZoneConfig;
 }
 
 /** A field just dropped into a zone (v1 `FunctionNodeBuilder` + `ConfigDataUtils.toFunctionData`). */
-export function newFunctionData({ id, field, columnName, tableName, isNested = false, zone: zoneConfig }: NewItemInput): FunctionData {
+export function newFunctionData({ id, field, columnName, tableName, isNested = false, dynamicFunction, zone: zoneConfig }: NewItemInput): FunctionData {
   const { family, type } = defaultFunctionOf(field, zoneConfig);
   return {
     id,
@@ -224,6 +306,7 @@ export function newFunctionData({ id, field, columnName, tableName, isNested = f
     displayAsColumn: false,
     isNested,
     numElemsShown: 10,
-    isShowNElements: false
+    isShowNElements: false,
+    ...(dynamicFunction && { dynamicFunction })
   };
 }

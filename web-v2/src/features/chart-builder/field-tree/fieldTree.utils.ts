@@ -2,6 +2,8 @@ import { asString, isRecord, type JsonObject } from '@/core/json/json';
 import { chartIconOf, CONTROL_ICON } from '@/core/chart-builder/chartCatalogue';
 import { ChartInfoType, type ChartControl } from '@/core/chart-builder/chartControls';
 import { TableType, type DatabaseInfo, type SchemaColumn, type TableSchema } from '@/core/schema/SchemaService';
+import type { ExpressionColumnKind } from '@/core/schema/SchemaEditService';
+import type { ActionItem, ColumnAction, TableAction } from '../field-actions/fieldActions.utils';
 import type { DroppedField } from '../state/builderState.utils';
 
 /** A plain column, a measure (aggregated by its expression) or a calculated column. */
@@ -41,12 +43,31 @@ export interface DatabaseSelect {
   readonly onChange: (dbName: string) => void;
 }
 
+/** The menus of the tables, measures and calculated columns (v1 `DatabaseListing` context menus). */
+export interface TreeActions {
+  readonly tableActionsOf: (tableKey: string) => readonly ActionItem<TableAction>[];
+  readonly onTableAction: (tableKey: string, action: TableAction) => void;
+  readonly onColumnAction: (node: FieldNode, action: ColumnAction) => void;
+}
+
 export interface TreeTables {
   readonly nodes: readonly TableNode[];
   readonly expanded: ReadonlySet<string>;
   readonly onToggle: (key: string) => void;
   readonly status: 'loading' | 'error' | 'ready';
   readonly error: string;
+  /** None for an ad hoc table, which has no actions (v1 `hideTableAction`). */
+  readonly actions?: TreeActions;
+}
+
+/** The kind of a tree column that has a menu: measures and calculated columns. */
+export function expressionKindOf(node: FieldNode): ExpressionColumnKind | undefined {
+  return node.role === 'column' ? undefined : node.role;
+}
+
+/** The name of the column a tree row stands for. */
+export function columnNameOfNode(node: FieldNode): string {
+  return asString(node.dropped.field['field_name']);
 }
 
 /** What a tree row hands to the drop zones. */
@@ -144,6 +165,29 @@ export function controlIconOf(control: ChartControl): string {
   return CHART_ICON_PATH + (control.infoType === ChartInfoType.FunctionController ? CONTROL_ICON : chartIconOf(control.chartType));
 }
 
+/** The icon of a field as the tree shows it: its column type, a function for a measure, or a chart icon. */
+export type FieldIcon = { readonly kind: 'type'; readonly type: string } | { readonly kind: 'measure' } | { readonly kind: 'image'; readonly src: string };
+
+/** A field as the tree shows it; the tree rows and the drag image share it (v1's drag image: icon and name). */
+export interface FieldLook {
+  readonly title: string;
+  readonly icon: FieldIcon;
+  /** Measures and calculated columns are in italics. */
+  readonly italic: boolean;
+}
+
+/** How the tree shows a field (`class_name` and `field_type` as stored), under `title`. */
+export function fieldLookOf(field: JsonObject, title: string): FieldLook {
+  const className = asString(field['class_name']);
+  if (className === 'chart_control_field') return { title, icon: { kind: 'image', src: CHART_ICON_PATH + CONTROL_ICON }, italic: false };
+  if (className === 'expression_field') return { title, icon: { kind: 'measure' }, italic: true };
+  return { title, icon: { kind: 'type', type: asString(field['field_type']) }, italic: className === 'calculated_field' };
+}
+
+export function controlLookOf(control: ChartControl): FieldLook {
+  return { title: control.title, icon: { kind: 'image', src: controlIconOf(control) }, italic: false };
+}
+
 /** The chart controls whose title matches `keyword` (v1 `filterChartControls`). */
 export function searchControls(controls: readonly ChartControl[], keyword: string): readonly ChartControl[] {
   const word = keyword.trim().toLocaleLowerCase();
@@ -191,6 +235,11 @@ export function toggled(expanded: ReadonlySet<string>, key: string): ReadonlySet
   const next = new Set(expanded);
   if (!next.delete(key)) next.add(key);
   return next;
+}
+
+/** Opens a table, keeping the set when it already is (v1 `expandTables` after an action on the table). */
+export function opened(expanded: ReadonlySet<string>, key: string): ReadonlySet<string> {
+  return expanded.has(key) ? expanded : new Set([...expanded, key]);
 }
 
 /** The SQL of an ad hoc view by its name, for the chart's `sql_views` (v1 `BuilderTableSchemaStore.getSqlQuery`). */

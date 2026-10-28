@@ -47,4 +47,19 @@ describe('buildKpi', () => {
     const kpi = buildKpi({ icon: { enabled: true, iconClass: 'setting-icon-wallet', color: '#fff', background: '#000' } }, response);
     expect(kpi.icon).toEqual({ className: 'setting-icon-wallet', style: { color: '#fff', background: '#000', borderRadius: '4px', boxShadow: undefined } });
   });
+
+  it('picks the trend and area layouts by theme', () => {
+    const trendOn = { dataRange: { enabled: true }, trendLine: { enabled: true } };
+    expect(buildKpi({ theme: 'style_2', ...trendOn }, response).layout).toBe('trend');
+    expect(buildKpi({ theme: 'style_area_1' }, response).layout).toBe('area');
+    expect(buildKpi({ ...trendOn }, response).layout).toBe('plain');
+  });
+
+  it('adds the comparison and the trend line once their data is in', () => {
+    const compared: SeriesOneResponse = { ...response, compareValue: 125385679.185 };
+    const kpi = buildKpi({ theme: 'style_1', dataRange: { enabled: true }, comparison: { enabled: true }, trendLine: { enabled: true, color: '#abc' } }, compared, [1, 2]);
+    expect(kpi.comparison).toMatchObject({ percentage: 100, text: '+100%' });
+    expect(kpi.trend).toEqual({ data: [1, 2], displayAs: 'line', color: '#abc' });
+    expect(buildKpi({}, compared)).not.toHaveProperty('comparison');
+  });
 });

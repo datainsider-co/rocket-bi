@@ -32,7 +32,7 @@ function toMode(item: FunctionData, mode: RowMode): FunctionData {
 }
 
 /** The chart types whose columns must all group or all list rows (v1 `TableFunctionConvertor`). */
-const ROW_MODE_TYPES = new Set<string>([ChartType.Table]);
+const ROW_MODE_TYPES = new Set<string>([ChartType.Table, ChartType.CollapseTable]);
 
 /**
  * After a table column switches between grouping and listing rows, the other items follow it (v1

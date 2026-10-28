@@ -153,5 +153,242 @@
    ]
   ],
   "total": 12
+ },
+ "group_table_chart_setting": {
+  "class_name": "json_table_response",
+  "headers": [
+   {
+    "key": "960db2",
+    "label": "region",
+    "is_group_by": true,
+    "is_text_left": true
+   },
+   {
+    "key": "4f5daa",
+    "label": "total_revenue by region",
+    "is_group_by": false,
+    "is_text_left": false
+   },
+   {
+    "key": "84002f",
+    "label": "units_sold by region",
+    "is_group_by": false,
+    "is_text_left": true
+   }
+  ],
+  "records": [
+   {
+    "children": [
+     {
+      "children": [],
+      "960db2": "Bangladesh",
+      "4f5daa": "1948296.96",
+      "84002f": "7632"
+     },
+     {
+      "children": [],
+      "960db2": "Bhutan",
+      "4f5daa": "3454857.21",
+      "84002f": "8189"
+     }
+    ],
+    "960db2": "Asia",
+    "4f5daa": "3.433024325E7",
+    "84002f": "161761"
+   },
+   {
+    "children": [
+     {
+      "children": [],
+      "960db2": "East Timor",
+      "4f5daa": "424435.3",
+      "84002f": "2755"
+     },
+     {
+      "children": [],
+      "960db2": "Federated States of Micronesia",
+      "4f5daa": "62100.06",
+      "84002f": "407"
+     }
+    ],
+    "960db2": "Australia and Oceania",
+    "4f5daa": "1.668843469E7",
+    "84002f": "67840"
+   },
+   {
+    "children": [
+     {
+      "children": [],
+      "960db2": "Antigua and Barbuda ",
+      "4f5daa": "481745.62",
+      "84002f": "3127"
+     },
+     {
+      "children": [],
+      "960db2": "Cuba",
+      "4f5daa": "897755.36",
+      "84002f": "11275"
+     }
+    ],
+    "960db2": "Central America and the Caribbean",
+    "4f5daa": "1.5355475600000001E7",
+    "84002f": "74891"
+   }
+  ],
+  "total": 7,
+  "min_max_values": [
+   {
+    "value_name": "total_revenue",
+    "min": 7273.97,
+    "max": 9107823.06
+   },
+   {
+    "value_name": "units_sold",
+    "min": 89.0,
+    "max": 23807.0
+   }
+  ],
+  "last_query_time": 0,
+  "last_processing_time": 0
+ },
+ "pivot_table_chart_setting": {
+  "class_name": "json_table_response",
+  "headers": [
+   {
+    "key": "960db2",
+    "label": "region",
+    "is_group_by": true,
+    "is_text_left": true
+   },
+   {
+    "label": "Offline",
+    "children": [
+     {
+      "label": "total_revenue",
+      "total": "1.2792258188999999E8",
+      "is_text_left": false,
+      "key": "e1015b"
+     },
+     {
+      "label": "units_sold",
+      "total": "587060",
+      "is_text_left": false,
+      "key": "d28fcf"
+     }
+    ]
+   },
+   {
+    "label": "Online",
+    "children": [
+     {
+      "label": "total_revenue",
+      "total": "1.2284877647999996E8",
+      "is_text_left": false,
+      "key": "d3cac9"
+     },
+     {
+      "label": "units_sold",
+      "total": "441986",
+      "is_text_left": false,
+      "key": "663c43"
+     }
+    ]
+   }
+  ],
+  "records": [
+   {
+    "children": [],
+    "960db2": "Asia",
+    "4f5daa": "3.433024325E7",
+    "84002f": "161761",
+    "e1015b": "1.7238363319999997E7",
+    "d28fcf": "86427",
+    "d3cac9": "1.709187993E7",
+    "663c43": "75334"
+   },
+   {
+    "children": [],
+    "960db2": "Australia and Oceania",
+    "4f5daa": "1.668843469E7",
+    "84002f": "67840",
+    "e1015b": "8146184.309999999",
+    "d28fcf": "36393",
+    "d3cac9": "8542250.379999999",
+    "663c43": "31447"
+   },
+   {
+    "children": [],
+    "960db2": "Central America and the Caribbean",
+    "4f5daa": "1.5355475600000001E7",
+    "84002f": "74891",
+    "e1015b": "8347059.27",
+    "d28fcf": "47537",
+    "d3cac9": "7008416.33",
+    "663c43": "27354"
+   }
+  ],
+  "total": 7,
+  "min_max_values": [
+   {
+    "value_name": "total_revenue",
+    "min": 852388.4099999999,
+    "max": 55403108.16999999
+   },
+   {
+    "value_name": "units_sold",
+    "min": 12107.0,
+    "max": 198813.0
+   }
+  ],
+  "last_query_time": 0,
+  "last_processing_time": 0
+ },
+ "stacked_series_chart_setting": {
+  "class_name": "series_one_response",
+  "series": [
+   {
+    "name": "Offline.C",
+    "data": [
+     2192780.31,
+     424435.3,
+     256609.6
+    ],
+    "stack": "Offline"
+   },
+   {
+    "name": "Offline.H",
+    "data": [
+     2516005.77,
+     888563.52,
+     6180780.8
+    ],
+    "stack": "Offline"
+   },
+   {
+    "name": "Online.C",
+    "data": [
+     1951377.4700000002,
+     62100.06,
+     228218.4
+    ],
+    "stack": "Online"
+   },
+   {
+    "name": "Online.H",
+    "data": [
+     11707747.84,
+     256152.32,
+     5032243.72
+    ],
+    "stack": "Online"
+   }
+  ],
+  "x_axis": [
+   "Asia",
+   "Australia and Oceania",
+   "Central America and the Caribbean"
+  ],
+  "last_query_time": 0,
+  "last_processing_time": 0
  }
 }

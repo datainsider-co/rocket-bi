@@ -1,6 +1,6 @@
 import type Highcharts from 'highcharts';
 import { cloneDeep, merge } from 'lodash-es';
-import type { SeriesOneResponse } from '@/core/query/VisualizationResponse';
+import type { SeriesItem, SeriesOneResponse } from '@/core/query/VisualizationResponse';
 import { vizKey, type VizOptions } from '@/core/query/vizOptions';
 import { createNumberFormat } from '../numberFormat';
 import { BASE_CONFIG, axisLabel, chartColors, isInsideCondition, titleText, type MinMaxCondition } from '../highchartsBase';
@@ -37,7 +37,7 @@ export function isTimestampFunction(scalarFunctionClassName: string | undefined)
 
 type AxisOptions = Record<string, unknown> & { condition?: MinMaxCondition };
 
-interface SeriesOptionsInput {
+export interface SeriesOptionsInput {
   options: VizOptions;
   response: SeriesOneResponse;
   themeColors: readonly string[];
@@ -72,13 +72,23 @@ function axisRange(axis: AxisOptions | undefined) {
   };
 }
 
+/** A series' values; on a datetime x axis, paired with the response's timestamps. */
+export function seriesData(item: SeriesItem, response: SeriesOneResponse, timestampXAxis: boolean): (number | null)[] | [number, number | null][] {
+  return timestampXAxis ? item.data.map((value, index) => [Number(response.xAxis[index]), value]) : [...item.data];
+}
+
+/** Each series' own options (Display tab), keyed by `vizKey(name)`. */
+export function perSeriesOptionsOf(options: VizOptions): Record<string, object> {
+  return ((options.plotOptions?.series as Record<string, unknown> | undefined)?.['response'] ?? {}) as Record<string, object>;
+}
+
 function seriesList(options: VizOptions, response: SeriesOneResponse, timestampXAxis: boolean): Highcharts.SeriesOptionsType[] {
   const defaultType = options.chart?.type ?? 'line';
-  const perSeries = ((options.plotOptions?.series as Record<string, unknown> | undefined)?.['response'] ?? {}) as Record<string, object>;
+  const perSeries = perSeriesOptionsOf(options);
   return response.series.map(item => {
     const key = vizKey(item.name);
     const type = options.typesByLabel?.[key] ?? defaultType;
-    const data = timestampXAxis ? item.data.map((value, index) => [Number(response.xAxis[index]), value]) : [...item.data];
+    const data = seriesData(item, response, timestampXAxis);
     return {
       name: item.name,
       data,
@@ -92,17 +102,27 @@ function seriesList(options: VizOptions, response: SeriesOneResponse, timestampX
   });
 }
 
-/** Column, bar, line and area charts (v1 `SeriesChart.vue`): stored viz options + the response → Highcharts options. */
-export function buildSeriesChartOptions({ options: stored, response, themeColors, timestampXAxis, onPointClick }: SeriesOptionsInput): Highcharts.Options {
-  const options = normalize(stored);
-  const series = options.plotOptions?.series as Record<string, unknown> | undefined;
-  const dataLabels = (series?.['dataLabels'] ?? {}) as { displayUnit?: string; condition?: MinMaxCondition; style?: { color?: string } };
-  const format = createNumberFormat({
-    displayUnit: dataLabels.displayUnit,
+type DataLabels = { displayUnit?: string; condition?: MinMaxCondition; style?: { color?: string } };
+
+function dataLabelsOf(options: VizOptions): DataLabels {
+  return ((options.plotOptions?.series as Record<string, unknown> | undefined)?.['dataLabels'] ?? {}) as DataLabels;
+}
+
+/** How the chart writes its numbers in labels, axes and tooltips: the data labels' display unit, the chart's precision. */
+export function seriesNumberFormat(options: VizOptions): (value: number) => string {
+  return createNumberFormat({
+    displayUnit: dataLabelsOf(options).displayUnit,
     precision: options.precision,
     decimalPoint: options.decimalPoint,
     thousandSep: options.thousandSep
   });
+}
+
+/** Column, bar, line and area charts (v1 `SeriesChart.vue`): stored viz options + the response → Highcharts options. */
+export function buildSeriesChartOptions({ options: stored, response, themeColors, timestampXAxis, onPointClick }: SeriesOptionsInput): Highcharts.Options {
+  const options = normalize(stored);
+  const dataLabels = dataLabelsOf(options);
+  const format = seriesNumberFormat(options);
   const yAxis = (Array.isArray(options.yAxis) ? options.yAxis : []) as AxisOptions[];
   const xAxis = (Array.isArray(options.xAxis) ? options.xAxis : [options.xAxis ?? {}]) as AxisOptions[];
   const tooltipStyle = (options.tooltip?.style ?? {}) as { color?: string; fontFamily?: string };
@@ -176,7 +196,7 @@ export function buildSeriesChartOptions({ options: stored, response, themeColors
 }
 
 /** v1 `DateTimeUtils.formatAsDDMMYYYYHms`. */
-function formatDateTime(epochMillis: number): string {
+export function formatDateTime(epochMillis: number): string {
   const date = new Date(epochMillis);
   const pad = (value: number) => String(value).padStart(2, '0');
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;

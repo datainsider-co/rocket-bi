@@ -3,9 +3,14 @@ import type { ChartControl } from '@/core/chart-builder/chartControls';
 import type { TableSchema } from '@/core/schema/SchemaService';
 import stored from '@/core/chart-builder/builder.fixture.json';
 import {
+  columnNameOfNode,
   controlIconOf,
+  controlLookOf,
+  expressionKindOf,
+  fieldLookOf,
   fieldRefsOf,
   initialExpanded,
+  opened,
   mainDatabaseOf,
   MAX_SEARCH_TABLES,
   searchControls,
@@ -102,6 +107,24 @@ describe('chart controls', () => {
     expect(controlIconOf(control('a', 'Normal', 'Donut'))).toBe('/chart-builder/charts/ic_donut.svg');
     expect(controlIconOf(control('a', 'FunctionController', 'tab_filter'))).toBe('/chart-builder/charts/chart_control.svg');
   });
+
+  it('shows a control as the tree shows it', () => {
+    expect(controlLookOf(control('Donut', 'Normal', 'Donut'))).toEqual({ title: 'Donut', icon: { kind: 'image', src: '/chart-builder/charts/ic_donut.svg' }, italic: false });
+  });
+});
+
+describe('fieldLookOf', () => {
+  const field = (className: string, type = 'Int32') => ({ class_name: className, field_name: 'f', field_type: type });
+
+  it('shows a column by its type, measures and calculated columns in italics', () => {
+    expect(fieldLookOf(field('table_field'), 'Units')).toEqual({ title: 'Units', icon: { kind: 'type', type: 'Int32' }, italic: false });
+    expect(fieldLookOf(field('calculated_field'), 'Double')).toEqual({ title: 'Double', icon: { kind: 'type', type: 'Int32' }, italic: true });
+    expect(fieldLookOf(field('expression_field'), 'Avg')).toEqual({ title: 'Avg', icon: { kind: 'measure' }, italic: true });
+  });
+
+  it('shows a chart control dropped as a field by the generic control icon', () => {
+    expect(fieldLookOf(field('chart_control_field', ''), 'Tab')).toEqual({ title: 'Tab', icon: { kind: 'image', src: '/chart-builder/charts/chart_control.svg' }, italic: false });
+  });
 });
 
 describe('fieldRefsOf / mainDatabaseOf / tablesIn', () => {
@@ -143,5 +166,25 @@ describe('viewQueryOf', () => {
     expect(viewQueryOf([sales, adhoc], 'tbl_1')).toBe('select 1 as id');
     expect(viewQueryOf([sales, { ...adhoc, dbName: 'db' }], 'tbl_1')).toBeUndefined();
     expect(viewQueryOf([sales], 'sales')).toBeUndefined();
+  });
+});
+
+describe('expressionKindOf and columnNameOfNode', () => {
+  it('give the kind and column of measures and calculated columns only', () => {
+    const items = tableNodesOf([sales])[0]!.items.filter((item): item is FieldNode => item.kind === 'field');
+    expect(items.map(item => [columnNameOfNode(item), expressionKindOf(item)])).toEqual([
+      ['country', undefined],
+      ['region', undefined],
+      ['revenue', 'measure'],
+      ['margin', 'calculated']
+    ]);
+  });
+});
+
+describe('opened', () => {
+  it('opens a closed table and keeps an open one', () => {
+    const expanded = new Set(['sales']);
+    expect(opened(expanded, 'sales')).toBe(expanded);
+    expect([...opened(expanded, 'orders')]).toEqual(['sales', 'orders']);
   });
 });

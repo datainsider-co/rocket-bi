@@ -4,6 +4,10 @@
  */
 export const ChartType = {
   Table: 'flatten_table',
+  /** v1's "Collapse Table": rows grouped by the first group by column, its groups expanding into the next. */
+  CollapseTable: 'table',
+  /** Rows by the Rows zone's groups, columns by the Columns zone's, a cell per value of each. */
+  PivotTable: 'pivot_table',
   Number: 'kpi',
   Line: 'line',
   Spline: 'spline',
@@ -12,6 +16,13 @@ export const ChartType = {
   AreaInverted: 'area_inverted',
   Column: 'column',
   Bar: 'bar',
+  /** A series chart drawn with Highcharts' lollipop series (v1 `SeriesChartOption`, chart type `lollipop`). */
+  Lollipop: 'lollipop',
+  /** Stacked series: the legend's values side by side, each stacking its breakdown's values (v1 `StackedChartOption`). */
+  StackedColumn: 'stack_column',
+  StackedBar: 'stack_bar',
+  /** The stacked bar on a polar pane (v1 `CircularChartOption`). */
+  CircularBar: 'circular_bar',
   Pie: 'pie',
   SemiPie: 'semi_pie',
   Donut: 'Donut',

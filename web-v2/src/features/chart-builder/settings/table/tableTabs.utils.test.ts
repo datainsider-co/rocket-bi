@@ -1,0 +1,126 @@
+import { describe, expect, it } from 'vitest';
+import type { VizOptions } from '@/core/query/vizOptions';
+import { ChartType } from '@/core/chart-builder/chartType';
+import {
+  gridRevert,
+  hasCollapseTab,
+  headerRevert,
+  TABLE_THEME_OPTIONS,
+  tableThemeChanges,
+  tableThemeOf,
+  tableTooltipRevert,
+  THICKNESSES,
+  toggleIconRevert,
+  totalRevert,
+  valuesRevert
+} from './tableTabs.utils';
+
+const viz = (options: object) => options as VizOptions;
+
+describe('table themes', () => {
+  it("offers v1's themes", () => {
+    expect(TABLE_THEME_OPTIONS.map(option => option.value)).toEqual(['aqua', 'default', 'venus', 'saturn', 'moon', 'mar']);
+  });
+
+  it('reads the theme, Default otherwise', () => {
+    expect(tableThemeOf(viz({ theme: 'moon' }))).toBe('moon');
+    expect(tableThemeOf(viz({ theme: 'style_1' }))).toBe('default');
+    expect(tableThemeOf(viz({}))).toBe('default');
+  });
+
+  it("writes the theme's name and settings, without the keys nothing reads", () => {
+    const changes = tableThemeChanges('saturn');
+    expect(changes).toMatchObject({ theme: 'saturn', 'header.backgroundColor': '#BC6E00', 'value.style.fontFamily': 'Arial, sans-serif', background: '#C38307' });
+    expect(Object.keys(changes).some(key => key.startsWith('total.') || key === 'value.isWordWrap' || key === 'value.style.color')).toBe(false);
+  });
+
+  it('writes the total row for a table that has one, never turning it on or off', () => {
+    const changes = tableThemeChanges('saturn', true);
+    expect(changes).toMatchObject({ 'total.backgroundColor': '#BC6E00', 'total.label.style.color': '#FFFFFFCC', 'total.label.align': 'left' });
+    expect(changes).not.toHaveProperty('total.enabled');
+  });
+
+  it('changes nothing for an unknown theme', () => {
+    expect(tableThemeChanges('x')).toEqual({});
+  });
+});
+
+describe('THICKNESSES', () => {
+  it('runs from 1px to 10px', () => {
+    expect(THICKNESSES[0]).toEqual({ label: '1px', value: '1px' });
+    expect(THICKNESSES).toHaveLength(10);
+  });
+});
+
+describe('reverts', () => {
+  it("puts back a new table's grid", () => {
+    expect(gridRevert()).toMatchObject({ 'grid.vertical.applyBody': false, 'grid.horizontal.applyBody': true, 'grid.horizontal.rowPadding': '0px' });
+  });
+
+  it('puts back the header', () => {
+    expect(headerRevert()).toEqual({
+      'header.style.fontFamily': 'var(--widget-primary-font-family, Roboto)',
+      'header.style.color': 'var(--text-color)',
+      'header.style.fontSize': '12px',
+      'header.align': 'left',
+      'header.backgroundColor': 'var(--header-background-color)',
+      'header.isWordWrap': false
+    });
+  });
+
+  it("puts back the rows' theme colors", () => {
+    expect(valuesRevert()).toMatchObject({
+      'value.backgroundColor': 'var(--row-even-background-color)',
+      'value.alternateBackgroundColor': 'var(--row-odd-background-color)',
+      'value.style.isWordWrap': false
+    });
+  });
+
+  it("puts back a new table's tooltip", () => {
+    expect(tableTooltipRevert()).toEqual({
+      'tooltip.valueColor': 'var(--secondary-text-color)',
+      'tooltip.backgroundColor': 'var(--tooltip-background-color)',
+      'tooltip.fontFamily': 'var(--widget-secondary-font-family, Roboto)'
+    });
+  });
+});
+
+describe('hasCollapseTab', () => {
+  const group = (name: string) => ({ name, function: { class_name: 'group' } });
+  const sum = { name: 'revenue', function: { class_name: 'sum' } };
+
+  it('shows on a collapse table with two group by columns or more', () => {
+    expect(hasCollapseTab(ChartType.CollapseTable, { columns: [group('region'), group('country'), sum] })).toBe(true);
+    expect(hasCollapseTab(ChartType.CollapseTable, { columns: [group('region'), sum] })).toBe(false);
+    expect(hasCollapseTab(ChartType.CollapseTable, {})).toBe(false);
+    expect(hasCollapseTab(ChartType.Table, { columns: [group('region'), group('country')] })).toBe(false);
+  });
+
+  it('shows on a pivot table with two row groups or more', () => {
+    expect(hasCollapseTab(ChartType.PivotTable, { rows: [group('region'), group('country')] })).toBe(true);
+    expect(hasCollapseTab(ChartType.PivotTable, { rows: [group('region')], columns: [group('a'), group('b')] })).toBe(false);
+  });
+
+  it('shows on nothing without a setting', () => {
+    expect(hasCollapseTab(ChartType.PivotTable, undefined)).toBe(false);
+  });
+});
+
+describe('totalRevert', () => {
+  it("puts back a new pivot table's total row, keeping its label", () => {
+    expect(totalRevert()).toEqual({
+      'total.enabled': true,
+      'total.label.style.color': 'var(--text-color)',
+      'total.label.style.fontFamily': 'var(--widget-secondary-font-family, Roboto)',
+      'total.label.style.fontSize': '12px',
+      'total.label.align': 'right',
+      'total.backgroundColor': 'var(--total-background-color)'
+    });
+  });
+});
+
+describe('toggleIconRevert', () => {
+  it("goes back to a new collapse table's colors", () => {
+    expect(toggleIconRevert()).toEqual({ 'toggleIcon.backgroundColor': 'var(--toggle-color)', 'toggleIcon.color': 'var(--text-color)' });
+  });
+});

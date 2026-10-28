@@ -4,6 +4,8 @@ import { FieldDndContext } from './FieldDndContext';
 import type { DragSource } from './fieldDnd.utils';
 import { fieldCollision, useFieldDndHandlers, type FieldDndOptions } from './useFieldDndHandlers';
 
+const OVERLAY_Z_INDEX = 2000;
+
 export interface FieldDndProviderProps extends FieldDndOptions {
   /** What follows the pointer while dragging (v1's drag image: icon and field name). */
   renderOverlay: (source: DragSource) => ReactNode;
@@ -29,8 +31,13 @@ export function FieldDndProvider({ renderOverlay, children, ...options }: FieldD
     >
       <FieldDndContext value={state}>
         {children}
-        {/* No drop animation: it would fly the overlay back to where the drag started, even after a drop. */}
-        <DragOverlay dropAnimation={null}>{state.active ? renderOverlay(state.active) : null}</DragOverlay>
+        {/*
+          No drop animation: it would fly the overlay back to where the drag started, even after a drop. Above antd's
+          modals (1000) and popups (1050): dnd-kit's default (999) hid it under the ChartBuilder modal.
+        */}
+        <DragOverlay dropAnimation={null} zIndex={OVERLAY_Z_INDEX}>
+          {state.active ? renderOverlay(state.active) : null}
+        </DragOverlay>
       </FieldDndContext>
     </DndContext>
   );

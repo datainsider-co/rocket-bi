@@ -81,6 +81,12 @@ describe('applyTableSort', () => {
     ]);
   });
 
+  it('sorts a pivot table by one of its rows or values', () => {
+    const sum = { class_name: 'sum', field: region };
+    const pivot = { rows: [{ name: 'region', function: { class_name: 'group', field: region } }], values: [{ name: 'total', function: sum }] };
+    expect(applyTableSort(pivot, { column: 'total', direction: 'ASC' })['sorts']).toEqual([{ class_name: 'order_by', function: sum, order: 'ASC' }]);
+  });
+
   it('keeps the stored sorts without a match or a sort', () => {
     expect(applyTableSort(table, { column: 'nope', direction: 'ASC' })).toBe(table);
     expect(applyTableSort(table, undefined)).toBe(table);

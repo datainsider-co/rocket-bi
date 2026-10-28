@@ -3,6 +3,7 @@ import { asRecord, type JsonObject } from '@/core/json/json';
 import { ChartType } from '@/core/chart-builder/chartType';
 import { defaultVizOptions, vizTitleOf } from '@/core/chart-builder/defaultVizOptions';
 import type { FunctionData } from '@/core/chart-builder/FunctionData';
+import { applyVizChanges } from '@/core/chart-builder/vizChanges';
 import stored from '@/core/chart-builder/builder.fixture.json';
 import storedDashboard from '@/core/dashboard/dashboard.fixture.json';
 import {
@@ -48,7 +49,7 @@ describe('newBuilderState', () => {
   });
 
   it('has no options for a type v2 does not build', () => {
-    expect(newBuilderState('pivot_table').options).toEqual({});
+    expect(newBuilderState('arearange').options).toEqual({});
   });
 });
 
@@ -71,10 +72,11 @@ describe('builderStateOf', () => {
 
   it('shows option changes on the stored setting without rebuilding it', () => {
     const widget = storedWidget(36);
-    const options = { class_name: 'number_chart_setting', options: { title: { text: 'Profit' } } };
-    const state = run(builderStateOf(widget), { type: 'options', options });
+    const setting = asRecord(widget['setting']);
+    const state = run(builderStateOf(widget), { type: 'vizChanges', changes: { 'title.text': 'Profit' } });
     expect(state.touched).toBe(false);
-    expect(builderSettingOf(state)).toStrictEqual({ ...asRecord(widget['setting']), options });
+    expect(builderSettingOf(state)).toStrictEqual({ ...setting, options: applyVizChanges(asRecord(setting['options']), { 'title.text': 'Profit' }) });
+    expect(vizTitleOf(state.options)).toBe('Profit');
   });
 });
 
@@ -90,9 +92,25 @@ describe('drop', () => {
     expect(items(run(column(), insert('sorting', revenue)), 'sorting')).toMatchObject([{ id: 3, sorting: 'Ascending' }]);
   });
 
-  it("replaces a full single-item zone's item", () => {
+  it("replaces a full single-item zone's item, keeping its id", () => {
     const state = run(column(), { type: 'drop', drop: { type: 'replace', zoneId: 'x_axis', index: 0 }, field: field('country', 'string') });
-    expect(items(state, 'x_axis').map(item => item.name)).toEqual(['country']);
+    expect(items(state, 'x_axis').map(item => [item.id, item.name])).toEqual([[1, 'country']]);
+  });
+
+  it('keeps the function of the replaced item for the same kind of column only', () => {
+    const pie = run(newBuilderState(ChartType.Pie), insert('value', revenue));
+    const [sum] = items(pie, 'value');
+    if (!sum) throw new Error('no item');
+    const averaged = run(pie, { type: 'updateItem', zone: 'value', item: { ...sum, functionType: 'Average' } });
+    const replace = { type: 'replace', zoneId: 'value', index: 0 } as const;
+    expect(items(run(averaged, { type: 'drop', drop: replace, field: field('total_profit', 'double') }), 'value')).toMatchObject([{ name: 'total_profit', functionType: 'Average' }]);
+    expect(items(run(averaged, { type: 'drop', drop: replace, field: region }), 'value')).toMatchObject([{ name: 'region', functionType: 'Count all' }]);
+  });
+
+  it('adds a chart control as a dynamic item', () => {
+    const data = { id: 50, display_name: 'Group by', chart_info_type: 'FunctionController' };
+    const control: DroppedField = { field: { class_name: 'chart_control_field', control_data: data }, columnName: 'Group by', tableName: '', dynamicFunction: data };
+    expect(items(run(newBuilderState(ChartType.Column), insert('x_axis', control)), 'x_axis')).toMatchObject([{ functionFamily: 'Dynamic', dynamicFunction: data }]);
   });
 
   it('reorders inside a zone, keeping the items', () => {
@@ -138,6 +156,21 @@ describe('updateItem and removeItem', () => {
     expect(items(grouped, 'columns').map(item => item.functionFamily)).toEqual(['Group By', 'Group By']);
   });
 
+  it("drops a removed collapse table column's formatting, and all conditional formatting when the columns stop grouping", () => {
+    const formatted = (state: BuilderState) =>
+      ({ ...state, options: applyVizChanges(state.options, { 'fieldFormatting.totalRevenue.precision': 3, 'conditionalFormatting.totalRevenue.dataBar.enabled': true }) });
+    const table = formatted(run(newBuilderState(ChartType.CollapseTable), insert('columns', region), insert('columns', revenue, 1)));
+    const removed = run(table, { type: 'removeItem', zone: 'columns', id: 2 });
+    expect(asRecord(removed.options['options'])).not.toHaveProperty('field_formatting.total_revenue');
+    expect(asRecord(removed.options['options'])).not.toHaveProperty('conditional_formatting.total_revenue');
+    expect(removed.latest?.options).toBe(removed.options);
+    const [first] = items(table, 'columns');
+    if (!first) throw new Error('no item');
+    const listed = run(table, { type: 'updateItem', zone: 'columns', item: { ...first, functionFamily: 'None' } });
+    expect(asRecord(listed.options['options'])).not.toHaveProperty('conditional_formatting');
+    expect(asRecord(listed.options['options'])).toHaveProperty('field_formatting.total_revenue.precision', 3);
+  });
+
   it('removes an item, and does nothing for an unknown one', () => {
     const state = column();
     expect(items(run(state, { type: 'removeItem', zone: 'x_axis', id: 1 }), 'x_axis')).toEqual([]);
@@ -146,9 +179,27 @@ describe('updateItem and removeItem', () => {
   });
 });
 
+describe('changeItemField', () => {
+  it('keeps the function for the same kind of column, taking its name', () => {
+    const state = run(column(), { type: 'changeItemField', zone: 'y_axis', id: 2, field: field('total_profit', 'double') });
+    expect(items(state, 'y_axis')).toMatchObject([{ id: 2, name: 'total_profit', columnName: 'total_profit', functionFamily: 'Aggregation', functionType: 'Sum' }]);
+  });
+
+  it("takes the zone's default for another kind", () => {
+    const state = run(column(), { type: 'changeItemField', zone: 'y_axis', id: 2, field: region });
+    expect(items(state, 'y_axis')).toMatchObject([{ id: 2, name: 'region', functionFamily: 'Aggregation', functionType: 'Count all' }]);
+  });
+
+  it('ignores an unknown item', () => {
+    const state = column();
+    expect(run(state, { type: 'changeItemField', zone: 'y_axis', id: 9, field: region })).toBe(state);
+    expect(run(state, { type: 'changeItemField', zone: 'nowhere', id: 2, field: region })).toBe(state);
+  });
+});
+
 describe('chartType', () => {
   it('moves the zones across and keeps the title', () => {
-    const titled = run(column(), { type: 'options', options: { ...defaultVizOptions(ChartType.Column), options: { title: { text: 'Revenue' } } } });
+    const titled = run(column(), { type: 'vizChanges', changes: { 'title.text': 'Revenue' } });
     const pie = run(titled, { type: 'chartType', chartType: ChartType.Pie });
     expect(Object.fromEntries(Object.entries(pie.data.configs).map(([key, list]) => [key, list.map(item => item.id)]))).toEqual({ legend: [1], value: [2], sorting: [] });
     expect(pie.options['class_name']).toBe('highcharts_pie_chart_setting');
@@ -171,7 +222,7 @@ describe('chartType', () => {
   it('ignores the same type and a type v2 does not build', () => {
     const state = column();
     expect(run(state, { type: 'chartType', chartType: ChartType.Column })).toBe(state);
-    expect(run(state, { type: 'chartType', chartType: 'pivot_table' })).toBe(state);
+    expect(run(state, { type: 'chartType', chartType: 'arearange' })).toBe(state);
   });
 
   it('leaves out the sorting and filters of a type without those zones', () => {
@@ -206,10 +257,90 @@ describe('conditions', () => {
     expect(Object.keys(added.data.filters)).toEqual(['1', '8']);
   });
 
+  it('adds a condition at an index of its group', () => {
+    const state = run(withRegion(), { type: 'addCondition', field: revenue, groupId: 1, index: 0 });
+    expect(state.data.filters['1']?.map(condition => condition.id)).toEqual([2, 1]);
+  });
+
+  it('moves a condition to another group, dropping its emptied group', () => {
+    const state = run(withRegion(), { type: 'addCondition', field: revenue });
+    const moved = run(state, { type: 'moveCondition', from: { groupId: 2, index: 0 }, to: { groupId: 1, index: 0 } });
+    expect(Object.keys(moved.data.filters)).toEqual(['1']);
+    expect(moved.data.filters['1']?.map(condition => [condition.id, condition.groupId])).toEqual([
+      [2, 1],
+      [1, 1]
+    ]);
+  });
+
+  it('moves a condition into a new group', () => {
+    const state = run(withRegion(), { type: 'addCondition', field: revenue, groupId: 1 });
+    const moved = run(state, { type: 'moveCondition', from: { groupId: 1, index: 1 }, to: { index: 0 } });
+    expect(Object.fromEntries(Object.entries(moved.data.filters).map(([key, group]) => [key, group.map(condition => [condition.id, condition.groupId])]))).toEqual({
+      '1': [[1, 1]],
+      '2': [[2, 2]]
+    });
+  });
+
+  it('reorders a condition inside its group', () => {
+    const state = run(withRegion(), { type: 'addCondition', field: revenue, groupId: 1 });
+    const moved = run(state, { type: 'moveCondition', from: { groupId: 1, index: 1 }, to: { groupId: 1, index: 0 } });
+    expect(moved.data.filters['1']?.map(condition => condition.id)).toEqual([2, 1]);
+  });
+
+  it('keeps the condition on a column of the same kind', () => {
+    const state = withRegion();
+    const condition = state.data.filters['1']?.[0];
+    if (!condition) throw new Error('no condition');
+    const valued = run(state, { type: 'updateCondition', condition: { ...condition, allValues: ['Asia'] } });
+    const changed = run(valued, { type: 'changeConditionField', groupId: 1, id: 1, field: field('country', 'string') });
+    expect(changed.data.filters['1']).toMatchObject([{ id: 1, columnName: 'country', allValues: ['Asia'], subType: 'in' }]);
+  });
+
+  it('starts the condition over on another kind of column', () => {
+    const changed = run(withRegion(), { type: 'changeConditionField', groupId: 1, id: 1, field: revenue });
+    expect(changed.data.filters['1']).toMatchObject([{ id: 1, groupId: 1, columnName: 'total_revenue', subType: 'equal', familyType: 'number', allValues: [] }]);
+  });
+
+  it('ignores an unknown condition', () => {
+    const state = withRegion();
+    expect(run(state, { type: 'changeConditionField', groupId: 1, id: 5, field: revenue })).toBe(state);
+  });
+
+  it('ignores a move from a missing condition', () => {
+    const state = withRegion();
+    expect(run(state, { type: 'moveCondition', from: { groupId: 1, index: 3 }, to: { index: 0 } })).toBe(state);
+  });
+
   it('removes a condition with its group once empty, and ignores unknown ones', () => {
     const state = withRegion();
     expect(run(state, { type: 'removeCondition', groupId: 1, id: 1 }).data.filters).toEqual({});
     expect(run(state, { type: 'removeCondition', groupId: 1, id: 7 })).toBe(state);
+  });
+});
+
+describe('syncTable', () => {
+  const sales = { dbName: 'sample_v2', name: 'sales' };
+
+  it('drops the items and conditions of a dropped table, and the stored setting with them', () => {
+    const state = run(column(), { type: 'addCondition', field: region });
+    const synced = run({ ...state, touched: false, storedSetting: {} }, { type: 'syncTable', table: sales });
+    expect(synced.data.configs).toEqual({ x_axis: [], y_axis: [] });
+    expect(synced.data.filters).toEqual({});
+    expect(synced.touched).toBe(true);
+    expect(synced.latest?.configs).toEqual({ x_axis: [], y_axis: [] });
+  });
+
+  it('keeps the state when the table is not used', () => {
+    const state = column();
+    expect(run(state, { type: 'syncTable', table: { dbName: 'sample_v2', name: 'other' } })).toBe(state);
+  });
+
+  it('only touches the filters when no item changes', () => {
+    const state = { ...run(newBuilderState(ChartType.Column), { type: 'addCondition', field: region }), touched: false };
+    const synced = run(state, { type: 'syncTable', table: sales });
+    expect(synced.data.filters).toEqual({});
+    expect(synced.data.configs).toBe(state.data.configs);
+    expect(synced.touched).toBe(true);
   });
 });
 

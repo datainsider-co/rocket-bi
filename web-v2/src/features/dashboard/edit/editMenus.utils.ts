@@ -1,5 +1,5 @@
 import type { MenuProps } from 'antd';
-import type { Widget } from '@/core/dashboard/Widget';
+import type { ChartWidget, Widget } from '@/core/dashboard/Widget';
 import type { DashboardPermissions } from '../access/access.utils';
 
 type MenuItems = NonNullable<MenuProps['items']>;
@@ -9,11 +9,19 @@ export interface WidgetEditHandlers {
   rename: (widget: Widget) => void;
   editText: (widget: Widget) => void;
   replaceImage: (widget: Widget) => void;
-  /** Opens ChartBuilder on the chart; absent until ChartBuilder is ported. */
+  /** Opens ChartBuilder on the chart; absent without ChartBuilder. */
   configChart?: (widget: Widget) => void;
+  /** The chart's inner filter (v1 "Add / Update / Delete chart filter"); absent without ChartBuilder. */
+  innerFilter?: InnerFilterHandlers;
   copy: (widget: Widget) => void;
   duplicate: (widget: Widget) => void;
   remove: (widget: Widget) => void;
+}
+
+export interface InnerFilterHandlers {
+  add: (chart: ChartWidget) => void;
+  config: (chart: ChartWidget) => void;
+  remove: (chart: ChartWidget) => void;
 }
 
 /**
@@ -31,6 +39,15 @@ export function widgetEditMenuItems(widget: Widget, permissions: DashboardPermis
   if (widget.kind === 'text') items.push(item('edit-text', 'Edit text', () => handlers.editText(widget), canEdit));
   if (widget.kind === 'image') items.push(item('replace-image', 'Replace image', () => handlers.replaceImage(widget), canEdit));
   if (widget.kind === 'chart' || widget.kind === 'text') items.push(item('copy', widget.kind === 'chart' ? 'Copy chart' : 'Copy widget', () => handlers.copy(widget), canCopy));
+  const inner = handlers.innerFilter;
+  if (widget.kind === 'chart' && inner) {
+    if (widget.chartFilter) {
+      items.push(item('config-inner-filter', 'Update chart filter', () => inner.config(widget), canEdit));
+      items.push(item('delete-inner-filter', 'Delete chart filter', () => inner.remove(widget), canEdit));
+    } else {
+      items.push(item('add-inner-filter', 'Add chart filter', () => inner.add(widget), canEdit));
+    }
+  }
   if (widget.kind !== 'tab' && widget.kind !== 'filter_panel') {
     items.push(item('duplicate', 'Duplicate', () => handlers.duplicate(widget), canCopy));
   }
@@ -45,7 +62,7 @@ export interface AddHandlers {
   addTab: () => void;
   addFilterPanel: () => void;
   paste?: () => void;
-  /** Opens ChartBuilder for a new chart; absent until ChartBuilder is ported. */
+  /** Opens ChartBuilder for a new chart; absent without ChartBuilder. */
   addChart?: () => void;
 }
 

@@ -37,7 +37,7 @@ export function useDashboardEditing({ dashboard, permissions, available, chartBu
     [dashboard, editor]
   );
   const settingMenu = useSettingMenu(dashboard, editor, dialogs.open);
-  return { canEdit: available && permissions.canEdit, mode, dialogs, actions, mainDate, settingMenu };
+  return { canEdit: available && permissions.canEdit, editor, mode, dialogs, actions, mainDate, settingMenu };
 }
 
 export type DashboardEditing = ReturnType<typeof useDashboardEditing>;

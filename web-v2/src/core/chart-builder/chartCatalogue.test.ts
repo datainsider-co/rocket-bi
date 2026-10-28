@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { asRecord, type JsonObject } from '@/core/json/json';
 import { builderDataFromJson } from './BuilderData';
-import { CHART_TYPES, chartIconOf, chartTypeInfoOf, ChartKind, defaultFunctionOf, functionInfoForFamily, newFunctionData, SORTING_ZONE } from './chartCatalogue';
+import { CHART_TYPES, chartIconOf, chartTypeInfoOf, ChartKind, defaultFunctionOf, functionInfoForFamily, newFunctionData, pickerItemsOf, SORTING_ZONE } from './chartCatalogue';
 import { ChartType } from './chartType';
 import { canBuildSetting } from './querySetting';
 import sent from './builderRequests.fixture.json';
@@ -39,6 +39,19 @@ describe('CHART_TYPES', () => {
     ]);
   });
 
+  it('adds an optional Breakdown to the stacked charts, bars and the circular bar with the axes swapped', () => {
+    expect(chartTypeInfoOf(ChartType.StackedColumn)?.zones.map(zone => [zone.key, zone.title, zone.optional])).toEqual([
+      ['x_axis', 'X-Axis', false],
+      ['y_axis', 'Y-Axis', false],
+      ['legend_optional', 'Legend', true],
+      ['breakdown_optional', 'Breakdown', true]
+    ]);
+    for (const chartType of [ChartType.StackedBar, ChartType.CircularBar]) {
+      expect(chartTypeInfoOf(chartType)?.zones.map(zone => zone.title)).toEqual(['Y-Axis', 'X-Axis', 'Legend', 'Breakdown']);
+    }
+    expect(zoneOf(ChartType.StackedColumn, 'breakdown_optional')).toMatchObject({ maxItems: 1, families: ['Group By', 'Date histogram'] });
+  });
+
   it('tells the inner filters and the input filters without Sorting and Filters apart', () => {
     expect(chartTypeInfoOf(ChartType.DropDownInnerFilter)?.kind).toBe(ChartKind.InnerFilter);
     expect(chartTypeInfoOf(ChartType.SlicerFilter)?.extraZones).toBe(false);
@@ -49,7 +62,9 @@ describe('CHART_TYPES', () => {
 describe('chartIconOf', () => {
   it.each([
     [ChartType.Donut, 'ic_donut.svg'],
-    ['pivot_table', 'ic_pivot_table.svg'],
+    [ChartType.PivotTable, 'ic_pivot_table.svg'],
+    [ChartType.CircularBar, 'ic_circular_bar.svg'],
+    ['arearange', 'ic_chart_area.svg'],
     ['unknown', 'chart_control.svg']
   ])('%s has %s', (chartType, icon) => {
     expect(chartIconOf(chartType)).toBe(icon);
@@ -63,6 +78,12 @@ describe('defaultFunctionOf', () => {
     [ChartType.Column, 'y_axis', 'double', 'Aggregation', 'Sum'],
     [ChartType.Column, 'y_axis', 'string', 'Aggregation', 'Count all'],
     [ChartType.Table, 'columns', 'int32', 'None', ''],
+    [ChartType.CollapseTable, 'columns', 'string', 'Group By', ''],
+    [ChartType.CollapseTable, 'columns', 'double', 'Aggregation', 'Sum'],
+    [ChartType.CollapseTable, 'columns', 'datetime', 'Date histogram', 'Year'],
+    [ChartType.PivotTable, 'columns', 'int32', 'Group By', ''],
+    [ChartType.PivotTable, 'rows', 'datetime', 'Date histogram', 'Year'],
+    [ChartType.PivotTable, 'values', 'datetime', 'Aggregation', 'Count all'],
     [ChartType.TabFilter, 'values', 'int64', 'Aggregation', 'Sum'],
     [ChartType.SlicerFilter, 'value', 'int32', 'None', '']
   ])('%s %s starts a %s column as %s %s', (chartType, key, type, family, functionType) => {
@@ -102,6 +123,19 @@ describe('newFunctionData', () => {
     expect(item).toEqual(stored);
   });
 
+  it('makes a chart control dropped into a zone a dynamic item holding its data', () => {
+    const control = { id: 50, display_name: 'Group by', chart_info_type: 'FunctionController' };
+    const item = newFunctionData({
+      id: 3,
+      field: { class_name: 'chart_control_field', control_data: control },
+      columnName: 'Group by',
+      tableName: '',
+      dynamicFunction: control,
+      zone: zoneOf(ChartType.Column, 'x_axis')
+    });
+    expect(item).toMatchObject({ functionFamily: 'Dynamic', functionType: '', name: 'Group by', dynamicFunction: control });
+  });
+
   it('sorts ascending in the Sorting zone', () => {
     const item = newFunctionData({ id: 1, field: field('double'), columnName: 'total', tableName: 'sales', zone: SORTING_ZONE });
     expect(item).toMatchObject({ functionFamily: 'Aggregation', functionType: 'Sum', sorting: 'Ascending' });
@@ -111,5 +145,22 @@ describe('newFunctionData', () => {
     const x = newFunctionData({ id: 1, field: field('string'), columnName: 'region', tableName: 'sales', zone: zoneOf(ChartType.Column, 'x_axis') });
     const y = newFunctionData({ id: 2, field: field('double'), columnName: 'total', tableName: 'sales', zone: zoneOf(ChartType.Column, 'y_axis') });
     expect(canBuildSetting({ chartType: ChartType.Column, configs: { x_axis: [x], y_axis: [y] }, filters: {} })).toBe(true);
+  });
+});
+
+describe('pickerItemsOf', () => {
+  it("lists v1's charts then the filter widgets, the ones v2 doesn't build disabled", () => {
+    const items = pickerItemsOf(ChartKind.Chart);
+    expect(items).toHaveLength(39 + 9);
+    expect(items[0]).toEqual({ type: 'flatten_table', title: 'Table', icon: 'ic_table.svg', buildable: true });
+    expect(items[1]).toEqual({ type: 'table', title: 'Collapse Table', icon: 'ic_collapse_table.svg', buildable: true });
+    expect(items[2]).toEqual({ type: 'pivot_table', title: 'Pivot Table', icon: 'ic_pivot_table.svg', buildable: true });
+    expect(items.find(item => item.type === 'arearange')).toMatchObject({ buildable: false });
+    expect(items.at(-1)).toMatchObject({ type: 'multi_tree_filter', buildable: true });
+    expect(items.filter(item => item.buildable)).toHaveLength(CHART_TYPES.length - 2);
+  });
+
+  it('lists the inner filter types for an inner filter', () => {
+    expect(pickerItemsOf(ChartKind.InnerFilter).map(item => item.type)).toEqual(['drop_down_filter', 'tab_inner_filter']);
   });
 });

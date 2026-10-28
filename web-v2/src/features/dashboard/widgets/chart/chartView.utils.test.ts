@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { getPath } from '@/core/json/json';
+import { DateMode } from '@/core/query/dateRanges';
 import { drillFunction } from '@/core/query/drilldown';
 import { databaseSchemaFromJson } from '@/core/schema/SchemaService';
 import fixture from '@/core/schema/database.fixture.json';
@@ -56,6 +58,17 @@ describe('chart view', () => {
     expect(off.filtersOn).toBe(false);
     expect(chartViewReducer(off, { type: 'reset' }).filtersOn).toBe(false);
     expect(viewedSetting(stored, off)).toBe(stored);
+  });
+
+  it('queries a number chart with the date range picked on the card, through Reset drill down', () => {
+    const kpi = {
+      class_name: 'number_chart_setting',
+      options: { options: { data_range: { enabled: true, mode: 'this_year', date_field: field('order_date', 'datetime') } } }
+    };
+    const picked = chartViewReducer(INITIAL_VIEW, { type: 'dateRange', choice: { mode: DateMode.LastMonth } });
+    expect(getPath(viewedSetting(kpi, picked), ['options', 'options', 'data_range', 'mode'])).toBe('last_month');
+    expect(chartViewReducer(picked, { type: 'reset' }).dateRange).toEqual({ mode: DateMode.LastMonth });
+    expect(viewedSetting(stored, picked)).toBe(stored);
   });
 });
 

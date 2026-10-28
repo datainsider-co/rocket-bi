@@ -1,6 +1,7 @@
+import { Suspense, useMemo, useState } from 'react';
 import { useDashboardAccess } from '../access/useDashboardAccess';
 import { useAutoRefresh } from '../chart-data/useAutoRefresh';
-import type { ChartBuilderBridge } from '../edit/chartBuilderBridge';
+import type { ChartBuilderBridge, ChartBuilderHost, ChartBuilderRequest } from '../edit/chartBuilderBridge';
 import { useDashboardEditing } from '../edit/useDashboardEditing';
 import { useIsMobile } from '../grid/useIsMobile';
 import { refreshIntervalOf } from '../mode/dashboardMode.utils';
@@ -13,12 +14,14 @@ import { useDashboardPage } from './useDashboardPage';
 
 interface DashboardPageProps {
   embedded?: boolean;
-  /** ChartBuilder's entry points, once it is ported (Phase 4). */
-  chartBuilder?: ChartBuilderBridge;
+  /** ChartBuilder, given by the route; without it edit mode has no Add chart nor Config chart. */
+  chartBuilder?: ChartBuilderHost;
 }
 
-export function DashboardPage({ embedded = false, chartBuilder }: DashboardPageProps) {
+export function DashboardPage({ embedded = false, chartBuilder: ChartBuilder }: DashboardPageProps) {
   const page = useDashboardPage(embedded);
+  const [builderRequest, setBuilderRequest] = useState<ChartBuilderRequest>();
+  const chartBuilder = useMemo<ChartBuilderBridge | undefined>(() => ChartBuilder && { open: setBuilderRequest }, [ChartBuilder]);
   const mobile = useIsMobile();
   const access = useDashboardAccess(page.dashboard);
   const display = useDashboardDisplay();
@@ -40,6 +43,16 @@ export function DashboardPage({ embedded = false, chartBuilder }: DashboardPageP
         state={{ access, display, viewAs, editing }}
         layout={{ mobile, embedded }}
         options={embedded ? {} : { onRelationship: relationship.open, onShare: share.open }}
+        builder={
+          ChartBuilder &&
+          builderRequest &&
+          page.dashboard && (
+            // The builder is its own chunk: nothing shows while it loads, as the menu that opened it closes.
+            <Suspense fallback={null}>
+              <ChartBuilder request={builderRequest} dashboard={page.dashboard} editor={editing.editor} onClose={() => setBuilderRequest(undefined)} />
+            </Suspense>
+          )
+        }
         onBack={page.goBack}
       />
       {share.modal}

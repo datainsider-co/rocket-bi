@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { asRecord } from '@/core/json/json';
 import fixture from '@/core/dashboard/dashboard.fixture.json';
 import { HttpClientBuilder } from '@/shared/http/HttpClientBuilder';
 import { HttpQueryService } from './QueryService';
@@ -30,6 +31,12 @@ describe('toQueryRequestJson', () => {
       size: 20
     });
   });
+
+  it('asks a pivot table with columns for its first row group only', () => {
+    const group = (name: string) => ({ name, function: { class_name: 'group' } });
+    const setting = { class_name: 'pivot_table_chart_setting', columns: [group('channel')], rows: [group('region'), group('country')], values: [] };
+    expect(asRecord(toQueryRequestJson({ setting })['query_setting'])['rows']).toEqual([group('region')]);
+  });
 });
 
 describe('visualizationResponseFromJson', () => {
@@ -58,6 +65,38 @@ describe('visualizationResponseFromJson', () => {
       ['3', 'total_revenue', false]
     ]);
     expect(response.records[0]).toMatchObject({ '0': 'North America', '3': '6021738.87' });
+  });
+
+  it("reads a pivot table's grouped headers and their totals", () => {
+    const response = visualizationResponseFromJson(responses.pivot_table_chart_setting);
+    if (response.kind !== 'json_table') throw new Error('not a json table');
+    const [region, offline] = response.headers;
+    expect(region).toMatchObject({ key: '960db2', label: 'region', isGroupBy: true });
+    expect(region).not.toHaveProperty('total');
+    expect(offline).toMatchObject({ key: '', label: 'Offline' });
+    expect(offline?.children.map(header => [header.key, header.label, header.total])).toEqual([
+      ['e1015b', 'total_revenue', '1.2792258188999999E8'],
+      ['d28fcf', 'units_sold', '587060']
+    ]);
+  });
+
+  it("reads a table's min and max per column", () => {
+    const response = visualizationResponseFromJson({
+      class_name: 'json_table_response',
+      headers: [],
+      records: [],
+      min_max_values: [{ value_name: 'total_revenue', min: 2733.69, max: 6456747.15 }, { value_name: 'bad', min: null, max: 1 }]
+    });
+    expect(response.kind === 'json_table' && response.minMaxValues).toEqual([{ valueName: 'total_revenue', min: 2733.69, max: 6456747.15 }]);
+  });
+
+  it('reads compared values of number charts', () => {
+    const response = visualizationResponseFromJson({
+      class_name: 'series_one_response',
+      series: [{ name: 'p', data: [2] }],
+      compare_responses: { RawValues: { class_name: 'series_one_response', series: [{ name: 'p', data: [1] }] } }
+    });
+    expect(response.kind === 'series_one' && response.compareValue).toBe(1);
   });
 
   it('reads filter values as rows', () => {

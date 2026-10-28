@@ -15,6 +15,7 @@ const BACKGROUND = 'var(--chart-background-color)';
 const TOOLTIP_BACKGROUND = 'var(--tooltip-background-color)';
 const GRID_LINE_COLOR = 'var(--grid-line-color)';
 const TABLE_GRID_LINE_COLOR = 'var(--table-grid-line-color)';
+const TOTAL_BACKGROUND = 'var(--total-background-color)';
 const PRIMARY_FONT = 'var(--widget-primary-font-family, Roboto)';
 const PRIMARY_WEIGHT = 'var(--widget-primary-font-weight, 500)';
 const PRIMARY_STYLE = 'var(--widget-primary-font-style, normal)';
@@ -77,7 +78,7 @@ const seriesBase = (chart: JsonObject, legend: JsonObject) => ({
   tooltip: seriesTooltip
 });
 
-/** v1 `SeriesChartOption.getDefaultChartOption`, as the running v1 sends it. */
+/** v1 `SeriesChartOption.getDefaultChartOption`, as the running v1 sends it: with markers for the lollipop. */
 const series = (type: string) => ({
   ...seriesBase({ type }, bottomLegend()),
   plotOptions: {
@@ -85,7 +86,7 @@ const series = (type: string) => ({
     series: {
       lineWidth: 2,
       dashStyle: 'Solid',
-      marker: { enabled: false },
+      marker: { enabled: type === ChartType.Lollipop },
       dataLabels: { enabled: false, style: { ...secondaryStyle(), color: TEXT_COLOR, textOutline: 0 } }
     }
   }
@@ -97,6 +98,47 @@ const invertedSeries = (type: string) =>
     { type, inverted: true },
     { layout: 'vertical', align: 'right', verticalAlign: 'top', floating: true, enabled: true, itemStyle: { color: TEXT_COLOR }, title: legendTitle }
   );
+
+const stackedAxis = (gridLineWidth: string, extra: JsonObject = {}, labels: JsonObject = {}) => ({
+  visible: true,
+  ...extra,
+  labels: { style: { color: TEXT_COLOR }, ...labels },
+  title: { enabled: true, style: { color: TEXT_COLOR }, text: '' },
+  gridLineWidth,
+  gridLineColor: GRID_LINE_COLOR
+});
+
+const stackedBase = (chart: JsonObject) => ({
+  chart,
+  legend: bottomLegend(),
+  title: title(),
+  subtitle: subtitle(),
+  affectedByFilter: true,
+  themeColor: { enabled: true },
+  background: BACKGROUND
+});
+
+const stackedDataLabels = { enabled: false, style: secondaryStyle() };
+const stackedTooltip = { backgroundColor: TOOLTIP_BACKGROUND, style: secondaryStyle() };
+
+/** v1 `StackedChartOption.getDefaultChartOption`: one value axis, stacked by value, with markers. */
+const stacked = (type: string) => ({
+  ...stackedBase({ type }),
+  plotOptions: { series: { stacking: 'normal', lineWidth: 2, dashStyle: 'Solid', marker: { enabled: true }, dataLabels: stackedDataLabels } },
+  xAxis: [stackedAxis('0')],
+  yAxis: [stackedAxis('0.5')],
+  tooltip: stackedTooltip
+});
+
+/** v1 `CircularChartOption.getDefaultChartOption`: inverted columns on a polar pane, three quarters round. */
+const circularBar = () => ({
+  ...stackedBase({ type: 'column', polar: true, inverted: true }),
+  plotOptions: { series: { stacking: 'normal', pointPadding: 0, groupPadding: 0.15, dashStyle: 'Solid', marker: { enabled: true }, dataLabels: stackedDataLabels } },
+  pane: { size: '85%', innerSize: '20%', endAngle: 270 },
+  xAxis: [stackedAxis('0.5', {}, { y: 6 })],
+  yAxis: [stackedAxis('0.5', { endOnTick: true })],
+  tooltip: stackedTooltip
+});
 
 const pieTooltip = { backgroundColor: TOOLTIP_BACKGROUND, style: secondaryStyle() };
 
@@ -167,9 +209,9 @@ const number = () => ({
 
 const gridLine = (applied: boolean) => ({ color: TABLE_GRID_LINE_COLOR, thickness: '1px', applyBody: applied, applyHeader: applied, applyTotal: applied });
 
-/** v1 `FlattenTableChartOption.getDefaultChartOption`. */
-const table = () => ({
-  title: title({ text: 'Untitled Chart' }),
+/** What both tables start with (v1 `FlattenTableChartOption` and `TableChartOption`). */
+const tableBase = () => ({
+  title: title(),
   subtitle: subtitle(),
   grid: { horizontal: { ...gridLine(true), rowPadding: '0px' }, vertical: gridLine(false) },
   affectedByFilter: true,
@@ -193,6 +235,41 @@ const table = () => ({
   },
   toggleIcon: { color: TEXT_COLOR, backgroundColor: 'var(--toggle-color)' },
   background: BACKGROUND
+});
+
+/** v1 `FlattenTableChartOption.getDefaultChartOption`. */
+const table = () => ({
+  ...tableBase(),
+  title: title({ text: 'Untitled Chart' })
+});
+
+/**
+ * v1 `TableChartOption.getDefaultChartOption`, the collapse table's: like the flatten table's, with the default title
+ * text and its header in the secondary font.
+ */
+const collapseTable = () => {
+  const base = tableBase();
+  return { ...base, header: { ...base.header, style: { ...secondaryStyle(), color: TEXT_COLOR, isWordWrap: false, fontSize: '12px' } } };
+};
+
+/**
+ * v1 `PivotTableChartOption.getDefaultChartOption`: the collapse table's, with a total row (v1's running build sends
+ * the same).
+ */
+const pivotTable = () => ({
+  ...collapseTable(),
+  total: {
+    enabled: true,
+    backgroundColor: TOTAL_BACKGROUND,
+    label: {
+      text: 'Total',
+      enabled: true,
+      align: 'right',
+      isWordWrap: false,
+      backgroundColor: TOTAL_BACKGROUND,
+      style: { ...secondaryStyle('12px'), color: TEXT_COLOR, isWordWrap: false }
+    }
+  }
 });
 
 const noDefault = { enabled: true, setting: { value: null } };
@@ -291,12 +368,18 @@ const seriesDefaults = (options: () => object): Defaults => ({
   extra: { stacking_group: {}, series_types_by_label_map: {} }
 });
 
+const stackedDefaults = (className: string, options: () => object): Defaults => ({ ...seriesDefaults(options), className });
+
 const DEFAULTS: Readonly<Record<ChartType, Defaults>> = {
   [T.Line]: seriesDefaults(() => series(T.Line)),
   [T.Spline]: seriesDefaults(() => series(T.Spline)),
   [T.Area]: seriesDefaults(() => series(T.Area)),
   [T.Column]: seriesDefaults(() => series(T.Column)),
   [T.Bar]: seriesDefaults(() => series(T.Bar)),
+  [T.Lollipop]: seriesDefaults(() => series(T.Lollipop)),
+  [T.StackedColumn]: stackedDefaults('stacking_series_chart_setting', () => stacked('column')),
+  [T.StackedBar]: stackedDefaults('stacking_series_chart_setting', () => stacked('bar')),
+  [T.CircularBar]: stackedDefaults('circular_bar_chart_setting', circularBar),
   [T.LineInverted]: seriesDefaults(() => invertedSeries('line')),
   [T.AreaInverted]: seriesDefaults(() => invertedSeries('area')),
   [T.Pie]: { className: 'highcharts_pie_chart_setting', options: () => pie(false) },
@@ -304,6 +387,8 @@ const DEFAULTS: Readonly<Record<ChartType, Defaults>> = {
   [T.Donut]: { className: 'donut_chart_setting', options: donut },
   [T.Number]: { className: 'number_chart_setting', options: number },
   [T.Table]: { className: 'flatten_table_setting', options: table },
+  [T.CollapseTable]: { className: 'table_chart_setting', options: collapseTable },
+  [T.PivotTable]: { className: 'pivot_table_chart_setting', options: pivotTable },
   [T.TabFilter]: { className: 'tab_filter_chart_setting', options: () => tabFilter('normal') },
   [T.SingleChoice]: { className: 'tab_filter_chart_setting', options: () => tabFilter('single_choice') },
   [T.MultiChoice]: { className: 'tab_filter_chart_setting', options: () => tabFilter('multi_choice') },

@@ -26,6 +26,16 @@ const series: SettingBuilder = {
   build: configs => ({ x_axis: firstColumn(configs, 'x_axis'), y_axis: columns(configs, 'y_axis'), legend: firstColumn(configs, 'legend_optional') })
 };
 
+/**
+ * Stacked charts (v1 `StackingSeriesQuerySettingHandler`, `StackedQuerySetting`): the series setting with a breakdown,
+ * under the same class name.
+ */
+const stacked: SettingBuilder = {
+  className: series.className,
+  canBuild: series.canBuild,
+  build: configs => ({ ...series.build(configs), breakdown: firstColumn(configs, 'breakdown_optional') })
+};
+
 const pie: SettingBuilder = {
   className: 'pie_chart_setting',
   canBuild: configs => filled(configs, 'legend') && filled(configs, 'value'),
@@ -40,17 +50,38 @@ const number: SettingBuilder = {
 
 const AGGREGATE_FUNCTIONS = new Set(['avg', 'sum', 'max', 'min', 'count', 'count_distinct', 'select_expression']);
 
-/** Number and aggregated columns get their min and max (v1 `FlattenTableQuerySettingHandler.forceTurnOnCalcMinMax`). */
+/** Number and aggregated columns get their min and max (v1 `forceTurnOnCalcMinMax` of both table handlers). */
 function withMinMax(column: JsonObject): JsonObject {
   const func = asRecord(column['function']);
   const isNumber = isNumberType(asString(asRecord(func['field'])['field_type']));
   return AGGREGATE_FUNCTIONS.has(asString(func['class_name'])) || isNumber ? { ...column, is_calc_min_max: true } : column;
 }
 
-const table: SettingBuilder = {
-  className: 'table_chart_setting',
+/** Tables list their columns, number and aggregated ones with min / max (v1 `FlattenTableQuerySettingHandler`, `TableQuerySettingHandler`). */
+const tableOf = (className: string): SettingBuilder => ({
+  className,
   canBuild: configs => filled(configs, 'columns'),
   build: configs => ({ columns: columns(configs, 'columns').map(withMinMax), formatters: [] })
+});
+
+const table = tableOf('table_chart_setting');
+
+/** The collapse table: the same columns; the server nests the rows by its group by columns. */
+const groupTable = tableOf('group_table_chart_setting');
+
+/**
+ * The pivot table (v1 `PivotQuerySettingHandler`): any zone filled is enough. Rows go without their group totals, values
+ * with their min and max, whatever their type.
+ */
+const pivot: SettingBuilder = {
+  className: 'pivot_table_chart_setting',
+  canBuild: configs => ['columns', 'rows', 'values'].some(key => filled(configs, key)),
+  build: configs => ({
+    columns: columns(configs, 'columns'),
+    rows: columns(configs, 'rows').map(column => ({ ...column, is_calc_group_total: false })),
+    values: columns(configs, 'values').map(column => ({ ...column, is_calc_min_max: true })),
+    formatters: []
+  })
 };
 
 /** Tab, choice, dropdown and tree filters, and inner filters (v1 `TabFilterQuerySettingHandler`, `TreeFilterQuerySettingHandler`). */
@@ -103,11 +134,17 @@ const BUILDERS: Readonly<Record<ChartType, SettingBuilder>> = {
   [T.AreaInverted]: series,
   [T.Column]: series,
   [T.Bar]: series,
+  [T.Lollipop]: series,
+  [T.StackedColumn]: stacked,
+  [T.StackedBar]: stacked,
+  [T.CircularBar]: stacked,
   [T.Pie]: pie,
   [T.SemiPie]: pie,
   [T.Donut]: pie,
   [T.Number]: number,
   [T.Table]: table,
+  [T.CollapseTable]: groupTable,
+  [T.PivotTable]: pivot,
   [T.TabFilter]: tabControl,
   [T.SingleChoice]: tabControl,
   [T.MultiChoice]: tabControl,
