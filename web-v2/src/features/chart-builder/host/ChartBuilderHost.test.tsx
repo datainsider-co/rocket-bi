@@ -12,11 +12,13 @@ import { asRecord, type JsonObject } from '@/core/json/json';
 import responses from '@/core/query/queryResponses.fixture.json';
 import { visualizationResponseFromJson } from '@/core/query/VisualizationResponse';
 import { QueryService } from '@/core/query/QueryService';
+import { SchemaEditService } from '@/core/schema/SchemaEditService';
 import { SchemaService } from '@/core/schema/SchemaService';
 import type { ChartBuilderRequest } from '@/features/dashboard/edit/chartBuilderBridge';
 import type { DashboardEditor } from '@/features/dashboard/edit/useDashboardEditor';
 import { DashboardControlsProvider } from '@/features/dashboard/controls/DashboardControlsContext';
 import { fakeQueryService, fakeSchemaService } from '@/features/dashboard/testing';
+import { fakeSchemaEditService } from '../field-actions/testing';
 import { ChartBuilderHost } from './ChartBuilderHost';
 
 const dashboard = dashboardFromJson(stored);
@@ -41,6 +43,7 @@ function renderHost(request: ChartBuilderRequest, queries = fakeQueryService()) 
     di => {
       di.bindValue(QueryService, queries);
       di.bindValue(SchemaService, fakeSchemaService());
+      di.bindValue(SchemaEditService, fakeSchemaEditService());
     }
   ]);
   render(

@@ -3,9 +3,12 @@ import type { ChartControl } from '@/core/chart-builder/chartControls';
 import type { TableSchema } from '@/core/schema/SchemaService';
 import stored from '@/core/chart-builder/builder.fixture.json';
 import {
+  columnNameOfNode,
   controlIconOf,
+  expressionKindOf,
   fieldRefsOf,
   initialExpanded,
+  opened,
   mainDatabaseOf,
   MAX_SEARCH_TABLES,
   searchControls,
@@ -143,5 +146,25 @@ describe('viewQueryOf', () => {
     expect(viewQueryOf([sales, adhoc], 'tbl_1')).toBe('select 1 as id');
     expect(viewQueryOf([sales, { ...adhoc, dbName: 'db' }], 'tbl_1')).toBeUndefined();
     expect(viewQueryOf([sales], 'sales')).toBeUndefined();
+  });
+});
+
+describe('expressionKindOf and columnNameOfNode', () => {
+  it('give the kind and column of measures and calculated columns only', () => {
+    const items = tableNodesOf([sales])[0]!.items.filter((item): item is FieldNode => item.kind === 'field');
+    expect(items.map(item => [columnNameOfNode(item), expressionKindOf(item)])).toEqual([
+      ['country', undefined],
+      ['region', undefined],
+      ['revenue', 'measure'],
+      ['margin', 'calculated']
+    ]);
+  });
+});
+
+describe('opened', () => {
+  it('opens a closed table and keeps an open one', () => {
+    const expanded = new Set(['sales']);
+    expect(opened(expanded, 'sales')).toBe(expanded);
+    expect([...opened(expanded, 'orders')]).toEqual(['sales', 'orders']);
   });
 });

@@ -6,6 +6,7 @@ import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { TableSchema } from '@/core/schema/SchemaService';
 import type { ChartBuilderRequest } from '@/features/dashboard/edit/chartBuilderBridge';
 import type { DashboardEditor } from '@/features/dashboard/edit/useDashboardEditor';
+import { useFieldActions } from '../field-actions/useFieldActions';
 import { useFieldTree } from '../field-tree/useFieldTree';
 import { builderModeOf, previewJsonOf, typeKindOf, usedSettingsOf } from '../host/builderSession.utils';
 import { useChartSave } from '../host/useChartSave';
@@ -31,6 +32,7 @@ export function useChartBuilderModal({ request, dashboard, editor, adhocTable, o
   const usedSettings = useMemo(() => usedSettingsOf(request, dashboard), [request, dashboard]);
   // v1 `AdhocBuilderConfig`: no Chart Control tab on an ad hoc table.
   const tree = useFieldTree({ usedSettings, adhocTable, controls: adhocTable ? undefined : controls });
+  const fieldActions = useFieldActions({ disabled: adhocTable !== undefined, tables: tree.tables, onExpand: tree.expand });
   const extraData = useMemo(() => builderExtraDataOf(state), [state]);
   const previewJson = useMemo(() => setting && previewJsonOf(request, setting, extraData), [request, setting, extraData]);
   const preview = usePreview(previewJson, dashboard.id);
@@ -56,8 +58,9 @@ export function useChartBuilderModal({ request, dashboard, editor, adhocTable, o
   };
 
   return {
-    tree: tree.view,
+    tree: { ...tree.view, tables: { ...tree.view.tables, actions: fieldActions.tree } },
     tables: tree.nodes,
+    fieldActions: { editMeasure: fieldActions.editMeasure, dialogs: fieldActions.dialogs },
     types: { items: types, value: state.data.chartType, onChange: (chartType: string) => dispatch({ type: 'chartType', chartType }) },
     preview,
     previewBackground: asString(asRecord(state.options['options'])['background']) || THEME_BACKGROUND,

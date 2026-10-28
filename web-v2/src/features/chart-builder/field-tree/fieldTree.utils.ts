@@ -2,6 +2,8 @@ import { asString, isRecord, type JsonObject } from '@/core/json/json';
 import { chartIconOf, CONTROL_ICON } from '@/core/chart-builder/chartCatalogue';
 import { ChartInfoType, type ChartControl } from '@/core/chart-builder/chartControls';
 import { TableType, type DatabaseInfo, type SchemaColumn, type TableSchema } from '@/core/schema/SchemaService';
+import type { ExpressionColumnKind } from '@/core/schema/SchemaEditService';
+import type { ActionItem, ColumnAction, TableAction } from '../field-actions/fieldActions.utils';
 import type { DroppedField } from '../state/builderState.utils';
 
 /** A plain column, a measure (aggregated by its expression) or a calculated column. */
@@ -41,12 +43,31 @@ export interface DatabaseSelect {
   readonly onChange: (dbName: string) => void;
 }
 
+/** The menus of the tables, measures and calculated columns (v1 `DatabaseListing` context menus). */
+export interface TreeActions {
+  readonly tableActionsOf: (tableKey: string) => readonly ActionItem<TableAction>[];
+  readonly onTableAction: (tableKey: string, action: TableAction) => void;
+  readonly onColumnAction: (node: FieldNode, action: ColumnAction) => void;
+}
+
 export interface TreeTables {
   readonly nodes: readonly TableNode[];
   readonly expanded: ReadonlySet<string>;
   readonly onToggle: (key: string) => void;
   readonly status: 'loading' | 'error' | 'ready';
   readonly error: string;
+  /** None for an ad hoc table, which has no actions (v1 `hideTableAction`). */
+  readonly actions?: TreeActions;
+}
+
+/** The kind of a tree column that has a menu: measures and calculated columns. */
+export function expressionKindOf(node: FieldNode): ExpressionColumnKind | undefined {
+  return node.role === 'column' ? undefined : node.role;
+}
+
+/** The name of the column a tree row stands for. */
+export function columnNameOfNode(node: FieldNode): string {
+  return asString(node.dropped.field['field_name']);
 }
 
 /** What a tree row hands to the drop zones. */
@@ -191,6 +212,11 @@ export function toggled(expanded: ReadonlySet<string>, key: string): ReadonlySet
   const next = new Set(expanded);
   if (!next.delete(key)) next.add(key);
   return next;
+}
+
+/** Opens a table, keeping the set when it already is (v1 `expandTables` after an action on the table). */
+export function opened(expanded: ReadonlySet<string>, key: string): ReadonlySet<string> {
+  return expanded.has(key) ? expanded : new Set([...expanded, key]);
 }
 
 /** The SQL of an ad hoc view by its name, for the chart's `sql_views` (v1 `BuilderTableSchemaStore.getSqlQuery`). */

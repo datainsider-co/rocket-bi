@@ -9,6 +9,7 @@ import {
   fieldRefsOf,
   initialExpanded,
   mainDatabaseOf,
+  opened,
   searchControls,
   searchTableNodes,
   tableNodesOf,
@@ -48,6 +49,7 @@ export function useFieldTree({ usedSettings, adhocTable, controls }: FieldTreeIn
   const shown = useMemo(() => searchTableNodes(nodes, keyword), [nodes, keyword]);
 
   const onToggle = useCallback((key: string) => setExpandedByDb(current => ({ ...current, [dbName]: toggled(current[dbName] ?? defaultExpanded, key) })), [dbName, defaultExpanded]);
+  const expand = useCallback((key: string) => setExpandedByDb(current => ({ ...current, [dbName]: opened(current[dbName] ?? defaultExpanded, key) })), [dbName, defaultExpanded]);
   const onSelectDatabase = useCallback((name: string) => {
     setPicked(name);
     setKeyword('');
@@ -72,6 +74,10 @@ export function useFieldTree({ usedSettings, adhocTable, controls }: FieldTreeIn
       controls: controls && searchControls(controls, keyword)
     },
     /** Every table of the database, whatever the search, for picking a field from a menu. */
-    nodes
+    nodes,
+    /** The schemas behind `nodes`, none for an ad hoc table. */
+    tables: adhocTable ? undefined : schema.data?.tables,
+    /** Opens a table of the shown database. */
+    expand
   };
 }
