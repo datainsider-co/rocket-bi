@@ -13,6 +13,11 @@ export interface ConnectionService {
   exists(): Promise<boolean>;
   /** `undefined` when the saved connection is a type v2 can't handle yet. Fails with 404 when there is none. */
   get(): Promise<Connection | undefined>;
+  /**
+   * The saved connection's `class_name`, also for the types v2 can't set up (`bigquery_connection`, ...): what SQL
+   * dialect the formulas are written in. Fails with 404 when there is none.
+   */
+  getSourceType(): Promise<string>;
   save(connection: Connection): Promise<void>;
   /** Resolves when the server can connect; fails with the driver's message otherwise. */
   test(connection: Connection): Promise<void>;
@@ -42,6 +47,11 @@ export class HttpConnectionService implements ConnectionService {
 
   async get(): Promise<Connection | undefined> {
     return parseConnection(await this.http.get('connection').json());
+  }
+
+  async getSourceType(): Promise<string> {
+    const className = asJson(await this.http.get('connection').json()).class_name;
+    return typeof className === 'string' ? className : '';
   }
 
   async save(connection: Connection): Promise<void> {
