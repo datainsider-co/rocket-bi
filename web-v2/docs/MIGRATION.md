@@ -72,6 +72,7 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
 - **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 to CB6, CB7a, CB7b, CB7c and CB8 done, CB7d next) for the chart types
   v2 already renders; the other chart types (scatter, area range, ...) follow, each with its builder handler. ChartBuilder
   plugs into edit mode as the `ChartBuilderHost` the dashboard route gives `DashboardPage`.
+- **Data ingestion** (Phase 8, [`DATA_INGESTION.md`](DATA_INGESTION.md)): DI0 and DI1 done, DI2 (routes, sidebar, feature flag) next.
 - **Share links (`?token=`)**: the Share dialog (M7b) creates directory tokens, which the server accepts; opening
   them without a session still needs client work, see Phase 3 M5b. **Blocked by the server**: MySQL `like` and
   datetime `between` filters, see Decisions (M3b).
@@ -419,13 +420,23 @@ The field drag and drop notes (`shared/field-dnd`) moved to [`CHART_BUILDER.md`]
 |---|---|---|---|
 | My ETL, shared, history, trash, ETL editor | `screens/data-cook` (`/data-warehouse/data-cook`), `di-core/data-cook` | 70 | Not started |
 
+### Phase 8: Data ingestion
+
+Moved out of Deferred on 2026-10-29. Plan, decisions and steps (DI0 to DI8) in [`DATA_INGESTION.md`](DATA_INGESTION.md).
+MVP: MySQL, PostgreSQL, SQL Server, Oracle, Redshift, Generic JDBC and CSV import; the other source types are listed as
+"Coming soon". Streaming, SDK tracking, Lake jobs and Google Analytics UA are dropped.
+
+| Feature | v1 location | Size | Status |
+|---|---|---|---|
+| Data sources, jobs, queued jobs, job history, CSV import | `screens/data-ingestion` (`/data-ingestion/*`), `di-core/data-ingestion`, `components/di-upload-document` | 156 + 136 | In progress: DI0, DI1 done; DI2 next |
+
 ### Deferred (disabled in v1 by feature flags or unused)
 
 Port only if still needed. Decide before starting.
 
 | Feature | v1 location | Size | Note |
 |---|---|---|---|
-| Data ingestion (sources, jobs, queued, streaming, history) | `screens/data-ingestion`, `di-core/data-ingestion` | 156 + 136 | `VUE_APP_IS_DISABLE_INGESTION: true` |
+| Streaming (Kafka) | `screens/data-ingestion/components/streaming*` | – | **Won't migrate** (decided 2026-10-29): `relay/streaming_job` is 404 on the server. The rest of data ingestion is Phase 8 |
 | Lake house | `screens/lake-house`, `di-core/lake-house` | 10 + 33 | `VUE_APP_IS_DISABLE_LAKE_HOUSE: true`. **Won't migrate** (decided 2026-10-22). It was the only v1 user of byte-level upload progress, so v2 has no XHR upload helper |
 | CDP, tracking profile | `screens/tracking-profile`, `di-core/tracking` | 17 + 14 | `VUE_APP_IS_DISABLE_CDP: true` |
 | Shopify integration | routes `/shopify`, `/shopify/redirect` | – | |
