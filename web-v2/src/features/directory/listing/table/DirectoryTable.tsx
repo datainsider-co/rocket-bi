@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Table } from 'antd';
 import type { TableColumnsType } from 'antd';
 import type { Directory } from '@/core/directory/Directory';
-import { SortOrder } from '@/core/directory/DirectoryService';
+import { SortOrder } from '@/core/listing/Listing';
 import { formatDateTime } from '../../directory.utils';
 import { DirectoryNameCell } from './cells/DirectoryNameCell';
 import { EmptyListing } from './EmptyListing';

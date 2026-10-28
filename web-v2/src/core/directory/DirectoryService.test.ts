@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { HttpClientBuilder } from '@/shared/http/HttpClientBuilder';
 import { DefaultDirectoryId, DirectoryType } from './Directory';
-import { HttpDirectoryService, SortOrder } from './DirectoryService';
+import { SortOrder } from '@/core/listing/Listing';
+import { HttpDirectoryService } from './DirectoryService';
 
 /** Shape of one item of `POST directories/{id}/list` from the local backend. */
 const DASHBOARD_JSON = {

@@ -3,6 +3,7 @@ import { AuthModule } from '@/core/auth/AuthModule';
 import { ConnectionModule } from '@/core/connection/ConnectionModule';
 import { DashboardModule } from '@/core/dashboard/DashboardModule';
 import { DirectoryModule } from '@/core/directory/DirectoryModule';
+import { IngestionModule } from '@/core/ingestion/IngestionModule';
 import { PermissionModule } from '@/core/permission/PermissionModule';
 import { QueryModule } from '@/core/query/QueryService';
 import { RelationshipModule } from '@/core/relationship/RelationshipModule';
@@ -25,5 +26,6 @@ export const appModules: readonly DiModule[] = [
   SchemaEditModule,
   RelationshipModule,
   UserModule,
-  ShareModule
+  ShareModule,
+  IngestionModule
 ];

@@ -4,7 +4,8 @@ import { CompanyBrand } from './CompanyBrand';
 import { HeaderDropdown } from './HeaderDropdown';
 import { HeaderNavButton } from './HeaderNavButton';
 import { MobileNavDrawer } from './MobileNavDrawer';
-import { HEADER_NAV_ITEMS, SETTINGS_PATHS, activeLinkKeys, isPathActive } from './header.utils';
+import { SETTINGS_PATHS, activeLinkKeys, isPathActive } from './header.utils';
+import type { HeaderNavItem } from './header.utils';
 import type { HeaderAccount, HeaderBrand, HeaderTheme } from './header.types';
 import { handleSettingsClick, linkMenuItems, settingsMenuItems } from './headerMenuItems';
 import { NAV_ICONS } from './navIcons';
@@ -12,13 +13,14 @@ import { SettingIcon } from './icons/SettingIcon';
 
 interface HeaderBarViewProps {
   brand: HeaderBrand;
+  navItems: readonly HeaderNavItem[];
   pathname: string;
   account: HeaderAccount;
   theme: HeaderTheme;
 }
 
-/** v1 `HeaderBar.vue`: brand on the left, Dashboards, Data Warehouse and Settings on the right; a drawer below `md`. */
-export function HeaderBarView({ brand, pathname, account, theme }: HeaderBarViewProps) {
+/** v1 `HeaderBar.vue`: brand on the left, the nav entries and Settings on the right; a drawer below `md`. */
+export function HeaderBarView({ brand, navItems, pathname, account, theme }: HeaderBarViewProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -26,7 +28,7 @@ export function HeaderBarView({ brand, pathname, account, theme }: HeaderBarView
       <CompanyBrand brand={brand} />
 
       <nav aria-label="Main" className="flex items-center gap-3 max-md:hidden">
-        {HEADER_NAV_ITEMS.map(item =>
+        {navItems.map(item =>
           item.children ? (
             <HeaderDropdown
               key={item.key}
@@ -69,6 +71,7 @@ export function HeaderBarView({ brand, pathname, account, theme }: HeaderBarView
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         brand={brand}
+        navItems={navItems}
         pathname={pathname}
         account={account}
         theme={theme}

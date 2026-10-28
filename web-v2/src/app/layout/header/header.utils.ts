@@ -1,3 +1,5 @@
+import type { FeatureFlags } from '@/app/featureFlags';
+
 /** A page the header links to. Paths follow v1 (`web/src/router/Router.ts`) so links keep working as pages land. */
 export interface HeaderLink {
   key: string;
@@ -7,7 +9,7 @@ export interface HeaderLink {
 
 /** A top-level header entry: a plain link, or a group whose links open in a dropdown. */
 export interface HeaderNavItem {
-  key: 'dashboards' | 'data-warehouse';
+  key: 'dashboards' | 'data-warehouse' | 'data-ingestion';
   label: string;
   to: string;
   /** Path prefixes that highlight this entry. */
@@ -15,8 +17,7 @@ export interface HeaderNavItem {
   children?: readonly HeaderLink[];
 }
 
-/** v1 `HeaderBar.vue`. Lake House, Data Ingestion and CDP are left out: v1 turns them off in every environment. */
-export const HEADER_NAV_ITEMS: readonly HeaderNavItem[] = [
+const BASE_NAV_ITEMS: readonly HeaderNavItem[] = [
   {
     key: 'dashboards',
     label: 'Dashboards',
@@ -37,6 +38,21 @@ export const HEADER_NAV_ITEMS: readonly HeaderNavItem[] = [
     ]
   }
 ];
+
+const DATA_INGESTION_ITEM: HeaderNavItem = {
+  key: 'data-ingestion',
+  label: 'Data Ingestion',
+  to: '/data-ingestion',
+  activePaths: ['/data-ingestion']
+};
+
+/**
+ * v1 `HeaderBar.vue`, in its order. Data Ingestion shows behind its feature flag; Lake House and CDP are not migrated
+ * (v1 turned them off in every environment).
+ */
+export function headerNavItems(flags: FeatureFlags): readonly HeaderNavItem[] {
+  return flags.ingestion ? [...BASE_NAV_ITEMS, DATA_INGESTION_ITEM] : BASE_NAV_ITEMS;
+}
 
 export const USER_PROFILE_PATH = '/settings/user-profile/me';
 export const ORGANIZATION_SETTINGS_PATH = '/settings/organization';

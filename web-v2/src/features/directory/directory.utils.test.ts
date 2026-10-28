@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DefaultDirectoryId, Directory, DirectoryParents, DirectoryType } from '@/core/directory/Directory';
-import { SortOrder } from '@/core/directory/DirectoryService';
+import { SortOrder } from '@/core/listing/Listing';
 import {
   DEFAULT_SORT,
   DirectoryAction,

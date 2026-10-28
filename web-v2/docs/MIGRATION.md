@@ -72,6 +72,7 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
 - **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 to CB6, CB7a, CB7b, CB7c and CB8 done, CB7d next) for the chart types
   v2 already renders; the other chart types (scatter, area range, ...) follow, each with its builder handler. ChartBuilder
   plugs into edit mode as the `ChartBuilderHost` the dashboard route gives `DashboardPage`.
+- **Data ingestion** (Phase 8, [`DATA_INGESTION.md`](DATA_INGESTION.md)): DI0 to DI7 done (listings, source and job actions, the JDBC source form and the job form); CSV import (DI8) next.
 - **Share links (`?token=`)**: the Share dialog (M7b) creates directory tokens, which the server accepts; opening
   them without a session still needs client work, see Phase 3 M5b. **Blocked by the server**: MySQL `like` and
   datetime `between` filters, see Decisions (M3b).
@@ -92,8 +93,8 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 | Dependency injection | `src/core/di/Container.ts`: `token<T>()`, `bindValue` / `bindSingleton` (v1 only used singletons), lazy, circular-dependency check, later modules override earlier ones (test modules). Modules listed in `src/app/di/appModules.ts`, container created in `main.tsx`, passed to `DiProvider` (`useDi`). No decorators or `reflect-metadata`. v1: `di-core/common/modules/` | Done |
 | Session and auth state | Login state, current user, permissions. v1: `src/store/modules/AuthenticationStore.ts`, `di-core/common/services/DataManager.ts`, `PermissionHandler.ts`. Done: `ssid` cookie and share token (`src/core/session/session.ts`), session expiry → clear cache and full reload to `/login` (`src/app/sessionExpiredHandler.ts`), no query retry on 4xx. Current user: `features/auth/current-user` (`check_session` query, seeded by login; logout calls `/user/auth/logout`, which v1 never did). Permissions: organization ones via `core/permission/PermissionService` (`admin/permissions/{username}/is_permitted`, `shared/permission/permissionQueries`), resource ones via `ResourcePermissionService` (`share/{type}/{id}/action_permitted`). Left: share token without a session (blocked by the server, see Phase 3 M5b) | In progress |
 | Route guards | `src/app/routeGuards.ts` (loaders): no session → `/login?redirect=<path>`; logged-in users skip login and forgot password. v1: `router.beforeEach` in `Router.ts` | Done |
-| App layout | Header, navigation, page shell. Header done (`src/app/layout/header`, v1 `src/shared/components/HeaderBar.vue`): organization logo and name, Dashboards, Data Warehouse menu, Settings menu (profile, Organization Settings, dark mode, Sign Out), drawer below `md`. Links use v1 paths, so they show Not found until those pages land. Left: Change Password (v1 `ChangePasswordModal`, default login only), Assistant sidebar, trial days left (plan and billing), Lake House / Data Ingestion / CDP behind feature flags | In progress |
-| Feature flags | v1 `VUE_APP_IS_DISABLE_*` (LakeHouse, Streaming, CDP, Ingestion, User activities) | Not started |
+| App layout | Header, navigation, page shell. Header done (`src/app/layout/header`, v1 `src/shared/components/HeaderBar.vue`): organization logo and name, Dashboards, Data Warehouse menu, Settings menu (profile, Organization Settings, dark mode, Sign Out), drawer below `md`. Links use v1 paths, so they show Not found until those pages land. Left: Change Password (v1 `ChangePasswordModal`, default login only), Assistant sidebar, trial days left (plan and billing), Lake House / CDP behind feature flags (Data Ingestion done, behind `VITE_ENABLE_INGESTION`) | In progress |
+| Feature flags | v1 `VUE_APP_IS_DISABLE_*` (LakeHouse, Streaming, CDP, Ingestion, User activities). v2: `src/app/featureFlags.ts`, `VITE_ENABLE_*` read at build time, off unless `true`. Only `VITE_ENABLE_INGESTION` exists (on in `.env.development`); Lake House and Streaming won't migrate, CDP and User activities get a flag when they land | Done |
 | Shared UI kit | Only components that two or more features need; ported on demand from `web/src/shared/components` | Ongoing |
 
 ### Phase 1: Authentication
@@ -419,13 +420,23 @@ The field drag and drop notes (`shared/field-dnd`) moved to [`CHART_BUILDER.md`]
 |---|---|---|---|
 | My ETL, shared, history, trash, ETL editor | `screens/data-cook` (`/data-warehouse/data-cook`), `di-core/data-cook` | 70 | Not started |
 
+### Phase 8: Data ingestion
+
+Moved out of Deferred on 2026-10-29. Plan, decisions and steps (DI0 to DI8) in [`DATA_INGESTION.md`](DATA_INGESTION.md).
+MVP: MySQL, PostgreSQL, SQL Server, Oracle, Redshift, Generic JDBC and CSV import; the other source types are listed as
+"Coming soon". Streaming, SDK tracking, Lake jobs and Google Analytics UA are dropped.
+
+| Feature | v1 location | Size | Status |
+|---|---|---|---|
+| Data sources, jobs, queued jobs, job history, CSV import | `screens/data-ingestion` (`/data-ingestion/*`), `di-core/data-ingestion`, `components/di-upload-document` | 156 + 136 | In progress: DI0 to DI7 done; DI8 (CSV) next |
+
 ### Deferred (disabled in v1 by feature flags or unused)
 
 Port only if still needed. Decide before starting.
 
 | Feature | v1 location | Size | Note |
 |---|---|---|---|
-| Data ingestion (sources, jobs, queued, streaming, history) | `screens/data-ingestion`, `di-core/data-ingestion` | 156 + 136 | `VUE_APP_IS_DISABLE_INGESTION: true` |
+| Streaming (Kafka) | `screens/data-ingestion/components/streaming*` | – | **Won't migrate** (decided 2026-10-29): `relay/streaming_job` is 404 on the server. The rest of data ingestion is Phase 8 |
 | Lake house | `screens/lake-house`, `di-core/lake-house` | 10 + 33 | `VUE_APP_IS_DISABLE_LAKE_HOUSE: true`. **Won't migrate** (decided 2026-10-22). It was the only v1 user of byte-level upload progress, so v2 has no XHR upload helper |
 | CDP, tracking profile | `screens/tracking-profile`, `di-core/tracking` | 17 + 14 | `VUE_APP_IS_DISABLE_CDP: true` |
 | Shopify integration | routes `/shopify`, `/shopify/redirect` | – | |
