@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import type { JsonObject } from '@/core/json/json';
-import { CompareMode, compareRangeOf, compareRequestOf, dateRangeCondition, dateRangeFilterRequests, numberComparisonOf, trendLineSettingOf } from './comparison';
+import {
+  CompareMode,
+  compareRangeOf,
+  compareRequestOf,
+  dateRangeCondition,
+  dateRangeFilterRequests,
+  isNestedField,
+  numberComparisonOf,
+  trendLineSettingOf
+} from './comparison';
 import { DateMode } from './dateRanges';
 
 const field = { class_name: 'table_field', db_name: 'sample_v2', tbl_name: 'sales', field_name: 'order_date', field_type: 'datetime' };
@@ -162,5 +171,60 @@ describe('trendLineSettingOf', () => {
   it('has none without a trend line or a value', () => {
     expect(trendLineSettingOf(kpi({ data_range: dataRange('this_year') }))).toBeUndefined();
     expect(trendLineSettingOf({ ...kpi({ data_range: dataRange('this_year'), trend_line: { enabled: true } }), value: undefined })).toBeUndefined();
+  });
+});
+
+describe('isNestedField', () => {
+  it.each([
+    [{ field_name: '`orders.created_at`', tbl_name: 'sales' }, true],
+    [{ field_name: 'created_at', tbl_name: 'sales.orders' }, true],
+    [{ field_name: 'order_date', tbl_name: 'sales' }, false],
+    [{}, false]
+  ])('tells whether %o is inside a nested column', (column, nested) => {
+    expect(isNestedField(column)).toBe(nested);
+  });
+});
+
+describe('a date column inside a nested column', () => {
+  const nestedField = { class_name: 'table_field', db_name: 'sample_v2', tbl_name: 'sales', field_name: '`orders.created_at`', field_type: 'datetime' };
+  const firstElement = { class_name: 'get_array_element', index: 1 };
+  const nestedRange = (mode: string, extra: JsonObject = {}) => ({ ...dataRange(mode, extra), date_field: nestedField });
+
+  it('reads the first element in the range and the compared period', () => {
+    expect(compareRequestOf(kpi({ data_range: nestedRange('this_month'), comparison: { enabled: true, mode: 'previous_period' } }))).toEqual({
+      mode: 'RawValues',
+      first_condition: { class_name: 'current_month', field: nestedField, scalar_function: firstElement },
+      second_condition: {
+        class_name: 'current_month',
+        field: nestedField,
+        scalar_function: firstElement,
+        interval_function: { class_name: 'past_n_month', n_month: 1 }
+      }
+    });
+  });
+
+  it('reads the first element in custom ranges', () => {
+    const request = compareRequestOf(kpi({ data_range: nestedRange('custom', { date_range: customRange }), comparison: { enabled: true, mode: 'same_period_last_month' } }));
+    expect(request?.['first_condition']).toMatchObject({ class_name: 'between_and_including', scalar_function: firstElement });
+    expect(request?.['second_condition']).toMatchObject({ class_name: 'between_and_including', scalar_function: firstElement });
+  });
+
+  it('reads the first element in the date filter', () => {
+    expect(dateRangeFilterRequests(kpi({ data_range: nestedRange('last_7_days') }))[0]?.condition).toEqual({
+      class_name: 'last_n_day',
+      n_day: '7',
+      field: nestedField,
+      scalar_function: firstElement
+    });
+  });
+
+  it('reads the first element under the trend line date function and in its filter', () => {
+    const setting = trendLineSettingOf(kpi({ data_range: nestedRange('this_year'), trend_line: { enabled: true, trend_by: 'Month of' } }));
+    const xFunction = { class_name: 'group', field: nestedField, scalar_function: { class_name: 'to_month_num', inner_fn: firstElement } };
+    expect(setting).toMatchObject({
+      x_axis: { name: '`orders.created_at`', function: xFunction },
+      filters: [filter, { class_name: 'current_year', field: nestedField, scalar_function: firstElement }],
+      sorts: [{ class_name: 'order_by', function: xFunction, order: 'ASC' }]
+    });
   });
 });

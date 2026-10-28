@@ -83,8 +83,24 @@ export function numberComparisonOf(setting: JsonObject): NumberComparison | unde
   };
 }
 
+/** v1 `GetArrayElement`: a column inside a nested column is read by its first element. */
+const NESTED_SCALAR: JsonObject = { class_name: 'get_array_element', index: 1 };
+
+/**
+ * Whether the date column sits inside a nested column: named `` `nested.inner` `` (the field tree), or on a table
+ * named `table.nested` (v1 `SchemaUtils.isNested`).
+ */
+export function isNestedField(field: JsonObject): boolean {
+  return asString(field['field_name']).includes('.') || asString(field['tbl_name']).includes('.');
+}
+
+/** A condition on the date column; one inside a nested column reads its first element (v1 `buildDateFilterCondition`). */
+function onField(field: JsonObject, condition: JsonObject): JsonObject {
+  return { ...condition, field, ...(isNestedField(field) && { scalar_function: NESTED_SCALAR }) };
+}
+
 function between(field: JsonObject, [start, end]: StoredRange): JsonObject {
-  return { class_name: 'between_and_including', field, min: formatDateTime(start), max: formatDateTime(end, true) };
+  return onField(field, { class_name: 'between_and_including', min: formatDateTime(start), max: formatDateTime(end, true) });
 }
 
 /** v1 `ConditionUtils.buildDateFilterCondition`: relative modes are computed by the server, custom by its range. */
@@ -107,7 +123,7 @@ const MODE_CONDITIONS: Readonly<Partial<Record<DateMode, JsonObject>>> = {
 export function dateRangeCondition({ field, mode, range }: Pick<NumberComparison, 'field' | 'mode' | 'range'>): JsonObject | undefined {
   if (mode === DateMode.Custom) return range && between(field, range);
   const condition = MODE_CONDITIONS[mode];
-  return condition && { ...condition, field };
+  return condition && onField(field, condition);
 }
 
 const past = (unit: 'day' | 'week' | 'month' | 'quarter' | 'year', count = 1): JsonObject => ({ class_name: `past_n_${unit}`, [`n_${unit}`]: count });
@@ -231,7 +247,8 @@ export const TREND_BY_OPTIONS: readonly string[] = Object.keys(TREND_SCALARS);
 
 /**
  * The trend line's series query (v1 `ComparisonUtils.buildTrendLineQuerySetting`): the value over time, in the range.
- * v1 dropped the chart's own filters; v2 keeps them.
+ * v1 dropped the chart's own filters; v2 keeps them. A date column inside a nested column is read by its first element
+ * under the date function, as v1's builder does for zone items (`DiFunctionResolver`); v1's trend line didn't.
  */
 export function trendLineSettingOf(setting: JsonObject): JsonObject | undefined {
   const comparison = numberComparisonOf(setting);
@@ -240,7 +257,10 @@ export function trendLineSettingOf(setting: JsonObject): JsonObject | undefined 
   const xFunction = {
     class_name: 'group',
     field: comparison.field,
-    scalar_function: { class_name: TREND_SCALARS[comparison.trend.trendBy] ?? 'to_month_num' }
+    scalar_function: {
+      class_name: TREND_SCALARS[comparison.trend.trendBy] ?? 'to_month_num',
+      ...(isNestedField(comparison.field) && { inner_fn: NESTED_SCALAR })
+    }
   };
   const condition = dateRangeCondition(comparison);
   const filters = Array.isArray(setting['filters']) ? setting['filters'] : [];
