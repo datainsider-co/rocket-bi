@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 import type { DataSourceService } from '@/core/ingestion/DataSourceService';
 import type { JobHistoryService } from '@/core/ingestion/JobHistoryService';
 import type { JobService } from '@/core/ingestion/JobService';
+import type { SchemaService } from '@/core/schema/SchemaService';
 
 /** Test-only: a DataSourceService with no sources. Override what the test needs. */
 export function fakeDataSourceService(overrides: Partial<DataSourceService> = {}): DataSourceService {
@@ -42,6 +43,18 @@ export function fakeJobService(overrides: Partial<JobService> = {}): JobService 
 export function fakeJobHistoryService(overrides: Partial<JobHistoryService> = {}): JobHistoryService {
   return {
     list: vi.fn<JobHistoryService['list']>(async () => ({ total: 0, data: [] })),
+    ...overrides
+  };
+}
+
+/** Test-only: a warehouse with no databases, for the job form's destination. Override what the test needs. */
+export function fakeSchemaService(overrides: Partial<SchemaService> = {}): SchemaService {
+  return {
+    listDatabases: vi.fn<SchemaService['listDatabases']>(async () => []),
+    getDatabase: vi.fn<SchemaService['getDatabase']>(async name => ({ name, tables: [] })),
+    detectTableSchema: vi.fn<SchemaService['detectTableSchema']>(async () => {
+      throw new Error('not used');
+    }),
     ...overrides
   };
 }
