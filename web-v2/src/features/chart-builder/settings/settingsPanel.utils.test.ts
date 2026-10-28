@@ -4,8 +4,12 @@ import type { VisualizationResponse } from '@/core/query/VisualizationResponse';
 import { hasStackTab, seriesResponseOf, settingsKindOf } from './settingsPanel.utils';
 
 describe('settingsKindOf', () => {
-  it.each([ChartType.Column, ChartType.Bar, ChartType.Line, ChartType.Spline, ChartType.LineInverted, ChartType.Area, ChartType.AreaInverted])('gives %s the series settings', chartType => {
+  it.each([ChartType.Column, ChartType.Bar, ChartType.Lollipop, ChartType.Line, ChartType.Spline, ChartType.LineInverted, ChartType.Area, ChartType.AreaInverted])('gives %s the series settings', chartType => {
     expect(settingsKindOf(chartType)).toBe('series');
+  });
+
+  it.each([ChartType.StackedColumn, ChartType.StackedBar, ChartType.CircularBar])('gives %s the stacked settings', chartType => {
+    expect(settingsKindOf(chartType)).toBe('stacked');
   });
 
   it.each([ChartType.Pie, ChartType.SemiPie, ChartType.Donut])('gives %s the pie settings', chartType => {

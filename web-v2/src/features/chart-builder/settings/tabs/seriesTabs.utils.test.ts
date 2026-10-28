@@ -10,6 +10,7 @@ import {
   dataLabelRevert,
   dataLabelSettingsOf,
   displayRevert,
+  seriesNameRevert,
   dualAxisRevert,
   dualAxisToggle,
   gridToggle,
@@ -134,9 +135,17 @@ describe('axisTitlesOf', () => {
   });
 });
 
+describe('seriesNameRevert', () => {
+  it("puts back the response's name only", () => {
+    expect(seriesNameRevert('offlineC', 'Offline.C')).toEqual({ 'plotOptions.series.response.offlineC.name': 'Offline.C' });
+  });
+});
+
 describe('axisTabNames', () => {
   it('swaps the names on bars', () => {
     expect(axisTabNames(ChartType.Bar)).toEqual({ x: 'Y Axis', y: 'X Axis' });
+    expect(axisTabNames(ChartType.StackedBar)).toEqual({ x: 'Y Axis', y: 'X Axis' });
+    expect(axisTabNames(ChartType.CircularBar)).toEqual({ x: 'X Axis', y: 'Y Axis' });
     expect(axisTabNames(ChartType.Column)).toEqual({ x: 'X Axis', y: 'Y Axis' });
   });
 });
@@ -144,6 +153,7 @@ describe('axisTabNames', () => {
 describe('axis reverts', () => {
   it('shows the x axis without gridlines', () => {
     expect(xAxisRevert('Region')).toMatchObject({ 'xAxis[0].visible': true, 'xAxis[0].title.text': 'Region', 'xAxis[0].gridLineWidth': '0', 'xAxis[0].prefix.text': '' });
+    expect(xAxisRevert('Region', '0.5')).toMatchObject({ 'xAxis[0].gridLineWidth': '0.5' });
   });
 
   it('shows the y axis with gridlines and no range', () => {

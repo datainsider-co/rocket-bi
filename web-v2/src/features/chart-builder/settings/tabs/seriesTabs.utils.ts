@@ -92,6 +92,11 @@ export function displayRevert(key: string, name: string): VizChanges {
   };
 }
 
+/** v1 `LegendNameTab.handleRevert`: the series' name back to the response's. */
+export function seriesNameRevert(key: string, name: string): VizChanges {
+  return { [seriesPath(key, 'name')]: name };
+}
+
 // Axes (v1 `XAxisTab`, `SeriesYAxisTab`, `SeriesDualYAxisTab`)
 
 export const AXIS_DEFAULTS = {
@@ -120,9 +125,11 @@ export function axisTitlesOf(setting: JsonObject | undefined) {
 
 export type AxisTitles = ReturnType<typeof axisTitlesOf>;
 
-/** Bars swap the axes, and v1 swapped the tabs' names with them. */
+const BARS = new Set<string>([ChartType.Bar, ChartType.StackedBar]);
+
+/** Bars swap the axes, and v1 swapped the tabs' names with them (not the circular bar's). */
 export function axisTabNames(chartType: string): { x: string; y: string } {
-  return chartType === ChartType.Bar ? { x: 'Y Axis', y: 'X Axis' } : { x: 'X Axis', y: 'Y Axis' };
+  return BARS.has(chartType) ? { x: 'Y Axis', y: 'X Axis' } : { x: 'X Axis', y: 'Y Axis' };
 }
 
 function axisStyleDefaults(axis: string, title: string): VizChanges {
@@ -142,9 +149,12 @@ function axisStyleDefaults(axis: string, title: string): VizChanges {
   };
 }
 
-/** v1 `XAxisTab.handleRevert`: no grid on series charts' x axis. */
-export function xAxisRevert(title: string): VizChanges {
-  return { ...axisStyleDefaults('xAxis[0]', title), 'xAxis[0].visible': true, 'xAxis[0].gridLineWidth': '0' };
+/**
+ * v1 `XAxisTab.handleRevert`: no grid on series charts' x axis. The circular bar starts with one, so its revert keeps
+ * it (v1 turned it off).
+ */
+export function xAxisRevert(title: string, gridLineWidth = '0'): VizChanges {
+  return { ...axisStyleDefaults('xAxis[0]', title), 'xAxis[0].visible': true, 'xAxis[0].gridLineWidth': gridLineWidth };
 }
 
 function rangeDefaults(axis: string): VizChanges {

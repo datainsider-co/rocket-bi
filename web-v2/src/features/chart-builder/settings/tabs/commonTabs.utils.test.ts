@@ -100,6 +100,12 @@ describe('otherSettingsOf', () => {
     expect(otherSettingsOf(ChartType.DropDown)).toEqual({ numberFormat: false, crossFilter: false, drilldown: false, zoom: false });
   });
 
+  it('gives the stacked column and bar drilldown and zoom, but not the circular bar or lollipop, like v1', () => {
+    expect(otherSettingsOf(ChartType.StackedBar)).toMatchObject({ drilldown: true, zoom: true });
+    expect(otherSettingsOf(ChartType.CircularBar)).toMatchObject({ drilldown: false, zoom: false });
+    expect(otherSettingsOf(ChartType.Lollipop)).toMatchObject({ drilldown: false, zoom: false });
+  });
+
   it('gives a spline no drilldown or zoom, like v1', () => {
     expect(otherSettingsOf(ChartType.Spline)).toMatchObject({ drilldown: false, zoom: false });
   });

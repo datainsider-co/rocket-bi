@@ -84,7 +84,7 @@ const FILTERS = new Set<string>([
 ]);
 const PIES = new Set<string>([ChartType.Pie, ChartType.SemiPie, ChartType.Donut]);
 /** v1 `VisualHeaderConfigs.drilldownWidgets` and `zoomWidgets`, for the types v2 builds: the same set. */
-const DRILL_AND_ZOOM = new Set<string>([ChartType.Pie, ChartType.Bar, ChartType.Column, ChartType.Line, ChartType.Area]);
+const DRILL_AND_ZOOM = new Set<string>([ChartType.Pie, ChartType.Bar, ChartType.Column, ChartType.Line, ChartType.Area, ChartType.StackedBar, ChartType.StackedColumn]);
 
 /** Which settings the Other tab shows (v1 `VisualHeader`). */
 export function otherSettingsOf(chartType: string) {

@@ -11,6 +11,7 @@ import { FilterSettingsView } from './FilterSettingsView';
 import { NumberSettingsView } from './NumberSettingsView';
 import { PieSettingsView } from './PieSettingsView';
 import { SeriesSettingsView } from './SeriesSettingsView';
+import { StackedSettingsView } from './StackedSettingsView';
 import { seriesResponseOf, settingsKindOf } from './settingsPanel.utils';
 import { TableSettingsView } from './TableSettingsView';
 import { axisTitlesOf, seriesChoicesOf } from './tabs/seriesTabs.utils';
@@ -28,7 +29,8 @@ interface SettingsPanelProps {
 /** The builder's Settings tab (v1 `ChartSettingModal`): the chart's viz options, by chart type. */
 export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPanelProps) {
   const { chartType, setting, viz, onChange } = useChartSettings();
-  const series = useMemo(() => seriesChoicesOf(seriesResponseOf(response)), [response]);
+  const seriesResponse = seriesResponseOf(response);
+  const series = useMemo(() => seriesChoicesOf(seriesResponse), [seriesResponse]);
   const axisTitles = useMemo(() => axisTitlesOf(setting), [setting]);
   const defaultValue = useFilterDefault(setting, viz, filterEntry, onChange);
   const tables = useFieldChoices();
@@ -40,6 +42,8 @@ export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPa
   switch (settingsKindOf(chartType)) {
     case 'series':
       return <SeriesSettingsView {...tab} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
+    case 'stacked':
+      return <StackedSettingsView {...tab} response={seriesResponse} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
     case 'pie':
       return <PieSettingsView {...tab} themeColors={themeColors} />;
     case 'number':
