@@ -87,6 +87,19 @@ describe('SettingsPanel', () => {
     expect(screen.queryByTitle('country')).not.toBeInTheDocument();
   });
 
+  it("turns a pivot table's total row off, and gives its grid the total and header lines", async () => {
+    renderPanel({ widget: sent.pivot_table });
+    expect(screen.getByText('Collapsed And Expanded')).toBeInTheDocument();
+    const totalTab = screen.getByText('Total');
+    await userEvent.click(totalTab);
+    const panel = totalTab.closest<HTMLElement>('.ant-collapse-item');
+    if (!panel) throw new Error('no panel');
+    await userEvent.click(within(panel).getByRole('switch', { name: 'Show total' }));
+    expect(options()['total']).toMatchObject({ enabled: false, label: { text: 'Total' } });
+    await userEvent.click(screen.getByText('Grid'));
+    expect(screen.getAllByRole('switch', { name: 'Total' })).toHaveLength(2);
+  });
+
   it("saves a filter's selection in the preview as its default, and resets it", async () => {
     const widget = stored.widgets.find(item => item.id === 39);
     if (!widget) throw new Error('no tab filter');

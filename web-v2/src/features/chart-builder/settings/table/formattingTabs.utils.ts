@@ -1,7 +1,9 @@
 import { cloneDeep, get, set } from 'lodash-es';
 import type { VizChanges } from '@/core/chart-builder/vizChanges';
-import { asRecord, asString, isRecord, type JsonObject } from '@/core/json/json';
+import { ChartType } from '@/core/chart-builder/chartType';
+import { asArray, asRecord, asString, isRecord, type JsonObject } from '@/core/json/json';
 import { vizKey, type VizOptions } from '@/core/query/vizOptions';
+import { pivotColumnsOf } from '@/core/query/pivotQuery';
 import { isNumberType } from '@/core/schema/fieldTypes';
 import { TEXT_COLOR, type SettingOption } from '../settingOptions';
 
@@ -40,6 +42,36 @@ export function shownColumnsOf(collapse: boolean, columns: readonly unknown[]): 
   const firstGroup = columns.find(column => classOf(column) === 'group');
   if (!collapse || !firstGroup) return [...columns];
   return [firstGroup, ...columns.filter(column => !NOT_AGGREGATE.has(classOf(column)))];
+}
+
+/** The columns of a table's Field formatting and Conditional formatting tabs. */
+export interface FormattingColumns {
+  readonly field: readonly unknown[];
+  readonly conditional: readonly unknown[];
+}
+
+/**
+ * A pivot table's (v1 `PivotSetting.formattingColumns`, `conditionalFormattingColumns`): its first row group and its
+ * values; under columns across, a value cell stands for one column value only, so only values get conditional
+ * formatting.
+ */
+export function pivotFormattingColumnsOf(setting: JsonObject): FormattingColumns {
+  const values = pivotColumnsOf(setting, 'values');
+  const field = [...pivotColumnsOf(setting, 'rows').slice(0, 1), ...values];
+  return { field, conditional: pivotColumnsOf(setting, 'columns').length > 0 ? values : field };
+}
+
+/**
+ * The columns each formatting tab lists, by chart type: a pivot table's (`pivotFormattingColumnsOf`), or the columns a
+ * flatten or collapse table shows (`shownColumnsOf`) in both.
+ */
+export function formattingChoicesOf(chartType: string, setting: JsonObject): { field: ColumnChoice[]; conditional: ColumnChoice[] } {
+  if (chartType === ChartType.PivotTable) {
+    const { field, conditional } = pivotFormattingColumnsOf(setting);
+    return { field: columnChoicesOf(field), conditional: columnChoicesOf(conditional) };
+  }
+  const shown = columnChoicesOf(shownColumnsOf(chartType === ChartType.CollapseTable, asArray(setting['columns'])));
+  return { field: shown, conditional: shown };
 }
 
 // Field formatting

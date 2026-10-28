@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ChartType } from '@/core/chart-builder/chartType';
 import type { VizOptions } from '@/core/query/vizOptions';
 import {
   columnChoicesOf,
@@ -14,6 +15,8 @@ import {
   invalidBounds,
   invalidRules,
   newRule,
+  formattingChoicesOf,
+  pivotFormattingColumnsOf,
   shownColumnsOf,
   withValue
 } from './formattingTabs.utils';
@@ -35,6 +38,38 @@ describe('columnChoicesOf', () => {
       { label: 'total_revenue', value: 'totalRevenue', functionClass: 'select', numeric: true },
       { label: 'Count of orders', value: 'countOfOrders', functionClass: 'count', numeric: true }
     ]);
+  });
+});
+
+describe('pivotFormattingColumnsOf', () => {
+  const column = (name: string, className = 'group') => ({ name, function: { class_name: className } });
+  const [byRegion, byCountry, byChannel, sum] = [column('region'), column('country'), column('channel'), column('revenue', 'sum')];
+
+  it('formats the first row group and the values, conditionally too without columns across', () => {
+    expect(pivotFormattingColumnsOf({ rows: [byRegion, byCountry], values: [sum] })).toEqual({ field: [byRegion, sum], conditional: [byRegion, sum] });
+  });
+
+  it('formats only the values conditionally under columns across', () => {
+    expect(pivotFormattingColumnsOf({ rows: [byRegion], columns: [byChannel], values: [sum] })).toEqual({ field: [byRegion, sum], conditional: [sum] });
+    expect(pivotFormattingColumnsOf({})).toEqual({ field: [], conditional: [] });
+  });
+});
+
+describe('formattingChoicesOf', () => {
+  const column = (name: string, className = 'group') => ({ name, function: { class_name: className } });
+
+  it("lists a pivot table's columns apart for each tab", () => {
+    const choices = formattingChoicesOf(ChartType.PivotTable, { rows: [column('region')], columns: [column('channel')], values: [column('revenue', 'sum')] });
+    expect(choices.field.map(choice => choice.name)).toEqual(['region', 'revenue']);
+    expect(choices.conditional.map(choice => choice.name)).toEqual(['revenue']);
+  });
+
+  it('lists the columns a collapse or flatten table shows in both tabs', () => {
+    const setting = { columns: [column('region'), column('country'), column('revenue', 'sum')] };
+    expect(formattingChoicesOf(ChartType.CollapseTable, setting).field.map(choice => choice.name)).toEqual(['region', 'revenue']);
+    const flat = formattingChoicesOf(ChartType.Table, setting);
+    expect(flat.conditional.map(choice => choice.name)).toEqual(['region', 'country', 'revenue']);
+    expect(formattingChoicesOf(ChartType.Table, {}).field).toEqual([]);
   });
 });
 

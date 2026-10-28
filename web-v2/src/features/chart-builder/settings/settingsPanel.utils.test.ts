@@ -16,13 +16,14 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(ChartType.Number)).toBe('number');
     expect(settingsKindOf(ChartType.Table)).toBe('table');
     expect(settingsKindOf(ChartType.CollapseTable)).toBe('table');
+    expect(settingsKindOf(ChartType.PivotTable)).toBe('table');
   });
 
   it.each([ChartType.DropDown, ChartType.DropDownInnerFilter, ChartType.SlicerFilter, ChartType.MultiTreeFilter])('gives %s the filter settings', chartType => {
     expect(settingsKindOf(chartType)).toBe('filter');
   });
 
-  it.each(['pivot_table', 'gauge'])('has none yet for %s', chartType => {
+  it.each(['arearange', 'gauge'])('has none yet for %s', chartType => {
     expect(settingsKindOf(chartType)).toBeUndefined();
   });
 });

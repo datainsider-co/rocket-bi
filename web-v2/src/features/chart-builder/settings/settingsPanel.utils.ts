@@ -6,6 +6,8 @@ const SERIES = new Set<string>([ChartType.Column, ChartType.Bar, ChartType.Line,
 
 const PIES = new Set<string>([ChartType.Pie, ChartType.SemiPie, ChartType.Donut]);
 
+const TABLES = new Set<string>([ChartType.Table, ChartType.CollapseTable, ChartType.PivotTable]);
+
 export type SettingsKind = 'series' | 'pie' | 'number' | 'table' | 'filter';
 
 /** Which settings a chart type has (v1 picked the component by viz option class); `undefined` while v2 has none. */
@@ -13,7 +15,7 @@ export function settingsKindOf(chartType: string): SettingsKind | undefined {
   if (SERIES.has(chartType)) return 'series';
   if (PIES.has(chartType)) return 'pie';
   if (chartType === ChartType.Number) return 'number';
-  if (chartType === ChartType.Table || chartType === ChartType.CollapseTable) return 'table';
+  if (TABLES.has(chartType)) return 'table';
   return filterControlKindOf(chartType) ? 'filter' : undefined;
 }
 

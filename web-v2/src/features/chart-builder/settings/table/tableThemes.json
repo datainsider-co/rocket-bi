@@ -33,7 +33,12 @@
       "value.alternateBackgroundColor": "#3e4e9f",
       "value.style.fontFamily": "Roboto",
       "value.style.fontSize": "12px",
-      "background": "#2d3b83"
+      "background": "#2d3b83",
+      "total.label.style.color": "#FFFFFFCC",
+      "total.label.style.fontFamily": "Roboto",
+      "total.label.style.fontSize": "12px",
+      "total.label.align": "left",
+      "total.backgroundColor": "#3e4e9f"
     }
   },
   {
@@ -70,7 +75,12 @@
       "value.alternateBackgroundColor": "var(--row-odd-background-color)",
       "value.style.fontFamily": "Roboto",
       "value.style.fontSize": "12px",
-      "background": "var(--chart-background-color)"
+      "background": "var(--chart-background-color)",
+      "total.label.style.color": "var(--text-color)",
+      "total.label.style.fontFamily": "Roboto",
+      "total.label.style.fontSize": "12px",
+      "total.label.align": "left",
+      "total.backgroundColor": "var(--total-background-color)"
     }
   },
   {
@@ -107,7 +117,12 @@
       "value.alternateBackgroundColor": "#0B9ECB17",
       "value.style.fontFamily": "Roboto",
       "value.style.fontSize": "12px",
-      "background": "#00575F"
+      "background": "#00575F",
+      "total.label.style.color": "#FFFFFFCC",
+      "total.label.style.fontFamily": "Roboto",
+      "total.label.style.fontSize": "12px",
+      "total.label.align": "left",
+      "total.backgroundColor": "#008298"
     }
   },
   {
@@ -144,7 +159,12 @@
       "value.alternateBackgroundColor": "#8283872B",
       "value.style.fontFamily": "Arial, sans-serif",
       "value.style.fontSize": "12px",
-      "background": "#C38307"
+      "background": "#C38307",
+      "total.label.style.color": "#FFFFFFCC",
+      "total.label.style.fontFamily": "Roboto",
+      "total.label.style.fontSize": "12px",
+      "total.label.align": "left",
+      "total.backgroundColor": "#BC6E00"
     }
   },
   {
@@ -181,7 +201,12 @@
       "value.alternateBackgroundColor": "#D9D9DD",
       "value.style.fontFamily": "Arial, sans-serif",
       "value.style.fontSize": "12px",
-      "background": "#DDDDDD"
+      "background": "#DDDDDD",
+      "total.label.style.color": "#FFFFFFCC",
+      "total.label.style.fontFamily": "Roboto",
+      "total.label.style.fontSize": "12px",
+      "total.label.align": "left",
+      "total.backgroundColor": "#727C85"
     }
   },
   {
@@ -218,7 +243,12 @@
       "value.alternateBackgroundColor": "#823733",
       "value.style.fontFamily": "Roboto",
       "value.style.fontSize": "12px",
-      "background": "#6d2e2b"
+      "background": "#6d2e2b",
+      "total.label.style.color": "#FFFFFF",
+      "total.label.style.fontFamily": "Roboto",
+      "total.label.style.fontSize": "12px",
+      "total.label.align": "left",
+      "total.backgroundColor": "#823733"
     }
   }
 ]

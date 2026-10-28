@@ -7,11 +7,11 @@ import type { TabProps } from '../tabs/tabProps';
 import { GRID_DEFAULTS as D, gridRevert, THICKNESSES } from './tableTabs.utils';
 
 /**
- * v1 table `GridTab`: vertical lines (in the header, between cells) and horizontal ones (between rows). v1's Total
- * toggles and the horizontal Header one did nothing on a flatten table (no total row, one header row); they come with
- * the tables that have them.
+ * v1 table `GridTab`: vertical lines (in the header, between cells) and horizontal ones (between rows). The Total
+ * toggles and the horizontal Header one (between header rows) only show for a pivot table, the table that has a total
+ * row and several header rows; they did nothing on the others.
  */
-export function TableGridTab({ viz, onChange }: TabProps) {
+export function TableGridTab({ viz, onChange, pivot = false }: TabProps & { pivot?: boolean }) {
   const toggle = (path: string, label: string, fallback: boolean) => (
     <ToggleSetting label={label} value={boolAt(viz, `grid.${path}`, fallback)} onChange={value => onChange({ [`grid.${path}`]: value })} />
   );
@@ -32,8 +32,11 @@ export function TableGridTab({ viz, onChange }: TabProps) {
       {line('vertical', 'Vertical grid color')}
       {toggle('vertical.applyHeader', 'Header', D.vertical.applyHeader)}
       {toggle('vertical.applyBody', 'Body', D.vertical.applyBody)}
+      {pivot && toggle('vertical.applyTotal', 'Total', D.vertical.applyTotal)}
       {line('horizontal', 'Horizontal grid color')}
+      {pivot && toggle('horizontal.applyHeader', 'Header', D.horizontal.applyHeader)}
       {toggle('horizontal.applyBody', 'Body', D.horizontal.applyBody)}
+      {pivot && toggle('horizontal.applyTotal', 'Total', D.horizontal.applyTotal)}
       <RevertButton onRevert={() => onChange(gridRevert())} />
     </div>
   );

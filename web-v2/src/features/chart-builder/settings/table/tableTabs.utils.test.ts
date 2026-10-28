@@ -11,6 +11,7 @@ import {
   tableTooltipRevert,
   THICKNESSES,
   toggleIconRevert,
+  totalRevert,
   valuesRevert
 } from './tableTabs.utils';
 
@@ -31,6 +32,12 @@ describe('table themes', () => {
     const changes = tableThemeChanges('saturn');
     expect(changes).toMatchObject({ theme: 'saturn', 'header.backgroundColor': '#BC6E00', 'value.style.fontFamily': 'Arial, sans-serif', background: '#C38307' });
     expect(Object.keys(changes).some(key => key.startsWith('total.') || key === 'value.isWordWrap' || key === 'value.style.color')).toBe(false);
+  });
+
+  it('writes the total row for a table that has one, never turning it on or off', () => {
+    const changes = tableThemeChanges('saturn', true);
+    expect(changes).toMatchObject({ 'total.backgroundColor': '#BC6E00', 'total.label.style.color': '#FFFFFFCC', 'total.label.align': 'left' });
+    expect(changes).not.toHaveProperty('total.enabled');
   });
 
   it('changes nothing for an unknown theme', () => {
@@ -83,10 +90,32 @@ describe('hasCollapseTab', () => {
   const sum = { name: 'revenue', function: { class_name: 'sum' } };
 
   it('shows on a collapse table with two group by columns or more', () => {
-    expect(hasCollapseTab(ChartType.CollapseTable, [group('region'), group('country'), sum])).toBe(true);
-    expect(hasCollapseTab(ChartType.CollapseTable, [group('region'), sum])).toBe(false);
-    expect(hasCollapseTab(ChartType.CollapseTable, [])).toBe(false);
-    expect(hasCollapseTab(ChartType.Table, [group('region'), group('country')])).toBe(false);
+    expect(hasCollapseTab(ChartType.CollapseTable, { columns: [group('region'), group('country'), sum] })).toBe(true);
+    expect(hasCollapseTab(ChartType.CollapseTable, { columns: [group('region'), sum] })).toBe(false);
+    expect(hasCollapseTab(ChartType.CollapseTable, {})).toBe(false);
+    expect(hasCollapseTab(ChartType.Table, { columns: [group('region'), group('country')] })).toBe(false);
+  });
+
+  it('shows on a pivot table with two row groups or more', () => {
+    expect(hasCollapseTab(ChartType.PivotTable, { rows: [group('region'), group('country')] })).toBe(true);
+    expect(hasCollapseTab(ChartType.PivotTable, { rows: [group('region')], columns: [group('a'), group('b')] })).toBe(false);
+  });
+
+  it('shows on nothing without a setting', () => {
+    expect(hasCollapseTab(ChartType.PivotTable, undefined)).toBe(false);
+  });
+});
+
+describe('totalRevert', () => {
+  it("puts back a new pivot table's total row, keeping its label", () => {
+    expect(totalRevert()).toEqual({
+      'total.enabled': true,
+      'total.label.style.color': 'var(--text-color)',
+      'total.label.style.fontFamily': 'var(--widget-secondary-font-family, Roboto)',
+      'total.label.style.fontSize': '12px',
+      'total.label.align': 'right',
+      'total.backgroundColor': 'var(--total-background-color)'
+    });
   });
 });
 
