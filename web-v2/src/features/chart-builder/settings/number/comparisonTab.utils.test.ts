@@ -21,6 +21,7 @@ const local = (year: number, month: number, date: number) => new Date(year, mont
 const now = local(2026, 10, 28);
 const orderDate = { class_name: 'table_field', db_name: 'sample_v2', tbl_name: 'sales', field_name: 'order_date', field_type: 'datetime' };
 const shipDate = { ...orderDate, field_name: 'ship_date' };
+const nestedDate = { ...orderDate, field_name: '`orders.created`' };
 
 const field = (title: string, type: string, json: JsonObject, role: 'column' | 'measure' = 'column') => ({
   kind: 'field' as const,
@@ -40,7 +41,12 @@ const tables: TableNode[] = [
       field('Region', 'string', { ...orderDate, field_name: 'region' }),
       field('Ship Date', 'date', shipDate),
       field('Date measure', 'datetime', orderDate, 'measure'),
-      { kind: 'nested', key: 'n', title: 'Nested', fields: [field('Inner', 'date', orderDate)] }
+      {
+        kind: 'nested',
+        key: 'n',
+        title: 'Orders',
+        fields: [field('Created', 'date', nestedDate), field('Name', 'string', { ...nestedDate, field_name: '`orders.name`' })]
+      }
     ]
   }
 ];
@@ -64,10 +70,11 @@ describe('dateFieldKeyOf', () => {
 });
 
 describe('dateFieldChoicesOf', () => {
-  it("offers the tables' date columns", () => {
+  it("offers the tables' date columns, those inside nested columns under them", () => {
     expect(dateFieldChoicesOf(tables)).toEqual([
       { label: 'Sales.Order Date', value: 'sample_v2.sales.order_date', field: orderDate },
-      { label: 'Sales.Ship Date', value: 'sample_v2.sales.ship_date', field: shipDate }
+      { label: 'Sales.Ship Date', value: 'sample_v2.sales.ship_date', field: shipDate },
+      { label: 'Sales.Orders.Created', value: 'sample_v2.sales.`orders.created`', field: nestedDate }
     ]);
   });
 

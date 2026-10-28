@@ -5,7 +5,7 @@ import { asString, isRecord, type JsonObject } from '@/core/json/json';
 import { DateMode, dateRangeOf, isDateMode } from '@/core/query/dateRanges';
 import type { VizOptions } from '@/core/query/vizOptions';
 import { isDateType } from '@/core/schema/fieldTypes';
-import type { TableNode } from '../../field-tree/fieldTree.utils';
+import type { FieldNode, TableNode } from '../../field-tree/fieldTree.utils';
 
 /** v1 number `ComparisonTab`: the date range, the period it is compared with and the trend line. */
 
@@ -28,16 +28,18 @@ export function dateFieldKeyOf(viz: VizOptions): string {
   return fieldKeyOf(get(viz, 'dataRange.dateField'));
 }
 
+function dateChoice(label: string, item: FieldNode): DateFieldChoice[] {
+  return item.role === 'column' && isDateType(item.type) ? [{ label: `${label}.${item.title}`, value: fieldKeyOf(item.dropped.field), field: item.dropped.field }] : [];
+}
+
 /**
  * The date columns of the builder's tables (v1 `dateOptions`, every table of the database, not only the chart's), by
- * table then column. Nested columns are left out.
+ * table then column. A date column inside a nested column is listed under it, `table.nested.column`; v1 listed none.
  */
 export function dateFieldChoicesOf(tables: readonly TableNode[]): DateFieldChoice[] {
   return tables.flatMap(table =>
     table.items.flatMap(item =>
-      item.kind === 'field' && item.role === 'column' && isDateType(item.type)
-        ? [{ label: `${table.title}.${item.title}`, value: fieldKeyOf(item.dropped.field), field: item.dropped.field }]
-        : []
+      item.kind === 'field' ? dateChoice(table.title, item) : item.fields.flatMap(inner => dateChoice(`${table.title}.${item.title}`, inner))
     )
   );
 }
