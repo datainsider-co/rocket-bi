@@ -1,47 +1,46 @@
 import { Table } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
-import type { JobInfo } from '@/core/ingestion/Job';
-import type { JobSortField } from '@/core/ingestion/JobService';
-import type { Sort } from '@/core/listing/Listing';
+import type { JobId, JobInfo } from '@/core/ingestion/Job';
 import { listingPagination } from '../listing/listing.utils';
+import type { JobRowActions } from './JobActionsCell';
 import { jobColumns } from './jobColumns';
-import { toJobSortField } from './jobs.utils';
+import { isEditableJob, toJobSortField } from './jobs.utils';
+import type { JobsTableData, JobsTableHandlers } from './useJobsListing';
 
-export interface JobsPaging {
-  readonly page: number;
-  readonly pageSize: number;
-  readonly total: number;
+export interface JobSelection {
+  readonly selectedIds: readonly JobId[];
+  readonly onChange: (ids: JobId[]) => void;
 }
 
 interface JobsTableProps {
-  jobs: readonly JobInfo[];
-  paging: JobsPaging;
-  sort: Sort<JobSortField>;
-  isLoading: boolean;
-  onPageChange: (page: number, pageSize: number) => void;
-  onSort: (field: JobSortField) => void;
+  table: JobsTableData;
+  handlers: Pick<JobsTableHandlers, 'onPageChange' | 'onSort'>;
+  selection: JobSelection;
+  actions: JobRowActions;
 }
 
 function sorterColumnKey(sorter: SorterResult<JobInfo> | SorterResult<JobInfo>[]): unknown {
   return Array.isArray(sorter) ? sorter[0]?.columnKey : sorter.columnKey;
 }
 
-/** v1 `DiTable2` of `JobScreen`: paged and sorted on the server. Rows can't be opened yet (edit is DI6). */
-export function JobsTable({ jobs, paging, sort, isLoading, onPageChange, onSort }: JobsTableProps) {
+/** v1 `DiTable2` of `JobScreen`: paged and sorted on the server, checkboxes for the bulk actions; a row opens its job. */
+export function JobsTable({ table, handlers, selection, actions }: JobsTableProps) {
   return (
     <Table<JobInfo>
       rowKey={info => info.job.id}
-      columns={jobColumns(sort)}
-      dataSource={jobs}
-      loading={isLoading}
+      columns={jobColumns(table.sort, actions)}
+      dataSource={table.jobs}
+      loading={table.isLoading}
       showSorterTooltip={false}
       scroll={{ x: 'max-content' }}
-      pagination={listingPagination(paging.page, paging.pageSize, paging.total)}
+      pagination={listingPagination(table.page, table.pageSize, table.total)}
+      rowSelection={{ selectedRowKeys: [...selection.selectedIds], onChange: keys => selection.onChange(keys.map(Number)) }}
+      onRow={({ job }) => (isEditableJob(job) ? { onClick: () => actions.onEdit(job), className: 'cursor-pointer' } : {})}
       onChange={(pagination, _filters, sorter, { action }) => {
-        if (action === 'paginate') onPageChange(pagination.current ?? 1, pagination.pageSize ?? paging.pageSize);
+        if (action === 'paginate') handlers.onPageChange(pagination.current ?? 1, pagination.pageSize ?? table.pageSize);
         if (action !== 'sort') return;
         const field = toJobSortField(sorterColumnKey(sorter));
-        if (field) onSort(field);
+        if (field) handlers.onSort(field);
       }}
     />
   );

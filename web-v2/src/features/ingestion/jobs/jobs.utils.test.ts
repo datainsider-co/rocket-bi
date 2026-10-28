@@ -4,7 +4,10 @@ import fixture from '@/core/ingestion/ingestion.fixture.json';
 import { jobInfoFromJson, NEVER_RUNS, QUEUED_STATUSES, type Job, type JobInfo } from '@/core/ingestion/Job';
 import { IngestionSection } from '../ingestion.utils';
 import {
+  deleteJobsText,
   emptyJobsText,
+  forceSyncSummary,
+  isEditableJob,
   jobListingStatuses,
   lastSuccessfulSyncLabel,
   nextRunLabel,
@@ -102,5 +105,34 @@ describe('emptyJobsText', () => {
 
   it.each(['', '  '])('says there are no jobs yet without a keyword (%j)', keyword => {
     expect(emptyJobsText(keyword)).toBe('No data yet');
+  });
+});
+
+describe('isEditableJob', () => {
+  it('edits JDBC jobs only', () => {
+    expect(isEditableJob(synced.job)).toBe(true);
+    expect(isEditableJob(unsupported)).toBe(false);
+  });
+});
+
+describe('deleteJobsText', () => {
+  it('names a single job like v1', () => {
+    expect(deleteJobsText([{ displayName: 'DI0 sales' }])).toBe("Are you sure to delete job 'DI0 sales'?");
+  });
+
+  it('counts several jobs', () => {
+    expect(deleteJobsText([{ displayName: 'a' }, { displayName: 'b' }])).toBe('Are you sure to delete 2 jobs?');
+  });
+});
+
+describe('forceSyncSummary', () => {
+  it('says how many jobs were scheduled when all were', () => {
+    expect(forceSyncSummary({ 1: true })).toEqual({ ok: true, text: '1 job force synced' });
+    expect(forceSyncSummary({ 1: true, 2: true })).toEqual({ ok: true, text: '2 jobs force synced' });
+  });
+
+  it('counts the failures', () => {
+    expect(forceSyncSummary({ 1: true, 2: false, 3: false })).toEqual({ ok: false, text: '1 job force synced, 2 jobs failed' });
+    expect(forceSyncSummary({ 1: false })).toEqual({ ok: false, text: '1 job failed' });
   });
 });

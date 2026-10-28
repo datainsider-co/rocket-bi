@@ -5,14 +5,15 @@ import { JobSortField } from '@/core/ingestion/JobService';
 import type { Sort } from '@/core/listing/Listing';
 import { columnSortOrder } from '../listing/listing.utils';
 import { JobStatusTag } from '../status/JobStatusTag';
-import { nextRunLabel, sourceNameLabel, syncModeLabel } from './jobs.utils';
+import { JobActionsCell, type JobRowActions } from './JobActionsCell';
+import { JOB_ACTION_COLUMN, nextRunLabel, sourceNameLabel, syncModeLabel } from './jobs.utils';
 import { LastSyncCell } from './LastSyncCell';
 
 /**
- * Columns of v1 `JobScreen` without the checkbox and Action ones (DI5b). A sortable column's `key` is its server sort
- * field; Source Name has none (v1 sent `source_name`, a 500). The sort cycle never clears: a click flips the order.
+ * Columns of v1 `JobScreen`; the checkbox column is the table's row selection. A sortable column's `key` is its server
+ * sort field; Source Name has none (v1 sent `source_name`, a 500). The sort cycle never clears: a click flips the order.
  */
-export function jobColumns(sort: Sort<JobSortField>): TableColumnsType<JobInfo> {
+export function jobColumns(sort: Sort<JobSortField>, actions: JobRowActions): TableColumnsType<JobInfo> {
   const sortable = (field: JobSortField): ColumnType<JobInfo> => ({
     key: field,
     sorter: true,
@@ -48,6 +49,12 @@ export function jobColumns(sort: Sort<JobSortField>): TableColumnsType<JobInfo> 
       ...sortable(JobSortField.CurrentSyncStatus),
       title: 'Current Status',
       render: (_, { job }) => <JobStatusTag status={job.currentSyncStatus} />
+    },
+    {
+      key: JOB_ACTION_COLUMN,
+      title: 'Action',
+      fixed: 'right',
+      render: (_, { job }) => <JobActionsCell job={job} actions={actions} />
     }
   ];
 }
