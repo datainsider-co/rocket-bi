@@ -644,6 +644,55 @@ Pivot Table (v1 `ChartType.PivotTable`, type `pivot_table`). Spec lấy từ v1 
 - **Chưa làm:** ghim cột đầu khi cuộn ngang (v1 `pinned`), menu chuột phải trên ô, Forecast / Summarize, Flatten
   Pivot Table (v1 ẩn khỏi picker), conditional formatting cho dòng total (`applyTo` values and totals).
 
+## Quyết định ở CB7c (2026-10-28)
+
+Stacked Column (`stack_column`), Stacked Bar (`stack_bar`), Circular Bar (`circular_bar`), Lollipop (`lollipop`). Spec
+lấy từ v1 và kiểm bằng backend local.
+
+- **Phát hiện:**
+  - Ba loại stacked dùng chung handler (v1 `StackingSeriesQuerySettingHandler`): vẫn là `series_chart_setting` như chart
+    series, thêm `breakdown` (zone `breakdown_optional`, tối đa 1, group by / date histogram). Dựng được khi có X và Y
+    như series. Lollipop dùng đúng handler series.
+  - Zone (v1 `STACKING_SERIES_CONFIGS`): zone của series cùng Breakdown. Stacked Bar và Circular Bar hiện Y-Axis trước
+    X-Axis như Bar (`BAR_STACKING_SERIES_CONFIGS`), key giữ nguyên.
+  - Viz options: `stacking_series_chart_setting` (stacked column / bar), `circular_bar_chart_setting` (column trên pane
+    polar, `inverted`, `pane.end_angle: 270`), cả hai có `stacking: normal`, marker bật, chỉ một trục Y, không có
+    `plot_options.area`. Lollipop là `highcharts_series_chart_setting` với `chart.type: lollipop`; v1 đang chạy bật
+    marker cho lollipop (source thì không). Default theo v1 đang chạy.
+  - **Response** vẫn là `series_one_response`. Có Legend thì mỗi series có `stack` là giá trị legend của nó. Có thêm
+    Breakdown thì series tên `<legend>.<breakdown>` (`Offline.C`), `stack` là giá trị legend. Không có Legend thì không
+    có `stack`.
+  - Renderer v1 (`StackingSeriesChart`): stack của series là nhóm chọn ở tab Stack (`stacking_group`, key `vizKey`),
+    nếu không thì `stack` của server, nếu không thì `unGroup`. Vì vậy chỉ có Legend thì các giá trị legend đứng cạnh
+    nhau (mỗi giá trị một stack); nhiều giá trị Y không có Legend thì chồng lên nhau; có Breakdown thì breakdown chồng
+    trong cột của từng giá trị legend. Đã xem trên v1.
+- **Fixture:** `stack_column` (region, Sum total_revenue, legend sales_channel, breakdown order_priority), `stack_bar`
+  (item_type, Sum total_revenue và Sum total_cost), `circular_bar` (region, Sum total_revenue, legend sales_channel),
+  `lollipop` (region, Sum total_profit) trong `builderRequests.fixture.json`: body v1 gửi khi Add. `queryResponses`
+  thêm `stacked_series_chart_setting`: response thật của stacked column có breakdown, giữ 4 series và 3 region. Các
+  widget (54–57) đã xoá khỏi dashboard 3. Builder v2 tạo cùng 4 chart qua Playwright gửi body giống hệt v1 (trừ id),
+  các widget đó (58–61) cũng đã xoá.
+- **Builder:** 4 type mới trong catalogue, handler `stacked`, default options. Picker bật cả 4 (loại disabled đầu tiên
+  vẫn là Area Range).
+- **Renderer** (`charts/series/stackedChartOptions.ts`): `ChartRenderer` vẽ hai viz class mới bằng chart series
+  (`buildSeriesChartOptions`), rồi thay series (stack như v1, type theo `typesByLabel` nếu có) và tooltip chung cho cả
+  category. Circular Bar đọc `chart.polar`, `pane` từ options. Lollipop đi qua renderer series như cũ.
+  `HighchartsChart` nạp `highcharts-more` (polar), `dumbbell` và `lollipop`.
+- **Tab Settings:**
+  - Lollipop dùng bộ tab series (Display có marker, không dash).
+  - Stacked (v1 `StackSeriesSetting`, `CircularBarSetting`): Title, Display (chỉ tên series, v1 `LegendNameTab`), Stack
+    (khi có từ 2 series: Value / Percentage ở `plot_options.series.stacking`, ô nhóm stack cho từng series), Legend, trục
+    X, trục Y, Data Color, Data Label, Background, Tooltip, Other. Stacked Bar đổi tên tab trục như Bar. Circular Bar có
+    gridline trục X, không có min / max trục Y (v1). Drilldown và zoom cho Stacked Column / Bar (v1
+    `VisualHeaderConfigs`).
+- **Khác v1:**
+  - Xoá trống ô nhóm stack thì series về stack của server. v1 lưu chuỗi rỗng, nên mọi series xoá trống bị chồng chung.
+  - Tooltip có tên category ở đầu; v1 chỉ liệt kê series.
+  - Data label của stacked có điều kiện min / max như chart series (v1 không truyền chart type cho tab nên ẩn, dù
+    renderer có đọc). Lọc theo điều kiện dùng `isInsideCondition` như CB6a, không theo logic lỗi của v1.
+  - Revert trục X của Circular Bar giữ gridline mặc định (0.5); v1 tắt.
+- **Chưa làm:** Stacked Line (v1 ẩn khỏi picker), dual axis cho stacked (v1 không có tab).
+
 ## Quyết định ở CB8 (2026-10-28)
 
 Action trên cây field: measure, calculated field, Update Table By Query, và Edit Measure trong menu "..."
