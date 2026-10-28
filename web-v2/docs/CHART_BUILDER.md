@@ -397,6 +397,27 @@ kiểm bằng backend local.
     `compare_responses.RawValues` thành `compareValue`.
 - **Trend line:** một query series thứ hai (`useKpiTrend`), giá trị theo thời gian (`Trend by` → `to_*_num`), sắp
   tăng dần, trong range. Vẽ bằng spline / areaspline trơn: không trục, legend, tooltip.
+  - Server OR các phần tử của `filters` (mỗi nhóm của zone Filters là một `and`; đã thử trên backend local). Vì vậy
+    điều kiện range được `and` vào từng nhóm, không thêm thành phần tử riêng. Bản đầu của CB7a thêm riêng, nên chart có
+    filter thì trend line bỏ qua range.
+- **Cột ngày trong cột nested** (`` `nested.inner` ``, hoặc bảng tên có dấu chấm như v1 `SchemaUtils.isNested`):
+  - Mọi điều kiện trên cột ngày có `scalar_function: get_array_element` (index 1): range, hai kỳ của
+    `compare_request`, filter request, filter của trend line.
+  - Trục và sort của trend line có `get_array_element` làm `inner_fn` của `to_*_num`, như v1 làm với item của zone
+    (`DiFunctionResolver`).
+  - Tab Date Range liệt kê cả cột ngày trong cột nested, nhãn `bảng.nested.cột`.
+  - Backend local: server nhận shape này (scalar lạ thì lỗi 400 khi parse), nhưng MySQL không có `get_array_element`
+    (500 `an implementation is missing`). Cột nested chỉ có trên ClickHouse, nên chưa chạy được trên stack local.
+- **Dropdown range cho người xem** (v1 `DateRangeDropdown`): trên layout không theme, khi bật date range, nằm giữa
+  header và giá trị.
+  - Nhãn là range dạng `MMM D, YYYY - MMM D, YYYY` (mode tương đối tính theo hôm nay), `All Time` khi không có range.
+  - Mở đúng popover của main date (`MainDateCalendarView`): 14 mode của v1 kể cả Custom và All Time, hai lịch,
+    Cancel / Apply.
+  - Lựa chọn chỉ nằm trong view của chart (`ChartView.dateRange`, cùng chỗ với drill / zoom / sort), không lưu, mất khi
+    reload, như v1. `viewedSetting` ghi `data_range.mode` / `date_range` lên setting đang xem (`withDateRange`), nên
+    giá trị, comparison, trend line và export đều đi qua `buildChartQuery` như cũ.
+  - Preview của builder chỉ hiện nhãn, không mở popover: range sửa ở tab Date Range.
+  - Đã kiểm trên dashboard: chọn Last Month thì `compare_request` và filter của trend line đổi sang `last_n_month`.
 - **Layout của KPI** theo v1:
   - Không theme: PercentageBar dưới giá trị (icon lên / xuống, % không dấu, giá trị so sánh; xanh `#4dcf36` / đỏ
     `#ea6b6b`), trend line xanh / đỏ phía dưới.
@@ -416,8 +437,12 @@ kiểm bằng backend local.
   - Layout có theme: v1 hiện giá trị so sánh chưa định dạng khi `display` là value; v2 định dạng như giá trị.
   - Bật trend line không reset màu, và không ghi `comparison.trend_by` thừa.
   - Default của tab không được ghi khi mở tab (v1 merge vào props mà không emit).
-- **Chưa làm:** dropdown đổi range cho người xem trên layout không theme (v1 `DateRangeDropdown`), cột ngày trong cột
-  nested (v1 thêm `get_array_element`).
+  - Dropdown của người xem: v1 sửa thẳng object setting của chart (`NumberQuerySetting.setDateRange`), nên lựa chọn
+    có thể lọt vào lần lưu sau và vào builder. v2 giữ nó riêng trong view.
+  - Dropdown luôn nằm trên giá trị. v1 đặt nó ở góc phải, dưới PercentageBar, khi có trend line.
+  - Cột nested: v1 chỉ thêm `get_array_element` cho điều kiện của range (`buildDateFilterCondition`), không cho range
+    custom của comparison, filter request và trend line; tab của v1 cũng không liệt kê được cột ngày trong cột nested.
+    v1 nhận ra cột nested theo tên bảng có dấu chấm, nên cột chọn từ cây field hiện tại không bao giờ được thêm.
 - **Backend local:** MySQL lỗi 500 (`No database selected`) với `between_and_including` trên cột datetime
   (`MySqlParser` sinh `toDateTime(...)` của ClickHouse). Range custom và comparison custom vì vậy chưa chạy được trên
   stack local; các mode tương đối chạy được.
