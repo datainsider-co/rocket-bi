@@ -1,9 +1,13 @@
-import { PageHeader } from '@/shared/layout/PageHeader';
-import { getWarehouseSection, WarehouseSection } from '../warehouse.utils';
+import { useNavigate } from 'react-router';
+import { DatabasesView } from './DatabasesView';
+import { schemaPathOf } from './databases.utils';
+import { useDatabaseListing } from './useDatabaseListing';
+import { useDeleteDatabase } from './useDeleteDatabase';
 
-const SECTION = getWarehouseSection(WarehouseSection.Databases);
-
-/** `/data-warehouse/databases/all` (v1 `DatabaseListing.vue`). The listing comes in DW4. */
+/** `/data-warehouse/databases/all` (v1 `DatabaseListing.vue`). */
 export function DatabasesPage() {
-  return <PageHeader icon={SECTION.icon} title={SECTION.title} />;
+  const listing = useDatabaseListing();
+  const onDelete = useDeleteDatabase();
+  const navigate = useNavigate();
+  return <DatabasesView listing={listing} actions={{ onDelete }} onOpen={entry => void navigate(schemaPathOf(entry.name))} />;
 }

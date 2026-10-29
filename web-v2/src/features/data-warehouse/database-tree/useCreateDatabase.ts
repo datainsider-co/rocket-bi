@@ -5,6 +5,7 @@ import { DatabaseService } from '@/core/schema/DatabaseService';
 import type { DatabaseInfo } from '@/core/schema/SchemaService';
 import { toErrorMessage } from '@/shared/http/errorMessage';
 import { schemaKeys } from '@/shared/schema/schemaQueries';
+import { warehouseKeys } from '../warehouseQueries';
 import { toDatabaseName } from './databaseTree.utils';
 
 export interface CreateDatabaseDialog {
@@ -26,6 +27,7 @@ export function useCreateDatabase(onCreated: (database: DatabaseInfo) => void): 
   const mutation = useMutation({
     mutationFn: (typed: string) => service.create(toDatabaseName(typed), typed.trim()),
     onSuccess: async database => {
+      void queryClient.invalidateQueries({ queryKey: warehouseKeys.databases });
       await queryClient.invalidateQueries({ queryKey: schemaKeys.databases });
       setOpen(false);
       onCreated(database);
