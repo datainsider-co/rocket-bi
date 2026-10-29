@@ -6,8 +6,7 @@ import {
   nullCounts,
   renameColumn,
   setColumnType,
-  tableMismatch,
-  toIdentifier
+  tableMismatch
 } from './csvColumns.utils';
 
 function column(name: string, type = 'string'): CsvColumn {
@@ -21,20 +20,6 @@ describe('columnTypeLabel', () => {
 
   it('shows another type as is', () => {
     expect(columnTypeLabel('datetime64')).toBe('datetime64');
-  });
-});
-
-describe('toIdentifier', () => {
-  it.each([
-    ['Đơn hàng 1', 'Don_hang_1'],
-    ['Mã số', 'Ma_so'],
-    ['  unit   price  ', 'unit_price'],
-    ['a--b__c', 'a_b_c'],
-    ['(x)', '_x_'],
-    ['plain_name', 'plain_name'],
-    ['', '']
-  ])('turns %j into %j as the server does', (name, identifier) => {
-    expect(toIdentifier(name)).toBe(identifier);
   });
 });
 

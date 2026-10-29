@@ -2,7 +2,8 @@ import { z } from 'zod';
 import type { CsvColumn } from '@/core/ingestion/CsvImport';
 import type { SchemaColumn, TableSchema } from '@/core/schema/SchemaService';
 import { requiredError } from '@/shared/form/fieldErrors';
-import { tableMismatch, toIdentifier } from './csvColumns.utils';
+import { toIdentifier } from '@/shared/schema/identifier.utils';
+import { tableMismatch } from './csvColumns.utils';
 
 export const csvDestinationSchema = z
   .object({

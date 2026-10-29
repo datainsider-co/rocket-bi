@@ -1,5 +1,6 @@
 import type { CsvColumn } from '@/core/ingestion/CsvImport';
 import type { SchemaColumn } from '@/core/schema/SchemaService';
+import { toIdentifier } from '@/shared/schema/identifier.utils';
 
 /** The types v1 offered (`COLUMN_DATA_TYPE`); the server may detect others (`datetime64`), shown by their name. */
 export const CSV_COLUMN_TYPES = [
@@ -14,22 +15,6 @@ export const CSV_COLUMN_TYPES = [
 
 export function columnTypeLabel(type: string): string {
   return CSV_COLUMN_TYPES.find(option => option.value === type)?.label ?? type;
-}
-
-/**
- * The name the server stores for a table or column (`ClickHouseUtils.normalizeString`): Vietnamese letters without
- * marks, every run of other characters as one `_`. Other accented letters lose their mark here but become `_` on the
- * server; the server's answer is what the import uses.
- */
-export function toIdentifier(name: string): string {
-  return name
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .trim()
-    .replace(/[^a-zA-Z0-9]+/g, '_')
-    .replace(/_+/g, '_');
 }
 
 export function renameColumn(columns: readonly CsvColumn[], index: number, name: string): CsvColumn[] {
