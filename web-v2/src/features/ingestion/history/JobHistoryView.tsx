@@ -1,7 +1,7 @@
 import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import { Button, Input, Result } from 'antd';
 import { getIngestionSection, IngestionSection } from '../ingestion.utils';
-import { IngestionPageHeader } from '../layout/IngestionPageHeader';
+import { PageHeader } from '@/shared/layout/PageHeader';
 import { HistoryEmptyState } from './HistoryEmptyState';
 import type { HistoryContent } from './jobHistory.utils';
 import { JobHistoryTable } from './JobHistoryTable';
@@ -24,8 +24,9 @@ interface JobHistoryViewProps {
 export function JobHistoryView({ searchText, onSearchChange, content, table, isFetching, onReload, onAddJob }: JobHistoryViewProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <IngestionPageHeader
-        section={SECTION}
+      <PageHeader
+        icon={SECTION.icon}
+        title={SECTION.title}
         actions={
           <>
             <Input

@@ -1,7 +1,7 @@
 import { Button, Input } from 'antd';
 import { DeleteOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { getIngestionSection, IngestionSection } from '../ingestion.utils';
-import { IngestionPageHeader } from '../layout/IngestionPageHeader';
+import { PageHeader } from '@/shared/layout/PageHeader';
 
 interface DataSourcesHeaderProps {
   isRefreshing: boolean;
@@ -18,10 +18,13 @@ interface DataSourcesHeaderProps {
  * v1 `DataSourceScreen` header: "Search data source", Delete for the checked rows, Refresh. Add Data Source was in
  * v1's sidebar; it sits with the other actions here.
  */
+const SECTION = getIngestionSection(IngestionSection.DataSources);
+
 export function DataSourcesHeader({ isRefreshing, selectedCount, onSearch, onRefresh, onDeleteSelected, onAdd }: DataSourcesHeaderProps) {
   return (
-    <IngestionPageHeader
-      section={getIngestionSection(IngestionSection.DataSources)}
+    <PageHeader
+      icon={SECTION.icon}
+      title={SECTION.title}
       actions={
         <>
           <Input
