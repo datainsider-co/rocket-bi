@@ -21,7 +21,7 @@ describe('SourceCatalogModal', () => {
   it('offers only the available types as buttons', () => {
     renderModal();
     expect(screen.getByRole('button', { name: 'MySQL' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'CSV' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'CSV' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'MongoDB' })).not.toBeInTheDocument();
   });
 

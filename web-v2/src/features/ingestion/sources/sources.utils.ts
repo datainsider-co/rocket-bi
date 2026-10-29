@@ -119,7 +119,8 @@ export type SourcesDialog =
   | { readonly kind: 'none' }
   | { readonly kind: 'catalog' }
   | { readonly kind: 'source'; readonly target: SourceFormTarget }
-  | { readonly kind: 'job'; readonly target: JobFormTarget };
+  | { readonly kind: 'job'; readonly target: JobFormTarget }
+  | { readonly kind: 'csv' };
 
 export const NO_DIALOG: SourcesDialog = { kind: 'none' };
 

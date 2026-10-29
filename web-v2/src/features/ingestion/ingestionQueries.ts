@@ -20,7 +20,10 @@ export const ingestionKeys = {
   databases: (sourceId: SourceId) => ['ingestion', 'source', sourceId, 'databases'] as const,
   tables: (sourceId: SourceId, databaseName: string) => ['ingestion', 'source', sourceId, 'tables', databaseName] as const,
   columns: (sourceId: SourceId, databaseName: string, tableName: string) =>
-    ['ingestion', 'source', sourceId, 'columns', databaseName, tableName] as const
+    ['ingestion', 'source', sourceId, 'columns', databaseName, tableName] as const,
+  /** A file isn't a key: its name, size and time stand for it, with how it is read and the column types picked. */
+  csvPreview: (file: Pick<File, 'name' | 'size' | 'lastModified'>, setting: object, types: readonly string[] | undefined) =>
+    ['ingestion', 'csv-preview', file.name, file.size, file.lastModified, setting, types ?? null] as const
 };
 
 /** Listings keep the previous page on screen while the next one loads. */

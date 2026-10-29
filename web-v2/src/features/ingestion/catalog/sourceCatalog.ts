@@ -5,8 +5,8 @@ import { JDBC_SOURCE_KINDS } from '../sourceKinds';
  * The source types the "Add Data Source" catalog lists, in v1's order (`ALL_DATASOURCE`). Google Analytics (Universal
  * Analytics, shut down by Google) and the SDK trackers v1 had commented out are left out.
  *
- * An entry is `available` when v2 has a form for it; `form` then says which one, so the caller (DI4b) can open it
- * without matching on `key`. The other types are listed as `coming-soon` and can't be picked.
+ * An entry is `available` when v2 has a form for it; `form` then says which one, so the caller can open it without
+ * matching on `key`. The other types are listed as `coming-soon` and can't be picked.
  */
 
 /** Which form an available entry opens: the JDBC source form for one `database_type`, or the CSV import wizard. */
@@ -76,8 +76,7 @@ export const SOURCE_CATALOG: readonly SourceCatalogEntry[] = [
   comingSoon('ga4', 'Google Analytics 4', 'ic_ga_4.png'),
   comingSoon('google_ads', 'Google Ads', 'ic_gg_ads.png'),
   comingSoon('google_search_console', 'Google Search Console', 'ic_google_search_console.png'),
-  // Picked from here once the CSV import wizard lands (DI8): `{ status: 'available', form: { kind: 'csv' } }`.
-  comingSoon('csv', 'CSV', 'ic_csv.png'),
+  { key: 'csv', title: 'CSV', iconUrl: `${ICON_DIR}/ic_csv.png`, status: 'available', form: { kind: 'csv' } },
   comingSoon('google_sheets', 'Google Sheets', 'ic_google_sheet.png'),
   comingSoon('shopify', 'Shopify', 'ic_shopify.png'),
   comingSoon('s3', 'S3', 'ic_s3.png'),

@@ -4,17 +4,25 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { AppProviders } from '@/app/AppProviders';
 import { createContainer } from '@/core/di/Container';
+import { CsvImportService } from '@/core/ingestion/CsvImportService';
 import { DataSourceService } from '@/core/ingestion/DataSourceService';
 import { JobHistoryService } from '@/core/ingestion/JobHistoryService';
 import { JobService } from '@/core/ingestion/JobService';
 import { SchemaService } from '@/core/schema/SchemaService';
-import { fakeDataSourceService, fakeJobHistoryService, fakeJobService, fakeSchemaService } from './testing';
+import {
+  fakeCsvImportService,
+  fakeDataSourceService,
+  fakeJobHistoryService,
+  fakeJobService,
+  fakeSchemaService
+} from './testing';
 
 interface IngestionServices {
   sources?: DataSourceService;
   jobs?: JobService;
   history?: JobHistoryService;
   schema?: SchemaService;
+  csv?: CsvImportService;
 }
 
 /**
@@ -26,12 +34,14 @@ export function renderIngestionPage(page: ReactElement, path: string, services: 
   const jobs = services.jobs ?? fakeJobService();
   const history = services.history ?? fakeJobHistoryService();
   const schema = services.schema ?? fakeSchemaService();
+  const csv = services.csv ?? fakeCsvImportService();
   const container = createContainer([
     di => {
       di.bindValue(DataSourceService, sources);
       di.bindValue(JobService, jobs);
       di.bindValue(JobHistoryService, history);
       di.bindValue(SchemaService, schema);
+      di.bindValue(CsvImportService, csv);
     }
   ]);
   const router = createMemoryRouter([{ path: '*', element: page }], { initialEntries: [path] });
@@ -41,7 +51,7 @@ export function renderIngestionPage(page: ReactElement, path: string, services: 
       <RouterProvider router={router} />
     </AppProviders>
   );
-  return { ...result, router, queryClient, sources, jobs, history, schema };
+  return { ...result, router, queryClient, sources, jobs, history, schema, csv };
 }
 
 /**

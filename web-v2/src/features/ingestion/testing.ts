@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import type { CsvImportService } from '@/core/ingestion/CsvImportService';
 import type { DataSourceService } from '@/core/ingestion/DataSourceService';
 import type { JobHistoryService } from '@/core/ingestion/JobHistoryService';
 import type { JobService } from '@/core/ingestion/JobService';
@@ -55,6 +56,16 @@ export function fakeSchemaService(overrides: Partial<SchemaService> = {}): Schem
     detectTableSchema: vi.fn<SchemaService['detectTableSchema']>(async () => {
       throw new Error('not used');
     }),
+    ...overrides
+  };
+}
+
+/** Test-only: a CSV import that detects no columns and inserts every chunk. Override what the test needs. */
+export function fakeCsvImportService(overrides: Partial<CsvImportService> = {}): CsvImportService {
+  return {
+    detect: vi.fn<CsvImportService['detect']>(async () => ({ columns: [], records: [] })),
+    createTable: vi.fn<CsvImportService['createTable']>(async table => table.name),
+    ingest: vi.fn<CsvImportService['ingest']>(async () => 0),
     ...overrides
   };
 }
