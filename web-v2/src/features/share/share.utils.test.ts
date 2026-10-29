@@ -1,7 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { Directory } from '@/core/directory/Directory';
 import { ShareLevel } from '@/core/share/shareLevel';
-import { ShareLinkKind, directoryShare, embedCode, levelOptions, linkSummary, shareLink, sharedSummary } from './share.utils';
+import { UserProfile } from '@/core/user/UserProfile';
+import {
+  databaseShare,
+  directoryShare,
+  embedCode,
+  levelOptions,
+  linkSummary,
+  peopleResourceOf,
+  sharedSummary,
+  shareLink,
+  ShareLinkKind
+} from './share.utils';
 
 describe('levelOptions', () => {
   it('lists v1 levels, highest first', () => {
@@ -101,5 +112,26 @@ describe('directoryShare', () => {
   it('falls back to owner_id when the owner is not sent', () => {
     const folder = new Directory({ id: 7, name: '123', owner_id: 'ann', directory_type: 'directory' });
     expect(directoryShare(folder).target.owner).toBe('ann');
+  });
+});
+
+describe('databaseShare', () => {
+  it('shares a database by name, with people only', () => {
+    const owner = new UserProfile({ username: 'root' });
+    expect(databaseShare({ name: 'dw0_probe', displayName: 'DW0 Probe', owner, creatorId: 'root' })).toEqual({
+      target: { type: 'database', id: 'dw0_probe', name: 'DW0 Probe', owner: 'root' },
+      options: {}
+    });
+  });
+
+  it('falls back to the creator id for the owner', () => {
+    expect(databaseShare({ name: 'sys', displayName: 'sys', owner: undefined, creatorId: '' }).target.owner).toBe('');
+  });
+});
+
+describe('peopleResourceOf', () => {
+  it('keeps the type and id of what is shared', () => {
+    expect(peopleResourceOf({ type: 'directory', id: 8, name: 'Sales', owner: 'root' })).toEqual({ type: 'directory', id: 8 });
+    expect(peopleResourceOf({ type: 'database', id: 'shop', name: 'shop', owner: '' })).toEqual({ type: 'database', id: 'shop' });
   });
 });

@@ -1,5 +1,4 @@
 import { ResourceAction } from '@/core/permission/ResourcePermissionService';
-import type { ResourceType } from '@/core/permission/ResourcePermissionService';
 
 /** What a user or a link may do, as the share dialog offers it (v1 `ActionType` edit / view_and_download / view / none). */
 export const ShareLevel = {
@@ -26,8 +25,11 @@ export const SHARE_LEVEL_ACTIONS: Readonly<Record<ShareLevel, readonly ResourceA
   [ShareLevel.None]: []
 };
 
-/** The action of a permission `{orgId}:{type}:{action}:{id}` when it is on this resource. */
-function actionOn(permission: string, type: ResourceType, id: number): string | undefined {
+/**
+ * The action of a permission `{orgId}:{type}:{action}:{id}` when it is on this resource. `type` is a `ResourceType`, or
+ * `database` with the database's name as id.
+ */
+function actionOn(permission: string, type: string, id: number | string): string | undefined {
   const [, permissionType, action, permissionId] = permission.split(':');
   return permissionType === type && permissionId === String(id) ? action : undefined;
 }
@@ -36,7 +38,7 @@ function actionOn(permission: string, type: ResourceType, id: number): string | 
  * The level the permissions give on one resource (v1 `PermissionProviders.getActionType`): edit wins, then view and
  * download, then view. The organization part is not compared: the server only sends the user's own organization.
  */
-export function shareLevelOf(permissions: readonly string[], type: ResourceType, id: number): ShareLevel {
+export function shareLevelOf(permissions: readonly string[], type: string, id: number | string): ShareLevel {
   const actions = new Set(permissions.map(permission => actionOn(permission, type, id)));
   if (actions.has(ResourceAction.Edit)) return ShareLevel.Edit;
   if (actions.has(ResourceAction.View) && actions.has(ResourceAction.Download)) return ShareLevel.ViewAndDownload;

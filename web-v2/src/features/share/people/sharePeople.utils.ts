@@ -1,8 +1,8 @@
 import type { ResourceAction } from '@/core/permission/ResourcePermissionService';
 import type { ResourceSharing } from '@/core/share/ResourceSharing';
-import type { ShareResource } from '@/core/share/ShareService';
 import { SHARE_LEVEL_ACTIONS, ShareLevel, shareLevelOf } from '@/core/share/shareLevel';
 import type { UserProfile } from '@/core/user/UserProfile';
+import type { PeopleResource } from '../share.utils';
 
 /**
  * The people edits waiting for Apply (v1 `ShareStore` createdUsers / editedUsers / revokedUsers). Only what the
@@ -46,7 +46,7 @@ export interface PersonRow {
 }
 
 /** Added users first (v1 put them on top), then the shared ones, each with the level picked or the server's. */
-export function personRows(sharing: ResourceSharing | undefined, draft: PeopleDraft, resource: ShareResource): PersonRow[] {
+export function personRows(sharing: ResourceSharing | undefined, draft: PeopleDraft, resource: PeopleResource): PersonRow[] {
   const shared = sharing?.usersSharing ?? [];
   const sharedNames = new Set(shared.map(item => item.user.username));
   const added = draft.added
@@ -78,7 +78,7 @@ export interface PeopleChanges {
  * What changed against the server's sharing. Unlike v1, a user set back to their current level sends nothing, and an
  * added user set to Remove access is simply not shared.
  */
-export function peopleChanges(sharing: ResourceSharing | undefined, draft: PeopleDraft, resource: ShareResource): PeopleChanges {
+export function peopleChanges(sharing: ResourceSharing | undefined, draft: PeopleDraft, resource: PeopleResource): PeopleChanges {
   const changes: PeopleChanges = { create: {}, edit: {}, revoke: [] };
   for (const row of personRows(sharing, draft, resource)) {
     const { username } = row.user;

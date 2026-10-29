@@ -1,16 +1,15 @@
 import { useReducer } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useDi } from '@/app/di/DiContext';
-import type { ShareResource } from '@/core/share/ShareService';
-import { ShareService } from '@/core/share/ShareService';
 import type { ShareLevel } from '@/core/share/shareLevel';
 import type { UserProfile } from '@/core/user/UserProfile';
+import type { PeopleResource } from '../share.utils';
 import { sharingQueryOptions } from '../shareQueries';
 import { EMPTY_PEOPLE_DRAFT, listedUsernames, peopleChanges, peopleDraftReducer, personRows } from './sharePeople.utils';
+import { useSharePeopleApi } from './useSharePeopleApi';
 
 /** Who the resource is shared with, and the edits waiting for Apply. */
-export function useSharePeople(resource: ShareResource) {
-  const sharing = useQuery(sharingQueryOptions(useDi(ShareService), resource));
+export function useSharePeople(resource: PeopleResource) {
+  const sharing = useQuery(sharingQueryOptions(useSharePeopleApi(), resource));
   const [draft, dispatch] = useReducer(peopleDraftReducer, EMPTY_PEOPLE_DRAFT);
   const rows = personRows(sharing.data, draft, resource);
   const listed = listedUsernames(sharing.data, draft);

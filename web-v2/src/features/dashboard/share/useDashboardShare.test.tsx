@@ -7,6 +7,7 @@ import { AuthenticationService } from '@/core/auth/AuthenticationService';
 import { LoginResponse } from '@/core/auth/LoginResponse';
 import { DashboardService } from '@/core/dashboard/DashboardService';
 import { createContainer } from '@/core/di/Container';
+import { DatabaseShareService } from '@/core/schema/DatabaseShareService';
 import { Directory } from '@/core/directory/Directory';
 import { DirectoryService } from '@/core/directory/DirectoryService';
 import { ShareService } from '@/core/share/ShareService';
@@ -14,7 +15,7 @@ import { UserService } from '@/core/user/UserService';
 import { fakeAuthenticationService } from '@/features/auth/testing';
 import { fakeUserService } from '@/features/dashboard/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
-import { fakeShareService } from '@/features/share/testing';
+import { fakeDatabaseShareService, fakeShareService } from '@/features/share/testing';
 import { useDashboardShare } from './useDashboardShare';
 
 function Harness() {
@@ -43,6 +44,7 @@ describe('useDashboardShare', () => {
         di.bindValue(DashboardService, fakeDashboardService());
         di.bindValue(DirectoryService, directories);
         di.bindValue(ShareService, share);
+        di.bindValue(DatabaseShareService, fakeDatabaseShareService());
         di.bindValue(UserService, fakeUserService());
       }
     ]);

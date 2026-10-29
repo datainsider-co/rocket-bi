@@ -15,6 +15,7 @@ import { PermissionService } from '@/core/permission/PermissionService';
 import { ResourcePermissionService } from '@/core/permission/ResourcePermissionService';
 import { QueryService } from '@/core/query/QueryService';
 import { DatabaseService } from '@/core/schema/DatabaseService';
+import { DatabaseShareService } from '@/core/schema/DatabaseShareService';
 import { SchemaService } from '@/core/schema/SchemaService';
 import { ShareService } from '@/core/share/ShareService';
 import { UserService } from '@/core/user/UserService';
@@ -22,7 +23,7 @@ import { fakeQueryService, fakeResourcePermissionService, fakeSchemaService, fak
 import { fakeConnectionService, fakePermissionService } from '@/features/data-source/testing';
 import { fakeDatabaseService } from '@/features/data-warehouse/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
-import { fakeShareService } from '@/features/share/testing';
+import { fakeDatabaseShareService, fakeShareService } from '@/features/share/testing';
 
 type Service = AuthenticationService;
 
@@ -58,6 +59,7 @@ export function renderAppAt(path: string, service: Service, modules: readonly Di
       di.bindValue(UserService, fakeUserService());
       di.bindValue(ShareService, fakeShareService());
       di.bindValue(DatabaseService, fakeDatabaseService());
+      di.bindValue(DatabaseShareService, fakeDatabaseShareService());
     },
     ...modules
   ]);

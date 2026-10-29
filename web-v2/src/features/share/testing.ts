@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 import { PermissionToken, ResourceSharing } from '@/core/share/ResourceSharing';
+import type { DatabaseShareService } from '@/core/schema/DatabaseShareService';
 import type { ShareService } from '@/core/share/ShareService';
 
 type Service = ShareService;
@@ -19,6 +20,19 @@ export function fakeShareService(overrides: Partial<Service> = {}): Service {
     ),
     updateLink: vi.fn<Service['updateLink']>(async () => {}),
     revokeLink: vi.fn<Service['revokeLink']>(async () => {}),
+    ...overrides
+  };
+}
+
+/** Test-only: a database owned by root, shared with nobody, whose changes all succeed. */
+export function fakeDatabaseShareService(overrides: Partial<DatabaseShareService> = {}): DatabaseShareService {
+  return {
+    getSharing: vi.fn<DatabaseShareService['getSharing']>(
+      async () => new ResourceSharing({ owner: { username: 'root', full_name: 'root', email: 'hello@gmail.com' }, users_sharing: [] })
+    ),
+    shareWithUsers: vi.fn<DatabaseShareService['shareWithUsers']>(async () => {}),
+    editShares: vi.fn<DatabaseShareService['editShares']>(async () => {}),
+    revokeShares: vi.fn<DatabaseShareService['revokeShares']>(async () => {}),
     ...overrides
   };
 }

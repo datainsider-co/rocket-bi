@@ -20,6 +20,11 @@ describe('shareLevelOf', () => {
   it('ignores malformed permissions', () => {
     expect(shareLevelOf(['view', 'directory:view', ''], 'directory', 7)).toBe(ShareLevel.None);
   });
+
+  it('reads a database share, named by the database (DW0)', () => {
+    const permissions = ['0:database:view:dw0_probe', '0:database:download:dw0_probe', '0:database:edit:other'];
+    expect(shareLevelOf(permissions, 'database', 'dw0_probe')).toBe(ShareLevel.ViewAndDownload);
+  });
 });
 
 describe('SHARE_LEVEL_ACTIONS', () => {
