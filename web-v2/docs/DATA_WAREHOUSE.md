@@ -404,6 +404,36 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
 - Đã kiểm bằng Playwright trên `pnpm dev`: share `dw0_probe` cho user Viewer (View), mở lại thấy user và mức quyền, Remove
   access rồi Apply; `share/list` xác nhận không còn ai. Không lỗi console.
 
+## Quyết định ở DW6 (2026-10-30)
+
+- **URL** như v1: `?database=&table=`, ghi bằng `replace`. Không có `database` thì mở database đầu tiên (chỉ hiển thị, không
+  ghi lại URL); `table` mà không có `database` bị bỏ qua. Chọn trên cây hoặc trong danh sách bảng đều đổi URL.
+- **Xem database** (`schema/database-view`): danh sách bảng từ query schema của cây (không tải lại), search bảng, menu
+  Action: Share Database (DW5) và Delete Database (`useDeleteDatabase` của DW4, rồi về database đầu tiên). Cột **Name,
+  Type (Table / View), Columns, Action** thay cho Owner và Created Time của v1: server không trả owner hay thời gian tạo
+  của bảng (v1 hiện "Unknown" và thời gian của database cho mọi bảng). Click dòng mở bảng. Nút "New table" làm ở DW7.
+- **Xem bảng** (`schema/table-view`): breadcrumb "database › bảng" (database click được), menu Action: Query table,
+  Update schema by query (chỉ view / materialized), Delete table. Bảng đọc qua `TableService.getTable` (có nullable,
+  description, default value), poll 30s khi `table_status` là `Processing` và hiện thông báo. Nút Edit làm ở DW7.
+- **Tab** chỉ có Table Schema và Table Data; Measure Schema, Calculated Field (DW7) và RLS (DW8) thêm khi làm tới.
+  - Table Schema: Column (n), Display Name, Nullable, Type (nhãn của v1), Description, Default Value; cột theo thứ tự của
+    bảng (v1 xếp theo tên); search theo tên hoặc tên hiển thị. Số cột chỉ đếm cột thật (v1 đếm cả cột materialized ẩn).
+  - Table Data: `group_table_chart_setting` một `select` mỗi cột thật (`tablePreviewRequest`), phân trang server 20 / 50 /
+    100, sort một cột trên server khi click header, giữ trang cũ trên màn hình khi tải trang mới. Không gửi gì của
+    dashboard (v1 gửi kèm filter của dashboard mở gần nhất qua id `-2`). Giá trị hiện như server trả (v1 format số thành
+    `1.00`).
+- **Delete table** từ menu Action, nút trên dòng và menu của bảng trên cây: câu xác nhận của v1, `DELETE` rồi làm mới
+  database và về view database. Cache của bảng (và của database khi xoá database) chỉ được đánh dấu cũ (`refetchType:
+  'none'`), không gỡ: gỡ khi view còn mở làm nó tải lại một bảng đã mất (404).
+- **Query table / Update schema by query** mở `/data-warehouse/query-editor?database=&table=` và `?mode=update&...` như
+  v1; Query Editor đọc các tham số này ở DW10.
+- **Test**: `renderAppAt` bind thêm fake `TableService`, `SchemaEditService`. `asyncUtilTimeout` của Testing Library nâng
+  lên 3s trong `src/test/setup.ts`: test đầu tiên của mỗi file chạy qua route thật phải tải chunk lazy, quá 1s khi cả bộ
+  test chạy song song (lý do `DirectoryListingPage.test` thỉnh thoảng hỏng từ DW1).
+- Đã kiểm bằng Playwright trên `pnpm dev`: database đầu tiên mặc định, mở bảng, search cột, Table Data sort giảm dần
+  theo Qty, Query table, menu của view có Update schema by query, xoá thật một view và một database tạo tạm. Không lỗi
+  console.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -414,7 +444,7 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
 | DW3 | **Cây database dùng chung.** Short info + tải khi mở, search, refresh, tạo database, slot action cho bảng / cột, kéo bảng, Storybook | Xong (xem DW3) |
 | DW4 | **Databases.** Listing (search, sort, phân trang ở client, Owner trống khi server không trả), click dòng → Schema, Delete (xoá hẳn, hỏi xác nhận), trạng thái rỗng / lỗi | Xong (xem DW4) |
 | DW5 | **Share database.** `ShareModal` nhận adapter, không có link / password, chỉ gửi thay đổi thật như M7b | Xong (xem DW5) |
-| DW6 | **Schema đọc.** Chọn database / bảng theo URL, view database (danh sách bảng), tab Table Schema (search cột), Table Data (preview phân trang, sort), poll bảng `Processing`, Action menu (Query table, Update schema by query → Query Editor, Delete table, Delete database) | Chưa làm |
+| DW6 | **Schema đọc.** Chọn database / bảng theo URL, view database (danh sách bảng), tab Table Schema (search cột), Table Data (preview phân trang, sort), poll bảng `Processing`, Action menu (Query table, Update schema by query → Query Editor, Delete table, Delete database) | Xong (xem DW6) |
 | DW7 | **Schema sửa.** Create table (modal tên + form cột), Edit schema (nullable, type có xác nhận, description, default value theo kiểu, thêm cột), Measure và Calculated Field (danh sách + `FormulaFieldDialog` của CB8), menu bảng / cột trên cây | Chưa làm |
 | DW8 | **RLS.** Danh sách policy, form user / user attribute / operator, View All / View Nothing / Custom (trình sửa condition của CB4), Save / Cancel, preview làm mới sau khi lưu | Chưa làm |
 | DW9 | **Relationship global.** Tách `shared/relationship`, adapter cho dashboard (không đổi hành vi M7c) và global; thả bảng từ cây, xoá bảng, Save / Discard, hỏi khi rời trang | Chưa làm |
