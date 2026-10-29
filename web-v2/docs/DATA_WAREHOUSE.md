@@ -372,6 +372,22 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
 - Schema, Query Editor và Relationship hiện có header, cây và khung trống bên phải. Đã kiểm bằng Playwright trên
   `pnpm dev` (1440px và 375px): mở database, mở bảng, tìm, tạo database, không lỗi console.
 
+## Quyết định ở DW4 (2026-10-30)
+
+- **Listing ở client** (`features/data-warehouse/databases`): một request `databases/my_data` (query `warehouseKeys.databases`),
+  search khi gõ (tên hiển thị hoặc tên, không phân biệt hoa thường; v1 chỉ tên hiển thị), sort và phân trang bằng antd
+  `Table` trên trình duyệt (20 / 50 / 100 dòng, "Total: N"). Mặc định sort theo tên như v1; v2 cho sort cả Owner và
+  Created Time (v1 tắt sort mọi cột).
+- **Cột** như v1: Name (icon database + tên hiển thị), Owner (avatar + tên, từ `md`; không có owner thì creator id, rồi
+  "Unknown" như v1), Created Time (`MMM DD, YYYY hh:mm A`, từ `sm`), Action. Nút Share của v1 làm ở DW5.
+- **Click dòng** mở `/data-warehouse/schema?database=<name>` như v1.
+- **Delete**: câu xác nhận của v1 ("permanently delete"), `DELETE databases/{name}`, toast khi xong; lỗi của server hiện
+  thành toast (viewer bị 403). Listing và cây database (`schemaKeys.databases`, query của database đó bị bỏ) chỉ làm mới
+  sau khi server xoá xong, không xoá trước như v1. Tạo database từ cây cũng làm mới listing.
+- Trạng thái rỗng "Your database is empty" như v1, "No databases found" khi search không ra, lỗi có Retry.
+- Đã kiểm bằng Playwright trên `pnpm dev` (1440px và 375px): listing khớp v1, xoá thật một database tạo tạm, click dòng
+  sang Schema, không lỗi console.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -380,7 +396,7 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
 | DW1 | **Core.** `DatabaseService`, `TableService`, `DatabaseShareService`, `RlsPolicyService`, mở rộng `TableSchema` / cột (giữ `json` gốc), raw query request và parameters thuần. Test round-trip với fixture DW0 | Xong (xem DW1) |
 | DW2 | **Khung.** Routes `/data-warehouse/*` ở path của v1 (kể cả redirect `/data-management/*`), layout có header icon + tên, `/data-warehouse/databases/trash` chuyển về `all` (không có trash, DW0), page lazy load | Xong (xem DW2) |
 | DW3 | **Cây database dùng chung.** Short info + tải khi mở, search, refresh, tạo database, slot action cho bảng / cột, kéo bảng, Storybook | Xong (xem DW3) |
-| DW4 | **Databases.** Listing (search, sort, phân trang ở client, Owner trống khi server không trả), click dòng → Schema, Delete (xoá hẳn, hỏi xác nhận), trạng thái rỗng / lỗi | Chưa làm |
+| DW4 | **Databases.** Listing (search, sort, phân trang ở client, Owner trống khi server không trả), click dòng → Schema, Delete (xoá hẳn, hỏi xác nhận), trạng thái rỗng / lỗi | Xong (xem DW4) |
 | DW5 | **Share database.** `ShareModal` nhận adapter, không có link / password, chỉ gửi thay đổi thật như M7b | Chưa làm |
 | DW6 | **Schema đọc.** Chọn database / bảng theo URL, view database (danh sách bảng), tab Table Schema (search cột), Table Data (preview phân trang, sort), poll bảng `Processing`, Action menu (Query table, Update schema by query → Query Editor, Delete table, Delete database) | Chưa làm |
 | DW7 | **Schema sửa.** Create table (modal tên + form cột), Edit schema (nullable, type có xác nhận, description, default value theo kiểu, thêm cột), Measure và Calculated Field (danh sách + `FormulaFieldDialog` của CB8), menu bảng / cột trên cây | Chưa làm |
