@@ -7,8 +7,10 @@ import { IngestionModule } from '@/core/ingestion/IngestionModule';
 import { PermissionModule } from '@/core/permission/PermissionModule';
 import { QueryModule } from '@/core/query/QueryService';
 import { RelationshipModule } from '@/core/relationship/RelationshipModule';
+import { RlsModule } from '@/core/rls/RlsPolicyService';
 import { SchemaEditModule } from '@/core/schema/SchemaEditService';
 import { SchemaModule } from '@/core/schema/SchemaService';
+import { WarehouseModule } from '@/core/schema/WarehouseModule';
 import { ShareModule } from '@/core/share/ShareModule';
 import { UserModule } from '@/core/user/UserService';
 import { HttpModule } from './HttpModule';
@@ -24,6 +26,8 @@ export const appModules: readonly DiModule[] = [
   QueryModule,
   SchemaModule,
   SchemaEditModule,
+  WarehouseModule,
+  RlsModule,
   RelationshipModule,
   UserModule,
   ShareModule,
