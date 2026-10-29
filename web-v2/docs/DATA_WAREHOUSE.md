@@ -341,6 +341,37 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
 - Các trang hiện chỉ có header. Đã kiểm bằng Playwright trên `pnpm dev`: redirect, menu Data Warehouse sáng đúng mục,
   không lỗi console.
 
+## Quyết định ở DW3 (2026-10-30)
+
+- **Một cây cho ba trang** (`features/data-warehouse/database-tree/DatabaseTree`), nhận hai prop: `selection`
+  (`dbName`, `tableName` đang xem, dòng được tô) và `handlers` (`onSelectDatabase`, `onSelectTable`, `onSelectColumn`,
+  menu bảng / cột qua `tableActionsOf` + `onTableAction`, `columnActionsOf` + `onColumnAction`, `draggableTables`). Mỗi
+  trang chỉ truyền thứ nó cần: Schema chọn database / bảng và có menu, Query Editor chọn cột để chèn, Relationship kéo
+  bảng. Thay `Provide/Inject` và store toàn cục của v1.
+- **Dữ liệu** qua `schemaQueries` có sẵn của ChartBuilder (`GET databases`, `GET databases/{name}`), không thêm cache
+  riêng. Database chỉ tải khi mở và giữ trong danh sách đã tải, nên tìm kiếm vẫn thấy bảng của database đã đóng (v1 chỉ
+  tìm trong database đã tải). Database đang tải có spinner riêng, lỗi hiện ngay dưới database đó. Refresh làm mới mọi
+  query schema (`schemaKeys.all`).
+- **Tìm kiếm** như v1: nút kính lúp mở ô tìm, chờ 300 ms; database khớp tên thì hiện đủ bảng, không thì hiện database có
+  bảng khớp và tự mở nó. Đóng ô tìm thì xoá từ khoá.
+- **Bảng**: mũi tên mở cột; tên bảng gọi `onSelectTable` nếu trang có, không thì cũng mở cột. Cột theo thứ tự cột thường,
+  calculated, measure (hai loại sau có nhãn), icon theo kiểu. Kéo bảng dùng HTML drag and drop với type riêng
+  `application/x-rocketbi-table` (`tableDrag.ts`), để DW9 thả lên React Flow.
+- **Tạo database** (nút +): tên gõ vào được chuẩn hoá như v1 (chữ thường, bỏ dấu tiếng Việt, `_`) và hiện trước "Will be
+  created as `don_hang`"; không cho tên rỗng sau chuẩn hoá, bắt đầu bằng số, hoặc trùng. Tạo xong làm mới danh sách và
+  gọi `onSelectDatabase`. Đã thử tạo thật trên stack local rồi xoá.
+- **Khung chia đôi** (`layout/WarehouseSplitLayout`): antd `Splitter`, cây rộng 340px, kéo được từ 220px tới 50%, gập
+  được (thay "◀▶" của v1). Dưới 768px cây nằm trên, cao tối đa 40% màn hình. Đổi qua lại mốc 768px thì cây mount lại và
+  mất trạng thái mở / tìm.
+- **Nút trong cây** kế thừa `font-family` / `font-size` của trang: Tailwind chạy không có preflight nên `<button>` dùng
+  font mặc định của trình duyệt (13px). Cây field của ChartBuilder cũng bị vậy, chưa sửa.
+- **Chuyển lên `shared/`** vì giờ có feature thứ hai cần: `toIdentifier` (`shared/schema/identifier.utils`, từ CSV),
+  `useDebouncedValue` (`shared/hooks`, từ Share), `useMediaQuery` (`shared/hooks`, phần chung của `useIsMobile` của
+  dashboard), `toErrorMessage` (`shared/http/errorMessage`, hai bản giống hệt ở Ingestion và Data Source setup),
+  `ActionMenuView` cùng `ActionItem` (`shared/menu`, từ cây field của ChartBuilder).
+- Schema, Query Editor và Relationship hiện có header, cây và khung trống bên phải. Đã kiểm bằng Playwright trên
+  `pnpm dev` (1440px và 375px): mở database, mở bảng, tìm, tạo database, không lỗi console.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -348,7 +379,7 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
 | DW0 | **Spike và payload thật** trên docker local (warehouse MySQL): `databases/my_data`, `trash`, `remove` / `restore` có chạy không; tạo database, tạo bảng, PUT schema (đổi type, thêm cột, default value), `from_query` view và materialized; share database (ba endpoint); `policies/list`, `PUT policies` với user attribute và condition; `chart/query` với `raw_query_setting` + parameters (text, number, date, list) và `limit`; tạo analysis bằng v1 rồi lưu JSON; `relationships/global`. Có cần `DI-SERVICE-KEY` / `admin_secret_key` không. Lưu fixture | Xong (không có trash, RLS không chạy trên MySQL, xem DW0) |
 | DW1 | **Core.** `DatabaseService`, `TableService`, `DatabaseShareService`, `RlsPolicyService`, mở rộng `TableSchema` / cột (giữ `json` gốc), raw query request và parameters thuần. Test round-trip với fixture DW0 | Xong (xem DW1) |
 | DW2 | **Khung.** Routes `/data-warehouse/*` ở path của v1 (kể cả redirect `/data-management/*`), layout có header icon + tên, `/data-warehouse/databases/trash` chuyển về `all` (không có trash, DW0), page lazy load | Xong (xem DW2) |
-| DW3 | **Cây database dùng chung.** Short info + tải khi mở, search, refresh, tạo database, slot action cho bảng / cột, kéo bảng, Storybook | Chưa làm |
+| DW3 | **Cây database dùng chung.** Short info + tải khi mở, search, refresh, tạo database, slot action cho bảng / cột, kéo bảng, Storybook | Xong (xem DW3) |
 | DW4 | **Databases.** Listing (search, sort, phân trang ở client, Owner trống khi server không trả), click dòng → Schema, Delete (xoá hẳn, hỏi xác nhận), trạng thái rỗng / lỗi | Chưa làm |
 | DW5 | **Share database.** `ShareModal` nhận adapter, không có link / password, chỉ gửi thay đổi thật như M7b | Chưa làm |
 | DW6 | **Schema đọc.** Chọn database / bảng theo URL, view database (danh sách bảng), tab Table Schema (search cột), Table Data (preview phân trang, sort), poll bảng `Processing`, Action menu (Query table, Update schema by query → Query Editor, Delete table, Delete database) | Chưa làm |
