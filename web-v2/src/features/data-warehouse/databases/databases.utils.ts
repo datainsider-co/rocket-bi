@@ -35,6 +35,6 @@ export function schemaPathOf(dbName: string): string {
 }
 
 /** v1's confirm. The server has no trash (`DATA_WAREHOUSE.md`, DW0), so the delete is permanent. */
-export function deleteDatabaseText(entry: DatabaseEntry): string {
+export function deleteDatabaseText(entry: Pick<DatabaseEntry, 'displayName'>): string {
   return `Are you sure you want to permanently delete database '${entry.displayName}'?`;
 }

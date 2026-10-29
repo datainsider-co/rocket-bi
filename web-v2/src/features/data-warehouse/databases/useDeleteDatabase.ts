@@ -8,28 +8,33 @@ import { schemaKeys } from '@/shared/schema/schemaQueries';
 import { warehouseKeys } from '../warehouseQueries';
 import { deleteDatabaseText } from './databases.utils';
 
+/** What a delete needs of a database: the listing's rows and the Schema page both have it. */
+export type DeletableDatabase = Pick<DatabaseEntry, 'name' | 'displayName'>;
+
 /**
  * A row's Delete: v1's confirm, then `DELETE databases/{name}`. The listing and the database tree reload once the
  * server is done; v1 dropped the database from its store before, and kept it gone when the delete failed.
  */
-export function useDeleteDatabase(): (entry: DatabaseEntry) => void {
+export function useDeleteDatabase(onDeleted?: (entry: DeletableDatabase) => void): (entry: DeletableDatabase) => void {
   const service = useDi(DatabaseService);
   const queryClient = useQueryClient();
   const { modal, message } = App.useApp();
 
   const { mutateAsync } = useMutation({
-    mutationFn: (entry: DatabaseEntry) => service.delete(entry.name),
+    mutationFn: (entry: DeletableDatabase) => service.delete(entry.name),
     onSuccess: (_, entry) => {
-      queryClient.removeQueries({ queryKey: schemaKeys.database(entry.name) });
+      // Stale, not refetched: the tree and the Schema page may still be showing it.
+      void queryClient.invalidateQueries({ queryKey: schemaKeys.database(entry.name), refetchType: 'none' });
       void queryClient.invalidateQueries({ queryKey: warehouseKeys.databases });
       void queryClient.invalidateQueries({ queryKey: schemaKeys.databases });
       void message.success(`Database ${entry.displayName} deleted`);
+      onDeleted?.(entry);
     },
     onError: error => void message.error(toErrorMessage(error))
   });
 
   return useCallback(
-    (entry: DatabaseEntry) => {
+    (entry: DeletableDatabase) => {
       void modal.confirm({
         title: 'Delete database',
         content: deleteDatabaseText(entry),
