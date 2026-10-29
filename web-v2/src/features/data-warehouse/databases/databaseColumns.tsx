@@ -1,4 +1,4 @@
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, ShareAltOutlined } from '@ant-design/icons';
 import { Button, Tooltip, Typography } from 'antd';
 import type { TableColumnsType } from 'antd';
 import type { DatabaseEntry } from '@/core/schema/DatabaseService';
@@ -6,6 +6,7 @@ import { UserAvatar } from '@/shared/user/UserAvatar';
 import { compareDatabases, formatCreatedTime, ownerName } from './databases.utils';
 
 export interface DatabaseRowActions {
+  readonly onShare: (entry: DatabaseEntry) => void;
   readonly onDelete: (entry: DatabaseEntry) => void;
 }
 
@@ -55,22 +56,36 @@ export function databaseColumns(actions: DatabaseRowActions): TableColumnsType<D
     {
       key: 'action',
       title: 'Action',
-      width: 90,
+      width: 110,
       render: (_, entry) => (
-        <Tooltip title="Delete">
-          <Button
-            type="text"
-            size="small"
-            danger
-            icon={<DeleteOutlined />}
-            aria-label={`Delete ${entry.displayName}`}
-            onClick={event => {
-              // The row opens the database; the button must not.
-              event.stopPropagation();
-              actions.onDelete(entry);
-            }}
-          />
-        </Tooltip>
+        <span className="flex items-center gap-1">
+          <Tooltip title="Share">
+            <Button
+              type="text"
+              size="small"
+              icon={<ShareAltOutlined />}
+              aria-label={`Share ${entry.displayName}`}
+              onClick={event => {
+                // The row opens the database; its buttons must not.
+                event.stopPropagation();
+                actions.onShare(entry);
+              }}
+            />
+          </Tooltip>
+          <Tooltip title="Delete">
+            <Button
+              type="text"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              aria-label={`Delete ${entry.displayName}`}
+              onClick={event => {
+                event.stopPropagation();
+                actions.onDelete(entry);
+              }}
+            />
+          </Tooltip>
+        </span>
       )
     }
   ];

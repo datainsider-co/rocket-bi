@@ -2,10 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DatabaseService, databaseEntryFromJson } from '@/core/schema/DatabaseService';
+import { DatabaseShareService } from '@/core/schema/DatabaseShareService';
 import fixture from '@/core/schema/warehouse.fixture.json';
 import { clearSession, saveSession } from '@/core/session/session';
+import { ResourceSharing } from '@/core/share/ResourceSharing';
+import { UserProfile } from '@/core/user/UserProfile';
+import { UserService } from '@/core/user/UserService';
 import { ApiError } from '@/shared/http/ApiError';
 import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing';
+import { fakeUserService } from '@/features/dashboard/testing';
+import { fakeDatabaseShareService } from '@/features/share/testing';
 import { fakeDatabaseService } from '../testing';
 
 const entries = [...fixture.myData.response.data, fixture.multiGets.response[0]].map(databaseEntryFromJson);
@@ -97,5 +103,38 @@ describe('DatabasesPage', () => {
     await user.click(await screen.findByRole('button', { name: 'Retry' }));
 
     expect(await screen.findByRole('table')).toBeInTheDocument();
+  });
+
+  it('shares a database with people only, through its own endpoints', async () => {
+    const sharing = fakeDatabaseShareService({
+      getSharing: vi.fn<DatabaseShareService['getSharing']>(async () => new ResourceSharing(fixture.shareListAfterCreate.response))
+    });
+    const ann = { username: 'ann', full_name: 'Ann Lee', email: 'ann@example.com' };
+    const users = fakeUserService({
+      suggest: vi.fn<UserService['suggest']>(async () => ({ total: 1, users: [{ profile: new UserProfile(ann), json: ann }] }))
+    });
+    renderAppAt('/data-warehouse/databases/all', fakeAuthenticationService(), [
+      di => {
+        di.bindValue(DatabaseService, fakeDatabaseService({ listMyData: vi.fn<DatabaseService['listMyData']>(async () => entries) }));
+        di.bindValue(DatabaseShareService, sharing);
+        di.bindValue(UserService, users);
+      }
+    ]);
+    const user = userEvent.setup();
+
+    await user.click(await screen.findByRole('button', { name: 'Share dw0_probe' }));
+
+    const people = await screen.findByRole('list', { name: 'People with access' });
+    expect(within(people).getByText('DW0 Viewer')).toBeInTheDocument();
+    expect(sharing.getSharing).toHaveBeenCalledWith('dw0_probe');
+    expect(screen.queryByRole('button', { name: 'Get link' })).not.toBeInTheDocument();
+
+    await user.type(screen.getByRole('combobox', { name: 'Add people and groups' }), 'an');
+    await user.click(await screen.findByText('Ann Lee', {}, { timeout: 2000 }));
+    await user.click(screen.getAllByRole('button', { name: 'Apply' })[0] as HTMLElement);
+
+    await waitFor(() => expect(sharing.shareWithUsers).toHaveBeenCalledWith('dw0_probe', { ann: ['view'] }));
+    expect(sharing.editShares).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByRole('list', { name: 'People with access' })).not.toBeInTheDocument());
   });
 });
