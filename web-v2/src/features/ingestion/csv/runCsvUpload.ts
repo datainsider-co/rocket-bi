@@ -1,4 +1,4 @@
-import { toErrorMessage } from '../ingestion.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import type { CsvChunkReader } from './csvFile';
 import type { CsvChunkFailure, CsvUploadAction } from './csvUpload.utils';
 

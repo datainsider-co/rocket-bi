@@ -6,7 +6,7 @@ import type { CsvColumn } from '@/core/ingestion/CsvImport';
 import { CsvImportService, type CsvTableRef } from '@/core/ingestion/CsvImportService';
 import { SchemaService } from '@/core/schema/SchemaService';
 import { databaseQueryOptions, databasesQueryOptions } from '@/shared/schema/schemaQueries';
-import { toErrorMessage } from '../ingestion.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import type { Suggestions } from '../job-form/useJobFormOptions';
 import {
   csvDestinationSchema,

@@ -2,7 +2,7 @@ import { useCallback, useReducer, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDi } from '@/app/di/DiContext';
 import { CsvImportService, type CsvTableRef } from '@/core/ingestion/CsvImportService';
-import { toErrorMessage } from '../ingestion.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import { csvChunkReader } from './csvFile';
 import { csvUploadReducer, initialUploadState } from './csvUpload.utils';
 import type { CsvReadSetting } from './csvWizard.utils';

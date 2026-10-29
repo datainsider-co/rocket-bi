@@ -3,7 +3,7 @@ import { useDi } from '@/app/di/DiContext';
 import type { JdbcJobClassName } from '@/core/ingestion/Job';
 import { JobService } from '@/core/ingestion/JobService';
 import { browserOffsetAt, type OffsetAt } from '@/shared/schedule/schedule.utils';
-import { toErrorMessage } from '../ingestion.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import { ingestionKeys } from '../ingestionQueries';
 import { planJobSave, type JobFormTarget, type JobFormValues, type JobSavePlan } from './jobForm.utils';
 

@@ -2,7 +2,7 @@ import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import { useDi } from '@/app/di/DiContext';
 import type { CsvColumn, CsvPreview } from '@/core/ingestion/CsvImport';
 import { CsvImportService } from '@/core/ingestion/CsvImportService';
-import { toErrorMessage } from '../ingestion.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import { ingestionKeys } from '../ingestionQueries';
 import { readSample } from './csvFile';
 import type { CsvReadSetting } from './csvWizard.utils';

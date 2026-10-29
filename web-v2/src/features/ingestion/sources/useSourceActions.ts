@@ -4,7 +4,7 @@ import { App } from 'antd';
 import { useDi } from '@/app/di/DiContext';
 import type { DataSource, SourceId } from '@/core/ingestion/DataSource';
 import { DataSourceService } from '@/core/ingestion/DataSourceService';
-import { toErrorMessage } from '../ingestion.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import { ingestionKeys } from '../ingestionQueries';
 import { deleteSourcesText } from './sources.utils';
 

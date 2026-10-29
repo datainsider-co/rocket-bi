@@ -1,7 +1,7 @@
 import { useCallback, useReducer, useState } from 'react';
 import { App } from 'antd';
 import type { CsvTableRef } from '@/core/ingestion/CsvImportService';
-import { toErrorMessage } from '../ingestion.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import { columnErrors, nullCounts, renameColumn, setColumnType } from './csvColumns.utils';
 import { readSample } from './csvFile';
 import { guessDelimiter } from './csvText.utils';

@@ -4,7 +4,7 @@ import { App } from 'antd';
 import { useDi } from '@/app/di/DiContext';
 import type { Job, JobId } from '@/core/ingestion/Job';
 import { JobService } from '@/core/ingestion/JobService';
-import { toErrorMessage } from '../ingestion.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import { ingestionKeys } from '../ingestionQueries';
 import { deleteJobsText, forceSyncSummary } from './jobs.utils';
 

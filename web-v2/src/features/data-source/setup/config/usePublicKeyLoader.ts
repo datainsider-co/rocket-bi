@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { toErrorMessage } from '../setup.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import type { ConnectionFormValues } from './connectionForm.utils';
 
 /** Fills the read-only public key field the first time the SSH section opens. */
