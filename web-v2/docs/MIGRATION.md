@@ -397,6 +397,8 @@ The field drag and drop notes (`shared/field-dnd`) moved to [`CHART_BUILDER.md`]
 
 ### Phase 5: Data warehouse
 
+Plan, decisions and steps (DW0 to DW12) in [`DATA_WAREHOUSE.md`](DATA_WAREHOUSE.md).
+
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Databases (all, trash) | `screens/data-management` (`/data-warehouse/databases`) | 49 | Not started |
