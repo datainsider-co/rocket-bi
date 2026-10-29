@@ -221,7 +221,7 @@ Code v1 cần đọc: `screens/data-management` (`views/`, `components/`, `store
   src/core/schema/              mở rộng: DatabaseService (my_data, create, delete),
                                 TableService (create, update schema, from_query), DatabaseShareService
   src/core/rls/                 RlsPolicy, RlsPolicyService (policies/list, PUT policies)
-  src/core/query-analysis/      raw query request, parameters (thuần), analysis ↔ dashboard JSON
+  src/core/query/rawQuery.ts    raw query request, parameters (thuần); analysis ↔ dashboard JSON làm ở DW11
   src/shared/code-editor/       Monaco chuyển từ chart-builder, thêm SQL completion
   src/shared/relationship/      phần chung của relationship editor
   src/features/data-warehouse/  layout/, database-tree/, databases/, schema/, rls/, query-editor/, relationship/
@@ -296,12 +296,42 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
 `big_qty`), analysis "DW0 Analysis" (dashboard 5) trong My Data, user `dw0.viewer@example.com` / `123456` (nhóm Viewer)
 để thử share. Policy, share và relationship global đã trả về như cũ.
 
+## Quyết định ở DW1 (2026-10-30)
+
+- **`TableDefinition`** (`core/schema/TableDefinition.ts`) là model riêng cho trang Schema, không mở rộng `TableSchema` mà
+  ChartBuilder đang đọc. Bảng và từng cột giữ `json` gốc; ghi thì merge phần sửa lên đó, nên PUT gửi lại nguyên
+  `primary_keys`, `order_bys`, `partition_by`, measure, calculated column. Cột **đổi kiểu** chỉ giữ các key chung của mọi
+  loại cột (`name`, `display_name`, `description`, `is_nullable`, `is_encrypted`, `is_private`, `default_value`,
+  `default_expression`), vì server đọc cột theo `class_name`; description rỗng và default value chưa đặt thì bỏ khỏi
+  JSON. Bảng đọc từ fixture ghi ra đúng bằng JSON của server (test `toStrictEqual`).
+- **Service** (bind trong `WarehouseModule` và `RlsModule`, đều trên `ApiClient`, không header bí mật nào):
+  - `DatabaseService`: `listMyData` (một request, không phân trang), `create`, `delete`. `DatabaseEntry` có `owner`
+    khi server trả.
+  - `TableService`: `getTable`, `createTable` (`tbl_name`, `primary_keys: []`, `order_bys: []` như request DW0),
+    `updateTable` (`{ table_schema }`), `createTableFromQuery` (`is_override: false`). Ghi đè query của view và xoá bảng
+    vẫn ở `SchemaEditService` (CB8); `tablePath` của nó được export để dùng chung.
+  - `DatabaseShareService`: như `ShareService` nhưng theo tên database, không có link. Trả `ResourceSharing` có sẵn
+    nên `ShareModal` dùng lại được ở DW5.
+  - `RlsPolicyService`: `list`, `put` (thay cả tập, trả lại danh sách đã lưu). `RlsPolicy` không có `name` (server
+    không lưu); `conditions` là JSON thô của trình sửa filter; `ALWAYS_TRUE` / `ALWAYS_FALSE` cho View All / View
+    Nothing; operator lạ đọc thành `IsNull`.
+- **Parameters** (`core/query/queryParameters.ts`, dùng chung với dashboard):
+  - `formatParamValue` nhân đôi `'` và escape `\`, `$` (kiểm trên server: `O'Brien`, `US$ 5`, `a$1b` ra đúng). Dấu `\`
+    đơn vẫn bị MySQL hiểu là ký tự escape trong chuỗi (`back\slash` thành `backslash`); tuỳ connector nên không xử lý.
+  - `storedParameters` lấy từ `query_parameter` trong viz options (cả dạng mảng của query editor lẫn dạng map của
+    builder v1), chỉ dùng `setting.parameters` khi không có. Đây là thay đổi cho cả chart trên dashboard: trước đây v2
+    ưu tiên `setting.parameters` như v1, nên `{{minQty}}` không được thay.
+- **`core/query/rawQuery.ts`**: `parameterNames` (tên chỉ gồm ký tự word, như server thay được), `syncParameters`,
+  `parameterValues`, `hasLimit` (đúng regex của server), `rawQuerySetting`; request dựng bằng `toQueryRequestJson` có
+  sẵn. Phần analysis ↔ dashboard JSON để DW11.
+- **`fakeHttp`** chuyển từ `core/ingestion/testing.ts` sang `src/test/fakeHttp.ts`: module thứ hai cần nó.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
 |---|---|---|
 | DW0 | **Spike và payload thật** trên docker local (warehouse MySQL): `databases/my_data`, `trash`, `remove` / `restore` có chạy không; tạo database, tạo bảng, PUT schema (đổi type, thêm cột, default value), `from_query` view và materialized; share database (ba endpoint); `policies/list`, `PUT policies` với user attribute và condition; `chart/query` với `raw_query_setting` + parameters (text, number, date, list) và `limit`; tạo analysis bằng v1 rồi lưu JSON; `relationships/global`. Có cần `DI-SERVICE-KEY` / `admin_secret_key` không. Lưu fixture | Xong (không có trash, RLS không chạy trên MySQL, xem DW0) |
-| DW1 | **Core.** `DatabaseService`, `TableService`, `DatabaseShareService`, `RlsPolicyService`, mở rộng `TableSchema` / cột (giữ `json` gốc), raw query request và parameters thuần. Test round-trip với fixture DW0 | Chưa làm |
+| DW1 | **Core.** `DatabaseService`, `TableService`, `DatabaseShareService`, `RlsPolicyService`, mở rộng `TableSchema` / cột (giữ `json` gốc), raw query request và parameters thuần. Test round-trip với fixture DW0 | Xong (xem DW1) |
 | DW2 | **Khung.** Routes `/data-warehouse/*` ở path của v1 (kể cả redirect `/data-management/*`), layout có header icon + tên, `/data-warehouse/databases/trash` chuyển về `all` (không có trash, DW0), page lazy load | Chưa làm |
 | DW3 | **Cây database dùng chung.** Short info + tải khi mở, search, refresh, tạo database, slot action cho bảng / cột, kéo bảng, Storybook | Chưa làm |
 | DW4 | **Databases.** Listing (search, sort, phân trang ở client, Owner trống khi server không trả), click dòng → Schema, Delete (xoá hẳn, hỏi xác nhận), trạng thái rỗng / lỗi | Chưa làm |
