@@ -388,6 +388,22 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
 - Đã kiểm bằng Playwright trên `pnpm dev` (1440px và 375px): listing khớp v1, xoá thật một database tạo tạm, click dòng
   sang Schema, không lỗi console.
 
+## Quyết định ở DW5 (2026-10-30)
+
+- **Một `ShareModal` cho directory và database.** `ShareTarget` thành union `directory` (id số) | `database` (id là tên).
+  Phần people đi qua `SharePeopleApi` (`features/share/people/sharePeopleApi.ts`): directory dùng `share/directory/{id}`,
+  database dùng `databases/{name}/share/*` (`DatabaseShareService`). Link anyone và password chỉ có ở directory: với
+  database hai hook đó chạy ở trạng thái tắt, và `applyShare` dừng sau phần people.
+- **Mức quyền** của database: Edit, View, Remove access. v1 chỉ cho View & Download trên directory, dashboard, query; DW0
+  cũng thấy server từ chối `download` khi sửa share của user ngoài nhóm Editor. `shareLevelOf` nhận được loại `database`
+  và id dạng chuỗi.
+- **Chỉ gửi thay đổi thật**, như M7b: không thay đổi thì không request nào, Remove access thì `share/revoke`. Đóng dialog
+  là bỏ hết thay đổi (v1 reset nhầm store nên thay đổi dở rò sang lần share sau).
+- **Nút Share** trên từng dòng của listing, trước nút Delete như v1; click không mở database.
+- `DatabaseShareService` được bind trong `renderAppAt` và các test đã dựng container cho Share.
+- Đã kiểm bằng Playwright trên `pnpm dev`: share `dw0_probe` cho user Viewer (View), mở lại thấy user và mức quyền, Remove
+  access rồi Apply; `share/list` xác nhận không còn ai. Không lỗi console.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -397,7 +413,7 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
 | DW2 | **Khung.** Routes `/data-warehouse/*` ở path của v1 (kể cả redirect `/data-management/*`), layout có header icon + tên, `/data-warehouse/databases/trash` chuyển về `all` (không có trash, DW0), page lazy load | Xong (xem DW2) |
 | DW3 | **Cây database dùng chung.** Short info + tải khi mở, search, refresh, tạo database, slot action cho bảng / cột, kéo bảng, Storybook | Xong (xem DW3) |
 | DW4 | **Databases.** Listing (search, sort, phân trang ở client, Owner trống khi server không trả), click dòng → Schema, Delete (xoá hẳn, hỏi xác nhận), trạng thái rỗng / lỗi | Xong (xem DW4) |
-| DW5 | **Share database.** `ShareModal` nhận adapter, không có link / password, chỉ gửi thay đổi thật như M7b | Chưa làm |
+| DW5 | **Share database.** `ShareModal` nhận adapter, không có link / password, chỉ gửi thay đổi thật như M7b | Xong (xem DW5) |
 | DW6 | **Schema đọc.** Chọn database / bảng theo URL, view database (danh sách bảng), tab Table Schema (search cột), Table Data (preview phân trang, sort), poll bảng `Processing`, Action menu (Query table, Update schema by query → Query Editor, Delete table, Delete database) | Chưa làm |
 | DW7 | **Schema sửa.** Create table (modal tên + form cột), Edit schema (nullable, type có xác nhận, description, default value theo kiểu, thêm cột), Measure và Calculated Field (danh sách + `FormulaFieldDialog` của CB8), menu bảng / cột trên cây | Chưa làm |
 | DW8 | **RLS.** Danh sách policy, form user / user attribute / operator, View All / View Nothing / Custom (trình sửa condition của CB4), Save / Cancel, preview làm mới sau khi lưu | Chưa làm |
