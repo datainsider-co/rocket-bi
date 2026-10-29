@@ -181,8 +181,9 @@ Code v1 cần đọc: `screens/data-management` (`views/`, `components/`, `store
 
 - **Phạm vi**: Databases, Schema (kể cả RLS), Query Editor, Relationship. Không port: AI (`//@ai`, AI description), rename
   (v1 không có, server cũng không có endpoint rename database), AI prompt từ cây.
-- **Delete ở All**: v1 xoá hẳn. v2 **chuyển vào Trash** bằng `PUT databases/{db}/remove` nếu DW0 xác nhận
-  server làm được, để Trash có ý nghĩa; Delete forever chỉ ở Trash. Nếu server không làm được thì giữ như v1 và ẩn Trash.
+- **Delete ở All**: v1 xoá hẳn. Dự định chuyển vào Trash bằng `PUT databases/{db}/remove` nếu server làm được, không thì
+  giữ như v1 và ẩn Trash. **DW0: server không có trash**, nên Delete xoá hẳn (hỏi xác nhận) và không có trang Trash
+  (`/data-warehouse/databases/trash` chuyển về `all`).
 - **Auto-save của Query Editor**: v1 lưu mỗi 5s, luôn vào widget 0. v2 **bỏ auto-save**, Save / Ctrl+S
   tường minh, nút hiện `Save*` khi có thay đổi, hỏi khi rời trang (`useBlocker` như M6). Lý do: auto-save ghi đè analysis
   dùng chung khi người khác đang xem, và v1 lưu sai widget.
@@ -199,8 +200,10 @@ Code v1 cần đọc: `screens/data-management` (`views/`, `components/`, `store
   `rawQueryRequest(sql, params, page)`), không đi qua controls của dashboard (sửa bug filter rò qua id `-2`). Preview cho
   sort theo một cột như M4a.
 - **Parameters**: map `parameters` gửi lên luôn dựng từ `options.query_parameter` (tên đúng như gõ), không đọc
-  `setting.parameters` đã lưu (key bị v1 đổi). Giá trị text escape `'` (`''`). Nhận `LIMIT` không phân biệt hoa thường.
-  Hàm thuần `syncParams(sql, params)`, `paramValue(param)`, có test.
+  `setting.parameters` đã lưu (key bị v1 đổi, DW0 đã xác nhận). Giá trị text escape `'` thành `''`, rồi escape `\` và `$`
+  vì server thay bằng `String.replaceAll` (xem DW0). Hàm thuần `syncParams(sql, params)`, `paramValue(param)`, có test.
+- **`LIMIT`**: dùng đúng luật của server (` limit ` có khoảng trắng hai bên, không phân biệt hoa thường): SQL có `limit`
+  thì không phân trang và hiện số dòng nhận được, vì `total` server trả là số dòng khi bỏ `limit`.
 - **Lưu analysis**: Save ghi widget của tab đang sửa query (widget 0 là query chính, tab chart giữ `sql_views` của nó),
   không bao giờ gửi `parameter_widget_ids`. Create Table / Update Table không đổi text trong editor; cả hai cùng thay
   parameter như nhau.
@@ -215,7 +218,7 @@ Code v1 cần đọc: `screens/data-management` (`views/`, `components/`, `store
 - **Vị trí code**:
 
   ```
-  src/core/schema/              mở rộng: DatabaseService (my_data, trash, create, delete, remove, restore),
+  src/core/schema/              mở rộng: DatabaseService (my_data, create, delete),
                                 TableService (create, update schema, from_query), DatabaseShareService
   src/core/rls/                 RlsPolicy, RlsPolicyService (policies/list, PUT policies)
   src/core/query-analysis/      raw query request, parameters (thuần), analysis ↔ dashboard JSON
@@ -226,15 +229,82 @@ Code v1 cần đọc: `screens/data-management` (`views/`, `components/`, `store
 
   Tên `data-warehouse` theo path của v1 (không dùng `data`, bị `.gitignore`).
 
+## Phát hiện ở DW0 (2026-10-30)
+
+Chạy trên docker local (warehouse MySQL), bằng script gọi API và bằng v1 điều khiển qua Playwright (analysis). Request và
+response lưu ở `src/core/schema/warehouse.fixture.json`. Không request nào cần `DI-SERVICE-KEY` hay `admin_secret_key`.
+
+- **Không có trash.** `SchemaModule` của server dùng `MySqlSchemaMetadataStorage`, trong đó `remove` và `restore` trả
+  `true` mà không làm gì, `databases/trash` luôn rỗng (bản SSDB có trash thật nhưng không được dùng). Đây là server bản
+  open source, không chỉ stack local.
+- **`databases/my_data`** bỏ qua `from` / `size` (luôn trả hết, `total` là số phần tử), đã lọc các database ẩn theo
+  `hidden_db_name_patterns` (`etl_<n>`, `preview_etl_<n>`) nhưng vẫn có `mysql`, `sys`, `information_schema`,
+  `performance_schema` (v1 cũng hiện). `owner` chỉ có khi `creator_id` khớp một user: database có sẵn trong warehouse
+  không có owner, database tạo qua API có. `GET databases` không có `owner`; `multi_gets` có `{ database, owner? }`.
+- **Display name của database và bảng không được lưu** (MySQL storage): `POST databases` với `display_name: "DW0 Probe"`
+  trả `display_name: "dw0_probe"`; bảng cũng vậy, kể cả bảng tạo từ query. Display name, description, default value của
+  **cột** thì lưu được.
+- **PUT schema** (`{ table_schema }`) chạy thật: đổi kiểu cột đổi luôn kiểu trong MySQL (`double` → `longtext`), thêm cột
+  có default value, đổi display name của cột (v1 khoá ô này; server cho sửa). Response là bảng đầy đủ, có thêm
+  `partition_by`, `temporary`, `table_status` không có trong response tạo bảng.
+- **`from_query`**: `view` tạo và ghi đè (`is_override: true`) được; tên trùng thì 400 `table big_qty already exist in db
+  dw0_probe`; `materialized` thì **501 `Unsupported table type materialized`** trên MySQL; SQL sai thì 500 với message
+  của database (đôi khi khó hiểu: `No database selected`).
+- **`chart/query` với `raw_query_setting`**:
+  - Server bọc SQL thành `select * from (<sql>) as v limit <size> offset <from>`, nên hai câu lệnh hay DDL đều lỗi cú
+    pháp: editor chỉ chạy được một câu `select`.
+  - SQL khớp regex ` limit ` (không phân biệt hoa thường) thì server không phân trang, nhưng `total` vẫn là số dòng khi
+    bỏ `limit` (5 thay vì 3). `limit` trong subquery hoặc trong chuỗi (`'no limit 5'`) làm server cắt SQL sai và lỗi.
+  - Response `json_table_response`: `headers` (`key` là `"0"`, `"1"`, …, `label` là tên cột), `records` là chuỗi
+    (`"1"`, `"true"`, `"2026-10-01 08:00:00.0"`).
+  - **Parameters** (`QueryParser.applyParameters`): regex `\{\{\s*<key>\s*\}\}` (key không escape), thay bằng
+    `String.replaceAll`, nên `\` và `$` trong giá trị là ký tự đặc biệt (`'O\'Brien'` thành lỗi cú pháp). `'O''Brien tea'`
+    chạy đúng. Parameter thiếu trong map thì `{{x}}` còn nguyên trong SQL và lỗi cú pháp. List gửi `1,3` hay `'1','3'`
+    đều được. Key lấy từ map `parameters` ở ngoài cùng của request.
+  - v1 thực tế gửi SQL ở cả `sql` lẫn `sql_views[0].query.query` (alias ngẫu nhiên `view_xxxxxxxxxx`), thêm `" \n"` vào
+    cuối, `options: {}`, và parameter rỗng thành `''` (`qty > ''` trên MySQL trả mọi dòng).
+  - **Đã xác nhận bug key của v1**: với `{{minQty}}`, `parameters` ngoài cùng có `minQty` nhưng `query_setting.parameters`
+    (phần được lưu) thành `min_qty`.
+- **Chuỗi tiếng Việt trong SQL không khớp**: `where name = 'Phở'` trả 0 dòng dù dữ liệu đúng UTF-8 (`hex` khớp, `like 'Ph%'`
+  ra dòng đó). Filter `in` của chart cũng vậy. Cùng nợ backend với DI8 (charset của kết nối JDBC tới warehouse).
+- **Preview bảng** bằng `group_table_chart_setting` với một `select` mỗi cột chạy được, header `key` là hash, sort bằng
+  `sorts: [{ class_name: "order_by", order, function: { class_name: "select", field } }]`.
+- **Share database**: ba endpoint chạy như mô tả. `permissions` trong `share/list` có tiền tố org
+  (`0:database:view:dw0_probe`), còn request gửi tên action ngắn (`view`, `download`, …). Như M7b, `share/update` từ chối
+  mọi quyền ngoài `view` với user không thuộc nhóm Editor (400 `Target user is not an editor…`), kể cả View & Download;
+  `share` (tạo) thì không kiểm. Id share là chuỗi (`s_5`). `share/database/{db}` (endpoint chung) trả 500. Viewer được
+  share `view` thấy database trong `my_data` và `GET databases`, sửa hay xoá thì 403.
+- **RLS**:
+  - `policies/list` và `PUT policies` (cần `rls:view:*` / `rls:edit:*`) chạy; PUT thay cả tập, policy có `policy_id`
+    cũ giữ id, `-1` được cấp id mới, policy vắng mặt bị xoá. **`name` không được lưu** (model của server không có field
+    này). `user_attribute: null` bị bỏ khỏi response.
+  - **Áp dụng RLS hỏng trên MySQL**: mọi query (raw SQL lẫn object query) của user bị một policy nhắm tới đều 500 (lỗi
+    cú pháp quanh alias `tbl_xxxxxx`, hoặc `Every derived table must have its own alias`). Giá trị trong condition của
+    policy không được escape (`O'Brien tea` làm vỡ SQL); filter `in` thường thì có escape. Policy không có `user_ids` và
+    `user_attribute` không áp vào ai. Nợ backend; DW8 làm phần quản lý policy, phần thực thi không kiểm được trên stack
+    này.
+- **Relationship global**: `GET` (rỗng là `{ views: [], relationships: [], extra_data: {} }`), `POST` → `{ success:
+  true }`, `DELETE relationships/global` có. Server cấp `alias_name` (`tbl_<hash>`) và lưu `extra_data` nguyên văn (key
+  thừa vẫn còn). Dashboard chưa lưu relationship riêng thì `relationships/{id}` trả bản global.
+- **Analysis của v1** (`dashboards/create`): widget `class_name: "chart_v3"`, `extra_data.current_chart_type: "table"`,
+  setting `raw_query_setting` có `options` là `table_chart_setting` đầy đủ kèm `raw_query` và `query_parameter: [{
+  display_name, value_type, value, list }]`; `directory_type: "queries"`, `setting` của dashboard mặc định. Mở lại `?adhoc=`
+  gọi `dashboards/{id}`, `get_directory_id`, `directories/{id}`, `directories/{id}/parents`. **Auto-save** mỗi khoảng 5s
+  đã thấy thật: `PUT dashboards/{id}/widgets/{wid}/edit` sau khi sửa text.
+
+Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `products` 5 dòng có tiếng Việt và `O'Brien tea`, view
+`big_qty`), analysis "DW0 Analysis" (dashboard 5) trong My Data, user `dw0.viewer@example.com` / `123456` (nhóm Viewer)
+để thử share. Policy, share và relationship global đã trả về như cũ.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
 |---|---|---|
-| DW0 | **Spike và payload thật** trên docker local (warehouse MySQL): `databases/my_data`, `trash`, `remove` / `restore` có chạy không; tạo database, tạo bảng, PUT schema (đổi type, thêm cột, default value), `from_query` view và materialized; share database (ba endpoint); `policies/list`, `PUT policies` với user attribute và condition; `chart/query` với `raw_query_setting` + parameters (text, number, date, list) và `limit`; tạo analysis bằng v1 rồi lưu JSON; `relationships/global`. Có cần `DI-SERVICE-KEY` / `admin_secret_key` không. Lưu fixture | Chưa làm |
+| DW0 | **Spike và payload thật** trên docker local (warehouse MySQL): `databases/my_data`, `trash`, `remove` / `restore` có chạy không; tạo database, tạo bảng, PUT schema (đổi type, thêm cột, default value), `from_query` view và materialized; share database (ba endpoint); `policies/list`, `PUT policies` với user attribute và condition; `chart/query` với `raw_query_setting` + parameters (text, number, date, list) và `limit`; tạo analysis bằng v1 rồi lưu JSON; `relationships/global`. Có cần `DI-SERVICE-KEY` / `admin_secret_key` không. Lưu fixture | Xong (không có trash, RLS không chạy trên MySQL, xem DW0) |
 | DW1 | **Core.** `DatabaseService`, `TableService`, `DatabaseShareService`, `RlsPolicyService`, mở rộng `TableSchema` / cột (giữ `json` gốc), raw query request và parameters thuần. Test round-trip với fixture DW0 | Chưa làm |
-| DW2 | **Khung.** Routes `/data-warehouse/*` ở path của v1 (kể cả redirect `/data-management/*`), layout có header icon + tên, sidebar All / Trash, page lazy load | Chưa làm |
+| DW2 | **Khung.** Routes `/data-warehouse/*` ở path của v1 (kể cả redirect `/data-management/*`), layout có header icon + tên, `/data-warehouse/databases/trash` chuyển về `all` (không có trash, DW0), page lazy load | Chưa làm |
 | DW3 | **Cây database dùng chung.** Short info + tải khi mở, search, refresh, tạo database, slot action cho bảng / cột, kéo bảng, Storybook | Chưa làm |
-| DW4 | **Databases.** Listing All / Trash (search, sort, phân trang ở client), click dòng → Schema, Delete / Move to trash, Recover, Delete forever theo quyết định ở trên, trạng thái rỗng / lỗi | Chưa làm |
+| DW4 | **Databases.** Listing (search, sort, phân trang ở client, Owner trống khi server không trả), click dòng → Schema, Delete (xoá hẳn, hỏi xác nhận), trạng thái rỗng / lỗi | Chưa làm |
 | DW5 | **Share database.** `ShareModal` nhận adapter, không có link / password, chỉ gửi thay đổi thật như M7b | Chưa làm |
 | DW6 | **Schema đọc.** Chọn database / bảng theo URL, view database (danh sách bảng), tab Table Schema (search cột), Table Data (preview phân trang, sort), poll bảng `Processing`, Action menu (Query table, Update schema by query → Query Editor, Delete table, Delete database) | Chưa làm |
 | DW7 | **Schema sửa.** Create table (modal tên + form cột), Edit schema (nullable, type có xác nhận, description, default value theo kiểu, thêm cột), Measure và Calculated Field (danh sách + `FormulaFieldDialog` của CB8), menu bảng / cột trên cây | Chưa làm |
