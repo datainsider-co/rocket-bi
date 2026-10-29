@@ -1,0 +1,3562 @@
+{
+  "_comment": "DW0 (2026-10-30): requests and responses captured on the local docker stack (warehouse MySQL). analysis* entries were made with v1 driven by Playwright. Session ids removed. See docs/DATA_WAREHOUSE.md.",
+  "databasesList": {
+    "method": "GET",
+    "path": "databases",
+    "status": 200,
+    "response": [
+      {
+        "name": "bi_service_schema",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "bi_service_schema",
+        "created_time": 1793295348830,
+        "updated_time": 1793295348830
+      },
+      {
+        "name": "caas",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "caas",
+        "created_time": 1793295348697,
+        "updated_time": 1793295348697
+      },
+      {
+        "name": "di0_csv",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "di0_csv",
+        "created_time": 1793295348332,
+        "updated_time": 1793295348332
+      },
+      {
+        "name": "di0_ingest",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "di0_ingest",
+        "created_time": 1793295348666,
+        "updated_time": 1793295348666
+      },
+      {
+        "name": "di0_multi",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "di0_multi",
+        "created_time": 1793295348382,
+        "updated_time": 1793295348382
+      },
+      {
+        "name": "di6_e2e",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "di6_e2e",
+        "created_time": 1793295348814,
+        "updated_time": 1793295348814
+      },
+      {
+        "name": "di6_probe_newdb",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "di6_probe_newdb",
+        "created_time": 1793295348396,
+        "updated_time": 1793295348396
+      },
+      {
+        "name": "di_schema",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "di_schema",
+        "created_time": 1793295348345,
+        "updated_time": 1793295348345
+      },
+      {
+        "name": "etl",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "etl",
+        "created_time": 1793295348363,
+        "updated_time": 1793295348363
+      },
+      {
+        "name": "information_schema",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "information_schema",
+        "created_time": 1793295348407,
+        "updated_time": 1793295348407
+      },
+      {
+        "name": "ingestion_schema",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "ingestion_schema",
+        "created_time": 1793295348679,
+        "updated_time": 1793295348679
+      },
+      {
+        "name": "job_scheduler_schema",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "job_scheduler_schema",
+        "created_time": 1793295348724,
+        "updated_time": 1793295348724
+      },
+      {
+        "name": "mysql",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "mysql",
+        "created_time": 1793295348752,
+        "updated_time": 1793295348752
+      },
+      {
+        "name": "performance_schema",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "performance_schema",
+        "created_time": 1793295348143,
+        "updated_time": 1793295348143
+      },
+      {
+        "name": "sample_v2",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "sample_v2",
+        "created_time": 1793295348317,
+        "updated_time": 1793295348317
+      },
+      {
+        "name": "sys",
+        "organization_id": 0,
+        "creator_id": "",
+        "display_name": "sys",
+        "created_time": 1793295348475,
+        "updated_time": 1793295348475
+      }
+    ]
+  },
+  "myData": {
+    "method": "GET",
+    "path": "databases/my_data?from=0&size=5",
+    "status": 200,
+    "response": {
+      "data": [
+        {
+          "database": {
+            "name": "bi_service_schema",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "bi_service_schema",
+            "created_time": 1793295348830,
+            "updated_time": 1793295348830
+          }
+        },
+        {
+          "database": {
+            "name": "caas",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "caas",
+            "created_time": 1793295348697,
+            "updated_time": 1793295348697
+          }
+        },
+        {
+          "database": {
+            "name": "di0_csv",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "di0_csv",
+            "created_time": 1793295348332,
+            "updated_time": 1793295348332
+          }
+        },
+        {
+          "database": {
+            "name": "di0_ingest",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "di0_ingest",
+            "created_time": 1793295348666,
+            "updated_time": 1793295348666
+          }
+        },
+        {
+          "database": {
+            "name": "di0_multi",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "di0_multi",
+            "created_time": 1793295348382,
+            "updated_time": 1793295348382
+          }
+        },
+        {
+          "database": {
+            "name": "di6_e2e",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "di6_e2e",
+            "created_time": 1793295348814,
+            "updated_time": 1793295348814
+          }
+        },
+        {
+          "database": {
+            "name": "di6_probe_newdb",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "di6_probe_newdb",
+            "created_time": 1793295348396,
+            "updated_time": 1793295348396
+          }
+        },
+        {
+          "database": {
+            "name": "di_schema",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "di_schema",
+            "created_time": 1793295348345,
+            "updated_time": 1793295348345
+          }
+        },
+        {
+          "database": {
+            "name": "etl",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "etl",
+            "created_time": 1793295348363,
+            "updated_time": 1793295348363
+          }
+        },
+        {
+          "database": {
+            "name": "information_schema",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "information_schema",
+            "created_time": 1793295348407,
+            "updated_time": 1793295348407
+          }
+        },
+        {
+          "database": {
+            "name": "ingestion_schema",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "ingestion_schema",
+            "created_time": 1793295348679,
+            "updated_time": 1793295348679
+          }
+        },
+        {
+          "database": {
+            "name": "job_scheduler_schema",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "job_scheduler_schema",
+            "created_time": 1793295348724,
+            "updated_time": 1793295348724
+          }
+        },
+        {
+          "database": {
+            "name": "mysql",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "mysql",
+            "created_time": 1793295348752,
+            "updated_time": 1793295348752
+          }
+        },
+        {
+          "database": {
+            "name": "performance_schema",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "performance_schema",
+            "created_time": 1793295348143,
+            "updated_time": 1793295348143
+          }
+        },
+        {
+          "database": {
+            "name": "sample_v2",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "sample_v2",
+            "created_time": 1793295348317,
+            "updated_time": 1793295348317
+          }
+        },
+        {
+          "database": {
+            "name": "sys",
+            "organization_id": 0,
+            "creator_id": "",
+            "display_name": "sys",
+            "created_time": 1793295348475,
+            "updated_time": 1793295348475
+          }
+        }
+      ],
+      "total": 16
+    }
+  },
+  "trash": {
+    "method": "GET",
+    "path": "databases/trash?from=0&size=5",
+    "status": 200,
+    "response": {
+      "data": [],
+      "total": 0
+    }
+  },
+  "databaseCreate": {
+    "method": "POST",
+    "path": "databases",
+    "request": {
+      "name": "dw0_probe",
+      "display_name": "DW0 Probe"
+    },
+    "status": 200,
+    "response": {
+      "name": "dw0_probe",
+      "organization_id": 0,
+      "display_name": "dw0_probe",
+      "creator_id": "root",
+      "created_time": 1793295841678,
+      "updated_time": 1793295841678,
+      "tables": []
+    }
+  },
+  "databaseRemove": {
+    "method": "PUT",
+    "path": "databases/dw0_probe/remove",
+    "status": 200,
+    "response": true
+  },
+  "trashAfterRemove": {
+    "method": "GET",
+    "path": "databases/trash",
+    "status": 200,
+    "response": {
+      "data": [],
+      "total": 0
+    }
+  },
+  "databaseRestore": {
+    "method": "PUT",
+    "path": "databases/dw0_probe/restore",
+    "status": 200,
+    "response": true
+  },
+  "databaseGet": {
+    "method": "GET",
+    "path": "databases/dw0_probe",
+    "status": 200,
+    "response": {
+      "name": "dw0_probe",
+      "organization_id": 0,
+      "display_name": "dw0_probe",
+      "creator_id": "root",
+      "created_time": 1793295841679,
+      "updated_time": 1793295841679,
+      "tables": []
+    }
+  },
+  "tableCreate": {
+    "method": "POST",
+    "path": "databases/dw0_probe/tables",
+    "request": {
+      "db_name": "dw0_probe",
+      "tbl_name": "products",
+      "display_name": "Products",
+      "columns": [
+        {
+          "class_name": "int64",
+          "name": "id",
+          "display_name": "Id",
+          "is_nullable": false
+        },
+        {
+          "class_name": "string",
+          "name": "name",
+          "display_name": "Tên sản phẩm",
+          "description": "product name",
+          "is_nullable": true,
+          "default_value": "none"
+        },
+        {
+          "class_name": "double",
+          "name": "price",
+          "display_name": "Price",
+          "is_nullable": true
+        },
+        {
+          "class_name": "datetime",
+          "name": "created_at",
+          "display_name": "Created At",
+          "is_nullable": true,
+          "input_formats": []
+        },
+        {
+          "class_name": "bool",
+          "name": "active",
+          "display_name": "Active",
+          "is_nullable": true
+        }
+      ],
+      "primary_keys": [],
+      "order_bys": []
+    },
+    "status": 200,
+    "response": {
+      "name": "products",
+      "db_name": "dw0_probe",
+      "organization_id": 0,
+      "display_name": "products",
+      "columns": [
+        {
+          "class_name": "int64",
+          "name": "id",
+          "display_name": "Id",
+          "is_nullable": false,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "name",
+          "display_name": "Tên sản phẩm",
+          "description": "product name",
+          "default_value": "none",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "double",
+          "name": "price",
+          "display_name": "Price",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "datetime",
+          "name": "created_at",
+          "display_name": "Created At",
+          "input_as_timestamp": false,
+          "input_formats": [],
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "bool",
+          "name": "active",
+          "display_name": "Active",
+          "is_nullable": true,
+          "is_encrypted": false
+        }
+      ],
+      "primary_keys": [],
+      "partition_by": [],
+      "order_bys": [],
+      "table_type": "default",
+      "expression_columns": [],
+      "calculated_columns": [],
+      "temporary": false
+    }
+  },
+  "tableGet": {
+    "method": "GET",
+    "path": "databases/dw0_probe/tables/products",
+    "status": 200,
+    "response": {
+      "name": "products",
+      "db_name": "dw0_probe",
+      "organization_id": 0,
+      "display_name": "products",
+      "columns": [
+        {
+          "class_name": "int64",
+          "name": "id",
+          "display_name": "Id",
+          "is_nullable": false,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "name",
+          "display_name": "Tên sản phẩm",
+          "description": "product name",
+          "default_value": "none",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "double",
+          "name": "price",
+          "display_name": "Price",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "datetime",
+          "name": "created_at",
+          "display_name": "Created At",
+          "input_as_timestamp": false,
+          "input_formats": [],
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "bool",
+          "name": "active",
+          "display_name": "Active",
+          "is_nullable": true,
+          "is_encrypted": false
+        }
+      ],
+      "primary_keys": [],
+      "partition_by": [],
+      "order_bys": [],
+      "table_type": "default",
+      "table_status": "Normal",
+      "ttl": 0,
+      "expression_columns": [],
+      "calculated_columns": [],
+      "temporary": false
+    }
+  },
+  "tableUpdate": {
+    "method": "PUT",
+    "path": "databases/dw0_probe/tables/products",
+    "request": {
+      "table_schema": {
+        "name": "products",
+        "db_name": "dw0_probe",
+        "organization_id": 0,
+        "display_name": "Products v2",
+        "columns": [
+          {
+            "class_name": "int64",
+            "name": "id",
+            "display_name": "Id",
+            "is_nullable": false,
+            "is_encrypted": false
+          },
+          {
+            "class_name": "string",
+            "name": "name",
+            "display_name": "Name edited",
+            "description": "edited desc",
+            "default_value": "none",
+            "is_nullable": true,
+            "is_encrypted": false
+          },
+          {
+            "class_name": "string",
+            "name": "price",
+            "display_name": "Price",
+            "is_nullable": true,
+            "is_encrypted": false
+          },
+          {
+            "class_name": "datetime",
+            "name": "created_at",
+            "display_name": "Created At",
+            "input_as_timestamp": false,
+            "input_formats": [],
+            "is_nullable": true,
+            "is_encrypted": false
+          },
+          {
+            "class_name": "bool",
+            "name": "active",
+            "display_name": "Active",
+            "is_nullable": true,
+            "is_encrypted": false
+          },
+          {
+            "class_name": "int32",
+            "name": "qty",
+            "display_name": "Qty",
+            "is_nullable": true,
+            "default_value": 0
+          }
+        ],
+        "primary_keys": [],
+        "partition_by": [],
+        "order_bys": [],
+        "table_type": "default",
+        "table_status": "Normal",
+        "ttl": 0,
+        "expression_columns": [],
+        "calculated_columns": [],
+        "temporary": false
+      }
+    },
+    "status": 200,
+    "response": {
+      "name": "products",
+      "db_name": "dw0_probe",
+      "organization_id": 0,
+      "display_name": "products",
+      "columns": [
+        {
+          "class_name": "int64",
+          "name": "id",
+          "display_name": "Id",
+          "is_nullable": false,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "name",
+          "display_name": "Name edited",
+          "description": "edited desc",
+          "default_value": "none",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "price",
+          "display_name": "Price",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "datetime",
+          "name": "created_at",
+          "display_name": "Created At",
+          "input_as_timestamp": false,
+          "input_formats": [],
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "bool",
+          "name": "active",
+          "display_name": "Active",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "int32",
+          "name": "qty",
+          "display_name": "Qty",
+          "default_value": 0,
+          "is_nullable": true,
+          "is_encrypted": false
+        }
+      ],
+      "primary_keys": [],
+      "partition_by": [],
+      "order_bys": [],
+      "table_type": "default",
+      "table_status": "Normal",
+      "ttl": 0,
+      "expression_columns": [],
+      "calculated_columns": [],
+      "temporary": false
+    }
+  },
+  "databaseGetWithTables": {
+    "method": "GET",
+    "path": "databases/dw0_probe",
+    "status": 200,
+    "response": {
+      "name": "dw0_probe",
+      "organization_id": 0,
+      "display_name": "dw0_probe",
+      "creator_id": "root",
+      "created_time": 1793295841679,
+      "updated_time": 1793295841679,
+      "tables": [
+        {
+          "name": "big_qty",
+          "db_name": "dw0_probe",
+          "organization_id": 0,
+          "display_name": "big_qty",
+          "columns": [
+            {
+              "class_name": "int64",
+              "name": "id",
+              "display_name": "id",
+              "is_nullable": false,
+              "is_encrypted": false
+            },
+            {
+              "class_name": "string",
+              "name": "name",
+              "display_name": "name",
+              "is_nullable": true,
+              "is_encrypted": false
+            },
+            {
+              "class_name": "int32",
+              "name": "qty",
+              "display_name": "qty",
+              "is_nullable": true,
+              "is_encrypted": false
+            }
+          ],
+          "engine": null,
+          "primary_keys": [],
+          "partition_by": [],
+          "order_bys": [],
+          "query": "select id, name, qty from dw0_probe.products where qty > 1 and active = 1",
+          "table_type": "view",
+          "table_status": "Normal",
+          "ttl": 0,
+          "expression_columns": [],
+          "calculated_columns": [],
+          "temporary": false
+        },
+        {
+          "name": "products",
+          "db_name": "dw0_probe",
+          "organization_id": 0,
+          "display_name": "products",
+          "columns": [
+            {
+              "class_name": "int64",
+              "name": "id",
+              "display_name": "Id",
+              "is_nullable": false,
+              "is_encrypted": false
+            },
+            {
+              "class_name": "string",
+              "name": "name",
+              "display_name": "Name edited",
+              "description": "edited desc",
+              "default_value": "none",
+              "is_nullable": true,
+              "is_encrypted": false
+            },
+            {
+              "class_name": "string",
+              "name": "price",
+              "display_name": "Price",
+              "is_nullable": true,
+              "is_encrypted": false
+            },
+            {
+              "class_name": "datetime",
+              "name": "created_at",
+              "display_name": "Created At",
+              "input_as_timestamp": false,
+              "input_formats": [],
+              "is_nullable": true,
+              "is_encrypted": false
+            },
+            {
+              "class_name": "bool",
+              "name": "active",
+              "display_name": "Active",
+              "is_nullable": true,
+              "is_encrypted": false
+            },
+            {
+              "class_name": "int32",
+              "name": "qty",
+              "display_name": "Qty",
+              "default_value": 0,
+              "is_nullable": true,
+              "is_encrypted": false
+            }
+          ],
+          "engine": null,
+          "primary_keys": [],
+          "partition_by": [],
+          "order_bys": [],
+          "query": null,
+          "table_type": "default",
+          "table_status": "Normal",
+          "ttl": 0,
+          "expression_columns": [],
+          "calculated_columns": [],
+          "temporary": false
+        }
+      ]
+    }
+  },
+  "multiGets": {
+    "method": "POST",
+    "path": "databases/multi_gets",
+    "request": {
+      "db_names": [
+        "dw0_probe",
+        "sample_v2"
+      ]
+    },
+    "status": 200,
+    "response": [
+      {
+        "database": {
+          "name": "dw0_probe",
+          "organization_id": 0,
+          "display_name": "dw0_probe",
+          "creator_id": "root",
+          "created_time": 1793295841679,
+          "updated_time": 1793295841679,
+          "tables": [
+            {
+              "name": "big_qty",
+              "db_name": "dw0_probe",
+              "organization_id": 0,
+              "display_name": "big_qty",
+              "columns": [
+                {
+                  "class_name": "int64",
+                  "name": "id",
+                  "display_name": "id",
+                  "is_nullable": false,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "name",
+                  "display_name": "name",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "qty",
+                  "display_name": "qty",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": null,
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "query": "select id, name, qty from dw0_probe.products where qty > 1 and active = 1",
+              "table_type": "view",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            },
+            {
+              "name": "products",
+              "db_name": "dw0_probe",
+              "organization_id": 0,
+              "display_name": "products",
+              "columns": [
+                {
+                  "class_name": "int64",
+                  "name": "id",
+                  "display_name": "Id",
+                  "is_nullable": false,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "name",
+                  "display_name": "Name edited",
+                  "description": "edited desc",
+                  "default_value": "none",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "price",
+                  "display_name": "Price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "created_at",
+                  "display_name": "Created At",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "bool",
+                  "name": "active",
+                  "display_name": "Active",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "qty",
+                  "display_name": "Qty",
+                  "default_value": 0,
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": null,
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "query": null,
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            }
+          ]
+        },
+        "owner": {
+          "username": "root",
+          "full_name": "root",
+          "email": "hello@gmail.com",
+          "gender": 0,
+          "already_confirmed": true,
+          "updated_time": 1792599231000,
+          "created_time": 1792599231000
+        }
+      },
+      {
+        "database": {
+          "name": "sample_v2",
+          "organization_id": 0,
+          "display_name": "sample_v2",
+          "creator_id": "",
+          "created_time": 1793295348317,
+          "updated_time": 1793295348317,
+          "tables": [
+            {
+              "name": "sales",
+              "db_name": "sample_v2",
+              "organization_id": 0,
+              "display_name": "sales",
+              "columns": [
+                {
+                  "class_name": "string",
+                  "name": "region",
+                  "display_name": "region",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "country",
+                  "display_name": "country",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "item_type",
+                  "display_name": "item_type",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "sales_channel",
+                  "display_name": "sales_channel",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "order_priority",
+                  "display_name": "order_priority",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "order_date",
+                  "display_name": "order_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int64",
+                  "name": "order_id",
+                  "display_name": "order_id",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "ship_date",
+                  "display_name": "ship_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "units_sold",
+                  "display_name": "units_sold",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_price",
+                  "display_name": "unit_price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_cost",
+                  "display_name": "unit_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_revenue",
+                  "display_name": "total_revenue",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_cost",
+                  "display_name": "total_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_profit",
+                  "display_name": "total_profit",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": "InnoDB",
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "query": null,
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "fromQueryView": {
+    "method": "POST",
+    "path": "databases/dw0_probe/tables/from_query",
+    "request": {
+      "db_name": "dw0_probe",
+      "display_name": "Big qty",
+      "tbl_name": "big_qty",
+      "query": "select id, name, qty from dw0_probe.products where qty > 1",
+      "is_override": false,
+      "table_type": "view"
+    },
+    "status": 200,
+    "response": {
+      "name": "big_qty",
+      "db_name": "dw0_probe",
+      "organization_id": 0,
+      "display_name": "big_qty",
+      "columns": [
+        {
+          "class_name": "int64",
+          "name": "id",
+          "display_name": "id",
+          "is_nullable": false,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "name",
+          "display_name": "name",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "int32",
+          "name": "qty",
+          "display_name": "qty",
+          "is_nullable": true,
+          "is_encrypted": false
+        }
+      ],
+      "primary_keys": [],
+      "partition_by": [],
+      "order_bys": [],
+      "query": "select id, name, qty from dw0_probe.products where qty > 1",
+      "table_type": "view",
+      "expression_columns": [],
+      "calculated_columns": [],
+      "temporary": false
+    }
+  },
+  "fromQueryViewExists": {
+    "method": "POST",
+    "path": "databases/dw0_probe/tables/from_query",
+    "request": {
+      "db_name": "dw0_probe",
+      "display_name": "Big qty",
+      "tbl_name": "big_qty",
+      "query": "select id, name, qty from dw0_probe.products where qty > 1",
+      "is_override": false,
+      "table_type": "view"
+    },
+    "status": 400,
+    "response": {
+      "code": 400,
+      "reason": "bad_request",
+      "message": "table big_qty already exist in db dw0_probe"
+    }
+  },
+  "fromQueryMaterialized": {
+    "method": "POST",
+    "path": "databases/dw0_probe/tables/from_query",
+    "request": {
+      "db_name": "dw0_probe",
+      "display_name": "Big qty mat",
+      "tbl_name": "big_qty_mat",
+      "query": "select id, name, qty from dw0_probe.products where qty > 1",
+      "is_override": false,
+      "table_type": "materialized"
+    },
+    "status": 501,
+    "response": {
+      "code": 501,
+      "reason": "not_supported",
+      "message": "Unsupported table type materialized"
+    }
+  },
+  "fromQueryOverride": {
+    "method": "POST",
+    "path": "databases/dw0_probe/tables/from_query",
+    "request": {
+      "db_name": "dw0_probe",
+      "display_name": "Big qty",
+      "tbl_name": "big_qty",
+      "query": "select id, name, qty from dw0_probe.products where qty > 1 and active = 1",
+      "is_override": true,
+      "table_type": "view"
+    },
+    "status": 200,
+    "response": {
+      "name": "big_qty",
+      "db_name": "dw0_probe",
+      "organization_id": 0,
+      "display_name": "big_qty",
+      "columns": [
+        {
+          "class_name": "int64",
+          "name": "id",
+          "display_name": "id",
+          "is_nullable": false,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "name",
+          "display_name": "name",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "int32",
+          "name": "qty",
+          "display_name": "qty",
+          "is_nullable": true,
+          "is_encrypted": false
+        }
+      ],
+      "primary_keys": [],
+      "partition_by": [],
+      "order_bys": [],
+      "query": "select id, name, qty from dw0_probe.products where qty > 1 and active = 1",
+      "table_type": "view",
+      "expression_columns": [],
+      "calculated_columns": [],
+      "temporary": false
+    }
+  },
+  "fromQueryBadSql": {
+    "method": "POST",
+    "path": "databases/dw0_probe/tables/from_query",
+    "request": {
+      "db_name": "dw0_probe",
+      "display_name": "Bad",
+      "tbl_name": "bad",
+      "query": "select nope from x",
+      "is_override": false,
+      "table_type": "view"
+    },
+    "status": 500,
+    "response": {
+      "code": 500,
+      "reason": "db_execute_error",
+      "message": "No database selected",
+      "cause": "No database selected"
+    }
+  },
+  "adhocTable": {
+    "method": "POST",
+    "path": "databases/adhoc/tables",
+    "request": {
+      "query": "select id, name, qty from dw0_probe.products"
+    },
+    "status": 200,
+    "response": {
+      "name": "adhoc_view",
+      "db_name": "",
+      "organization_id": 0,
+      "display_name": "adhoc_view",
+      "columns": [
+        {
+          "class_name": "int64",
+          "name": "id",
+          "display_name": "id",
+          "is_nullable": false,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "string",
+          "name": "name",
+          "display_name": "name",
+          "is_nullable": true,
+          "is_encrypted": false
+        },
+        {
+          "class_name": "int32",
+          "name": "qty",
+          "display_name": "qty",
+          "is_nullable": true,
+          "is_encrypted": false
+        }
+      ],
+      "primary_keys": [],
+      "partition_by": [],
+      "order_bys": [],
+      "query": "select id, name, qty from dw0_probe.products",
+      "table_type": "view",
+      "expression_columns": [],
+      "calculated_columns": [],
+      "temporary": false
+    }
+  },
+  "tablePreview": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "group_table_chart_setting",
+        "filters": [],
+        "sorts": [],
+        "sql_views": [],
+        "parameters": {},
+        "columns": [
+          {
+            "name": "id",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "id",
+                "field_type": "int64"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          },
+          {
+            "name": "name",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "name",
+                "field_type": "string"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          },
+          {
+            "name": "price",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "price",
+                "field_type": "string"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          },
+          {
+            "name": "created_at",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "created_at",
+                "field_type": "datetime"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          },
+          {
+            "name": "active",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "active",
+                "field_type": "bool"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          },
+          {
+            "name": "qty",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "qty",
+                "field_type": "int32"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          }
+        ],
+        "options": {
+          "class_name": "table_chart_setting"
+        }
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 3
+    },
+    "status": 200,
+    "response": {
+      "class_name": "json_table_response",
+      "headers": [
+        {
+          "key": "b80bb7",
+          "label": "id",
+          "is_group_by": false,
+          "is_text_left": false
+        },
+        {
+          "key": "b06893",
+          "label": "name",
+          "is_group_by": false,
+          "is_text_left": true
+        },
+        {
+          "key": "78a5eb",
+          "label": "price",
+          "is_group_by": false,
+          "is_text_left": true
+        },
+        {
+          "key": "fde81f",
+          "label": "created_at",
+          "is_group_by": false,
+          "is_text_left": true
+        },
+        {
+          "key": "c76a5e",
+          "label": "active",
+          "is_group_by": false,
+          "is_text_left": true
+        },
+        {
+          "key": "f44fc6",
+          "label": "qty",
+          "is_group_by": false,
+          "is_text_left": false
+        }
+      ],
+      "records": [
+        {
+          "b80bb7": "1",
+          "b06893": "Bánh mì",
+          "78a5eb": "12.5",
+          "fde81f": "2026-10-01 08:00:00.0",
+          "c76a5e": "true",
+          "f44fc6": "3"
+        },
+        {
+          "b80bb7": "2",
+          "b06893": "Phở",
+          "78a5eb": "45",
+          "fde81f": "2026-10-02 09:30:00.0",
+          "c76a5e": "true",
+          "f44fc6": "1"
+        },
+        {
+          "b80bb7": "3",
+          "b06893": "Cà phê",
+          "78a5eb": "25.0",
+          "fde81f": "2026-10-03 10:00:00.0",
+          "c76a5e": "false",
+          "f44fc6": "2"
+        }
+      ],
+      "total": 5,
+      "min_max_values": [],
+      "last_query_time": 0,
+      "last_processing_time": 0
+    }
+  },
+  "tablePreviewSorted": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "group_table_chart_setting",
+        "filters": [],
+        "sorts": [
+          {
+            "class_name": "order_by",
+            "order": "DESC",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "qty",
+                "field_type": "int32"
+              }
+            }
+          }
+        ],
+        "sql_views": [],
+        "parameters": {},
+        "columns": [
+          {
+            "name": "id",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "id",
+                "field_type": "int64"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          },
+          {
+            "name": "name",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "name",
+                "field_type": "string"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          },
+          {
+            "name": "price",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "price",
+                "field_type": "string"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          },
+          {
+            "name": "created_at",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "created_at",
+                "field_type": "datetime"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          },
+          {
+            "name": "active",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "active",
+                "field_type": "bool"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          },
+          {
+            "name": "qty",
+            "function": {
+              "class_name": "select",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "qty",
+                "field_type": "int32"
+              }
+            },
+            "is_horizontal_view": false,
+            "is_collapse": false,
+            "is_calc_group_total": true,
+            "is_calc_min_max": false,
+            "is_dynamic_function": false
+          }
+        ],
+        "options": {
+          "class_name": "table_chart_setting"
+        }
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 3
+    },
+    "status": 200,
+    "response": {
+      "class_name": "json_table_response",
+      "headers": [
+        {
+          "key": "b80bb7",
+          "label": "id",
+          "is_group_by": false,
+          "is_text_left": false
+        },
+        {
+          "key": "b06893",
+          "label": "name",
+          "is_group_by": false,
+          "is_text_left": true
+        },
+        {
+          "key": "78a5eb",
+          "label": "price",
+          "is_group_by": false,
+          "is_text_left": true
+        },
+        {
+          "key": "fde81f",
+          "label": "created_at",
+          "is_group_by": false,
+          "is_text_left": true
+        },
+        {
+          "key": "c76a5e",
+          "label": "active",
+          "is_group_by": false,
+          "is_text_left": true
+        },
+        {
+          "key": "f44fc6",
+          "label": "qty",
+          "is_group_by": false,
+          "is_text_left": false
+        }
+      ],
+      "records": [
+        {
+          "b80bb7": "5",
+          "b06893": "Trà đá",
+          "78a5eb": "5",
+          "fde81f": "2026-10-05 12:00:00.0",
+          "c76a5e": "true",
+          "f44fc6": "10"
+        },
+        {
+          "b80bb7": "4",
+          "b06893": "O'Brien tea",
+          "78a5eb": "30",
+          "fde81f": "2026-10-04 11:00:00.0",
+          "c76a5e": "true",
+          "f44fc6": "5"
+        },
+        {
+          "b80bb7": "1",
+          "b06893": "Bánh mì",
+          "78a5eb": "12.5",
+          "fde81f": "2026-10-01 08:00:00.0",
+          "c76a5e": "true",
+          "f44fc6": "3"
+        }
+      ],
+      "total": 5,
+      "min_max_values": [],
+      "last_query_time": 0,
+      "last_processing_time": 0
+    }
+  },
+  "rawQuery": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "raw_query_setting",
+        "sql": "select * from dw0_probe.products",
+        "sql_views": [],
+        "options": {
+          "class_name": "table_chart_setting",
+          "raw_query": "select * from dw0_probe.products",
+          "query_parameter": []
+        },
+        "parameters": {}
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 20,
+      "parameters": {}
+    },
+    "status": 500,
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Brien tea'))))\n) \n) as v\nlimit 20 offset 0' at line 5"
+    }
+  },
+  "rawQueryPage2": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "raw_query_setting",
+        "sql": "select * from dw0_probe.products",
+        "sql_views": [],
+        "options": {
+          "class_name": "table_chart_setting",
+          "raw_query": "select * from dw0_probe.products",
+          "query_parameter": []
+        },
+        "parameters": {}
+      },
+      "filter_requests": [],
+      "from": 2,
+      "size": 2,
+      "parameters": {}
+    },
+    "status": 500,
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Brien tea'))))\n) \n) as v\nlimit 2 offset 2' at line 5"
+    }
+  },
+  "rawQueryLimit": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "raw_query_setting",
+        "sql": "SELECT id, name FROM dw0_probe.products LIMIT 3",
+        "sql_views": [],
+        "options": {
+          "class_name": "table_chart_setting",
+          "raw_query": "SELECT id, name FROM dw0_probe.products LIMIT 3",
+          "query_parameter": []
+        },
+        "parameters": {}
+      },
+      "filter_requests": [],
+      "from": -1,
+      "size": -1,
+      "parameters": {}
+    },
+    "status": 500,
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Brien tea'))))\n)  LIMIT 3' at line 3"
+    }
+  },
+  "rawQueryParamText": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "raw_query_setting",
+        "sql": "select * from dw0_probe.products where name = {{myName}}",
+        "sql_views": [],
+        "options": {
+          "class_name": "table_chart_setting",
+          "raw_query": "select * from dw0_probe.products where name = {{myName}}",
+          "query_parameter": [
+            {
+              "display_name": "myName",
+              "value_type": "text",
+              "value": "O'Brien tea",
+              "list": []
+            }
+          ]
+        },
+        "parameters": {
+          "myName": "'Phở'"
+        }
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 20,
+      "parameters": {
+        "myName": "'Phở'"
+      }
+    },
+    "status": 500,
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Brien tea'))))\n)  where name = 'Ph?'\n) as v\nlimit 20 offset 0' at line 5"
+    }
+  },
+  "rawQueryParamQuote": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "raw_query_setting",
+        "sql": "select * from dw0_probe.products where name = {{myName}}",
+        "sql_views": [],
+        "options": {
+          "class_name": "table_chart_setting",
+          "raw_query": "select * from dw0_probe.products where name = {{myName}}",
+          "query_parameter": []
+        },
+        "parameters": {
+          "myName": "'O''Brien tea'"
+        }
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 20,
+      "parameters": {
+        "myName": "'O''Brien tea'"
+      }
+    },
+    "status": 500,
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Brien tea'))))\n)  where name = 'O''Brien tea'\n) as v\nlimit 20 offset 0' at line 5"
+    }
+  },
+  "rawQueryParamNumber": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "raw_query_setting",
+        "sql": "select * from dw0_probe.products where qty > {{min_qty}}",
+        "sql_views": [],
+        "options": {
+          "class_name": "table_chart_setting",
+          "raw_query": "select * from dw0_probe.products where qty > {{min_qty}}",
+          "query_parameter": []
+        },
+        "parameters": {
+          "min_qty": "2"
+        }
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 20,
+      "parameters": {
+        "min_qty": "2"
+      }
+    },
+    "status": 500,
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Brien tea'))))\n)  where qty > 2\n) as v\nlimit 20 offset 0' at line 5"
+    }
+  },
+  "rawQueryParamDate": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "raw_query_setting",
+        "sql": "select * from dw0_probe.products where created_at >= {{from_date}}",
+        "sql_views": [],
+        "options": {
+          "class_name": "table_chart_setting",
+          "raw_query": "select * from dw0_probe.products where created_at >= {{from_date}}",
+          "query_parameter": []
+        },
+        "parameters": {
+          "from_date": "'2026-10-03 00:00:00'"
+        }
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 20,
+      "parameters": {
+        "from_date": "'2026-10-03 00:00:00'"
+      }
+    },
+    "status": 500,
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Brien tea'))))\n)  where created_at >= '2026-10-03 00:00:00'\n) as v\nlimit 20 offs' at line 5"
+    }
+  },
+  "rawQueryParamList": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "raw_query_setting",
+        "sql": "select * from dw0_probe.products where id in ({{ids}})",
+        "sql_views": [],
+        "options": {
+          "class_name": "table_chart_setting",
+          "raw_query": "select * from dw0_probe.products where id in ({{ids}})",
+          "query_parameter": []
+        },
+        "parameters": {
+          "ids": "1,3"
+        }
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 20,
+      "parameters": {
+        "ids": "1,3"
+      }
+    },
+    "status": 500,
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Brien tea'))))\n)  where id in (1,3)\n) as v\nlimit 20 offset 0' at line 5"
+    }
+  },
+  "rawQueryParamMissing": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "raw_query_setting",
+        "sql": "select * from dw0_probe.products where qty > {{nope}}",
+        "sql_views": [],
+        "options": {
+          "class_name": "table_chart_setting",
+          "raw_query": "select * from dw0_probe.products where qty > {{nope}}",
+          "query_parameter": []
+        },
+        "parameters": {}
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 20,
+      "parameters": {}
+    },
+    "status": 500,
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Brien tea'))))\n)  where qty > {{nope}}\n) as v\nlimit 20 offset 0' at line 5"
+    }
+  },
+  "rawQueryError": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "class_name": "raw_query_setting",
+        "sql": "select * from dw0_probe.nope",
+        "sql_views": [],
+        "options": {
+          "class_name": "table_chart_setting",
+          "raw_query": "select * from dw0_probe.nope",
+          "query_parameter": []
+        },
+        "parameters": {}
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 20,
+      "parameters": {}
+    },
+    "status": 500,
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "Table 'dw0_probe.nope' doesn't exist"
+    }
+  },
+  "shareList": {
+    "method": "GET",
+    "path": "databases/dw0_probe/share/list",
+    "status": 200,
+    "response": {
+      "owner": {
+        "username": "root",
+        "full_name": "root",
+        "email": "hello@gmail.com",
+        "gender": 0,
+        "already_confirmed": true,
+        "updated_time": 1792599231000,
+        "created_time": 1792599231000
+      },
+      "total_user_sharing": 0,
+      "users_sharing": []
+    }
+  },
+  "shareCreate": {
+    "method": "POST",
+    "path": "databases/dw0_probe/share",
+    "request": {
+      "resource_type": "database",
+      "resource_id": "dw0_probe",
+      "user_actions": {
+        "up-860803c8-e3be-4afb-b88b-743817456dfc": [
+          "view"
+        ]
+      }
+    },
+    "status": 200,
+    "response": {
+      "up-860803c8-e3be-4afb-b88b-743817456dfc": true
+    }
+  },
+  "shareListAfterCreate": {
+    "method": "GET",
+    "path": "databases/dw0_probe/share/list",
+    "status": 200,
+    "response": {
+      "owner": {
+        "username": "root",
+        "full_name": "root",
+        "email": "hello@gmail.com",
+        "gender": 0,
+        "already_confirmed": true,
+        "updated_time": 1792599231000,
+        "created_time": 1792599231000
+      },
+      "total_user_sharing": 1,
+      "users_sharing": [
+        {
+          "id": "s_5",
+          "user": {
+            "username": "up-860803c8-e3be-4afb-b88b-743817456dfc",
+            "full_name": "DW0 Viewer",
+            "last_name": "Viewer",
+            "first_name": "DW0",
+            "email": "dw0.viewer@example.com",
+            "mobile_phone": "",
+            "gender": -1,
+            "avatar": "",
+            "already_confirmed": true,
+            "properties": {},
+            "updated_time": 1793295998664,
+            "created_time": 1793295998664
+          },
+          "permissions": [
+            "0:database:view:dw0_probe"
+          ],
+          "created_at": 1793296011000,
+          "updated_at": 1793296011000,
+          "created_by": "root"
+        }
+      ]
+    }
+  },
+  "shareUpdate": {
+    "method": "PUT",
+    "path": "databases/dw0_probe/share/update",
+    "request": {
+      "resource_type": "database",
+      "resource_id": "dw0_probe",
+      "share_id_actions": {
+        "s_5": [
+          "view",
+          "download",
+          "edit",
+          "copy",
+          "delete",
+          "create"
+        ]
+      }
+    },
+    "status": 400,
+    "response": {
+      "code": 400,
+      "reason": "bad_request",
+      "message": "Target user is not an editor, can not be assigned edit permissions."
+    }
+  },
+  "shareRevoke": {
+    "method": "DELETE",
+    "path": "databases/dw0_probe/share/revoke",
+    "request": {
+      "resource_type": "database",
+      "resource_id": "dw0_probe",
+      "usernames": [
+        "up-860803c8-e3be-4afb-b88b-743817456dfc"
+      ]
+    },
+    "status": 200,
+    "response": {
+      "up-860803c8-e3be-4afb-b88b-743817456dfc": true
+    }
+  },
+  "policiesListEmpty": {
+    "method": "POST",
+    "path": "policies/list",
+    "request": {
+      "db_name": "dw0_probe",
+      "tbl_name": "products"
+    },
+    "status": 200,
+    "response": {
+      "total": 0,
+      "data": []
+    }
+  },
+  "policiesPut": {
+    "method": "PUT",
+    "path": "policies",
+    "request": {
+      "db_name": "dw0_probe",
+      "tbl_name": "products",
+      "policies": [
+        {
+          "policy_id": -1,
+          "name": "Viewer sees cheap",
+          "user_ids": [
+            "up-860803c8-e3be-4afb-b88b-743817456dfc"
+          ],
+          "user_attribute": {
+            "key": "region",
+            "values": [],
+            "operator": "IsNull"
+          },
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "conditions": [
+            {
+              "class_name": "in",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "name",
+                "field_type": "string"
+              },
+              "possible_values": [
+                "Phở",
+                "O'Brien tea"
+              ],
+              "is_include_null": false
+            }
+          ]
+        },
+        {
+          "policy_id": -1,
+          "name": "Attr all",
+          "user_ids": [],
+          "user_attribute": {
+            "key": "department",
+            "values": [
+              "sales",
+              "ops"
+            ],
+            "operator": "Contain"
+          },
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "conditions": [
+            {
+              "class_name": "always_true"
+            }
+          ]
+        },
+        {
+          "policy_id": -1,
+          "user_ids": [],
+          "user_attribute": null,
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "conditions": [
+            {
+              "class_name": "always_false"
+            }
+          ]
+        }
+      ]
+    },
+    "status": 200,
+    "response": {
+      "total": 3,
+      "data": [
+        {
+          "policy_id": 1,
+          "org_id": 0,
+          "user_ids": [
+            "up-860803c8-e3be-4afb-b88b-743817456dfc"
+          ],
+          "user_attribute": {
+            "key": "region",
+            "values": [],
+            "operator": "IsNull"
+          },
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "conditions": [
+            {
+              "class_name": "in",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "name",
+                "field_type": "string"
+              },
+              "possible_values": [
+                "Phở",
+                "O'Brien tea"
+              ],
+              "is_include_null": false
+            }
+          ]
+        },
+        {
+          "policy_id": 2,
+          "org_id": 0,
+          "user_ids": [],
+          "user_attribute": {
+            "key": "department",
+            "values": [
+              "sales",
+              "ops"
+            ],
+            "operator": "Contain"
+          },
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "conditions": [
+            {
+              "class_name": "always_true"
+            }
+          ]
+        },
+        {
+          "policy_id": 3,
+          "org_id": 0,
+          "user_ids": [],
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "conditions": [
+            {
+              "class_name": "always_false"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "policiesList": {
+    "method": "POST",
+    "path": "policies/list",
+    "request": {
+      "db_name": "dw0_probe",
+      "tbl_name": "products"
+    },
+    "status": 200,
+    "response": {
+      "total": 3,
+      "data": [
+        {
+          "policy_id": 1,
+          "org_id": 0,
+          "user_ids": [
+            "up-860803c8-e3be-4afb-b88b-743817456dfc"
+          ],
+          "user_attribute": {
+            "key": "region",
+            "values": [],
+            "operator": "IsNull"
+          },
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "conditions": [
+            {
+              "class_name": "in",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "name",
+                "field_type": "string"
+              },
+              "possible_values": [
+                "Phở",
+                "O'Brien tea"
+              ],
+              "is_include_null": false
+            }
+          ]
+        },
+        {
+          "policy_id": 2,
+          "org_id": 0,
+          "user_ids": [],
+          "user_attribute": {
+            "key": "department",
+            "values": [
+              "sales",
+              "ops"
+            ],
+            "operator": "Contain"
+          },
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "conditions": [
+            {
+              "class_name": "always_true"
+            }
+          ]
+        },
+        {
+          "policy_id": 3,
+          "org_id": 0,
+          "user_ids": [],
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "conditions": [
+            {
+              "class_name": "always_false"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "policiesPutReplace": {
+    "method": "PUT",
+    "path": "policies",
+    "request": {
+      "db_name": "dw0_probe",
+      "tbl_name": "products",
+      "policies": [
+        {
+          "policy_id": 1,
+          "org_id": 0,
+          "user_ids": [
+            "up-860803c8-e3be-4afb-b88b-743817456dfc"
+          ],
+          "user_attribute": {
+            "key": "region",
+            "values": [
+              "north"
+            ],
+            "operator": "Equal"
+          },
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "conditions": [
+            {
+              "class_name": "in",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "name",
+                "field_type": "string"
+              },
+              "possible_values": [
+                "Phở",
+                "O'Brien tea"
+              ],
+              "is_include_null": false
+            }
+          ]
+        }
+      ]
+    },
+    "status": 200,
+    "response": {
+      "total": 1,
+      "data": [
+        {
+          "policy_id": 1,
+          "org_id": 0,
+          "user_ids": [
+            "up-860803c8-e3be-4afb-b88b-743817456dfc"
+          ],
+          "user_attribute": {
+            "key": "region",
+            "values": [
+              "north"
+            ],
+            "operator": "Equal"
+          },
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "conditions": [
+            {
+              "class_name": "in",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "name",
+                "field_type": "string"
+              },
+              "possible_values": [
+                "Phở",
+                "O'Brien tea"
+              ],
+              "is_include_null": false
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "relationshipGlobalGet": {
+    "method": "GET",
+    "path": "relationships/global",
+    "status": 200,
+    "response": {
+      "views": [],
+      "relationships": [],
+      "extra_data": {}
+    }
+  },
+  "relationshipGlobalPost": {
+    "method": "POST",
+    "path": "relationships/global",
+    "request": {
+      "views": [
+        {
+          "class_name": "table_view",
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "alias_name": ""
+        },
+        {
+          "class_name": "table_view",
+          "db_name": "dw0_probe",
+          "tbl_name": "big_qty",
+          "alias_name": ""
+        }
+      ],
+      "relationships": [
+        {
+          "first_view": {
+            "class_name": "table_view",
+            "db_name": "dw0_probe",
+            "tbl_name": "products",
+            "alias_name": ""
+          },
+          "second_view": {
+            "class_name": "table_view",
+            "db_name": "dw0_probe",
+            "tbl_name": "big_qty",
+            "alias_name": ""
+          },
+          "field_pairs": [
+            {
+              "first_field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "id",
+                "field_type": "int64"
+              },
+              "second_field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "big_qty",
+                "field_name": "id",
+                "field_type": "int64"
+              }
+            }
+          ]
+        }
+      ],
+      "extra_data": {
+        "table_positions": {
+          "dw0ProbeProducts": {
+            "left": 40,
+            "top": 60
+          },
+          "dw0ProbeBigQty": {
+            "left": 360,
+            "top": 60
+          },
+          "staleRemovedTable": {
+            "left": 0,
+            "top": 0
+          }
+        }
+      }
+    },
+    "status": 200,
+    "response": {
+      "success": true
+    }
+  },
+  "relationshipGlobalAfterPost": {
+    "method": "GET",
+    "path": "relationships/global",
+    "status": 200,
+    "response": {
+      "views": [
+        {
+          "class_name": "table_view",
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "alias_name": "tbl_233445"
+        },
+        {
+          "class_name": "table_view",
+          "db_name": "dw0_probe",
+          "tbl_name": "big_qty",
+          "alias_name": "tbl_d5adad"
+        }
+      ],
+      "relationships": [
+        {
+          "first_view": {
+            "class_name": "table_view",
+            "db_name": "dw0_probe",
+            "tbl_name": "products",
+            "alias_name": "tbl_233445"
+          },
+          "second_view": {
+            "class_name": "table_view",
+            "db_name": "dw0_probe",
+            "tbl_name": "big_qty",
+            "alias_name": "tbl_d5adad"
+          },
+          "field_pairs": [
+            {
+              "first_field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "products",
+                "field_name": "id",
+                "field_type": "int64"
+              },
+              "second_field": {
+                "class_name": "table_field",
+                "db_name": "dw0_probe",
+                "tbl_name": "big_qty",
+                "field_name": "id",
+                "field_type": "int64"
+              }
+            }
+          ]
+        }
+      ],
+      "extra_data": {
+        "table_positions": {
+          "dw0ProbeProducts": {
+            "left": 40,
+            "top": 60
+          },
+          "dw0ProbeBigQty": {
+            "left": 360,
+            "top": 60
+          },
+          "staleRemovedTable": {
+            "left": 0,
+            "top": 0
+          }
+        }
+      }
+    }
+  },
+  "relationshipGlobalDelete": {
+    "method": "DELETE",
+    "path": "relationships/global",
+    "status": 200,
+    "response": {
+      "success": true
+    }
+  },
+  "analysisCreate": {
+    "method": "POST",
+    "path": "dashboards/create",
+    "request": {
+      "name": "DW0 Analysis",
+      "parent_directory_id": 1,
+      "widgets": [
+        {
+          "class_name": "chart_v3",
+          "id": 2,
+          "name": "",
+          "description": "",
+          "extra_data": {
+            "current_chart_type": "table"
+          },
+          "setting": {
+            "filters": [],
+            "sorts": [],
+            "options": {
+              "options": {
+                "title": {
+                  "align": "center",
+                  "enabled": true,
+                  "text": "Untitled chart",
+                  "style": {
+                    "color": "var(--text-color)",
+                    "font_family": "var(--widget-primary-font-family, Roboto)",
+                    "font_size": "20px",
+                    "font_weight": "var(--widget-primary-font-weight, 500)",
+                    "font_style": "var(--widget-primary-font-style, normal)"
+                  }
+                },
+                "subtitle": {
+                  "align": "center",
+                  "enabled": true,
+                  "text": "",
+                  "style": {
+                    "color": "var(--secondary-text-color)",
+                    "font_family": "var(--widget-secondary-font-family, Roboto)",
+                    "font_size": "11px",
+                    "font_weight": "var(--widget-secondary-font-weight, 400)",
+                    "font_style": "var(--widget-secondary-font-style, normal)",
+                    "text_decoration": "var(--widget-secondary-font-underlined, underline)"
+                  }
+                },
+                "grid": {
+                  "horizontal": {
+                    "color": "var(--table-grid-line-color)",
+                    "thickness": "1px",
+                    "row_padding": "0px",
+                    "apply_body": true,
+                    "apply_header": true,
+                    "apply_total": true
+                  },
+                  "vertical": {
+                    "color": "var(--table-grid-line-color)",
+                    "thickness": "1px",
+                    "apply_body": false,
+                    "apply_header": false,
+                    "apply_total": false
+                  }
+                },
+                "affected_by_filter": true,
+                "tooltip": {
+                  "font_family": "var(--widget-secondary-font-family, Roboto)",
+                  "background_color": "var(--tooltip-background-color)",
+                  "value_color": "var(--secondary-text-color)"
+                },
+                "value": {
+                  "color": "var(--text-color)",
+                  "background_color": "var(--row-even-background-color)",
+                  "align": "left",
+                  "alternate_background_color": "var(--row-odd-background-color)",
+                  "alternate_color": "var(--text-color)",
+                  "enable_url_icon": false,
+                  "style": {
+                    "color": "var(--secondary-text-color)",
+                    "font_family": "var(--widget-secondary-font-family, Roboto)",
+                    "font_size": "12px",
+                    "font_weight": "var(--widget-secondary-font-weight, 400)",
+                    "font_style": "var(--widget-secondary-font-style, normal)",
+                    "is_word_wrap": false
+                  }
+                },
+                "header": {
+                  "align": "left",
+                  "background_color": "var(--header-background-color)",
+                  "color": "#FFFFFF",
+                  "is_word_wrap": false,
+                  "is_auto_width_size": false,
+                  "style": {
+                    "color": "var(--text-color)",
+                    "font_family": "var(--widget-secondary-font-family, Roboto)",
+                    "font_size": "12px",
+                    "font_weight": "var(--widget-secondary-font-weight, 400)",
+                    "font_style": "var(--widget-secondary-font-style, normal)",
+                    "is_word_wrap": false
+                  }
+                },
+                "toggle_icon": {
+                  "color": "var(--text-color)",
+                  "background_color": "var(--toggle-color)"
+                },
+                "background": "var(--chart-background-color)",
+                "query_parameter": [
+                  {
+                    "display_name": "min_qty",
+                    "value_type": "text",
+                    "value": "",
+                    "list": null
+                  }
+                ],
+                "raw_query": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n"
+              },
+              "class_name": "table_chart_setting"
+            },
+            "sql_views": [
+              {
+                "class_name": "sql_view",
+                "alias_name": "view_2ATJwZNKDn",
+                "query": {
+                  "class_name": "sql_query",
+                  "query": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n"
+                }
+              }
+            ],
+            "parameters": {
+              "min_qty": "''"
+            },
+            "sql": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n",
+            "class_name": "raw_query_setting"
+          }
+        }
+      ],
+      "directory_type": "queries",
+      "setting": {
+        "version": "1",
+        "enable_overlap": false,
+        "theme_name": "light_default",
+        "main_date_filter": {
+          "id": -99887766,
+          "mode": "all_time"
+        },
+        "border": {
+          "width": 1,
+          "color": "#f2f2f7",
+          "color_opacity": 100,
+          "radius": {
+            "top_left": 20,
+            "top_right": 20,
+            "bottom_right": 20,
+            "bottom_left": 20
+          },
+          "position": "outside"
+        },
+        "size": {
+          "width": 100,
+          "height": 0,
+          "width_unit": "%",
+          "height_unit": "auto"
+        },
+        "background_image": {
+          "image_name": "",
+          "path": "",
+          "fit_mode": "repeat",
+          "brightness": 100,
+          "contrast": 100,
+          "grayscale": 0,
+          "opacity": 100
+        },
+        "background": {
+          "color": "#FAFAFB",
+          "opacity": 100
+        },
+        "widget_setting": {
+          "primary_text": {
+            "font_family": "Roboto",
+            "font_size": "20px",
+            "font_weight": "500",
+            "text_align": "center",
+            "color": "#4f4f4f",
+            "color_opacity": 100,
+            "is_bold": false,
+            "is_italic": false,
+            "is_underline": false
+          },
+          "secondary_text": {
+            "font_family": "Roboto",
+            "font_size": "14px",
+            "font_weight": "normal",
+            "text_align": "center",
+            "color": "#5f6368",
+            "color_opacity": 100,
+            "is_bold": false,
+            "is_italic": false,
+            "is_underline": false
+          },
+          "padding": 15,
+          "border": {
+            "width": 0,
+            "color": "#f2f2f7",
+            "color_opacity": 100,
+            "radius": {
+              "top_left": 20,
+              "top_right": 20,
+              "bottom_right": 20,
+              "bottom_left": 20
+            },
+            "position": "outside"
+          },
+          "background": {
+            "color": "#FFFFFF",
+            "opacity": 100
+          }
+        },
+        "auto_refresh_setting": {
+          "is_auto_refresh": false,
+          "refresh_interval_ms": 10000
+        }
+      }
+    },
+    "status": 200,
+    "response": {
+      "org_id": 0,
+      "id": 5,
+      "name": "DW0 Analysis",
+      "creator_id": "root",
+      "owner_id": "root",
+      "setting": {
+        "version": "1",
+        "enable_overlap": false,
+        "theme_name": "light_default",
+        "main_date_filter": {
+          "id": -99887766,
+          "mode": "all_time"
+        },
+        "border": {
+          "width": 1,
+          "color": "#f2f2f7",
+          "color_opacity": 100,
+          "radius": {
+            "top_left": 20,
+            "top_right": 20,
+            "bottom_right": 20,
+            "bottom_left": 20
+          },
+          "position": "outside"
+        },
+        "size": {
+          "width": 100,
+          "height": 0,
+          "width_unit": "%",
+          "height_unit": "auto"
+        },
+        "background_image": {
+          "image_name": "",
+          "path": "",
+          "fit_mode": "repeat",
+          "brightness": 100,
+          "contrast": 100,
+          "grayscale": 0,
+          "opacity": 100
+        },
+        "background": {
+          "color": "#FAFAFB",
+          "opacity": 100
+        },
+        "widget_setting": {
+          "primary_text": {
+            "font_family": "Roboto",
+            "font_size": "20px",
+            "font_weight": "500",
+            "text_align": "center",
+            "color": "#4f4f4f",
+            "color_opacity": 100,
+            "is_bold": false,
+            "is_italic": false,
+            "is_underline": false
+          },
+          "secondary_text": {
+            "font_family": "Roboto",
+            "font_size": "14px",
+            "font_weight": "normal",
+            "text_align": "center",
+            "color": "#5f6368",
+            "color_opacity": 100,
+            "is_bold": false,
+            "is_italic": false,
+            "is_underline": false
+          },
+          "padding": 15,
+          "border": {
+            "width": 0,
+            "color": "#f2f2f7",
+            "color_opacity": 100,
+            "radius": {
+              "top_left": 20,
+              "top_right": 20,
+              "bottom_right": 20,
+              "bottom_left": 20
+            },
+            "position": "outside"
+          },
+          "background": {
+            "color": "#FFFFFF",
+            "opacity": 100
+          }
+        },
+        "auto_refresh_setting": {
+          "is_auto_refresh": false,
+          "refresh_interval_ms": 10000
+        }
+      },
+      "widgets": [
+        {
+          "class_name": "chart_v3",
+          "id": 62,
+          "name": "",
+          "description": "",
+          "setting": {
+            "class_name": "raw_query_setting",
+            "sql": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n",
+            "filters": [],
+            "sorts": [],
+            "sql_views": [
+              {
+                "class_name": "sql_view",
+                "alias_name": "view_2ATJwZNKDn",
+                "query": {
+                  "class_name": "sql_query",
+                  "query": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n",
+                  "rls_conditions": [],
+                  "expressions": {},
+                  "parameters": {},
+                  "all_query_views": [
+                    {
+                      "class_name": "table_view",
+                      "db_name": "dw0_probe",
+                      "tbl_name": "products",
+                      "alias_name": "tbl_233445"
+                    }
+                  ]
+                }
+              }
+            ],
+            "options": {
+              "options": {
+                "subtitle": {
+                  "align": "center",
+                  "enabled": true,
+                  "text": "",
+                  "style": {
+                    "color": "var(--secondary-text-color)",
+                    "text_decoration": "var(--widget-secondary-font-underlined, underline)",
+                    "font_style": "var(--widget-secondary-font-style, normal)",
+                    "font_weight": "var(--widget-secondary-font-weight, 400)",
+                    "font_family": "var(--widget-secondary-font-family, Roboto)",
+                    "font_size": "11px"
+                  }
+                },
+                "toggle_icon": {
+                  "color": "var(--text-color)",
+                  "background_color": "var(--toggle-color)"
+                },
+                "background": "var(--chart-background-color)",
+                "affected_by_filter": true,
+                "grid": {
+                  "horizontal": {
+                    "apply_body": true,
+                    "color": "var(--table-grid-line-color)",
+                    "thickness": "1px",
+                    "row_padding": "0px",
+                    "apply_total": true,
+                    "apply_header": true
+                  },
+                  "vertical": {
+                    "apply_body": false,
+                    "color": "var(--table-grid-line-color)",
+                    "thickness": "1px",
+                    "apply_total": false,
+                    "apply_header": false
+                  }
+                },
+                "raw_query": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n",
+                "header": {
+                  "style": {
+                    "is_word_wrap": false,
+                    "color": "var(--text-color)",
+                    "font_style": "var(--widget-secondary-font-style, normal)",
+                    "font_weight": "var(--widget-secondary-font-weight, 400)",
+                    "font_family": "var(--widget-secondary-font-family, Roboto)",
+                    "font_size": "12px"
+                  },
+                  "align": "left",
+                  "is_word_wrap": false,
+                  "background_color": "var(--header-background-color)",
+                  "color": "#FFFFFF",
+                  "is_auto_width_size": false
+                },
+                "tooltip": {
+                  "font_family": "var(--widget-secondary-font-family, Roboto)",
+                  "background_color": "var(--tooltip-background-color)",
+                  "value_color": "var(--secondary-text-color)"
+                },
+                "title": {
+                  "align": "center",
+                  "enabled": true,
+                  "text": "Untitled chart",
+                  "style": {
+                    "color": "var(--text-color)",
+                    "font_style": "var(--widget-primary-font-style, normal)",
+                    "font_weight": "var(--widget-primary-font-weight, 500)",
+                    "font_family": "var(--widget-primary-font-family, Roboto)",
+                    "font_size": "20px"
+                  }
+                },
+                "query_parameter": [
+                  {
+                    "display_name": "min_qty",
+                    "value_type": "text",
+                    "value": ""
+                  }
+                ],
+                "value": {
+                  "style": {
+                    "is_word_wrap": false,
+                    "color": "var(--secondary-text-color)",
+                    "font_style": "var(--widget-secondary-font-style, normal)",
+                    "font_weight": "var(--widget-secondary-font-weight, 400)",
+                    "font_family": "var(--widget-secondary-font-family, Roboto)",
+                    "font_size": "12px"
+                  },
+                  "align": "left",
+                  "background_color": "var(--row-even-background-color)",
+                  "color": "var(--text-color)",
+                  "enable_url_icon": false,
+                  "alternate_background_color": "var(--row-odd-background-color)",
+                  "alternate_color": "var(--text-color)"
+                }
+              },
+              "class_name": "table_chart_setting"
+            },
+            "dynamic_function_ids": []
+          },
+          "creator_id": "root",
+          "owner_id": "root",
+          "extra_data": {
+            "current_chart_type": "table"
+          },
+          "comparison_info": {}
+        }
+      ],
+      "widget_positions": {},
+      "use_as_template": false,
+      "all_query_views": [
+        {
+          "class_name": "table_view",
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "alias_name": "tbl_233445"
+        }
+      ]
+    }
+  },
+  "analysisGet": {
+    "method": "GET",
+    "path": "dashboards/5",
+    "status": 200,
+    "response": {
+      "org_id": 0,
+      "id": 5,
+      "name": "DW0 Analysis",
+      "creator_id": "root",
+      "owner_id": "root",
+      "setting": {
+        "version": "1",
+        "enable_overlap": false,
+        "theme_name": "light_default",
+        "main_date_filter": {
+          "id": -99887766,
+          "mode": "all_time"
+        },
+        "border": {
+          "width": 1,
+          "color": "#f2f2f7",
+          "color_opacity": 100,
+          "radius": {
+            "top_left": 20,
+            "top_right": 20,
+            "bottom_right": 20,
+            "bottom_left": 20
+          },
+          "position": "outside"
+        },
+        "size": {
+          "width": 100,
+          "height": 0,
+          "width_unit": "%",
+          "height_unit": "auto"
+        },
+        "background_image": {
+          "image_name": "",
+          "path": "",
+          "fit_mode": "repeat",
+          "brightness": 100,
+          "contrast": 100,
+          "grayscale": 0,
+          "opacity": 100
+        },
+        "background": {
+          "color": "#FAFAFB",
+          "opacity": 100
+        },
+        "widget_setting": {
+          "primary_text": {
+            "font_family": "Roboto",
+            "font_size": "20px",
+            "font_weight": "500",
+            "text_align": "center",
+            "color": "#4f4f4f",
+            "color_opacity": 100,
+            "is_bold": false,
+            "is_italic": false,
+            "is_underline": false
+          },
+          "secondary_text": {
+            "font_family": "Roboto",
+            "font_size": "14px",
+            "font_weight": "normal",
+            "text_align": "center",
+            "color": "#5f6368",
+            "color_opacity": 100,
+            "is_bold": false,
+            "is_italic": false,
+            "is_underline": false
+          },
+          "padding": 15,
+          "border": {
+            "width": 0,
+            "color": "#f2f2f7",
+            "color_opacity": 100,
+            "radius": {
+              "top_left": 20,
+              "top_right": 20,
+              "bottom_right": 20,
+              "bottom_left": 20
+            },
+            "position": "outside"
+          },
+          "background": {
+            "color": "#FFFFFF",
+            "opacity": 100
+          }
+        },
+        "auto_refresh_setting": {
+          "is_auto_refresh": false,
+          "refresh_interval_ms": 10000
+        }
+      },
+      "widgets": [
+        {
+          "class_name": "chart_v3",
+          "id": 62,
+          "name": "",
+          "description": "",
+          "setting": {
+            "class_name": "raw_query_setting",
+            "sql": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n and id < 5",
+            "filters": [],
+            "sorts": [],
+            "sql_views": [
+              {
+                "class_name": "sql_view",
+                "alias_name": "view_s0CbS7CNUC",
+                "query": {
+                  "class_name": "sql_query",
+                  "query": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n and id < 5",
+                  "rls_conditions": [],
+                  "expressions": {},
+                  "parameters": {},
+                  "all_query_views": [
+                    {
+                      "class_name": "table_view",
+                      "db_name": "dw0_probe",
+                      "tbl_name": "products",
+                      "alias_name": "tbl_233445"
+                    }
+                  ]
+                }
+              }
+            ],
+            "options": {
+              "options": {
+                "subtitle": {
+                  "align": "center",
+                  "enabled": true,
+                  "text": "",
+                  "style": {
+                    "color": "var(--secondary-text-color)",
+                    "text_decoration": "var(--widget-secondary-font-underlined, underline)",
+                    "font_style": "var(--widget-secondary-font-style, normal)",
+                    "font_weight": "var(--widget-secondary-font-weight, 400)",
+                    "font_family": "var(--widget-secondary-font-family, Roboto)",
+                    "font_size": "11px"
+                  }
+                },
+                "toggle_icon": {
+                  "color": "var(--text-color)",
+                  "background_color": "var(--toggle-color)"
+                },
+                "background": "var(--chart-background-color)",
+                "affected_by_filter": true,
+                "grid": {
+                  "horizontal": {
+                    "apply_body": true,
+                    "color": "var(--table-grid-line-color)",
+                    "thickness": "1px",
+                    "row_padding": "0px",
+                    "apply_total": true,
+                    "apply_header": true
+                  },
+                  "vertical": {
+                    "apply_body": false,
+                    "color": "var(--table-grid-line-color)",
+                    "thickness": "1px",
+                    "apply_total": false,
+                    "apply_header": false
+                  }
+                },
+                "raw_query": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n and id < 5",
+                "header": {
+                  "style": {
+                    "is_word_wrap": false,
+                    "color": "var(--text-color)",
+                    "font_style": "var(--widget-secondary-font-style, normal)",
+                    "font_weight": "var(--widget-secondary-font-weight, 400)",
+                    "font_family": "var(--widget-secondary-font-family, Roboto)",
+                    "font_size": "12px"
+                  },
+                  "align": "left",
+                  "is_word_wrap": false,
+                  "background_color": "var(--header-background-color)",
+                  "color": "#FFFFFF",
+                  "is_auto_width_size": false
+                },
+                "tooltip": {
+                  "font_family": "var(--widget-secondary-font-family, Roboto)",
+                  "background_color": "var(--tooltip-background-color)",
+                  "value_color": "var(--secondary-text-color)"
+                },
+                "title": {
+                  "align": "center",
+                  "enabled": true,
+                  "text": "Untitled chart",
+                  "style": {
+                    "color": "var(--text-color)",
+                    "font_style": "var(--widget-primary-font-style, normal)",
+                    "font_weight": "var(--widget-primary-font-weight, 500)",
+                    "font_family": "var(--widget-primary-font-family, Roboto)",
+                    "font_size": "20px"
+                  }
+                },
+                "query_parameter": [
+                  {
+                    "display_name": "min_qty",
+                    "value_type": "text",
+                    "value": ""
+                  }
+                ],
+                "value": {
+                  "style": {
+                    "is_word_wrap": false,
+                    "color": "var(--secondary-text-color)",
+                    "font_style": "var(--widget-secondary-font-style, normal)",
+                    "font_weight": "var(--widget-secondary-font-weight, 400)",
+                    "font_family": "var(--widget-secondary-font-family, Roboto)",
+                    "font_size": "12px"
+                  },
+                  "align": "left",
+                  "background_color": "var(--row-even-background-color)",
+                  "color": "var(--text-color)",
+                  "enable_url_icon": false,
+                  "alternate_background_color": "var(--row-odd-background-color)",
+                  "alternate_color": "var(--text-color)"
+                }
+              },
+              "class_name": "table_chart_setting"
+            },
+            "dynamic_function_ids": []
+          },
+          "creator_id": "root",
+          "owner_id": "root",
+          "extra_data": {
+            "current_chart_type": "table"
+          },
+          "comparison_info": {}
+        }
+      ],
+      "widget_positions": {},
+      "use_as_template": false,
+      "all_query_views": [
+        {
+          "class_name": "table_view",
+          "db_name": "dw0_probe",
+          "tbl_name": "products",
+          "alias_name": "tbl_233445"
+        }
+      ]
+    }
+  },
+  "analysisQuery": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "filters": [],
+        "sorts": [],
+        "options": {},
+        "sql_views": [
+          {
+            "class_name": "sql_view",
+            "alias_name": "view_KjODsb1LCc",
+            "query": {
+              "class_name": "sql_query",
+              "query": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n and id < 5 \n"
+            }
+          }
+        ],
+        "parameters": {
+          "min_qty": "''"
+        },
+        "sql": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n and id < 5 \n",
+        "class_name": "raw_query_setting"
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 20,
+      "dashboard_id": 5,
+      "parameters": {
+        "min_qty": "''"
+      }
+    },
+    "status": 200,
+    "response": {
+      "class_name": "json_table_response",
+      "headers": [
+        {
+          "key": "0",
+          "label": "id",
+          "is_group_by": false,
+          "is_text_left": false
+        },
+        {
+          "key": "1",
+          "label": "name",
+          "is_group_by": false,
+          "is_text_left": true
+        },
+        {
+          "key": "2",
+          "label": "qty",
+          "is_group_by": false,
+          "is_text_left": false
+        }
+      ],
+      "records": [
+        {
+          "0": "1",
+          "1": "Bánh mì",
+          "2": "3"
+        },
+        {
+          "0": "2",
+          "1": "Phở",
+          "2": "1"
+        },
+        {
+          "0": "3",
+          "1": "Cà phê",
+          "2": "2"
+        },
+        {
+          "0": "4",
+          "1": "O'Brien tea",
+          "2": "5"
+        }
+      ],
+      "total": 4,
+      "min_max_values": [],
+      "last_query_time": 0,
+      "last_processing_time": 0
+    }
+  },
+  "analysisWidgetEdit": {
+    "method": "PUT",
+    "path": "dashboards/5/widgets/62/edit",
+    "request": {
+      "dashboard_id": 5,
+      "widget_id": 62,
+      "widget": {
+        "class_name": "chart_v3",
+        "id": 62,
+        "name": "",
+        "description": "",
+        "extra_data": {
+          "current_chart_type": "table"
+        },
+        "setting": {
+          "filters": [],
+          "sorts": [],
+          "options": {
+            "options": {
+              "title": {
+                "align": "center",
+                "enabled": true,
+                "text": "Untitled chart",
+                "style": {
+                  "color": "var(--text-color)",
+                  "font_family": "var(--widget-primary-font-family, Roboto)",
+                  "font_size": "20px",
+                  "font_weight": "var(--widget-primary-font-weight, 500)",
+                  "font_style": "var(--widget-primary-font-style, normal)"
+                }
+              },
+              "subtitle": {
+                "align": "center",
+                "enabled": true,
+                "text": "",
+                "style": {
+                  "color": "var(--secondary-text-color)",
+                  "font_family": "var(--widget-secondary-font-family, Roboto)",
+                  "font_size": "11px",
+                  "font_weight": "var(--widget-secondary-font-weight, 400)",
+                  "font_style": "var(--widget-secondary-font-style, normal)",
+                  "text_decoration": "var(--widget-secondary-font-underlined, underline)"
+                }
+              },
+              "grid": {
+                "horizontal": {
+                  "color": "var(--table-grid-line-color)",
+                  "thickness": "1px",
+                  "row_padding": "0px",
+                  "apply_body": true,
+                  "apply_header": true,
+                  "apply_total": true
+                },
+                "vertical": {
+                  "color": "var(--table-grid-line-color)",
+                  "thickness": "1px",
+                  "apply_body": false,
+                  "apply_header": false,
+                  "apply_total": false
+                }
+              },
+              "affected_by_filter": true,
+              "tooltip": {
+                "font_family": "var(--widget-secondary-font-family, Roboto)",
+                "background_color": "var(--tooltip-background-color)",
+                "value_color": "var(--secondary-text-color)"
+              },
+              "value": {
+                "color": "var(--text-color)",
+                "background_color": "var(--row-even-background-color)",
+                "align": "left",
+                "alternate_background_color": "var(--row-odd-background-color)",
+                "alternate_color": "var(--text-color)",
+                "enable_url_icon": false,
+                "style": {
+                  "color": "var(--secondary-text-color)",
+                  "font_family": "var(--widget-secondary-font-family, Roboto)",
+                  "font_size": "12px",
+                  "font_weight": "var(--widget-secondary-font-weight, 400)",
+                  "font_style": "var(--widget-secondary-font-style, normal)",
+                  "is_word_wrap": false
+                }
+              },
+              "header": {
+                "align": "left",
+                "background_color": "var(--header-background-color)",
+                "color": "#FFFFFF",
+                "is_word_wrap": false,
+                "is_auto_width_size": false,
+                "style": {
+                  "color": "var(--text-color)",
+                  "font_family": "var(--widget-secondary-font-family, Roboto)",
+                  "font_size": "12px",
+                  "font_weight": "var(--widget-secondary-font-weight, 400)",
+                  "font_style": "var(--widget-secondary-font-style, normal)",
+                  "is_word_wrap": false
+                }
+              },
+              "toggle_icon": {
+                "color": "var(--text-color)",
+                "background_color": "var(--toggle-color)"
+              },
+              "background": "var(--chart-background-color)",
+              "query_parameter": [
+                {
+                  "display_name": "min_qty",
+                  "value_type": "text",
+                  "value": ""
+                }
+              ],
+              "raw_query": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n and id < 5"
+            },
+            "class_name": "table_chart_setting"
+          },
+          "sql_views": [
+            {
+              "class_name": "sql_view",
+              "alias_name": "view_s0CbS7CNUC",
+              "query": {
+                "class_name": "sql_query",
+                "query": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n and id < 5"
+              }
+            }
+          ],
+          "parameters": {
+            "min_qty": "''"
+          },
+          "sql": "select id, name, qty from dw0_probe.products where qty > {{min_qty}} \n and id < 5",
+          "class_name": "raw_query_setting"
+        }
+      }
+    },
+    "status": 200,
+    "response": {
+      "success": true
+    }
+  },
+  "analysisQueryCamelParam": {
+    "method": "POST",
+    "path": "chart/query",
+    "request": {
+      "query_setting": {
+        "filters": [],
+        "sorts": [],
+        "options": {},
+        "sql_views": [
+          {
+            "class_name": "sql_view",
+            "alias_name": "view_PlizU6y7xu",
+            "query": {
+              "class_name": "sql_query",
+              "query": "select id from dw0_probe.products where qty > {{minQty}} \n"
+            }
+          }
+        ],
+        "parameters": {
+          "min_qty": "''"
+        },
+        "sql": "select id from dw0_probe.products where qty > {{minQty}} \n",
+        "class_name": "raw_query_setting"
+      },
+      "filter_requests": [],
+      "from": 0,
+      "size": 20,
+      "parameters": {
+        "minQty": "''"
+      }
+    },
+    "status": 200,
+    "response": {
+      "class_name": "json_table_response",
+      "headers": [
+        {
+          "key": "0",
+          "label": "id",
+          "is_group_by": false,
+          "is_text_left": false
+        }
+      ],
+      "records": [
+        {
+          "0": "1"
+        },
+        {
+          "0": "2"
+        },
+        {
+          "0": "3"
+        },
+        {
+          "0": "4"
+        },
+        {
+          "0": "5"
+        }
+      ],
+      "total": 5,
+      "min_max_values": [],
+      "last_query_time": 0,
+      "last_processing_time": 0
+    }
+  }
+}
