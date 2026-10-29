@@ -1,21 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useDi } from '@/app/di/DiContext';
 import { UserService } from '@/core/user/UserService';
+import { useDebouncedValue } from '@/shared/hooks/useDebouncedValue';
 
 /** v1 asked for the first 100 matches. */
 const SUGGESTION_SIZE = 100;
 /** v1's search input waited 500 ms after the last key. */
 export const SEARCH_DEBOUNCE_MS = 500;
-
-function useDebouncedValue<T>(value: T, delayMs: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delayMs);
-    return () => clearTimeout(timer);
-  }, [value, delayMs]);
-  return debounced;
-}
 
 /**
  * "Add people and groups" (v1 `SearchUserInput`): users matching the keyword, once typing pauses, the previous
