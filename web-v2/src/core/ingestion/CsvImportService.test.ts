@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { csvColumnFromJson, type CsvColumn } from './CsvImport';
 import { HttpCsvImportService } from './CsvImportService';
 import fixture from './ingestion.fixture.json';
-import { fakeHttp, type Reply } from './testing';
+import { fakeHttp, type Reply } from '@/test/fakeHttp';
 
 function setup(...replies: Reply[]) {
   const { http, requests } = fakeHttp(...replies);
