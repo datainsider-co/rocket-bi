@@ -3,7 +3,8 @@ import { chartIconOf, CONTROL_ICON } from '@/core/chart-builder/chartCatalogue';
 import { ChartInfoType, type ChartControl } from '@/core/chart-builder/chartControls';
 import { TableType, type DatabaseInfo, type SchemaColumn, type TableSchema } from '@/core/schema/SchemaService';
 import type { ExpressionColumnKind } from '@/core/schema/SchemaEditService';
-import type { ActionItem, ColumnAction, TableAction } from '../field-actions/fieldActions.utils';
+import type { ActionItem } from '@/shared/menu/ActionMenuView';
+import type { ColumnAction, TableAction } from '../field-actions/fieldActions.utils';
 import type { DroppedField } from '../state/builderState.utils';
 
 /** A plain column, a measure (aggregated by its expression) or a calculated column. */

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { ExpressionColumn, ExpressionColumnKind } from '@/core/schema/SchemaEditService';
 import { TableType, type SchemaColumn, type TableSchema } from '@/core/schema/SchemaService';
+import type { ActionItem } from '@/shared/menu/ActionMenuView';
 import { columnNameOf, toExpression, toFormula } from './formula.utils';
 
 /**
@@ -11,12 +12,6 @@ export type TableAction = 'addCalculated' | 'addMeasure' | 'updateQuery';
 
 /** What the menu of a measure or calculated column offers. */
 export type ColumnAction = 'edit' | 'delete';
-
-export interface ActionItem<T extends string> {
-  readonly key: T;
-  readonly label: string;
-  readonly danger?: boolean;
-}
 
 /** Only a view of a database has a query to change (v1 `isViewTable`). */
 export function canUpdateByQuery(table: Pick<TableSchema, 'dbName' | 'tableType'>): boolean {

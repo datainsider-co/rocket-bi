@@ -1,6 +1,6 @@
 import { FieldDraggable } from '@/shared/field-dnd/FieldDraggable';
 import { columnActionsOf } from '../field-actions/fieldActions.utils';
-import { ActionMenuView } from './ActionMenuView';
+import { ActionMenuView } from '@/shared/menu/ActionMenuView';
 import { FieldLabelView } from './FieldLabelView';
 import { expressionKindOf, fieldLookOf, type FieldNode, type FieldTreePayload, type TreeActions } from './fieldTree.utils';
 
