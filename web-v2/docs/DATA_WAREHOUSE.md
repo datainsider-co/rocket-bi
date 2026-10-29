@@ -326,13 +326,28 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
   sẵn. Phần analysis ↔ dashboard JSON để DW11.
 - **`fakeHttp`** chuyển từ `core/ingestion/testing.ts` sang `src/test/fakeHttp.ts`: module thứ hai cần nó.
 
+## Quyết định ở DW2 (2026-10-30)
+
+- **Routes** (`app/router.tsx`, `warehouseRoutes`) ở path của v1, không sau feature flag (v1 không tắt Data Warehouse):
+  `/data-warehouse/databases/all`, `schema`, `query-editor`, `relationship`, page lazy load. `/data-warehouse`,
+  `/data-warehouse/databases`, `/data-warehouse/databases/trash` và mọi `/data-management/*` chuyển về listing.
+  `/data-warehouse/data-cook` vẫn Not found tới Phase 7.
+- **Không có sidebar All Database / Trash**: không có trash thì sidebar chỉ còn một mục. Trang listing chiếm cả chiều
+  rộng, header "All Databases" như v1.
+- **Không có layout chung cho `/data-warehouse`**: mỗi trang tự render header (`features/data-warehouse/warehouse.utils.ts`
+  giữ tên, icon, path của từng trang như v1). Khung chia đôi cây database / nội dung làm cùng cây ở DW3.
+- **`PageHeader`** (icon, tiêu đề, action) chuyển từ `features/ingestion/layout/IngestionPageHeader` sang
+  `shared/layout/PageHeader`, nhận `icon` và `title` thay cho section của Ingestion.
+- Các trang hiện chỉ có header. Đã kiểm bằng Playwright trên `pnpm dev`: redirect, menu Data Warehouse sáng đúng mục,
+  không lỗi console.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
 |---|---|---|
 | DW0 | **Spike và payload thật** trên docker local (warehouse MySQL): `databases/my_data`, `trash`, `remove` / `restore` có chạy không; tạo database, tạo bảng, PUT schema (đổi type, thêm cột, default value), `from_query` view và materialized; share database (ba endpoint); `policies/list`, `PUT policies` với user attribute và condition; `chart/query` với `raw_query_setting` + parameters (text, number, date, list) và `limit`; tạo analysis bằng v1 rồi lưu JSON; `relationships/global`. Có cần `DI-SERVICE-KEY` / `admin_secret_key` không. Lưu fixture | Xong (không có trash, RLS không chạy trên MySQL, xem DW0) |
 | DW1 | **Core.** `DatabaseService`, `TableService`, `DatabaseShareService`, `RlsPolicyService`, mở rộng `TableSchema` / cột (giữ `json` gốc), raw query request và parameters thuần. Test round-trip với fixture DW0 | Xong (xem DW1) |
-| DW2 | **Khung.** Routes `/data-warehouse/*` ở path của v1 (kể cả redirect `/data-management/*`), layout có header icon + tên, `/data-warehouse/databases/trash` chuyển về `all` (không có trash, DW0), page lazy load | Chưa làm |
+| DW2 | **Khung.** Routes `/data-warehouse/*` ở path của v1 (kể cả redirect `/data-management/*`), layout có header icon + tên, `/data-warehouse/databases/trash` chuyển về `all` (không có trash, DW0), page lazy load | Xong (xem DW2) |
 | DW3 | **Cây database dùng chung.** Short info + tải khi mở, search, refresh, tạo database, slot action cho bảng / cột, kéo bảng, Storybook | Chưa làm |
 | DW4 | **Databases.** Listing (search, sort, phân trang ở client, Owner trống khi server không trả), click dòng → Schema, Delete (xoá hẳn, hỏi xác nhận), trạng thái rỗng / lỗi | Chưa làm |
 | DW5 | **Share database.** `ShareModal` nhận adapter, không có link / password, chỉ gửi thay đổi thật như M7b | Chưa làm |
