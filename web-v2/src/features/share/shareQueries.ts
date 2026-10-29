@@ -1,22 +1,21 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { DirectoryService } from '@/core/directory/DirectoryService';
 import type { ShareResource, ShareService } from '@/core/share/ShareService';
-
-/** v1 read the first 100 users a resource is shared with. */
-const SHARING_PAGE_SIZE = 100;
+import type { SharePeopleApi } from './people/sharePeopleApi';
+import type { PeopleResource } from './share.utils';
 
 /** Everything under `share` is invalidated after Apply. */
 export const shareKeys = {
   all: ['share'] as const,
-  sharing: ({ type, id }: ShareResource) => ['share', type, id, 'users'] as const,
+  sharing: ({ type, id }: PeopleResource) => ['share', type, id, 'users'] as const,
   link: ({ type, id }: ShareResource) => ['share', type, id, 'link'] as const,
   password: (directoryId: number) => ['share', 'directory', directoryId, 'password'] as const
 };
 
-export function sharingQueryOptions(service: ShareService, resource: ShareResource) {
+export function sharingQueryOptions(api: SharePeopleApi, resource: PeopleResource) {
   return queryOptions({
     queryKey: shareKeys.sharing(resource),
-    queryFn: () => service.getSharing(resource, 0, SHARING_PAGE_SIZE)
+    queryFn: () => api.getSharing(resource)
   });
 }
 

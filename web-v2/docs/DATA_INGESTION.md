@@ -309,6 +309,45 @@ Bốn listing làm song song bằng 4 sub-agent, mỗi agent một thư mục; p
   force sync, sửa job, xem history, xoá job, sửa và xoá source; không lỗi console. Dữ liệu thử đã xoá, còn lại database
   `di6_probe_newdb` và `di6_e2e` trong warehouse.
 
+## Quyết định ở DI8 (2026-10-30)
+
+- **Core** (`core/ingestion/CsvImport.ts`, `CsvImportService.ts`, phẳng như các file khác của `core/ingestion`, không có
+  thư mục `csv/`): `detect`, `createTable` (`ingestion/csv/schema`), `ingest` (`POST ingestion/csv`), trên `ApiClient`
+  (không cần `access-token`). Request khớp fixture DI0. Cột giữ `json` gốc của server như DI1, nên `input_formats` của cột
+  ngày không mất khi đổi kiểu qua lại. `add_batch_info` luôn `false` (chỉ luồng cũ đọc), ingest luôn `include_header: false`.
+- **Không dùng papaparse**: nó cắt file theo byte và `readAsText` từng lát, nên ký tự UTF-8 nhiều byte (chữ có dấu) nằm ở
+  ranh giới bị hỏng. v2 đọc `Blob.slice` và giải mã bằng một `TextDecoder` dạng stream (`csvFile.ts`), tách ở dòng kết
+  thúc ngoài dấu ngoặc kép (`csvText.utils.ts`) và gửi nguyên văn các dòng hoàn chỉnh; server tự parse. CRLF server đọc
+  đúng (đã kiểm), BOM bị `TextDecoder` bỏ.
+- **Wizard** (`features/ingestion/csv/`): File → Preview → Destination → Import trong một modal, mở từ thẻ CSV của
+  catalog. CSV là import một lần, không tạo source hay job.
+  - **File**: một file, không rỗng (như v1). Đọc dòng đầu để đoán delimiter (`,` `;` Tab `|`, đếm ngoài ngoặc kép).
+  - **Preview**: 100 dòng đầu (trong 256 KB đầu) qua `detect`; đổi kiểu cột thì gửi lại kèm schema, server trả các dòng đã
+    đổi kiểu. Mỗi cột hiện số ô rỗng (gồm giá trị không đổi được kiểu, server ghi NULL không báo). Header / delimiter /
+    encoding đổi thì cột về lại kết quả đoán của server. Tên cột trùng sau khi chuẩn hoá (`unit price` và `unit_price`)
+    hoặc rỗng thì không đi tiếp được. Bảng preview là `<table>` thường: bảng antd có cuộn render tiêu đề cột lần thứ hai
+    (hàng đo ẩn) nên input bị nhân đôi và Tab vào được.
+  - **Encoding**: UTF-8, UTF-16 LE / BE, Windows-1258 (tiếng Việt), Windows-1252. Bỏ ASCII và UTF-32 của v1 (trình duyệt
+    đọc thành Windows-1252 và UTF-8).
+  - **Destination**: database và bảng chọn từ danh sách hoặc gõ (`NameInput` của job form). Tên mới chuẩn hoá như server
+    (`ClickHouseUtils.normalizeString`: `Đơn hàng` → `Don_hang`); server chỉ chuẩn hoá tên bảng và cột, nên v2 chuẩn hoá
+    luôn tên database. Không bắt đầu bằng chữ số (như v1). Tên gõ khớp một bảng đã có (theo tên hoặc tên chuẩn hoá) thì
+    **thêm dòng vào bảng đó**, thay cho lỗi "Already exists" của v1; cột phải giống bảng theo vị trí, tên và kiểu
+    (`ingestion/csv` chèn theo vị trí, đã thử: merge bảng thứ tự cột khác thì dữ liệu vào sai cột). Bảng đã có không gọi
+    `schema` (gọi thì server ghi đè display name của bảng).
+  - **Import**: chunk 256 KB, gửi lần lượt, tiến độ theo số chunk, Stop huỷ request đang chạy. Chunk lỗi thì dừng chờ
+    Retry / Skip / Skip all failures (v1: Skip One / Skip All / Stop). Đóng modal khi đang chạy thì hỏi rồi dừng; dòng đã
+    import vẫn giữ. Xong thì báo số dòng và các chunk bị bỏ qua, làm mới query schema. Không có thu nhỏ chạy nền và nút
+    "View data" của v1 (Data Warehouse chưa migrate).
+- **Chunk và timeout**: stack local chèn khoảng 1,7 ms/dòng (MySQL), chunk 1 MB (16 nghìn dòng) quá timeout 30s; dùng
+  chunk 256 KB (khoảng 7s) và timeout 2 phút riêng cho `ingestion/csv` (v1: chunk 10 KB, timeout 180s).
+- **Nợ backend**: warehouse MySQL của stack local từ chối mọi ký tự ngoài ASCII trong dữ liệu (`Incorrect string value:
+  '\xC1'`), gọi thẳng bằng curl cũng vậy; tên cột và display name tiếng Việt thì được. Cần kiểm lại trên ClickHouse.
+- Đã chạy bằng Playwright trên `pnpm dev` với backend docker: file 20 nghìn dòng (`;`, CRLF, header tiếng Việt, một ô có
+  xuống dòng, giá trị `abc` trong cột Double) vào database và bảng mới, rồi thêm lần nữa vào bảng đó, rồi bị từ chối khi
+  để sai kiểu cột; query lại thấy đủ 40 nghìn dòng, 412 NULL, ô xuống dòng giữ nguyên. Không lỗi console. Database thử đã
+  xoá.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -325,5 +364,5 @@ Bốn listing làm song song bằng 4 sub-agent, mỗi agent một thư mục; p
 | DI6a | **Khung `JobFormModal`.** `planJobSave`, `useSaveJob`, `ScheduleForm`, database đích, sync mode | Xong |
 | DI6b | **`JobKind` JDBC.** `jdbc_job`, `generic_jdbc_job`, chọn nhiều bảng | Xong (không có registry, xem DI6) |
 | DI7 | **Job History.** Bảng lịch sử phân trang, search, sort. Link "Click here" tạo job ở trạng thái rỗng làm cùng DI6 | Xong |
-| DI8 | **CSV.** Wizard như phần Quyết định | Chưa làm |
+| DI8 | **CSV.** Wizard như phần Quyết định | Xong (không dùng papaparse, xem DI8) |
 | Sau MVP | MongoDB, BigQuery → S3 → Hubspot, Mixpanel, Palexy (`'expand'`) → các connector OAuth (popup `/third-party-auth/:type` trong v2, kiểm origin của `postMessage`) | Chưa làm |

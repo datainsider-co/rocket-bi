@@ -62,7 +62,7 @@ export interface SchemaEditService {
 
 export const SchemaEditService = token<SchemaEditService>('SchemaEditService');
 
-const tablePath = (table: TableRef) => `databases/${encodeURIComponent(table.dbName)}/tables/${encodeURIComponent(table.name)}`;
+export const tablePath = (table: TableRef) => `databases/${encodeURIComponent(table.dbName)}/tables/${encodeURIComponent(table.name)}`;
 
 export class HttpSchemaEditService implements SchemaEditService {
   constructor(private readonly http: KyInstance) {}

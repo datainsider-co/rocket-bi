@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useDi } from '@/app/di/DiContext';
 import { ConnectionService } from '@/core/connection/ConnectionService';
 import { refreshHistoryQueryOptions } from '../../connectionQueries';
-import { toErrorMessage } from '../setup.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import { isRefreshDone, toRefreshOutcome, toStageItems } from './setupProgress.utils';
 import type { RefreshOutcome } from './setupProgress.utils';
 

@@ -7,7 +7,7 @@ import type { SharePeopleSectionProps } from './people/SharePeopleSection';
 import { useSharePeople } from './people/useSharePeople';
 import { useUserSearch } from './people/useUserSearch';
 import type { ShareOptions, ShareTarget } from './share.utils';
-import { embedCode, levelOptions, shareLink, sharedSummary } from './share.utils';
+import { embedCode, levelOptions, peopleResourceOf, shareLink, sharedSummary } from './share.utils';
 import { useApplyShare } from './useApplyShare';
 import { useCopyText } from './useCopyText';
 
@@ -26,29 +26,31 @@ export interface ShareDialogParams {
 
 /** v1 `DiShareModal`: people and link, edited apart and applied together. */
 export function useShareDialog({ target, options, onShared, onClose, origin }: ShareDialogParams) {
-  const resource = { type: target.type, id: target.id };
+  const resource = peopleResourceOf(target);
+  const directoryId = target.type === 'directory' ? target.id : undefined;
   const [section, setSection] = useState<Section>('people');
   const username = useCurrentUser().data?.userInfo.username;
   const people = useSharePeople(resource);
   const search = useUserSearch(people.isListed);
-  const link = useShareLink(resource, options.link !== undefined);
-  const hasPassword = options.password === true && username !== undefined && username === target.owner;
-  const password = useSharePassword(target.id, hasPassword);
+  // A database has neither link nor password: both hooks run switched off, on a directory id they never read.
+  const link = useShareLink({ type: 'directory', id: directoryId ?? 0 }, options.link !== undefined && directoryId !== undefined);
+  const hasPassword = options.password === true && directoryId !== undefined && username !== undefined && username === target.owner;
+  const password = useSharePassword(directoryId ?? 0, hasPassword);
   const copy = useCopyText();
   const apply = useApplyShare(() => {
     onShared();
     onClose();
   });
 
-  // The resource is always a directory, which offers View & Download.
-  const levels = levelOptions(true);
+  // v1 offered View & Download on directories only.
+  const levels = levelOptions(target.type === 'directory');
   const actions = {
     isApplying: apply.isPending,
     onCancel: onClose,
     onApply: () => apply.mutate({ resource, people: people.changes(), link: link.change(), password: password.change() })
   };
   const tokenId = link.tokenId;
-  const linkParams = { origin, target, dashboardId: options.dashboardId, tokenId: tokenId ?? '' };
+  const linkParams = { origin, target: { id: directoryId ?? 0, name: target.name }, dashboardId: options.dashboardId, tokenId: tokenId ?? '' };
 
   const peopleSection: SharePeopleSectionProps = {
     expanded: section === 'people',

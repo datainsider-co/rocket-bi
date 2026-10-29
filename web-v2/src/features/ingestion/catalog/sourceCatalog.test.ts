@@ -38,7 +38,7 @@ describe('SOURCE_CATALOG', () => {
     expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it('makes the six JDBC types available, each with its form (CSV waits for DI8)', () => {
+  it('makes the six JDBC types and CSV available, each with its form', () => {
     const available = SOURCE_CATALOG.filter(isAvailableSource).map(entry => [entry.key, entry.form]);
     expect(available).toEqual([
       ['generic_jdbc', { kind: 'jdbc', databaseType: JdbcDatabaseType.GenericJdbc }],
@@ -46,7 +46,8 @@ describe('SOURCE_CATALOG', () => {
       ['oracle', { kind: 'jdbc', databaseType: JdbcDatabaseType.Oracle }],
       ['sql_server', { kind: 'jdbc', databaseType: JdbcDatabaseType.SqlServer }],
       ['redshift', { kind: 'jdbc', databaseType: JdbcDatabaseType.Redshift }],
-      ['postgresql', { kind: 'jdbc', databaseType: JdbcDatabaseType.Postgres }]
+      ['postgresql', { kind: 'jdbc', databaseType: JdbcDatabaseType.Postgres }],
+      ['csv', { kind: 'csv' }]
     ]);
   });
 
@@ -56,7 +57,7 @@ describe('SOURCE_CATALOG', () => {
   });
 
   it('marks the rest coming soon', () => {
-    expect(SOURCE_CATALOG.filter(entry => !isAvailableSource(entry))).toHaveLength(14);
+    expect(SOURCE_CATALOG.filter(entry => !isAvailableSource(entry))).toHaveLength(13);
     expect(SOURCE_CATALOG.find(entry => entry.key === 'mongodb')?.status).toBe('coming-soon');
   });
 

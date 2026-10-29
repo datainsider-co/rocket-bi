@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { MySqlConnection } from '@/core/connection/MySqlConnection';
 import { RefreshSchemaHistory } from '@/core/connection/RefreshSchemaHistory';
-import { ApiError } from '@/shared/http/ApiError';
-import { HIDDEN, toErrorMessage, toInitialSetupState } from './setup.utils';
+import { HIDDEN, toInitialSetupState } from './setup.utils';
 
 const connection = new MySqlConnection({ host: 'db' });
 
@@ -59,14 +58,3 @@ describe('toInitialSetupState', () => {
   });
 });
 
-describe('toErrorMessage', () => {
-  it('uses the message of an error', () => {
-    expect(toErrorMessage(new ApiError('Communications link failure', 500, 'db_execute_error'))).toBe(
-      'Communications link failure'
-    );
-  });
-
-  it.each([new Error(''), 'oops', undefined])('falls back for %j', error => {
-    expect(toErrorMessage(error)).toMatch(/^Oops internal error/);
-  });
-});

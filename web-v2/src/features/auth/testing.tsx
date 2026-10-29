@@ -14,13 +14,19 @@ import { DirectoryService } from '@/core/directory/DirectoryService';
 import { PermissionService } from '@/core/permission/PermissionService';
 import { ResourcePermissionService } from '@/core/permission/ResourcePermissionService';
 import { QueryService } from '@/core/query/QueryService';
+import { DatabaseService } from '@/core/schema/DatabaseService';
+import { DatabaseShareService } from '@/core/schema/DatabaseShareService';
+import { SchemaEditService } from '@/core/schema/SchemaEditService';
 import { SchemaService } from '@/core/schema/SchemaService';
+import { TableService } from '@/core/schema/TableService';
 import { ShareService } from '@/core/share/ShareService';
 import { UserService } from '@/core/user/UserService';
+import { fakeSchemaEditService } from '@/features/chart-builder/field-actions/testing';
 import { fakeQueryService, fakeResourcePermissionService, fakeSchemaService, fakeUserService } from '@/features/dashboard/testing';
 import { fakeConnectionService, fakePermissionService } from '@/features/data-source/testing';
+import { fakeDatabaseService, fakeTableService } from '@/features/data-warehouse/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
-import { fakeShareService } from '@/features/share/testing';
+import { fakeDatabaseShareService, fakeShareService } from '@/features/share/testing';
 
 type Service = AuthenticationService;
 
@@ -55,6 +61,10 @@ export function renderAppAt(path: string, service: Service, modules: readonly Di
       di.bindValue(SchemaService, fakeSchemaService());
       di.bindValue(UserService, fakeUserService());
       di.bindValue(ShareService, fakeShareService());
+      di.bindValue(DatabaseService, fakeDatabaseService());
+      di.bindValue(DatabaseShareService, fakeDatabaseShareService());
+      di.bindValue(TableService, fakeTableService());
+      di.bindValue(SchemaEditService, fakeSchemaEditService());
     },
     ...modules
   ]);

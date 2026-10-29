@@ -72,7 +72,7 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
 - **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 to CB6, CB7a, CB7b, CB7c and CB8 done, CB7d next) for the chart types
   v2 already renders; the other chart types (scatter, area range, ...) follow, each with its builder handler. ChartBuilder
   plugs into edit mode as the `ChartBuilderHost` the dashboard route gives `DashboardPage`.
-- **Data ingestion** (Phase 8, [`DATA_INGESTION.md`](DATA_INGESTION.md)): DI0 to DI7 done (listings, source and job actions, the JDBC source form and the job form); CSV import (DI8) next.
+- **Data ingestion** (Phase 8, [`DATA_INGESTION.md`](DATA_INGESTION.md)): the MVP is done, DI0 to DI8 (listings, source and job actions, the JDBC source form, the job form and CSV import). The other source types come after the MVP.
 - **Share links (`?token=`)**: the Share dialog (M7b) creates directory tokens, which the server accepts; opening
   them without a session still needs client work, see Phase 3 M5b. **Blocked by the server**: MySQL `like` and
   datetime `between` filters, see Decisions (M3b).
@@ -397,6 +397,8 @@ The field drag and drop notes (`shared/field-dnd`) moved to [`CHART_BUILDER.md`]
 
 ### Phase 5: Data warehouse
 
+Plan, decisions and steps (DW0 to DW12) in [`DATA_WAREHOUSE.md`](DATA_WAREHOUSE.md).
+
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Databases (all, trash) | `screens/data-management` (`/data-warehouse/databases`) | 49 | Not started |
@@ -428,7 +430,7 @@ MVP: MySQL, PostgreSQL, SQL Server, Oracle, Redshift, Generic JDBC and CSV impor
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| Data sources, jobs, queued jobs, job history, CSV import | `screens/data-ingestion` (`/data-ingestion/*`), `di-core/data-ingestion`, `components/di-upload-document` | 156 + 136 | In progress: DI0 to DI7 done; DI8 (CSV) next |
+| Data sources, jobs, queued jobs, job history, CSV import | `screens/data-ingestion` (`/data-ingestion/*`), `di-core/data-ingestion`, `components/di-upload-document` | 156 + 136 | MVP done: DI0 to DI8. Left: the source types listed as "Coming soon" (after the MVP) |
 
 ### Deferred (disabled in v1 by feature flags or unused)
 

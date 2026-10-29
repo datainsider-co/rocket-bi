@@ -5,7 +5,7 @@ import type { JdbcSource } from '@/core/ingestion/DataSource';
 import { DataSourceService } from '@/core/ingestion/DataSourceService';
 import { SchemaService } from '@/core/schema/SchemaService';
 import { databaseQueryOptions, databasesQueryOptions } from '@/shared/schema/schemaQueries';
-import { toErrorMessage } from '../ingestion.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import {
   sourceColumnsQueryOptions,
   sourceDatabasesQueryOptions,

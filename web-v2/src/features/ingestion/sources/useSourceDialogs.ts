@@ -8,8 +8,8 @@ import { jobSavedMessage, type JobSavePlan } from '../job-form/jobForm.utils';
 import { dialogAfterSourceSaved, isEditableSource, NO_DIALOG, type SourcesDialog } from './sources.utils';
 
 /**
- * The modals of the Data Sources page: Add Data Source opens the catalog, a picked type its form, and a new source
- * its first job (locked to it). Edit opens the form on the source; a row opens a new job on it. A saved job goes to
+ * The modals of the Data Sources page: Add Data Source opens the catalog, a picked type its form (CSV its import
+ * wizard), and a new source its first job (locked to it). Edit opens the form on the source; a row opens a new job on it. A saved job goes to
  * the Jobs page, as v1 did.
  */
 export function useSourceDialogs() {
@@ -20,7 +20,11 @@ export function useSourceDialogs() {
   const close = useCallback(() => setDialog(NO_DIALOG), []);
   const openCatalog = useCallback(() => setDialog({ kind: 'catalog' }), []);
   const selectType = useCallback((entry: AvailableSourceEntry) => {
-    if (entry.form.kind === 'jdbc') setDialog({ kind: 'source', target: { mode: 'create', databaseType: entry.form.databaseType } });
+    setDialog(
+      entry.form.kind === 'jdbc'
+        ? { kind: 'source', target: { mode: 'create', databaseType: entry.form.databaseType } }
+        : { kind: 'csv' }
+    );
   }, []);
   const edit = useCallback((source: DataSource) => {
     if (isEditableSource(source)) setDialog({ kind: 'source', target: { mode: 'edit', source } });

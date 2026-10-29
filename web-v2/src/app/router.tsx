@@ -8,6 +8,7 @@ import { AppLayout, type AppRouteHandle } from '@/app/layout/AppLayout';
 import { PageLoading } from '@/app/layout/PageLoading';
 import { redirectIfLoggedIn, requireSession } from '@/app/routeGuards';
 import { AuthLayout } from '@/features/auth/AuthLayout';
+import { DATABASES_PATH, WAREHOUSE_PATH } from '@/features/data-warehouse/warehouse.utils';
 
 /**
  * Loads a page's chunk on first visit. Layouts, guards and error pages stay in the main bundle so they can render
@@ -41,6 +42,37 @@ const ingestionRoutes: RouteObject[] = featureFlags.ingestion
       }
     ]
   : [];
+
+/**
+ * Data Warehouse at v1's paths, old `/data-management/*` links included. The server has no trash (`DATA_WAREHOUSE.md`,
+ * DW0), so v1's Trash page goes to the listing.
+ */
+const warehouseRoutes: RouteObject[] = [
+  { path: '/data-management/*', loader: () => redirect(WAREHOUSE_PATH) },
+  {
+    path: WAREHOUSE_PATH,
+    children: [
+      { index: true, loader: () => redirect(DATABASES_PATH) },
+      ...['databases', 'databases/trash'].map(path => ({ path, loader: () => redirect(DATABASES_PATH) })),
+      {
+        path: 'databases/all',
+        ...lazyPage(() => import('@/features/data-warehouse/databases/DatabasesPage'), m => m.DatabasesPage)
+      },
+      {
+        path: 'schema',
+        ...lazyPage(() => import('@/features/data-warehouse/schema/SchemaPage'), m => m.SchemaPage)
+      },
+      {
+        path: 'query-editor',
+        ...lazyPage(() => import('@/features/data-warehouse/query-editor/QueryEditorPage'), m => m.QueryEditorPage)
+      },
+      {
+        path: 'relationship',
+        ...lazyPage(() => import('@/features/data-warehouse/relationship/RelationshipPage'), m => m.RelationshipPage)
+      }
+    ]
+  }
+];
 
 /** Every route of the app. Add a feature's page here; keep the page component in its feature folder. */
 export const appRoutes: RouteObject[] = [
@@ -96,6 +128,7 @@ export const appRoutes: RouteObject[] = [
                 // The dashboard with ChartBuilder for edit mode (the embedded page has no edit mode).
                 ...lazyPage(() => import('@/features/chart-builder/DashboardBuilderPage'), m => m.DashboardBuilderPage)
               },
+              ...warehouseRoutes,
               ...ingestionRoutes,
               { path: '*', element: <NotFoundPage /> }
             ]

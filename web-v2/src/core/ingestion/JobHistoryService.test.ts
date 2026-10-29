@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fixture from './ingestion.fixture.json';
 import { HttpJobHistoryService } from './JobHistoryService';
-import { fakeHttp } from './testing';
+import { fakeHttp } from '@/test/fakeHttp';
 
 describe('HttpJobHistoryService', () => {
   it('lists the runs', async () => {

@@ -3,7 +3,7 @@ import { useDi } from '@/app/di/DiContext';
 import type { Connection } from '@/core/connection/Connection';
 import { ConnectionService } from '@/core/connection/ConnectionService';
 import { connectionKeys, sshPublicKeyQueryOptions } from '../../connectionQueries';
-import { toErrorMessage } from '../setup.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import { TEST_SSH_TIMEOUT_MS, toConnection } from './connectionForm.utils';
 import type { ConnectionFormValues } from './connectionForm.utils';
 

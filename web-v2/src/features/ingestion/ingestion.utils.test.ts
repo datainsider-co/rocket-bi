@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  getIngestionSection,
-  INGESTION_SECTIONS,
-  ingestionSectionFromPath,
-  toErrorMessage,
-  type IngestionSection
-} from './ingestion.utils';
+import { getIngestionSection, INGESTION_SECTIONS, ingestionSectionFromPath, type IngestionSection } from './ingestion.utils';
 
 describe('INGESTION_SECTIONS', () => {
   it('lists the v1 sidebar without Streaming, at v1 paths', () => {
@@ -44,12 +38,3 @@ describe('ingestionSectionFromPath', () => {
   });
 });
 
-describe('toErrorMessage', () => {
-  it("shows the server's message", () => {
-    expect(toErrorMessage(new Error('unable to connect to data source: refused'))).toBe('unable to connect to data source: refused');
-  });
-
-  it.each([[new Error('')], ['boom'], [undefined]])('falls back for %j', error => {
-    expect(toErrorMessage(error)).toMatch(/^Oops internal error!/);
-  });
-});

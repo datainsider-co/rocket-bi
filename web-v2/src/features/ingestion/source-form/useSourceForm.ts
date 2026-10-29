@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDi } from '@/app/di/DiContext';
 import type { DataSource, JdbcSource } from '@/core/ingestion/DataSource';
 import { DataSourceService } from '@/core/ingestion/DataSourceService';
-import { toErrorMessage } from '../ingestion.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
 import { ingestionKeys } from '../ingestionQueries';
 import { formValuesToSource, type SourceFormValues } from './sourceForm.utils';
 

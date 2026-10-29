@@ -3,7 +3,7 @@ import { ApiError } from '@/shared/http/ApiError';
 import { dataSourceFromJson, type JdbcSource } from './DataSource';
 import { HttpDataSourceService } from './DataSourceService';
 import fixture from './ingestion.fixture.json';
-import { fakeHttp, type Reply } from './testing';
+import { fakeHttp, type Reply } from '@/test/fakeHttp';
 
 function setup(...replies: Reply[]) {
   const { http, requests } = fakeHttp(...replies);

@@ -2,7 +2,13 @@ import type { ReactNode } from 'react';
 import { MoreOutlined } from '@ant-design/icons';
 import { Button, Dropdown } from 'antd';
 import { FIELD_NO_DRAG_CLASS } from '@/shared/field-dnd/FieldPointerSensor';
-import type { ActionItem } from '../field-actions/fieldActions.utils';
+
+/** An entry of a row's menu. */
+export interface ActionItem<T extends string> {
+  readonly key: T;
+  readonly label: string;
+  readonly danger?: boolean;
+}
 
 interface ActionMenuViewProps<T extends string> {
   items: readonly ActionItem<T>[];

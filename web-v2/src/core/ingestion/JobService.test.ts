@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fixture from './ingestion.fixture.json';
 import { jobFromJson, type JdbcJob } from './Job';
 import { HttpJobService } from './JobService';
-import { fakeHttp, type Reply } from './testing';
+import { fakeHttp, type Reply } from '@/test/fakeHttp';
 
 function setup(...replies: Reply[]) {
   const { http, requests } = fakeHttp(...replies);

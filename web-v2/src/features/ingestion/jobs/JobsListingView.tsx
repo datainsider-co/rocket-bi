@@ -1,7 +1,7 @@
 import { DeleteOutlined, PlusOutlined, SearchOutlined, SyncOutlined } from '@ant-design/icons';
 import { Button, Input } from 'antd';
 import type { IngestionSectionConfig } from '../ingestion.utils';
-import { IngestionPageHeader } from '../layout/IngestionPageHeader';
+import { PageHeader } from '@/shared/layout/PageHeader';
 import { JOB_SEARCH_PLACEHOLDER } from './jobs.utils';
 import { JobsListingBody } from './JobsListingBody';
 import { JobsRefreshButton } from './JobsRefreshButton';
@@ -23,8 +23,9 @@ export function JobsListingView({ section, listing: { search, refresh, table, ha
 
   return (
     <>
-      <IngestionPageHeader
-        section={section}
+      <PageHeader
+        icon={section.icon}
+        title={section.title}
         actions={
           <>
             <Input

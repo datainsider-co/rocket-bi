@@ -1,16 +1,29 @@
 import { DirectoryType } from '@/core/directory/Directory';
 import type { Directory } from '@/core/directory/Directory';
+import type { DatabaseEntry } from '@/core/schema/DatabaseService';
 import { ShareLevel } from '@/core/share/shareLevel';
 import { dashboardPath, toIdParam } from '@/shared/routing/idParam';
 
-/** What the dialog shares. Dashboards and queries are shared through their directory, like v1. */
-export interface ShareTarget {
-  type: 'directory';
-  /** Directory id. */
-  id: number;
-  name: string;
-  /** Username of the owner; only the owner may set a password. */
-  owner: string;
+/**
+ * What the dialog shares. Dashboards and queries are shared through their directory, like v1; a database by its name,
+ * with people only (no link, no password).
+ */
+export type ShareTarget =
+  | {
+      type: 'directory';
+      /** Directory id. */
+      id: number;
+      name: string;
+      /** Username of the owner; only the owner may set a password. */
+      owner: string;
+    }
+  | { type: 'database'; id: string; name: string; owner: string };
+
+/** Whose users the people section reads and changes. */
+export type PeopleResource = { type: 'directory'; id: number } | { type: 'database'; id: string };
+
+export function peopleResourceOf(target: ShareTarget): PeopleResource {
+  return target.type === 'directory' ? { type: target.type, id: target.id } : { type: target.type, id: target.id };
 }
 
 /** Which page the link opens. */
@@ -63,7 +76,7 @@ export function linkSummary(level: ShareLevel): string {
 
 export interface LinkParams {
   origin: string;
-  target: Pick<ShareTarget, 'id' | 'name'>;
+  target: { id: number; name: string };
   dashboardId?: number;
   tokenId: string;
 }
@@ -108,4 +121,9 @@ export function directoryShare(
     default:
       return { target, options: { link: ShareLinkKind.Folder } };
   }
+}
+
+/** Sharing a database (v1 `ShareDatabaseHandler`): people only, without View & Download (v1 offered it on directories). */
+export function databaseShare(entry: Pick<DatabaseEntry, 'name' | 'displayName' | 'owner' | 'creatorId'>): ShareRequest {
+  return { target: { type: 'database', id: entry.name, name: entry.displayName, owner: entry.owner?.username || entry.creatorId }, options: {} };
 }

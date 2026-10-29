@@ -5,16 +5,18 @@ import { DirectoryService } from '@/core/directory/DirectoryService';
 import { ShareService } from '@/core/share/ShareService';
 import type { SharePlan } from './applyShare';
 import { applyShare } from './applyShare';
+import { useSharePeopleApi } from './people/useSharePeopleApi';
 import { shareKeys } from './shareQueries';
 
 /** Apply: sends the plan, then refreshes what the dialog reads and tells the caller. A failure keeps the dialog open. */
 export function useApplyShare(onDone: () => void) {
   const share = useDi(ShareService);
   const directories = useDi(DirectoryService);
+  const peopleApi = useSharePeopleApi();
   const queryClient = useQueryClient();
   const { message } = App.useApp();
   return useMutation({
-    mutationFn: (plan: SharePlan) => applyShare(plan, { share, directories }),
+    mutationFn: (plan: SharePlan) => applyShare(plan, { peopleApi, share, directories }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: shareKeys.all });
       onDone();

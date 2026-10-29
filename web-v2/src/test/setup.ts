@@ -1,8 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach } from 'vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 
 afterEach(() => cleanup());
+
+// Pages rendered through the real routes load their lazy chunks on first use, which can take over the default 1 s of
+// `findBy` / `waitFor` while the whole suite runs in parallel.
+configure({ asyncUtilTimeout: 3000 });
 
 // jsdom has no matchMedia; antd's responsive utilities need it.
 if (!window.matchMedia) {

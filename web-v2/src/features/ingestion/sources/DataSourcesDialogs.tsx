@@ -1,6 +1,7 @@
 import type { DataSource } from '@/core/ingestion/DataSource';
 import { SourceCatalogModal } from '../catalog/SourceCatalogModal';
 import type { AvailableSourceEntry } from '../catalog/sourceCatalog';
+import { CsvImportModal } from '../csv/CsvImportModal';
 import { JobFormModal } from '../job-form/JobFormModal';
 import type { JobSavePlan } from '../job-form/jobForm.utils';
 import { SourceFormModal } from '../source-form/SourceFormModal';
@@ -21,6 +22,7 @@ export function DataSourcesDialogs({ dialog, onSelectType, onSourceSaved, onJobS
       <SourceCatalogModal open={dialog.kind === 'catalog'} onSelect={onSelectType} onClose={onClose} />
       {dialog.kind === 'source' && <SourceFormModal target={dialog.target} onSaved={onSourceSaved} onClose={onClose} />}
       {dialog.kind === 'job' && <JobFormModal target={dialog.target} onSaved={onJobSaved} onClose={onClose} />}
+      {dialog.kind === 'csv' && <CsvImportModal onClose={onClose} />}
     </>
   );
 }

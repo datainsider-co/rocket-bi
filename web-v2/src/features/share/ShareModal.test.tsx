@@ -6,6 +6,7 @@ import { AppProviders } from '@/app/AppProviders';
 import { AuthenticationService } from '@/core/auth/AuthenticationService';
 import { LoginResponse } from '@/core/auth/LoginResponse';
 import { createContainer } from '@/core/di/Container';
+import { DatabaseShareService } from '@/core/schema/DatabaseShareService';
 import { Directory } from '@/core/directory/Directory';
 import { DirectoryService } from '@/core/directory/DirectoryService';
 import { PermissionToken, ResourceSharing } from '@/core/share/ResourceSharing';
@@ -18,7 +19,7 @@ import { fakeDirectoryService } from '@/features/directory/testing';
 import { hashPassword } from '@/shared/security/hashPassword';
 import { ShareModal } from './ShareModal';
 import type { ShareOptions } from './share.utils';
-import { fakeShareService } from './testing';
+import { fakeDatabaseShareService, fakeShareService } from './testing';
 
 const TARGET = { type: 'directory', id: 8, name: 'v2 Sample', owner: 'root' } as const;
 const DASHBOARD: ShareOptions = { link: 'dashboard', dashboardId: 1, password: true, embed: true };
@@ -35,6 +36,7 @@ function setup({ share = fakeShareService(), username = 'root', options = DASHBO
     di => {
       di.bindValue(AuthenticationService, fakeAuthenticationService({}, new LoginResponse({ user_info: { username } })));
       di.bindValue(ShareService, share);
+      di.bindValue(DatabaseShareService, fakeDatabaseShareService());
       di.bindValue(DirectoryService, directories);
       di.bindValue(UserService, users);
     }

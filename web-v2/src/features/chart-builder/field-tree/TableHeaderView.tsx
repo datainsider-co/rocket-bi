@@ -1,5 +1,5 @@
 import { CaretDownOutlined, CaretRightOutlined } from '@ant-design/icons';
-import { ActionMenuView } from './ActionMenuView';
+import { ActionMenuView } from '@/shared/menu/ActionMenuView';
 import type { TableNode, TreeActions } from './fieldTree.utils';
 
 interface TableHeaderViewProps {
