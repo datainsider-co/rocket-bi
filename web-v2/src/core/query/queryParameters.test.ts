@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import fixture from '@/core/schema/warehouse.fixture.json';
 import {
   formatParamValue,
   parameterConfigOf,
@@ -18,7 +19,10 @@ describe('formatParamValue', () => {
     ['list', 'a', "'a'"],
     ['number', '12.5', '12.5'],
     ['number', 'abc', '0'],
-    ['text', undefined, "''"]
+    ['text', undefined, "''"],
+    ['text', "O'Brien", "'O''Brien'"],
+    ['text', 'US$ 5', "'US\\$ 5'"],
+    ['text', 'a\\b', "'a\\\\b'"]
   ])('%s %s', (type, value, expected) => {
     expect(formatParamValue(type, value)).toBe(expected);
   });
@@ -43,12 +47,19 @@ describe('viz option accessors', () => {
 });
 
 describe('storedParameters', () => {
-  it('prefers the setting parameters', () => {
-    expect(storedParameters({ parameters: { a: "'x'" }, ...viz({ query_parameter: { b: param } }) })).toEqual({ a: "'x'" });
+  it('reads the viz options, formatted and named as in the SQL', () => {
+    expect(storedParameters({ parameters: { a: "'x'" }, ...viz({ query_parameter: { minUnits: param, bad: {} } }) })).toEqual({ min_units: '5000' });
   });
 
-  it('falls back to the viz options, formatted', () => {
-    expect(storedParameters({ parameters: {}, ...viz({ query_parameter: { minUnits: param, bad: {} } }) })).toEqual({ min_units: '5000' });
+  it("reads the query editor's list, not the keys v1 snake_cased", () => {
+    const request = fixture.analysisQueryCamelParam.request.query_setting;
+    const setting = { ...request, ...viz({ query_parameter: [{ display_name: 'minQty', value_type: 'text', value: '', list: null }] }) };
+    expect(request.parameters).toEqual({ min_qty: "''" });
+    expect(storedParameters(setting)).toEqual({ minQty: "''" });
+  });
+
+  it('falls back to the setting parameters', () => {
+    expect(storedParameters({ parameters: { a: "'x'" }, ...viz({}) })).toEqual({ a: "'x'" });
     expect(storedParameters({})).toEqual({});
   });
 });

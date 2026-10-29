@@ -23,13 +23,18 @@ export interface QueryParameter {
   value: string;
 }
 
-/** A parameter as the SQL needs it: quoted text, plain number (v1 `QuerySetting.formatParamValue`). */
+/**
+ * A parameter as the SQL needs it: quoted text, plain number (v1 `QuerySetting.formatParamValue`). Quotes inside text
+ * are doubled, and `\` and `$` escaped because the server puts the value in with Java's `replaceAll`
+ * (`QueryParser.applyParameters`), where they are special. v1 escaped nothing, so `O'Brien` broke the SQL.
+ */
 export function formatParamValue(valueType: string, value: unknown): string {
   if (valueType === ParamValueType.Number) {
     const number = Number(value);
     return String(Number.isFinite(number) ? number : 0);
   }
-  return `'${String(value ?? '')}'`;
+  const quoted = `'${String(value ?? '').replaceAll("'", "''")}'`;
+  return quoted.replace(/[\\$]/g, char => `\\${char}`);
 }
 
 export function parameterFromJson(value: unknown): QueryParameter | undefined {
@@ -58,19 +63,22 @@ export function parameterWidgetIdsOf(setting: JsonObject): number[] {
   return asArray(vizOption(setting, 'parameter_widget_ids')).filter((id): id is number => typeof id === 'number');
 }
 
-/** The values the chart was saved with (v1 `QueryRequest.fromQuerySetting`). */
+/**
+ * The values the chart was saved with. They come from the parameters in its viz options (`query_parameter`, a list from
+ * the query editor, a map from v1's builder), named as in the SQL. `setting.parameters` is only the fallback: v1
+ * snake_cased its keys on save, so `{{minQty}}` was stored as `min_qty` and never replaced (`DATA_WAREHOUSE.md`, DW0).
+ */
 export function storedParameters(setting: JsonObject): Record<string, string> {
-  const parameters = setting['parameters'];
-  if (isRecord(parameters) && Object.keys(parameters).length > 0) {
-    return Object.fromEntries(Object.entries(parameters).map(([key, value]) => [key, String(value)]));
-  }
   const inOptions = vizOption(setting, 'query_parameter');
+  const items = Array.isArray(inOptions) ? inOptions : isRecord(inOptions) ? Object.values(inOptions) : [];
   const stored: Record<string, string> = {};
-  for (const item of isRecord(inOptions) ? Object.values(inOptions) : []) {
+  for (const item of items) {
     const parameter = parameterFromJson(item);
     if (parameter) stored[parameter.displayName] = formatParamValue(parameter.valueType, parameter.value);
   }
-  return stored;
+  if (Object.keys(stored).length > 0) return stored;
+  const parameters = setting['parameters'];
+  return isRecord(parameters) ? Object.fromEntries(Object.entries(parameters).map(([key, value]) => [key, String(value)])) : {};
 }
 
 export interface ParameterInput {
