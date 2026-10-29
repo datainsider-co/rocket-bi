@@ -5,6 +5,8 @@ import type { SchemaService } from '@/core/schema/SchemaService';
 const SCHEMA_STALE_MS = 5 * 60_000;
 
 export const schemaKeys = {
+  /** Every schema query, to refresh them all. */
+  all: ['schema'] as const,
   databases: ['schema', 'databases'] as const,
   database: (dbName: string) => ['schema', 'database', dbName] as const
 };
