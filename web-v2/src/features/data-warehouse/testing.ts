@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import type { RlsPolicyService } from '@/core/rls/RlsPolicyService';
 import type { DatabaseService } from '@/core/schema/DatabaseService';
 import { tableDefinitionFromJson } from '@/core/schema/TableDefinition';
 import type { TableService } from '@/core/schema/TableService';
@@ -21,6 +22,15 @@ export function fakeTableService(overrides: Partial<TableService> = {}): TableSe
     createTable: vi.fn<TableService['createTable']>(async table => table),
     updateTable: vi.fn<TableService['updateTable']>(async table => table),
     createTableFromQuery: vi.fn<TableService['createTableFromQuery']>(async () => tableDefinitionFromJson(fixture.fromQueryView.response)),
+    ...overrides
+  };
+}
+
+/** Test-only: a table without policies; saving answers with the policies given, unless overridden. */
+export function fakeRlsPolicyService(overrides: Partial<RlsPolicyService> = {}): RlsPolicyService {
+  return {
+    list: vi.fn<RlsPolicyService['list']>(async () => []),
+    put: vi.fn<RlsPolicyService['put']>(async (_table, policies) => [...policies]),
     ...overrides
   };
 }
