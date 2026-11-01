@@ -1,4 +1,5 @@
 import { asArray, asBoolean, asRecord, asString, type JsonObject } from '@/core/json/json';
+import { isDateType } from './fieldTypes';
 
 /**
  * A table as the Schema page edits it (backend `TableSchema`, `databases/{db}/tables/*`). `TableSchema` of
@@ -20,7 +21,7 @@ export const TableKind = {
   Materialized: 'materialized'
 } as const;
 
-/** What `default_value` holds: text, a number or a boolean, by the column's type. */
+/** What `default_value` holds: text, a number or a boolean, by the column's type; a date column's is a timestamp in ms. */
 export type DefaultValue = string | number | boolean;
 
 export interface ColumnDefinition {
@@ -76,7 +77,8 @@ export function newColumn(name: string, type: string): ColumnDefinition {
 /**
  * The column merged onto the JSON it was read from. A changed type keeps only the keys every column class has, since
  * the server parses a column by `class_name`. An empty description and an unset default value are left out, as the
- * server sends them.
+ * server sends them. A date column's default is a timestamp, which the server reads as such with `input_as_timestamp`
+ * (checked on the local stack: `1793500000000` became `DEFAULT '2026-11-01 02:26:40'`, UTC).
  */
 export function columnDefinitionToJson(column: ColumnDefinition): JsonObject {
   const readType = asString(column.json['class_name']);
@@ -90,6 +92,7 @@ export function columnDefinitionToJson(column: ColumnDefinition): JsonObject {
     display_name: column.displayName,
     ...(column.description && { description: column.description }),
     ...(column.defaultValue !== undefined && { default_value: column.defaultValue }),
+    ...(isDateType(column.type) && typeof column.defaultValue === 'number' && { input_as_timestamp: true }),
     is_nullable: column.isNullable
   };
 }
