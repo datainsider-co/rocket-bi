@@ -6,17 +6,15 @@ import { DiProvider } from '@/app/di/DiContext';
 import { createContainer } from '@/core/di/Container';
 import { RelationshipService } from '@/core/relationship/RelationshipService';
 import { SchemaService } from '@/core/schema/SchemaService';
-import { fixtureRelationshipService, fixtureSchemaService } from './relationship.fixtures';
+import { EMPTY_RELATIONSHIP_JSON, fixtureRelationshipService, fixtureSchemaService } from '@/shared/relationship/relationship.fixtures';
 import { RelationshipModal } from './RelationshipModal';
-
-const EMPTY = { views: [], relationships: [], extra_data: {} };
 
 /** Fake services over the fixture data; Save keeps the result for the next open. */
 function Playground({ editable, empty }: { editable: boolean; empty: boolean }) {
   const [container] = useState(() =>
     createContainer([
       di => {
-        di.bindValue(RelationshipService, fixtureRelationshipService(empty ? EMPTY : undefined));
+        di.bindValue(RelationshipService, fixtureRelationshipService(empty ? EMPTY_RELATIONSHIP_JSON : undefined));
         di.bindValue(SchemaService, fixtureSchemaService());
       }
     ])

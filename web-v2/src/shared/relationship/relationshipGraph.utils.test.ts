@@ -7,6 +7,8 @@ import {
   TABLE_NODE_TYPE,
   nodePositionsOf,
   relatedColumns,
+  restoreNodes,
+  toBaseNode,
   toBaseNodes,
   toEdges,
   toNewConnection,
@@ -27,6 +29,26 @@ const tableA: RelationshipTable = {
 const tableB: RelationshipTable = { ...tableA, id: 'b', tblName: 'b' };
 const aToB = makeConnection({ tableId: 'a', column: 'city' }, { tableId: 'b', column: 'id' });
 const CONNECTIONS = { [aToB.key]: aToB };
+
+describe('toBaseNode', () => {
+  it('places one table', () => {
+    expect(toBaseNode(tableB, { x: 3, y: 4 })).toMatchObject({ id: 'b', position: { x: 3, y: 4 }, data: { table: tableB } });
+  });
+});
+
+describe('restoreNodes', () => {
+  const measuredA = { ...toBaseNode(tableA, { x: 50, y: 50 }), measured: { width: 209, height: 90 } };
+
+  it('puts a kept table back where it was, keeping its measured size', () => {
+    expect(restoreNodes([measuredA], [tableA], { a: { x: 1, y: 2 } })).toEqual([{ ...measuredA, position: { x: 1, y: 2 } }]);
+  });
+
+  it('brings a removed table back and drops an added one', () => {
+    const added = toBaseNode(tableB, { x: 9, y: 9 });
+
+    expect(restoreNodes([added], [tableA], {})).toEqual([toBaseNode(tableA, { x: 0, y: 0 })]);
+  });
+});
 
 describe('toBaseNodes', () => {
   it('makes a draggable-by-header table node per table', () => {
@@ -106,6 +128,15 @@ describe('toTableNodes', () => {
   it('keeps what React Flow measured', () => {
     const base = toBaseNodes([tableA], {}).map(node => ({ ...node, measured: { width: 209, height: 90 } }));
     expect(toTableNodes(base, {}, new Set(), vi.fn<(tableId: string) => void>())[0]?.measured).toEqual({ width: 209, height: 90 });
+  });
+
+  it('offers Remove only when given', () => {
+    const base = toBaseNodes([tableA], {});
+    const remove = vi.fn<(tableId: string) => void>();
+    const toggle = vi.fn<(tableId: string) => void>();
+
+    expect(toTableNodes(base, {}, new Set(), toggle)[0]?.data.onRemove).toBeUndefined();
+    expect(toTableNodes(base, {}, new Set(), toggle, remove)[0]?.data.onRemove).toBe(remove);
   });
 });
 

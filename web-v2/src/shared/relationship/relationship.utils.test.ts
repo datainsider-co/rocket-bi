@@ -9,15 +9,18 @@ import {
   defaultTablePosition,
   isDirty,
   makeConnection,
+  newRelationshipTable,
   tableIdOf,
   tableNameOf,
   tablePositionKey,
   toEditorState,
+  toGlobalRelationshipInfo,
   toNodePositions,
   toRelationshipInfo,
   toRelationships,
   toTablePositions,
   viewTableId,
+  withoutTableConnections,
   type RelationshipTable,
   type TableColumns
 } from './relationship.utils';
@@ -181,6 +184,36 @@ describe('isDirty', () => {
   it('is false when a table moved back', () => {
     expect(isDirty(initial, { ...initial, positions: { a: { x: 0, y: 0 } } })).toBe(false);
   });
+
+  it('is true when a table was added or removed', () => {
+    expect(isDirty(initial, { ...initial, positions: { a: { x: 0, y: 0 }, b: { x: 0, y: 0 } } })).toBe(true);
+    expect(isDirty(initial, { ...initial, positions: {} })).toBe(true);
+  });
+});
+
+describe('newRelationshipTable', () => {
+  it('is a table view without an alias, keyed like loaded ones', () => {
+    const added = newRelationshipTable('sample_v2', 'sales', [col('id')]);
+
+    expect(added).toMatchObject({ id: SALES_ID, dbName: 'sample_v2', tblName: 'sales', columns: [col('id')] });
+    expect(added.view.toJson()).toEqual({ class_name: 'table_view', db_name: 'sample_v2', tbl_name: 'sales', alias_name: '' });
+  });
+});
+
+describe('withoutTableConnections', () => {
+  const ab = makeConnection({ tableId: 'a', column: 'x' }, { tableId: 'b', column: 'y' });
+  const ca = makeConnection({ tableId: 'c', column: 'x' }, { tableId: 'a', column: 'y' });
+  const bc = makeConnection({ tableId: 'b', column: 'x' }, { tableId: 'c', column: 'y' });
+  const connections = { [ab.key]: ab, [ca.key]: ca, [bc.key]: bc };
+
+  it('drops the joins on either side of the table', () => {
+    expect(withoutTableConnections(connections, 'a')).toEqual({ [bc.key]: bc });
+  });
+
+  it('keeps everything for a table without joins, leaving the input alone', () => {
+    expect(withoutTableConnections(connections, 'd')).toEqual(connections);
+    expect(Object.keys(connections)).toHaveLength(3);
+  });
 });
 
 describe('toRelationships', () => {
@@ -271,5 +304,34 @@ describe('toRelationshipInfo', () => {
 
     expect(info.views).toBe(loaded.views);
     expect(info.toJson()).toEqual(loaded.toJson());
+  });
+});
+
+describe('toGlobalRelationshipInfo', () => {
+  it('sends the drawn tables as views, with the positions of those tables only', () => {
+    const loaded = new RelationshipInfo(RELATIONSHIP_JSON);
+    const { tables, connections } = toEditorState(loaded, COLUMNS);
+    const sales = tables.find(item => item.id === SALES_ID)!;
+    const added = newRelationshipTable('db', 'items', [col('id')]);
+    const positions = { [SALES_ID]: { x: 5, y: 6 }, [added.id]: { x: 7, y: 8 } };
+
+    const info = toGlobalRelationshipInfo([sales, added], connections, positions);
+
+    expect(info.views).toEqual([sales.view, added.view]);
+    // Every join of the fixture goes to a SQL view that is no longer drawn.
+    expect(info.relationships).toEqual([]);
+    expect(info.tablePositions).toEqual({ sampleV2Sales: { left: 5, top: 6 }, dbitems: { left: 7, top: 8 } });
+  });
+
+  it('groups the joins between drawn tables', () => {
+    const a = newRelationshipTable('db', 'a', [col('id')]);
+    const b = newRelationshipTable('db', 'b', [col('a_id')]);
+    const join = makeConnection({ tableId: a.id, column: 'id' }, { tableId: b.id, column: 'a_id' });
+
+    const info = toGlobalRelationshipInfo([a, b], { [join.key]: join }, {});
+
+    expect(info.relationships).toHaveLength(1);
+    expect(info.relationships[0]?.fieldPairs[0]?.firstField?.fieldName).toBe('id');
+    expect(info.tablePositions).toEqual({});
   });
 });

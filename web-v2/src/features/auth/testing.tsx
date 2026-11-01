@@ -14,6 +14,8 @@ import { DirectoryService } from '@/core/directory/DirectoryService';
 import { PermissionService } from '@/core/permission/PermissionService';
 import { ResourcePermissionService } from '@/core/permission/ResourcePermissionService';
 import { QueryService } from '@/core/query/QueryService';
+import { RelationshipService } from '@/core/relationship/RelationshipService';
+import { RlsPolicyService } from '@/core/rls/RlsPolicyService';
 import { DatabaseService } from '@/core/schema/DatabaseService';
 import { DatabaseShareService } from '@/core/schema/DatabaseShareService';
 import { SchemaEditService } from '@/core/schema/SchemaEditService';
@@ -24,9 +26,10 @@ import { UserService } from '@/core/user/UserService';
 import { fakeSchemaEditService } from '@/features/chart-builder/field-actions/testing';
 import { fakeQueryService, fakeResourcePermissionService, fakeSchemaService, fakeUserService } from '@/features/dashboard/testing';
 import { fakeConnectionService, fakePermissionService } from '@/features/data-source/testing';
-import { fakeDatabaseService, fakeTableService } from '@/features/data-warehouse/testing';
+import { fakeDatabaseService, fakeRlsPolicyService, fakeTableService } from '@/features/data-warehouse/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
 import { fakeDatabaseShareService, fakeShareService } from '@/features/share/testing';
+import { fixtureRelationshipService } from '@/shared/relationship/relationship.fixtures';
 
 type Service = AuthenticationService;
 
@@ -62,9 +65,11 @@ export function renderAppAt(path: string, service: Service, modules: readonly Di
       di.bindValue(UserService, fakeUserService());
       di.bindValue(ShareService, fakeShareService());
       di.bindValue(DatabaseService, fakeDatabaseService());
+      di.bindValue(RlsPolicyService, fakeRlsPolicyService());
       di.bindValue(DatabaseShareService, fakeDatabaseShareService());
       di.bindValue(TableService, fakeTableService());
       di.bindValue(SchemaEditService, fakeSchemaEditService());
+      di.bindValue(RelationshipService, fixtureRelationshipService());
     },
     ...modules
   ]);

@@ -3,7 +3,8 @@ import { useDi } from '@/app/di/DiContext';
 import type { RelationshipInfo } from '@/core/relationship/RelationshipInfo';
 import { RelationshipService } from '@/core/relationship/RelationshipService';
 import { SchemaService } from '@/core/schema/SchemaService';
-import { relationshipKeys, relationshipQueryOptions } from './relationshipQueries';
+import { relationshipKeys } from '@/shared/relationship/relationshipData';
+import { relationshipQueryOptions } from './relationshipQueries';
 
 /** The dashboard's relationships with the schema of every table in them. */
 export function useRelationshipData(dashboardId: number) {

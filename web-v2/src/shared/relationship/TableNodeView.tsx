@@ -8,11 +8,13 @@ const NO_NAME = '<<noname>>';
 
 /**
  * A table on the relationship canvas (v1 `TableSchemaItem`): the database name, the table header that moves it,
- * and one row per shown column. Each row is a handle, so dragging a row onto another table's row joins them.
- * Showing or hiding rows changes the node's height, which makes React Flow measure the handles again.
+ * and one row per shown column. Each row is a handle, so dragging a row onto another table's row joins them. Its
+ * menu expands the table, and removes it where tables can be removed (the global relationships). Showing or hiding
+ * rows changes the node's height, which makes React Flow measure the handles again.
  */
 function TableNodeViewImpl({ id, data, isConnectable }: NodeProps<TableNode>) {
-  const { table, columns, related, expanded, onToggleExpand } = data;
+  const { table, columns, related, expanded, onToggleExpand, onRemove } = data;
+  const items = [{ key: 'toggle', label: expanded ? 'Collapse' : 'Expand' }, ...(onRemove ? [{ key: 'remove', label: 'Remove', danger: true }] : [])];
 
   return (
     <div className="relationship-table">
@@ -26,10 +28,7 @@ function TableNodeViewImpl({ id, data, isConnectable }: NodeProps<TableNode>) {
           </span>
           <Dropdown
             trigger={['click']}
-            menu={{
-              items: [{ key: 'toggle', label: expanded ? 'Collapse' : 'Expand' }],
-              onClick: () => onToggleExpand(id)
-            }}
+            menu={{ items, onClick: ({ key }) => (key === 'remove' ? onRemove?.(id) : onToggleExpand(id)) }}
           >
             <button type="button" className="relationship-table__menu nodrag" aria-label={`Actions of ${table.tblName}`}>
               <i className="di-icon-three-dot" />

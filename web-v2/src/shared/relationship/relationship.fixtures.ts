@@ -94,16 +94,22 @@ const ADHOC_COLUMNS: Record<string, ReturnType<typeof column>[]> = {
   [REGIONS_QUERY]: [column('region', 'string'), column('country', 'string'), column('order_count', 'uint64')]
 };
 
-/** A relationship service holding one dashboard's relationships in memory; saves replace them. */
-export function fixtureRelationshipService(json: unknown = RELATIONSHIP_JSON): RelationshipService {
+/** What the server answers when nothing is saved. */
+export const EMPTY_RELATIONSHIP_JSON = { views: [], relationships: [], extra_data: {} };
+
+/** A relationship service holding one dashboard's and the global relationships in memory; saves replace them. */
+export function fixtureRelationshipService(json: unknown = RELATIONSHIP_JSON, globalJson: unknown = EMPTY_RELATIONSHIP_JSON): RelationshipService {
   let stored = new RelationshipInfo(json);
+  let global = new RelationshipInfo(globalJson);
   return {
     getDashboardRelationship: async () => new RelationshipInfo(stored.toJson()),
     saveDashboardRelationship: async (_dashboardId, info) => {
       stored = new RelationshipInfo(info.toJson());
     },
-    getGlobalRelationship: async () => new RelationshipInfo(),
-    saveGlobalRelationship: async () => {}
+    getGlobalRelationship: async () => new RelationshipInfo(global.toJson()),
+    saveGlobalRelationship: async info => {
+      global = new RelationshipInfo(info.toJson());
+    }
   };
 }
 

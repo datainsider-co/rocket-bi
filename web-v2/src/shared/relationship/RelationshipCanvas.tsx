@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from 'react';
+import { useState, type DragEvent, type MouseEvent } from 'react';
 import { ConnectionMode, ReactFlow, type EdgeTypes, type NodeTypes } from '@xyflow/react';
 import { MAX_ZOOM, MIN_ZOOM } from './canvasZoom.utils';
 import { ConnectionMenu, type ConnectionMenuAnchor } from './ConnectionMenu';
@@ -17,16 +17,25 @@ export type CanvasGraph = Pick<
   'nodes' | 'edges' | 'onNodesChange' | 'isValidConnection' | 'connect' | 'removeConnection'
 >;
 
+/** Something dragged from outside can be dropped on the canvas (a table of the database tree). */
+export interface CanvasDrop {
+  readonly onDragOver: (event: DragEvent) => void;
+  readonly onDrop: (event: DragEvent) => void;
+}
+
 interface RelationshipCanvasProps {
   graph: CanvasGraph;
   editable: boolean;
+  drop?: CanvasDrop | undefined;
+  /** Shown over an empty canvas. */
+  emptyHint?: string | undefined;
 }
 
 /**
  * The tables and their joins. Dragging a table's header moves it, dragging a column onto another table's column
  * joins them (edit mode), the wheel zooms and dragging the background pans, like v1's Konva stage.
  */
-export function RelationshipCanvas({ graph, editable }: RelationshipCanvasProps) {
+export function RelationshipCanvas({ graph, editable, drop, emptyHint }: RelationshipCanvasProps) {
   const [menu, setMenu] = useState<ConnectionMenuAnchor | null>(null);
 
   const openMenu = (event: MouseEvent, edge: RelationshipEdge) => {
@@ -37,7 +46,10 @@ export function RelationshipCanvas({ graph, editable }: RelationshipCanvasProps)
   const closeMenu = () => setMenu(null);
 
   return (
-    <div className="relative min-h-0 flex-1">
+    <div className="relative min-h-0 flex-1" onDragOver={drop?.onDragOver} onDrop={drop?.onDrop}>
+      {emptyHint && graph.nodes.length === 0 && (
+        <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center p-4 text-center text-black/45">{emptyHint}</div>
+      )}
       <ReactFlow
         nodes={graph.nodes}
         edges={graph.edges}

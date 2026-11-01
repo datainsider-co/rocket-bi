@@ -4,6 +4,7 @@ import {
   type Connection,
   type Connections,
   type NodePositions,
+  type Point,
   type RelationshipColumn,
   type RelationshipTable
 } from './relationship.utils';
@@ -24,20 +25,33 @@ export interface TableNodeData extends TableNodeBase {
   readonly related: ReadonlySet<string>;
   readonly expanded: boolean;
   readonly onToggleExpand: (tableId: string) => void;
+  /** Removes the table from the canvas; only the global relationships can (v1). */
+  readonly onRemove: ((tableId: string) => void) | undefined;
 }
 
 export type TableBaseNode = Node<TableNodeBase, typeof TABLE_NODE_TYPE>;
 export type TableNode = Node<TableNodeData, typeof TABLE_NODE_TYPE>;
 export type RelationshipEdge = Edge<Record<string, never>, typeof RELATIONSHIP_EDGE_TYPE>;
 
+export function toBaseNode(table: RelationshipTable, position: Point): TableBaseNode {
+  return { id: table.id, type: TABLE_NODE_TYPE, position, dragHandle: `.${TABLE_DRAG_HANDLE_CLASS}`, data: { table } };
+}
+
 export function toBaseNodes(tables: readonly RelationshipTable[], positions: NodePositions): TableBaseNode[] {
-  return tables.map(table => ({
-    id: table.id,
-    type: TABLE_NODE_TYPE,
-    position: positions[table.id] ?? { x: 0, y: 0 },
-    dragHandle: `.${TABLE_DRAG_HANDLE_CLASS}`,
-    data: { table }
-  }));
+  return tables.map(table => toBaseNode(table, positions[table.id] ?? { x: 0, y: 0 }));
+}
+
+/**
+ * The nodes of `tables` at `positions`, as Discard puts them back: a node still on the canvas keeps what React Flow
+ * measured, a removed one comes back, an added one goes.
+ */
+export function restoreNodes(nodes: readonly TableBaseNode[], tables: readonly RelationshipTable[], positions: NodePositions): TableBaseNode[] {
+  const current = new Map(nodes.map(node => [node.id, node]));
+  return tables.map(table => {
+    const position = positions[table.id] ?? { x: 0, y: 0 };
+    const node = current.get(table.id);
+    return node ? { ...node, position } : toBaseNode(table, position);
+  });
 }
 
 export function nodePositionsOf(nodes: readonly Node[]): NodePositions {
@@ -88,7 +102,8 @@ export function toTableNodes(
   nodes: readonly TableBaseNode[],
   connections: Connections,
   expanded: ReadonlySet<string>,
-  onToggleExpand: (tableId: string) => void
+  onToggleExpand: (tableId: string) => void,
+  onRemove?: (tableId: string) => void
 ): TableNode[] {
   const related = relatedColumns(connections);
   return nodes.map(node => {
@@ -101,7 +116,8 @@ export function toTableNodes(
         columns: visibleColumns(node.data.table.columns, tableRelated, isExpanded),
         related: tableRelated,
         expanded: isExpanded,
-        onToggleExpand
+        onToggleExpand,
+        onRemove
       }
     };
   });

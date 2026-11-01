@@ -7,7 +7,7 @@ import { DiProvider } from '@/app/di/DiContext';
 import { createContainer } from '@/core/di/Container';
 import { RelationshipService } from '@/core/relationship/RelationshipService';
 import { SchemaService } from '@/core/schema/SchemaService';
-import { fixtureRelationshipService, fixtureSchemaService } from './relationship.fixtures';
+import { fixtureRelationshipService, fixtureSchemaService } from '@/shared/relationship/relationship.fixtures';
 import { RelationshipModal } from './RelationshipModal';
 
 function renderModal(editable: boolean, relationships = fixtureRelationshipService()) {

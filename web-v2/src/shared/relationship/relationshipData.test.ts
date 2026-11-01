@@ -4,7 +4,7 @@ import type { RelationshipService } from '@/core/relationship/RelationshipServic
 import { databaseSchemaFromJson, type SchemaService } from '@/core/schema/SchemaService';
 import { RELATIONSHIP_JSON, fixtureRelationshipService, fixtureSchemaService } from './relationship.fixtures';
 import { ADHOC_DB_NAME, tableIdOf } from './relationship.utils';
-import { loadRelationshipData, tableColumns } from './relationshipQueries';
+import { loadRelationshipData, tableColumns } from './relationshipData';
 
 const SALES_ID = tableIdOf('sample_v2', 'sales');
 const ORDERS_ID = tableIdOf(ADHOC_DB_NAME, 'orders');
@@ -49,7 +49,7 @@ describe('loadRelationshipData', () => {
     const schema = fixtureSchemaService();
     const getDatabase = vi.spyOn(schema, 'getDatabase');
 
-    const { info, columns } = await loadRelationshipData(fixtureRelationshipService(), schema, 1);
+    const { info, columns } = await loadRelationshipData(() => fixtureRelationshipService().getDashboardRelationship(1), schema);
 
     expect(info.views).toHaveLength(3);
     expect(getDatabase).toHaveBeenCalledTimes(1);
@@ -75,25 +75,24 @@ describe('loadRelationshipData', () => {
       })
     };
 
-    const { columns } = await loadRelationshipData(fixtureRelationshipService(), schema, 1);
+    const { columns } = await loadRelationshipData(() => fixtureRelationshipService().getDashboardRelationship(1), schema);
 
     expect(columns).toEqual({ [SALES_ID]: [], [ORDERS_ID]: [], [REGIONS_ID]: [] });
   });
 
   it('fails when the relationships fail to load', async () => {
-    const relationships = fixtureRelationshipService();
-    relationships.getDashboardRelationship = vi.fn<RelationshipService['getDashboardRelationship']>(async () => {
+    const load = vi.fn<RelationshipService['getGlobalRelationship']>(async () => {
       throw new Error('No permission');
     });
 
-    await expect(loadRelationshipData(relationships, fixtureSchemaService(), 1)).rejects.toThrow('No permission');
+    await expect(loadRelationshipData(load, fixtureSchemaService())).rejects.toThrow('No permission');
   });
 
   it('loads nothing more for a dashboard without views', async () => {
     const schema = fixtureSchemaService();
     const getDatabase = vi.spyOn(schema, 'getDatabase');
 
-    const data = await loadRelationshipData(fixtureRelationshipService({ views: [] }), schema, 1);
+    const data = await loadRelationshipData(async () => new RelationshipInfo({ views: [] }), schema);
 
     expect(data.columns).toEqual({});
     expect(getDatabase).not.toHaveBeenCalled();

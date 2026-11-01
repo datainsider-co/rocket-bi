@@ -1,6 +1,6 @@
 import camelCase from 'lodash-es/camelCase';
 import { TableField, ViewField, type Field } from '@/core/relationship/Field';
-import { QueryViewType, type QueryView } from '@/core/relationship/QueryView';
+import { QueryViewType, TableView, type QueryView } from '@/core/relationship/QueryView';
 import { FieldPair, Relationship } from '@/core/relationship/Relationship';
 import { RelationshipInfo, type TablePosition, type TablePositions } from '@/core/relationship/RelationshipInfo';
 
@@ -93,6 +93,25 @@ export function makeConnection(source: ColumnRef, target: ColumnRef): Connection
   return { key: connectionKey(source, target), source, target };
 }
 
+/**
+ * A database table added to the global relationships. The server fills in its alias when it is saved (the same
+ * `tbl_xxxxxx` for the same table each time); v1 sent every global view without one.
+ */
+export function newRelationshipTable(dbName: string, tblName: string, columns: readonly RelationshipColumn[]): RelationshipTable {
+  return {
+    id: tableIdOf(dbName, tblName),
+    dbName,
+    tblName,
+    view: new TableView({ db_name: dbName, tbl_name: tblName, alias_name: '' }),
+    columns
+  };
+}
+
+/** The connections that don't join `tableId`: what is left once the table is removed. */
+export function withoutTableConnections(connections: Connections, tableId: string): Connections {
+  return Object.fromEntries(Object.entries(connections).filter(([, { source, target }]) => source.tableId !== tableId && target.tableId !== tableId));
+}
+
 /** Where a table without a saved position goes: a row along the top, like v1. */
 export function defaultTablePosition(index: number): TablePosition {
   return { left: index * DEFAULT_TABLE_GAP, top: 0 };
@@ -167,7 +186,10 @@ function samePositions(a: NodePositions, b: NodePositions): boolean {
   );
 }
 
-/** Whether connections or table positions differ from what was loaded. */
+/**
+ * Whether connections or table positions differ from what was loaded. Positions are keyed by table, so a table added
+ * or removed is a change too; a table moved back where it was is not.
+ */
 export function isDirty(
   initial: { connections: Connections; positions: NodePositions },
   current: { connections: Connections; positions: NodePositions }
@@ -236,5 +258,18 @@ export function toRelationshipInfo(
     loaded.views,
     toRelationships(tables, connections),
     toTablePositions(tables, positions, loaded.tablePositions)
+  );
+}
+
+/**
+ * What Save of the global relationships sends (v1 `GlobalRelationshipHandler`): the views of the tables on the canvas,
+ * the connections grouped into relationships, and the positions of those tables only, so a removed table's position
+ * goes with it (v1 kept it).
+ */
+export function toGlobalRelationshipInfo(tables: readonly RelationshipTable[], connections: Connections, positions: NodePositions): RelationshipInfo {
+  return RelationshipInfo.of(
+    tables.map(table => table.view),
+    toRelationships(tables, connections),
+    toTablePositions(tables, positions, {})
   );
 }
