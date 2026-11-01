@@ -4,7 +4,6 @@ import { useDi } from '@/app/di/DiContext';
 import type { ConditionData } from '@/core/chart-builder/ConditionData';
 import { toQueryRequestJson } from '@/core/query/QueryRequest';
 import { QueryService } from '@/core/query/QueryService';
-import { useBuilder } from '../../state/BuilderContext';
 import { columnValuesSetting, nextValuesFrom, sqlViewsOf, VALUES_PAGE_SIZE, valuesPageOf } from './columnValues.utils';
 
 export interface ColumnValues {
@@ -16,10 +15,15 @@ export interface ColumnValues {
   readonly retry: () => void;
 }
 
+/** Where a condition's column lives: a view's query, and the dashboard whose RLS and relationships apply. */
+export interface ColumnValuesSource {
+  readonly sqlQueryOf?: ((viewName: string) => string | undefined) | undefined;
+  readonly dashboardId?: number | undefined;
+}
+
 /** The condition's column values from the server, page by page (v1 `SelectionFilter.handleLoadChartData`). */
-export function useColumnValues(condition: ConditionData, enabled: boolean): ColumnValues {
+export function useColumnValues(condition: ConditionData, enabled: boolean, { sqlQueryOf, dashboardId }: ColumnValuesSource): ColumnValues {
   const service = useDi(QueryService);
-  const { sqlQueryOf, dashboardId } = useBuilder();
   const setting = useMemo(
     () => columnValuesSetting(condition.field, condition.isNested, sqlViewsOf(condition.field, sqlQueryOf)),
     [condition.field, condition.isNested, sqlQueryOf]

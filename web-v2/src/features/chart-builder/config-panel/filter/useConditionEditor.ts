@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { ConditionData } from '@/core/chart-builder/ConditionData';
+import type { ChartControl } from '@/core/chart-builder/chartControls';
 import { FilterInput, inputOf, type FilterCondition } from '@/core/query/internalFilter';
-import { useBuilder } from '../../state/BuilderContext';
 import {
   canUseControl,
   conditionChoicesOf,
@@ -12,18 +12,23 @@ import {
   withDraftControl,
   type ValueMode
 } from './conditionEditor.utils';
-import { useColumnValues } from './useColumnValues';
+import { useColumnValues, type ColumnValuesSource } from './useColumnValues';
+
+/** What a condition can draw on: the chart controls to take values from (none outside a dashboard), where its column is. */
+export interface ConditionEditorContext extends ColumnValuesSource {
+  readonly controls: readonly ChartControl[];
+}
 
 /**
  * The editor's draft of one condition (v1 `InternalFilterPopover`). The column's values are loaded only while a list
  * is typed in by hand. Mount it per opening so the draft starts from the condition.
  */
-export function useConditionEditor(condition: ConditionData) {
-  const { controls } = useBuilder();
+export function useConditionEditor(condition: ConditionData, context: ConditionEditorContext) {
+  const { controls } = context;
   const family = familyOfCondition(condition);
   const [draft, setDraft] = useState(() => draftOf(condition));
   const input = inputOf(family, draft.condition);
-  const columnValues = useColumnValues(condition, draft.mode === 'manual' && input === FilterInput.MultiSelect);
+  const columnValues = useColumnValues(condition, draft.mode === 'manual' && input === FilterInput.MultiSelect, context);
   const valueControls = useMemo(() => valueControlsOf(controls), [controls]);
 
   return {
