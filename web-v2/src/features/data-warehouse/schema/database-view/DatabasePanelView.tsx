@@ -1,12 +1,14 @@
-import { DeleteOutlined, SearchOutlined, SettingOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined, SearchOutlined, SettingOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Input, Spin, Table, Tooltip, Typography } from 'antd';
 import type { TableSchema } from '@/core/schema/SchemaService';
+import { CreateTableModal } from '../schema-edit/CreateTableModal';
 import type { DatabasePanelData } from './useDatabasePanel';
 
 export interface DatabasePanelActions {
   readonly onOpenTable: (table: TableSchema) => void;
   readonly onDeleteTable: (table: TableSchema) => void;
   readonly onShareDatabase: () => void;
+  readonly onCreateTable: (name: string, displayName: string) => void;
   readonly onDeleteDatabase: () => void;
 }
 
@@ -18,7 +20,7 @@ interface DatabasePanelViewProps {
 
 const tableTitle = (table: TableSchema) => table.displayName || table.name;
 
-/** A database's view (v1 `TableManagement`): its tables, a search, and the database's Action menu. */
+/** A database's view (v1 `TableManagement`): its tables, a search, New table and the database's Action menu. */
 export function DatabasePanelView({ dbName, data, actions }: DatabasePanelViewProps) {
   const menu = {
     items: [
@@ -43,6 +45,9 @@ export function DatabasePanelView({ dbName, data, actions }: DatabasePanelViewPr
           value={data.searchText}
           onChange={event => data.onSearchChange(event.target.value)}
         />
+        <Button className="max-sm:hidden" icon={<PlusOutlined />} disabled={data.status !== 'ready'} onClick={() => data.onCreateOpenChange(true)}>
+          New table
+        </Button>
         <Dropdown menu={menu} trigger={['click']}>
           <Button type="text" icon={<SettingOutlined />}>
             Action
@@ -103,6 +108,7 @@ export function DatabasePanelView({ dbName, data, actions }: DatabasePanelViewPr
           />
         </div>
       )}
+      {data.isCreateOpen && <CreateTableModal existing={data.allTableNames} onSubmit={actions.onCreateTable} onCancel={() => data.onCreateOpenChange(false)} />}
     </section>
   );
 }

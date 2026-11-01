@@ -7,10 +7,12 @@ import {
   columnTypeLabel,
   filterColumns,
   filterTables,
+  hasColumnSearch,
   isProcessing,
   previewColumns,
   previewRows,
   queryTablePath,
+  schemaTabsOf,
   selectionFromParams,
   selectionToParams,
   tablePreviewRequest,
@@ -43,6 +45,20 @@ describe('selectionToParams', () => {
     expect(selectionToParams({ dbName: 'a b', tableName: 't' }).toString()).toBe('database=a+b&table=t');
     expect(selectionToParams({ dbName: 'db', tableName: undefined }).toString()).toBe('database=db');
     expect(selectionToParams({ dbName: undefined, tableName: 't' }).toString()).toBe('');
+  });
+});
+
+describe('schemaTabsOf', () => {
+  it("lists v1's tabs, without the formula ones on a phone", () => {
+    expect(schemaTabsOf(false).map(tab => tab.label)).toEqual(['Table Schema', 'Table Data', 'Measure Schema', 'Calculated Field', 'RLS']);
+    expect(schemaTabsOf(true).map(tab => tab.value)).toEqual(['schema', 'data', 'rls']);
+  });
+
+  it('searches the tabs that list columns', () => {
+    expect(hasColumnSearch('schema')).toBe(true);
+    expect(hasColumnSearch('measure')).toBe(true);
+    expect(hasColumnSearch('data')).toBe(false);
+    expect(hasColumnSearch('rls')).toBe(false);
   });
 });
 

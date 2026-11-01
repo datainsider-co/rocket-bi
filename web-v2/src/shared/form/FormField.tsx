@@ -10,6 +10,8 @@ interface FormFieldProps<T extends FieldValues, N extends FieldPath<T>> {
   label?: string | undefined;
   /** Shows the required mark; the rule itself lives in the zod schema. */
   required?: boolean | undefined;
+  /** On the antd `Form.Item`: `mb-0` for a field in a table cell. */
+  className?: string | undefined;
   /** Renders the input. Spread `field` onto it; `id` ties it to the label. */
   render: (field: ControllerRenderProps<T, N> & { id: string }) => ReactElement;
 }
@@ -20,6 +22,7 @@ export function FormField<T extends FieldValues, N extends FieldPath<T>>({
   name,
   label,
   required,
+  className,
   render
 }: FormFieldProps<T, N>) {
   return (
@@ -30,6 +33,7 @@ export function FormField<T extends FieldValues, N extends FieldPath<T>>({
         <Form.Item
           label={label}
           required={required}
+          className={className}
           htmlFor={name}
           validateStatus={fieldState.error ? 'error' : undefined}
           help={fieldState.error?.message}

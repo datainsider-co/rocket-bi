@@ -2,6 +2,7 @@ import { CheckOutlined } from '@ant-design/icons';
 import { Table } from 'antd';
 import type { ColumnDefinition } from '@/core/schema/TableDefinition';
 import { columnTypeLabel } from '../schema.utils';
+import { formatDefaultValue } from '../schema-edit/schemaEdit.utils';
 
 const DASH = '--';
 
@@ -32,7 +33,7 @@ export function TableColumnsView({ columns, total }: { columns: readonly ColumnD
           width: 140,
           ellipsis: true,
           responsive: ['md'],
-          render: (_, column) => (column.defaultValue === undefined ? DASH : String(column.defaultValue))
+          render: (_, column) => formatDefaultValue(column.type, column.defaultValue)
         }
       ]}
     />
