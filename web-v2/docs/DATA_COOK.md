@@ -215,8 +215,8 @@ Chạy bằng curl và Playwright (v1 ở `localhost:5050`) trên docker local. 
 - **Layout** (`features/data-cook/layout`):
   - Sidebar giống Ingestion, có nút "New ETL" (mở `my-etl/create`) và bốn mục với tên, icon của v1.
   - Trình sửa nằm trong layout và giữ My ETL được chọn, như v1.
-- **Trang** hiện chỉ có header; DC3, DC4 (đã xong), DC6 điền nội dung. Trang tạo hiện "My ETL › Untitled ETL" như v1; trang của
-  một ETL chưa có tên cho tới DC6.
+- **Trang** hiện chỉ có header; DC3, DC4, DC6a (đã xong) điền nội dung. Trang tạo hiện "My ETL › Untitled ETL" như v1.
+  Hai route của trình sửa gộp làm một ở DC6a.
 - Đã kiểm bằng Playwright trên `pnpm dev` (1440px và 375px): redirect, chọn mục, nút New ETL, không lỗi console.
 
 ## Quyết định ở DC3 / DC4 (2026-11-02)
@@ -235,7 +235,7 @@ Chạy bằng curl và Playwright (v1 ở `localhost:5050`) trên docker local. 
     poll.
   - **Force Run** mở dialog chọn ngày như `ForceRunSettingModal` của v1 (mặc định hôm nay, ngày đã qua bị khoá). Đã kiểm:
     `at_time` thành `next_execute_time`, tức ETL chạy vào lúc đó. Hôm nay → chạy ngay (`now`), ngày sau → đầu ngày đó.
-  - Menu Edit / Share / Delete. **Share bị khoá** ("Sharing ETLs is not supported yet") tới DC5. Delete đưa vào trash,
+  - Menu Edit / Share / Delete. Share bị khoá tới DC5 (giờ đã mở). Delete đưa vào trash,
     Trash có Restore và Delete forever; cả ba hỏi xác nhận (antd, không HTML). Dòng trong Trash không mở trình sửa.
   - Rỗng: My ETL mời tạo ETL đầu tiên (link `my-etl/create`); search không ra gì nói rõ từ khoá.
 - **History** (`features/data-cook/history`):
@@ -250,6 +250,60 @@ Chạy bằng curl và Playwright (v1 ở `localhost:5050`) trên docker local. 
   module riêng. Đã kiểm bằng Playwright trên `pnpm dev` (1440px và 375px): listing, sort, Force Run, polling, history,
   View log, Delete → Trash → Restore, không lỗi console, không cuộn ngang ở 375px.
 
+## Quyết định ở DC5 (2026-11-02)
+
+- **Adapter thứ ba của `ShareModal`**: `ShareTarget` / `PeopleResource` thêm `{ type: 'etl', id }` (id là số; quyền
+  `0:etl:view:<id>` đọc đúng bằng `shareLevelOf`). `sharePeopleApi` chọn endpoint theo loại: directory qua
+  `share/directory/{id}`, database và ETL qua endpoint riêng của chúng (`EtlShareService` của DC1).
+- **Chỉ people**, như v1 (`DataCookShareHandler`): không có Get link, không có password; mức quyền như database (không
+  có View & Download). `etlShare(etl)` dựng request từ dòng của listing.
+- Menu Share của listing (My ETL, Share With Me) mở dialog; không còn khoá. Đã kiểm bằng Playwright: dialog đọc
+  `data_cook/1/share/list`, không có link.
+
+## Quyết định ở DC6a (2026-11-02)
+
+- **Dùng chung**: `database-tree` và `useUnsavedGuard` (+ `leavesPage`) chuyển từ `features/data-warehouse` lên
+  `shared/` (Data Cook là nơi thứ hai dùng). Key danh sách database của Data Warehouse thành `schemaKeys.entries`, để cây
+  (giờ ở `shared`) làm mới nó khi tạo database. `useUnsavedGuard` thêm tham số `stays`: những URL vẫn là trang đang sửa
+  thì không hỏi.
+- **Một route** `my-etl/:name` cho cả `create` (thay hai route của DC2), để trình sửa không remount khi ETL mới có id và
+  URL. `useEditorSession` (hàm thuần `editorSession.utils`) giữ session khi URL chuyển sang đúng ETL vừa tạo, mở session
+  mới (remount) khi sang ETL khác hoặc bấm New ETL. `my-etl/<không có id>` là Not found.
+- **Tạo lười**: trang tạo vẽ canvas trống "Untitled ETL"; nguồn đầu tiên gọi `data_cook/create` (cùng lúc lấy JSON bảng),
+  rồi URL thay bằng `my-etl/untitled-etl-<id>`, phần sửa vẫn chưa lưu. Đổi tên một ETL chưa có id rồi Save thì Save tạo
+  trước.
+- **Nguồn**: `EtlService.getSourceTable` lấy JSON bảng từ `GET databases/{db}` nguyên vẹn làm `table_schema` (v1 gửi lại
+  `TableSchema` nó đọc). Tên bảng đích như v1 (`tbl_name` của bảng, không phải display name, thêm `_1`, `_2` nếu trùng);
+  `db_display_name` là display name của database. Chọn lại một bảng đã là nguồn: báo "… is already a source of this ETL"
+  (v1 bỏ qua im lặng). Thêm nguồn bằng `DatabaseTree` trong modal "Add Source".
+- **Draft và reducer** (`editor/draft`): `EtlDraft` = ETL server trả + tên + `EtlGraph` + `extraData`. `etlEditorReducer`
+  (created, saved, discard, rename, addSource, remove, renameTable, move). "Có thay đổi" = so `etlJobToJson` của draft với
+  bản gốc, nên **kéo box cũng tính** (v1 không tính, nên vị trí kéo bị mất khi rời trang mà không lưu).
+- **Layout** (`etlLayout.utils`): công thức của v1 (`MIN_TOP` 20, 380 / 200 / 160, box lệch +200 / +80) cho bảng và
+  operator chưa có vị trí, ghi vào `extra_data` lúc mở. Sửa bug v1 (operator mới tự tính chính nó là anh em ở top 0, nên
+  con đầu tiên của một nguồn ở top 20 nằm ở 160). Các box của một bảng xếp chồng (cách 70) thay vì đè nhau.
+  `stage_position` giữ nguyên như đã lưu (v1 tự đọc sai nó); mở ETL thì fit vào khung, tối đa 100%.
+- **Canvas** (`editor/canvas`): bảng (database trên, bảng dưới, nút "+" tròn mở menu), hình thoi của operator (bấm mở
+  menu; join ghi kiểu join như v1), box Save To Data Warehouse / Save To Database / email. Cạnh `smoothstep` có mũi tên.
+  React Flow giữ vị trí trong lúc kéo; draft nhận vị trí khi thả (một lần sửa). Control bar dùng lại của Relationship:
+  zoom, Fit content, Full screen, **Discard Changes** (hỏi, như Relationship) và Save. Bỏ "Clear All" của v1 (xoá hết
+  không hỏi).
+- **Menu**: bảng có Join Table, Manage Fields, SQL Query, Pivot Table, Transform Table, Save To Data Warehouse (khoá,
+  "Not supported yet", tới DC7 – DC9), Edit Display Name (chỉ bảng của operator, như v1), Remove. Bỏ Python Query, Save
+  To Database, Send To Email (sau MVP). Hình thoi và box: Edit (khoá), Remove.
+- **Remove** xoá bảng và mọi bước phía sau (như v1); **hỏi khi có bước phía sau** ("Remove 'x' and the 2 steps after
+  it?"), v1 không hỏi. Input còn lại của một join bị xoá thành lá. Xoá box chỉ bỏ cấu hình đích. Vị trí của những gì bị
+  xoá cũng bỏ.
+- **Đổi tên** ETL (bút chì ở header) và bảng (Edit Display Name) dùng chung `EtlNameModal`, luật của v1 (bắt buộc, tối đa
+  250, không có `\/?*"><:|@(){}` và backtick), và **nằm trong draft tới khi Save** (v1 đổi tên ETL là lưu cả ETL ngay).
+- **Save** (DC6a, chưa có dialog của DC9): `PUT data_cook/{id}` với draft, giữ lịch và incremental như server trả; báo
+  "ETL saved", **ở lại trang** (v1 quay về My ETL), URL theo tên mới. Rời trang khi có thay đổi: hỏi với câu của v1.
+- Trang ETL không tồn tại hoặc trong trash (404): "ETL not found" và nút về My ETL.
+- **Đã kiểm bằng Playwright** trên `pnpm dev` với docker: mở ETL 2 (vị trí khớp v1), menu, tạo lười (một `create`, URL
+  đổi, không remount), chọn lại cùng bảng, kéo + đổi tên + Save (server giữ nguồn, vị trí theo key v1, lịch `none`),
+  guard, Remove + Discard, 375px không cuộn ngang, không lỗi console. **v1 mở được ETL v2 tạo** (đúng vị trí, preview
+  được nguồn). Để lại ETL 11 "DC6a probe" (nguồn `di0_ingest.sales`) cho DC6b.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -259,8 +313,8 @@ Chạy bằng curl và Playwright (v1 ở `localhost:5050`) trên docker local. 
 | DC2 | **Khung.** Routes `/data-warehouse/data-cook/*` ở path của v1 (`my-etl`, `shared`, `history`, `trash`, `my-etl/create`, `my-etl/:name`), layout có sidebar, page lazy load | Xong (xem DC2) |
 | DC3 | **Listing.** My ETL, Shared, Trash: phân trang, search, sort theo whitelist, refresh. Cột Name, Owner, Created Time, Last Run (status), Next Run, Action (Force Run hoặc Cancel, menu Edit / Share / Delete). Trash: Restore, Delete forever. Click dòng mở trình sửa | Xong (xem DC3 / DC4) |
 | DC4 | **ETL History.** Cột History Id, ETL Name (link tới ETL), Last Run, Total Run Time, Status, Message (log nhiều dòng xem được đầy đủ) | Xong (xem DC3 / DC4) |
-| DC5 | **Share ETL.** Adapter `etl` cho `ShareModal` trên `data_cook/{id}/share/*`, chỉ people | Chưa làm |
-| DC6a | **Trình sửa: khung.** Load / tạo lười, reducer trên đồ thị phẳng, canvas React Flow (nguồn, operator, đích, vị trí từ `extra_data`), thêm nguồn từ `DatabaseTree`, context menu, xoá / đổi tên operator, đổi tên ETL, Save (giữ lịch hiện có), hỏi khi rời trang có thay đổi | Chưa làm |
+| DC5 | **Share ETL.** Adapter `etl` cho `ShareModal` trên `data_cook/{id}/share/*`, chỉ people | Xong (xem DC5) |
+| DC6a | **Trình sửa: khung.** Load / tạo lười, reducer trên đồ thị phẳng, canvas React Flow (nguồn, operator, đích, vị trí từ `extra_data`), thêm nguồn từ `DatabaseTree`, context menu, xoá / đổi tên operator, đổi tên ETL, Save (giữ lịch hiện có), hỏi khi rời trang có thay đổi | Xong (xem DC6a) |
 | DC6b | **Trình sửa: preview.** `preview_sync` theo nhánh, trạng thái loading / lỗi trên node, lỗi lan xuống, panel dữ liệu (`TableDataView` trên database preview), Retry, force refresh | Chưa làm |
 | DC7 | **Operator không cần ChartBuilder.** SQL Query (`shared/code-editor`, autocomplete bảng của database preview), Join (chọn bảng thứ hai, kiểu join, nhiều điều kiện), Manage Fields (đổi tên, ẩn, đổi kiểu, thêm expression field, xem SQL qua `view_query`) | Chưa làm |
 | DC8 | **Transform và Pivot** bằng ChartBuilder nhúng (host mới, dựa trên phần tách host của DW11) | Chưa làm |
