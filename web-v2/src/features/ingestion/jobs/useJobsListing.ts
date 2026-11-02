@@ -3,11 +3,11 @@ import type { JobInfo } from '@/core/ingestion/Job';
 import type { JobSortField } from '@/core/ingestion/JobService';
 import type { Sort } from '@/core/listing/Listing';
 import type { IngestionSection } from '../ingestion.utils';
-import { useKeepPageInRange } from '../listing/useKeepPageInRange';
-import { useListingState } from '../listing/useListingState';
+import { useKeepPageInRange } from '@/shared/listing/useKeepPageInRange';
+import { useListingState } from '@/shared/listing/useListingState';
 import { DEFAULT_JOB_SORT, jobListingStatuses } from './jobs.utils';
 import { DEFAULT_REFRESH_OPTION, refreshOptionOf, toRefetchInterval, type RefreshOption } from './refresh.utils';
-import { useDebouncedSearch, type DebouncedSearch } from '../listing/useDebouncedSearch';
+import { useDebouncedSearch, type DebouncedSearch } from '@/shared/listing/useDebouncedSearch';
 import { useJobsQuery } from './useJobsQuery';
 
 export interface JobsRefresh {

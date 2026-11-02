@@ -5,6 +5,7 @@ import {
   countLabel,
   DEFAULT_PAGE_SIZE,
   formatDateTime,
+  formatDuration,
   initialListingState,
   lastPage,
   listingPagination,
@@ -160,5 +161,24 @@ describe('countLabel', () => {
     [2, '2 jobs']
   ])('%i → %s', (count, label) => {
     expect(countLabel(count, 'job', 'jobs')).toBe(label);
+  });
+});
+
+describe('formatDuration', () => {
+  it.each([
+    [0, '0ms'],
+    [391, '391ms'],
+    [999.9, '999ms'],
+    [1000, '1s'],
+    [45_500, '45s'],
+    [125_000, '2m 5s'],
+    [3_603_000, '1h 0m 3s'],
+    [90_061_000, '25h 1m 1s']
+  ])('%d ms → %s', (millis, expected) => {
+    expect(formatDuration(millis)).toBe(expected);
+  });
+
+  it.each([-1, Number.NaN, Number.POSITIVE_INFINITY])('shows -- for %d', millis => {
+    expect(formatDuration(millis)).toBe('--');
   });
 });

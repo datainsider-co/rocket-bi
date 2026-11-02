@@ -1,7 +1,7 @@
 import { Typography } from 'antd';
 import type { TableColumnsType } from 'antd';
 import type { SourceInfo, SourceSortField } from '@/core/ingestion/DataSourceService';
-import { columnSortOrder, formatDateTime, type ListingState } from '../listing/listing.utils';
+import { columnSortOrder, formatDateTime, type ListingState } from '@/shared/listing/listing.utils';
 import { SourceActionsCell, type SourceRowActions } from './SourceActionsCell';
 import { SourceOwnerCell } from './SourceOwnerCell';
 import { SOURCE_ACTION_COLUMN, sortFieldOfColumn, SourceColumn, sourceTypeLabel } from './sources.utils';

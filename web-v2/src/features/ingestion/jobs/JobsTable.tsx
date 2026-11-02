@@ -1,7 +1,7 @@
 import { Table } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
 import type { JobId, JobInfo } from '@/core/ingestion/Job';
-import { listingPagination } from '../listing/listing.utils';
+import { listingPagination } from '@/shared/listing/listing.utils';
 import type { JobRowActions } from './JobActionsCell';
 import { jobColumns } from './jobColumns';
 import { isEditableJob, toJobSortField } from './jobs.utils';

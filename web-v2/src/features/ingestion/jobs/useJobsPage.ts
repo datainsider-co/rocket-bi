@@ -3,7 +3,7 @@ import { App } from 'antd';
 import type { Job } from '@/core/ingestion/Job';
 import type { IngestionSection } from '../ingestion.utils';
 import { jobSavedMessage, type JobFormTarget, type JobSavePlan } from '../job-form/jobForm.utils';
-import { useRowSelection } from '../listing/useRowSelection';
+import { useRowSelection } from '@/shared/listing/useRowSelection';
 import type { JobRowActions } from './JobActionsCell';
 import { isEditableJob } from './jobs.utils';
 import type { JobSelection } from './JobsTable';

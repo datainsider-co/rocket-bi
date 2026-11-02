@@ -2,7 +2,7 @@ import { Table } from 'antd';
 import type { TableProps } from 'antd';
 import type { SourceId } from '@/core/ingestion/DataSource';
 import type { SourceInfo, SourceSortField } from '@/core/ingestion/DataSourceService';
-import { listingPagination } from '../listing/listing.utils';
+import { listingPagination } from '@/shared/listing/listing.utils';
 import type { SourceRowActions } from './SourceActionsCell';
 import { sourceColumns } from './sourceColumns';
 import { isEditableSource, sortFieldOfColumn, sourceRowKey, type DataSourcesListing } from './sources.utils';

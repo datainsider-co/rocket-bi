@@ -3,7 +3,7 @@ import type { DataSource, JdbcSource, SourceId } from '@/core/ingestion/DataSour
 import { SourceSortField, type SourceInfo } from '@/core/ingestion/DataSourceService';
 import { SortOrder, type Sort } from '@/core/listing/Listing';
 import type { JobFormTarget } from '../job-form/jobForm.utils';
-import { countLabel, type ListingState } from '../listing/listing.utils';
+import { countLabel, type ListingState } from '@/shared/listing/listing.utils';
 import type { SourceFormTarget } from '../source-form/sourceForm.utils';
 import { JDBC_SOURCE_KINDS } from '../sourceKinds';
 

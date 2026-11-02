@@ -15,26 +15,6 @@ export function toHistorySortField(columnKey: unknown): JobHistorySortField | un
     : undefined;
 }
 
-const SECOND = 1000;
-const MINUTE = 60 * SECOND;
-const HOUR = 60 * MINUTE;
-
-/**
- * A run's duration, like v1 `DateTimeUtils.formatAsHms` (`45s`, `2m 5s`, `1h 0m 3s`, hours not wrapped into days).
- * Unlike v1, a run under a second shows its milliseconds (`391ms`) instead of `0s`, since most runs are that short.
- * `--` for a negative or non-finite value.
- */
-export function formatDuration(millis: number): string {
-  if (!Number.isFinite(millis) || millis < 0) return '--';
-  if (millis < SECOND) return `${Math.trunc(millis)}ms`;
-  const hours = Math.trunc(millis / HOUR);
-  const minutes = Math.trunc((millis % HOUR) / MINUTE);
-  const seconds = Math.trunc((millis % MINUTE) / SECOND);
-  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
-  if (minutes > 0) return `${minutes}m ${seconds}s`;
-  return `${seconds}s`;
-}
-
 const ROW_COUNT_FORMAT = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
 
 /** Total Inserted Rows with thousands separators (`1,234,567`). v1 showed the raw number. */

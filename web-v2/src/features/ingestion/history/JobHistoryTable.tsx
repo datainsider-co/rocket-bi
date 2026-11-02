@@ -1,10 +1,10 @@
 import { Table, type TableColumnsType } from 'antd';
 import type { JobHistory } from '@/core/ingestion/JobHistory';
 import { JobHistorySortField } from '@/core/ingestion/JobHistoryService';
-import { columnSortOrder, formatDateTime, listingPagination } from '../listing/listing.utils';
+import { columnSortOrder, formatDateTime, formatDuration, listingPagination } from '@/shared/listing/listing.utils';
 import { JobStatusTag } from '../status/JobStatusTag';
 import { HistoryMessageCell } from './HistoryMessageCell';
-import { formatDuration, formatRowCount, toHistorySortField } from './jobHistory.utils';
+import { formatRowCount, toHistorySortField } from './jobHistory.utils';
 import type { JobHistoryTableState } from './useJobHistory';
 
 /** The order antd cycles through; never "no sort", so a click always asks for a sort (the hook decides which). */

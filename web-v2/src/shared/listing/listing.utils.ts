@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { SortOrder, type ListingRequest, type Sort } from '@/core/listing/Listing';
 
-/** v1 `SearchInput` `timeBound` of the ingestion listings. */
+/** v1 `SearchInput` `timeBound` of the ingestion listings (Data Cook's was 300 ms, close enough). */
 export const SEARCH_DEBOUNCE_MS = 400;
 
 /** v1 `DefaultPaging.DefaultPageSize`. */
@@ -10,7 +10,7 @@ export const DEFAULT_PAGE_SIZE = 20;
 /** v1 `ListingFooter` page sizes. */
 export const PAGE_SIZE_OPTIONS: readonly number[] = [20, 30, 50, 100, 200];
 
-/** antd `Table` `pagination` shared by the ingestion listings: total, page size picker, always shown. */
+/** antd `Table` `pagination` shared by the listings of Data Ingestion and Data Cook: total, page size picker, always shown. */
 export interface ListingPagination {
   readonly current: number;
   readonly pageSize: number;
@@ -93,6 +93,26 @@ export function columnSortOrder<Field extends string>(
 /** v1 `DateTimeUtils.formatAsMMMDDYYYHHmmss` (`Oct 29, 2026 07:30:00`), in the browser's time zone; `--` for 0. */
 export function formatDateTime(epochMillis: number): string {
   return epochMillis > 0 ? dayjs(epochMillis).format('MMM DD, YYYY HH:mm:ss') : '--';
+}
+
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
+
+/**
+ * A run's duration, like v1 `DateTimeUtils.formatAsHms` (`45s`, `2m 5s`, `1h 0m 3s`, hours not wrapped into days).
+ * Unlike v1, a run under a second shows its milliseconds (`391ms`) instead of `0s`, since most runs are that short.
+ * `--` for a negative or non-finite value.
+ */
+export function formatDuration(millis: number): string {
+  if (!Number.isFinite(millis) || millis < 0) return '--';
+  if (millis < SECOND) return `${Math.trunc(millis)}ms`;
+  const hours = Math.trunc(millis / HOUR);
+  const minutes = Math.trunc((millis % HOUR) / MINUTE);
+  const seconds = Math.trunc((millis % MINUTE) / SECOND);
+  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
 }
 
 /**
