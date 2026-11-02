@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { dashboardFromJson } from '@/core/dashboard/Dashboard';
 import { DashboardSummary } from '@/core/dashboard/DashboardService';
 import type { DashboardService } from '@/core/dashboard/DashboardService';
 import { widgetFromJson } from '@/core/dashboard/Widget';
@@ -40,6 +41,10 @@ export function fakeDashboardService(overrides: Partial<DashboardService> = {}):
       throw new Error('not stubbed');
     }),
     create: vi.fn<DashboardService['create']>(async name => new DashboardSummary({ id: 50, name })),
+    // Ids from 300 on, in order, as the server gives them.
+    createQuery: vi.fn<DashboardService['createQuery']>(async (name, _parentId, widgets) =>
+      dashboardFromJson({ id: 51, name, owner_id: 'root', widgets: widgets.map((widget, index) => ({ ...widget, id: 300 + index })) })
+    ),
     rename: vi.fn<DashboardService['rename']>(async () => {}),
     resizeWidgets: vi.fn<DashboardService['resizeWidgets']>(async () => {}),
     createWidget: vi.fn<DashboardService['createWidget']>(async (_dashboardId, widget) => widgetFromJson({ ...widget, id: 900 })),

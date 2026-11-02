@@ -1,5 +1,5 @@
 import type { JsonObject } from '@/core/json/json';
-import { formatParamValue, ParamValueType, type QueryParameter } from './queryParameters';
+import { formatParamValue, ParamValueType, sqlLiteral, type QueryParameter } from './queryParameters';
 
 /**
  * Raw SQL as the query editor runs it (backend `RawQuerySetting`). The server wraps the SQL in
@@ -26,6 +26,18 @@ export function syncParameters(sql: string, parameters: readonly QueryParameter[
 /** What the request's `parameters` holds: each value formatted for the SQL, by name. */
 export function parameterValues(parameters: readonly QueryParameter[]): Record<string, string> {
   return Object.fromEntries(parameters.map(parameter => [parameter.displayName, formatParamValue(parameter.valueType, parameter.value)]));
+}
+
+/**
+ * The SQL with each parameter's value in place, as SQL literals: for requests that take plain SQL (a table from a
+ * query). Placeholders without a parameter stay.
+ */
+export function inlineParameters(sql: string, parameters: readonly QueryParameter[]): string {
+  const byName = new Map(parameters.map(parameter => [parameter.displayName, parameter]));
+  return sql.replace(PARAMETER_PATTERN, (placeholder, name: string) => {
+    const parameter = byName.get(name);
+    return parameter ? sqlLiteral(parameter.valueType, parameter.value) : placeholder;
+  });
 }
 
 /**

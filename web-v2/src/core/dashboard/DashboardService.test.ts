@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { HttpClientBuilder } from '@/shared/http/HttpClientBuilder';
 import { HttpDashboardService } from './DashboardService';
+import fixture from '@/core/schema/warehouse.fixture.json';
 
 function setup(body: unknown) {
   const requests: { method: string; url: string; body: string }[] = [];
@@ -30,6 +31,17 @@ describe('HttpDashboardService', () => {
     expect(requests[0]).toMatchObject({ method: 'POST', url: 'http://api.test/dashboards/create' });
     expect(sent()).toEqual({ name: 'probe-dash', parent_directory_id: 2, directory_type: 'dashboard' });
     expect(dashboard).toMatchObject({ id: 1, name: 'probe-dash', ownerId: 'root' });
+  });
+
+  it('creates a query analysis with its widgets', async () => {
+    const { response } = fixture.analysisCreate;
+    const { service, sent } = setup(response);
+    const widget = { class_name: 'chart_v3', id: -1, setting: {} };
+
+    const analysis = await service.createQuery('DW0 Analysis', -1, [widget]);
+
+    expect(sent()).toEqual({ name: 'DW0 Analysis', parent_directory_id: -1, directory_type: 'queries', widgets: [widget] });
+    expect(analysis).toMatchObject({ id: response.id, name: 'DW0 Analysis', widgets: [{ kind: 'chart' }] });
   });
 
   it('gets a dashboard with its widgets', async () => {
