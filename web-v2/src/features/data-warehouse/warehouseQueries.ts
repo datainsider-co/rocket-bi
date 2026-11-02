@@ -14,6 +14,8 @@ export const warehouseKeys = {
   table: ({ dbName, name }: TableRef) => ['warehouse', 'table', dbName, name] as const,
   previews: ['warehouse', 'preview'] as const,
   preview: (request: JsonObject) => ['warehouse', 'preview', request] as const,
+  /** The Query Editor's results; the run and its request follow. */
+  rawQuery: ['warehouse', 'raw-query'] as const,
   policies: ({ dbName, name }: TableRef) => ['warehouse', 'policies', dbName, name] as const
 };
 

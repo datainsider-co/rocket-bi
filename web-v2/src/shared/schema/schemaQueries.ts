@@ -8,6 +8,8 @@ export const schemaKeys = {
   /** Every schema query, to refresh them all. */
   all: ['schema'] as const,
   databases: ['schema', 'databases'] as const,
+  /** Every database's query, to read the ones loaded so far. */
+  anyDatabase: ['schema', 'database'] as const,
   database: (dbName: string) => ['schema', 'database', dbName] as const
 };
 
