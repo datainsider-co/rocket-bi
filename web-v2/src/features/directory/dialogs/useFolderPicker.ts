@@ -18,7 +18,7 @@ const ROOT: Folder = { id: DefaultDirectoryId.MyData, name: 'My Data' };
  * Browses My Data folder by folder to pick a move target (v1 `MyDataPickDirectory`). The visited path is kept, so
  * Back needs no request. `excludeId` (the item being moved) is hidden, so a folder can't move into itself.
  */
-export function useFolderPicker(excludeId: number) {
+export function useFolderPicker(excludeId?: number) {
   const service = useDi(DirectoryService);
   const [path, setPath] = useState<readonly Folder[]>([ROOT]);
   const current = path.at(-1) ?? ROOT;
@@ -27,7 +27,7 @@ export function useFolderPicker(excludeId: number) {
   return {
     current,
     canGoBack: path.length > 1,
-    folders: movableFolders(listing.data ?? [], [excludeId]),
+    folders: movableFolders(listing.data ?? [], excludeId === undefined ? [] : [excludeId]),
     isLoading: listing.isPending,
     error: listing.error?.message,
     open: (folder: Directory) => setPath(previous => [...previous, { id: folder.id, name: folder.name }]),

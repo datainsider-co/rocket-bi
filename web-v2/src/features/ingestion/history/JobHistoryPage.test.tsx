@@ -5,7 +5,7 @@ import fixture from '@/core/ingestion/ingestion.fixture.json';
 import { jobHistoryFromJson, type JobHistory } from '@/core/ingestion/JobHistory';
 import type { JobHistoryService } from '@/core/ingestion/JobHistoryService';
 import type { ListingPage } from '@/core/listing/Listing';
-import { formatDateTime } from '../listing/listing.utils';
+import { formatDateTime } from '@/shared/listing/listing.utils';
 import { findDialog, renderIngestionPage } from '../renderIngestionPage';
 import { fakeJobHistoryService } from '../testing';
 import { JobHistoryPage } from './JobHistoryPage';

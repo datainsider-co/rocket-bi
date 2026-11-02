@@ -1,5 +1,5 @@
 import type { JsonObject } from '@/core/json/json';
-import { formatParamValue, ParamValueType, type QueryParameter } from './queryParameters';
+import { formatParamValue, ParamValueType, sqlLiteral, type QueryParameter } from './queryParameters';
 
 /**
  * Raw SQL as the query editor runs it (backend `RawQuerySetting`). The server wraps the SQL in
@@ -29,11 +29,31 @@ export function parameterValues(parameters: readonly QueryParameter[]): Record<s
 }
 
 /**
+ * The SQL with each parameter's value in place, as SQL literals: for requests that take plain SQL (a table from a
+ * query). Placeholders without a parameter stay.
+ */
+export function inlineParameters(sql: string, parameters: readonly QueryParameter[]): string {
+  const byName = new Map(parameters.map(parameter => [parameter.displayName, parameter]));
+  return sql.replace(PARAMETER_PATTERN, (placeholder, name: string) => {
+    const parameter = byName.get(name);
+    return parameter ? sqlLiteral(parameter.valueType, parameter.value) : placeholder;
+  });
+}
+
+/**
  * Whether the server will skip paging: it looks for ` limit ` in the lowercased SQL (`SqlRegex.LimitRegex`), anywhere,
  * strings and subqueries included. Its `total` then still counts the rows without the limit.
  */
 export function hasLimit(sql: string): boolean {
   return /\slimit\s/.test(sql.toLowerCase());
+}
+
+/**
+ * The SQL as the server can wrap it: without the `;` that ends a statement, which would land inside the server's
+ * `(<sql>) as v`. A closing `--` comment is fine: the server puts the SQL on lines of its own.
+ */
+export function runnableSql(sql: string): string {
+  return sql.trim().replace(/[\s;]+$/, '');
 }
 
 /** The setting to query raw SQL with; `toQueryRequestJson` adds paging and the request's own `parameters`. */

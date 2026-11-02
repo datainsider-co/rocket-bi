@@ -4,10 +4,10 @@ import type { JobHistory } from '@/core/ingestion/JobHistory';
 import { JobHistoryService, type JobHistorySortField } from '@/core/ingestion/JobHistoryService';
 import type { Sort } from '@/core/listing/Listing';
 import { historyQueryOptions } from '../ingestionQueries';
-import { useKeepPageInRange } from '../listing/useKeepPageInRange';
-import { useListingState } from '../listing/useListingState';
+import { useKeepPageInRange } from '@/shared/listing/useKeepPageInRange';
+import { useListingState } from '@/shared/listing/useListingState';
 import { DEFAULT_HISTORY_SORT, historyContent, type HistoryContent } from './jobHistory.utils';
-import { useDebouncedSearch, type DebouncedSearch } from '../listing/useDebouncedSearch';
+import { useDebouncedSearch, type DebouncedSearch } from '@/shared/listing/useDebouncedSearch';
 
 /** What `JobHistoryTable` needs: one page of runs and the controls that change it. */
 export interface JobHistoryTableState {

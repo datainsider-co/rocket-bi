@@ -3,9 +3,12 @@ import fixture from '@/core/schema/warehouse.fixture.json';
 import {
   formatParamValue,
   parameterConfigOf,
+  parameterDefinitionsOf,
   parameterFromJson,
+  parameterToJson,
   parameterWidgetIdsOf,
   queryParameters,
+  sqlLiteral,
   storedParameters
 } from './queryParameters';
 
@@ -28,12 +31,39 @@ describe('formatParamValue', () => {
   });
 });
 
+describe('sqlLiteral', () => {
+  it.each([
+    ['text', "O'Brien $5 a\\b", "'O''Brien $5 a\\b'"],
+    ['number', '7', '7'],
+    ['number', 'x', '0'],
+    ['date', undefined, "''"]
+  ])('%s %s', (type, value, expected) => {
+    expect(sqlLiteral(type, value)).toBe(expected);
+  });
+});
+
 describe('parameterFromJson', () => {
   it('reads a parameter and needs a name', () => {
     expect(parameterFromJson(param)).toEqual({ displayName: 'min_units', valueType: 'number', value: '5000' });
     expect(parameterFromJson({ display_name: 'x', value: null })).toEqual({ displayName: 'x', valueType: 'text', value: '' });
     expect(parameterFromJson({ value: 1 })).toBeUndefined();
     expect(parameterFromJson('x')).toBeUndefined();
+  });
+
+  it('round-trips through parameterToJson', () => {
+    const region = { displayName: 'region', valueType: 'list', value: 'north', list: ['north', 'south'] };
+    expect(parameterToJson(region)).toEqual({ display_name: 'region', value_type: 'list', value: 'north', list: ['north', 'south'] });
+    expect(parameterFromJson(parameterToJson(region))).toEqual(region);
+    expect(parameterToJson({ displayName: 'a', valueType: 'text', value: '' })).toMatchObject({ list: null });
+  });
+
+  it('keeps the values of a list parameter', () => {
+    expect(parameterFromJson({ display_name: 'region', value_type: 'list', value: 'north', list: ['north', 'south'] })).toEqual({
+      displayName: 'region',
+      valueType: 'list',
+      value: 'north',
+      list: ['north', 'south']
+    });
   });
 });
 
@@ -43,6 +73,14 @@ describe('viz option accessors', () => {
     expect(parameterConfigOf(viz({}))).toBeUndefined();
     expect(parameterWidgetIdsOf(viz({ parameter_widget_ids: [23, 'x'] }))).toEqual([23]);
     expect(parameterWidgetIdsOf({})).toEqual([]);
+  });
+});
+
+describe('parameterDefinitionsOf', () => {
+  it('reads the list or the map in the viz options, skipping what is no parameter', () => {
+    expect(parameterDefinitionsOf(viz({ query_parameter: [param, {}] }))).toEqual([{ displayName: 'min_units', valueType: 'number', value: '5000' }]);
+    expect(parameterDefinitionsOf(viz({ query_parameter: { minUnits: param } }))).toHaveLength(1);
+    expect(parameterDefinitionsOf({})).toEqual([]);
   });
 });
 

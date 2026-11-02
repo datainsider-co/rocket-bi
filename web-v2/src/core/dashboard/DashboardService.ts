@@ -47,6 +47,11 @@ export interface DashboardService {
    * default setting when it reads one without it.
    */
   create(name: string, parentDirectoryId: number): Promise<DashboardSummary>;
+  /**
+   * Creates a saved query analysis (`directory_type: queries`) with its widgets: the query, then its charts. The server
+   * gives the widgets their ids, in order.
+   */
+  createQuery(name: string, parentDirectoryId: number, widgets: readonly JsonObject[]): Promise<Dashboard>;
   rename(id: number, name: string): Promise<void>;
   /**
    * Saves widget positions. The server rejects the request unless `positions` has exactly one entry per widget of
@@ -80,6 +85,11 @@ export class HttpDashboardService implements DashboardService {
   async create(name: string, parentDirectoryId: number): Promise<DashboardSummary> {
     const json = { name, parent_directory_id: parentDirectoryId, directory_type: DirectoryType.Dashboard };
     return new DashboardSummary(await this.http.post('dashboards/create', { json }).json());
+  }
+
+  async createQuery(name: string, parentDirectoryId: number, widgets: readonly JsonObject[]): Promise<Dashboard> {
+    const json = { name, parent_directory_id: parentDirectoryId, directory_type: DirectoryType.Query, widgets };
+    return dashboardFromJson(await this.http.post('dashboards/create', { json }).json());
   }
 
   async rename(id: number, name: string): Promise<void> {

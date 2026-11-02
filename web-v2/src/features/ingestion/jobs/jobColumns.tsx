@@ -3,7 +3,7 @@ import type { ColumnType } from 'antd/es/table/interface';
 import type { JobInfo } from '@/core/ingestion/Job';
 import { JobSortField } from '@/core/ingestion/JobService';
 import type { Sort } from '@/core/listing/Listing';
-import { columnSortOrder } from '../listing/listing.utils';
+import { columnSortOrder } from '@/shared/listing/listing.utils';
 import { JobStatusTag } from '../status/JobStatusTag';
 import { JobActionsCell, type JobRowActions } from './JobActionsCell';
 import { JOB_ACTION_COLUMN, nextRunLabel, sourceNameLabel, syncModeLabel } from './jobs.utils';

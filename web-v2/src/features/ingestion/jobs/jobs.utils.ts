@@ -11,7 +11,7 @@ import {
 import { JobSortField } from '@/core/ingestion/JobService';
 import { SortOrder, type Sort } from '@/core/listing/Listing';
 import { IngestionSection } from '../ingestion.utils';
-import { countLabel, formatDateTime } from '../listing/listing.utils';
+import { countLabel, formatDateTime } from '@/shared/listing/listing.utils';
 
 /** v1 `JobScreen`: newest change first. */
 export const DEFAULT_JOB_SORT: Sort<JobSortField> = { field: JobSortField.LastModified, order: SortOrder.Desc };

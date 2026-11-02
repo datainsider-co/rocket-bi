@@ -1,17 +1,23 @@
 import { queryOptions } from '@tanstack/react-query';
 import type { JsonObject } from '@/core/json/json';
 import type { QueryService } from '@/core/query/QueryService';
+import type { RlsPolicyService } from '@/core/rls/RlsPolicyService';
 import type { DatabaseService } from '@/core/schema/DatabaseService';
 import type { TableRef } from '@/core/schema/SchemaEditService';
 import type { TableService } from '@/core/schema/TableService';
+import { schemaKeys } from '@/shared/schema/schemaQueries';
 import { isProcessing } from './schema/schema.utils';
 
 /** Queries of the Data Warehouse pages; the schemas themselves are `shared/schema/schemaQueries`. */
 export const warehouseKeys = {
   all: ['warehouse'] as const,
-  databases: ['warehouse', 'databases'] as const,
+  databases: schemaKeys.entries,
   table: ({ dbName, name }: TableRef) => ['warehouse', 'table', dbName, name] as const,
-  preview: (request: JsonObject) => ['warehouse', 'preview', request] as const
+  previews: ['warehouse', 'preview'] as const,
+  preview: (request: JsonObject) => ['warehouse', 'preview', request] as const,
+  /** The Query Editor's results; the run and its request follow. */
+  rawQuery: ['warehouse', 'raw-query'] as const,
+  policies: ({ dbName, name }: TableRef) => ['warehouse', 'policies', dbName, name] as const
 };
 
 /** v1 polled a table the server was still filling every 30 s. */
@@ -38,5 +44,13 @@ export function tablePreviewQueryOptions(service: QueryService, request: JsonObj
   return queryOptions({
     queryKey: warehouseKeys.preview(request),
     queryFn: ({ signal }) => service.query(request, signal)
+  });
+}
+
+/** A table's RLS policies (`policies/list`). */
+export function rlsPoliciesQueryOptions(service: RlsPolicyService, table: TableRef) {
+  return queryOptions({
+    queryKey: warehouseKeys.policies(table),
+    queryFn: ({ signal }) => service.list(table, signal)
   });
 }

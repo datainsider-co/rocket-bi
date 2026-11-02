@@ -101,6 +101,12 @@ describe('columnDefinitionToJson', () => {
     expect(json).not.toHaveProperty('default_value');
   });
 
+  it("marks a date column's default as a timestamp", () => {
+    expect(columnDefinitionToJson({ ...date, defaultValue: 1793500000000 })).toMatchObject({ default_value: 1793500000000, input_as_timestamp: true });
+    expect(columnDefinitionToJson({ ...newColumn('day', 'date'), defaultValue: 1793500000000 })).toMatchObject({ input_as_timestamp: true });
+    expect(columnDefinitionToJson(newColumn('day', 'date'))).not.toHaveProperty('input_as_timestamp');
+  });
+
   it('writes a new column', () => {
     expect(columnDefinitionToJson(newColumn('note', 'string'))).toStrictEqual({
       class_name: 'string',

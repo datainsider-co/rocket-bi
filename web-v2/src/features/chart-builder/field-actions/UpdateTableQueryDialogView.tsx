@@ -1,7 +1,7 @@
 import { Alert, Modal, Skeleton, Typography } from 'antd';
 import type { TableSchema } from '@/core/schema/SchemaService';
-import type { EditorLanguage } from './completions.utils';
-import { LazyCodeEditor } from './editor/LazyCodeEditor';
+import type { EditorLanguage } from '@/shared/code-editor/codeEditor.utils';
+import { LazyCodeEditor } from '@/shared/code-editor/LazyCodeEditor';
 
 interface UpdateTableQueryDialogViewProps {
   table: Pick<TableSchema, 'dbName' | 'name' | 'displayName'>;

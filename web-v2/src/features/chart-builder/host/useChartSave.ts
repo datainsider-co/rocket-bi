@@ -1,8 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { App } from 'antd';
 import type { JsonObject } from '@/core/json/json';
-import type { ChartBuilderRequest } from '@/features/dashboard/edit/chartBuilderBridge';
-import type { DashboardEditor } from '@/features/dashboard/edit/useDashboardEditor';
+import type { ChartBuilderRequest, ChartSaver } from '@/features/dashboard/edit/chartBuilderBridge';
 import { saveActionOf, type SaveAction } from './builderSession.utils';
 
 /**
@@ -10,7 +9,7 @@ import { saveActionOf, type SaveAction } from './builderSession.utils';
  * `ChartBuilderModal.handleAddChart` / `handleUpdateChart`). A failure keeps the builder open with the server's
  * message, as v1 did.
  */
-export function useChartSave(request: ChartBuilderRequest, editor: DashboardEditor, onSaved: () => void) {
+export function useChartSave(request: ChartBuilderRequest, editor: ChartSaver, onSaved: () => void) {
   const { message } = App.useApp();
   const mutation = useMutation({
     mutationFn: (action: SaveAction) => (action.kind === 'create' ? editor.createWidget(action.json, action.position) : editor.updateWidget(action.json)),

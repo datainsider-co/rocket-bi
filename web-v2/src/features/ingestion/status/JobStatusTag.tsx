@@ -1,12 +1,8 @@
 import type { JobStatus } from '@/core/ingestion/Job';
-import { jobStatusIconUrl } from './jobStatus.utils';
+import { StatusTag } from '@/shared/listing/StatusTag';
+import { jobStatusIcon } from './jobStatus.utils';
 
-/** v1 `StatusCell`: the status icon and its name, in a table cell. */
+/** v1 `StatusCell` for a job's status. */
 export function JobStatusTag({ status }: { status: JobStatus }) {
-  return (
-    <span className="inline-flex items-center gap-2 whitespace-nowrap">
-      <img src={jobStatusIconUrl(status)} alt="" width={16} height={16} />
-      <span>{status}</span>
-    </span>
-  );
+  return <StatusTag status={status} icon={jobStatusIcon(status)} />;
 }

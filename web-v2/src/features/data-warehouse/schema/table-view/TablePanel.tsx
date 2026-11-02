@@ -1,8 +1,12 @@
 import { useNavigate } from 'react-router';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { useDeleteTable } from '../useDeleteTable';
 import { queryTablePath, updateByQueryPath } from '../schema.utils';
 import { TablePanelView } from './TablePanelView';
 import { useTablePanel } from './useTablePanel';
+
+/** v1 `ChartUtils.isMobile`. */
+const NARROW = '(max-width: 767px)';
 
 interface TablePanelProps {
   dbName: string;
@@ -16,6 +20,7 @@ export function TablePanel({ dbName, tableName, onOpenDatabase }: TablePanelProp
   const data = useTablePanel({ dbName, name: tableName });
   const navigate = useNavigate();
   const deleteTable = useDeleteTable(onOpenDatabase);
+  const narrow = useMediaQuery(NARROW);
   const { table } = data;
   const actions = {
     onOpenDatabase,
@@ -23,5 +28,5 @@ export function TablePanel({ dbName, tableName, onOpenDatabase }: TablePanelProp
     onUpdateByQuery: () => table && void navigate(updateByQueryPath(table)),
     onDeleteTable: () => deleteTable({ dbName, name: tableName, displayName: table?.displayName ?? tableName })
   };
-  return <TablePanelView dbName={dbName} data={data} actions={actions} />;
+  return <TablePanelView dbName={dbName} data={data} actions={actions} narrow={narrow} />;
 }

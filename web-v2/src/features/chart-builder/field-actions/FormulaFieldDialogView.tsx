@@ -1,8 +1,8 @@
 import { Alert, Form, Input, Modal, Skeleton } from 'antd';
 import type { Control } from 'react-hook-form';
 import { FormField } from '@/shared/form/FormField';
-import type { EditorLanguage } from './completions.utils';
-import { LazyCodeEditor } from './editor/LazyCodeEditor';
+import type { EditorLanguage } from '@/shared/code-editor/codeEditor.utils';
+import { LazyCodeEditor } from '@/shared/code-editor/LazyCodeEditor';
 import type { FormulaFieldValues } from './fieldActions.utils';
 import { FunctionReferenceView } from './FunctionReferenceView';
 import type { FunctionReference } from './useFunctionReference';

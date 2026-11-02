@@ -175,7 +175,7 @@ Code v1 cần đọc: `screens/data-management` (`views/`, `components/`, `store
 | Analysis đã lưu | `core/dashboard` (`DashboardService.get`, `widgets/*`), `features/dashboard/access` (quyền, password), `features/directory/dialogs` (`useFolderPicker`, `NameModal`) | Dùng lại nguyên |
 | Share database | `features/share/ShareModal`, `core/share` | Endpoint khác (`databases/{db}/share/*`) và không có link / password: cho `ShareModal` nhận một adapter |
 | Relationship | `core/relationship` (đã có global), `features/dashboard/relationship` (React Flow) | Tách phần chung lên `shared/relationship/`, thêm thêm / xoá bảng, nguồn và hàm lưu truyền vào |
-| Listing | `core/listing`, `features/ingestion/listing` (`useListingState`, debounce search, `listingPagination`) | Listing database phân trang ở client: chỉ dùng lại phần UI |
+| Listing | `core/listing`, `shared/listing` (`useListingState`, debounce search, `listingPagination`) | Listing database phân trang ở client: chỉ dùng lại phần UI |
 
 ## Quyết định (2026-10-30)
 
@@ -188,7 +188,7 @@ Code v1 cần đọc: `screens/data-management` (`views/`, `components/`, `store
   tường minh, nút hiện `Save*` khi có thay đổi, hỏi khi rời trang (`useBlocker` như M6). Lý do: auto-save ghi đè analysis
   dùng chung khi người khác đang xem, và v1 lưu sai widget.
 - **Add Chart To Dashboard**: tính năng riêng, khá nặng (tạo input filter, tab widget, `parameter_widget_ids`). Để sau
-  cùng (DW12), có thể bỏ nếu không ai dùng.
+  cùng (DW12), có thể bỏ nếu không ai dùng. **Đã bỏ ở DW12.**
 - **Kiểm quyền ở client**: v1 không kiểm. v2 giữ như v1 (server quyết, hiện message lỗi của server), riêng
   analysis đã lưu thì kiểm quyền dashboard như M5a.
 - **Một cây database dùng chung** (`features/data-warehouse/database-tree`): dữ liệu bằng TanStack Query (danh sách short
@@ -426,13 +426,206 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
   database và về view database. Cache của bảng (và của database khi xoá database) chỉ được đánh dấu cũ (`refetchType:
   'none'`), không gỡ: gỡ khi view còn mở làm nó tải lại một bảng đã mất (404).
 - **Query table / Update schema by query** mở `/data-warehouse/query-editor?database=&table=` và `?mode=update&...` như
-  v1; Query Editor đọc các tham số này ở DW10.
+  v1; Query Editor đọc các tham số này từ DW10.
 - **Test**: `renderAppAt` bind thêm fake `TableService`, `SchemaEditService`. `asyncUtilTimeout` của Testing Library nâng
   lên 3s trong `src/test/setup.ts`: test đầu tiên của mỗi file chạy qua route thật phải tải chunk lazy, quá 1s khi cả bộ
   test chạy song song (lý do `DirectoryListingPage.test` thỉnh thoảng hỏng từ DW1).
 - Đã kiểm bằng Playwright trên `pnpm dev`: database đầu tiên mặc định, mở bảng, search cột, Table Data sort giảm dần
   theo Qty, Query table, menu của view có Update schema by query, xoá thật một view và một database tạo tạm. Không lỗi
   console.
+
+## Quyết định ở DW7 (2026-11-01)
+
+- **Sửa schema** (`schema/schema-edit`): nút Edit ở tab Table Schema, chỉ bảng `default` / `materialized` (v1
+  `isReadonlyTable`), ẩn dưới 768px như v1. Form react-hook-form + zod (`useFieldArray`): cột có sẵn sửa display name (v1
+  khoá, server cho sửa: DW0), nullable, type, description (≤255), default value; cột mới có thêm tên (chữ, số, `_`, không
+  bắt đầu bằng số, không trùng tên nào của bảng kể cả measure / calculated) và bỏ được trước khi lưu. Không xoá cột có
+  sẵn. Dòng `i` của form là cột `i` của bảng (không khớp theo tên như v1), cột giữ `json` gốc nên PUT giữ `primary_keys`,
+  measure, calculated column (đã thử trên server).
+  - Default value theo kiểu: Select True / False, InputNumber, Input, DatePicker (có giờ với `datetime*`). Đổi kiểu sang
+    nhóm khác thì xoá default value. Cột date gửi timestamp ms kèm `input_as_timestamp: true` (`columnDefinitionToJson`),
+    server lưu theo UTC; tab Table Schema hiện default của cột date thành ngày giờ.
+  - Ô Type gõ để tìm (15 kiểu). Kiểu ngoài danh sách (array, nested) không đổi được.
+  - Save có đổi kiểu thì hỏi bằng câu của v1. Lỗi thì form giữ nguyên và hiện message của server (v1 về view mode trước
+    rồi mới PUT, lỗi là mất). Lưu xong ghi bảng server trả vào cache và làm mới database của cây.
+  - Đang sửa thì các tab khác bị khoá; rời trang (kể cả chọn bảng khác trên cây, vì đổi `?table=`) hay Cancel khi có thay
+    đổi thì hỏi bằng câu của v1. `features/data-warehouse/useUnsavedGuard` dùng chung cho DW7, DW8, DW9.
+- **Tạo bảng**: nút "New table" ở view database (ẩn dưới 640px như v1) mở modal tên: bắt buộc, ≤250 ký tự, không có
+  `\/?*"<>:|`, không trùng; tên lưu là `toTableName` (chữ thường, bỏ dấu tiếng Việt, `_`) và hiện trước "Will be created as"
+  (v1 dùng regex giữ cả dấu ngoặc). Rồi tới form cột (một cột string như v1), Create gọi `POST databases/{db}/tables` và mở
+  bảng mới. Bản nháp gắn với `location.key` (`useTableDraft`): điều hướng nào cũng kết thúc nó, sau khi hỏi.
+- **Measure Schema, Calculated Field** (`schema/formula-columns`): hai tab liệt kê `expression_columns` /
+  `calculated_columns` của bảng đang mở (đọc từ `json` của `TableDefinition`), search, nút Add, click dòng hoặc nút Edit để
+  sửa, nút Delete (câu xác nhận của CB8, đúng loại: v1 ghi "measure field" cho calculated). Ẩn dưới 768px như v1. Hiện
+  thêm cột Expression; bỏ Nullable, Default Value, Encryption của v1 (giống nhau với mọi formula).
+- **Dùng lại `FormulaFieldDialog` của CB8** (import từ `features/chart-builder`, chưa chuyển lên `shared`). Không dùng được
+  `useFieldActions` vì nó làm mới builder; trang Schema có `useFormulaColumns` riêng, sau mỗi thay đổi làm mới bảng và
+  database của cây. Các tab lấy action qua `FormulaColumnsContext` thay vì truyền qua bốn tầng.
+- **Menu trên cây** (`useSchemaTreeHandlers`): bảng có Add Calculated Field, Add Measure, Delete table; measure và
+  calculated column có Edit / Delete (v1 click chuột phải). Cột thường không có menu.
+- `FormField` (shared) nhận `className` (`mb-0` cho ô trong bảng). Default value của tab Table Schema định dạng theo kiểu.
+- Đã kiểm bằng Playwright trên `pnpm dev` (1440px và 375px) với bảng `dw0_probe.dw7_probe`: sửa description, đổi `datetime` →
+  `datetime64` (có xác nhận), thêm cột `bool` default `true`, server trả đúng và giữ measure / calculated; mở dialog Edit
+  Measure; menu bảng trên cây; tạo bảng "DW7 Created" thành `dw7_created` rồi xoá; mobile chỉ còn hai tab và không có Edit.
+  Không lỗi console.
+
+## Quyết định ở DW8 (2026-11-01)
+
+- **Tab RLS** (`schema/rls`), cả trên mobile như v1. View mode là bảng đọc (`RlsPoliciesView`): Attribute Name, Condition
+  bằng chữ (`in north, south`), Filters (View All, View Nothing, hay filter bằng chữ: `Qty greater than 1 or Name in Phở`).
+  "Edit RLS" mở form của cả danh sách (react-hook-form + zod, `useFieldArray`), Add RLS / Cancel / Save như v1.
+- **Không có ô chọn user**: v1 chỉ sửa user attribute và filter. Policy có `user_ids` (tạo qua API như ở DW0) giữ nguyên và
+  hiện "N users".
+- **Validate** (v1 `ensurePolicy` chỉ kiểm attribute rỗng, Contain và Equal): cần attribute name trừ khi policy có user; equal
+  / not equal cần một giá trị, in / not in cần ít nhất một; cần chọn filter. Policy không nhắm tới ai (như policy thứ ba của
+  DW0) không lưu được, phải xoá hoặc điền.
+- Attribute name snake_case hoá khi rời ô (v1 hoá khi gõ nên không gõ được khoảng trắng). Giá trị của in / not in là tags
+  (Enter, `,`, `;` như v1), chỉ gửi giá trị operator đọc (null check gửi `[]`).
+- Xoá policy chỉ ở edit mode, không hỏi (Cancel trả lại tất cả). Policy mới mặc định `in` và View All (v1 `IsNull` và chưa
+  có filter).
+- **Custom filter** (`RlsFilterModal`): v1 mở cả ChartBuilder chỉ để có zone Filter. v2 mở modal nhỏ với nhóm AND (OR giữa
+  các nhóm), mỗi condition dùng `ConditionItemView` và `ConditionEditor` của CB4. Thêm condition bằng menu phẳng các cột của
+  bảng (không có submenu theo bảng như builder). Condition chưa có giá trị bị bỏ khi Apply, Apply khoá khi không còn
+  condition nào.
+  - `ConditionEditor`, `useConditionEditor`, `useColumnValues` không còn đọc `useBuilder`: nhận `context` (`controls`,
+    `sqlQueryOf`, `dashboardId`). ConfigPanel truyền từ builder, RLS truyền `controls: []`.
+  - Policy lưu condition của server; mở lại thì chuyển ngược thành `ConditionData` (`conditionDataOf`, ngược với
+    `conditionOf`): lớp tìm theo family của field (`less_than` là Earlier Than với date, Less Than với số), `and` thành một
+    nhóm, condition lẻ thành nhóm riêng. Cái không đọc được (`or`, `dynamic_condition`, lớp lạ) được đếm và cảnh báo rằng
+    Apply sẽ thay chúng. Ghi ra vẫn như v1: mỗi nhóm một `and` (`filtersOf`); `is_include_null: false` không được ghi lại.
+- Save thay cả tập (`PUT policies`), ghi kết quả vào cache và làm mới Table Data như v1. Không kiểm được việc áp RLS trên
+  MySQL (DW0).
+- Đã kiểm bằng Playwright trên `pnpm dev` với `dw0_probe.products`: thêm hai policy (`sales_region` in north, south với
+  filter `qty > 1`; `dept` equal ops với View Nothing), giá trị cột tải từ server trong trình sửa condition, lưu, server trả
+  đúng; policy trả về rỗng như trước. Không lỗi console.
+
+## Quyết định ở DW9 (2026-11-01)
+
+- **Phần chung của relationship editor** chuyển sang `shared/relationship/`: canvas, node, edge, control bar, CSS, các utils
+  và `useRelationshipEditor`, `useRelationshipEditActions`, `useCanvasControls`, `useFullscreen`, fixture. Adapter gồm hai
+  phần: `useRelationshipEditor(data, { editable, allowTableEdit })` và `RelationshipSaver` (`mutate` + `isPending` của
+  mutation của từng nơi). Dashboard (`features/dashboard/relationship`) chỉ còn modal, query và container
+  `RelationshipEditor` với `allowTableEdit: false`; hành vi M7c không đổi. `loadRelationshipData(load, schema)` dùng chung,
+  `relationshipKeys` có `dashboard(id)` và `global`.
+- **Trang Relationship** (`features/data-warehouse/relationship`): luôn ở chế độ sửa, `GET` / `POST relationships/global`.
+  Cây database bật `draggableTables`; thả bảng lên canvas đặt nó dưới con trỏ qua `screenToFlowPosition` (lệch trái 40px
+  như v1), kể cả khi canvas đã pan / zoom (v1 dùng offset trong panel). Cột lấy từ query schema của cây. Bảng đã có thì
+  không thêm và báo "… is already on the canvas". Canvas rỗng có gợi ý kéo bảng.
+- **Remove** trong menu bảng (chỉ ở global) xoá bảng cùng các join của nó. Save gửi `views` là các bảng trên canvas (bảng
+  mới có `alias_name: ''` như v1; server cấp alias cố định theo bảng, `tbl_233445` cho `products`) và `table_positions` chỉ
+  của các bảng đó, nên vị trí của bảng đã xoá đi theo (v1 giữ lại). Key vị trí vẫn là `camelCase(db + tbl)` của v1
+  (`dw0Probeproducts`), v1 và v2 đọc được của nhau.
+- **Dirty** so sánh join và vị trí theo bảng: thêm / xoá bảng là thay đổi, kéo bảng về đúng chỗ cũ thì không (React Flow bỏ
+  qua bước di chuột đầu tiên của một lần kéo, nên kéo tay "về chỗ cũ" thường lệch vài px). Discard (hỏi trước) trả lại cả
+  bảng, join và vị trí. Save xong lấy trạng thái hiện tại làm mốc mới (`markSaved`) và chỉ đánh dấu cũ các query
+  relationship (`refetchType: 'none'`): refetch sẽ mount lại editor và mất pan / zoom.
+- **Hỏi khi rời trang** có thay đổi chưa lưu bằng `useUnsavedGuard` chung của Data Warehouse (lời nhắn riêng "Leave without
+  saving?"), kèm `beforeunload`. `leavesPage` nằm ở `warehouse.utils`.
+- **Test**: `renderAppAt` bind `RelationshipService` bằng `fixtureRelationshipService()`, fixture có thêm bản global trong
+  bộ nhớ.
+- Đã kiểm bằng Playwright trên `pnpm dev` (1440px và 375px): thả hai bảng của `dw0_probe`, thả lại bảng đã có, nối `id`, Save,
+  reload thấy lại, Remove, hỏi khi rời trang, Discard, kéo bảng về chỗ cũ. Global relationship trả về rỗng như trước. Không lỗi
+  console. Trên 375px nút Save nằm dưới cùng, phải cuộn nội dung mới thấy (cây 40vh + canvas 50vh của khung chia đôi).
+
+## Quyết định ở DW10 (2026-11-02)
+
+- **Monaco chuyển lên `shared/code-editor/`**: `CodeEditor`, `LazyCodeEditor`, `monaco.ts`, `codeEditor.utils` (kèm kiểu
+  `EditorLanguage`, `CompletionSpec`). Danh mục hàm theo connector, `formulaLanguage` / `queryLanguage` và
+  `escapeIdentifier` vẫn ở `chart-builder/field-actions` (`useFunctionCatalog` đọc `features/data-source`); Query Editor
+  import từ đó như DW7 dùng `FormulaFieldDialog`.
+- **`CodeEditor` thêm**: `completionsAt` (gợi ý theo text trước con trỏ, có thể async), `triggerCharacters`, `onRun`
+  (Ctrl/Cmd+Enter), `handleRef` (`insertText` ở mọi con trỏ, `selectedText`), `lineNumbers`, `className`. Phần đăng ký
+  ngôn ngữ tách ra `useMonacoLanguage`.
+  - **Monaco giữ text của nó**: `value` chỉ được đưa vào khi trang tự đổi (đổi tên / xoá parameter). Truyền `value` cho
+    `@monaco-editor/react` làm mất phím khi gõ nhanh: trang render sau Monaco, và giá trị cũ ghi đè chữ vừa gõ (Playwright
+    gõ `select` ra `seeti`). Giá trị editor đã gửi nằm trong hàng đợi tới khi quay lại qua props; giá trị khác là của trang.
+    Áp dụng cho cả dialog formula của CB8.
+- **Autocomplete** (`sqlCompletion.utils`): hàm và keyword theo connector, database, `db.table` và cột của các database
+  đã tải; sau `db.` chỉ bảng của database đó (tải nó trước nếu chưa có), sau `db.table.` hay `table.` chỉ cột. Mỗi tên cột
+  gợi ý một lần (v1 nhân đôi giữa các bảng), không gợi ý measure (không select được). Đọc cache schema lúc editor hỏi,
+  không có state riêng.
+- **Execute** (nút hoặc Ctrl/Cmd+Enter): chạy phần bôi đen của selection đầu, không có thì cả text; khoá khi text rỗng.
+  `runnableSql` bỏ `;` ở cuối: server bọc SQL thành `(\n<sql>\n) as v` nên `;` làm lỗi cú pháp, còn comment `--` ở cuối
+  thì không sao (đã thử trên server). Mỗi Execute là một run có id trong query key, nên chạy lại cùng SQL vẫn hỏi server.
+  Không retry: lỗi gần như luôn do SQL, hỏi lại chỉ làm message chậm.
+- **Kết quả**: bảng antd, cột theo `label` của header, phân trang server 20 / 50 / 100 ("Total: N"). SQL có `limit` gửi
+  `from=-1,size=-1`, phân trang trên màn hình và hiện "N rows" là số dòng nhận được. Lỗi hiện message của server; chưa
+  chạy thì hiện câu của v1. Không sort (v1 tắt). Đang tải trang mới vẫn giữ bảng cũ.
+- **Parameters** (`parameters.utils`, `useQueryParameters`):
+  - Lấy thẳng từ SQL khi gõ (v1 chờ 1s), định nghĩa giữ theo tên, parameter mới là text. Giá trị đang dùng tách khỏi
+    default như v1 (`parameterValues`).
+  - Thanh parameter: tên, ô giá trị theo kiểu (text / number nhận khi Enter hoặc rời ô, date / list khi chọn), menu Edit,
+    Set Value as Default (chỉ khi khác default), Delete (hỏi bằng câu của v1, xoá placeholder khỏi SQL). Đổi giá trị thì
+    chạy lại. Add Param chèn ` {{ untitled_param_N }}` tại con trỏ.
+  - Modal Config Parameter (react-hook-form + zod): tên chỉ gồm chữ, số, `_` vì server chỉ thay các tên đó (v1 chỉ cấm
+    khoảng trắng, nên `{{a-b}}` không bao giờ có giá trị), không trùng; Number phải là số; List là các giá trị mỗi dòng,
+    default nằm trong list (để trống thì lấy giá trị đầu như v1). Đổi tên thì thay mọi `{{ cũ }}` trong SQL; default
+    đổi thì chạy lại.
+  - `QueryParameter` có thêm `list`, `parameterFromJson` đọc nó.
+- **Actions**: Download CSV / Excel (`query/csv|xlsx`, mọi dòng của lần chạy cuối, với giá trị parameter lúc đó), file
+  `query_result.csv|xlsx`, khoá tới khi đã chạy. Create Table và Add Chart To Dashboard làm ở DW12, Save ở DW11.
+- **Chèn từ cây**: click bảng chèn `db.table`, click cột chèn `table.column` như v1 (backtick khi cần), tại con trỏ.
+- **URL**: `?database&table` mở `select * from db.table`, không chạy, cây mở database đó. `?mode=update` lấy query của
+  view từ schema và chạy luôn như v1; nút Update Table làm ở DW12. `?adhoc=` mở editor rỗng tới DW11. Editor mount theo
+  nguồn của URL, đổi nguồn thì bắt đầu lại.
+- **Layout**: chia dọc, editor 45% (kéo được) trên kết quả. Dưới 768px khung này cao ít nhất 85vh để editor có chỗ (trang
+  cuộn dưới cây). Chưa hỏi khi rời trang: làm cùng Save ở DW11.
+- **Test**: `QueryEditorPage.test` thay editor bằng textarea có `handleRef` (chèn vào cuối text).
+- Đã kiểm bằng Playwright trên `pnpm dev` (1440px và 375px) với `dw0_probe`: Execute `products`, parameter `{{min_qty}}`
+  đổi giá trị thì chạy lại với `'1'`, gợi ý sau `dw0_probe.` ra `big_qty`, `products`, Ctrl+Enter chỉ chạy dòng đang bôi
+  đen, `LIMIT 3` gửi `-1/-1` và hiện "3 rows", tải CSV, lỗi bảng không tồn tại hiện message (một request), click bảng trên
+  cây chèn `dw0_probe.products`, `?mode=update` của `big_qty` nạp query và chạy. Không lỗi console ngoài 500 của query lỗi
+  cố ý.
+
+## Quyết định ở DW11 (2026-11-02)
+
+- **Analysis là các tab** (`query-editor/analysis`): widget đầu là query (bảng `raw_query_setting`), các widget sau là chart
+  dựng trên query. Mỗi tab giữ SQL, định nghĩa parameter, lần chạy cuối và bản đã lưu (`AnalysisTab`, reducer
+  `tabsReducer`); chọn tab thì editor đổi sang SQL của tab đó như v1, giá trị đang chọn trên thanh parameter thì bắt đầu lại.
+  Query mới cũng là một analysis một tab, chưa lưu. Tab query không xoá được.
+- **SQL của tab nằm trong widget** đúng chỗ v1 để: `sql_views[0]` (view mà chart đọc), `options.options.raw_query`,
+  `query_parameter`, `setting.parameters` (giá trị dạng SQL) và `setting.sql` của widget query (`withQuery`). View và
+  `sql` bỏ `;` cuối vì server đặt chúng trong SQL của nó; `raw_query` giữ nguyên text. Đọc lại bỏ `" \n"` v1 thêm vào cuối.
+  v1 mở được analysis do v2 lưu, kể cả tab chart (đã thử trên `:5050`).
+- **Mở `?adhoc=`**: dashboard, password và quyền như M5a (`useDashboardAccess`), breadcrumb My Data › folder › tên trong
+  header. Query chạy ngay khi mở như v1; tab chart hiện chart với SQL đã lưu. Không có quyền sửa thì editor chỉ đọc, không
+  có Save, Add Chart, Add Param, sửa / xoá chart; vẫn Execute và đổi giá trị parameter được. Download theo quyền download.
+- **Tab chart**: chart hiện bằng preview của ChartBuilder (`usePreview`, `PreviewView`) trong `DashboardControlsProvider`
+  của analysis (query mới dùng một analysis rỗng id -1; server nhận `dashboard_id` âm). Execute trên tab chart chạy lại
+  chart với SQL đang gõ và giá trị đang chọn. Download chỉ có ở tab query (dữ liệu của query); v1 tải bảng của chart.
+- **ChartBuilder ngoài dashboard**: `ChartBuilderHost` nhận `editor: ChartSaver` (chỉ `createWidget`, `updateWidget`), và
+  request `addChart` mang `adhoc` (view mới `view_xxxxxxxxxx` trên SQL của tab và giá trị parameter để đọc cột). Trước khi
+  mở builder, bảng ad hoc được tải (`adhocTableQueryOptions`); query không tạo được bảng thì báo lỗi, không mở builder
+  trên các database như khi sửa chart cũ. Analysis đã lưu thì thêm / sửa / xoá chart ghi lên server ngay như v1, kèm SQL
+  của tab; query chưa lưu giữ chart trong state với id âm.
+- **Save** (nút hoặc Ctrl/Cmd+S): analysis đã lưu thì ghi từng tab có thay đổi vào widget của nó (v1 auto-save mỗi 5s và
+  luôn ghi widget 0), nút hiện `Save*` khi có thay đổi. Query mới: "Save Analysis" mở một dialog gộp chọn folder và tên
+  (v1 hai bước), `POST dashboards/create` với `directory_type: queries` và mọi tab, server cấp id widget theo thứ tự; xong
+  thì mở chính analysis đó (`?adhoc=`, v1 về My Data). Actions › Create Analysis là Save As, mở bản mới.
+- **Hỏi khi rời trang** khi có tab thay đổi chưa lưu (`useUnsavedGuard`, câu của v1); query mới tính là thay đổi khi text
+  khác lúc mở. Lưu hay tạo bản mới thì cho qua.
+- `DashboardService.createQuery`, `parameterToJson`, `parameterDefinitionsOf` (core), `useFolderPicker` không bắt buộc
+  `excludeId`, `PageHeader` có `trail`. `CodeEditor` thêm `readOnly`, `onSave`; phần giữ text của Monaco tách ra
+  `useSyncedValue`.
+- Đã kiểm bằng Playwright trên `pnpm dev` (1440px và 375px): mở analysis v1 "DW0 Analysis", query mới → Add Chart (Pie,
+  chọn field bằng "click here") → Save Analysis → mở lại có tab chart; sửa SQL tab chart, Ctrl+Enter, Ctrl+S ghi đúng một
+  `PUT …/widgets/{id}/edit`; reload thấy SQL mới; hỏi khi rời trang; Edit chart qua builder; Save As; Delete chart. Không
+  lỗi console ngoài cảnh báo deprecated của antd (`List`, `maskClosable`) đã có ở code cũ.
+
+## Quyết định ở DW12 (2026-11-02)
+
+- **Create Table** (Actions, ẩn khi chỉ đọc hoặc đang sửa view): dialog database (mặc định database của URL), tên (luật và
+  "Will be created as" của DW7, tên trùng với bảng đã tải của database bị từ chối trước khi gửi), loại View / Materialized
+  (`materialized` server trả 501 trên MySQL, hiện message). Giá trị parameter đặt thẳng vào SQL dưới dạng literal
+  (`inlineParameters`, không escape `\` / `$` như khi server thay), bỏ `;` cuối. Tạo xong làm mới database trên cây và ở lại
+  editor (v1 sang trang Schema, bỏ query đang viết).
+- **Update Table** (`?mode=update`): nút Save thành "Update Table", Ctrl/Cmd+S cũng vậy, hỏi xác nhận rồi gọi
+  `updateViewQuery` của CB8, nên measure và calculated column của view được tạo lại trên query mới (báo những cái không còn
+  chạy). Thay parameter như Create Table (v1 không thay). Xong thì sang trang Schema của view như v1. Mode này không có
+  Add Chart, Save Analysis, Create Table. `UpdateTableQueryDialog` của builder giữ nguyên cho sửa nhanh.
+- **Add Chart To Dashboard: bỏ**, không port (quyết định 2026-11-02).
+- Đã kiểm bằng Playwright trên `pnpm dev`: Create Table với parameter `O'Brien tea` gửi `'O''Brien tea'`, tên `products` bị
+  từ chối, `DW12 Obrien` thành `dw12_obrien`; mở `?mode=update` của nó, thêm điều kiện, Ctrl+S, xác nhận, sang Schema.
 
 ## Các bước
 
@@ -445,12 +638,12 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
 | DW4 | **Databases.** Listing (search, sort, phân trang ở client, Owner trống khi server không trả), click dòng → Schema, Delete (xoá hẳn, hỏi xác nhận), trạng thái rỗng / lỗi | Xong (xem DW4) |
 | DW5 | **Share database.** `ShareModal` nhận adapter, không có link / password, chỉ gửi thay đổi thật như M7b | Xong (xem DW5) |
 | DW6 | **Schema đọc.** Chọn database / bảng theo URL, view database (danh sách bảng), tab Table Schema (search cột), Table Data (preview phân trang, sort), poll bảng `Processing`, Action menu (Query table, Update schema by query → Query Editor, Delete table, Delete database) | Xong (xem DW6) |
-| DW7 | **Schema sửa.** Create table (modal tên + form cột), Edit schema (nullable, type có xác nhận, description, default value theo kiểu, thêm cột), Measure và Calculated Field (danh sách + `FormulaFieldDialog` của CB8), menu bảng / cột trên cây | Chưa làm |
-| DW8 | **RLS.** Danh sách policy, form user / user attribute / operator, View All / View Nothing / Custom (trình sửa condition của CB4), Save / Cancel, preview làm mới sau khi lưu | Chưa làm |
-| DW9 | **Relationship global.** Tách `shared/relationship`, adapter cho dashboard (không đổi hành vi M7c) và global; thả bảng từ cây, xoá bảng, Save / Discard, hỏi khi rời trang | Chưa làm |
-| DW10 | **Query Editor: editor và chạy.** `shared/code-editor` với SQL, autocomplete bảng / cột / hàm, Run (cả đoạn / phần bôi đen, Ctrl+Enter), bảng kết quả phân trang, `limit`, parameters (thanh param, modal thêm / sửa, chạy lại khi đổi), chèn từ cây, Download CSV / Excel, mode query mới với `?database&table` | Chưa làm |
-| DW11 | **Analysis đã lưu.** Mở `?adhoc=` (quyền, password, breadcrumb), Save / Save As (folder + tên), tab chart bằng ChartBuilder (host cho analysis và cho query chưa lưu), sửa / xoá tab, hỏi khi rời trang | Chưa làm |
-| DW12 | **Bảng từ query và phần còn lại.** Create Table (view / materialized), mode `update` (Update Table, Ctrl+S) thay `UpdateTableQueryDialog` khi cần sửa dài, Add Chart To Dashboard nếu giữ | Chưa làm |
+| DW7 | **Schema sửa.** Create table (modal tên + form cột), Edit schema (nullable, type có xác nhận, description, default value theo kiểu, thêm cột), Measure và Calculated Field (danh sách + `FormulaFieldDialog` của CB8), menu bảng / cột trên cây | Xong (xem DW7) |
+| DW8 | **RLS.** Danh sách policy, form user / user attribute / operator, View All / View Nothing / Custom (trình sửa condition của CB4), Save / Cancel, preview làm mới sau khi lưu | Xong (xem DW8) |
+| DW9 | **Relationship global.** Tách `shared/relationship`, adapter cho dashboard (không đổi hành vi M7c) và global; thả bảng từ cây, xoá bảng, Save / Discard, hỏi khi rời trang | Xong (xem DW9) |
+| DW10 | **Query Editor: editor và chạy.** `shared/code-editor` với SQL, autocomplete bảng / cột / hàm, Run (cả đoạn / phần bôi đen, Ctrl+Enter), bảng kết quả phân trang, `limit`, parameters (thanh param, modal thêm / sửa, chạy lại khi đổi), chèn từ cây, Download CSV / Excel, mode query mới với `?database&table` | Xong (xem DW10) |
+| DW11 | **Analysis đã lưu.** Mở `?adhoc=` (quyền, password, breadcrumb), Save / Save As (folder + tên), tab chart bằng ChartBuilder (host cho analysis và cho query chưa lưu), sửa / xoá tab, hỏi khi rời trang | Xong (xem DW11) |
+| DW12 | **Bảng từ query và phần còn lại.** Create Table (view / materialized), mode `update` (Update Table, Ctrl+S) thay `UpdateTableQueryDialog` khi cần sửa dài, Add Chart To Dashboard nếu giữ | Xong, Add Chart To Dashboard bỏ (xem DW12) |
 
 Thứ tự: DW0 → DW1 → DW2 → DW3, rồi ba nhánh song song theo thư mục: **Databases + Share** (DW4, DW5), **Schema** (DW6 →
 DW7 → DW8), **Relationship** (DW9). Query Editor (DW10 → DW11 → DW12) đi sau DW6 vì Action menu của Schema mở nó, và DW11

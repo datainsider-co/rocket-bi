@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import type { EtlShareService } from '@/core/data-cook/EtlShareService';
 import { PermissionToken, ResourceSharing } from '@/core/share/ResourceSharing';
 import type { DatabaseShareService } from '@/core/schema/DatabaseShareService';
 import type { ShareService } from '@/core/share/ShareService';
@@ -33,6 +34,19 @@ export function fakeDatabaseShareService(overrides: Partial<DatabaseShareService
     shareWithUsers: vi.fn<DatabaseShareService['shareWithUsers']>(async () => {}),
     editShares: vi.fn<DatabaseShareService['editShares']>(async () => {}),
     revokeShares: vi.fn<DatabaseShareService['revokeShares']>(async () => {}),
+    ...overrides
+  };
+}
+
+/** Test-only: an ETL owned by root, shared with nobody, whose changes all succeed. */
+export function fakeEtlShareService(overrides: Partial<EtlShareService> = {}): EtlShareService {
+  return {
+    getSharing: vi.fn<EtlShareService['getSharing']>(
+      async () => new ResourceSharing({ owner: { username: 'root', full_name: 'root', email: 'hello@gmail.com' }, users_sharing: [] })
+    ),
+    shareWithUsers: vi.fn<EtlShareService['shareWithUsers']>(async () => {}),
+    editShares: vi.fn<EtlShareService['editShares']>(async () => {}),
+    revokeShares: vi.fn<EtlShareService['revokeShares']>(async () => {}),
     ...overrides
   };
 }

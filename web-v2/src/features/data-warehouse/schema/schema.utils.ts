@@ -29,13 +29,37 @@ export function selectionToParams({ dbName, tableName }: SchemaSelection): URLSe
   return params;
 }
 
-/** The tabs of a table (v1 `DataSchema.ctrl` tab list). Measures, calculated fields (DW7) and RLS (DW8) come later. */
+/** The tabs of a table (v1 `DataSchema.ctrl` tab list). */
 export const SchemaTab = {
   Schema: 'schema',
-  Data: 'data'
+  Data: 'data',
+  Measure: 'measure',
+  Calculated: 'calculated',
+  Rls: 'rls'
 } as const;
 
 export type SchemaTab = (typeof SchemaTab)[keyof typeof SchemaTab];
+
+const TAB_LABELS: Readonly<Record<SchemaTab, string>> = {
+  schema: 'Table Schema',
+  data: 'Table Data',
+  measure: 'Measure Schema',
+  calculated: 'Calculated Field',
+  rls: 'RLS'
+};
+
+/** v1 hid Measure Schema and Calculated Field on phones: their formula dialog needs a wide screen. */
+export function schemaTabsOf(narrow: boolean): { value: SchemaTab; label: string }[] {
+  const tabs: SchemaTab[] = narrow
+    ? [SchemaTab.Schema, SchemaTab.Data, SchemaTab.Rls]
+    : [SchemaTab.Schema, SchemaTab.Data, SchemaTab.Measure, SchemaTab.Calculated, SchemaTab.Rls];
+  return tabs.map(value => ({ value, label: TAB_LABELS[value] }));
+}
+
+/** The tabs that list columns, with a search above them (v1). */
+export function hasColumnSearch(tab: SchemaTab): boolean {
+  return tab === SchemaTab.Schema || tab === SchemaTab.Measure || tab === SchemaTab.Calculated;
+}
 
 /** v1 `ColumnTypeOptions`: the types a column can be given, with v1's labels. */
 export const COLUMN_TYPES: readonly { value: string; label: string }[] = [
@@ -65,8 +89,8 @@ function matches(text: string, search: string): boolean {
   return text.toLowerCase().includes(search);
 }
 
-/** v1's column search: the name or the display name contains the text. */
-export function filterColumns(columns: readonly ColumnDefinition[], text: string): ColumnDefinition[] {
+/** v1's column search: the name or the display name contains the text. Columns, measures or calculated columns. */
+export function filterColumns<T extends Pick<ColumnDefinition, 'name' | 'displayName'>>(columns: readonly T[], text: string): T[] {
   const search = text.trim().toLowerCase();
   return search ? columns.filter(column => matches(column.name, search) || matches(column.displayName, search)) : [...columns];
 }

@@ -5,7 +5,7 @@ import fixture from '@/core/ingestion/ingestion.fixture.json';
 import { jobInfoFromJson, QUEUED_STATUSES, type JobInfo } from '@/core/ingestion/Job';
 import type { JobService } from '@/core/ingestion/JobService';
 import { listingPageFromJson, type ListingPage } from '@/core/listing/Listing';
-import { formatDateTime } from '../listing/listing.utils';
+import { formatDateTime } from '@/shared/listing/listing.utils';
 import { renderIngestionPage } from '../renderIngestionPage';
 import { fakeJobService } from '../testing';
 import { JobsPage } from './JobsPage';

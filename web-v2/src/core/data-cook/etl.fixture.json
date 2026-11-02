@@ -1,0 +1,4112 @@
+{
+  "_comment": "Recorded on the local docker stack (2026-11-02, DATA_COOK.md DC0). ETL 1 holds every operator kind (saved by curl); ETL 2 was made with v1's editor (Join, SQL, Manage Fields, Save To Data Warehouse, incremental, positions). Bodies are the server's, keys untouched.",
+  "etlCreate": {
+    "method": "POST",
+    "path": "data_cook/create",
+    "request": {
+      "display_name": "DC0 fixture",
+      "operators": [],
+      "schedule_time": {
+        "class_name": "none_schedule"
+      }
+    },
+    "status": 200,
+    "response": {
+      "id": 4,
+      "display_name": "DC0 fixture",
+      "operators": [],
+      "owner_id": "root",
+      "schedule_time": {
+        "class_name": "none_schedule"
+      },
+      "created_time": 1793633892264,
+      "updated_time": 1793633892264,
+      "owner": {
+        "username": "root",
+        "full_name": "root",
+        "email": "hello@gmail.com",
+        "gender": 0,
+        "already_confirmed": true,
+        "updated_time": 1792599231000,
+        "created_time": 1792599231000
+      },
+      "status": "Initialized",
+      "next_execute_time": 9223372036854775807,
+      "last_execute_time": 0,
+      "config": {
+        "map_incremental_config": {}
+      }
+    }
+  },
+  "etlUpdate": {
+    "method": "PUT",
+    "path": "data_cook/1",
+    "request": {
+      "display_name": "DC0 probe",
+      "operators": [
+        {
+          "class_name": "sql_query_operator",
+          "operator": {
+            "class_name": "get_data_operator",
+            "table_schema": {
+              "name": "sales",
+              "db_name": "sample_v2",
+              "organization_id": 0,
+              "display_name": "sales",
+              "columns": [
+                {
+                  "class_name": "string",
+                  "name": "region",
+                  "display_name": "region",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "country",
+                  "display_name": "country",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "item_type",
+                  "display_name": "item_type",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "sales_channel",
+                  "display_name": "sales_channel",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "order_priority",
+                  "display_name": "order_priority",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "order_date",
+                  "display_name": "order_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int64",
+                  "name": "order_id",
+                  "display_name": "order_id",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "ship_date",
+                  "display_name": "ship_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "units_sold",
+                  "display_name": "units_sold",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_price",
+                  "display_name": "unit_price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_cost",
+                  "display_name": "unit_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_revenue",
+                  "display_name": "total_revenue",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_cost",
+                  "display_name": "total_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_profit",
+                  "display_name": "total_profit",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": "InnoDB",
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            },
+            "dest_table_config": {
+              "tbl_name": "sales",
+              "db_display_name": "ETL Database",
+              "tbl_display_name": "sales"
+            },
+            "is_persistent": false,
+            "third_party_persist_configurations": []
+          },
+          "query": "select region, count(*) as cnt from preview_etl_1.sales group by region",
+          "dest_table_configuration": {
+            "tbl_name": "sales_sql",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_sql"
+          },
+          "is_persistent": true,
+          "persist_configuration": {
+            "db_name": "dc0_out",
+            "tbl_name": "sales_by_region",
+            "type": "Update"
+          },
+          "third_party_persist_configurations": []
+        },
+        {
+          "class_name": "pivot_table_operator",
+          "operator": {
+            "class_name": "get_data_operator",
+            "table_schema": {
+              "name": "sales",
+              "db_name": "sample_v2",
+              "organization_id": 0,
+              "display_name": "sales",
+              "columns": [
+                {
+                  "class_name": "string",
+                  "name": "region",
+                  "display_name": "region",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "country",
+                  "display_name": "country",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "item_type",
+                  "display_name": "item_type",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "sales_channel",
+                  "display_name": "sales_channel",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "order_priority",
+                  "display_name": "order_priority",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "order_date",
+                  "display_name": "order_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int64",
+                  "name": "order_id",
+                  "display_name": "order_id",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "ship_date",
+                  "display_name": "ship_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "units_sold",
+                  "display_name": "units_sold",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_price",
+                  "display_name": "unit_price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_cost",
+                  "display_name": "unit_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_revenue",
+                  "display_name": "total_revenue",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_cost",
+                  "display_name": "total_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_profit",
+                  "display_name": "total_profit",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": "InnoDB",
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "query": null,
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            },
+            "dest_table_config": {
+              "tbl_name": "sales",
+              "db_display_name": "sample_v2",
+              "tbl_display_name": "sales"
+            },
+            "is_persistent": false,
+            "third_party_persist_configurations": []
+          },
+          "query": {
+            "filters": [],
+            "sorts": [
+              {
+                "class_name": "order_by",
+                "order": "ASC",
+                "function": {
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "region",
+                    "field_type": "string"
+                  },
+                  "class_name": "group"
+                }
+              }
+            ],
+            "options": {},
+            "sql_views": [],
+            "parameters": {},
+            "columns": [
+              {
+                "name": "sales_channel",
+                "function": {
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "sales_channel",
+                    "field_type": "string"
+                  },
+                  "class_name": "group"
+                },
+                "is_horizontal_view": false,
+                "is_collapse": false,
+                "is_calc_group_total": true,
+                "is_calc_min_max": false,
+                "is_dynamic_function": false
+              }
+            ],
+            "rows": [
+              {
+                "name": "region",
+                "function": {
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "region",
+                    "field_type": "string"
+                  },
+                  "class_name": "group"
+                },
+                "is_horizontal_view": false,
+                "is_collapse": false,
+                "is_calc_group_total": false,
+                "is_calc_min_max": false,
+                "is_dynamic_function": false
+              },
+              {
+                "name": "country",
+                "function": {
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "country",
+                    "field_type": "string"
+                  },
+                  "class_name": "group"
+                },
+                "is_horizontal_view": false,
+                "is_collapse": false,
+                "is_calc_group_total": false,
+                "is_calc_min_max": false,
+                "is_dynamic_function": false
+              }
+            ],
+            "values": [
+              {
+                "name": "total_revenue",
+                "function": {
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "total_revenue",
+                    "field_type": "double"
+                  },
+                  "class_name": "sum"
+                },
+                "is_horizontal_view": false,
+                "is_collapse": false,
+                "is_calc_group_total": true,
+                "is_calc_min_max": true,
+                "is_dynamic_function": false
+              },
+              {
+                "name": "units_sold",
+                "function": {
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "units_sold",
+                    "field_type": "int32"
+                  },
+                  "class_name": "sum"
+                },
+                "is_horizontal_view": false,
+                "is_collapse": false,
+                "is_calc_group_total": true,
+                "is_calc_min_max": true,
+                "is_dynamic_function": false
+              }
+            ],
+            "formatters": [],
+            "class_name": "flatten_pivot_table_chart_setting"
+          },
+          "dest_table_configuration": {
+            "tbl_name": "sales_pivot",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_pivot"
+          },
+          "is_persistent": false,
+          "third_party_persist_configurations": []
+        },
+        {
+          "class_name": "manage_field_operator",
+          "operator": {
+            "class_name": "get_data_operator",
+            "table_schema": {
+              "name": "sales",
+              "db_name": "sample_v2",
+              "organization_id": 0,
+              "display_name": "sales",
+              "columns": [
+                {
+                  "class_name": "string",
+                  "name": "region",
+                  "display_name": "region",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "country",
+                  "display_name": "country",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "item_type",
+                  "display_name": "item_type",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "sales_channel",
+                  "display_name": "sales_channel",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "order_priority",
+                  "display_name": "order_priority",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "order_date",
+                  "display_name": "order_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int64",
+                  "name": "order_id",
+                  "display_name": "order_id",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "ship_date",
+                  "display_name": "ship_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "units_sold",
+                  "display_name": "units_sold",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_price",
+                  "display_name": "unit_price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_cost",
+                  "display_name": "unit_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_revenue",
+                  "display_name": "total_revenue",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_cost",
+                  "display_name": "total_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_profit",
+                  "display_name": "total_profit",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": "InnoDB",
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "query": null,
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            },
+            "dest_table_config": {
+              "tbl_name": "sales",
+              "db_display_name": "sample_v2",
+              "tbl_display_name": "sales"
+            },
+            "is_persistent": false,
+            "third_party_persist_configurations": []
+          },
+          "fields": [
+            {
+              "display_name": "Region",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "preview_etl_1",
+                "tbl_name": "sales",
+                "field_name": "region",
+                "field_type": "string"
+              },
+              "is_hidden": false,
+              "as_type": "string"
+            }
+          ],
+          "extra_fields": [
+            {
+              "field_name": "double_units",
+              "display_name": "Double Units",
+              "expression": "units_sold * 2",
+              "as_type": "int64",
+              "is_hidden": false
+            }
+          ],
+          "dest_table_configuration": {
+            "tbl_name": "sales_mf",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_mf"
+          },
+          "is_persistent": false,
+          "third_party_persist_configurations": []
+        },
+        {
+          "class_name": "send_to_group_email_operator",
+          "operators": [
+            {
+              "class_name": "transform_operator",
+              "operator": {
+                "class_name": "get_data_operator",
+                "table_schema": {
+                  "name": "sales",
+                  "db_name": "sample_v2",
+                  "organization_id": 0,
+                  "display_name": "sales",
+                  "columns": [
+                    {
+                      "class_name": "string",
+                      "name": "region",
+                      "display_name": "region",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "country",
+                      "display_name": "country",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "item_type",
+                      "display_name": "item_type",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "sales_channel",
+                      "display_name": "sales_channel",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "order_priority",
+                      "display_name": "order_priority",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "datetime",
+                      "name": "order_date",
+                      "display_name": "order_date",
+                      "input_as_timestamp": false,
+                      "input_formats": [],
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "int64",
+                      "name": "order_id",
+                      "display_name": "order_id",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "datetime",
+                      "name": "ship_date",
+                      "display_name": "ship_date",
+                      "input_as_timestamp": false,
+                      "input_formats": [],
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "int32",
+                      "name": "units_sold",
+                      "display_name": "units_sold",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "unit_price",
+                      "display_name": "unit_price",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "unit_cost",
+                      "display_name": "unit_cost",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_revenue",
+                      "display_name": "total_revenue",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_cost",
+                      "display_name": "total_cost",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_profit",
+                      "display_name": "total_profit",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    }
+                  ],
+                  "engine": "InnoDB",
+                  "primary_keys": [],
+                  "partition_by": [],
+                  "order_bys": [],
+                  "query": null,
+                  "table_type": "default",
+                  "table_status": "Normal",
+                  "ttl": 0,
+                  "expression_columns": [],
+                  "calculated_columns": [],
+                  "temporary": false
+                },
+                "dest_table_config": {
+                  "tbl_name": "sales",
+                  "db_display_name": "sample_v2",
+                  "tbl_display_name": "sales"
+                },
+                "is_persistent": false,
+                "third_party_persist_configurations": []
+              },
+              "query": {
+                "filters": [],
+                "sorts": [
+                  {
+                    "class_name": "order_by",
+                    "order": "ASC",
+                    "function": {
+                      "field": {
+                        "class_name": "table_field",
+                        "db_name": "preview_etl_1",
+                        "tbl_name": "sales",
+                        "field_name": "country",
+                        "field_type": "string"
+                      },
+                      "class_name": "group"
+                    }
+                  }
+                ],
+                "options": {},
+                "sql_views": [],
+                "parameters": {},
+                "columns": [
+                  {
+                    "name": "region",
+                    "function": {
+                      "field": {
+                        "class_name": "table_field",
+                        "db_name": "preview_etl_1",
+                        "tbl_name": "sales",
+                        "field_name": "region",
+                        "field_type": "string"
+                      },
+                      "class_name": "select"
+                    },
+                    "is_horizontal_view": false,
+                    "is_collapse": false,
+                    "is_calc_group_total": true,
+                    "is_calc_min_max": false,
+                    "is_dynamic_function": false
+                  },
+                  {
+                    "name": "country",
+                    "function": {
+                      "field": {
+                        "class_name": "table_field",
+                        "db_name": "preview_etl_1",
+                        "tbl_name": "sales",
+                        "field_name": "country",
+                        "field_type": "string"
+                      },
+                      "class_name": "select"
+                    },
+                    "is_horizontal_view": false,
+                    "is_collapse": false,
+                    "is_calc_group_total": true,
+                    "is_calc_min_max": false,
+                    "is_dynamic_function": false
+                  },
+                  {
+                    "name": "total_revenue",
+                    "function": {
+                      "field": {
+                        "class_name": "table_field",
+                        "db_name": "preview_etl_1",
+                        "tbl_name": "sales",
+                        "field_name": "total_revenue",
+                        "field_type": "double"
+                      },
+                      "class_name": "select"
+                    },
+                    "is_horizontal_view": false,
+                    "is_collapse": false,
+                    "is_calc_group_total": true,
+                    "is_calc_min_max": true,
+                    "is_dynamic_function": false
+                  },
+                  {
+                    "name": "units_sold",
+                    "function": {
+                      "field": {
+                        "class_name": "table_field",
+                        "db_name": "preview_etl_1",
+                        "tbl_name": "sales",
+                        "field_name": "units_sold",
+                        "field_type": "int32"
+                      },
+                      "class_name": "select"
+                    },
+                    "is_horizontal_view": false,
+                    "is_collapse": false,
+                    "is_calc_group_total": true,
+                    "is_calc_min_max": true,
+                    "is_dynamic_function": false
+                  }
+                ],
+                "formatters": [],
+                "class_name": "table_chart_setting"
+              },
+              "dest_table_configuration": {
+                "tbl_name": "sales_transform",
+                "db_display_name": "ETL Database",
+                "tbl_display_name": "sales_transform"
+              },
+              "is_persistent": false,
+              "third_party_persist_configurations": []
+            }
+          ],
+          "dest_table_configuration": {
+            "tbl_name": "send_email_1",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "send_email_1"
+          },
+          "receivers": [
+            "a@b.co"
+          ],
+          "cc": [],
+          "bcc": [],
+          "subject": "x",
+          "file_names": [
+            "sales_transform"
+          ],
+          "content": null,
+          "display_name": null,
+          "is_zip": false,
+          "file_type": "Csv",
+          "is_persistent": false,
+          "third_party_persist_configurations": []
+        },
+        {
+          "class_name": "python_operator",
+          "operator": {
+            "class_name": "get_data_operator",
+            "table_schema": {
+              "name": "sales",
+              "db_name": "sample_v2",
+              "organization_id": 0,
+              "display_name": "sales",
+              "columns": [
+                {
+                  "class_name": "string",
+                  "name": "region",
+                  "display_name": "region",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "country",
+                  "display_name": "country",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "item_type",
+                  "display_name": "item_type",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "sales_channel",
+                  "display_name": "sales_channel",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "order_priority",
+                  "display_name": "order_priority",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "order_date",
+                  "display_name": "order_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int64",
+                  "name": "order_id",
+                  "display_name": "order_id",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "ship_date",
+                  "display_name": "ship_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "units_sold",
+                  "display_name": "units_sold",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_price",
+                  "display_name": "unit_price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_cost",
+                  "display_name": "unit_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_revenue",
+                  "display_name": "total_revenue",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_cost",
+                  "display_name": "total_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_profit",
+                  "display_name": "total_profit",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": "InnoDB",
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "query": null,
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            },
+            "dest_table_config": {
+              "tbl_name": "sales",
+              "db_display_name": "sample_v2",
+              "tbl_display_name": "sales"
+            },
+            "is_persistent": false,
+            "third_party_persist_configurations": []
+          },
+          "code": "def process(client, database, table, dest_database, dest_table):\n    pass\n",
+          "dest_table_configuration": {
+            "tbl_name": "sales_py",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_py"
+          },
+          "is_persistent": false,
+          "third_party_persist_configurations": []
+        }
+      ],
+      "schedule_time": {
+        "class_name": "schedule_weekly",
+        "recur_every": 1,
+        "at_hour": 2,
+        "at_minute": 30,
+        "at_second": 0,
+        "include_days": [
+          "MONDAY",
+          "FRIDAY"
+        ],
+        "start_time": 1793633725000
+      },
+      "extra_data": {
+        "render_options": {
+          "sales_transform": {
+            "configs": {},
+            "filters": {},
+            "current_chart_type": "flatten_table"
+          }
+        },
+        "table_position": {
+          "sales": {
+            "top": "20px",
+            "left": "20px"
+          }
+        },
+        "operator_position": {},
+        "saved_table_position": {},
+        "saved_email_config_position": {},
+        "saved_third_party_position": {},
+        "stage_position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "config": {
+        "map_incremental_config": {}
+      }
+    },
+    "status": 200,
+    "response": {
+      "id": 1,
+      "display_name": "DC0 probe",
+      "operators": [
+        {
+          "class_name": "sql_query_operator",
+          "operator": {
+            "class_name": "get_data_operator",
+            "table_schema": {
+              "name": "sales",
+              "db_name": "sample_v2",
+              "organization_id": 0,
+              "display_name": "sales",
+              "columns": [
+                {
+                  "class_name": "string",
+                  "name": "region",
+                  "display_name": "region",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "country",
+                  "display_name": "country",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "item_type",
+                  "display_name": "item_type",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "sales_channel",
+                  "display_name": "sales_channel",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "order_priority",
+                  "display_name": "order_priority",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "order_date",
+                  "display_name": "order_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int64",
+                  "name": "order_id",
+                  "display_name": "order_id",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "ship_date",
+                  "display_name": "ship_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "units_sold",
+                  "display_name": "units_sold",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_price",
+                  "display_name": "unit_price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_cost",
+                  "display_name": "unit_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_revenue",
+                  "display_name": "total_revenue",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_cost",
+                  "display_name": "total_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_profit",
+                  "display_name": "total_profit",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": "InnoDB",
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            },
+            "dest_table_config": {
+              "tbl_name": "sales",
+              "db_display_name": "ETL Database",
+              "tbl_display_name": "sales"
+            },
+            "is_persistent": false,
+            "third_party_persist_configurations": []
+          },
+          "query": "select region, count(*) as cnt from preview_etl_1.sales group by region",
+          "dest_table_configuration": {
+            "tbl_name": "sales_sql",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_sql"
+          },
+          "is_persistent": true,
+          "persist_configuration": {
+            "db_name": "dc0_out",
+            "tbl_name": "sales_by_region",
+            "type": "Update"
+          },
+          "third_party_persist_configurations": []
+        },
+        {
+          "class_name": "pivot_table_operator",
+          "operator": {
+            "class_name": "get_data_operator",
+            "table_schema": {
+              "name": "sales",
+              "db_name": "sample_v2",
+              "organization_id": 0,
+              "display_name": "sales",
+              "columns": [
+                {
+                  "class_name": "string",
+                  "name": "region",
+                  "display_name": "region",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "country",
+                  "display_name": "country",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "item_type",
+                  "display_name": "item_type",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "sales_channel",
+                  "display_name": "sales_channel",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "order_priority",
+                  "display_name": "order_priority",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "order_date",
+                  "display_name": "order_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int64",
+                  "name": "order_id",
+                  "display_name": "order_id",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "ship_date",
+                  "display_name": "ship_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "units_sold",
+                  "display_name": "units_sold",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_price",
+                  "display_name": "unit_price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_cost",
+                  "display_name": "unit_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_revenue",
+                  "display_name": "total_revenue",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_cost",
+                  "display_name": "total_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_profit",
+                  "display_name": "total_profit",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": "InnoDB",
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            },
+            "dest_table_config": {
+              "tbl_name": "sales",
+              "db_display_name": "sample_v2",
+              "tbl_display_name": "sales"
+            },
+            "is_persistent": false,
+            "third_party_persist_configurations": []
+          },
+          "query": {
+            "class_name": "pivot_table_chart_setting",
+            "rows": [
+              {
+                "name": "region",
+                "function": {
+                  "class_name": "group",
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "region",
+                    "field_type": "string"
+                  },
+                  "group_by_func": true,
+                  "aggregate_func": false
+                },
+                "is_horizontal_view": false,
+                "is_calc_group_total": false,
+                "is_calc_min_max": false,
+                "is_dynamic_function": false,
+                "is_flatten": false
+              },
+              {
+                "name": "country",
+                "function": {
+                  "class_name": "group",
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "country",
+                    "field_type": "string"
+                  },
+                  "group_by_func": true,
+                  "aggregate_func": false
+                },
+                "is_horizontal_view": false,
+                "is_calc_group_total": false,
+                "is_calc_min_max": false,
+                "is_dynamic_function": false,
+                "is_flatten": false
+              }
+            ],
+            "columns": [
+              {
+                "name": "sales_channel",
+                "function": {
+                  "class_name": "group",
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "sales_channel",
+                    "field_type": "string"
+                  },
+                  "group_by_func": true,
+                  "aggregate_func": false
+                },
+                "is_horizontal_view": false,
+                "is_calc_group_total": true,
+                "is_calc_min_max": false,
+                "is_dynamic_function": false,
+                "is_flatten": false
+              }
+            ],
+            "values": [
+              {
+                "name": "total_revenue",
+                "function": {
+                  "class_name": "sum",
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "total_revenue",
+                    "field_type": "double"
+                  },
+                  "group_by_func": false,
+                  "aggregate_func": true
+                },
+                "is_horizontal_view": false,
+                "is_calc_group_total": true,
+                "is_calc_min_max": true,
+                "is_dynamic_function": false,
+                "is_flatten": false
+              },
+              {
+                "name": "units_sold",
+                "function": {
+                  "class_name": "sum",
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "units_sold",
+                    "field_type": "int32"
+                  },
+                  "group_by_func": false,
+                  "aggregate_func": true
+                },
+                "is_horizontal_view": false,
+                "is_calc_group_total": true,
+                "is_calc_min_max": true,
+                "is_dynamic_function": false,
+                "is_flatten": false
+              }
+            ],
+            "formatters": [],
+            "filters": [],
+            "sorts": [
+              {
+                "class_name": "order_by",
+                "function": {
+                  "class_name": "group",
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "region",
+                    "field_type": "string"
+                  },
+                  "group_by_func": true,
+                  "aggregate_func": false
+                },
+                "order": "ASC",
+                "group_by_func": false,
+                "aggregate_func": false
+              }
+            ],
+            "aggregate_conditions": [],
+            "views": [],
+            "join_conditions": [],
+            "sql_views": [],
+            "options": {},
+            "dynamic_function_ids": []
+          },
+          "dest_table_configuration": {
+            "tbl_name": "sales_pivot",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_pivot"
+          },
+          "is_persistent": false,
+          "third_party_persist_configurations": []
+        },
+        {
+          "class_name": "manage_field_operator",
+          "operator": {
+            "class_name": "get_data_operator",
+            "table_schema": {
+              "name": "sales",
+              "db_name": "sample_v2",
+              "organization_id": 0,
+              "display_name": "sales",
+              "columns": [
+                {
+                  "class_name": "string",
+                  "name": "region",
+                  "display_name": "region",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "country",
+                  "display_name": "country",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "item_type",
+                  "display_name": "item_type",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "sales_channel",
+                  "display_name": "sales_channel",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "order_priority",
+                  "display_name": "order_priority",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "order_date",
+                  "display_name": "order_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int64",
+                  "name": "order_id",
+                  "display_name": "order_id",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "ship_date",
+                  "display_name": "ship_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "units_sold",
+                  "display_name": "units_sold",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_price",
+                  "display_name": "unit_price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_cost",
+                  "display_name": "unit_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_revenue",
+                  "display_name": "total_revenue",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_cost",
+                  "display_name": "total_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_profit",
+                  "display_name": "total_profit",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": "InnoDB",
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            },
+            "dest_table_config": {
+              "tbl_name": "sales",
+              "db_display_name": "sample_v2",
+              "tbl_display_name": "sales"
+            },
+            "is_persistent": false,
+            "third_party_persist_configurations": []
+          },
+          "fields": [
+            {
+              "display_name": "Region",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "preview_etl_1",
+                "tbl_name": "sales",
+                "field_name": "region",
+                "field_type": "string"
+              },
+              "is_hidden": false,
+              "as_type": "string"
+            }
+          ],
+          "dest_table_configuration": {
+            "tbl_name": "sales_mf",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_mf"
+          },
+          "extra_fields": [
+            {
+              "field_name": "double_units",
+              "display_name": "Double Units",
+              "expression": "units_sold * 2",
+              "as_type": "int64",
+              "is_hidden": false
+            }
+          ],
+          "is_persistent": false,
+          "third_party_persist_configurations": [],
+          "active_field_configs": [
+            {
+              "display_name": "Region",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "preview_etl_1",
+                "tbl_name": "sales",
+                "field_name": "region",
+                "field_type": "string"
+              },
+              "is_hidden": false,
+              "as_type": "string"
+            },
+            {
+              "field_name": "double_units",
+              "display_name": "Double Units",
+              "expression": "units_sold * 2",
+              "as_type": "int64",
+              "is_hidden": false
+            }
+          ]
+        },
+        {
+          "class_name": "send_to_group_email_operator",
+          "operators": [
+            {
+              "class_name": "transform_operator",
+              "operator": {
+                "class_name": "get_data_operator",
+                "table_schema": {
+                  "name": "sales",
+                  "db_name": "sample_v2",
+                  "organization_id": 0,
+                  "display_name": "sales",
+                  "columns": [
+                    {
+                      "class_name": "string",
+                      "name": "region",
+                      "display_name": "region",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "country",
+                      "display_name": "country",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "item_type",
+                      "display_name": "item_type",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "sales_channel",
+                      "display_name": "sales_channel",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "order_priority",
+                      "display_name": "order_priority",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "datetime",
+                      "name": "order_date",
+                      "display_name": "order_date",
+                      "input_as_timestamp": false,
+                      "input_formats": [],
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "int64",
+                      "name": "order_id",
+                      "display_name": "order_id",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "datetime",
+                      "name": "ship_date",
+                      "display_name": "ship_date",
+                      "input_as_timestamp": false,
+                      "input_formats": [],
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "int32",
+                      "name": "units_sold",
+                      "display_name": "units_sold",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "unit_price",
+                      "display_name": "unit_price",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "unit_cost",
+                      "display_name": "unit_cost",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_revenue",
+                      "display_name": "total_revenue",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_cost",
+                      "display_name": "total_cost",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_profit",
+                      "display_name": "total_profit",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    }
+                  ],
+                  "engine": "InnoDB",
+                  "primary_keys": [],
+                  "partition_by": [],
+                  "order_bys": [],
+                  "table_type": "default",
+                  "table_status": "Normal",
+                  "ttl": 0,
+                  "expression_columns": [],
+                  "calculated_columns": [],
+                  "temporary": false
+                },
+                "dest_table_config": {
+                  "tbl_name": "sales",
+                  "db_display_name": "sample_v2",
+                  "tbl_display_name": "sales"
+                },
+                "is_persistent": false,
+                "third_party_persist_configurations": []
+              },
+              "query": {
+                "class_name": "group_table_chart_setting",
+                "columns": [
+                  {
+                    "name": "region",
+                    "function": {
+                      "class_name": "select",
+                      "field": {
+                        "class_name": "table_field",
+                        "db_name": "preview_etl_1",
+                        "tbl_name": "sales",
+                        "field_name": "region",
+                        "field_type": "string"
+                      },
+                      "group_by_func": false,
+                      "aggregate_func": false
+                    },
+                    "is_horizontal_view": false,
+                    "is_calc_group_total": true,
+                    "is_calc_min_max": false,
+                    "is_dynamic_function": false,
+                    "is_flatten": false
+                  },
+                  {
+                    "name": "country",
+                    "function": {
+                      "class_name": "select",
+                      "field": {
+                        "class_name": "table_field",
+                        "db_name": "preview_etl_1",
+                        "tbl_name": "sales",
+                        "field_name": "country",
+                        "field_type": "string"
+                      },
+                      "group_by_func": false,
+                      "aggregate_func": false
+                    },
+                    "is_horizontal_view": false,
+                    "is_calc_group_total": true,
+                    "is_calc_min_max": false,
+                    "is_dynamic_function": false,
+                    "is_flatten": false
+                  },
+                  {
+                    "name": "total_revenue",
+                    "function": {
+                      "class_name": "select",
+                      "field": {
+                        "class_name": "table_field",
+                        "db_name": "preview_etl_1",
+                        "tbl_name": "sales",
+                        "field_name": "total_revenue",
+                        "field_type": "double"
+                      },
+                      "group_by_func": false,
+                      "aggregate_func": false
+                    },
+                    "is_horizontal_view": false,
+                    "is_calc_group_total": true,
+                    "is_calc_min_max": true,
+                    "is_dynamic_function": false,
+                    "is_flatten": false
+                  },
+                  {
+                    "name": "units_sold",
+                    "function": {
+                      "class_name": "select",
+                      "field": {
+                        "class_name": "table_field",
+                        "db_name": "preview_etl_1",
+                        "tbl_name": "sales",
+                        "field_name": "units_sold",
+                        "field_type": "int32"
+                      },
+                      "group_by_func": false,
+                      "aggregate_func": false
+                    },
+                    "is_horizontal_view": false,
+                    "is_calc_group_total": true,
+                    "is_calc_min_max": true,
+                    "is_dynamic_function": false,
+                    "is_flatten": false
+                  }
+                ],
+                "formatters": [],
+                "filters": [],
+                "sorts": [
+                  {
+                    "class_name": "order_by",
+                    "function": {
+                      "class_name": "group",
+                      "field": {
+                        "class_name": "table_field",
+                        "db_name": "preview_etl_1",
+                        "tbl_name": "sales",
+                        "field_name": "country",
+                        "field_type": "string"
+                      },
+                      "group_by_func": true,
+                      "aggregate_func": false
+                    },
+                    "order": "ASC",
+                    "group_by_func": false,
+                    "aggregate_func": false
+                  }
+                ],
+                "sql_views": [],
+                "options": {},
+                "dynamic_function_ids": []
+              },
+              "dest_table_configuration": {
+                "tbl_name": "sales_transform",
+                "db_display_name": "ETL Database",
+                "tbl_display_name": "sales_transform"
+              },
+              "is_persistent": false,
+              "third_party_persist_configurations": []
+            }
+          ],
+          "dest_table_configuration": {
+            "tbl_name": "send_email_1",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "send_email_1"
+          },
+          "receivers": [
+            "a@b.co"
+          ],
+          "cc": [],
+          "bcc": [],
+          "subject": "x",
+          "file_names": [
+            "sales_transform"
+          ],
+          "is_zip": false,
+          "file_type": "Csv"
+        },
+        {
+          "class_name": "python_operator",
+          "operator": {
+            "class_name": "get_data_operator",
+            "table_schema": {
+              "name": "sales",
+              "db_name": "sample_v2",
+              "organization_id": 0,
+              "display_name": "sales",
+              "columns": [
+                {
+                  "class_name": "string",
+                  "name": "region",
+                  "display_name": "region",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "country",
+                  "display_name": "country",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "item_type",
+                  "display_name": "item_type",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "sales_channel",
+                  "display_name": "sales_channel",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "order_priority",
+                  "display_name": "order_priority",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "order_date",
+                  "display_name": "order_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int64",
+                  "name": "order_id",
+                  "display_name": "order_id",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "ship_date",
+                  "display_name": "ship_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "units_sold",
+                  "display_name": "units_sold",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_price",
+                  "display_name": "unit_price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_cost",
+                  "display_name": "unit_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_revenue",
+                  "display_name": "total_revenue",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_cost",
+                  "display_name": "total_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_profit",
+                  "display_name": "total_profit",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": "InnoDB",
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            },
+            "dest_table_config": {
+              "tbl_name": "sales",
+              "db_display_name": "sample_v2",
+              "tbl_display_name": "sales"
+            },
+            "is_persistent": false,
+            "third_party_persist_configurations": []
+          },
+          "code": "def process(client, database, table, dest_database, dest_table):\n    pass\n",
+          "dest_table_configuration": {
+            "tbl_name": "sales_py",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_py"
+          },
+          "is_persistent": false,
+          "third_party_persist_configurations": []
+        }
+      ],
+      "owner_id": "root",
+      "schedule_time": {
+        "class_name": "schedule_weekly",
+        "recur_every": 1,
+        "at_hour": 2,
+        "at_minute": 30,
+        "at_second": 0,
+        "include_days": [
+          "MONDAY",
+          "FRIDAY"
+        ],
+        "start_time": 1793633725000
+      },
+      "created_time": 1793631086502,
+      "updated_time": 1793633877113,
+      "owner": {
+        "username": "root",
+        "full_name": "root",
+        "email": "hello@gmail.com",
+        "gender": 0,
+        "already_confirmed": true,
+        "updated_time": 1792599231000,
+        "created_time": 1792599231000
+      },
+      "extra_data": {
+        "saved_email_config_position": {},
+        "render_options": {
+          "sales_transform": {
+            "configs": {},
+            "filters": {},
+            "current_chart_type": "flatten_table"
+          }
+        },
+        "operator_position": {},
+        "table_position": {
+          "sales": {
+            "top": "20px",
+            "left": "20px"
+          }
+        },
+        "saved_third_party_position": {},
+        "saved_table_position": {},
+        "stage_position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "status": "Error",
+      "next_execute_time": 1793932200000,
+      "last_execute_time": 1793631222208,
+      "config": {
+        "map_incremental_config": {}
+      }
+    }
+  },
+  "etlGetV1": {
+    "method": "GET",
+    "path": "data_cook/2",
+    "status": 200,
+    "response": {
+      "id": 2,
+      "display_name": "DC0 v1 ETL",
+      "operators": [
+        {
+          "class_name": "join_operator",
+          "join_configs": [
+            {
+              "left_operator": {
+                "class_name": "get_data_operator",
+                "table_schema": {
+                  "name": "sales",
+                  "db_name": "di0_ingest",
+                  "organization_id": 0,
+                  "display_name": "sales",
+                  "columns": [
+                    {
+                      "class_name": "string",
+                      "name": "region",
+                      "display_name": "region",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "country",
+                      "display_name": "country",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "item_type",
+                      "display_name": "item_type",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "sales_channel",
+                      "display_name": "sales_channel",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "order_priority",
+                      "display_name": "order_priority",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "datetime",
+                      "name": "order_date",
+                      "display_name": "order_date",
+                      "input_as_timestamp": false,
+                      "input_formats": [],
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "int64",
+                      "name": "order_id",
+                      "display_name": "order_id",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "datetime",
+                      "name": "ship_date",
+                      "display_name": "ship_date",
+                      "input_as_timestamp": false,
+                      "input_formats": [],
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "int32",
+                      "name": "units_sold",
+                      "display_name": "units_sold",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "unit_price",
+                      "display_name": "unit_price",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "unit_cost",
+                      "display_name": "unit_cost",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_revenue",
+                      "display_name": "total_revenue",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_cost",
+                      "display_name": "total_cost",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_profit",
+                      "display_name": "total_profit",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    }
+                  ],
+                  "primary_keys": [],
+                  "partition_by": [],
+                  "order_bys": [],
+                  "table_type": "default",
+                  "table_status": "Normal",
+                  "expression_columns": [],
+                  "calculated_columns": [],
+                  "temporary": false
+                },
+                "dest_table_config": {
+                  "tbl_name": "sales",
+                  "db_display_name": "di0_ingest",
+                  "tbl_display_name": "sales"
+                },
+                "is_persistent": false,
+                "third_party_persist_configurations": []
+              },
+              "right_operator": {
+                "class_name": "get_data_operator",
+                "table_schema": {
+                  "name": "sales_copy",
+                  "db_name": "di6_probe_newdb",
+                  "organization_id": 0,
+                  "display_name": "sales_copy",
+                  "columns": [
+                    {
+                      "class_name": "string",
+                      "name": "region",
+                      "display_name": "region",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "country",
+                      "display_name": "country",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "item_type",
+                      "display_name": "item_type",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "sales_channel",
+                      "display_name": "sales_channel",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "string",
+                      "name": "order_priority",
+                      "display_name": "order_priority",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "datetime",
+                      "name": "order_date",
+                      "display_name": "order_date",
+                      "input_as_timestamp": false,
+                      "input_formats": [],
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "int64",
+                      "name": "order_id",
+                      "display_name": "order_id",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "datetime",
+                      "name": "ship_date",
+                      "display_name": "ship_date",
+                      "input_as_timestamp": false,
+                      "input_formats": [],
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "int32",
+                      "name": "units_sold",
+                      "display_name": "units_sold",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "unit_price",
+                      "display_name": "unit_price",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "unit_cost",
+                      "display_name": "unit_cost",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_revenue",
+                      "display_name": "total_revenue",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_cost",
+                      "display_name": "total_cost",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    },
+                    {
+                      "class_name": "double",
+                      "name": "total_profit",
+                      "display_name": "total_profit",
+                      "is_nullable": true,
+                      "is_encrypted": false
+                    }
+                  ],
+                  "primary_keys": [],
+                  "partition_by": [],
+                  "order_bys": [],
+                  "table_type": "default",
+                  "table_status": "Normal",
+                  "expression_columns": [],
+                  "calculated_columns": [],
+                  "temporary": false
+                },
+                "dest_table_config": {
+                  "tbl_name": "sales_copy",
+                  "db_display_name": "di6_probe_newdb",
+                  "tbl_display_name": "sales_copy"
+                },
+                "is_persistent": false,
+                "third_party_persist_configurations": []
+              },
+              "conditions": [
+                {
+                  "class_name": "equal_field",
+                  "left_field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_2",
+                    "tbl_name": "sales",
+                    "field_name": "order_id",
+                    "field_type": "int64"
+                  },
+                  "right_field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_2",
+                    "tbl_name": "sales_copy",
+                    "field_name": "order_id",
+                    "field_type": "int64"
+                  }
+                }
+              ],
+              "join_type": "inner"
+            }
+          ],
+          "dest_table_configuration": {
+            "tbl_name": "sales_join_sales_copy",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_join_sales_copy"
+          },
+          "is_persistent": false,
+          "third_party_persist_configurations": []
+        },
+        {
+          "class_name": "manage_field_operator",
+          "operator": {
+            "class_name": "sql_query_operator",
+            "operator": {
+              "class_name": "get_data_operator",
+              "table_schema": {
+                "name": "sales",
+                "db_name": "sample_v2",
+                "organization_id": 0,
+                "display_name": "sales",
+                "columns": [
+                  {
+                    "class_name": "string",
+                    "name": "region",
+                    "display_name": "region",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "string",
+                    "name": "country",
+                    "display_name": "country",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "string",
+                    "name": "item_type",
+                    "display_name": "item_type",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "string",
+                    "name": "sales_channel",
+                    "display_name": "sales_channel",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "string",
+                    "name": "order_priority",
+                    "display_name": "order_priority",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "datetime",
+                    "name": "order_date",
+                    "display_name": "order_date",
+                    "input_as_timestamp": false,
+                    "input_formats": [],
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "int64",
+                    "name": "order_id",
+                    "display_name": "order_id",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "datetime",
+                    "name": "ship_date",
+                    "display_name": "ship_date",
+                    "input_as_timestamp": false,
+                    "input_formats": [],
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "int32",
+                    "name": "units_sold",
+                    "display_name": "units_sold",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "double",
+                    "name": "unit_price",
+                    "display_name": "unit_price",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "double",
+                    "name": "unit_cost",
+                    "display_name": "unit_cost",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "double",
+                    "name": "total_revenue",
+                    "display_name": "total_revenue",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "double",
+                    "name": "total_cost",
+                    "display_name": "total_cost",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  },
+                  {
+                    "class_name": "double",
+                    "name": "total_profit",
+                    "display_name": "total_profit",
+                    "is_nullable": true,
+                    "is_encrypted": false
+                  }
+                ],
+                "primary_keys": [],
+                "partition_by": [],
+                "order_bys": [],
+                "table_type": "default",
+                "table_status": "Normal",
+                "expression_columns": [],
+                "calculated_columns": [],
+                "temporary": false
+              },
+              "dest_table_config": {
+                "tbl_name": "sales_1",
+                "db_display_name": "sample_v2",
+                "tbl_display_name": "sales_1"
+              },
+              "is_persistent": false,
+              "third_party_persist_configurations": []
+            },
+            "query": "select region, count(*) as cnt from preview_etl_2.sales_1 group by region",
+            "dest_table_configuration": {
+              "tbl_name": "sales_1_1",
+              "db_display_name": "ETL Database",
+              "tbl_display_name": "sales_1_1"
+            },
+            "is_persistent": true,
+            "persist_configuration": {
+              "db_name": "dc0_v1_out",
+              "tbl_name": "regioncount2",
+              "type": "Append"
+            },
+            "third_party_persist_configurations": []
+          },
+          "fields": [
+            {
+              "display_name": "region",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "preview_etl_2",
+                "tbl_name": "sales_1_1",
+                "field_name": "region",
+                "field_type": "string"
+              },
+              "is_hidden": false,
+              "as_type": "string"
+            },
+            {
+              "display_name": "cnt",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "preview_etl_2",
+                "tbl_name": "sales_1_1",
+                "field_name": "cnt",
+                "field_type": "int64"
+              },
+              "is_hidden": false,
+              "as_type": "int64"
+            }
+          ],
+          "dest_table_configuration": {
+            "tbl_name": "sales_1_2",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_1_2"
+          },
+          "extra_fields": [],
+          "is_persistent": false,
+          "third_party_persist_configurations": [],
+          "active_field_configs": [
+            {
+              "display_name": "region",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "preview_etl_2",
+                "tbl_name": "sales_1_1",
+                "field_name": "region",
+                "field_type": "string"
+              },
+              "is_hidden": false,
+              "as_type": "string"
+            },
+            {
+              "display_name": "cnt",
+              "field": {
+                "class_name": "table_field",
+                "db_name": "preview_etl_2",
+                "tbl_name": "sales_1_1",
+                "field_name": "cnt",
+                "field_type": "int64"
+              },
+              "is_hidden": false,
+              "as_type": "int64"
+            }
+          ]
+        }
+      ],
+      "owner_id": "root",
+      "schedule_time": {
+        "class_name": "schedule_daily",
+        "recur_every": 1,
+        "start_time": 1793633725000
+      },
+      "created_time": 1793631972669,
+      "updated_time": 1793633732933,
+      "owner": {
+        "username": "root",
+        "full_name": "root",
+        "email": "hello@gmail.com",
+        "gender": 0,
+        "already_confirmed": true,
+        "updated_time": 1792599231000,
+        "created_time": 1792599231000
+      },
+      "extra_data": {
+        "saved_email_config_position": {},
+        "render_options": {},
+        "operator_position": {
+          "sales_join_sales_copy": {
+            "top": "340px",
+            "left": "400px"
+          },
+          "sales_11": {
+            "top": "180px",
+            "left": "400px"
+          },
+          "sales_12": {
+            "top": "180px",
+            "left": "980px"
+          }
+        },
+        "table_position": {
+          "sales_11": {
+            "top": "180px",
+            "left": "600px"
+          },
+          "sales_1": {
+            "top": "180px",
+            "left": "20px"
+          },
+          "sales_join_sales_copy": {
+            "top": "340px",
+            "left": "600px"
+          },
+          "sales": {
+            "top": "20px",
+            "left": "20px"
+          },
+          "sales_12": {
+            "top": "180px",
+            "left": "1180px"
+          },
+          "sales_copy": {
+            "top": "340px",
+            "left": "20px"
+          }
+        },
+        "saved_third_party_position": {},
+        "saved_table_position": {},
+        "stage_position": {
+          "x": -12,
+          "y": -12
+        }
+      },
+      "status": "Initialized",
+      "next_execute_time": 1793720125000,
+      "last_execute_time": 0,
+      "config": {
+        "map_incremental_config": {
+          "sales_1": {
+            "column_name": "order_date",
+            "value": "2015-01-01 00:00:00"
+          }
+        }
+      }
+    }
+  },
+  "etlGetMissing": {
+    "method": "GET",
+    "path": "data_cook/9999",
+    "status": 404,
+    "response": {
+      "code": 404,
+      "reason": "not_found",
+      "message": "not found etl job"
+    }
+  },
+  "myEtl": {
+    "method": "POST",
+    "path": "data_cook/my_etl",
+    "request": {
+      "keyword": "",
+      "from": 0,
+      "size": 10,
+      "sorts": [
+        {
+          "field": "created_time",
+          "order": "DESC"
+        }
+      ]
+    },
+    "status": 200,
+    "response": {
+      "total": 3,
+      "data": [
+        {
+          "id": 4,
+          "display_name": "DC0 fixture",
+          "operators": [],
+          "owner_id": "root",
+          "schedule_time": {
+            "class_name": "none_schedule"
+          },
+          "created_time": 1793633892264,
+          "updated_time": 1793633892264,
+          "owner": {
+            "username": "root",
+            "full_name": "root",
+            "email": "hello@gmail.com",
+            "gender": 0,
+            "already_confirmed": true,
+            "updated_time": 1792599231000,
+            "created_time": 1792599231000
+          },
+          "status": "Initialized",
+          "next_execute_time": 9223372036854775807,
+          "last_execute_time": 0,
+          "config": {
+            "map_incremental_config": {}
+          }
+        },
+        {
+          "id": 2,
+          "display_name": "DC0 v1 ETL",
+          "operators": [],
+          "owner_id": "root",
+          "schedule_time": {
+            "class_name": "schedule_daily",
+            "recur_every": 1,
+            "start_time": 1793633725000
+          },
+          "created_time": 1793631972669,
+          "updated_time": 1793633732933,
+          "owner": {
+            "username": "root",
+            "full_name": "root",
+            "email": "hello@gmail.com",
+            "gender": 0,
+            "already_confirmed": true,
+            "updated_time": 1792599231000,
+            "created_time": 1792599231000
+          },
+          "extra_data": {
+            "saved_email_config_position": {},
+            "render_options": {},
+            "operator_position": {
+              "sales_join_sales_copy": {
+                "top": "340px",
+                "left": "400px"
+              },
+              "sales_11": {
+                "top": "180px",
+                "left": "400px"
+              },
+              "sales_12": {
+                "top": "180px",
+                "left": "980px"
+              }
+            },
+            "table_position": {
+              "sales_11": {
+                "top": "180px",
+                "left": "600px"
+              },
+              "sales_1": {
+                "top": "180px",
+                "left": "20px"
+              },
+              "sales_join_sales_copy": {
+                "top": "340px",
+                "left": "600px"
+              },
+              "sales": {
+                "top": "20px",
+                "left": "20px"
+              },
+              "sales_12": {
+                "top": "180px",
+                "left": "1180px"
+              },
+              "sales_copy": {
+                "top": "340px",
+                "left": "20px"
+              }
+            },
+            "saved_third_party_position": {},
+            "saved_table_position": {},
+            "stage_position": {
+              "x": -12,
+              "y": -12
+            }
+          },
+          "status": "Initialized",
+          "next_execute_time": 1793720125000,
+          "last_execute_time": 0,
+          "config": {
+            "map_incremental_config": {
+              "sales_1": {
+                "column_name": "order_date",
+                "value": "2015-01-01 00:00:00"
+              }
+            }
+          }
+        },
+        {
+          "id": 1,
+          "display_name": "DC0 probe",
+          "operators": [],
+          "owner_id": "root",
+          "schedule_time": {
+            "class_name": "schedule_weekly",
+            "recur_every": 1,
+            "at_hour": 2,
+            "at_minute": 30,
+            "at_second": 0,
+            "include_days": [
+              "MONDAY",
+              "FRIDAY"
+            ],
+            "start_time": 1793633725000
+          },
+          "created_time": 1793631086502,
+          "updated_time": 1793633877113,
+          "owner": {
+            "username": "root",
+            "full_name": "root",
+            "email": "hello@gmail.com",
+            "gender": 0,
+            "already_confirmed": true,
+            "updated_time": 1792599231000,
+            "created_time": 1792599231000
+          },
+          "extra_data": {
+            "saved_email_config_position": {},
+            "render_options": {
+              "sales_transform": {
+                "configs": {},
+                "filters": {},
+                "current_chart_type": "flatten_table"
+              }
+            },
+            "operator_position": {},
+            "table_position": {
+              "sales": {
+                "top": "20px",
+                "left": "20px"
+              }
+            },
+            "saved_third_party_position": {},
+            "saved_table_position": {},
+            "stage_position": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "status": "Error",
+          "next_execute_time": 1793932200000,
+          "last_execute_time": 1793631222208,
+          "config": {
+            "map_incremental_config": {}
+          }
+        }
+      ]
+    }
+  },
+  "sharedEtl": {
+    "method": "POST",
+    "path": "data_cook/shared",
+    "request": {
+      "from": 0,
+      "size": 10
+    },
+    "status": 200,
+    "response": {
+      "total": 0,
+      "data": []
+    }
+  },
+  "archive": {
+    "method": "DELETE",
+    "path": "data_cook/4",
+    "status": 200,
+    "response": {
+      "id": 4,
+      "display_name": "DC0 fixture",
+      "operators": [],
+      "owner_id": "root",
+      "schedule_time": {
+        "class_name": "none_schedule"
+      },
+      "created_time": 1793633892264,
+      "updated_time": 1793633892264,
+      "owner": {
+        "username": "root",
+        "full_name": "root",
+        "email": "hello@gmail.com",
+        "gender": 0,
+        "already_confirmed": true,
+        "updated_time": 1792599231000,
+        "created_time": 1792599231000
+      },
+      "status": "Initialized",
+      "next_execute_time": 9223372036854775807,
+      "last_execute_time": 0,
+      "config": {
+        "map_incremental_config": {}
+      }
+    }
+  },
+  "trash": {
+    "method": "POST",
+    "path": "data_cook/trash",
+    "request": {
+      "from": 0,
+      "size": 10
+    },
+    "status": 200,
+    "response": {
+      "total": 1,
+      "data": [
+        {
+          "id": 4,
+          "display_name": "DC0 fixture",
+          "operators": [],
+          "owner_id": "root",
+          "schedule_time": {
+            "class_name": "none_schedule"
+          },
+          "created_time": 1793633892264,
+          "updated_time": 1793633892264,
+          "owner": {
+            "username": "root",
+            "full_name": "root",
+            "email": "hello@gmail.com",
+            "gender": 0,
+            "already_confirmed": true,
+            "updated_time": 1792599231000,
+            "created_time": 1792599231000
+          },
+          "status": "Initialized",
+          "next_execute_time": 9223372036854775807,
+          "last_execute_time": 0,
+          "config": {
+            "map_incremental_config": {}
+          }
+        }
+      ]
+    }
+  },
+  "restore": {
+    "method": "POST",
+    "path": "data_cook/trash/4/restore",
+    "status": 200,
+    "response": {
+      "id": 4,
+      "display_name": "DC0 fixture",
+      "operators": [],
+      "owner_id": "root",
+      "schedule_time": {
+        "class_name": "none_schedule"
+      },
+      "created_time": 1793633892264,
+      "updated_time": 1793633892264,
+      "owner": {
+        "username": "root",
+        "full_name": "root",
+        "email": "hello@gmail.com",
+        "gender": 0,
+        "already_confirmed": true,
+        "updated_time": 1792599231000,
+        "created_time": 1792599231000
+      },
+      "status": "Initialized",
+      "next_execute_time": 9223372036854775807,
+      "last_execute_time": 0,
+      "config": {
+        "map_incremental_config": {}
+      }
+    }
+  },
+  "hardDelete": {
+    "method": "DELETE",
+    "path": "data_cook/trash/4",
+    "status": 200,
+    "response": {
+      "id": 4,
+      "display_name": "DC0 fixture",
+      "operators": [],
+      "owner_id": "root",
+      "schedule_time": {
+        "class_name": "none_schedule"
+      },
+      "created_time": 1793633892264,
+      "updated_time": 1793633892264,
+      "owner": {
+        "username": "root",
+        "full_name": "root",
+        "email": "hello@gmail.com",
+        "gender": 0,
+        "already_confirmed": true,
+        "updated_time": 1792599231000,
+        "created_time": 1792599231000
+      },
+      "status": "Initialized",
+      "next_execute_time": 9223372036854775807,
+      "last_execute_time": 0,
+      "config": {
+        "map_incremental_config": {}
+      }
+    }
+  },
+  "history": {
+    "method": "POST",
+    "path": "data_cook/history",
+    "request": {
+      "from": 0,
+      "size": 10,
+      "sorts": [
+        {
+          "field": "id",
+          "order": "DESC"
+        }
+      ]
+    },
+    "status": 200,
+    "response": {
+      "total": 2,
+      "data": [
+        {
+          "id": 2,
+          "etl_job_id": 1,
+          "total_execution_time": 25,
+          "status": "Error",
+          "message": "execute ELT DC0 probe \n+ process RootOperator(0) success, result RootOperatorResult(0) \n+ process GetOperator(1) success, result TableResult sales: 14 columns, table type: Some(view) \nexecute failure, No database selected",
+          "etl_info": {
+            "id": 1,
+            "display_name": "DC0 probe",
+            "operators": [],
+            "owner_id": "root",
+            "schedule_time": {
+              "class_name": "schedule_weekly",
+              "recur_every": 1,
+              "at_hour": 2,
+              "at_minute": 30,
+              "at_second": 0,
+              "include_days": [
+                "MONDAY",
+                "FRIDAY"
+              ],
+              "start_time": 1793633725000
+            },
+            "created_time": 1793631086502,
+            "updated_time": 1793633877113,
+            "owner": {
+              "username": "root",
+              "full_name": "root",
+              "email": "hello@gmail.com",
+              "gender": 0,
+              "already_confirmed": true,
+              "updated_time": 1792599231000,
+              "created_time": 1792599231000
+            },
+            "extra_data": {
+              "saved_email_config_position": {},
+              "render_options": {
+                "sales_transform": {
+                  "configs": {},
+                  "filters": {},
+                  "current_chart_type": "flatten_table"
+                }
+              },
+              "operator_position": {},
+              "table_position": {
+                "sales": {
+                  "top": "20px",
+                  "left": "20px"
+                }
+              },
+              "saved_third_party_position": {},
+              "saved_table_position": {},
+              "stage_position": {
+                "x": 0,
+                "y": 0
+              }
+            },
+            "status": "Error",
+            "next_execute_time": 1793932200000,
+            "last_execute_time": 1793631222208,
+            "config": {
+              "map_incremental_config": {}
+            }
+          },
+          "created_time": 1793631207476,
+          "updated_time": 1793631222236
+        },
+        {
+          "id": 1,
+          "etl_job_id": 1,
+          "total_execution_time": 122,
+          "status": "Done",
+          "message": "execute ELT DC0 probe \n+ process RootOperator(0) success, result RootOperatorResult(0) \n+ process GetOperator(1) success, result TableResult sales: 14 columns, table type: Some(view) \n+ process SQLOperator(2) success, result TableResult sales_sql: 2 columns, table type: Some(view) \n+ process SaveDwhOperator(3) success, result SaveDwhResult: 7 inserted rows, 7 total rows \nexecute completed!",
+          "etl_info": {
+            "id": 1,
+            "display_name": "DC0 probe",
+            "operators": [],
+            "owner_id": "root",
+            "schedule_time": {
+              "class_name": "schedule_weekly",
+              "recur_every": 1,
+              "at_hour": 2,
+              "at_minute": 30,
+              "at_second": 0,
+              "include_days": [
+                "MONDAY",
+                "FRIDAY"
+              ],
+              "start_time": 1793633725000
+            },
+            "created_time": 1793631086502,
+            "updated_time": 1793633877113,
+            "owner": {
+              "username": "root",
+              "full_name": "root",
+              "email": "hello@gmail.com",
+              "gender": 0,
+              "already_confirmed": true,
+              "updated_time": 1792599231000,
+              "created_time": 1792599231000
+            },
+            "extra_data": {
+              "saved_email_config_position": {},
+              "render_options": {
+                "sales_transform": {
+                  "configs": {},
+                  "filters": {},
+                  "current_chart_type": "flatten_table"
+                }
+              },
+              "operator_position": {},
+              "table_position": {
+                "sales": {
+                  "top": "20px",
+                  "left": "20px"
+                }
+              },
+              "saved_third_party_position": {},
+              "saved_table_position": {},
+              "stage_position": {
+                "x": 0,
+                "y": 0
+              }
+            },
+            "status": "Error",
+            "next_execute_time": 1793932200000,
+            "last_execute_time": 1793631222208,
+            "config": {
+              "map_incremental_config": {}
+            }
+          },
+          "created_time": 1793631132463,
+          "updated_time": 1793631147333
+        }
+      ]
+    }
+  },
+  "forceRun": {
+    "method": "PUT",
+    "path": "data_cook/2/force_run",
+    "request": {
+      "at_time": 1793634000000,
+      "mode": "Continuous"
+    },
+    "status": 200,
+    "response": {
+      "success": true
+    }
+  },
+  "kill": {
+    "method": "PUT",
+    "path": "data_cook/2/kill",
+    "request": {},
+    "status": 200,
+    "response": {
+      "success": true
+    }
+  },
+  "databaseName": {
+    "method": "GET",
+    "path": "data_cook/1/preview/database_name",
+    "status": 200,
+    "response": {
+      "id": 1,
+      "database_name": "preview_etl_1"
+    }
+  },
+  "previewDone": {
+    "method": "POST",
+    "path": "data_cook/1/preview_sync",
+    "request": {
+      "operators": [
+        {
+          "class_name": "transform_operator",
+          "operator": {
+            "class_name": "get_data_operator",
+            "table_schema": {
+              "name": "sales",
+              "db_name": "sample_v2",
+              "organization_id": 0,
+              "display_name": "sales",
+              "columns": [
+                {
+                  "class_name": "string",
+                  "name": "region",
+                  "display_name": "region",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "country",
+                  "display_name": "country",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "item_type",
+                  "display_name": "item_type",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "sales_channel",
+                  "display_name": "sales_channel",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "order_priority",
+                  "display_name": "order_priority",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "order_date",
+                  "display_name": "order_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int64",
+                  "name": "order_id",
+                  "display_name": "order_id",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "ship_date",
+                  "display_name": "ship_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "units_sold",
+                  "display_name": "units_sold",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_price",
+                  "display_name": "unit_price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_cost",
+                  "display_name": "unit_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_revenue",
+                  "display_name": "total_revenue",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_cost",
+                  "display_name": "total_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_profit",
+                  "display_name": "total_profit",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": "InnoDB",
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "query": null,
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            },
+            "dest_table_config": {
+              "tbl_name": "sales",
+              "db_display_name": "sample_v2",
+              "tbl_display_name": "sales"
+            },
+            "is_persistent": false,
+            "third_party_persist_configurations": []
+          },
+          "query": {
+            "filters": [],
+            "sorts": [
+              {
+                "class_name": "order_by",
+                "order": "ASC",
+                "function": {
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "country",
+                    "field_type": "string"
+                  },
+                  "class_name": "group"
+                }
+              }
+            ],
+            "options": {},
+            "sql_views": [],
+            "parameters": {},
+            "columns": [
+              {
+                "name": "region",
+                "function": {
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "region",
+                    "field_type": "string"
+                  },
+                  "class_name": "select"
+                },
+                "is_horizontal_view": false,
+                "is_collapse": false,
+                "is_calc_group_total": true,
+                "is_calc_min_max": false,
+                "is_dynamic_function": false
+              },
+              {
+                "name": "country",
+                "function": {
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "country",
+                    "field_type": "string"
+                  },
+                  "class_name": "select"
+                },
+                "is_horizontal_view": false,
+                "is_collapse": false,
+                "is_calc_group_total": true,
+                "is_calc_min_max": false,
+                "is_dynamic_function": false
+              },
+              {
+                "name": "total_revenue",
+                "function": {
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "total_revenue",
+                    "field_type": "double"
+                  },
+                  "class_name": "select"
+                },
+                "is_horizontal_view": false,
+                "is_collapse": false,
+                "is_calc_group_total": true,
+                "is_calc_min_max": true,
+                "is_dynamic_function": false
+              },
+              {
+                "name": "units_sold",
+                "function": {
+                  "field": {
+                    "class_name": "table_field",
+                    "db_name": "preview_etl_1",
+                    "tbl_name": "sales",
+                    "field_name": "units_sold",
+                    "field_type": "int32"
+                  },
+                  "class_name": "select"
+                },
+                "is_horizontal_view": false,
+                "is_collapse": false,
+                "is_calc_group_total": true,
+                "is_calc_min_max": true,
+                "is_dynamic_function": false
+              }
+            ],
+            "formatters": [],
+            "class_name": "table_chart_setting"
+          },
+          "dest_table_configuration": {
+            "tbl_name": "sales_transform",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_transform"
+          },
+          "is_persistent": false,
+          "third_party_persist_configurations": []
+        }
+      ],
+      "force": true
+    },
+    "status": 200,
+    "response": {
+      "id": 1,
+      "status": "Done",
+      "data": {
+        "all_table_schemas": [
+          {
+            "name": "sales",
+            "db_name": "preview_etl_1",
+            "organization_id": 0,
+            "display_name": "sales",
+            "columns": [
+              {
+                "class_name": "string",
+                "name": "region",
+                "display_name": "region",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "string",
+                "name": "country",
+                "display_name": "country",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "string",
+                "name": "item_type",
+                "display_name": "item_type",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "string",
+                "name": "sales_channel",
+                "display_name": "sales_channel",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "string",
+                "name": "order_priority",
+                "display_name": "order_priority",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "datetime",
+                "name": "order_date",
+                "display_name": "order_date",
+                "input_as_timestamp": false,
+                "input_formats": [],
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "int64",
+                "name": "order_id",
+                "display_name": "order_id",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "datetime",
+                "name": "ship_date",
+                "display_name": "ship_date",
+                "input_as_timestamp": false,
+                "input_formats": [],
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "int32",
+                "name": "units_sold",
+                "display_name": "units_sold",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "double",
+                "name": "unit_price",
+                "display_name": "unit_price",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "double",
+                "name": "unit_cost",
+                "display_name": "unit_cost",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "double",
+                "name": "total_revenue",
+                "display_name": "total_revenue",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "double",
+                "name": "total_cost",
+                "display_name": "total_cost",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "double",
+                "name": "total_profit",
+                "display_name": "total_profit",
+                "is_nullable": true,
+                "is_encrypted": false
+              }
+            ],
+            "primary_keys": [],
+            "partition_by": [],
+            "order_bys": [],
+            "query": "select tbl_4d03e2.`region` as `region`, tbl_4d03e2.`country` as `country`, tbl_4d03e2.`item_type` as `item_type`, tbl_4d03e2.`sales_channel` as `sales_channel`, tbl_4d03e2.`order_priority` as `order_priority`, tbl_4d03e2.`order_date` as `order_date`, tbl_4d03e2.`order_id` as `order_id`, tbl_4d03e2.`ship_date` as `ship_date`, tbl_4d03e2.`units_sold` as `units_sold`, tbl_4d03e2.`unit_price` as `unit_price`, tbl_4d03e2.`unit_cost` as `unit_cost`, tbl_4d03e2.`total_revenue` as `total_revenue`, tbl_4d03e2.`total_cost` as `total_cost`, tbl_4d03e2.`total_profit` as `total_profit`\nfrom `sample_v2`.`sales` tbl_4d03e2\nlimit 1000 offset 0\n",
+            "table_type": "view",
+            "expression_columns": [],
+            "calculated_columns": [],
+            "temporary": false
+          },
+          {
+            "name": "sales_transform",
+            "db_name": "preview_etl_1",
+            "organization_id": 0,
+            "display_name": "sales_transform",
+            "columns": [
+              {
+                "class_name": "string",
+                "name": "region",
+                "display_name": "region",
+                "default_value": "",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "string",
+                "name": "country",
+                "display_name": "country",
+                "default_value": "",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "double",
+                "name": "total_revenue",
+                "display_name": "total_revenue",
+                "default_value": 0.0,
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "int64",
+                "name": "units_sold",
+                "display_name": "units_sold",
+                "default_value": 0,
+                "is_nullable": true,
+                "is_encrypted": false
+              }
+            ],
+            "primary_keys": [],
+            "partition_by": [],
+            "order_bys": [],
+            "table_type": "default",
+            "expression_columns": [],
+            "calculated_columns": [],
+            "temporary": false
+          }
+        ]
+      },
+      "errors": []
+    }
+  },
+  "previewError": {
+    "method": "POST",
+    "path": "data_cook/1/preview_sync",
+    "request": {
+      "operators": [
+        {
+          "class_name": "sql_query_operator",
+          "operator": {
+            "class_name": "get_data_operator",
+            "table_schema": {
+              "name": "sales",
+              "db_name": "sample_v2",
+              "organization_id": 0,
+              "display_name": "sales",
+              "columns": [
+                {
+                  "class_name": "string",
+                  "name": "region",
+                  "display_name": "region",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "country",
+                  "display_name": "country",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "item_type",
+                  "display_name": "item_type",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "sales_channel",
+                  "display_name": "sales_channel",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "string",
+                  "name": "order_priority",
+                  "display_name": "order_priority",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "order_date",
+                  "display_name": "order_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int64",
+                  "name": "order_id",
+                  "display_name": "order_id",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "datetime",
+                  "name": "ship_date",
+                  "display_name": "ship_date",
+                  "input_as_timestamp": false,
+                  "input_formats": [],
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "int32",
+                  "name": "units_sold",
+                  "display_name": "units_sold",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_price",
+                  "display_name": "unit_price",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "unit_cost",
+                  "display_name": "unit_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_revenue",
+                  "display_name": "total_revenue",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_cost",
+                  "display_name": "total_cost",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                },
+                {
+                  "class_name": "double",
+                  "name": "total_profit",
+                  "display_name": "total_profit",
+                  "is_nullable": true,
+                  "is_encrypted": false
+                }
+              ],
+              "engine": "InnoDB",
+              "primary_keys": [],
+              "partition_by": [],
+              "order_bys": [],
+              "table_type": "default",
+              "table_status": "Normal",
+              "ttl": 0,
+              "expression_columns": [],
+              "calculated_columns": [],
+              "temporary": false
+            },
+            "dest_table_config": {
+              "tbl_name": "sales",
+              "db_display_name": "ETL Database",
+              "tbl_display_name": "sales"
+            },
+            "is_persistent": false,
+            "third_party_persist_configurations": []
+          },
+          "query": "select region from sales",
+          "dest_table_configuration": {
+            "tbl_name": "sales_sql",
+            "db_display_name": "ETL Database",
+            "tbl_display_name": "sales_sql"
+          },
+          "is_persistent": true,
+          "persist_configuration": {
+            "db_name": "dc0_out",
+            "tbl_name": "sales_by_region",
+            "type": "Update"
+          },
+          "third_party_persist_configurations": []
+        }
+      ],
+      "force": true
+    },
+    "status": 200,
+    "response": {
+      "id": 1,
+      "status": "Error",
+      "data": {
+        "all_table_schemas": [
+          {
+            "name": "sales",
+            "db_name": "preview_etl_1",
+            "organization_id": 0,
+            "display_name": "sales",
+            "columns": [
+              {
+                "class_name": "string",
+                "name": "region",
+                "display_name": "region",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "string",
+                "name": "country",
+                "display_name": "country",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "string",
+                "name": "item_type",
+                "display_name": "item_type",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "string",
+                "name": "sales_channel",
+                "display_name": "sales_channel",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "string",
+                "name": "order_priority",
+                "display_name": "order_priority",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "datetime",
+                "name": "order_date",
+                "display_name": "order_date",
+                "input_as_timestamp": false,
+                "input_formats": [],
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "int64",
+                "name": "order_id",
+                "display_name": "order_id",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "datetime",
+                "name": "ship_date",
+                "display_name": "ship_date",
+                "input_as_timestamp": false,
+                "input_formats": [],
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "int32",
+                "name": "units_sold",
+                "display_name": "units_sold",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "double",
+                "name": "unit_price",
+                "display_name": "unit_price",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "double",
+                "name": "unit_cost",
+                "display_name": "unit_cost",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "double",
+                "name": "total_revenue",
+                "display_name": "total_revenue",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "double",
+                "name": "total_cost",
+                "display_name": "total_cost",
+                "is_nullable": true,
+                "is_encrypted": false
+              },
+              {
+                "class_name": "double",
+                "name": "total_profit",
+                "display_name": "total_profit",
+                "is_nullable": true,
+                "is_encrypted": false
+              }
+            ],
+            "primary_keys": [],
+            "partition_by": [],
+            "order_bys": [],
+            "query": "select tbl_4d03e2.`region` as `region`, tbl_4d03e2.`country` as `country`, tbl_4d03e2.`item_type` as `item_type`, tbl_4d03e2.`sales_channel` as `sales_channel`, tbl_4d03e2.`order_priority` as `order_priority`, tbl_4d03e2.`order_date` as `order_date`, tbl_4d03e2.`order_id` as `order_id`, tbl_4d03e2.`ship_date` as `ship_date`, tbl_4d03e2.`units_sold` as `units_sold`, tbl_4d03e2.`unit_price` as `unit_price`, tbl_4d03e2.`unit_cost` as `unit_cost`, tbl_4d03e2.`total_revenue` as `total_revenue`, tbl_4d03e2.`total_cost` as `total_cost`, tbl_4d03e2.`total_profit` as `total_profit`\nfrom `sample_v2`.`sales` tbl_4d03e2\nlimit 1000 offset 0\n",
+            "table_type": "view",
+            "expression_columns": [],
+            "calculated_columns": [],
+            "temporary": false
+          }
+        ]
+      },
+      "errors": [
+        {
+          "message": "No database selected",
+          "error_tbl_name": "sales_sql"
+        }
+      ]
+    }
+  },
+  "viewQuery": {
+    "method": "POST",
+    "path": "data_cook/1/view_query",
+    "request": {
+      "fields": [
+        {
+          "display_name": "Region",
+          "field": {
+            "class_name": "table_field",
+            "db_name": "preview_etl_1",
+            "tbl_name": "sales",
+            "field_name": "region",
+            "field_type": "string"
+          },
+          "is_hidden": false,
+          "as_type": "string"
+        }
+      ],
+      "extra_fields": [
+        {
+          "field_name": "double_units",
+          "display_name": "Double Units",
+          "expression": "units_sold * 2",
+          "as_type": "int64",
+          "is_hidden": false
+        }
+      ]
+    },
+    "status": 200,
+    "response": {
+      "id": 1,
+      "query": "select CONVERT(tbl_91dc70.`region`, NCHAR) as `Region`, CONVERT(units_sold * 2, DECIMAL) as `Double Units`\nfrom `preview_etl_1`.`sales` tbl_91dc70\n"
+    }
+  },
+  "shareList": {
+    "method": "GET",
+    "path": "data_cook/1/share/list",
+    "status": 200,
+    "response": {
+      "owner": {
+        "username": "root",
+        "full_name": "root",
+        "email": "hello@gmail.com",
+        "gender": 0,
+        "already_confirmed": true,
+        "updated_time": 1792599231000,
+        "created_time": 1792599231000
+      },
+      "total_user_sharing": 0,
+      "users_sharing": []
+    }
+  },
+  "shareCreate": {
+    "method": "POST",
+    "path": "data_cook/1/share",
+    "request": {
+      "resource_type": "etl",
+      "resource_id": "1",
+      "user_actions": {
+        "up-860803c8-e3be-4afb-b88b-743817456dfc": [
+          "view"
+        ]
+      }
+    },
+    "status": 200,
+    "response": {
+      "up-860803c8-e3be-4afb-b88b-743817456dfc": true
+    }
+  },
+  "shareListShared": {
+    "method": "GET",
+    "path": "data_cook/1/share/list",
+    "status": 200,
+    "response": {
+      "owner": {
+        "username": "root",
+        "full_name": "root",
+        "email": "hello@gmail.com",
+        "gender": 0,
+        "already_confirmed": true,
+        "updated_time": 1792599231000,
+        "created_time": 1792599231000
+      },
+      "total_user_sharing": 1,
+      "users_sharing": [
+        {
+          "id": "s_2",
+          "user": {
+            "username": "up-860803c8-e3be-4afb-b88b-743817456dfc",
+            "full_name": "DW0 Viewer",
+            "last_name": "Viewer",
+            "first_name": "DW0",
+            "email": "dw0.viewer@example.com",
+            "mobile_phone": "",
+            "gender": -1,
+            "avatar": "",
+            "already_confirmed": true,
+            "properties": {},
+            "updated_time": 1793295998664,
+            "created_time": 1793295998664
+          },
+          "permissions": [
+            "0:etl:view:1"
+          ],
+          "created_at": 1793633957202,
+          "updated_at": 1793633957202,
+          "created_by": "root"
+        }
+      ]
+    }
+  },
+  "shareUpdate": {
+    "method": "PUT",
+    "path": "data_cook/1/share/update",
+    "request": {
+      "resource_type": "etl",
+      "resource_id": "1",
+      "share_id_actions": {
+        "s_2": [
+          "view"
+        ]
+      }
+    },
+    "status": 200,
+    "response": {
+      "up-860803c8-e3be-4afb-b88b-743817456dfc": true
+    }
+  },
+  "shareRevoke": {
+    "method": "DELETE",
+    "path": "data_cook/1/share/revoke",
+    "request": {
+      "resource_type": "etl",
+      "resource_id": "1",
+      "usernames": [
+        "up-860803c8-e3be-4afb-b88b-743817456dfc"
+      ]
+    },
+    "status": 200,
+    "response": {
+      "up-860803c8-e3be-4afb-b88b-743817456dfc": true
+    }
+  }
+}

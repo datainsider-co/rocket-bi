@@ -8,6 +8,7 @@ import { AppLayout, type AppRouteHandle } from '@/app/layout/AppLayout';
 import { PageLoading } from '@/app/layout/PageLoading';
 import { redirectIfLoggedIn, requireSession } from '@/app/routeGuards';
 import { AuthLayout } from '@/features/auth/AuthLayout';
+import { DataCookSection, getDataCookSection } from '@/features/data-cook/dataCook.utils';
 import { DATABASES_PATH, WAREHOUSE_PATH } from '@/features/data-warehouse/warehouse.utils';
 
 /**
@@ -43,6 +44,28 @@ const ingestionRoutes: RouteObject[] = featureFlags.ingestion
     ]
   : [];
 
+/** Data Cook at v1's paths, under Data Warehouse. The ETL editor shares the layout, as in v1. */
+const dataCookRoute: RouteObject = {
+  path: 'data-cook',
+  ...lazyPage(() => import('@/features/data-cook/layout/DataCookLayout'), m => m.DataCookLayout),
+  children: [
+    { index: true, loader: () => redirect(getDataCookSection(DataCookSection.MyEtl).path) },
+    ...['my-etl', 'shared', 'trash'].map(path => ({
+      path,
+      ...lazyPage(() => import('@/features/data-cook/listing/EtlListingPage'), m => m.EtlListingPage)
+    })),
+    {
+      path: 'history',
+      ...lazyPage(() => import('@/features/data-cook/history/EtlHistoryPage'), m => m.EtlHistoryPage)
+    },
+    // `my-etl/create` too: one route, so the editor stays mounted when a new ETL gets its id and URL.
+    {
+      path: 'my-etl/:name',
+      ...lazyPage(() => import('@/features/data-cook/editor/EtlEditorPage'), m => m.EtlEditorPage)
+    }
+  ]
+};
+
 /**
  * Data Warehouse at v1's paths, old `/data-management/*` links included. The server has no trash (`DATA_WAREHOUSE.md`,
  * DW0), so v1's Trash page goes to the listing.
@@ -69,7 +92,8 @@ const warehouseRoutes: RouteObject[] = [
       {
         path: 'relationship',
         ...lazyPage(() => import('@/features/data-warehouse/relationship/RelationshipPage'), m => m.RelationshipPage)
-      }
+      },
+      dataCookRoute
     ]
   }
 ];

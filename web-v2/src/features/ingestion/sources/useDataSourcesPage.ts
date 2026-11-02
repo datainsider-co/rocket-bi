@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { DataSource } from '@/core/ingestion/DataSource';
-import { useRowSelection } from '../listing/useRowSelection';
+import { useRowSelection } from '@/shared/listing/useRowSelection';
 import { sourceRowKey } from './sources.utils';
 import { useDataSources } from './useDataSources';
 import { useSourceActions } from './useSourceActions';

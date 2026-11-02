@@ -1,9 +1,8 @@
 import { JobStatus } from '@/core/ingestion/Job';
-
-const ICON_DIR = '/ingestion/status';
+import type { StatusIcon } from '@/shared/listing/statusIcon';
 
 /** v1 `StatusCell.jobStatusImg`: Killed and Terminated share an icon; Compiling and Unknown use the unknown one. */
-const ICONS: Readonly<Record<JobStatus, string>> = {
+const ICONS: Readonly<Record<JobStatus, StatusIcon>> = {
   [JobStatus.Synced]: 'synced',
   [JobStatus.Error]: 'error',
   [JobStatus.Queued]: 'queued',
@@ -15,6 +14,6 @@ const ICONS: Readonly<Record<JobStatus, string>> = {
   [JobStatus.Unknown]: 'unknown'
 };
 
-export function jobStatusIconUrl(status: JobStatus): string {
-  return `${ICON_DIR}/${ICONS[status]}.svg`;
+export function jobStatusIcon(status: JobStatus): StatusIcon {
+  return ICONS[status];
 }

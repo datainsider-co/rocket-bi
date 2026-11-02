@@ -3,7 +3,7 @@ import type { ShareService } from '@/core/share/ShareService';
 import type { SharePlan } from './applyShare';
 import { applyShare } from './applyShare';
 import { sharePeopleApi } from './people/sharePeopleApi';
-import { fakeDatabaseShareService, fakeShareService } from './testing';
+import { fakeDatabaseShareService, fakeEtlShareService, fakeShareService } from './testing';
 
 const resource = { type: 'directory', id: 8 } as const;
 const NOTHING: SharePlan = {
@@ -25,7 +25,7 @@ function setup() {
   });
   const directories = { setPassword: vi.fn<(id: number, hashedPassword: string | undefined) => Promise<void>>(track('password')) };
   const databases = fakeDatabaseShareService();
-  const deps = { peopleApi: sharePeopleApi(share, databases), share, directories };
+  const deps = { peopleApi: sharePeopleApi(share, databases, fakeEtlShareService()), share, directories };
   return { share, databases, directories, deps, calls };
 }
 
