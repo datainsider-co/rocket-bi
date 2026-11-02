@@ -1,0 +1,77 @@
+import { useCallback, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { App } from 'antd';
+import { useDi } from '@/app/di/DiContext';
+import type { EtlJob } from '@/core/data-cook/EtlJob';
+import { EtlService } from '@/core/data-cook/EtlService';
+import { SchemaService } from '@/core/schema/SchemaService';
+import type { TreeTable } from '@/shared/database-tree/databaseTree.utils';
+import { toErrorMessage } from '@/shared/http/errorMessage';
+import { databasesQueryOptions } from '@/shared/schema/schemaQueries';
+import { dataCookKeys } from '../../dataCookQueries';
+import { alreadySourceText, findSource, newSourceOperator, type EtlDraft } from '../draft/etlDraft.utils';
+import type { EtlEditorDispatch } from '../draft/useEtlEditorState';
+
+export interface AddSourceDialog {
+  readonly isOpen: boolean;
+  readonly isAdding: boolean;
+  readonly open: () => void;
+  readonly close: () => void;
+  readonly pick: (table: TreeTable) => void;
+}
+
+/**
+ * Add Source (v1 `SelectSourcePopover`): a warehouse table becomes a source, with the server's JSON of the table. A new
+ * ETL is created on its first source (v1 created one as soon as the page opened): the editor needs an id from there on.
+ * `onCreated` follows the new ETL to its URL.
+ */
+export function useAddSource(draft: EtlDraft, dispatch: EtlEditorDispatch, onCreated: (etl: EtlJob) => void): AddSourceDialog {
+  const service = useDi(EtlService);
+  const schema = useDi(SchemaService);
+  const queryClient = useQueryClient();
+  const { message } = App.useApp();
+  const [isOpen, setOpen] = useState(false);
+
+  const add = useMutation({
+    mutationFn: async (table: TreeTable) => {
+      const [json, databases] = await Promise.all([
+        service.getSourceTable(table.dbName, table.name),
+        queryClient.fetchQuery(databasesQueryOptions(schema))
+      ]);
+      const created = draft.etl.id === 0 ? await service.create(draft.displayName) : undefined;
+      const dbDisplayName = databases.find(database => database.name === table.dbName)?.displayName || table.dbName;
+      return { json, dbDisplayName, created };
+    },
+    onSuccess: ({ json, dbDisplayName, created }) => {
+      if (created) {
+        dispatch({ type: 'created', etl: created });
+        void queryClient.invalidateQueries({ queryKey: dataCookKeys.all });
+        onCreated(created);
+      }
+      dispatch({ type: 'addSource', operator: newSourceOperator(json, dbDisplayName, new Set(draft.graph.operators.keys())) });
+      setOpen(false);
+    },
+    onError: error => void message.error(toErrorMessage(error))
+  });
+  const { mutate, isPending } = add;
+
+  const pick = useCallback(
+    (table: TreeTable) => {
+      if (isPending) return;
+      if (findSource(draft.graph, table.dbName, table.name)) {
+        void message.info(alreadySourceText(table.name));
+        return;
+      }
+      mutate(table);
+    },
+    [draft.graph, isPending, mutate, message]
+  );
+
+  return {
+    isOpen,
+    isAdding: isPending,
+    open: useCallback(() => setOpen(true), []),
+    close: useCallback(() => setOpen(false), []),
+    pick
+  };
+}

@@ -58,10 +58,11 @@ const dataCookRoute: RouteObject = {
       path: 'history',
       ...lazyPage(() => import('@/features/data-cook/history/EtlHistoryPage'), m => m.EtlHistoryPage)
     },
-    ...['my-etl/create', 'my-etl/:name'].map(path => ({
-      path,
+    // `my-etl/create` too: one route, so the editor stays mounted when a new ETL gets its id and URL.
+    {
+      path: 'my-etl/:name',
       ...lazyPage(() => import('@/features/data-cook/editor/EtlEditorPage'), m => m.EtlEditorPage)
-    }))
+    }
   ]
 };
 

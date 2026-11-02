@@ -1,0 +1,183 @@
+/* ETL canvas: v1's Konva boxes (`TableItem`, `OperatorType`, `SavedTable`) redone in DOM over React Flow. */
+
+.etl-editor {
+  /* v1 data-cook ACCENT_COLOR, also `--color-header`. */
+  --etl-accent: var(--color-header);
+  --etl-error: #ea6b6b;
+  --etl-text: #4f4f4f;
+  --etl-muted-bg: #f2f2f7;
+
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* The page is full screen; the editor covers it. */
+.etl-editor--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  border-radius: 0;
+}
+
+.etl-canvas {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  font-family: var(--font-sans);
+  color: var(--etl-text);
+}
+
+.etl-canvas .react-flow__edge-path {
+  stroke: var(--etl-accent);
+  stroke-width: 1;
+}
+
+.etl-canvas .react-flow__arrowhead polyline {
+  stroke: var(--etl-accent);
+  fill: var(--etl-accent);
+}
+
+.etl-handle.react-flow__handle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* A table */
+
+.etl-table,
+.etl-box {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 140px;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+  font-size: 14px;
+  cursor: move;
+}
+
+.etl-table:hover,
+.etl-box:hover {
+  border-color: var(--etl-accent);
+}
+
+.etl-table {
+  max-width: 300px;
+}
+
+.etl-table__db {
+  height: 38px;
+  overflow: hidden;
+  padding: 0 12px;
+  border-radius: 2px 2px 0 0;
+  background: var(--etl-muted-bg);
+  line-height: 38px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.etl-table__name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 20px 0 12px;
+  white-space: nowrap;
+}
+
+/* The round "+" on the right edge (v1's 18px button). */
+.etl-node__menu {
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgb(89 127 255);
+  color: #fff;
+  font-size: 9px;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+/* An operator */
+
+.etl-operator {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 76px;
+  padding: 0 22px;
+  border: none;
+  background: none;
+  color: var(--etl-text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.etl-operator svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.etl-operator polygon {
+  fill: #fff;
+  stroke: #505050;
+  stroke-width: 1;
+}
+
+.etl-operator:hover polygon {
+  stroke: var(--etl-accent);
+}
+
+.etl-operator__label {
+  position: relative;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* Where a table goes */
+
+.etl-box {
+  display: flex;
+  max-width: 350px;
+  height: 52px;
+}
+
+.etl-box__icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  border-radius: 2px 0 0 2px;
+  background: var(--etl-muted-bg);
+  font-size: 26px;
+}
+
+.etl-box__text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 0 20px 0 10px;
+  line-height: 20px;
+  white-space: nowrap;
+}

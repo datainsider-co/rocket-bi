@@ -12,8 +12,13 @@ export type DataCookSection = (typeof DataCookSection)[keyof typeof DataCookSect
 
 export const DATA_COOK_PATH = '/data-warehouse/data-cook';
 
+const EDITOR_PATH = `${DATA_COOK_PATH}/my-etl/`;
+
+/** The editor's `:name` of an ETL that doesn't exist yet. */
+export const NEW_ETL_SEGMENT = 'create';
+
 /** v1 "New ETL": the editor on an ETL that doesn't exist yet. */
-export const NEW_ETL_PATH = `${DATA_COOK_PATH}/my-etl/create`;
+export const NEW_ETL_PATH = `${EDITOR_PATH}${NEW_ETL_SEGMENT}`;
 
 export interface DataCookSectionConfig {
   readonly key: DataCookSection;
@@ -50,7 +55,14 @@ export function dataCookSectionFromPath(pathname: string): DataCookSection {
 
 /** The editor of an ETL, `my-etl/<slug>-<id>` (v1 `Routers.UpdateEtl`). */
 export function etlEditorPath(id: number, displayName: string): string {
-  return `${DATA_COOK_PATH}/my-etl/${toIdParam(id, displayName)}`;
+  return `${EDITOR_PATH}${toIdParam(id, displayName)}`;
+}
+
+/** Whether `pathname` is the editor of ETL `id`, under any name: a rename or a create changes the URL, not the page. */
+export function isEtlEditorPath(pathname: string, id: number): boolean {
+  if (!pathname.startsWith(EDITOR_PATH)) return false;
+  const segment = pathname.slice(EDITOR_PATH.length);
+  return !segment.includes('/') && etlIdFromParam(segment) === id;
 }
 
 /** The ETL id in the editor's `:name` segment, or `undefined` when there is none. */

@@ -5,7 +5,8 @@ import {
   dataCookSectionFromPath,
   etlEditorPath,
   etlIdFromParam,
-  getDataCookSection
+  getDataCookSection,
+  isEtlEditorPath
 } from './dataCook.utils';
 
 describe('DATA_COOK_SECTIONS', () => {
@@ -61,5 +62,22 @@ describe('etlIdFromParam', () => {
     [undefined, undefined]
   ])('reads %s as %s', (param, id) => {
     expect(etlIdFromParam(param)).toBe(id);
+  });
+});
+
+describe('isEtlEditorPath', () => {
+  it('is the editor of the ETL under any name', () => {
+    expect(isEtlEditorPath('/data-warehouse/data-cook/my-etl/untitled-etl-12', 12)).toBe(true);
+    expect(isEtlEditorPath('/data-warehouse/data-cook/my-etl/sales-12', 12)).toBe(true);
+  });
+
+  it.each([
+    '/data-warehouse/data-cook/my-etl/sales-13',
+    '/data-warehouse/data-cook/my-etl/create',
+    '/data-warehouse/data-cook/my-etl',
+    '/data-warehouse/data-cook/my-etl/sales-12/x',
+    '/data-warehouse/data-cook/trash'
+  ])('is not %s', pathname => {
+    expect(isEtlEditorPath(pathname, 12)).toBe(false);
   });
 });
