@@ -5,6 +5,7 @@ import type { ChartWidget } from '@/core/dashboard/Widget';
 import type { ChartBuilderRequest } from '@/features/dashboard/edit/chartBuilderBridge';
 import {
   adhocQueryOf,
+  adhocSourceOf,
   adhocViewOf,
   builderControlsOf,
   builderModeOf,
@@ -117,7 +118,27 @@ describe('adhocViewOf and adhocQueryOf', () => {
   it('puts the stored parameter values in, leaving unknown ones', () => {
     const view = adhocViewOf(setting);
     if (!view) throw new Error('no view');
-    expect(adhocQueryOf(view, setting)).toBe('select * from t where a = $10 and b = $10 -- {{other}}');
+    expect(adhocQueryOf(view, { limit: '$10' })).toBe('select * from t where a = $10 and b = $10 -- {{other}}');
+  });
+});
+
+describe('adhocSourceOf', () => {
+  const adhoc = { view: { name: 'view_new', query: 'select {{a}}' }, parameters: { a: '1' } };
+  const editedSetting = {
+    sql_views: [{ alias_name: 'view_old', query: { query: 'select {{b}}' } }],
+    options: { options: { query_parameter: [{ display_name: 'b', value_type: 'number', value: '2' }] } }
+  };
+
+  it("takes an edited chart's view with its stored values", () => {
+    expect(adhocSourceOf(request('addChart'), editedSetting)).toEqual({ view: { name: 'view_old', query: 'select {{b}}' }, parameters: { b: '2' } });
+  });
+
+  it("takes a new chart's query", () => {
+    expect(adhocSourceOf({ kind: 'addChart', adhoc }, {})).toBe(adhoc);
+  });
+
+  it('has none for a chart on tables', () => {
+    expect(adhocSourceOf(request('addChart'), {})).toBeUndefined();
   });
 });
 

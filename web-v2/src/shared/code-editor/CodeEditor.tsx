@@ -1,8 +1,9 @@
-import { useEffect, useImperativeHandle, useRef, useState, type Ref } from 'react';
+import { useEffect, useImperativeHandle, useState, type Ref } from 'react';
 import { Editor } from '@monaco-editor/react';
 import { EDITOR_THEME_RULES, type EditorLanguage } from './codeEditor.utils';
 import { monaco } from './monaco';
 import { useMonacoLanguage } from './useMonacoLanguage';
+import { useLatest, useSyncedValue } from './useSyncedValue';
 
 /** What a page does to the editor's text beyond its value (v1 `EditorController`). */
 export interface CodeEditorHandle {
@@ -22,6 +23,9 @@ export interface CodeEditorProps {
   onWord?: (word: string) => void;
   /** Ctrl/Cmd+Enter (v1 `onExecute`). */
   onRun?: () => void;
+  /** Ctrl/Cmd+S (v1 `onSave`), instead of the browser saving the page. */
+  onSave?: () => void;
+  readOnly?: boolean;
   handleRef?: Ref<CodeEditorHandle>;
   lineNumbers?: boolean;
   placeholder?: string;
@@ -33,48 +37,14 @@ export interface CodeEditorProps {
 const THEME = 'di-code-light';
 monaco.editor.defineTheme(THEME, { base: 'vs', inherit: true, rules: [...EDITOR_THEME_RULES], colors: {} });
 
-/** The latest value of a callback, for listeners Monaco keeps from mount. */
-function useLatest<T>(value: T) {
-  const ref = useRef(value);
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref;
-}
-
-/**
- * Monaco keeps its own text; `value` goes into it only when the page changed it. A value the editor sent can come back
- * after newer keys were typed (the page renders later than Monaco), and putting it back would drop those keys, as
- * `@monaco-editor/react`'s `value` did. Sent values wait in a queue until they come back; any other value is the
- * page's.
- */
-function useSyncedValue(editor: monaco.editor.IStandaloneCodeEditor | undefined, value: string, onChange: (value: string) => void) {
-  const sent = useRef<string[]>([]);
-  useEffect(() => {
-    const index = sent.current.indexOf(value);
-    if (index >= 0) {
-      sent.current = sent.current.slice(index + 1);
-      return;
-    }
-    sent.current = [];
-    const model = editor?.getModel();
-    if (!editor || !model || model.getValue() === value) return;
-    editor.pushUndoStop();
-    editor.executeEdits('set-value', [{ range: model.getFullModelRange(), text: value, forceMoveMarkers: true }]);
-    editor.pushUndoStop();
-  }, [editor, value]);
-  return (next: string | undefined) => {
-    sent.current.push(next ?? '');
-    onChange(next ?? '');
-  };
-}
-
 /** A SQL editor (Monaco) with the given language's colours and suggestions. Lazy loaded through `LazyCodeEditor`. */
-export function CodeEditor({ value, onChange, languageId, language, onWord, onRun, handleRef, lineNumbers = false, placeholder, ariaLabel, height, className }: CodeEditorProps) {
+export function CodeEditor(props: CodeEditorProps) {
+  const { value, onChange, languageId, language, onWord, onRun, onSave, handleRef, lineNumbers = false, readOnly = false, placeholder, ariaLabel, height, className } = props;
   useMonacoLanguage(languageId, language);
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const onWordRef = useLatest(onWord);
   const onRunRef = useLatest(onRun);
+  const onSaveRef = useLatest(onSave);
   const emit = useSyncedValue(editor, value, onChange);
   useEffect(() => {
     const listener = editor?.onDidChangeCursorPosition(({ position }) => {
@@ -90,8 +60,17 @@ export function CodeEditor({ value, onChange, languageId, language, onWord, onRu
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
       run: () => onRunRef.current?.()
     });
-    return () => action?.dispose();
-  }, [editor, onRunRef]);
+    const save = editor?.addAction({
+      id: 'di.save',
+      label: 'Save',
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
+      run: () => onSaveRef.current?.()
+    });
+    return () => {
+      action?.dispose();
+      save?.dispose();
+    };
+  }, [editor, onRunRef, onSaveRef]);
   useImperativeHandle(
     handleRef,
     () => ({
@@ -123,6 +102,7 @@ export function CodeEditor({ value, onChange, languageId, language, onWord, onRu
           placeholder,
           minimap: { enabled: false },
           lineNumbers: lineNumbers ? 'on' : 'off',
+          readOnly,
           glyphMargin: false,
           folding: false,
           wordWrap: 'on',

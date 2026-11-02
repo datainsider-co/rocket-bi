@@ -78,6 +78,13 @@ export interface AdhocView {
   readonly query: string;
 }
 
+/** The view an ad hoc chart reads and its parameter values: the edited chart's, or the query's of a new one. */
+export function adhocSourceOf(request: ChartBuilderRequest, setting: JsonObject): { view: AdhocView; parameters: Readonly<Record<string, string>> } | undefined {
+  const view = adhocViewOf(setting);
+  if (view) return { view, parameters: storedParameters(setting) };
+  return request.kind === 'addChart' ? request.adhoc : undefined;
+}
+
 /** The view an ad hoc chart (made from a query) reads, v1 opened those on that view's table alone. */
 export function adhocViewOf(setting: JsonObject): AdhocView | undefined {
   const view = asArray(setting['sql_views']).find(isRecord);
@@ -89,11 +96,10 @@ export function adhocViewOf(setting: JsonObject): AdhocView | undefined {
 const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
- * The view's SQL with the chart's stored parameter values in place (v1 `DashboardDetail.assignParameterValues`), to
- * read its columns. v1 took the inputs' current values; the stored ones are what the chart was saved with.
+ * The view's SQL with parameter values in place (v1 `DashboardDetail.assignParameterValues`), to read its columns. An
+ * edited chart gives the values it was saved with (`storedParameters`); v1 took the inputs' current values.
  */
-export function adhocQueryOf(view: AdhocView, setting: JsonObject): string {
-  const parameters = storedParameters(setting);
+export function adhocQueryOf(view: AdhocView, parameters: Readonly<Record<string, string>>): string {
   return Object.entries(parameters).reduce((query, [key, value]) => query.replace(new RegExp(`{{\\s*${escapeRegExp(key)}\\s*}}`, 'g'), () => value), view.query);
 }
 

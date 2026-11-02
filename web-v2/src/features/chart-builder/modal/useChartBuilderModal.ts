@@ -4,8 +4,7 @@ import { pickerItemsOf } from '@/core/chart-builder/chartCatalogue';
 import { asRecord, asString } from '@/core/json/json';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { TableSchema } from '@/core/schema/SchemaService';
-import type { ChartBuilderRequest } from '@/features/dashboard/edit/chartBuilderBridge';
-import type { DashboardEditor } from '@/features/dashboard/edit/useDashboardEditor';
+import type { ChartBuilderRequest, ChartSaver } from '@/features/dashboard/edit/chartBuilderBridge';
 import { useFieldActions } from '../field-actions/useFieldActions';
 import { useFieldTree } from '../field-tree/useFieldTree';
 import { builderModeOf, previewJsonOf, typeKindOf, usedSettingsOf } from '../host/builderSession.utils';
@@ -19,7 +18,7 @@ import type { BuilderActions } from './ChartBuilderModalView';
 export interface ChartBuilderModalInput {
   request: ChartBuilderRequest;
   dashboard: Dashboard;
-  editor: DashboardEditor;
+  editor: ChartSaver;
   /** An ad hoc chart's table, shown alone in the tree. */
   adhocTable?: TableSchema;
   onClose: () => void;
