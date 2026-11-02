@@ -14,7 +14,7 @@ import { fakeSchemaEditService } from './testing';
 import type { FormulaFieldTarget } from './useFormulaFieldForm';
 
 // Monaco doesn't run in jsdom: a textarea stands in for the editor.
-vi.mock('./editor/LazyCodeEditor', () => ({
+vi.mock('@/shared/code-editor/LazyCodeEditor', () => ({
   LazyCodeEditor: ({ value, onChange, ariaLabel }: { value: string; onChange: (value: string) => void; ariaLabel: string }) => (
     <textarea aria-label={ariaLabel} value={value} onChange={event => onChange(event.target.value)} />
   )

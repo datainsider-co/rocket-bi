@@ -1,10 +1,37 @@
-import type { CompletionKind, Highlight } from '../completions.utils';
-
 /**
  * Monaco's language data for a formula or a query, as plain values (v1 `*Syntax.monarchLanguage` and the
  * `MonacoFormulaController`s' token providers): one tokenizer for every data source, coloring the source's functions
- * and the table's columns.
+ * and the table's columns. What the editor suggests is data too, so it is tested without Monaco and the editor stays a
+ * thin chunk.
  */
+
+export type CompletionKind = 'function' | 'field' | 'table' | 'database';
+
+export interface CompletionSpec {
+  readonly label: string;
+  readonly insertText: string;
+  readonly kind: CompletionKind;
+  readonly detail?: string | undefined;
+  readonly documentation?: string | undefined;
+}
+
+/** Words the editor colours: function names, and the names it shows as columns. */
+export interface Highlight {
+  readonly functions: readonly string[];
+  readonly fields: readonly string[];
+}
+
+export interface EditorLanguage {
+  readonly completions: readonly CompletionSpec[];
+  readonly highlight: Highlight;
+  /**
+   * Suggestions that depend on the text before the cursor on its line (a SQL editor after `db.`); they replace
+   * `completions` when given. May load what it suggests.
+   */
+  readonly completionsAt?: (textBefore: string) => Promise<readonly CompletionSpec[]>;
+  /** Characters that open the suggestions; `[`, `(` and `,` when not given. */
+  readonly triggerCharacters?: readonly string[];
+}
 
 /** A Monarch rule: `[regex, token]` or `[regex, token, next state]`, or with `cases`. */
 type MonarchRule = readonly unknown[];
@@ -67,7 +94,12 @@ export const EDITOR_THEME_RULES = [
 ] as const;
 
 /** Monaco's `CompletionItemKind` names for ours. */
-export const COMPLETION_KINDS: Readonly<Record<CompletionKind, 'Function' | 'Field' | 'Struct'>> = { function: 'Function', field: 'Field', table: 'Struct' };
+export const COMPLETION_KINDS: Readonly<Record<CompletionKind, 'Function' | 'Field' | 'Struct' | 'Module'>> = {
+  function: 'Function',
+  field: 'Field',
+  table: 'Struct',
+  database: 'Module'
+};
 
 /**
  * How many characters before the typed word a suggestion replaces: a `[` the user typed before a `[Display Name]`

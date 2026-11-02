@@ -1,32 +1,12 @@
 import type { TableSchema } from '@/core/schema/SchemaService';
+import type { CompletionSpec, EditorLanguage } from '@/shared/code-editor/codeEditor.utils';
 import { escapeIdentifier } from './formula.utils';
 import type { FunctionInfo } from './functionCatalog.utils';
 
 /**
- * What the code editor suggests and colours, without Monaco's types (v1 `FormulaUtils.createSuggest*`, the
- * `MonacoFormulaController`s): kept as data so it is tested here and the editor stays a thin chunk.
+ * What the code editor suggests and colours (v1 `FormulaUtils.createSuggest*`, the `MonacoFormulaController`s), as
+ * the data `shared/code-editor` takes.
  */
-
-export type CompletionKind = 'function' | 'field' | 'table';
-
-export interface CompletionSpec {
-  readonly label: string;
-  readonly insertText: string;
-  readonly kind: CompletionKind;
-  readonly detail?: string;
-  readonly documentation?: string;
-}
-
-/** Words the editor colours: function names, and the names it shows as columns. */
-export interface Highlight {
-  readonly functions: readonly string[];
-  readonly fields: readonly string[];
-}
-
-export interface EditorLanguage {
-  readonly completions: readonly CompletionSpec[];
-  readonly highlight: Highlight;
-}
 
 export function functionCompletions(functions: readonly FunctionInfo[]): CompletionSpec[] {
   return functions.map(info => ({ label: info.name, insertText: info.name, kind: 'function', detail: info.title, documentation: info.description }));
