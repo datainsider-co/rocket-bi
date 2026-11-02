@@ -24,17 +24,14 @@ export interface QueryResult {
   readonly onPageChange: (page: number, pageSize: number) => void;
 }
 
-export interface QueryRunner {
-  readonly result: QueryResult;
-  /** Runs from the first page. */
-  readonly execute: (run: QueryRun) => void;
-}
-
-/** Execute and the result (v1 `QueryComponent.handleExecuteQuery`, its `ChartHolder`): a page at a time from the server. */
-export function useQueryRun(initialRun: QueryRun | undefined): QueryRunner {
+/**
+ * The result of `run` (v1 `QueryComponent`'s `ChartHolder`): a page at a time from the server, from the first page on
+ * each run.
+ */
+export function useQueryRun(run: QueryRun | undefined): QueryResult {
   const service = useDi(QueryService);
-  const [run, setRun] = useState(initialRun);
-  const [page, setPage] = useState(1);
+  const [paging, setPaging] = useState({ runId: run?.id, page: 1 });
+  const page = paging.runId === run?.id ? paging.page : 1;
   const [pageSize, setPageSize] = useState(RESULT_PAGE_SIZE);
   const whole = run ? isWholeResult(run) : false;
   const request = useMemo(() => run && rawQueryRequest(run, whole ? 1 : page, pageSize), [run, whole, page, pageSize]);
@@ -49,32 +46,25 @@ export function useQueryRun(initialRun: QueryRun | undefined): QueryRunner {
   });
   const response = query.data?.kind === 'json_table' ? query.data : undefined;
 
-  const execute = useCallback((next: QueryRun) => {
-    setRun(next);
-    setPage(1);
-  }, []);
   const onPageChange = useCallback(
     (next: number, size: number) => {
-      setPage(size === pageSize ? next : 1);
+      setPaging({ runId: run?.id, page: size === pageSize ? next : 1 });
       setPageSize(size);
     },
-    [pageSize]
+    [run?.id, pageSize]
   );
 
   return {
-    result: {
-      run,
-      columns: response ? resultColumns(response.headers) : [],
-      rows: response ? previewRows(response.records, whole ? 0 : (page - 1) * pageSize) : [],
-      total: whole ? (response?.records.length ?? 0) : (response?.total ?? 0),
-      whole,
-      isLoading: query.isPending && query.fetchStatus !== 'idle',
-      isFetching: query.isFetching,
-      error: query.isError ? toErrorMessage(query.error) : undefined,
-      page,
-      pageSize,
-      onPageChange
-    },
-    execute
+    run,
+    columns: response ? resultColumns(response.headers) : [],
+    rows: response ? previewRows(response.records, whole ? 0 : (page - 1) * pageSize) : [],
+    total: whole ? (response?.records.length ?? 0) : (response?.total ?? 0),
+    whole,
+    isLoading: query.isPending && query.fetchStatus !== 'idle',
+    isFetching: query.isFetching,
+    error: query.isError ? toErrorMessage(query.error) : undefined,
+    page,
+    pageSize,
+    onPageChange
   };
 }

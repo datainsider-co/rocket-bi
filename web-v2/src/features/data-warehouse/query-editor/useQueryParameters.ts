@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { App } from 'antd';
 import type { QueryParameter } from '@/core/query/queryParameters';
 import { syncParameters } from '@/core/query/rawQuery';
@@ -23,6 +23,9 @@ export interface QueryParameters {
 interface ParameterDeps {
   readonly sql: string;
   readonly setSql: (sql: string) => void;
+  /** The definitions kept so far (the tab's), and how to keep new ones. */
+  readonly stored: readonly QueryParameter[];
+  readonly setStored: (parameters: readonly QueryParameter[]) => void;
   /** Puts text at the editor's cursor. */
   readonly insert: (text: string) => void;
   /** Runs the query again with these values (v1 ran on each change). */
@@ -33,17 +36,16 @@ interface ParameterDeps {
  * The parameter bar (v1 `QueryComponent` parameters): the SQL's `{{ name }}` placeholders as they are typed, each with
  * its definition (text when new) and the value picked on the page. v1 found them 1 s after typing stopped.
  */
-export function useQueryParameters({ sql, setSql, insert, rerun }: ParameterDeps): QueryParameters {
+export function useQueryParameters({ sql, setSql, stored, setStored, insert, rerun }: ParameterDeps): QueryParameters {
   const { modal } = App.useApp();
-  const [saved, setSaved] = useState<readonly QueryParameter[]>([]);
   const [values, setValues] = useState<Readonly<Record<string, string>>>({});
   const [editing, setEditing] = useState<QueryParameter>();
-  const definitions = useMemo(() => syncParameters(sql, saved), [sql, saved]);
+  const definitions = useMemo(() => syncParameters(sql, stored), [sql, stored]);
   const current = useMemo(() => withValues(definitions, values), [definitions, values]);
 
-  const save = useCallback((parameter: QueryParameter, replacing = parameter.displayName) => {
-    setSaved(items => [...items.filter(item => item.displayName !== replacing && item.displayName !== parameter.displayName), parameter]);
-  }, []);
+  const save = (parameter: QueryParameter, replacing = parameter.displayName) => {
+    setStored([...stored.filter(item => item.displayName !== replacing && item.displayName !== parameter.displayName), parameter]);
+  };
   const forget = (names: readonly string[]) => setValues(items => omitValues(items, names));
 
   const onAdd = () => {

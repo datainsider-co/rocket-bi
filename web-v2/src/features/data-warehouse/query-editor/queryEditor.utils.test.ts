@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  analysisPath,
   columnReference,
   EditorMode,
   editorSourceOf,
@@ -26,6 +27,12 @@ describe('editorSourceOf', () => {
     ['adhoc=0', { mode: EditorMode.Query, dbName: undefined, tableName: undefined }]
   ])('%j', (search, expected) => {
     expect(editorSourceOf(new URLSearchParams(search))).toEqual(expected);
+  });
+});
+
+describe('analysisPath', () => {
+  it('opens a saved analysis', () => {
+    expect(analysisPath(5)).toBe('/data-warehouse/query-editor?adhoc=5');
   });
 });
 

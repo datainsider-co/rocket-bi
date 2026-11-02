@@ -4,6 +4,7 @@ import type { QueryParameter } from '@/core/query/queryParameters';
 import { hasLimit, parameterValues, rawQuerySetting, runnableSql, syncParameters } from '@/core/query/rawQuery';
 import type { TableHeader } from '@/core/query/VisualizationResponse';
 import { escapeIdentifier } from '@/features/chart-builder/field-actions/formula.utils';
+import { getWarehouseSection, WarehouseSection } from '../warehouse.utils';
 
 /** What the URL opens (v1 `QueryEditorMode`): a new query, a view's query to update, a saved analysis. */
 export const EditorMode = {
@@ -28,6 +29,11 @@ export function editorSourceOf(params: URLSearchParams): EditorSource {
   const analysisId = Number(params.get('adhoc'));
   if (Number.isInteger(analysisId) && analysisId > 0) return { mode: EditorMode.Analysis, dbName, tableName, analysisId };
   return { mode: EditorMode.Query, dbName, tableName };
+}
+
+/** The Query Editor on a saved analysis (v1 `?adhoc=`). */
+export function analysisPath(id: number): string {
+  return `${getWarehouseSection(WarehouseSection.QueryEditor).path}?adhoc=${id}`;
 }
 
 /** A table as SQL names it (v1 `FormulaUtils.toQuery`): `db.table`, with backticks where needed. */

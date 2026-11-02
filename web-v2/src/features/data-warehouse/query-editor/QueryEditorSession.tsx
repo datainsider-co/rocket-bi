@@ -1,45 +1,48 @@
-import type { RefObject } from 'react';
-import { Splitter } from 'antd';
+import { lazy, Suspense, useState, type RefObject } from 'react';
+import { DashboardControlsProvider } from '@/features/dashboard/controls/DashboardControlsContext';
+import { ViewAsProvider } from '@/features/dashboard/view-as/ViewAsContext';
 import type { CodeEditorHandle } from '@/shared/code-editor/CodeEditor';
-import { ParameterModal } from './ParameterModal';
-import { QueryInputView } from './QueryInputView';
-import { QueryResultView } from './QueryResultView';
-import { useQueryEditor, type QueryEditorStart } from './useQueryEditor';
+import { SaveAnalysisModal } from './analysis/SaveAnalysisModal';
+import { useAnalysisSession } from './analysis/useAnalysisSession';
+import { QueryTabWorkspace } from './QueryTabWorkspace';
+import { CreateTableFromQueryModal } from './table/CreateTableFromQueryModal';
+import type { SessionStart } from './useEditorSource';
+
+/** Loaded the first time a chart is added or edited. */
+const ChartBuilderHost = lazy(() => import('@/features/chart-builder/host/ChartBuilderHost').then(module => ({ default: module.ChartBuilderHost })));
 
 interface QueryEditorSessionProps {
-  start: QueryEditorStart;
+  start: SessionStart;
   editorRef: RefObject<CodeEditorHandle | null>;
 }
 
-/** The editor above its result (v1 `QueryComponent`'s vertical split). Mounted per source, so each starts over. */
+const START_SIZES = ['45%', '55%'];
+
+/**
+ * The analysis being edited (v1 `QueryEditor` + `QueryComponent`): the tab shown, Save, and ChartBuilder for its
+ * charts. Mounted per source, so each starts over. Its charts read the analysis's controls, as on a dashboard.
+ */
 export function QueryEditorSession({ start, editorRef }: QueryEditorSessionProps) {
-  const model = useQueryEditor(start, editorRef);
-  const { parameters, result } = model;
-  const editing = parameters.editing;
+  const session = useAnalysisSession(start);
+  const [sizes, setSizes] = useState<(number | string)[]>(START_SIZES);
+  const { builder } = session.charts;
+  const { naming } = session.save;
+  const { tables } = session;
 
   return (
-    <>
-      {/* On a phone the page scrolls below the tree: the split gets most of the screen, so the SQL has room. */}
-      <Splitter orientation="vertical" className="min-h-[85vh] flex-1 md:min-h-0">
-        <Splitter.Panel defaultSize="45%" min={150} className="pb-2">
-          <QueryInputView
-            editor={{ value: model.sql, onChange: model.onSqlChange, language: model.language, handleRef: editorRef }}
-            parameters={parameters}
-            commands={{ onExecute: model.onExecute, running: result.isFetching, canDownload: result.run !== undefined, onDownload: model.onDownload }}
-          />
-        </Splitter.Panel>
-        <Splitter.Panel className="flex min-h-0 flex-col overflow-auto rounded-lg bg-white">
-          <QueryResultView result={result} />
-        </Splitter.Panel>
-      </Splitter>
-      {editing && (
-        <ParameterModal
-          parameter={editing}
-          takenNames={parameters.definitions.map(item => item.displayName).filter(name => name !== editing.displayName)}
-          onSubmit={parameters.onEditDone}
-          onCancel={parameters.onEditCancel}
-        />
-      )}
-    </>
+    <DashboardControlsProvider dashboard={session.dashboard}>
+      <ViewAsProvider>
+        <QueryTabWorkspace key={session.active.id} session={session} editorRef={editorRef} sizes={{ value: sizes, onResize: setSizes }} />
+        {builder && (
+          <Suspense fallback={null}>
+            <ChartBuilderHost request={builder.request} dashboard={session.dashboard} editor={builder.saver} onClose={builder.onClose} />
+          </Suspense>
+        )}
+        {naming.open && <SaveAnalysisModal creating={naming.creating} error={naming.error} onSubmit={naming.onSubmit} onCancel={naming.onCancel} />}
+        {tables.creating && (
+          <CreateTableFromQueryModal dbName={session.dbName} creating={tables.creating.pending} error={tables.creating.error} onSubmit={tables.onCreateSubmit} onCancel={tables.onCreateCancel} />
+        )}
+      </ViewAsProvider>
+    </DashboardControlsProvider>
   );
 }

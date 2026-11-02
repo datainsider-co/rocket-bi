@@ -1,59 +1,57 @@
-import { useCallback, useRef, useState, type RefObject } from 'react';
+import { useCallback, type RefObject } from 'react';
 import type { ExportType } from '@/core/query/QueryService';
 import type { QueryParameter } from '@/core/query/queryParameters';
 import type { CodeEditorHandle } from '@/shared/code-editor/CodeEditor';
 import type { EditorLanguage } from '@/shared/code-editor/codeEditor.utils';
+import type { AnalysisTab } from './analysis/analysis.utils';
+import type { TabEdit } from './analysis/analysisTabs';
 import { sqlToRun, toRun } from './queryEditor.utils';
 import { useQueryParameters, type QueryParameters } from './useQueryParameters';
 import { useQueryRun, type QueryResult } from './useQueryRun';
 import { useResultExport } from './useResultExport';
 import { useSqlLanguage } from './useSqlLanguage';
 
-export interface QueryEditorStart {
-  readonly sql: string;
-  /** Runs as the page opens (v1, for a view's query to update). */
-  readonly autoRun: boolean;
-}
-
 export interface QueryEditorModel {
   readonly sql: string;
   readonly onSqlChange: (sql: string) => void;
   readonly language: EditorLanguage;
   readonly parameters: QueryParameters;
+  /** The query tab's result; a chart tab shows its chart instead. */
   readonly result: QueryResult;
   /** Runs the selected SQL, or all of it (v1 Execute, Ctrl/Cmd+Enter). */
   readonly onExecute: () => void;
   readonly onDownload: (type: ExportType) => void;
 }
 
-/** The Query Editor's text, its parameters, Execute and the result. */
-export function useQueryEditor(start: QueryEditorStart, editorRef: RefObject<CodeEditorHandle | null>): QueryEditorModel {
-  const [sql, setSql] = useState(start.sql);
-  const runId = useRef(0);
-  const runner = useQueryRun(start.autoRun && start.sql.trim() ? toRun(0, start.sql, []) : undefined);
+/**
+ * One tab's SQL, its parameters and Execute (v1 `QueryComponent`). The text, the definitions and the last run live in
+ * the tab, so they are there again when the tab is shown again; the values picked on the bar start over, as in v1.
+ */
+export function useQueryEditor(tab: AnalysisTab, onEdit: (edit: TabEdit) => void, editorRef: RefObject<CodeEditorHandle | null>): QueryEditorModel {
   const language = useSqlLanguage();
-  const { execute } = runner;
-
+  const lastRunId = tab.run?.id ?? 0;
   const rerun = useCallback(
     (parameters: readonly QueryParameter[], text: string) => {
-      const run = sqlToRun(text, editorRef.current?.selectedText() ?? '');
-      if (run.trim() === '') return;
-      runId.current += 1;
-      execute(toRun(runId.current, run, parameters));
+      const sql = sqlToRun(text, editorRef.current?.selectedText() ?? '');
+      // A new id each time: the same SQL asks the server again.
+      if (sql.trim() !== '') onEdit({ run: toRun(lastRunId + 1, sql, parameters) });
     },
-    [editorRef, execute]
+    [editorRef, onEdit, lastRunId]
   );
+  const setSql = useCallback((sql: string) => onEdit({ sql }), [onEdit]);
+  const setStored = useCallback((parameters: readonly QueryParameter[]) => onEdit({ parameters }), [onEdit]);
   const insert = useCallback((text: string) => editorRef.current?.insertText(text), [editorRef]);
-  const parameters = useQueryParameters({ sql, setSql, insert, rerun });
-  const download = useResultExport(runner.result.run);
+  const parameters = useQueryParameters({ sql: tab.sql, setSql, stored: tab.parameters, setStored, insert, rerun });
+  const result = useQueryRun(tab.kind === 'query' ? tab.run : undefined);
+  const download = useResultExport(result.run);
 
   return {
-    sql,
+    sql: tab.sql,
     onSqlChange: setSql,
     language,
     parameters,
-    result: runner.result,
-    onExecute: () => rerun(parameters.current, sql),
+    result,
+    onExecute: () => rerun(parameters.current, tab.sql),
     onDownload: type => void download(type)
   };
 }
