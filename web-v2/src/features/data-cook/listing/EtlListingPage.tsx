@@ -1,14 +1,14 @@
 import { useLocation } from 'react-router';
-import { PageHeader } from '@/shared/layout/PageHeader';
-import { dataCookSectionFromPath, getDataCookSection } from '../dataCook.utils';
+import { dataCookSectionFromPath } from '../dataCook.utils';
+import { EtlListing } from './EtlListing';
 
 /**
- * `/data-warehouse/data-cook/my-etl`, `shared` and `trash` (v1 `ListEtlJob.vue`, one component picked by route): the
- * section's header. The listing comes with DC3.
+ * `/data-warehouse/data-cook/my-etl`, `shared` and `trash`: one screen in v1 (`ListEtlJob.vue`), the listing picked by
+ * route.
  */
 export function EtlListingPage() {
   const { pathname } = useLocation();
-  const section = getDataCookSection(dataCookSectionFromPath(pathname));
+  const section = dataCookSectionFromPath(pathname);
 
-  return <PageHeader icon={section.icon} title={section.title} />;
+  return <EtlListing key={section} section={section} />;
 }
