@@ -36,6 +36,14 @@ export function hasLimit(sql: string): boolean {
   return /\slimit\s/.test(sql.toLowerCase());
 }
 
+/**
+ * The SQL as the server can wrap it: without the `;` that ends a statement, which would land inside the server's
+ * `(<sql>) as v`. A closing `--` comment is fine: the server puts the SQL on lines of its own.
+ */
+export function runnableSql(sql: string): string {
+  return sql.trim().replace(/[\s;]+$/, '');
+}
+
 /** The setting to query raw SQL with; `toQueryRequestJson` adds paging and the request's own `parameters`. */
 export function rawQuerySetting(sql: string, parameters: readonly QueryParameter[]): JsonObject {
   return {

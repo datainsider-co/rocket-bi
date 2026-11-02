@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fixture from '@/core/schema/warehouse.fixture.json';
 import { toQueryRequestJson } from './QueryRequest';
-import { hasLimit, parameterNames, parameterValues, rawQuerySetting, syncParameters } from './rawQuery';
+import { hasLimit, parameterNames, parameterValues, rawQuerySetting, runnableSql, syncParameters } from './rawQuery';
 
 const minQty = { displayName: 'min_qty', valueType: 'number', value: '2' };
 
@@ -42,6 +42,18 @@ describe('hasLimit', () => {
     ['select limited from t', false]
   ])('%s', (sql, expected) => {
     expect(hasLimit(sql)).toBe(expected);
+  });
+});
+
+describe('runnableSql', () => {
+  it.each([
+    ['  select 1;  ', 'select 1'],
+    ['select 1;\n;\n', 'select 1'],
+    ['select 1 -- note', 'select 1 -- note'],
+    ["select ';' as s", "select ';' as s"],
+    ['', '']
+  ])('%j → %j', (sql, expected) => {
+    expect(runnableSql(sql)).toBe(expected);
   });
 });
 

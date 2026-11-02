@@ -21,6 +21,8 @@ export interface QueryParameter {
   displayName: string;
   valueType: string;
   value: string;
+  /** The values to pick from, for a list parameter. */
+  list?: readonly string[];
 }
 
 /**
@@ -42,10 +44,12 @@ export function parameterFromJson(value: unknown): QueryParameter | undefined {
   const displayName = asString(value['display_name']);
   if (!displayName) return undefined;
   const raw = value['value'];
+  const list = asArray(value['list']).map(String);
   return {
     displayName,
     valueType: asString(value['value_type'], ParamValueType.Text),
-    value: raw === null || raw === undefined ? '' : String(raw)
+    value: raw === null || raw === undefined ? '' : String(raw),
+    ...(list.length > 0 && { list })
   };
 }
 

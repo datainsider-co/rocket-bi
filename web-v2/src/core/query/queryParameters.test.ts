@@ -35,6 +35,15 @@ describe('parameterFromJson', () => {
     expect(parameterFromJson({ value: 1 })).toBeUndefined();
     expect(parameterFromJson('x')).toBeUndefined();
   });
+
+  it('keeps the values of a list parameter', () => {
+    expect(parameterFromJson({ display_name: 'region', value_type: 'list', value: 'north', list: ['north', 'south'] })).toEqual({
+      displayName: 'region',
+      valueType: 'list',
+      value: 'north',
+      list: ['north', 'south']
+    });
+  });
 });
 
 describe('viz option accessors', () => {
