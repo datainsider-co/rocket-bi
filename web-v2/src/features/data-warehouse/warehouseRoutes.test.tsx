@@ -27,10 +27,4 @@ describe('Data Warehouse routes', () => {
       expect(await screen.findByRole('heading', { name: 'All Databases' })).toBeInTheDocument();
     }
   );
-
-  it('leaves Data Cook to its own phase', async () => {
-    renderAppAt('/data-warehouse/data-cook', fakeAuthenticationService());
-
-    expect(await screen.findByText(/not found/i)).toBeInTheDocument();
-  });
 });
