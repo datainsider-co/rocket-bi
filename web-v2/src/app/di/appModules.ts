@@ -2,6 +2,7 @@ import type { DiModule } from '@/core/di/Container';
 import { AuthModule } from '@/core/auth/AuthModule';
 import { ConnectionModule } from '@/core/connection/ConnectionModule';
 import { DashboardModule } from '@/core/dashboard/DashboardModule';
+import { DataCookModule } from '@/core/data-cook/DataCookModule';
 import { DirectoryModule } from '@/core/directory/DirectoryModule';
 import { IngestionModule } from '@/core/ingestion/IngestionModule';
 import { PermissionModule } from '@/core/permission/PermissionModule';
@@ -31,5 +32,6 @@ export const appModules: readonly DiModule[] = [
   RelationshipModule,
   UserModule,
   ShareModule,
-  IngestionModule
+  IngestionModule,
+  DataCookModule
 ];
