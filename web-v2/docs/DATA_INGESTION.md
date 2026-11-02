@@ -238,7 +238,7 @@ bằng `<password>`). Dữ liệu để lại cho các bước sau: source 1 "DI
 Bốn listing làm song song bằng 4 sub-agent, mỗi agent một thư mục; phần dùng chung làm trước rồi gom lại sau.
 
 - **Dùng chung** (`features/ingestion/`):
-  - `listing/`: `ListingState` (trang, cỡ trang, từ khoá, sort; đổi từ khoá / sort / cỡ trang thì về trang 1),
+  - `listing/` (đã chuyển lên `shared/listing` ở DC3 của Data Cook, kèm `formatDuration` và `StatusTag`): `ListingState` (trang, cỡ trang, từ khoá, sort; đổi từ khoá / sort / cỡ trang thì về trang 1),
     `useListingState`, `useDebouncedCallback` / `useDebouncedSearch` (400ms như v1), `useKeepPageInRange` (khi `total` giảm,
     ví dụ job rời khỏi Queued lúc auto refresh, kéo trang về trang cuối thay vì hiện trang rỗng), `listingPagination`
     (luôn hiện "Total: N", cỡ trang 20/30/50/100/200 như `ListingFooter` của v1), `formatDateTime` (`MMM DD, YYYY HH:mm:ss`).

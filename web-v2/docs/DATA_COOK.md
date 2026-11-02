@@ -215,9 +215,40 @@ Chạy bằng curl và Playwright (v1 ở `localhost:5050`) trên docker local. 
 - **Layout** (`features/data-cook/layout`):
   - Sidebar giống Ingestion, có nút "New ETL" (mở `my-etl/create`) và bốn mục với tên, icon của v1.
   - Trình sửa nằm trong layout và giữ My ETL được chọn, như v1.
-- **Trang** hiện chỉ có header; DC3, DC4, DC6 điền nội dung. Trang tạo hiện "My ETL › Untitled ETL" như v1; trang của
+- **Trang** hiện chỉ có header; DC3, DC4 (đã xong), DC6 điền nội dung. Trang tạo hiện "My ETL › Untitled ETL" như v1; trang của
   một ETL chưa có tên cho tới DC6.
 - Đã kiểm bằng Playwright trên `pnpm dev` (1440px và 375px): redirect, chọn mục, nút New ETL, không lỗi console.
+
+## Quyết định ở DC3 / DC4 (2026-11-02)
+
+- **Dùng chung với Ingestion**: `features/ingestion/listing` chuyển lên `shared/listing` (nơi thứ hai dùng), kèm
+  `formatDuration` (từ Job History) và `StatusTag` + `statusIcon` (icon status của v1). `JobStatusTag` và
+  `EtlStatusTag` chỉ còn map status → icon. Không dùng `JobsRefreshButton` (auto refresh): v1 Data Cook chỉ có nút Refresh.
+- **Listing** (`features/data-cook/listing`, một `EtlListing` cho ba section, remount theo section như v1):
+  - Phân trang trên server như các listing của Ingestion (v1 tải thêm khi cuộn).
+  - Sort mặc định `created_time` DESC (v1 không gửi sort, server trả cũ nhất trước). Sort được: Name, Created Time như v1,
+    thêm Last Run, Next Run. Owner không sort (`owner_id` không có nghĩa với người dùng).
+  - Last Run là status hiện tại của ETL và giờ chạy cuối (`--` khi chưa chạy), như Last Sync của Ingestion. Next Run `--`
+    khi không có lần chạy tới, và luôn `--` trong Trash.
+  - **Tự reload 5s khi có ETL đang chạy hoặc tới giờ chạy** (cancel được, hoặc `next_execute_time` ≤ bây giờ), dừng khi
+    hết; v1 chỉ reload khi bấm Refresh. Đã kiểm trên docker: sau Force Run, status đi Initialized → Queued → Error rồi thôi
+    poll.
+  - **Force Run** mở dialog chọn ngày như `ForceRunSettingModal` của v1 (mặc định hôm nay, ngày đã qua bị khoá). Đã kiểm:
+    `at_time` thành `next_execute_time`, tức ETL chạy vào lúc đó. Hôm nay → chạy ngay (`now`), ngày sau → đầu ngày đó.
+  - Menu Edit / Share / Delete. **Share bị khoá** ("Sharing ETLs is not supported yet") tới DC5. Delete đưa vào trash,
+    Trash có Restore và Delete forever; cả ba hỏi xác nhận (antd, không HTML). Dòng trong Trash không mở trình sửa.
+  - Rỗng: My ETL mời tạo ETL đầu tiên (link `my-etl/create`); search không ra gì nói rõ từ khoá.
+- **History** (`features/data-cook/history`):
+  - Sort mặc định `id` DESC như v1. Sort được History Id, Last Run (`updated_time`), Total Run Time, Status; ETL Name và
+    Message không.
+  - Có ô search (v1 có nhưng ẩn); server tìm theo tên ETL.
+  - ETL Name là link tới trình sửa (v1 chỉ là chữ). `--` khi server không gửi `etl_info`.
+  - Message hiện dòng cuối của log (cách run kết thúc, v1 hiện dòng đầu luôn là `execute ELT <tên>`) và "View log" mở
+    toàn bộ log trong dialog.
+  - Total Run Time theo millis (`formatDuration`): run trên docker chỉ vài chục ms.
+- `renderAppAt` bind fake `EtlService` / `EtlHistoryService` (`features/data-cook/testing.ts`); test trang thay bằng
+  module riêng. Đã kiểm bằng Playwright trên `pnpm dev` (1440px và 375px): listing, sort, Force Run, polling, history,
+  View log, Delete → Trash → Restore, không lỗi console, không cuộn ngang ở 375px.
 
 ## Các bước
 
@@ -226,8 +257,8 @@ Chạy bằng curl và Playwright (v1 ở `localhost:5050`) trên docker local. 
 | DC0 | **Spike và payload thật.** Tạo bằng v1 trên docker local một ETL có đủ Join, Manage Fields (cả expression field), Transform, Pivot, SQL, Save To Data Warehouse, incremental và lịch; lưu JSON server trả làm fixture (`core/data-cook/etl.fixture.json`). Kiểm: key trong `extra_data` và `map_incremental_config`, payload `view_query`, Python operator, `third_party/*/list` với `rocket-bi-mysql`, Send To Email có SMTP không, trash / restore / xoá hẳn, `kill`, sort được theo cột nào (whitelist như DI0), share người dùng | Xong (xem DC0) |
 | DC1 | **Core.** `EtlJob`, `EtlOperator` (8 loại + `unsupported`, giữ `json`), `etlGraph` (cây ↔ đồ thị phẳng, đặt tên bảng đích không trùng như `makeDestTableConfig` của v1), `EtlHistory`, `EtlService`, `EtlShareService`, `DataCookModule`. Test round-trip với fixture DC0 | Xong (xem DC1) |
 | DC2 | **Khung.** Routes `/data-warehouse/data-cook/*` ở path của v1 (`my-etl`, `shared`, `history`, `trash`, `my-etl/create`, `my-etl/:name`), layout có sidebar, page lazy load | Xong (xem DC2) |
-| DC3 | **Listing.** My ETL, Shared, Trash: phân trang, search, sort theo whitelist, refresh. Cột Name, Owner, Created Time, Last Run (status), Next Run, Action (Force Run hoặc Cancel, menu Edit / Share / Delete). Trash: Restore, Delete forever. Click dòng mở trình sửa | Chưa làm |
-| DC4 | **ETL History.** Cột History Id, ETL Name (link tới ETL), Last Run, Total Run Time, Status, Message (log nhiều dòng xem được đầy đủ) | Chưa làm |
+| DC3 | **Listing.** My ETL, Shared, Trash: phân trang, search, sort theo whitelist, refresh. Cột Name, Owner, Created Time, Last Run (status), Next Run, Action (Force Run hoặc Cancel, menu Edit / Share / Delete). Trash: Restore, Delete forever. Click dòng mở trình sửa | Xong (xem DC3 / DC4) |
+| DC4 | **ETL History.** Cột History Id, ETL Name (link tới ETL), Last Run, Total Run Time, Status, Message (log nhiều dòng xem được đầy đủ) | Xong (xem DC3 / DC4) |
 | DC5 | **Share ETL.** Adapter `etl` cho `ShareModal` trên `data_cook/{id}/share/*`, chỉ people | Chưa làm |
 | DC6a | **Trình sửa: khung.** Load / tạo lười, reducer trên đồ thị phẳng, canvas React Flow (nguồn, operator, đích, vị trí từ `extra_data`), thêm nguồn từ `DatabaseTree`, context menu, xoá / đổi tên operator, đổi tên ETL, Save (giữ lịch hiện có), hỏi khi rời trang có thay đổi | Chưa làm |
 | DC6b | **Trình sửa: preview.** `preview_sync` theo nhánh, trạng thái loading / lỗi trên node, lỗi lan xuống, panel dữ liệu (`TableDataView` trên database preview), Retry, force refresh | Chưa làm |

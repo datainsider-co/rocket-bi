@@ -175,7 +175,7 @@ Code v1 cần đọc: `screens/data-management` (`views/`, `components/`, `store
 | Analysis đã lưu | `core/dashboard` (`DashboardService.get`, `widgets/*`), `features/dashboard/access` (quyền, password), `features/directory/dialogs` (`useFolderPicker`, `NameModal`) | Dùng lại nguyên |
 | Share database | `features/share/ShareModal`, `core/share` | Endpoint khác (`databases/{db}/share/*`) và không có link / password: cho `ShareModal` nhận một adapter |
 | Relationship | `core/relationship` (đã có global), `features/dashboard/relationship` (React Flow) | Tách phần chung lên `shared/relationship/`, thêm thêm / xoá bảng, nguồn và hàm lưu truyền vào |
-| Listing | `core/listing`, `features/ingestion/listing` (`useListingState`, debounce search, `listingPagination`) | Listing database phân trang ở client: chỉ dùng lại phần UI |
+| Listing | `core/listing`, `shared/listing` (`useListingState`, debounce search, `listingPagination`) | Listing database phân trang ở client: chỉ dùng lại phần UI |
 
 ## Quyết định (2026-10-30)
 
