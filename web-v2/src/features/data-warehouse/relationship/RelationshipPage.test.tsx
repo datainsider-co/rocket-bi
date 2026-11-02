@@ -6,7 +6,7 @@ import { SchemaService } from '@/core/schema/SchemaService';
 import { clearSession, saveSession } from '@/core/session/session';
 import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing';
 import { fixtureRelationshipService, fixtureSchemaService, RELATIONSHIP_JSON } from '@/shared/relationship/relationship.fixtures';
-import { TABLE_DRAG_TYPE } from '../database-tree/tableDrag';
+import { TABLE_DRAG_TYPE } from '@/shared/database-tree/tableDrag';
 
 function setup(globalJson: unknown = RELATIONSHIP_JSON) {
   const relationships = fixtureRelationshipService(undefined, globalJson);

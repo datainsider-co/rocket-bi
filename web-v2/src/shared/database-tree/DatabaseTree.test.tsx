@@ -7,7 +7,7 @@ import { createContainer } from '@/core/di/Container';
 import { DatabaseService } from '@/core/schema/DatabaseService';
 import { SchemaService, type DatabaseSchema } from '@/core/schema/SchemaService';
 import { fakeSchemaService } from '@/features/dashboard/testing';
-import { fakeDatabaseService } from '../testing';
+import { fakeDatabaseService } from '@/features/data-warehouse/testing';
 import { DatabaseTree } from './DatabaseTree';
 import type { TreeHandlers, TreeSelection } from './databaseTree.utils';
 

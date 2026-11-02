@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useReducer } from 'react';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
-import { useUnsavedGuard } from '../../useUnsavedGuard';
+import { useUnsavedGuard } from '@/shared/routing/useUnsavedGuard';
 import { useTableFromQuery, type TableFromQuery } from '../table/useTableFromQuery';
 import type { SessionStart } from '../useEditorSource';
 import { isTabDirty, unsavedAnalysis, type AnalysisTab } from './analysis.utils';

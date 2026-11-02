@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { TreeHandlers } from '../database-tree/databaseTree.utils';
+import type { TreeHandlers } from '@/shared/database-tree/databaseTree.utils';
 import { findFormulaColumn, kindOfRole, SCHEMA_TABLE_ACTIONS, treeColumnActionsOf } from './formula-columns/formulaColumns.utils';
 import type { FormulaColumnActions } from './formula-columns/useFormulaColumns';
 import type { SchemaSelection } from './schema.utils';

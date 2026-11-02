@@ -8,7 +8,7 @@ import { newTable, type TableDefinition } from '@/core/schema/TableDefinition';
 import { TableService } from '@/core/schema/TableService';
 import { toErrorMessage } from '@/shared/http/errorMessage';
 import { schemaKeys } from '@/shared/schema/schemaQueries';
-import { LEAVE_CONTENT, LEAVE_TITLE, useUnsavedGuard } from '../../useUnsavedGuard';
+import { LEAVE_CONTENT, LEAVE_TITLE, useUnsavedGuard } from '@/shared/routing/useUnsavedGuard';
 import { warehouseKeys } from '../../warehouseQueries';
 import {
   changesType,

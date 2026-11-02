@@ -10,7 +10,7 @@ import { newRelationshipTable, tableIdOf } from '@/shared/relationship/relations
 import { tableColumns } from '@/shared/relationship/relationshipData';
 import type { RelationshipEditorState } from '@/shared/relationship/useRelationshipEditor';
 import { databaseQueryOptions } from '@/shared/schema/schemaQueries';
-import { isTableDrag, readTableDrag } from '../database-tree/tableDrag';
+import { isTableDrag, readTableDrag } from '@/shared/database-tree/tableDrag';
 import { alreadyOnCanvasMessage, dropPosition } from './globalRelationship.utils';
 
 /**

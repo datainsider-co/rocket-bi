@@ -10,7 +10,7 @@ interface DatabaseTreeViewProps {
   handlers: TreeHandlers;
 }
 
-/** The database panel of the Data Warehouse pages (v1 `DatabaseTreeView`). */
+/** The database panel of the Data Warehouse pages and Data Cook (v1 `DatabaseTreeView`). */
 export function DatabaseTreeView({ model, selection, handlers }: DatabaseTreeViewProps) {
   const { data, expansion, search, create, onDatabaseClick } = model;
   return (

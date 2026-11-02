@@ -6,7 +6,7 @@ import { useCanvasControls } from '@/shared/relationship/useCanvasControls';
 import { useFullscreen } from '@/shared/relationship/useFullscreen';
 import { useRelationshipEditActions } from '@/shared/relationship/useRelationshipEditActions';
 import { useRelationshipEditor } from '@/shared/relationship/useRelationshipEditor';
-import { useUnsavedGuard, type LeaveTexts } from '../useUnsavedGuard';
+import { useUnsavedGuard, type LeaveTexts } from '@/shared/routing/useUnsavedGuard';
 import { EMPTY_CANVAS_HINT } from './globalRelationship.utils';
 import { useSaveGlobalRelationship } from './useGlobalRelationship';
 import { useTableDrop } from './useTableDrop';

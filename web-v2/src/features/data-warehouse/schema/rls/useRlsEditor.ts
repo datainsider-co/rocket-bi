@@ -9,7 +9,7 @@ import type { RlsPolicy } from '@/core/rls/RlsPolicy';
 import { RlsPolicyService } from '@/core/rls/RlsPolicyService';
 import type { TableRef } from '@/core/schema/SchemaEditService';
 import { toErrorMessage } from '@/shared/http/errorMessage';
-import { LEAVE_CONTENT, LEAVE_TITLE, useUnsavedGuard } from '../../useUnsavedGuard';
+import { LEAVE_CONTENT, LEAVE_TITLE, useUnsavedGuard } from '@/shared/routing/useUnsavedGuard';
 import { warehouseKeys } from '../../warehouseQueries';
 import { newPolicyValues, policyValuesOf, rlsFormSchema, toRlsPolicy, type RlsFormValues } from './rls.utils';
 

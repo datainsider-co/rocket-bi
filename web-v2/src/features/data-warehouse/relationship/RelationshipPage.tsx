@@ -1,6 +1,6 @@
 import { PageHeader } from '@/shared/layout/PageHeader';
-import { DatabaseTree } from '../database-tree/DatabaseTree';
-import type { TreeHandlers } from '../database-tree/databaseTree.utils';
+import { DatabaseTree } from '@/shared/database-tree/DatabaseTree';
+import type { TreeHandlers } from '@/shared/database-tree/databaseTree.utils';
 import { WarehouseSplitLayout } from '../layout/WarehouseSplitLayout';
 import { getWarehouseSection, WarehouseSection } from '../warehouse.utils';
 import { GlobalRelationshipPanel } from './GlobalRelationshipPanel';

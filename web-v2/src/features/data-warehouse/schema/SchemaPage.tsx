@@ -3,7 +3,7 @@ import { FormulaFieldDialog } from '@/features/chart-builder/field-actions/Formu
 import { databaseShare, type ShareRequest } from '@/features/share/share.utils';
 import { ShareModal } from '@/features/share/ShareModal';
 import { PageHeader } from '@/shared/layout/PageHeader';
-import { DatabaseTree } from '../database-tree/DatabaseTree';
+import { DatabaseTree } from '@/shared/database-tree/DatabaseTree';
 import { WarehouseSplitLayout } from '../layout/WarehouseSplitLayout';
 import { getWarehouseSection, WarehouseSection } from '../warehouse.utils';
 import { FormulaColumnsContext } from './formula-columns/FormulaColumnsContext';

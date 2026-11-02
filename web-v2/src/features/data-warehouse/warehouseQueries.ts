@@ -5,12 +5,13 @@ import type { RlsPolicyService } from '@/core/rls/RlsPolicyService';
 import type { DatabaseService } from '@/core/schema/DatabaseService';
 import type { TableRef } from '@/core/schema/SchemaEditService';
 import type { TableService } from '@/core/schema/TableService';
+import { schemaKeys } from '@/shared/schema/schemaQueries';
 import { isProcessing } from './schema/schema.utils';
 
 /** Queries of the Data Warehouse pages; the schemas themselves are `shared/schema/schemaQueries`. */
 export const warehouseKeys = {
   all: ['warehouse'] as const,
-  databases: ['warehouse', 'databases'] as const,
+  databases: schemaKeys.entries,
   table: ({ dbName, name }: TableRef) => ['warehouse', 'table', dbName, name] as const,
   previews: ['warehouse', 'preview'] as const,
   preview: (request: JsonObject) => ['warehouse', 'preview', request] as const,

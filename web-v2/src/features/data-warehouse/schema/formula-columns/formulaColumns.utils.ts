@@ -2,7 +2,7 @@ import type { ExpressionColumnKind } from '@/core/schema/SchemaEditService';
 import type { SchemaColumn, TableSchema } from '@/core/schema/SchemaService';
 import { columnActionsOf, columnsOfKind, type ColumnAction } from '@/features/chart-builder/field-actions/fieldActions.utils';
 import type { ActionItem } from '@/shared/menu/ActionMenuView';
-import type { ColumnRole } from '../../database-tree/databaseTree.utils';
+import type { ColumnRole } from '@/shared/database-tree/databaseTree.utils';
 
 /**
  * Measures and calculated columns on the Schema page (v1 `MeasureFieldManagement`, `CalculatedFieldManagement` and the
