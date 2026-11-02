@@ -72,6 +72,9 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
 - **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 to CB6, CB7a, CB7b, CB7c and CB8 done, CB7d next) for the chart types
   v2 already renders; the other chart types (scatter, area range, ...) follow, each with its builder handler. ChartBuilder
   plugs into edit mode as the `ChartBuilderHost` the dashboard route gives `DashboardPage`.
+- **Data cook** (Phase 7, [`DATA_COOK.md`](DATA_COOK.md)): DC0 to DC2 done (real payloads, `core/data-cook`, routes and
+  layout at v1's paths); the listings (DC3) come next. **Blocked by the server** on MySQL: SQL operators need
+  database-qualified tables, joins fail on duplicate column names (DC0).
 - **Data ingestion** (Phase 8, [`DATA_INGESTION.md`](DATA_INGESTION.md)): the MVP is done, DI0 to DI8 (listings, source and job actions, the JDBC source form, the job form and CSV import). The other source types come after the MVP.
 - **Share links (`?token=`)**: the Share dialog (M7b) creates directory tokens, which the server accepts; opening
   them without a session still needs client work, see Phase 3 M5b. **Blocked by the server**: MySQL `like` and
@@ -422,7 +425,7 @@ Plan, decisions and steps (DC0 to DC9) in [`DATA_COOK.md`](DATA_COOK.md).
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| My ETL, shared, history, trash, ETL editor | `screens/data-cook` (`/data-warehouse/data-cook`), `di-core/data-cook` | 70 | Planned (decisions waiting for confirmation) |
+| My ETL, shared, history, trash, ETL editor | `screens/data-cook` (`/data-warehouse/data-cook`), `di-core/data-cook` | 70 | In progress: DC0 to DC2 done (payloads, `core/data-cook`, routes and layout); DC3 next |
 
 ### Phase 8: Data ingestion
 
