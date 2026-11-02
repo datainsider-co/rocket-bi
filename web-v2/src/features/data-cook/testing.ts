@@ -18,6 +18,7 @@ export function fakeEtlService(overrides: Partial<EtlService> = {}): EtlService 
     deleteForever: vi.fn<EtlService['deleteForever']>(async () => {}),
     forceRun: vi.fn<EtlService['forceRun']>(async () => {}),
     cancel: vi.fn<EtlService['cancel']>(async () => {}),
+    getSourceTable: vi.fn<EtlService['getSourceTable']>(async (dbName, tblName) => ({ name: tblName, db_name: dbName, columns: [] })),
     ...overrides
   };
 }

@@ -1,5 +1,6 @@
 import type { KyInstance } from 'ky';
 import { token } from '@/core/di/Container';
+import { asArray, asRecord, asString, type JsonObject } from '@/core/json/json';
 import {
   listingPageFromJson,
   listingRequestToJson,
@@ -46,6 +47,11 @@ export interface EtlService {
   /** Runs the ETL at `atTime` (epoch millis) and keeps its schedule afterwards. */
   forceRun(id: EtlId, atTime: number): Promise<void>;
   cancel(id: EtlId): Promise<void>;
+  /**
+   * A warehouse table as a source's `table_schema`: the server's JSON, kept whole (v1 sent its `TableSchema` back as
+   * it was read). Rejects when the table is gone.
+   */
+  getSourceTable(dbName: string, tblName: string, signal?: AbortSignal): Promise<JsonObject>;
 }
 
 export const EtlService = token<EtlService>('EtlService');
@@ -93,5 +99,12 @@ export class HttpEtlService implements EtlService {
   /** The server answers `{ success: true }` even when nothing was running. */
   async cancel(id: EtlId): Promise<void> {
     await this.http.put(`data_cook/${id}/kill`, { json: {} });
+  }
+
+  async getSourceTable(dbName: string, tblName: string, signal?: AbortSignal): Promise<JsonObject> {
+    const database = asRecord(await this.http.get(`databases/${encodeURIComponent(dbName)}`, { signal }).json());
+    const table = asArray(database['tables']).map(asRecord).find(item => asString(item['name']) === tblName);
+    if (!table) throw new Error(`Table ${dbName}.${tblName} no longer exists`);
+    return { ...table, db_name: asString(table['db_name'], dbName) };
   }
 }

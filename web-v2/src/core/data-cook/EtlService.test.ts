@@ -95,4 +95,20 @@ describe('HttpEtlService', () => {
     });
     expect(requests[1]).toEqual({ method: 'PUT', url: 'http://api.test/data_cook/2/kill', body: {} });
   });
+
+  it("reads a source table's JSON from its database, whole", async () => {
+    const table = { name: 'sales', display_name: 'Sales', columns: [{ class_name: 'string', name: 'region', is_nullable: true }], primary_keys: [] };
+    const { service, requests } = setup({ body: { name: 'di0_ingest', tables: [{ name: 'other', columns: [] }, table] } });
+
+    const json = await service.getSourceTable('di0_ingest', 'sales');
+
+    expect(requests[0]).toMatchObject({ method: 'GET', url: 'http://api.test/databases/di0_ingest' });
+    expect(json).toEqual({ ...table, db_name: 'di0_ingest' });
+  });
+
+  it('rejects a source table that is gone', async () => {
+    const { service } = setup({ body: { name: 'di0_ingest', tables: [] } });
+
+    await expect(service.getSourceTable('di0_ingest', 'sales')).rejects.toThrow('Table di0_ingest.sales no longer exists');
+  });
 });
