@@ -403,7 +403,7 @@ Plan, decisions and steps (DW0 to DW12) in [`DATA_WAREHOUSE.md`](DATA_WAREHOUSE.
 |---|---|---|---|
 | Databases (all, trash) | `screens/data-management` (`/data-warehouse/databases`) | 49 | Not started |
 | Schema explorer | `/data-warehouse/schema`, `di-core/schema` | – | Not started |
-| Query editor (Monaco) | `/data-warehouse/query-editor` | – | Not started |
+| Query editor (Monaco) | `/data-warehouse/query-editor` | – | In progress (DW10 done) |
 | Relationships | `/data-warehouse/relationship`, `di-core/data-relationship` | – | Not started |
 
 ### Phase 6: Organization settings
