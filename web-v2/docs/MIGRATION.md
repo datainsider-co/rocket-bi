@@ -403,7 +403,7 @@ Plan, decisions and steps (DW0 to DW12) in [`DATA_WAREHOUSE.md`](DATA_WAREHOUSE.
 |---|---|---|---|
 | Databases (all, trash) | `screens/data-management` (`/data-warehouse/databases`) | 49 | Not started |
 | Schema explorer | `/data-warehouse/schema`, `di-core/schema` | – | Not started |
-| Query editor (Monaco) | `/data-warehouse/query-editor` | – | In progress (DW10 done) |
+| Query editor (Monaco) | `/data-warehouse/query-editor` | – | Done (DW10 to DW12; Add Chart To Dashboard dropped) |
 | Relationships | `/data-warehouse/relationship`, `di-core/data-relationship` | – | Not started |
 
 ### Phase 6: Organization settings
@@ -418,9 +418,11 @@ Plan, decisions and steps (DW0 to DW12) in [`DATA_WAREHOUSE.md`](DATA_WAREHOUSE.
 
 ### Phase 7: Data cook (ETL)
 
+Plan, decisions and steps (DC0 to DC9) in [`DATA_COOK.md`](DATA_COOK.md).
+
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| My ETL, shared, history, trash, ETL editor | `screens/data-cook` (`/data-warehouse/data-cook`), `di-core/data-cook` | 70 | Not started |
+| My ETL, shared, history, trash, ETL editor | `screens/data-cook` (`/data-warehouse/data-cook`), `di-core/data-cook` | 70 | Planned (decisions waiting for confirmation) |
 
 ### Phase 8: Data ingestion
 

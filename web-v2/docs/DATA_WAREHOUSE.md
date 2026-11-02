@@ -188,7 +188,7 @@ Code v1 cần đọc: `screens/data-management` (`views/`, `components/`, `store
   tường minh, nút hiện `Save*` khi có thay đổi, hỏi khi rời trang (`useBlocker` như M6). Lý do: auto-save ghi đè analysis
   dùng chung khi người khác đang xem, và v1 lưu sai widget.
 - **Add Chart To Dashboard**: tính năng riêng, khá nặng (tạo input filter, tab widget, `parameter_widget_ids`). Để sau
-  cùng (DW12), có thể bỏ nếu không ai dùng.
+  cùng (DW12), có thể bỏ nếu không ai dùng. **Đã bỏ ở DW12.**
 - **Kiểm quyền ở client**: v1 không kiểm. v2 giữ như v1 (server quyết, hiện message lỗi của server), riêng
   analysis đã lưu thì kiểm quyền dashboard như M5a.
 - **Một cây database dùng chung** (`features/data-warehouse/database-tree`): dữ liệu bằng TanStack Query (danh sách short
@@ -577,6 +577,56 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
   cây chèn `dw0_probe.products`, `?mode=update` của `big_qty` nạp query và chạy. Không lỗi console ngoài 500 của query lỗi
   cố ý.
 
+## Quyết định ở DW11 (2026-11-02)
+
+- **Analysis là các tab** (`query-editor/analysis`): widget đầu là query (bảng `raw_query_setting`), các widget sau là chart
+  dựng trên query. Mỗi tab giữ SQL, định nghĩa parameter, lần chạy cuối và bản đã lưu (`AnalysisTab`, reducer
+  `tabsReducer`); chọn tab thì editor đổi sang SQL của tab đó như v1, giá trị đang chọn trên thanh parameter thì bắt đầu lại.
+  Query mới cũng là một analysis một tab, chưa lưu. Tab query không xoá được.
+- **SQL của tab nằm trong widget** đúng chỗ v1 để: `sql_views[0]` (view mà chart đọc), `options.options.raw_query`,
+  `query_parameter`, `setting.parameters` (giá trị dạng SQL) và `setting.sql` của widget query (`withQuery`). View và
+  `sql` bỏ `;` cuối vì server đặt chúng trong SQL của nó; `raw_query` giữ nguyên text. Đọc lại bỏ `" \n"` v1 thêm vào cuối.
+  v1 mở được analysis do v2 lưu, kể cả tab chart (đã thử trên `:5050`).
+- **Mở `?adhoc=`**: dashboard, password và quyền như M5a (`useDashboardAccess`), breadcrumb My Data › folder › tên trong
+  header. Query chạy ngay khi mở như v1; tab chart hiện chart với SQL đã lưu. Không có quyền sửa thì editor chỉ đọc, không
+  có Save, Add Chart, Add Param, sửa / xoá chart; vẫn Execute và đổi giá trị parameter được. Download theo quyền download.
+- **Tab chart**: chart hiện bằng preview của ChartBuilder (`usePreview`, `PreviewView`) trong `DashboardControlsProvider`
+  của analysis (query mới dùng một analysis rỗng id -1; server nhận `dashboard_id` âm). Execute trên tab chart chạy lại
+  chart với SQL đang gõ và giá trị đang chọn. Download chỉ có ở tab query (dữ liệu của query); v1 tải bảng của chart.
+- **ChartBuilder ngoài dashboard**: `ChartBuilderHost` nhận `editor: ChartSaver` (chỉ `createWidget`, `updateWidget`), và
+  request `addChart` mang `adhoc` (view mới `view_xxxxxxxxxx` trên SQL của tab và giá trị parameter để đọc cột). Trước khi
+  mở builder, bảng ad hoc được tải (`adhocTableQueryOptions`); query không tạo được bảng thì báo lỗi, không mở builder
+  trên các database như khi sửa chart cũ. Analysis đã lưu thì thêm / sửa / xoá chart ghi lên server ngay như v1, kèm SQL
+  của tab; query chưa lưu giữ chart trong state với id âm.
+- **Save** (nút hoặc Ctrl/Cmd+S): analysis đã lưu thì ghi từng tab có thay đổi vào widget của nó (v1 auto-save mỗi 5s và
+  luôn ghi widget 0), nút hiện `Save*` khi có thay đổi. Query mới: "Save Analysis" mở một dialog gộp chọn folder và tên
+  (v1 hai bước), `POST dashboards/create` với `directory_type: queries` và mọi tab, server cấp id widget theo thứ tự; xong
+  thì mở chính analysis đó (`?adhoc=`, v1 về My Data). Actions › Create Analysis là Save As, mở bản mới.
+- **Hỏi khi rời trang** khi có tab thay đổi chưa lưu (`useUnsavedGuard`, câu của v1); query mới tính là thay đổi khi text
+  khác lúc mở. Lưu hay tạo bản mới thì cho qua.
+- `DashboardService.createQuery`, `parameterToJson`, `parameterDefinitionsOf` (core), `useFolderPicker` không bắt buộc
+  `excludeId`, `PageHeader` có `trail`. `CodeEditor` thêm `readOnly`, `onSave`; phần giữ text của Monaco tách ra
+  `useSyncedValue`.
+- Đã kiểm bằng Playwright trên `pnpm dev` (1440px và 375px): mở analysis v1 "DW0 Analysis", query mới → Add Chart (Pie,
+  chọn field bằng "click here") → Save Analysis → mở lại có tab chart; sửa SQL tab chart, Ctrl+Enter, Ctrl+S ghi đúng một
+  `PUT …/widgets/{id}/edit`; reload thấy SQL mới; hỏi khi rời trang; Edit chart qua builder; Save As; Delete chart. Không
+  lỗi console ngoài cảnh báo deprecated của antd (`List`, `maskClosable`) đã có ở code cũ.
+
+## Quyết định ở DW12 (2026-11-02)
+
+- **Create Table** (Actions, ẩn khi chỉ đọc hoặc đang sửa view): dialog database (mặc định database của URL), tên (luật và
+  "Will be created as" của DW7, tên trùng với bảng đã tải của database bị từ chối trước khi gửi), loại View / Materialized
+  (`materialized` server trả 501 trên MySQL, hiện message). Giá trị parameter đặt thẳng vào SQL dưới dạng literal
+  (`inlineParameters`, không escape `\` / `$` như khi server thay), bỏ `;` cuối. Tạo xong làm mới database trên cây và ở lại
+  editor (v1 sang trang Schema, bỏ query đang viết).
+- **Update Table** (`?mode=update`): nút Save thành "Update Table", Ctrl/Cmd+S cũng vậy, hỏi xác nhận rồi gọi
+  `updateViewQuery` của CB8, nên measure và calculated column của view được tạo lại trên query mới (báo những cái không còn
+  chạy). Thay parameter như Create Table (v1 không thay). Xong thì sang trang Schema của view như v1. Mode này không có
+  Add Chart, Save Analysis, Create Table. `UpdateTableQueryDialog` của builder giữ nguyên cho sửa nhanh.
+- **Add Chart To Dashboard: bỏ**, không port (quyết định 2026-11-02).
+- Đã kiểm bằng Playwright trên `pnpm dev`: Create Table với parameter `O'Brien tea` gửi `'O''Brien tea'`, tên `products` bị
+  từ chối, `DW12 Obrien` thành `dw12_obrien`; mở `?mode=update` của nó, thêm điều kiện, Ctrl+S, xác nhận, sang Schema.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -592,8 +642,8 @@ Dữ liệu để lại cho các bước sau: database `dw0_probe` (bảng `prod
 | DW8 | **RLS.** Danh sách policy, form user / user attribute / operator, View All / View Nothing / Custom (trình sửa condition của CB4), Save / Cancel, preview làm mới sau khi lưu | Xong (xem DW8) |
 | DW9 | **Relationship global.** Tách `shared/relationship`, adapter cho dashboard (không đổi hành vi M7c) và global; thả bảng từ cây, xoá bảng, Save / Discard, hỏi khi rời trang | Xong (xem DW9) |
 | DW10 | **Query Editor: editor và chạy.** `shared/code-editor` với SQL, autocomplete bảng / cột / hàm, Run (cả đoạn / phần bôi đen, Ctrl+Enter), bảng kết quả phân trang, `limit`, parameters (thanh param, modal thêm / sửa, chạy lại khi đổi), chèn từ cây, Download CSV / Excel, mode query mới với `?database&table` | Xong (xem DW10) |
-| DW11 | **Analysis đã lưu.** Mở `?adhoc=` (quyền, password, breadcrumb), Save / Save As (folder + tên), tab chart bằng ChartBuilder (host cho analysis và cho query chưa lưu), sửa / xoá tab, hỏi khi rời trang | Chưa làm |
-| DW12 | **Bảng từ query và phần còn lại.** Create Table (view / materialized), mode `update` (Update Table, Ctrl+S) thay `UpdateTableQueryDialog` khi cần sửa dài, Add Chart To Dashboard nếu giữ | Chưa làm |
+| DW11 | **Analysis đã lưu.** Mở `?adhoc=` (quyền, password, breadcrumb), Save / Save As (folder + tên), tab chart bằng ChartBuilder (host cho analysis và cho query chưa lưu), sửa / xoá tab, hỏi khi rời trang | Xong (xem DW11) |
+| DW12 | **Bảng từ query và phần còn lại.** Create Table (view / materialized), mode `update` (Update Table, Ctrl+S) thay `UpdateTableQueryDialog` khi cần sửa dài, Add Chart To Dashboard nếu giữ | Xong, Add Chart To Dashboard bỏ (xem DW12) |
 
 Thứ tự: DW0 → DW1 → DW2 → DW3, rồi ba nhánh song song theo thư mục: **Databases + Share** (DW4, DW5), **Schema** (DW6 →
 DW7 → DW8), **Relationship** (DW9). Query Editor (DW10 → DW11 → DW12) đi sau DW6 vì Action menu của Schema mở nó, và DW11
