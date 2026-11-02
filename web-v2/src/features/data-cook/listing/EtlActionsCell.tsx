@@ -1,12 +1,11 @@
 import { MoreOutlined } from '@ant-design/icons';
 import { Button, Dropdown, type MenuProps } from 'antd';
 import { canCancelEtl, type EtlJob } from '@/core/data-cook/EtlJob';
-import { SHARE_NOT_READY_TEXT } from './etlListing.utils';
 import type { EtlRowActions } from './useEtlListingPage';
 
 const MENU_ITEMS: MenuProps['items'] = [
   { key: 'edit', label: 'Edit' },
-  { key: 'share', label: 'Share', disabled: true, title: SHARE_NOT_READY_TEXT },
+  { key: 'share', label: 'Share' },
   { key: 'delete', label: 'Delete', danger: true }
 ];
 
@@ -39,6 +38,7 @@ export function EtlActionsCell({ etl, actions }: { etl: EtlJob; actions: EtlRowA
           onClick: ({ key, domEvent }) => {
             domEvent.stopPropagation();
             if (key === 'edit') actions.onOpen(etl);
+            if (key === 'share') actions.onShare(etl);
             if (key === 'delete') actions.onTrash(etl);
           }
         }}

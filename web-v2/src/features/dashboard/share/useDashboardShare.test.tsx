@@ -6,6 +6,7 @@ import { AppProviders } from '@/app/AppProviders';
 import { AuthenticationService } from '@/core/auth/AuthenticationService';
 import { LoginResponse } from '@/core/auth/LoginResponse';
 import { DashboardService } from '@/core/dashboard/DashboardService';
+import { EtlShareService } from '@/core/data-cook/EtlShareService';
 import { createContainer } from '@/core/di/Container';
 import { DatabaseShareService } from '@/core/schema/DatabaseShareService';
 import { Directory } from '@/core/directory/Directory';
@@ -15,7 +16,7 @@ import { UserService } from '@/core/user/UserService';
 import { fakeAuthenticationService } from '@/features/auth/testing';
 import { fakeUserService } from '@/features/dashboard/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
-import { fakeDatabaseShareService, fakeShareService } from '@/features/share/testing';
+import { fakeDatabaseShareService, fakeEtlShareService, fakeShareService } from '@/features/share/testing';
 import { useDashboardShare } from './useDashboardShare';
 
 function Harness() {
@@ -45,6 +46,7 @@ describe('useDashboardShare', () => {
         di.bindValue(DirectoryService, directories);
         di.bindValue(ShareService, share);
         di.bindValue(DatabaseShareService, fakeDatabaseShareService());
+        di.bindValue(EtlShareService, fakeEtlShareService());
         di.bindValue(UserService, fakeUserService());
       }
     ]);

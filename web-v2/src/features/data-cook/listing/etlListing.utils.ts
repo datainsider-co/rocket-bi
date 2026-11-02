@@ -73,9 +73,6 @@ export function restoreEtlText(etl: Pick<EtlJob, 'displayName'>): string {
   return `Are you sure to restore '${etl.displayName}'?`;
 }
 
-/** Share opens with DC5. */
-export const SHARE_NOT_READY_TEXT = 'Sharing ETLs is not supported yet';
-
 /**
  * When a forced run on `day` starts (v1 `ForceRunSettingModal`): now for today, as v1's default, else the start of
  * that day. The server runs the ETL at that time (it becomes `next_execute_time`).

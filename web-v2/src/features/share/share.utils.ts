@@ -1,3 +1,4 @@
+import type { EtlJob } from '@/core/data-cook/EtlJob';
 import { DirectoryType } from '@/core/directory/Directory';
 import type { Directory } from '@/core/directory/Directory';
 import type { DatabaseEntry } from '@/core/schema/DatabaseService';
@@ -5,8 +6,8 @@ import { ShareLevel } from '@/core/share/shareLevel';
 import { dashboardPath, toIdParam } from '@/shared/routing/idParam';
 
 /**
- * What the dialog shares. Dashboards and queries are shared through their directory, like v1; a database by its name,
- * with people only (no link, no password).
+ * What the dialog shares. Dashboards and queries are shared through their directory, like v1; a database by its name
+ * and an ETL by its id, with people only (no link, no password).
  */
 export type ShareTarget =
   | {
@@ -17,13 +18,21 @@ export type ShareTarget =
       /** Username of the owner; only the owner may set a password. */
       owner: string;
     }
-  | { type: 'database'; id: string; name: string; owner: string };
+  | { type: 'database'; id: string; name: string; owner: string }
+  | { type: 'etl'; id: number; name: string; owner: string };
 
 /** Whose users the people section reads and changes. */
-export type PeopleResource = { type: 'directory'; id: number } | { type: 'database'; id: string };
+export type PeopleResource = { type: 'directory'; id: number } | { type: 'database'; id: string } | { type: 'etl'; id: number };
 
 export function peopleResourceOf(target: ShareTarget): PeopleResource {
-  return target.type === 'directory' ? { type: target.type, id: target.id } : { type: target.type, id: target.id };
+  switch (target.type) {
+    case 'directory':
+      return { type: target.type, id: target.id };
+    case 'database':
+      return { type: target.type, id: target.id };
+    case 'etl':
+      return { type: target.type, id: target.id };
+  }
 }
 
 /** Which page the link opens. */
@@ -126,4 +135,9 @@ export function directoryShare(
 /** Sharing a database (v1 `ShareDatabaseHandler`): people only, without View & Download (v1 offered it on directories). */
 export function databaseShare(entry: Pick<DatabaseEntry, 'name' | 'displayName' | 'owner' | 'creatorId'>): ShareRequest {
   return { target: { type: 'database', id: entry.name, name: entry.displayName, owner: entry.owner?.username || entry.creatorId }, options: {} };
+}
+
+/** Sharing an ETL (v1 `DataCookShareHandler`): people only, like a database. */
+export function etlShare(etl: Pick<EtlJob, 'id' | 'displayName' | 'owner' | 'ownerId'>): ShareRequest {
+  return { target: { type: 'etl', id: etl.id, name: etl.displayName, owner: etl.owner?.username || etl.ownerId }, options: {} };
 }

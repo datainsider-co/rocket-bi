@@ -4,6 +4,7 @@ import { ShareLevel } from '@/core/share/shareLevel';
 import { UserProfile } from '@/core/user/UserProfile';
 import {
   databaseShare,
+  etlShare,
   directoryShare,
   embedCode,
   levelOptions,
@@ -129,9 +130,24 @@ describe('databaseShare', () => {
   });
 });
 
+describe('etlShare', () => {
+  it('shares an ETL by id, with people only', () => {
+    const owner = new UserProfile({ username: 'root' });
+    expect(etlShare({ id: 1, displayName: 'DC0 probe', owner, ownerId: 'root' })).toEqual({
+      target: { type: 'etl', id: 1, name: 'DC0 probe', owner: 'root' },
+      options: {}
+    });
+  });
+
+  it('falls back to the owner id', () => {
+    expect(etlShare({ id: 2, displayName: 'x', owner: undefined, ownerId: 'ann' }).target.owner).toBe('ann');
+  });
+});
+
 describe('peopleResourceOf', () => {
   it('keeps the type and id of what is shared', () => {
     expect(peopleResourceOf({ type: 'directory', id: 8, name: 'Sales', owner: 'root' })).toEqual({ type: 'directory', id: 8 });
     expect(peopleResourceOf({ type: 'database', id: 'shop', name: 'shop', owner: '' })).toEqual({ type: 'database', id: 'shop' });
+    expect(peopleResourceOf({ type: 'etl', id: 1, name: 'DC0 probe', owner: 'root' })).toEqual({ type: 'etl', id: 1 });
   });
 });

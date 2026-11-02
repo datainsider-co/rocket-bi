@@ -3,6 +3,7 @@ import type { Dayjs } from 'dayjs';
 import { useNavigate } from 'react-router';
 import type { EtlJob } from '@/core/data-cook/EtlJob';
 import type { EtlListing } from '@/core/data-cook/EtlService';
+import { etlShare, type ShareRequest } from '@/features/share/share.utils';
 import { etlEditorPath } from '../dataCook.utils';
 import { forceRunTime } from './etlListing.utils';
 import { useEtlActions } from './useEtlActions';
@@ -13,6 +14,8 @@ export interface EtlRowActions {
   /** Row click and Edit: the editor. */
   readonly onOpen: (etl: EtlJob) => void;
   readonly onForceRun: (etl: EtlJob) => void;
+  /** The share dialog, people only (v1 `DataCookShareHandler`). */
+  readonly onShare: (etl: EtlJob) => void;
   readonly onCancel: (etl: EtlJob) => void;
   readonly onTrash: (etl: EtlJob) => void;
   readonly onRestore: (etl: EtlJob) => void;
@@ -30,15 +33,26 @@ export interface ForceRunDialog {
   readonly onClose: () => void;
 }
 
-/** One ETL listing page: the listing, the row actions and the force run dialog (v1 `ForceRunSettingModal`). */
+export interface ShareDialog {
+  /** What the open dialog shares; `undefined` while closed. */
+  readonly request: ShareRequest | undefined;
+  readonly onClose: () => void;
+}
+
+/**
+ * One ETL listing page: the listing, the row actions, the force run dialog (v1 `ForceRunSettingModal`) and the share
+ * dialog.
+ */
 export function useEtlListingPage(
   listing: EtlListing,
   now: () => number = Date.now
-): { state: EtlListingState; actions: EtlRowActions; forceRun: ForceRunDialog } {
+): { state: EtlListingState; actions: EtlRowActions; forceRun: ForceRunDialog; share: ShareDialog } {
   const state = useEtlListing(listing);
   const { forceRun, cancel, confirmTrash, confirmRestore, confirmDeleteForever, isForceRunning, isBusy } = useEtlActions();
   const navigate = useNavigate();
   const [target, setTarget] = useState<{ etl: EtlJob; openedAt: number }>();
+  const [shareRequest, setShareRequest] = useState<ShareRequest>();
+  const closeShare = useCallback(() => setShareRequest(undefined), []);
 
   const onClose = useCallback(() => setTarget(undefined), []);
   const onSubmit = useCallback(
@@ -54,6 +68,7 @@ export function useEtlListingPage(
     () => ({
       onOpen: etl => void navigate(etlEditorPath(etl.id, etl.displayName)),
       onForceRun: etl => setTarget({ etl, openedAt: now() }),
+      onShare: etl => setShareRequest(etlShare(etl)),
       onCancel: cancel,
       onTrash: confirmTrash,
       onRestore: confirmRestore,
@@ -72,6 +87,7 @@ export function useEtlListingPage(
       now: target?.openedAt ?? 0,
       onSubmit,
       onClose
-    }
+    },
+    share: { request: shareRequest, onClose: closeShare }
   };
 }

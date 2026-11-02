@@ -4,8 +4,14 @@ import userEvent from '@testing-library/user-event';
 import fixture from '@/core/data-cook/etl.fixture.json';
 import { etlJobFromJson, type EtlJob } from '@/core/data-cook/EtlJob';
 import { EtlService } from '@/core/data-cook/EtlService';
+import { EtlShareService } from '@/core/data-cook/EtlShareService';
 import { clearSession, saveSession } from '@/core/session/session';
+import { ResourceSharing } from '@/core/share/ResourceSharing';
+import { UserProfile } from '@/core/user/UserProfile';
+import { UserService } from '@/core/user/UserService';
 import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing';
+import { fakeUserService } from '@/features/dashboard/testing';
+import { fakeEtlShareService } from '@/features/share/testing';
 import { fakeEtlService } from '../testing';
 
 const ETLS: readonly EtlJob[] = fixture.myEtl.response.data.map(etlJobFromJson);
@@ -77,15 +83,46 @@ describe('EtlListingPage', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/data-warehouse/data-cook/my-etl/dc0-probe-1'));
   });
 
-  it('opens the editor from Edit; Share waits for DC5', async () => {
+  it('opens the editor from Edit', async () => {
     const { router } = renderListing('shared');
     await screen.findByText('DC0 v1 ETL');
 
     await userEvent.click(screen.getByRole('button', { name: 'More actions for DC0 v1 ETL' }));
-    expect(await screen.findByRole('menuitem', { name: 'Share' })).toHaveAttribute('aria-disabled', 'true');
-    await userEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Edit' }));
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/data-warehouse/data-cook/my-etl/dc0-v1-etl-2'));
+  });
+
+  it('shares an ETL with people only, through its own endpoints', async () => {
+    const sharing = fakeEtlShareService({
+      getSharing: vi.fn<EtlShareService['getSharing']>(async () => new ResourceSharing(fixture.shareListShared.response))
+    });
+    const ann = { username: 'ann', full_name: 'Ann Lee', email: 'ann@example.com' };
+    const users = fakeUserService({
+      suggest: vi.fn<UserService['suggest']>(async () => ({ total: 1, users: [{ profile: new UserProfile(ann), json: ann }] }))
+    });
+    renderAppAt('/data-warehouse/data-cook/my-etl', fakeAuthenticationService(), [
+      di => {
+        di.bindValue(EtlService, fakeEtlService({ list: vi.fn<EtlService['list']>(async () => ({ total: ETLS.length, data: ETLS })) }));
+        di.bindValue(EtlShareService, sharing);
+        di.bindValue(UserService, users);
+      }
+    ]);
+    await screen.findByText('DC0 probe');
+
+    await userEvent.click(screen.getByRole('button', { name: 'More actions for DC0 probe' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Share' }));
+
+    expect(await screen.findByRole('list', { name: 'People with access' })).toBeInTheDocument();
+    expect(sharing.getSharing).toHaveBeenCalledWith(1);
+    expect(screen.queryByRole('button', { name: 'Get link' })).not.toBeInTheDocument();
+
+    await userEvent.type(screen.getByRole('combobox', { name: 'Add people and groups' }), 'an');
+    await userEvent.click(await screen.findByText('Ann Lee', {}, { timeout: 2000 }));
+    await userEvent.click(screen.getAllByRole('button', { name: 'Apply' })[0] as HTMLElement);
+
+    await waitFor(() => expect(sharing.shareWithUsers).toHaveBeenCalledWith(1, { ann: ['view'] }));
+    await waitFor(() => expect(screen.queryByRole('list', { name: 'People with access' })).not.toBeInTheDocument());
   });
 
   it('force runs today from the dialog', async () => {
