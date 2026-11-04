@@ -83,26 +83,32 @@ const FILTERS = new Set<string>([
   ChartType.TabInnerFilter
 ]);
 const PIES = new Set<string>([ChartType.Pie, ChartType.SemiPie, ChartType.Donut]);
-/** v1 `VisualHeaderConfigs.drilldownWidgets` and `zoomWidgets`, for the types v2 builds: the same set. */
-const DRILL_AND_ZOOM = new Set<string>([ChartType.Pie, ChartType.Bar, ChartType.Column, ChartType.Line, ChartType.Area, ChartType.StackedBar, ChartType.StackedColumn]);
+const FUNNELS = new Set<string>([ChartType.Funnel, ChartType.Pyramid]);
+const DRILL_AND_ZOOM = [ChartType.Pie, ChartType.Bar, ChartType.Column, ChartType.Line, ChartType.Area, ChartType.StackedBar, ChartType.StackedColumn];
+/** v1 `VisualHeaderConfigs.drilldownWidgets`, for the types v2 builds. */
+const DRILLDOWN = new Set<string>([...DRILL_AND_ZOOM, ChartType.Pyramid, ChartType.Parliament]);
+/** v1 `VisualHeaderConfigs.zoomWidgets`, for the types v2 builds. */
+const ZOOM = new Set<string>([...DRILL_AND_ZOOM, ChartType.Funnel]);
 
 /** Which settings the Other tab shows (v1 `VisualHeader`). */
 export function otherSettingsOf(chartType: string) {
   return {
-    /** Display unit and precision; filters have no numbers to format. */
-    numberFormat: !FILTERS.has(chartType),
+    /** Display unit and precision; filters have no numbers to format, nor has a parliament (a dot per unit). */
+    numberFormat: !FILTERS.has(chartType) && chartType !== ChartType.Parliament,
+    thousandSeparator: chartType !== ChartType.Parliament,
     crossFilter: chartType === ChartType.Pie,
-    drilldown: DRILL_AND_ZOOM.has(chartType),
-    zoom: DRILL_AND_ZOOM.has(chartType)
+    drilldown: DRILLDOWN.has(chartType),
+    zoom: ZOOM.has(chartType)
   };
 }
 
 /**
- * Where the display unit lives (v1 `VisualHeader.seriesKey`). v1 wrote a donut's under `series`, where its renderer
- * never read it; v2 writes it under `pie`, like the Data Label tab.
+ * Where the display unit lives (v1 `VisualHeader.seriesKey`), next to the Data Label tab's settings. v1 wrote a donut's
+ * under `series`, where its renderer never read it; v2 writes it under `pie`, like the Data Label tab.
  */
 export function displayUnitPath(chartType: string): string {
   if (PIES.has(chartType)) return 'plotOptions.pie.dataLabels.displayUnit';
+  if (FUNNELS.has(chartType)) return `plotOptions.${chartType}.dataLabels.displayUnit`;
   if (TABLES.has(chartType)) return 'plotOptions.table.dataLabels.displayUnit';
   if (chartType === ChartType.Number) return 'plotOptions.kpi.dataLabels.displayUnit';
   return 'plotOptions.series.dataLabels.displayUnit';

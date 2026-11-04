@@ -89,7 +89,7 @@ describe('themeColorRevert', () => {
 
 describe('otherSettingsOf', () => {
   it('gives series charts number formats, drilldown and zoom', () => {
-    expect(otherSettingsOf(ChartType.Column)).toEqual({ numberFormat: true, crossFilter: false, drilldown: true, zoom: true });
+    expect(otherSettingsOf(ChartType.Column)).toEqual({ numberFormat: true, thousandSeparator: true, crossFilter: false, drilldown: true, zoom: true });
   });
 
   it('gives pies cross filtering', () => {
@@ -97,7 +97,17 @@ describe('otherSettingsOf', () => {
   });
 
   it('gives filters no number format', () => {
-    expect(otherSettingsOf(ChartType.DropDown)).toEqual({ numberFormat: false, crossFilter: false, drilldown: false, zoom: false });
+    expect(otherSettingsOf(ChartType.DropDown)).toEqual({ numberFormat: false, thousandSeparator: true, crossFilter: false, drilldown: false, zoom: false });
+  });
+
+  it('gives a parliament only the decimal point and drilldown, like v1', () => {
+    expect(otherSettingsOf(ChartType.Parliament)).toEqual({ numberFormat: false, thousandSeparator: false, crossFilter: false, drilldown: true, zoom: false });
+  });
+
+  it('gives the pyramid drilldown, the funnel zoom and the variable pie neither, like v1', () => {
+    expect(otherSettingsOf(ChartType.Pyramid)).toMatchObject({ numberFormat: true, crossFilter: false, drilldown: true, zoom: false });
+    expect(otherSettingsOf(ChartType.Funnel)).toMatchObject({ numberFormat: true, crossFilter: false, drilldown: false, zoom: true });
+    expect(otherSettingsOf(ChartType.VariablePie)).toMatchObject({ numberFormat: true, crossFilter: false, drilldown: false, zoom: false });
   });
 
   it('gives the stacked column and bar drilldown and zoom, but not the circular bar or lollipop, like v1', () => {
@@ -115,6 +125,9 @@ describe('displayUnitPath', () => {
   it.each([
     [ChartType.Column, 'plotOptions.series.dataLabels.displayUnit'],
     [ChartType.Donut, 'plotOptions.pie.dataLabels.displayUnit'],
+    [ChartType.Funnel, 'plotOptions.funnel.dataLabels.displayUnit'],
+    [ChartType.Pyramid, 'plotOptions.pyramid.dataLabels.displayUnit'],
+    [ChartType.VariablePie, 'plotOptions.series.dataLabels.displayUnit'],
     [ChartType.Table, 'plotOptions.table.dataLabels.displayUnit'],
     [ChartType.CollapseTable, 'plotOptions.table.dataLabels.displayUnit'],
     [ChartType.Number, 'plotOptions.kpi.dataLabels.displayUnit']
