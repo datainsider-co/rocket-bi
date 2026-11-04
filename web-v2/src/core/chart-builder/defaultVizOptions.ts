@@ -174,6 +174,80 @@ const donut = () => ({
   background: BACKGROUND
 });
 
+/** v1 `VariablepieChartOption.getDefaultChartOption`: labels off, under `series`, and no axes. */
+const variablePie = () => ({
+  chart: { type: ChartType.VariablePie },
+  title: title(),
+  subtitle: subtitle(),
+  affectedByFilter: true,
+  themeColor: { enabled: true },
+  background: BACKGROUND,
+  plotOptions: { series: { borderWidth: 0, dataLabels: { enabled: false, style: { ...secondaryStyle(), color: TEXT_COLOR, textOutline: 0 } } } },
+  xAxis: [],
+  yAxis: [],
+  tooltip: seriesTooltip
+});
+
+const funnelLabels = { dataLabels: { enabled: true, style: { color: TEXT_COLOR } } };
+
+/**
+ * v1 `FunnelChartOption.getDefaultChartOption`: no legend and no `themeColor` (the theme's colors all the same). The
+ * shape keys sit at the root, where v1 left them and nothing reads them.
+ */
+const funnel = () => ({
+  legend: bottomLegend(false),
+  title: title(),
+  subtitle: subtitle(),
+  plotOptions: { funnel: funnelLabels },
+  affectedByFilter: true,
+  center: ['40%', '50%'],
+  height: '90%',
+  neckWidth: '20%',
+  neckHeight: '25%',
+  width: '60%',
+  tooltip: pieTooltip,
+  background: BACKGROUND
+});
+
+/** v1 `PyramidChartOption.getDefaultChartOption`. */
+const pyramid = () => ({
+  legend: bottomLegend(false),
+  title: title(),
+  subtitle: subtitle(),
+  tooltip: pieTooltip,
+  plotOptions: { pyramid: funnelLabels },
+  affectedByFilter: true,
+  themeColor: { enabled: true },
+  center: ['40%', '50%'],
+  width: '80%',
+  background: BACKGROUND
+});
+
+/** v1 `ParliamentChartOption.getDefaultChartOption`: at most 1000 dots per value. */
+const parliament = () => ({
+  legend: bottomLegend(),
+  title: title(),
+  subtitle: subtitle(),
+  tooltip: pieTooltip,
+  affectedByFilter: true,
+  themeColor: { enabled: true },
+  background: BACKGROUND,
+  plotOptions: {
+    item: {
+      borderWidth: 0,
+      borderColor: 'black',
+      dataLabels: {
+        enabled: false,
+        borderWidth: 0,
+        textOutline: '0px contrast',
+        useHTML: true,
+        style: { border: '0px transparent', borderColor: 'none', textShadow: false, outline: 'none' }
+      }
+    }
+  },
+  maxDataPoint: 1000
+});
+
 const KPI_TEXT = '#11152D';
 const KPI_BACKGROUND = '#BEE2CA';
 const kpiAffix = (text?: string) => ({ enabled: true, isWordWrap: false, ...(text !== undefined && { text }), style: { color: KPI_TEXT, fontFamily: 'Montserrat', fontSize: '24px' } });
@@ -385,6 +459,10 @@ const DEFAULTS: Readonly<Record<ChartType, Defaults>> = {
   [T.Pie]: { className: 'highcharts_pie_chart_setting', options: () => pie(false) },
   [T.SemiPie]: { className: 'highcharts_pie_chart_setting', options: () => pie(true) },
   [T.Donut]: { className: 'donut_chart_setting', options: donut },
+  [T.VariablePie]: { className: 'variablepie_chart_setting', options: variablePie },
+  [T.Funnel]: { className: 'highcharts_funnel_chart_setting', options: funnel },
+  [T.Pyramid]: { className: 'highcharts_pyramid_chart_setting', options: pyramid },
+  [T.Parliament]: { className: 'parliament_setting', options: parliament },
   [T.Number]: { className: 'number_chart_setting', options: number },
   [T.Table]: { className: 'flatten_table_setting', options: table },
   [T.CollapseTable]: { className: 'table_chart_setting', options: collapseTable },

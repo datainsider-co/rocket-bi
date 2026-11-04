@@ -13,6 +13,7 @@ const groupBy: FunctionInfo = { family: FunctionFamily.GroupBy, type: '' };
 const byYear: FunctionInfo = { family: FunctionFamily.DateHistogram, type: DateFunctionType.Year };
 const sum: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.Sum };
 const countAll: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.CountAll };
+const countDistinct: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.CountDistinct };
 const none: FunctionInfo = { family: FunctionFamily.None, type: '' };
 
 /** The function a field dropped into a zone starts with, per kind of column (v1 `defaultTextFunctionInfo`, ...). */
@@ -63,7 +64,15 @@ const stackedZones = (xTitle?: string, yTitle?: string): ZoneConfig[] => [
   groupZone('breakdown_optional', 'Breakdown', { optional: true })
 ];
 
+/** v1 `PIE_CONFIGS`, also Funnel's and Pyramid's. */
 const PIE_ZONES = [groupZone('legend', 'Legend'), aggregationZone('value', 'Value', { maxItems: 1 })];
+/** v1 `VARIWIDE_CONFIGS`: the pie's zones and an optional Weight, the depth of each slice. */
+const VARIABLE_PIE_ZONES = [...PIE_ZONES, aggregationZone('weight', 'Weight', { maxItems: 1, optional: true })];
+/** v1 `PARLIAMENT_CONFIGS`: a value counts distinct values whatever the column, a dot each. */
+const PARLIAMENT_ZONES = [
+  groupZone('legend', 'Legend'),
+  zone('value', 'Value', [F.Aggregation], { text: countDistinct, number: countDistinct, date: countDistinct }, { maxItems: 1 })
+];
 const NUMBER_ZONES = [aggregationZone('value', 'Value', { maxItems: 1 })];
 const TABLE_ZONES = [zone('columns', 'Columns', [F.GroupBy, F.DateHistogram, F.Aggregation, F.None], NONE_DEFAULTS)];
 /** v1 `COLLAPSE_TABLE_CONFIGS`: the same zone, grouping text and dates and summing numbers by default. */
@@ -126,9 +135,13 @@ export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.Column, 'Column', 'ic_column.svg', seriesZones()),
   chart(T.Bar, 'Bar', 'ic_bar.svg', seriesZones('Y-Axis', 'X-Axis')),
   chart(T.Lollipop, 'Lollipop', 'ic_lollipop.svg', seriesZones()),
+  chart(T.Parliament, 'Parliament', 'ic_parliament.svg', PARLIAMENT_ZONES),
   chart(T.Pie, 'Pie', 'ic_pie.svg', PIE_ZONES),
   chart(T.SemiPie, 'Semi Pie', 'ic_pie.svg', PIE_ZONES),
+  chart(T.VariablePie, 'Variable Pie', 'ic_variable_pie.svg', VARIABLE_PIE_ZONES),
   chart(T.Donut, 'Donut', 'ic_donut.svg', PIE_ZONES),
+  chart(T.Funnel, 'Funnel', 'ic_funnel.svg', PIE_ZONES),
+  chart(T.Pyramid, 'Pyramid', 'ic_pyramid.svg', PIE_ZONES),
   chart(T.StackedColumn, 'Stacked Column', 'ic_stack_column.svg', stackedZones()),
   chart(T.StackedBar, 'Stacked Bar', 'ic_stack_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
   chart(T.CircularBar, 'Circular Bar', 'ic_circular_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
@@ -156,12 +169,8 @@ const OTHER_ICONS: Readonly<Record<string, string>> = {
   flatten_pivot_table: 'ic_pivot_table.svg',
   arearange: 'ic_chart_area.svg',
   column_range: 'ic_column.svg',
-  Parliament: 'ic_parliament.svg',
-  variablepie: 'ic_variable_pie.svg',
   scatter: 'ic_scatter.svg',
   bubble_chart: 'ic_bubble.svg',
-  funnel: 'ic_funnel.svg',
-  pyramid: 'ic_pyramid.svg',
   pareto: 'ic_pareto.svg',
   bell_curve: 'ic_bell_curve.svg',
   gauge: 'ic_gauge.svg',
@@ -201,15 +210,15 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   ['column_range', 'Column Range'],
   [T.Bar, 'Bar'],
   [T.Lollipop, 'Lollipop'],
-  ['Parliament', 'Parliament'],
+  [T.Parliament, 'Parliament'],
   [T.Pie, 'Pie'],
   [T.SemiPie, 'Semi Pie'],
-  ['variablepie', 'Variable Pie'],
+  [T.VariablePie, 'Variable Pie'],
   [T.Donut, 'Donut'],
   ['scatter', 'Scatter'],
   ['bubble_chart', 'Bubble'],
-  ['funnel', 'Funnel'],
-  ['pyramid', 'Pyramid'],
+  [T.Funnel, 'Funnel'],
+  [T.Pyramid, 'Pyramid'],
   ['pareto', 'Pareto'],
   ['bell_curve', 'Bell curve'],
   ['gauge', 'Gauges'],

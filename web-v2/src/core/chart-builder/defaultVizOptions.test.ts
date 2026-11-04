@@ -40,6 +40,20 @@ describe('defaultVizOptions', () => {
     expect(defaultVizOptions(ChartType.CircularBar)).toMatchObject({ class_name: 'circular_bar_chart_setting', options: { chart: { polar: true, inverted: true } } });
   });
 
+  it('gives the pie family their v1 classes and keys', () => {
+    expect(defaultVizOptions(ChartType.Funnel)).toMatchObject({
+      class_name: 'highcharts_funnel_chart_setting',
+      options: { legend: { enabled: false }, neck_width: '20%', plot_options: { funnel: { data_labels: { enabled: true } } } }
+    });
+    expect(defaultVizOptions(ChartType.Funnel)?.['options']).not.toHaveProperty('theme_color');
+    expect(defaultVizOptions(ChartType.Pyramid)).toMatchObject({ class_name: 'highcharts_pyramid_chart_setting', options: { width: '80%', theme_color: { enabled: true } } });
+    expect(defaultVizOptions(ChartType.VariablePie)).toMatchObject({
+      class_name: 'variablepie_chart_setting',
+      options: { chart: { type: 'variablepie' }, x_axis: [], plot_options: { series: { data_labels: { enabled: false } } } }
+    });
+    expect(defaultVizOptions(ChartType.Parliament)).toMatchObject({ class_name: 'parliament_setting', options: { max_data_point: 1000, plot_options: { item: { data_labels: { enabled: false } } } } });
+  });
+
   it('gives a fresh object each time', () => {
     const first = defaultVizOptions(ChartType.Column);
     expect(first).not.toBe(defaultVizOptions(ChartType.Column));

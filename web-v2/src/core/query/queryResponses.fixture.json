@@ -390,5 +390,27 @@
   ],
   "last_query_time": 0,
   "last_processing_time": 0
+ },
+ "generic_chart_setting": {
+  "class_name": "generic_chart_response",
+  "headers": [
+   "sales_channel",
+   "Units",
+   "Average units"
+  ],
+  "records": [
+   [
+    "Offline",
+    587060,
+    5699.6117
+   ],
+   [
+    "Online",
+    441986,
+    4556.5567
+   ]
+  ],
+  "last_query_time": 2,
+  "last_processing_time": 0
  }
 }

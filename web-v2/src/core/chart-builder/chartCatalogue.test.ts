@@ -31,6 +31,20 @@ describe('CHART_TYPES', () => {
     }
   });
 
+  it("gives the variable pie an optional Weight, and the parliament's value a count of distinct values, like v1", () => {
+    expect(chartTypeInfoOf(ChartType.VariablePie)?.zones.map(zone => [zone.key, zone.optional])).toEqual([
+      ['legend', false],
+      ['value', false],
+      ['weight', true]
+    ]);
+    expect(zoneOf(ChartType.Parliament, 'value').defaults).toEqual({
+      text: { family: 'Aggregation', type: 'Count distinct' },
+      number: { family: 'Aggregation', type: 'Count distinct' },
+      date: { family: 'Aggregation', type: 'Count distinct' }
+    });
+    expect(chartTypeInfoOf(ChartType.Funnel)?.zones).toEqual(chartTypeInfoOf(ChartType.Pie)?.zones);
+  });
+
   it('shows the bar zones as Y-Axis then X-Axis, stored as x_axis and y_axis', () => {
     expect(chartTypeInfoOf(ChartType.Bar)?.zones.map(zone => [zone.key, zone.title])).toEqual([
       ['x_axis', 'Y-Axis'],
@@ -156,6 +170,7 @@ describe('pickerItemsOf', () => {
     expect(items[1]).toEqual({ type: 'table', title: 'Collapse Table', icon: 'ic_collapse_table.svg', buildable: true });
     expect(items[2]).toEqual({ type: 'pivot_table', title: 'Pivot Table', icon: 'ic_pivot_table.svg', buildable: true });
     expect(items.find(item => item.type === 'arearange')).toMatchObject({ buildable: false });
+    expect(items.find(item => item.type === 'Parliament')).toEqual({ type: 'Parliament', title: 'Parliament', icon: 'ic_parliament.svg', buildable: true });
     expect(items.at(-1)).toMatchObject({ type: 'multi_tree_filter', buildable: true });
     expect(items.filter(item => item.buildable)).toHaveLength(CHART_TYPES.length - 2);
   });

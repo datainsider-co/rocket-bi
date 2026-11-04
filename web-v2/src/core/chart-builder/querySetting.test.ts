@@ -49,6 +49,30 @@ describe('buildSetting', () => {
     expect(canBuildSetting(data(ChartType.StackedBar, { x_axis: [x], breakdown_optional: [x] }))).toBe(false);
   });
 
+  it('builds the funnel, pyramid and parliament like the pie, under their own classes', () => {
+    const configs = { legend: [item({})], value: [item({ id: 2, name: 'n', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Sum' })] };
+    const pie = buildSetting(data(ChartType.Pie, configs), { options: {} });
+    for (const [chartType, className] of [
+      [ChartType.Funnel, 'funnel_chart_setting'],
+      [ChartType.Pyramid, 'pyramid_chart_setting'],
+      [ChartType.Parliament, 'parliament_chart_setting']
+    ] as const) {
+      expect(buildSetting(data(chartType, configs), { options: {} })).toStrictEqual({ ...pie, class_name: className });
+    }
+    expect(canBuildSetting(data(ChartType.Funnel, { legend: configs.legend }))).toBe(false);
+  });
+
+  it('builds the variable pie as generic columns: the legend, the value and the weight when it has one', () => {
+    const legend = item({});
+    const value = item({ id: 2, name: 'units', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Sum' });
+    const weight = item({ id: 3, name: 'orders', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Average' });
+    const names = (configs: BuilderData['configs']) => asArray(buildSetting(data(ChartType.VariablePie, configs), { options: {} })?.['columns']).map(column => asRecord(column)['name']);
+    expect(buildSetting(data(ChartType.VariablePie, { legend: [legend], value: [value] }), { options: {} })).toMatchObject({ class_name: 'generic_chart_setting' });
+    expect(names({ legend: [legend], value: [value] })).toEqual(['region', 'units']);
+    expect(names({ weight: [weight], value: [value], legend: [legend] })).toEqual(['region', 'units', 'orders']);
+    expect(canBuildSetting(data(ChartType.VariablePie, { legend: [legend], weight: [weight] }))).toBe(false);
+  });
+
   it('builds a pivot table from any one of its zones', () => {
     const rowsOnly = buildSetting(data(ChartType.PivotTable, { rows: [item({})] }), { options: {} });
     expect(rowsOnly).toMatchObject({ class_name: 'pivot_table_chart_setting', columns: [], values: [], formatters: [] });

@@ -54,6 +54,17 @@ describe('visualizationResponseFromJson', () => {
     });
   });
 
+  it('reads generic rows as they are, a value per column', () => {
+    expect(visualizationResponseFromJson(responses.generic_chart_setting)).toEqual({
+      kind: 'generic',
+      headers: ['sales_channel', 'Units', 'Average units'],
+      records: [
+        ['Offline', 587060, 5699.6117],
+        ['Online', 441986, 4556.5567]
+      ]
+    });
+  });
+
   it('reads json tables with their header keys', () => {
     const response = visualizationResponseFromJson(responses.table_chart_setting);
     expect(response.kind).toBe('json_table');
