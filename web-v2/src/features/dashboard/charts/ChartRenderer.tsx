@@ -19,7 +19,10 @@ import { columnDecorationsOf } from './table/columnDecorations';
 import { isCollapseTableSetting } from './table/collapseTable.utils';
 import { CollapseTable } from './table/CollapseTable';
 import { PivotTable } from './table/PivotTable';
+import { buildFunnelChartOptions, type FunnelType } from './funnel/funnelChartOptions';
+import { buildParliamentChartOptions, parliamentLimitError } from './parliament/parliamentChartOptions';
 import { buildPieChartOptions } from './pie/pieChartOptions';
+import { buildVariablePieChartOptions } from './pie/variablePieChartOptions';
 import { buildSeriesChartOptions, isTimestampFunction } from './series/seriesChartOptions';
 import { buildStackedChartOptions } from './series/stackedChartOptions';
 import { FlattenTableView } from './table/FlattenTableView';
@@ -69,15 +72,23 @@ export interface KpiParts {
 
 const SERIES_CLASSES = new Set<string>([ChartVizClass.Series, ChartVizClass.StackedSeries, ChartVizClass.CircularBar]);
 
-function Unsupported({ title, type }: { title: string; type: string }) {
+const FUNNEL_TYPES: Readonly<Record<string, FunnelType>> = { [ChartVizClass.Funnel]: 'funnel', [ChartVizClass.Pyramid]: 'pyramid' };
+
+/** The chart's title over why it shows nothing. */
+function ChartMessage({ title, message }: { title: string; message: string }) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-1 text-center">
       <div className="truncate font-medium">{title}</div>
       <div className="text-xs" style={{ color: 'var(--secondary-text-color)' }}>
-        {type} is not supported yet
+        {message}
       </div>
     </div>
   );
+}
+
+/** A parliament with more dots than it allows says so instead of drawing (v1 `InvalidDataException`). */
+function chartErrorOf(viz: ChartViz, response: VisualizationResponse): string | undefined {
+  return viz.className === ChartVizClass.Parliament && response.kind === 'series_two' ? parliamentLimitError(viz.options, response) : undefined;
 }
 
 /**
@@ -95,6 +106,12 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
     if ((viz.className === ChartVizClass.Pie || viz.className === ChartVizClass.Donut) && response.kind === 'series_two') {
       return buildPieChartOptions({ options: viz.options, response, themeColors, selected, onSelect });
     }
+    const funnelType = FUNNEL_TYPES[viz.className];
+    if (funnelType && response.kind === 'series_two') return buildFunnelChartOptions({ type: funnelType, options: viz.options, response, themeColors });
+    if (viz.className === ChartVizClass.Parliament && response.kind === 'series_two' && !chartErrorOf(viz, response)) {
+      return buildParliamentChartOptions({ options: viz.options, response, themeColors });
+    }
+    if (viz.className === ChartVizClass.VariablePie && response.kind === 'generic') return buildVariablePieChartOptions({ options: viz.options, response, themeColors });
     return undefined;
   }, [viz, response, themeColors, widget.setting, selected, onSelect, onPointMenu]);
   const tableFormat = useMemo(() => tableNumberFormat(viz.options), [viz.options]);
@@ -130,5 +147,8 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
     if (isPivotTableSetting(widget.setting)) return <PivotTable {...tableProps} setting={widget.setting} options={viz.options} subRows={table.subRows} />;
     return isCollapseTableSetting(widget.setting) ? <CollapseTable {...tableProps} columns={tableColumns} /> : <FlattenTableView {...tableProps} />;
   }
-  return <Unsupported title={titleText(viz.options.title) ?? widget.name} type={viz.className || asString(widget.setting['class_name'])} />;
+  const title = titleText(viz.options.title) ?? widget.name;
+  const error = chartErrorOf(viz, response);
+  if (error) return <ChartMessage title={title} message={error} />;
+  return <ChartMessage title={title} message={`${viz.className || asString(widget.setting['class_name'])} is not supported yet`} />;
 }
