@@ -762,6 +762,64 @@ của item. Spec lấy từ v1 (`DatabaseListing`, `CalculatedFieldModal`, `Upda
   db đó), action trên cột thường và cột nested (v1 cũng không có), quyền: menu hiện cho mọi người, server từ chối nếu
   thiếu quyền `database:edit` và message hiện ra.
 
+## Quyết định ở CB7e1 (2026-11-04)
+
+Funnel, Pyramid, Variable Pie và Parliament (họ pie, chọn làm trước trong CB7e ngày 2026-11-04).
+
+- **Builder** (v1 `FUNNEL_CONFIGS`, `PYRAMID_CONFIGS`, `VARIWIDE_CONFIGS`, `PARLIAMENT_CONFIGS`):
+  - Funnel và Pyramid có zone như pie (Legend, Value). Query setting `funnel_chart_setting` / `pyramid_chart_setting`,
+    cùng `legend` / `value` như pie.
+  - Parliament: Legend và Value, Value mặc định Count distinct với mọi kiểu cột. Query setting
+    `parliament_chart_setting`.
+  - Variable Pie: Legend, Value và Weight (tuỳ chọn). Query setting là `generic_chart_setting` với `columns` theo thứ
+    tự legend, value, weight (khi có), như v1 `VariablepieQuerySettingHandler`.
+  - `ChartType` giữ cách v1 viết: `funnel`, `pyramid`, `variablepie`, `Parliament` (viết hoa).
+  - Viz options mặc định lấy theo source v1, đã so với bundle v1 đang chạy trên docker (giống nhau). Funnel không có
+    `theme_color`; các key hình dạng (`neck_width`, `center`, ...) nằm ở gốc options như v1, renderer không đọc.
+  - Kích thước mặc định khi thêm chart: `DefaultSize` như v1 (các setting này không override `getDefaultSize`).
+- **Response:** Funnel, Pyramid, Parliament trả `series_two_response`. Variable Pie trả `generic_chart_response`
+  (`headers`, `records` là mảng giá trị theo cột), parse thành kind `generic`. Đã kiểm trên backend local; fixture ở
+  `queryResponses.fixture.json` (`generic_chart_setting`).
+- **Renderer** (`features/dashboard/charts`):
+  - `funnel/funnelChartOptions.ts`: Funnel và Pyramid với hình dạng v1 cố định trong chart. Tooltip của funnel đứng
+    đầu là tên series, của pyramid là tên điểm, như v1.
+  - `pie/variablePieChartOptions.ts`: mỗi record là một lát, weight thành `z`. Tooltip ghi value và weight theo tên
+    cột.
+  - `parliament/parliamentChartOptions.ts`: Highcharts item series, layout Parliament / Rectangle / Circle theo
+    `display_type`. Giá trị vượt `max_data_point` (mặc định 1000, không có thì 1500) thì không vẽ mà báo lỗi như v1.
+  - `pie/pointText.ts`: data label và tooltip dùng chung cho họ pie (pie dùng luôn). Tên điểm được escape, vì
+    Highcharts vẽ bằng HTML; v1 chèn nguyên văn.
+  - `HighchartsChart` nạp thêm module `funnel`, `variable-pie`, `item-series`.
+  - Drill down và zoom dùng sẵn bảng `legend` của `funnel_chart_setting`, `pyramid_chart_setting`,
+    `parliament_chart_setting`. Không có cross filter (v1 chỉ cho Pie).
+- **Tab Settings:**
+  - Funnel, Pyramid (v1 `FunnelSetting`, `PyramidSetting`): Title & Subtitle, Legend, Data Color, Data Label,
+    Background, Tooltip, Other. Variable Pie (v1 `VariablepieSetting`): cùng các tab, Legend đứng đầu như pie.
+  - Data Label: Funnel và Pyramid có Label style và Label position (Inside / Outside, lưu `inside` dạng boolean như
+    v1), dưới `plot_options.funnel` / `plot_options.pyramid`. Variable Pie không có Label style, như v1.
+  - Parliament (v1 `ParliamentSetting`): Title & Subtitle, Layout, General (Max data point), Legend, Data Color,
+    Background, Tooltip, Other. Không có Data Label (v1 comment tab này). Other chỉ có Decimal point và các toggle:
+    v1 ẩn display unit, precision và thousand separator.
+  - Other: drilldown cho Pyramid và Parliament, zoom cho Funnel, theo v1 `VisualHeaderConfigs`.
+- **Khác v1:**
+  - Variable Pie: tab Data Label và display unit ghi dưới `plot_options.series`, nhưng chart v1 đọc dưới `pie`, nên
+    không có tác dụng. v2 đọc đúng chỗ đã ghi.
+  - Parliament: tab General của v1 ghi `num_data_point`, chart lại đọc `max_data_point`. v2 ghi `max_data_point`.
+  - Parliament: v1 cố định `center` và `size` (`230%` cho Parliament, `140%` cho Circle), nên các chấm đè lên title và
+    tràn ra hai bên card. v2 để Highcharts tự vừa với vùng vẽ, chỉ giữ góc bắt đầu và kết thúc.
+  - Revert của Data Label trên funnel / pyramid ghi `inside: false`; v1 ghi `position`, key không ai đọc.
+- **Tooltip theo theme** (sửa cho mọi chart Highcharts): tooltip `outside` nằm trong container Highcharts gắn vào
+  `<body>`, ngoài `.dashboard-theme`, nên `var(--tooltip-background-color)` và `var(--text-color)` không có giá trị,
+  nền và chữ thành đen. `shared/charts/tooltipTheme.ts` (gọi trong `HighchartsChart`): mỗi lần tooltip hiện, các biến
+  mà options và HTML của nó dùng được gán lên container, lấy giá trị từ chart. Chart không lưu màu tooltip (như pie do
+  v1 tạo) thì nền mặc định là `var(--tooltip-background-color)` (`BASE_CONFIG`). Chữ của họ pie mặc định là
+  `var(--text-color)` như series; v1 dùng trắng, nên không đọc được trên tooltip sáng của theme.
+- **Nợ backend:** với `generic_chart_setting`, server đưa cột `count_all` lên trước các aggregate khác, bất kể vị trí,
+  nên giá trị nằm dưới header sai (ví dụ value Sum và weight Count all thì value nhận số đếm). Sum, Average, Max giữ
+  đúng thứ tự. v1 cũng bị.
+- **Đã kiểm trên app thật** (Playwright, backend local): dashboard tạm có cả 4 loại vẽ đúng, Parliament vượt giới hạn
+  hiện thông báo, builder mở từng chart với preview và tab Settings, đổi Layout sang Circle thì preview vẽ lại.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -773,7 +831,7 @@ của item. Spec lấy từ v1 (`DatabaseListing`, `CalculatedFieldModal`, `Upda
 | CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control). Display as column để lại CB7 | Xong |
 | CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Xong |
 | CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Xong. Tab style của table và tab Comparison của Number làm ở CB7a / CB7b |
-| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Chia theo thứ tự của `MIGRATION.md` (chọn 2026-10-28): **CB7a** Number: comparison, trend line (tab Comparison), dropdown date range cho người xem, cột ngày nested, xong. **CB7b** Tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer, Collapse Table, Pivot Table: CB7b1 (style), CB7b2 (field và conditional formatting), CB7b3 (Collapse Table), CB7b4 (Pivot Table) xong. **CB7c** Stacked Column / Bar, Circular Bar, Lollipop, xong. **CB7d** Scatter, Bubble, Area Range, Column Range. **CB7e** Funnel, Pyramid, Variable Pie, Parliament, Word Cloud, Tree map, Heat map, Gauges, Bullet. **CB7f** Pareto, Bell curve, Histogram, Spider web, Wind rose, Sankey, Line stock. Map có thiết kế riêng | Đang làm: xong CB7a, CB7b, CB7c |
+| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Chia theo thứ tự của `MIGRATION.md` (chọn 2026-10-28): **CB7a** Number: comparison, trend line (tab Comparison), dropdown date range cho người xem, cột ngày nested, xong. **CB7b** Tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer, Collapse Table, Pivot Table: CB7b1 (style), CB7b2 (field và conditional formatting), CB7b3 (Collapse Table), CB7b4 (Pivot Table) xong. **CB7c** Stacked Column / Bar, Circular Bar, Lollipop, xong. **CB7d** Scatter, Bubble, Area Range, Column Range. **CB7e** Funnel, Pyramid, Variable Pie, Parliament (CB7e1, xong), Word Cloud, Tree map, Heat map, Gauges, Bullet. **CB7f** Pareto, Bell curve, Histogram, Spider web, Wind rose, Sankey, Line stock. Map có thiết kế riêng | Đang làm: xong CB7a, CB7b, CB7c, CB7e1 |
 | CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query. Delete table thuộc Data Management, như v1 | Xong |
 
 ## Ghi chú về field drag and drop
