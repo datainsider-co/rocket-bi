@@ -41,6 +41,8 @@ export const BASE_CONFIG = {
       fontStyle: 'var(--widget-secondary-font-style, normal)'
     }
   },
+  /** The theme's tooltip for charts that don't set one (v1 left Highcharts' white). */
+  tooltip: { backgroundColor: 'var(--tooltip-background-color)' },
   credits: { enabled: false },
   exporting: { enabled: false }
 };

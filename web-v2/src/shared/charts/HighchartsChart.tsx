@@ -1,10 +1,15 @@
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReactModule, { type HighchartsReactRefObject } from 'highcharts-react-official';
-// Polar panes (circular bar) and the lollipop series, which builds on the dumbbell; each registers itself on import.
+// Polar panes (circular bar), the lollipop series, which builds on the dumbbell, the funnel and pyramid, the variable
+// pie and the item series (parliament); each registers itself on import.
 import 'highcharts/highcharts-more';
 import 'highcharts/modules/dumbbell';
 import 'highcharts/modules/lollipop';
+import 'highcharts/modules/funnel';
+import 'highcharts/modules/variable-pie';
+import 'highcharts/modules/item-series';
+import { withThemedTooltip } from './tooltipTheme';
 
 /**
  * The package ships CommonJS only (`module.exports = { HighchartsReact, default }`). Vite's pre-bundle hands that whole
@@ -61,11 +66,12 @@ export function HighchartsChart({ options, height = 400, fill = false, onPointCo
   };
 
   const chart = fill ? { ...options.chart, width: size?.width, height: size?.height } : { height, ...options.chart };
+  const themed = useMemo(() => withThemedTooltip(options), [options]);
   const content = (
     <HighchartsReact
       ref={chartRef}
       highcharts={Highcharts}
-      options={{ credits: { enabled: false }, ...options, chart }}
+      options={{ credits: { enabled: false }, ...themed, chart }}
       containerProps={{ 'data-testid': 'highcharts-chart' }}
     />
   );
