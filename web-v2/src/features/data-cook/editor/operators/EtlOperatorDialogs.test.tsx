@@ -6,10 +6,14 @@ import { etlJobFromJson, etlJobToJson, type EtlJob } from '@/core/data-cook/EtlJ
 import type { EtlOperator } from '@/core/data-cook/EtlOperator';
 import { EtlPreviewService } from '@/core/data-cook/EtlPreviewService';
 import { EtlService } from '@/core/data-cook/EtlService';
+import { readRenderOptions } from '@/core/data-cook/etlExtraData';
+import { QueryService } from '@/core/query/QueryService';
+import { visualizationResponseFromJson } from '@/core/query/VisualizationResponse';
+import { fakeQueryService } from '@/features/dashboard/testing';
 import { clearSession, saveSession } from '@/core/session/session';
 import type { CodeEditorProps } from '@/shared/code-editor/CodeEditor';
 import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing';
-import { fakeEtlPreviewService, fakeEtlService } from '../../testing';
+import { fakeEtlPreviewService, fakeEtlService, findDialog, saveThroughDialog } from '../../testing';
 import { treeOperators } from '../preview/etlPreview.utils';
 
 vi.mock('@/shared/code-editor/LazyCodeEditor', () => ({
@@ -32,16 +36,21 @@ const builtWithColumns: EtlPreviewService['preview'] = async (id, operators) => 
   errors: []
 });
 
-function setup(preview: Partial<EtlPreviewService> = {}) {
+/** Answers every `chart/query` with one column, region. */
+const regionTable: QueryService['query'] = async () =>
+  visualizationResponseFromJson({ class_name: 'json_table_response', headers: [{ key: '0', label: 'region', is_group_by: false, is_text_left: true, formatter_key: '' }], records: [{ '0': 'Asia' }], total: 1 });
+
+function setup(preview: Partial<EtlPreviewService> = {}, query = vi.fn<QueryService['query']>(regionTable)) {
   const service = fakeEtlService({ get: vi.fn<EtlService['get']>(async () => ETL2), update: vi.fn<EtlService['update']>(async etl => etl) });
   const previewService = fakeEtlPreviewService({ preview: vi.fn<EtlPreviewService['preview']>(builtWithColumns), ...preview });
   renderAppAt('/data-warehouse/data-cook/my-etl/dc0-v1-etl-2', fakeAuthenticationService(), [
     di => {
       di.bindValue(EtlService, service);
       di.bindValue(EtlPreviewService, previewService);
+      di.bindValue(QueryService, fakeQueryService({ query }));
     }
   ]);
-  return { service, previewService, user: userEvent.setup() };
+  return { service, previewService, query, user: userEvent.setup() };
 }
 
 const user = () => userEvent.setup();
@@ -64,15 +73,12 @@ async function previewed() {
   await waitFor(() => expect(screen.queryByLabelText('Previewing')).not.toBeInTheDocument());
 }
 
-/**
- * The open dialog titled `title`. Found by its title: the tests' `useId` gives every element the same id, so a
- * dialog's accessible name is not its own once the preview tabs are drawn.
- */
-async function findDialog(title: string): Promise<HTMLElement> {
+/** The menu item showing `text`; a submenu's title has no accessible name of its own. */
+async function findMenuItem(text: string): Promise<HTMLElement> {
   return waitFor(() => {
-    const dialog = screen.getAllByRole('dialog').find(item => item.querySelector('.ant-modal-title')?.textContent === title);
-    if (!dialog) throw new Error(`No dialog ${title}`);
-    return dialog;
+    const item = screen.getAllByRole('menuitem').findLast(element => element.textContent === text);
+    if (!item) throw new Error(`No menu item ${text}`);
+    return item;
   });
 }
 
@@ -86,11 +92,12 @@ async function findOption(title: string): Promise<HTMLElement> {
 }
 
 async function save(service: EtlService, events: ReturnType<typeof userEvent.setup>) {
-  await events.click(screen.getByRole('button', { name: 'Save' }));
+  await saveThroughDialog(events);
   await waitFor(() => expect(service.update).toHaveBeenCalled());
 }
 
-describe('operator dialogs', () => {
+// Each test renders the whole app and types through several dialogs: slower than the default 5 s under a full run.
+describe('operator dialogs', { timeout: 20_000 }, () => {
   it('adds an SQL Query after a table, saving its SQL on the preview database', async () => {
     const { service, previewService, user: events } = setup();
     await previewed();
@@ -212,6 +219,35 @@ describe('operator dialogs', () => {
       ['Region', false],
       ['cnt', true]
     ]);
+  });
+
+  it.each([
+    ['Transform Table', 'transform', 'table_chart_setting', 'table_chart_setting', 'flatten_table'],
+    ['Pivot Table', 'pivot', 'pivot_table_chart_setting', 'flatten_pivot_table_chart_setting', 'flatten_pivot_table']
+  ])('builds a %s with ChartBuilder on the table it reads', async (title, kind, storedClass, previewClass, chartType) => {
+    const { service, query, user: events } = setup();
+    await previewed();
+
+    await pickMenu('Actions of sales_1_2', title, events);
+    const builder = (await screen.findByRole('heading', { name: title })).closest<HTMLElement>('.ant-modal')!;
+    expect(within(builder).getByText('Drag and drop fields into the zones to build the table')).toBeInTheDocument();
+    // "click here" lists the table, then its columns.
+    await events.click(within(builder).getAllByRole('button', { name: 'click here' })[0]!);
+    await events.hover(await findMenuItem('sales_1_2'));
+    await events.click(await findMenuItem('region'));
+    expect(await within(builder).findByText('Asia')).toBeInTheDocument();
+    const asked = vi.mocked(query).mock.lastCall![0]['query_setting'] as Record<string, unknown>;
+    expect(asked['class_name']).toBe(previewClass);
+    await events.click(within(builder).getByRole('button', { name: 'Add' }));
+
+    expect(await screen.findByLabelText('Actions of sales_1_3')).toBeInTheDocument();
+    await save(service, events);
+    const operator = savedOperator(service, 'sales_1_3');
+    expect(operator?.kind).toBe(kind);
+    const stored = operator && 'query' in operator && typeof operator.query === 'object' ? operator.query : {};
+    expect(stored).toMatchObject({ class_name: storedClass, options: {} });
+    expect(JSON.stringify(stored)).toContain('"db_name":"preview_etl_2","tbl_name":"sales_1_2","field_name":"region"');
+    expect(readRenderOptions(savedEtl(service).extraData, 'sales_1_3')).toMatchObject({ current_chart_type: chartType });
   });
 
   it('says an operator cannot be added after a table whose preview failed', async () => {

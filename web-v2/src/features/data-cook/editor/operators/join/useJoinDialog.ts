@@ -11,6 +11,7 @@ import type { TablePreviewState } from '../../preview/useEtlPreview';
 import { useLoadSource } from '../../source/useLoadSource';
 import { EMPTY_CONDITION, joinConditions, joinFormError, joinFormOf, newJoinOperator, sourceAsPreviewTable, updatedJoin, type ConditionForm, type JoinForm } from '../join.utils';
 import { knownTable, newTableConfig } from '../operators.utils';
+import type { OperatorExtras } from '../useOperatorDialog';
 import { rightOptions, withCondition, withoutRightColumns } from './joinDialog.utils';
 
 /** The table on the right: one of the ETL, or a warehouse table that comes in as a new source (`source`). */
@@ -32,7 +33,7 @@ export interface JoinDialogContext {
   readonly graph: EtlGraph;
   readonly previews: ReadonlyMap<string, TablePreviewState>;
   readonly dbName: string;
-  readonly onAdd: (operator: EtlOperator, parentNames: readonly string[], sources?: readonly EtlOperator[]) => void;
+  readonly onAdd: (operator: EtlOperator, parentNames: readonly string[], extras?: OperatorExtras) => void;
   readonly onUpdate: (operator: EtlOperator) => void;
 }
 
@@ -101,7 +102,7 @@ export function useJoinDialog(sides: JoinSides, context: JoinDialogContext) {
     const sources = right.source ? [right.source] : [];
     const destTable = newTableConfig(graph, [sides.left, right.operator], sources.map(source => source.destTable.tblName));
     const operator = newJoinOperator(sides.left, right.operator, destTable, form.joinType, joinConditions(form, sides.leftTable, right.table));
-    onAdd(operator, [leftName, right.operator.destTable.tblName], sources);
+    onAdd(operator, [leftName, right.operator.destTable.tblName], { sources });
   }, [right, form, sides, graph, leftName, onAdd, onUpdate]);
 
   return {

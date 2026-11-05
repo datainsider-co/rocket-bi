@@ -3,8 +3,8 @@ import { baseTableName, uniqueTableName, type EtlGraph } from '@/core/data-cook/
 import type { TableSchema } from '@/core/schema/SchemaService';
 import type { EtlNodeRef } from '../graph/etlNodeRef';
 
-/** The operators v2 adds and edits with its own dialogs (DC7). Transform and Pivot come with ChartBuilder (DC8). */
-export type OperatorKind = 'sql' | 'join' | 'manageFields';
+/** The operators v2 adds and edits: its own dialogs (DC7), and ChartBuilder for Transform and Pivot (DC8). */
+export type OperatorKind = 'sql' | 'join' | 'manageFields' | 'transform' | 'pivot';
 
 /** The dialog an operator opens: adding one after `parent`, or editing the operator writing `tblName`. */
 export type OperatorDialog =
@@ -12,8 +12,8 @@ export type OperatorDialog =
   | { readonly mode: 'edit'; readonly kind: OperatorKind; readonly tblName: string };
 
 /** Menu keys that add an operator (v1 `TableContextMenu`). */
-const ADD_KEYS: Readonly<Record<string, OperatorKind>> = { join: 'join', manageFields: 'manageFields', sql: 'sql' };
-const KINDS: ReadonlySet<string> = new Set<OperatorKind>(['sql', 'join', 'manageFields']);
+const ADD_KEYS: Readonly<Record<string, OperatorKind>> = { join: 'join', manageFields: 'manageFields', sql: 'sql', transform: 'transform', pivot: 'pivot' };
+const KINDS: ReadonlySet<string> = new Set<OperatorKind>(['sql', 'join', 'manageFields', 'transform', 'pivot']);
 
 /** The dialog a menu item opens on a box: a table's operators add one after it, an operator's Edit edits it. */
 export function operatorDialogOf(ref: Pick<EtlNodeRef, 'type' | 'tblName'>, key: string, operator: EtlOperator | undefined): OperatorDialog | undefined {

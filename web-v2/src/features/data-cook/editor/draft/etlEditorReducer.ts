@@ -1,5 +1,6 @@
 import type { EtlJob } from '@/core/data-cook/EtlJob';
-import type { EtlOperator } from '@/core/data-cook/EtlOperator';
+import type { EtlOperator, PersistConfiguration } from '@/core/data-cook/EtlOperator';
+import type { JsonObject } from '@/core/json/json';
 import { writePosition, type Point } from '@/core/data-cook/etlExtraData';
 import { positionTarget, type EtlNodeRef } from '../graph/etlNodeRef';
 import {
@@ -8,6 +9,8 @@ import {
   removeOperator,
   removePersist,
   replaceOperator,
+  setPersist,
+  withRenderOptions,
   removeThirdParty,
   renameTable,
   type EtlDraft
@@ -32,9 +35,19 @@ export type EtlEditorAction =
   | { readonly type: 'discard' }
   | { readonly type: 'rename'; readonly displayName: string }
   | { readonly type: 'addSource'; readonly operator: EtlOperator }
-  /** A new operator reading `parentNames`, after the sources it brings (a join with a warehouse table). */
-  | { readonly type: 'addOperator'; readonly operator: EtlOperator; readonly parentNames: readonly string[]; readonly sources?: readonly EtlOperator[] }
-  | { readonly type: 'updateOperator'; readonly operator: EtlOperator }
+  /**
+   * A new operator reading `parentNames`, after the sources it brings (a join with a warehouse table), with the
+   * ChartBuilder state of a Transform or Pivot.
+   */
+  | {
+      readonly type: 'addOperator';
+      readonly operator: EtlOperator;
+      readonly parentNames: readonly string[];
+      readonly sources?: readonly EtlOperator[];
+      readonly renderOptions?: JsonObject;
+    }
+  | { readonly type: 'updateOperator'; readonly operator: EtlOperator; readonly renderOptions?: JsonObject }
+  | { readonly type: 'persist'; readonly tblName: string; readonly persist: PersistConfiguration }
   | { readonly type: 'remove'; readonly ref: EtlNodeRef }
   | { readonly type: 'renameTable'; readonly tblName: string; readonly displayName: string }
   | { readonly type: 'move'; readonly moves: readonly NodeMove[] };
@@ -75,10 +88,13 @@ export function etlEditorReducer(state: EtlEditorState, action: EtlEditorAction)
       return edit(state, addOperator(draft, action.operator));
     case 'addOperator': {
       const withSources = (action.sources ?? []).reduce((current, source) => addOperator(current, source), draft);
-      return edit(state, addOperator(withSources, action.operator, action.parentNames));
+      const added = addOperator(withSources, action.operator, action.parentNames);
+      return edit(state, withRenderOptions(added, action.operator.destTable.tblName, action.renderOptions));
     }
     case 'updateOperator':
-      return edit(state, replaceOperator(draft, action.operator));
+      return edit(state, withRenderOptions(replaceOperator(draft, action.operator), action.operator.destTable.tblName, action.renderOptions));
+    case 'persist':
+      return edit(state, setPersist(draft, action.tblName, action.persist));
     case 'remove':
       return edit(state, removeNode(draft, action.ref));
     case 'renameTable':

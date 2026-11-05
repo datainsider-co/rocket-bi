@@ -13,10 +13,15 @@ export interface TableRename {
 }
 
 /**
- * What the box menus do: Remove (asking first when steps after it go too), Edit Display Name, and the operators'
- * dialogs (`openOperator`).
+ * What the box menus do: Remove (asking first when steps after it go too), Edit Display Name, the operators' dialogs
+ * and Save To Data Warehouse.
  */
-export function useNodeMenu(draft: EtlDraft, dispatch: EtlEditorDispatch, openOperator: (dialog: OperatorDialog) => void) {
+export function useNodeMenu(
+  draft: EtlDraft,
+  dispatch: EtlEditorDispatch,
+  open: { readonly operator: (dialog: OperatorDialog) => void; readonly persist: (tblName: string) => void }
+) {
+  const { operator: openOperator, persist: openPersist } = open;
   const { modal } = App.useApp();
   const [renaming, setRenaming] = useState<TableRename>();
   const { graph } = draft;
@@ -28,6 +33,7 @@ export function useNodeMenu(draft: EtlDraft, dispatch: EtlEditorDispatch, openOp
       if (key === EtlMenuKey.Rename) setRenaming({ tblName: ref.tblName, displayName: operator.destTable.tblDisplayName });
       const dialog = operatorDialogOf(ref, key, operator);
       if (dialog) openOperator(dialog);
+      if ((ref.type === 'table' && key === EtlMenuKey.SaveToDataWarehouse) || (ref.type === 'persist' && key === EtlMenuKey.Edit)) openPersist(ref.tblName);
       if (key !== EtlMenuKey.Remove) return;
 
       const remove = () => dispatch({ type: 'remove', ref });
@@ -44,7 +50,7 @@ export function useNodeMenu(draft: EtlDraft, dispatch: EtlEditorDispatch, openOp
         onOk: remove
       });
     },
-    [graph, dispatch, modal, openOperator]
+    [graph, dispatch, modal, openOperator, openPersist]
   );
 
   const submitRename = useCallback(

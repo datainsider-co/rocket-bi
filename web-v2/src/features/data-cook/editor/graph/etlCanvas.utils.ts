@@ -71,7 +71,7 @@ export function toEtlNodes(graph: EtlGraph, extraData: JsonObject, onMenu: EtlNo
       add(ETL_NODE_TYPES.box, ref, savedPoint(extraData, ref, boxPoint(table)), {
         title: 'Email subject',
         subtitle: operator.subject || '<<no subject>>',
-        menu: boxMenu()
+        menu: boxMenu('email')
       });
       continue;
     }
@@ -93,7 +93,7 @@ export function toEtlNodes(graph: EtlGraph, extraData: JsonObject, onMenu: EtlNo
       add(ETL_NODE_TYPES.box, ref, savedPoint(extraData, ref, boxPoint(table, boxes)), {
         title: operator.persist.dbName || NO_NAME,
         subtitle: operator.persist.tblName || NO_NAME,
-        menu: boxMenu()
+        menu: boxMenu('persist')
       });
       boxes += 1;
     }
@@ -102,7 +102,7 @@ export function toEtlNodes(graph: EtlGraph, extraData: JsonObject, onMenu: EtlNo
       add(ETL_NODE_TYPES.box, ref, savedPoint(extraData, ref, boxPoint(table, boxes + index)), {
         title: asString(config['database_name']) || NO_NAME,
         subtitle: asString(config['table_name']) || NO_NAME,
-        menu: boxMenu()
+        menu: boxMenu('thirdParty')
       });
     });
   }

@@ -23,7 +23,7 @@ export const EtlMenuKey = {
   Remove: 'remove'
 } as const;
 
-/** Operators and destinations open with the steps that build their dialogs (DC8, DC9). */
+/** Save To Database and Send To Email come after the MVP (`DATA_COOK.md`). */
 export const NOT_SUPPORTED_YET = 'Not supported yet';
 
 const later = (key: string, label: string): EtlMenuItem => ({ key, label, disabled: true, title: NOT_SUPPORTED_YET });
@@ -39,16 +39,16 @@ export function tableMenu(isSource: boolean): EtlMenuItem[] {
     item(EtlMenuKey.Join, 'Join Table'),
     item(EtlMenuKey.ManageFields, 'Manage Fields'),
     item(EtlMenuKey.Sql, 'SQL Query'),
-    later(EtlMenuKey.Pivot, 'Pivot Table'),
-    later(EtlMenuKey.Transform, 'Transform Table'),
-    later(EtlMenuKey.SaveToDataWarehouse, 'Save To Data Warehouse'),
+    item(EtlMenuKey.Pivot, 'Pivot Table'),
+    item(EtlMenuKey.Transform, 'Transform Table'),
+    item(EtlMenuKey.SaveToDataWarehouse, 'Save To Data Warehouse'),
     ...(isSource ? [] : [{ key: EtlMenuKey.Rename, label: 'Edit Display Name' }]),
     REMOVE
   ];
 }
 
-/** The operators whose dialog v2 has (DC7). */
-const EDITABLE: ReadonlySet<EtlOperator['kind']> = new Set(['sql', 'join', 'manageFields']);
+/** The operators whose dialog v2 has (DC7, DC8). */
+const EDITABLE: ReadonlySet<EtlOperator['kind']> = new Set(['sql', 'join', 'manageFields', 'transform', 'pivot']);
 
 /** An operator's shape: Edit opens its dialog, Remove takes it and its table away. Python Query stays read-only. */
 export function operatorMenu(kind: EtlOperator['kind']): EtlMenuItem[] {
@@ -57,7 +57,7 @@ export function operatorMenu(kind: EtlOperator['kind']): EtlMenuItem[] {
   return [{ key: EtlMenuKey.Edit, label: 'Edit', disabled: true, title }, REMOVE];
 }
 
-/** A Save To Data Warehouse, Save To Database or email box. */
-export function boxMenu(): EtlMenuItem[] {
-  return [later(EtlMenuKey.Edit, 'Edit'), REMOVE];
+/** A Save To Data Warehouse, Save To Database or email box. Only Save To Data Warehouse has a dialog (DC9). */
+export function boxMenu(type: 'persist' | 'thirdParty' | 'email'): EtlMenuItem[] {
+  return [type === 'persist' ? item(EtlMenuKey.Edit, 'Edit') : later(EtlMenuKey.Edit, 'Edit'), REMOVE];
 }

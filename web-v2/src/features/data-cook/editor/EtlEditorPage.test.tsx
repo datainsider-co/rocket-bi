@@ -8,7 +8,7 @@ import { EtlService } from '@/core/data-cook/EtlService';
 import { clearSession, saveSession } from '@/core/session/session';
 import { ApiError } from '@/shared/http/ApiError';
 import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing';
-import { fakeEtlPreviewService, fakeEtlService } from '../testing';
+import { fakeEtlPreviewService, fakeEtlService, saveThroughDialog } from '../testing';
 
 const ETL2 = etlJobFromJson(fixture.etlGetV1.response);
 const SALES_JSON = { name: 'sales', db_name: 'sample_v2', display_name: 'Sales', columns: [] };
@@ -45,7 +45,9 @@ describe('EtlEditorPage', () => {
     expect(await screen.findByLabelText('Actions of sales_join_sales_copy')).toBeInTheDocument();
     expect(screen.getByText('Inner join')).toBeInTheDocument();
     expect(screen.getByText('regioncount2')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    // v1: Save opens its dialog whenever there are tables, to change the schedule too.
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Discard Changes' })).toBeDisabled();
   });
 
   it('renames a table and saves the ETL, keeping its schedule', async () => {
@@ -59,14 +61,15 @@ describe('EtlEditorPage', () => {
     await user.type(input, 'Region count{Enter}');
     expect(await screen.findByLabelText('Actions of Region count')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await saveThroughDialog(user);
 
     await waitFor(() => expect(service.update).toHaveBeenCalled());
     const json = etlJobToJson(savedEtl(service));
-    expect(json['schedule_time']).toEqual(etlJobToJson(ETL2)['schedule_time']);
+    // The schedule goes through the Save dialog: still daily, starting today (v1 did the same).
+    expect(json['schedule_time']).toMatchObject({ class_name: 'schedule_daily', recur_every: 1 });
     expect(JSON.stringify(json['operators'])).toContain('"tbl_display_name":"Region count"');
     expect(await screen.findByText('ETL saved')).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Discard Changes' })).toBeDisabled());
   });
 
   it('removes a table and the steps after it, after a confirm', async () => {
@@ -79,7 +82,7 @@ describe('EtlEditorPage', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Remove' }));
     await waitFor(() => expect(screen.queryByText('regioncount2')).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await saveThroughDialog(user);
     await waitFor(() => expect(service.update).toHaveBeenCalled());
     expect(savedEtl(service).operators.map(operator => operator.destTable.tblName)).toEqual(['sales_join_sales_copy']);
   });
@@ -100,7 +103,7 @@ describe('EtlEditorPage', () => {
     expect(await screen.findByLabelText('Actions of sales')).toBeInTheDocument();
     expect(service.get).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await saveThroughDialog(user);
     await waitFor(() => expect(service.update).toHaveBeenCalled());
     expect(savedEtl(service)).toMatchObject({ id: 12, displayName: 'Untitled ETL' });
     expect(etlJobToJson(savedEtl(service))['operators']).toEqual([expect.objectContaining({ table_schema: SALES_JSON })]);

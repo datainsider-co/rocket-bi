@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { boxMenu, NOT_SUPPORTED_YET, operatorMenu, tableMenu } from './etlMenu.utils';
 
 describe('tableMenu', () => {
-  it("lists v1's items, the ones waiting for their steps disabled", () => {
+  it("lists v1's items", () => {
     const menu = tableMenu(false);
 
     expect(menu.map(item => item.label)).toEqual([
@@ -15,8 +15,7 @@ describe('tableMenu', () => {
       'Edit Display Name',
       'Remove'
     ]);
-    expect(menu.slice(0, 3).some(item => item.disabled)).toBe(false);
-    expect(menu.slice(3, 6).every(item => item.disabled && item.title === NOT_SUPPORTED_YET)).toBe(true);
+    expect(menu.some(item => item.disabled)).toBe(false);
     expect(menu.at(-1)).toMatchObject({ key: 'remove', danger: true });
   });
 
@@ -26,7 +25,7 @@ describe('tableMenu', () => {
 });
 
 describe('operatorMenu', () => {
-  it.each(['sql', 'join', 'manageFields'] as const)('edits a %s operator', kind => {
+  it.each(['sql', 'join', 'manageFields', 'transform', 'pivot'] as const)('edits a %s operator', kind => {
     expect(operatorMenu(kind).map(item => [item.key, item.disabled ?? false])).toEqual([
       ['edit', false],
       ['remove', false]
@@ -34,8 +33,6 @@ describe('operatorMenu', () => {
   });
 
   it.each([
-    ['transform', NOT_SUPPORTED_YET],
-    ['pivot', NOT_SUPPORTED_YET],
     ['python', 'Not supported'],
     ['unsupported', 'Not supported']
   ] as const)('does not edit a %s operator yet', (kind, title) => {
@@ -44,10 +41,14 @@ describe('operatorMenu', () => {
 });
 
 describe('boxMenu', () => {
-  it('offers Edit (later) and Remove', () => {
-    expect(boxMenu().map(item => [item.key, item.disabled ?? false])).toEqual([
-      ['edit', true],
+  it('edits a Save To Data Warehouse box', () => {
+    expect(boxMenu('persist').map(item => [item.key, item.disabled ?? false])).toEqual([
+      ['edit', false],
       ['remove', false]
     ]);
+  });
+
+  it.each(['thirdParty', 'email'] as const)('only removes a %s box for now', type => {
+    expect(boxMenu(type)[0]).toMatchObject({ key: 'edit', disabled: true, title: NOT_SUPPORTED_YET });
   });
 });

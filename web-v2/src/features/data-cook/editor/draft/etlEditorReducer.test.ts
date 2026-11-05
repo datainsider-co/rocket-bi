@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fixture from '@/core/data-cook/etl.fixture.json';
 import { etlJobFromJson, newEtlJob } from '@/core/data-cook/EtlJob';
-import { PositionGroup, positionKey, readPosition } from '@/core/data-cook/etlExtraData';
+import { PositionGroup, positionKey, readPosition, readRenderOptions } from '@/core/data-cook/etlExtraData';
 import { leavesFromGraph } from '@/core/data-cook/etlGraph';
 import { newJoinOperator } from '../operators/join.utils';
 import { newSqlOperator } from '../operators/sqlQuery.utils';
@@ -61,6 +61,30 @@ describe('etlEditorReducer', () => {
 
     expect(state.draft.graph.operators.get('sales_1_1')).toBe(edited);
     expect(state.draft.graph.parentNames).toBe(loaded.draft.graph.parentNames);
+    expect(isDirty(state)).toBe(true);
+  });
+
+  it("keeps a Transform's builder state, and drops it with its table", () => {
+    const parent = loaded.draft.graph.operators.get('sales_1_2')!;
+    const operator = newSqlOperator(parent, { tblName: 'sales_1_3', dbDisplayName: 'ETL Database', tblDisplayName: 'sales_1_3' }, 'select 1');
+
+    const added = etlEditorReducer(loaded, { type: 'addOperator', operator, parentNames: ['sales_1_2'], renderOptions: { configs: {} } });
+    expect(readRenderOptions(added.draft.extraData, 'sales_1_3')).toEqual({ configs: {} });
+
+    const updated = etlEditorReducer(added, { type: 'updateOperator', operator, renderOptions: { configs: { columns: [] } } });
+    expect(readRenderOptions(updated.draft.extraData, 'sales_1_3')).toEqual({ configs: { columns: [] } });
+    expect(readRenderOptions(etlEditorReducer(updated, { type: 'updateOperator', operator }).draft.extraData, 'sales_1_3')).toEqual({ configs: { columns: [] } });
+
+    const removed = etlEditorReducer(updated, { type: 'remove', ref: { type: 'table', tblName: 'sales_1_3' } });
+    expect(readRenderOptions(removed.draft.extraData, 'sales_1_3')).toBeUndefined();
+  });
+
+  it('saves a table to the warehouse, and edits where', () => {
+    const persist = { dbName: 'out', tblName: 'region', type: 'Append' } as const;
+
+    const state = etlEditorReducer(loaded, { type: 'persist', tblName: 'sales_1_2', persist });
+
+    expect(state.draft.graph.operators.get('sales_1_2')?.persist).toEqual(persist);
     expect(isDirty(state)).toBe(true);
   });
 

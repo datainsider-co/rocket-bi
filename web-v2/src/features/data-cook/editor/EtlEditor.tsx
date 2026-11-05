@@ -7,7 +7,9 @@ import { EtlNameModal } from './EtlNameModal';
 import { OperatorDialogHost } from './operators/OperatorDialogHost';
 import { EtlPreviewContent } from './preview/EtlPreviewContent';
 import { EtlPreviewPanel } from './preview/EtlPreviewPanel';
+import { SaveEtlModal } from './save/SaveEtlModal';
 import { AddSourceModal } from './source/AddSourceModal';
+import { PersistModal } from './targets/PersistModal';
 import { useEtlEditor } from './useEtlEditor';
 
 interface EtlEditorProps {
@@ -18,7 +20,7 @@ interface EtlEditorProps {
 
 /** The editor of one ETL. Must be used inside `ReactFlowProvider`. */
 export function EtlEditor({ initial, onCreated }: EtlEditorProps) {
-  const { draft, canvas, preview, previews, operator, source, menu, edit, rename } = useEtlEditor(initial, onCreated);
+  const { draft, canvas, preview, previews, operator, persist, source, menu, edit, saveDialog, rename } = useEtlEditor(initial, onCreated);
   const zoom = useCanvasControls();
   const fullscreen = useFullscreen(zoom.onFitContent);
 
@@ -36,7 +38,9 @@ export function EtlEditor({ initial, onCreated }: EtlEditorProps) {
         )}
       </div>
       {source.isOpen && <AddSourceModal source={source} />}
-      <OperatorDialogHost etlId={draft.etl.id} graph={draft.graph} previews={previews} operator={operator} />
+      {persist.tblName !== undefined && <PersistModal dialog={persist} />}
+      {saveDialog.isOpen && <SaveEtlModal draft={draft} saving={saveDialog.saving} error={saveDialog.error} onSave={saveDialog.submit} onCancel={saveDialog.close} />}
+      <OperatorDialogHost etlId={draft.etl.id} graph={draft.graph} extraData={draft.extraData} previews={previews} operator={operator} />
       {rename.isOpen && <EtlNameModal title="Rename ETL" initialName={draft.displayName} onSubmit={rename.submit} onCancel={rename.close} />}
       {menu.renaming && (
         <EtlNameModal

@@ -1,3 +1,5 @@
+import { screen, waitFor, within } from '@testing-library/react';
+import type { UserEvent } from '@testing-library/user-event';
 import { vi } from 'vitest';
 import type { EtlHistoryService } from '@/core/data-cook/EtlHistoryService';
 import type { EtlPreviewService } from '@/core/data-cook/EtlPreviewService';
@@ -45,4 +47,23 @@ export function fakeEtlPreviewService(overrides: Partial<EtlPreviewService> = {}
     viewQuery: vi.fn<EtlPreviewService['viewQuery']>(async () => 'select 1'),
     ...overrides
   };
+}
+
+/**
+ * Test-only: the open dialog titled `title`. Found by its title: the tests' `useId` gives every element the same id, so
+ * a dialog's accessible name is not its own once the editor's tabs are drawn.
+ */
+export async function findDialog(title: string): Promise<HTMLElement> {
+  return waitFor(() => {
+    const dialog = screen.getAllByRole('dialog').find(item => item.querySelector('.ant-modal-title')?.textContent === title);
+    if (!dialog) throw new Error(`No dialog ${title}`);
+    return dialog;
+  });
+}
+
+/** Test-only: Save on the editor's control bar, then Save in the Save ETL dialog as it opens. */
+export async function saveThroughDialog(user: UserEvent): Promise<void> {
+  await user.click(screen.getByRole('button', { name: 'Save' }));
+  const dialog = await findDialog('Save ETL');
+  await user.click(within(dialog).getByRole('button', { name: 'Save' }));
 }

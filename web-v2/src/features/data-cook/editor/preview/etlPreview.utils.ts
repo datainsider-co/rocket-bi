@@ -182,3 +182,16 @@ export function previewTabs(graph: EtlGraph, statuses: ReadonlyMap<string, { rea
     return operator ? [{ tblName, label: previewTabLabel(operator), status }] : [];
   });
 }
+
+/**
+ * After a save, each table's signature then and now, where they differ: the server writes a Transform's or Pivot's
+ * query its own way (`aggregate_conditions`, `is_flatten`, ... added, DC8), yet the tables are the ones just built.
+ */
+export function signatureChanges(before: EtlGraph, after: EtlGraph): { tblName: string; from: string; to: string }[] {
+  const from = previewSignatures(before);
+  const to = previewSignatures(after);
+  return [...to].flatMap(([tblName, signature]) => {
+    const previous = from.get(tblName);
+    return previous !== undefined && previous !== signature ? [{ tblName, from: previous, to: signature }] : [];
+  });
+}

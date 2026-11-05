@@ -3,6 +3,7 @@ import type { EtlHistoryService, EtlHistorySortField } from '@/core/data-cook/Et
 import type { EtlId } from '@/core/data-cook/EtlJob';
 import type { EtlPreviewService } from '@/core/data-cook/EtlPreviewService';
 import type { EtlListing, EtlService, EtlSortField } from '@/core/data-cook/EtlService';
+import type { JsonObject } from '@/core/json/json';
 import type { ListingRequest } from '@/core/listing/Listing';
 
 /** Query keys of Data Cook. A run, a delete or a restore changes the listings and the history, so mutations invalidate `all`. */
@@ -14,13 +15,15 @@ export const dataCookKeys = {
   /** The editor's previews of an ETL's tables, each under its branch's signature (`editor/preview`). */
   database: (id: EtlId) => ['data-cook', 'database', id] as const,
   fieldsSample: (id: EtlId, request: unknown) => ['data-cook', 'fields-sample', id, request] as const,
+  /** A page of what a Transform or Pivot being built gives. */
+  builderPreview: (request: JsonObject) => ['data-cook', 'builder-preview', request] as const,
   previews: (id: EtlId) => ['data-cook', 'preview', id] as const,
   previewsOf: (id: EtlId, tblName: string) => ['data-cook', 'preview', id, tblName] as const,
   preview: (id: EtlId, tblName: string, signature: string) => ['data-cook', 'preview', id, tblName, signature] as const
 };
 
 /** What the editor reads of the tables it builds: a save or a run changes none of it. */
-const EDITOR_KEYS: ReadonlySet<unknown> = new Set(['preview', 'database', 'fields-sample']);
+const EDITOR_KEYS: ReadonlySet<unknown> = new Set(['preview', 'database', 'fields-sample', 'builder-preview']);
 
 /**
  * Marks the listings, the history and the ETLs stale after a save, a create or a run. Not the editor's previews: they

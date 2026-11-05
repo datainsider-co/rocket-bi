@@ -14,6 +14,7 @@ import {
   previewTabs,
   previousErrorText,
   shownTable,
+  signatureChanges,
   stableJson,
   tableResult,
   treeOperators
@@ -250,5 +251,22 @@ describe('previewTabs', () => {
 
   it('skips a table the graph no longer has', () => {
     expect(previewTabs(graphOf(), new Map([['a', { status: 'ready' as const }]]))).toEqual([]);
+  });
+});
+
+describe('signatureChanges', () => {
+  it('pairs the signatures of the tables that changed, and only those', () => {
+    const before = graphOf(c, sql('d', a));
+    const after = graphOf(sql('c', sql('b', a, 'select 2')), sql('d', a), sql('new', a));
+    const signatures = { before: previewSignatures(before), after: previewSignatures(after) };
+
+    expect(signatureChanges(before, after)).toEqual([
+      { tblName: 'b', from: signatures.before.get('b'), to: signatures.after.get('b') },
+      { tblName: 'c', from: signatures.before.get('c'), to: signatures.after.get('c') }
+    ]);
+  });
+
+  it('is empty when nothing changed', () => {
+    expect(signatureChanges(graphOf(c), graphOf(c))).toEqual([]);
   });
 });

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { App } from 'antd';
 import type { EtlOperator } from '@/core/data-cook/EtlOperator';
+import type { JsonObject } from '@/core/json/json';
 import type { EtlDraft } from '../draft/etlDraft.utils';
 import type { EtlEditorDispatch } from '../draft/useEtlEditorState';
 import type { TablePreviewState } from '../preview/useEtlPreview';
@@ -10,9 +11,18 @@ export interface OperatorDialogModel {
   readonly dialog: OperatorDialog | undefined;
   readonly open: (dialog: OperatorDialog) => void;
   readonly close: () => void;
-  /** A new operator reading `parentNames`, with a source it brings (Join with a warehouse table). */
-  readonly add: (operator: EtlOperator, parentNames: readonly string[], sources?: readonly EtlOperator[]) => void;
-  readonly update: (operator: EtlOperator) => void;
+  /**
+   * A new operator reading `parentNames`, with a source it brings (Join with a warehouse table) or its ChartBuilder
+   * state (Transform, Pivot).
+   */
+  readonly add: (operator: EtlOperator, parentNames: readonly string[], extras?: OperatorExtras) => void;
+  readonly update: (operator: EtlOperator, renderOptions?: JsonObject) => void;
+}
+
+/** What comes with a new operator. */
+export interface OperatorExtras {
+  readonly sources?: readonly EtlOperator[];
+  readonly renderOptions?: JsonObject;
 }
 
 /**
@@ -51,16 +61,16 @@ export function useOperatorDialog(
   );
   const close = useCallback(() => setDialog(undefined), []);
   const add = useCallback(
-    (operator: EtlOperator, parentNames: readonly string[], sources: readonly EtlOperator[] = []) => {
-      dispatch({ type: 'addOperator', operator, parentNames, sources });
+    (operator: EtlOperator, parentNames: readonly string[], extras: OperatorExtras = {}) => {
+      dispatch({ type: 'addOperator', operator, parentNames, ...extras });
       show(operator.destTable.tblName);
       setDialog(undefined);
     },
     [dispatch, show]
   );
   const update = useCallback(
-    (operator: EtlOperator) => {
-      dispatch({ type: 'updateOperator', operator });
+    (operator: EtlOperator, renderOptions?: JsonObject) => {
+      dispatch({ type: 'updateOperator', operator, renderOptions });
       show(operator.destTable.tblName);
       setDialog(undefined);
     },
