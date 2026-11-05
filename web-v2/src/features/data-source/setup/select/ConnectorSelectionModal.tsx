@@ -6,9 +6,11 @@ interface ConnectorSelectionModalProps {
   onChoose: (type: ConnectionType) => void;
   /** Closes setup for now; it shows again on the next visit while there is no connection. */
   onSkip: () => void;
+  /** "Skip" in first-run setup; "Cancel" on the settings page. */
+  skipLabel?: string;
 }
 
-export function ConnectorSelectionModal({ onChoose, onSkip }: ConnectorSelectionModalProps) {
+export function ConnectorSelectionModal({ onChoose, onSkip, skipLabel = 'Skip' }: ConnectorSelectionModalProps) {
   return (
     <Modal
       open
@@ -18,7 +20,7 @@ export function ConnectorSelectionModal({ onChoose, onSkip }: ConnectorSelection
       mask={{ closable: false }}
       keyboard={false}
       title={null}
-      footer={<Button onClick={onSkip}>Skip</Button>}
+      footer={<Button onClick={onSkip}>{skipLabel}</Button>}
     >
       <div className="px-2 pt-4 text-center">
         <Typography.Title level={3} className="!mb-2">

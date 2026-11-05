@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ApiOutlined } from '@ant-design/icons';
 import { Alert, Button, Form, Modal, Typography } from 'antd';
 import { useForm } from 'react-hook-form';
+import { supportsProperties, supportsSshTunnel } from '@/core/connection/ConnectionType';
 import { connectionFormSchema, hasSshTunnel } from './connectionForm.utils';
 import type { ConnectionFormValues } from './connectionForm.utils';
 import type { ConnectionFieldsFactory } from './fields/ConnectionFieldsFactory';
@@ -21,6 +22,8 @@ interface ConnectorConfigViewProps {
   test: { run: (values: ConnectionFormValues) => void; isPending: boolean; result?: TestResult | undefined };
   save: { run: (values: ConnectionFormValues) => void; isPending: boolean; errorMessage?: string | undefined };
   onBack: () => void;
+  /** "Back" to the type list in setup; "Cancel" when editing the saved connection. */
+  backLabel?: string;
   onLoadPublicKey: () => Promise<string>;
   /** Picks the type-specific fields; tests can inject their own. */
   fieldsFactory?: ConnectionFieldsFactory;
@@ -32,6 +35,7 @@ export function ConnectorConfigView({
   test,
   save,
   onBack,
+  backLabel = 'Back',
   onLoadPublicKey,
   fieldsFactory = defaultConnectionFieldsFactory
 }: ConnectorConfigViewProps) {
@@ -58,7 +62,7 @@ export function ConnectorConfigView({
       }
       footer={[
         <Button key="back" onClick={onBack} disabled={save.isPending}>
-          Back
+          {backLabel}
         </Button>,
         <Button key="apply" type="primary" htmlType="submit" form={FORM_ID} loading={save.isPending}>
           Apply
@@ -68,13 +72,15 @@ export function ConnectorConfigView({
       <form id={FORM_ID} noValidate onSubmit={handleSubmit(save.run)} className="pt-2">
         <Form layout="vertical" component={false} disabled={save.isPending}>
           {fieldsFactory.render(defaultValues.type, { control })}
-          <SshTunnelFields
-            control={control}
-            defaultOpen={hasSshTunnel(defaultValues.ssh)}
-            isPublicKeyLoading={publicKey.isLoading}
-            onOpen={publicKey.load}
-          />
-          <PropertiesFields control={control} />
+          {supportsSshTunnel(defaultValues.type) && (
+            <SshTunnelFields
+              control={control}
+              defaultOpen={hasSshTunnel(defaultValues.ssh)}
+              isPublicKeyLoading={publicKey.isLoading}
+              onOpen={publicKey.load}
+            />
+          )}
+          {supportsProperties(defaultValues.type) && <PropertiesFields control={control} />}
         </Form>
       </form>
       <Button icon={<ApiOutlined />} loading={test.isPending} onClick={handleSubmit(test.run)} className="mt-4">

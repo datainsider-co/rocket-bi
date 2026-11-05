@@ -8,9 +8,10 @@ interface ConnectorConfigModalProps {
   connection: Connection;
   onSaved: (connection: Connection) => void;
   onBack: () => void;
+  backLabel?: string;
 }
 
-export function ConnectorConfigModal({ connection, onSaved, onBack }: ConnectorConfigModalProps) {
+export function ConnectorConfigModal({ connection, onSaved, onBack, backLabel }: ConnectorConfigModalProps) {
   const { test, save, loadPublicKey } = useConnectorConfig(onSaved);
 
   return (
@@ -20,6 +21,7 @@ export function ConnectorConfigModal({ connection, onSaved, onBack }: ConnectorC
       test={test}
       save={save}
       onBack={onBack}
+      backLabel={backLabel}
       onLoadPublicKey={loadPublicKey}
     />
   );

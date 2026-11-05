@@ -7,12 +7,17 @@ import { ConnectionFieldsFactoryBuilder } from './ConnectionFieldsFactoryBuilder
 
 const ClickhouseStub: ConnectionFieldsRenderer = () => null;
 const MySqlStub: ConnectionFieldsRenderer = () => null;
+const OtherStub: ConnectionFieldsRenderer = () => null;
 const props = { control: {} as Control<ConnectionFormValues> };
 
 function fullBuilder() {
   return new ConnectionFieldsFactoryBuilder()
     .register(ConnectionType.Clickhouse, ClickhouseStub)
-    .register(ConnectionType.MySql, MySqlStub);
+    .register(ConnectionType.MySql, MySqlStub)
+    .register(ConnectionType.PostgreSql, OtherStub)
+    .register(ConnectionType.Redshift, OtherStub)
+    .register(ConnectionType.Vertica, OtherStub)
+    .register(ConnectionType.BigQuery, OtherStub);
 }
 
 describe('ConnectionFieldsFactoryBuilder', () => {
@@ -29,7 +34,7 @@ describe('ConnectionFieldsFactoryBuilder', () => {
   it('throws on build when a connection type has no renderer', () => {
     const builder = new ConnectionFieldsFactoryBuilder().register(ConnectionType.Clickhouse, ClickhouseStub);
 
-    expect(() => builder.build()).toThrow(`Missing connection fields renderer for: ${ConnectionType.MySql}`);
+    expect(() => builder.build()).toThrow(`Missing connection fields renderer for: ${ConnectionType.MySql}, `);
   });
 
   it('throws when a type is registered twice', () => {
