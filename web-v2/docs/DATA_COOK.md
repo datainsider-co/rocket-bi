@@ -304,6 +304,91 @@ Chạy bằng curl và Playwright (v1 ở `localhost:5050`) trên docker local. 
   guard, Remove + Discard, 375px không cuộn ngang, không lỗi console. **v1 mở được ETL v2 tạo** (đúng vị trí, preview
   được nguồn). Để lại ETL 11 "DC6a probe" (nguồn `di0_ingest.sales`) cho DC6b.
 
+## Quyết định ở DC6b (2026-11-05)
+
+- **Kiểm `force` trên server** (curl, ETL 11):
+  - Không `force` thì server dùng lại view theo **tên bảng**: sửa SQL rồi preview không force vẫn ra cột cũ. Nên mọi lần
+    build sau khi sửa đều phải `force`; v2 luôn gửi `force: true` (v1 cũng force khi mở và sau mỗi lần sửa).
+  - **Hai request force cùng lúc** đụng cùng một bảng thì hỏng nhau (`Table 'sales' already exists`, 5/6 request lỗi).
+    Nên preview của một ETL đi **tuần tự**, mỗi lần một request.
+  - Một request nhiều lá: server build hết các nhánh độc lập, chỉ dừng ở nhánh lỗi; bảng phía sau bảng lỗi không có
+    trong kết quả.
+- **Cache theo nhánh** (`editor/preview`):
+  - Mỗi bảng một query TanStack, key `[etlId, tblName, chữ ký]`. Chữ ký (`previewSignatures`) = hash của cài đặt riêng
+    của operator (bỏ cha, đích lưu, display name; key sắp xếp, vì JSON server trả và JSON v2 dựng khác thứ tự key) cộng
+    chữ ký của cha. Sửa một operator chỉ đổi chữ ký của nó và các bảng phía sau; đổi tên bảng hay thêm đích lưu không
+    build lại.
+  - `createPreviewBatcher` gom các bảng cần build trong cùng một nhịp thành **một** `preview_sync` (bỏ cây đã nằm trong
+    cây khác), và chờ request đang chạy xong mới gửi request sau. Mở ETL = một request với các lá, như v1.
+  - Build xong một bảng thì xoá preview của các chữ ký khác của nó (không còn ai xem): server chỉ giữ một view mỗi tên,
+    nên Discard về bản cũ sẽ build lại.
+  - Save, tạo ETL, Force Run chỉ làm mới listing / history / ETL (`etlsChanged`), không đụng preview.
+  - Python Query, operator lạ và các bảng phía sau chúng **không preview** ("… can't be previewed"), để một operator
+    Python (server trả 500) không làm hỏng request của cả ETL.
+- **Lỗi**: lỗi của chính bảng là câu server trả; bảng phía sau bảng lỗi ghi "Cannot preview: there are errors at a
+  previous step, `<loại>` of `<bảng>`" (câu của v1, không HTML). Request lỗi (500, mạng) thì mọi bảng trong request lỗi
+  theo.
+- **Giao diện**:
+  - Panel dưới canvas (v1 chia đôi): tab mỗi bảng (nguồn ghi `database.bảng` như v1), icon loading / lỗi trên tab, nút
+    Refresh (build lại tất cả, đọc lại dữ liệu). Mặc định bảng đầu tiên như v1; **bấm một bảng trên canvas** cũng chọn
+    nó (v1 chỉ chọn qua tab).
+  - Dữ liệu là `TableDataView` + `useTablePreview` của DW6, chuyển lên `shared/table-data` (nơi thứ hai dùng). Query
+    dữ liệu có thêm `version` (chữ ký) vì bảng preview được build lại dưới cùng tên. Key thành `tableDataKeys`; RLS
+    invalidate `tableDataKeys.all` thay cho key cũ của Data Warehouse.
+  - Node bảng: spinner khi đang build, viền đỏ và icon lỗi (tooltip là câu lỗi) khi lỗi, viền màu nhấn khi đang xem;
+    mũi tên ra khỏi bảng lỗi màu đỏ, như v1.
+- **Đã kiểm bằng Playwright** trên `pnpm dev` với docker: ETL 11 mở ra một request, dữ liệu thật; lỗi SQL hiện đúng câu
+  của MySQL; ETL 2 (v1) hiện đúng lỗi `Duplicate column name 'region'` của Join (nợ backend DC0) trên node, tab và mũi
+  tên; 375px không cuộn ngang. Favicon 404 là lỗi console duy nhất (có từ trước).
+
+## Quyết định ở DC7 (2026-11-05)
+
+- **Menu**: bảng có Join Table, Manage Fields, SQL Query (Pivot, Transform, Save To Data Warehouse còn khoá tới DC8 /
+  DC9). Hình thoi có Edit cho SQL Query, Join, Manage Fields; Transform / Pivot "Not supported yet", Python và operator
+  lạ "Not supported" (chỉ đọc).
+- **Điều kiện mở** (v1): thêm operator sau một bảng cần cột của bảng đó, nên preview của nó phải xong. Đang build thì
+  báo "The preview of X is loading", lỗi thì "Can not add operator / Preview table X has error" như v1. Sửa operator thì
+  mở được cả khi preview chưa có (cột rỗng, giữ field đã lưu).
+- **Reducer**: `addOperator` (kèm nguồn mới khi Join với bảng warehouse) và `updateOperator` (thay operator cùng tên
+  bảng, giữ cha). Tên bảng mới như v1 (`newTableConfig` = `baseTableName` + `uniqueTableName`, tránh cả tên của nguồn
+  thêm cùng lúc). Thêm / sửa xong thì panel chuyển sang bảng đó.
+- **SQL Query** (`operators/sql`):
+  - Dialog hiện SQL **không có database preview** (`withoutDatabase`, như `removeDatabase` của v1), khi lưu ghi lại
+    `preview_etl_<id>.` trước bảng cha (`withDatabase`, như `toETLQuery` nhưng không đụng chuỗi trong nháy, cột sau dấu
+    chấm hay tên đã có database). Lý do: server chạy SQL không chọn database (DC0).
+  - Bảng và cột bên trái, bấm để chèn; Execute chạy SQL (đã ghi database) và hiện kết quả. `useQueryRun`,
+    `QueryResultView` và phần chạy SQL của Query Editor chuyển lên `shared/query-result` (nơi thứ hai dùng).
+  - SQL mới mặc định `select * from <bảng>` (v1 để trống). Bắt buộc có SQL.
+- **Join** (`operators/join`):
+  - Bảng bên phải chọn trong dialog (v1 chọn trong menu): bảng khác của ETL (bảng chưa build preview bị khoá), hoặc nút
+    Data Warehouse mở `DatabaseTree`. Bảng warehouse đã là nguồn thì join với nguồn đó; chưa thì thành nguồn mới khi
+    Add, cột đọc từ `table_schema` dưới tên nguồn mới trong database preview (như `startJoinOperatorFromTable`).
+    `WarehouseTablePicker` và `useLoadSource` tách ra từ Add Source để dùng chung.
+  - Điều kiện: cột trái `=` cột phải (v1 chỉ tạo `=`; loại khác đọc từ server giữ dấu của nó). Kiểu join: Left, Inner,
+    Right, Full Outer theo thứ tự v1. Lỗi của v1: "Missing join clause", "Join clause is invalid".
+  - Sửa: bảng phải cố định; cột không còn trong preview giữ field đã lưu. Field ghi `table_field` trên database preview,
+    đúng JSON v1 (test so với ETL 2).
+- **Manage Fields** (`operators/manage-fields`):
+  - Thêm: mọi cột của bảng cha, cast theo kiểu của cột (`asTypeOf` = `convertToAsType`). Sửa: `mergeFields` của v1
+    (giữ field đã lưu, thêm cột mới, bỏ cột đã mất; field chưa có cast lấy cast của cột).
+  - Bảng field: tên, kiểu (danh sách của v1; expression có thêm Auto), vài giá trị mẫu, Edit / Hide-Show / Delete
+    (expression, hỏi trước). Search theo tên hoặc cột.
+  - Giá trị mẫu: `view_query` rồi chạy SQL đó 5 dòng (v1 6), mọi field hiện cả field đang ẩn như v1. **View SQL** hiện
+    câu `view_query` trả.
+  - Đổi tên: bắt buộc, không trùng (không phân biệt hoa thường), câu báo "This field name already exists" (v1 ghi sai
+    chính tả "Already exited").
+  - Expression field: công thức dùng `[Display Name]` như calculated field của ChartBuilder (`toExpression` /
+    `toFormula`, `formulaLanguage`), lưu thành tên cột. `field_name` sinh từ tên (v1 để rỗng; server dùng
+    `display_name` làm alias).
+- **Phím**: React Flow bắt Space (kéo canvas), Shift, Ctrl trên cả document và chặn Space khi đích không phải ô nhập.
+  Monaco 0.57 gõ qua EditContext (một `div`), nên **mọi dấu cách trong dialog SQL bị nuốt**. Canvas ETL tắt các phím đó
+  (`panActivationKeyCode`, `selectionKeyCode`, `multiSelectionKeyCode` = `null`; v1 không có, canvas không chọn node).
+  Dialog có trình soạn (SQL, expression) không đóng bằng Escape, để Escape đóng gợi ý không làm mất SQL.
+- **Đã kiểm bằng Playwright** trên `pnpm dev` với docker (ETL 11, ETL 2 của v1): thêm SQL Query (chạy thử, lưu
+  `preview_etl_11.sales`), Manage Fields (ẩn field, expression `[cnt] * 2` ra `cnt * 2`, giá trị mẫu), Join với bảng
+  khác của ETL; mỗi lần chỉ build bảng mới; sửa SQL chỉ build các bảng sau nó; Save không build lại; server lưu đúng
+  JSON; mở sửa Join / Manage Fields của ETL v1. Để lại ETL 11 có SQL, Manage Fields, Join cho DC8 / DC9.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -315,8 +400,8 @@ Chạy bằng curl và Playwright (v1 ở `localhost:5050`) trên docker local. 
 | DC4 | **ETL History.** Cột History Id, ETL Name (link tới ETL), Last Run, Total Run Time, Status, Message (log nhiều dòng xem được đầy đủ) | Xong (xem DC3 / DC4) |
 | DC5 | **Share ETL.** Adapter `etl` cho `ShareModal` trên `data_cook/{id}/share/*`, chỉ people | Xong (xem DC5) |
 | DC6a | **Trình sửa: khung.** Load / tạo lười, reducer trên đồ thị phẳng, canvas React Flow (nguồn, operator, đích, vị trí từ `extra_data`), thêm nguồn từ `DatabaseTree`, context menu, xoá / đổi tên operator, đổi tên ETL, Save (giữ lịch hiện có), hỏi khi rời trang có thay đổi | Xong (xem DC6a) |
-| DC6b | **Trình sửa: preview.** `preview_sync` theo nhánh, trạng thái loading / lỗi trên node, lỗi lan xuống, panel dữ liệu (`TableDataView` trên database preview), Retry, force refresh | Chưa làm |
-| DC7 | **Operator không cần ChartBuilder.** SQL Query (`shared/code-editor`, autocomplete bảng của database preview), Join (chọn bảng thứ hai, kiểu join, nhiều điều kiện), Manage Fields (đổi tên, ẩn, đổi kiểu, thêm expression field, xem SQL qua `view_query`) | Chưa làm |
+| DC6b | **Trình sửa: preview.** `preview_sync` theo nhánh, trạng thái loading / lỗi trên node, lỗi lan xuống, panel dữ liệu (`TableDataView` trên database preview), Retry, force refresh | Xong (xem DC6b) |
+| DC7 | **Operator không cần ChartBuilder.** SQL Query (`shared/code-editor`, autocomplete bảng của database preview), Join (chọn bảng thứ hai, kiểu join, nhiều điều kiện), Manage Fields (đổi tên, ẩn, đổi kiểu, thêm expression field, xem SQL qua `view_query`) | Xong (xem DC7) |
 | DC8 | **Transform và Pivot** bằng ChartBuilder nhúng (host mới, dựa trên phần tách host của DW11) | Chưa làm |
 | DC9 | **Đích và lưu.** Save To Data Warehouse (database / bảng có sẵn hoặc mới, Update / Append), dialog Save (tên, `ScheduleFields` không Minutely, incremental theo bảng nguồn) | Chưa làm |
 | Sau MVP | Save To Database (5 loại, SSL / JKS), Send To Email, Python Query (nếu server chạy được) | Chưa làm |

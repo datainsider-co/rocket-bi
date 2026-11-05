@@ -72,9 +72,11 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
 - **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 to CB6, CB7a, CB7b, CB7c and CB8 done, CB7d next) for the chart types
   v2 already renders; the other chart types (scatter, area range, ...) follow, each with its builder handler. ChartBuilder
   plugs into edit mode as the `ChartBuilderHost` the dashboard route gives `DashboardPage`.
-- **Data cook** (Phase 7, [`DATA_COOK.md`](DATA_COOK.md)): DC0 to DC5 and DC6a done (real payloads, `core/data-cook`,
-  routes and layout at v1's paths, the ETL listings, ETL History, Share, the editor's canvas); preview (DC6b) comes next. **Blocked by the server** on MySQL: SQL operators need
-  database-qualified tables, joins fail on duplicate column names (DC0).
+- **Data cook** (Phase 7, [`DATA_COOK.md`](DATA_COOK.md)): DC0 to DC5, DC6a, DC6b and DC7 done (real payloads,
+  `core/data-cook`, routes and layout at v1's paths, the ETL listings, ETL History, Share, the editor's canvas, its
+  preview, and the SQL Query, Join and Manage Fields dialogs); Transform and Pivot (DC8) and Save To Data Warehouse with
+  the Save dialog (DC9) come next. **Blocked by the server** on MySQL: SQL operators need database-qualified tables,
+  joins fail on duplicate column names (DC0).
 - **Organization settings** (Phase 6, [`ORGANIZATION_SETTINGS.md`](ORGANIZATION_SETTINGS.md)): DataSource Config and
   User Managements done (OS0 to OS5d); Overview, SSO, API keys, user activity and billing are not in scope yet.
 - **Data ingestion** (Phase 8, [`DATA_INGESTION.md`](DATA_INGESTION.md)): the MVP is done, DI0 to DI8 (listings, source and job actions, the JDBC source form, the job form and CSV import). The other source types come after the MVP.
@@ -430,7 +432,7 @@ Plan, decisions and steps (DC0 to DC9) in [`DATA_COOK.md`](DATA_COOK.md).
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| My ETL, shared, history, trash, ETL editor | `screens/data-cook` (`/data-warehouse/data-cook`), `di-core/data-cook` | 70 | In progress: DC0 to DC6a done (payloads, `core/data-cook`, routes and layout, listings, history, share, editor canvas); DC6b next |
+| My ETL, shared, history, trash, ETL editor | `screens/data-cook` (`/data-warehouse/data-cook`), `di-core/data-cook` | 70 | In progress: DC0 to DC7 done (payloads, `core/data-cook`, routes and layout, listings, history, share, editor canvas, preview, SQL Query, Join, Manage Fields); DC8 and DC9 next |
 
 ### Phase 8: Data ingestion
 
