@@ -1,5 +1,7 @@
 import { vi } from 'vitest';
 import type { EtlHistoryService } from '@/core/data-cook/EtlHistoryService';
+import type { EtlPreviewService } from '@/core/data-cook/EtlPreviewService';
+import { treeOperators } from './editor/preview/etlPreview.utils';
 import type { EtlService } from '@/core/data-cook/EtlService';
 
 /** Test-only: an EtlService with no ETLs. Override what the test needs. */
@@ -27,6 +29,20 @@ export function fakeEtlService(overrides: Partial<EtlService> = {}): EtlService 
 export function fakeEtlHistoryService(overrides: Partial<EtlHistoryService> = {}): EtlHistoryService {
   return {
     list: vi.fn<EtlHistoryService['list']>(async () => ({ total: 0, data: [] })),
+    ...overrides
+  };
+}
+
+/** Test-only: an EtlPreviewService that builds every table it is sent, without columns. Override what the test needs. */
+export function fakeEtlPreviewService(overrides: Partial<EtlPreviewService> = {}): EtlPreviewService {
+  return {
+    databaseName: vi.fn<EtlPreviewService['databaseName']>(async id => `preview_etl_${id}`),
+    preview: vi.fn<EtlPreviewService['preview']>(async (id, operators) => ({
+      status: 'Done',
+      tables: [...new Set(operators.flatMap(operator => [...treeOperators(operator).keys()]))].map(name => ({ dbName: `preview_etl_${id}`, name, columns: [] })),
+      errors: []
+    })),
+    viewQuery: vi.fn<EtlPreviewService['viewQuery']>(async () => 'select 1'),
     ...overrides
   };
 }

@@ -4,7 +4,7 @@ import { useDi } from '@/app/di/DiContext';
 import type { EtlJob } from '@/core/data-cook/EtlJob';
 import { EtlService } from '@/core/data-cook/EtlService';
 import { toErrorMessage } from '@/shared/http/errorMessage';
-import { dataCookKeys } from '../../dataCookQueries';
+import { etlsChanged } from '../../dataCookQueries';
 import { etlFromDraft, type EtlDraft } from '../draft/etlDraft.utils';
 import type { EtlEditorDispatch } from '../draft/useEtlEditorState';
 
@@ -33,7 +33,7 @@ export function useSaveEtl(
       void message.success('ETL saved');
     },
     onError: error => void message.error(toErrorMessage(error)),
-    onSettled: () => void queryClient.invalidateQueries({ queryKey: dataCookKeys.all })
+    onSettled: () => void etlsChanged(queryClient)
   });
 
   return { save: save.mutate, isSaving: save.isPending };

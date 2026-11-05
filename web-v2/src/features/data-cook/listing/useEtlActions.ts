@@ -5,7 +5,7 @@ import { useDi } from '@/app/di/DiContext';
 import type { EtlJob } from '@/core/data-cook/EtlJob';
 import { EtlService } from '@/core/data-cook/EtlService';
 import { toErrorMessage } from '@/shared/http/errorMessage';
-import { dataCookKeys } from '../dataCookQueries';
+import { etlsChanged } from '../dataCookQueries';
 import { deleteForeverText, forceRunMessage, restoreEtlText, trashEtlText } from './etlListing.utils';
 
 interface ConfirmText {
@@ -24,7 +24,7 @@ export function useEtlActions(now: () => number = Date.now) {
   const queryClient = useQueryClient();
   const { modal, message } = App.useApp();
   const options = {
-    onSettled: () => void queryClient.invalidateQueries({ queryKey: dataCookKeys.all }),
+    onSettled: () => void etlsChanged(queryClient),
     onError: (error: Error) => void message.error(toErrorMessage(error))
   };
 

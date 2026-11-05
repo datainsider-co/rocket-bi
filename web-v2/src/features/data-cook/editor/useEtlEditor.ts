@@ -8,12 +8,14 @@ import { etlEditorPath, isEtlEditorPath } from '../dataCook.utils';
 import { useEtlCanvas } from './canvas/useEtlCanvas';
 import { useNodeMenu } from './canvas/useNodeMenu';
 import { useEtlEditorState } from './draft/useEtlEditorState';
+import { useOperatorDialog } from './operators/useOperatorDialog';
+import { useEditorPreview } from './preview/useEditorPreview';
 import { useSaveEtl } from './save/useSaveEtl';
 import { useAddSource } from './source/useAddSource';
 
 /**
- * The ETL editor (v1 `ManageEtlJob` + `ManageEtlOperator`): the draft, its canvas, Add Source, Save, the renames and
- * the leave guard. `onCreated` tells the page the new ETL's id before the URL moves to it.
+ * The ETL editor (v1 `ManageEtlJob` + `ManageEtlOperator`): the draft, its canvas and preview, the operator dialogs,
+ * Add Source, Save, the renames and the leave guard. `onCreated` tells the page the new ETL's id before the URL moves to it.
  */
 export function useEtlEditor(initial: EtlJob, onCreated: (id: EtlId) => void) {
   const { draft, dirty, dispatch } = useEtlEditorState(initial);
@@ -41,13 +43,18 @@ export function useEtlEditor(initial: EtlJob, onCreated: (id: EtlId) => void) {
 
   const source = useAddSource(draft, dispatch, follow);
   const { save, isSaving } = useSaveEtl(draft, dispatch, follow);
-  const menu = useNodeMenu(draft, dispatch);
-  const canvas = useEtlCanvas(draft, dispatch, menu.onMenu);
+  const preview = useEditorPreview(draft);
+  const operator = useOperatorDialog(draft, dispatch, preview.tables, preview.show);
+  const menu = useNodeMenu(draft, dispatch, operator.open);
+  const canvas = useEtlCanvas(draft, dispatch, menu.onMenu, preview.canvas);
   const [isRenaming, setRenaming] = useState(false);
 
   return {
     draft,
     canvas,
+    preview: preview.panel,
+    previews: preview.tables,
+    operator,
     source,
     menu,
     edit: {

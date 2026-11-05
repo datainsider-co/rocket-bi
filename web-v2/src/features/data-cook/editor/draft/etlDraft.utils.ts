@@ -127,6 +127,11 @@ function updateOperator(draft: EtlDraft, tblName: string, update: (operator: Etl
   return { ...draft, graph: withOperators(draft.graph, new Map(draft.graph.operators).set(tblName, update(operator))) };
 }
 
+/** An edited operator in place of the one writing the same table; what it reads stays (v1 `handleUpdateOperator`). */
+export function replaceOperator(draft: EtlDraft, operator: EtlOperator): EtlDraft {
+  return updateOperator(draft, operator.destTable.tblName, () => operator);
+}
+
 /** v1 "Edit Display Name": only the display name changes; the table keeps its name. */
 export function renameTable(draft: EtlDraft, tblName: string, displayName: string): EtlDraft {
   return updateOperator(draft, tblName, operator => ({ ...operator, destTable: { ...operator.destTable, tblDisplayName: displayName } }));

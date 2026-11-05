@@ -4,7 +4,7 @@ import { etlJobFromJson } from '@/core/data-cook/EtlJob';
 import type { EtlOperator } from '@/core/data-cook/EtlOperator';
 import { etlGraphFromLeaves, type EtlGraph } from '@/core/data-cook/etlGraph';
 import { draftFromEtl } from '../draft/etlDraft.utils';
-import { keepMeasured, operatorLabel, toEtlEdges, toEtlNodes, type EtlNode, type EtlNodeData } from './etlCanvas.utils';
+import { keepMeasured, operatorLabel, toEtlEdges, toEtlNodes, withEdgeErrors, withPreview, type EtlNode, type EtlNodeData } from './etlCanvas.utils';
 
 const draft1 = draftFromEtl(etlJobFromJson(fixture.etlUpdate.response));
 const draft2 = draftFromEtl(etlJobFromJson(fixture.etlGetV1.response));
@@ -134,5 +134,38 @@ describe('keepMeasured', () => {
 
   it('returns no node for an empty canvas', () => {
     expect(keepMeasured([], [node('a')])).toEqual([]);
+  });
+});
+
+describe('withPreview', () => {
+  const nodes = toEtlNodes(draft2.graph, draft2.extraData, onMenu);
+  const previews = new Map([
+    ['sales', { status: 'ready' as const, message: undefined }],
+    ['sales_1_1', { status: 'error' as const, message: 'Unknown column' }]
+  ]);
+
+  it("puts each table's preview on its box and marks the shown one", () => {
+    const byId = new Map(withPreview(nodes, previews, 'sales').map(node => [node.id, node]));
+
+    expect(byId.get('table:sales')?.data.preview).toEqual({ status: 'ready', message: undefined, shown: true });
+    expect(byId.get('table:sales_1_1')?.data.preview).toEqual({ status: 'error', message: 'Unknown column', shown: false });
+  });
+
+  it('leaves the other boxes and the tables without a preview as they are', () => {
+    const decorated = withPreview(nodes, previews, undefined);
+
+    expect(decorated.find(node => node.id === 'operator:sales_1_1')).toBe(nodes.find(node => node.id === 'operator:sales_1_1'));
+    expect(decorated.find(node => node.id === 'table:sales_copy')).toBe(nodes.find(node => node.id === 'table:sales_copy'));
+  });
+});
+
+describe('withEdgeErrors', () => {
+  it('marks the arrows out of a failed table', () => {
+    const edges = withEdgeErrors(toEtlEdges(draft2.graph), new Map([['sales_1_1', { status: 'error' as const }]]));
+
+    const out = edges.filter(edge => edge.source === 'table:sales_1_1');
+    expect(out.length).toBeGreaterThan(0);
+    expect(out.every(edge => edge.className === 'etl-edge--error')).toBe(true);
+    expect(edges.filter(edge => edge.source !== 'table:sales_1_1').every(edge => edge.className === undefined)).toBe(true);
   });
 });

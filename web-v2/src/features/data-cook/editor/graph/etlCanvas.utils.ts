@@ -3,6 +3,7 @@ import { JoinType, OPERATOR_TITLES, type EtlOperator } from '@/core/data-cook/Et
 import type { EtlGraph } from '@/core/data-cook/etlGraph';
 import { readPosition, type Point } from '@/core/data-cook/etlExtraData';
 import { asString, type JsonObject } from '@/core/json/json';
+import type { TablePreviewStatus } from '../preview/etlPreview.utils';
 import { boxPoint, MIN_TOP } from './etlLayout.utils';
 import { nodeId, positionTarget, type EtlNodeRef } from './etlNodeRef';
 import { boxMenu, operatorMenu, tableMenu, type EtlMenuItem } from './etlMenu.utils';
@@ -18,6 +19,15 @@ export interface EtlNodeData extends Record<string, unknown> {
   readonly menu: readonly EtlMenuItem[];
   /** Picked a menu item. */
   readonly onMenu: (ref: EtlNodeRef, key: string) => void;
+  /** A table's preview (`withPreview`). */
+  readonly preview?: NodePreview;
+}
+
+/** How a table's box shows its preview: loading, failed, shown below the canvas. */
+export interface NodePreview {
+  readonly status: TablePreviewStatus;
+  readonly message: string | undefined;
+  readonly shown: boolean;
 }
 
 export type EtlNode = Node<EtlNodeData>;
@@ -74,7 +84,7 @@ export function toEtlNodes(graph: EtlGraph, extraData: JsonObject, onMenu: EtlNo
     });
     if (!isSource) {
       const ref = { type: 'operator', tblName } as const;
-      add(ETL_NODE_TYPES.operator, ref, savedPoint(extraData, ref, table), { title: operatorLabel(operator), subtitle: '', menu: operatorMenu() });
+      add(ETL_NODE_TYPES.operator, ref, savedPoint(extraData, ref, table), { title: operatorLabel(operator), subtitle: '', menu: operatorMenu(operator.kind) });
     }
 
     let boxes = 0;
@@ -131,4 +141,24 @@ export function keepMeasured(next: readonly EtlNode[], current: readonly EtlNode
     const size = measured.get(node.id);
     return size ? { ...node, measured: size } : node;
   });
+}
+
+/** The tables' boxes with their previews; the other boxes stay as they are. */
+export function withPreview(
+  nodes: readonly EtlNode[],
+  previews: ReadonlyMap<string, Pick<NodePreview, 'status' | 'message'>>,
+  shown: string | undefined
+): EtlNode[] {
+  return nodes.map(node => {
+    const { ref } = node.data;
+    const preview = ref.type === 'table' ? previews.get(ref.tblName) : undefined;
+    if (!preview) return node;
+    return { ...node, data: { ...node.data, preview: { status: preview.status, message: preview.message, shown: ref.tblName === shown } } };
+  });
+}
+
+/** v1 drew the arrows out of a failed table in red. */
+export function withEdgeErrors(edges: readonly EtlEdge[], previews: ReadonlyMap<string, Pick<NodePreview, 'status'>>): EtlEdge[] {
+  const failed = new Set([...previews].filter(([, preview]) => preview.status === 'error').map(([tblName]) => nodeId({ type: 'table', tblName })));
+  return edges.map(item => (failed.has(item.source) ? { ...item, className: 'etl-edge--error' } : item));
 }

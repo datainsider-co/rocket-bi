@@ -46,10 +46,16 @@ export function EtlCanvasView({ canvas, zoom, fullscreen, edit, onAddSource }: E
           nodeTypes={nodeTypes}
           onNodesChange={canvas.onNodesChange}
           onNodeDragStop={canvas.onNodeDragStop}
+          onNodeClick={canvas.onNodeClick}
           nodesConnectable={false}
           elementsSelectable={false}
           edgesFocusable={false}
           deleteKeyCode={null}
+          // React Flow takes these keys on the whole document. Monaco types through an EditContext `div`, which it
+          // doesn't read as an input, so Space never reached the SQL of an operator dialog. Nothing is selected here.
+          panActivationKeyCode={null}
+          selectionKeyCode={null}
+          multiSelectionKeyCode={null}
           zoomOnDoubleClick={false}
           defaultViewport={DEFAULT_VIEWPORT}
           onInit={instance => canvas.nodes.length > 0 && void instance.fitView(OPEN_FIT_OPTIONS)}

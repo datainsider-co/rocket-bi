@@ -9,6 +9,7 @@ import { LoginResponse } from '@/core/auth/LoginResponse';
 import { ConnectionService } from '@/core/connection/ConnectionService';
 import { DashboardService } from '@/core/dashboard/DashboardService';
 import { EtlHistoryService } from '@/core/data-cook/EtlHistoryService';
+import { EtlPreviewService } from '@/core/data-cook/EtlPreviewService';
 import { EtlService } from '@/core/data-cook/EtlService';
 import { EtlShareService } from '@/core/data-cook/EtlShareService';
 import { createContainer } from '@/core/di/Container';
@@ -28,7 +29,7 @@ import { ShareService } from '@/core/share/ShareService';
 import { UserService } from '@/core/user/UserService';
 import { fakeSchemaEditService } from '@/features/chart-builder/field-actions/testing';
 import { fakeQueryService, fakeResourcePermissionService, fakeSchemaService, fakeUserService } from '@/features/dashboard/testing';
-import { fakeEtlHistoryService, fakeEtlService } from '@/features/data-cook/testing';
+import { fakeEtlHistoryService, fakeEtlPreviewService, fakeEtlService } from '@/features/data-cook/testing';
 import { fakeConnectionService, fakePermissionService } from '@/features/data-source/testing';
 import { fakeDatabaseService, fakeRlsPolicyService, fakeTableService } from '@/features/data-warehouse/testing';
 import { fakeDashboardService, fakeDirectoryService } from '@/features/directory/testing';
@@ -77,6 +78,7 @@ export function renderAppAt(path: string, service: Service, modules: readonly Di
       di.bindValue(RelationshipService, fixtureRelationshipService());
       di.bindValue(EtlService, fakeEtlService());
       di.bindValue(EtlHistoryService, fakeEtlHistoryService());
+      di.bindValue(EtlPreviewService, fakeEtlPreviewService());
     },
     ...modules
   ]);

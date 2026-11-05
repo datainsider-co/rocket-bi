@@ -7,6 +7,7 @@ import {
   draftFromEtl,
   removeOperator,
   removePersist,
+  replaceOperator,
   removeThirdParty,
   renameTable,
   type EtlDraft
@@ -31,6 +32,9 @@ export type EtlEditorAction =
   | { readonly type: 'discard' }
   | { readonly type: 'rename'; readonly displayName: string }
   | { readonly type: 'addSource'; readonly operator: EtlOperator }
+  /** A new operator reading `parentNames`, after the sources it brings (a join with a warehouse table). */
+  | { readonly type: 'addOperator'; readonly operator: EtlOperator; readonly parentNames: readonly string[]; readonly sources?: readonly EtlOperator[] }
+  | { readonly type: 'updateOperator'; readonly operator: EtlOperator }
   | { readonly type: 'remove'; readonly ref: EtlNodeRef }
   | { readonly type: 'renameTable'; readonly tblName: string; readonly displayName: string }
   | { readonly type: 'move'; readonly moves: readonly NodeMove[] };
@@ -69,6 +73,12 @@ export function etlEditorReducer(state: EtlEditorState, action: EtlEditorAction)
       return edit(state, { ...draft, displayName: action.displayName });
     case 'addSource':
       return edit(state, addOperator(draft, action.operator));
+    case 'addOperator': {
+      const withSources = (action.sources ?? []).reduce((current, source) => addOperator(current, source), draft);
+      return edit(state, addOperator(withSources, action.operator, action.parentNames));
+    }
+    case 'updateOperator':
+      return edit(state, replaceOperator(draft, action.operator));
     case 'remove':
       return edit(state, removeNode(draft, action.ref));
     case 'renameTable':

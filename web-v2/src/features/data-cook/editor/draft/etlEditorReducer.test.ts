@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import fixture from '@/core/data-cook/etl.fixture.json';
 import { etlJobFromJson, newEtlJob } from '@/core/data-cook/EtlJob';
-import { PositionGroup, readPosition } from '@/core/data-cook/etlExtraData';
+import { PositionGroup, positionKey, readPosition } from '@/core/data-cook/etlExtraData';
+import { leavesFromGraph } from '@/core/data-cook/etlGraph';
+import { newJoinOperator } from '../operators/join.utils';
+import { newSqlOperator } from '../operators/sqlQuery.utils';
 import { draftSnapshot, newSourceOperator } from './etlDraft.utils';
 import { etlEditorReducer, initEtlEditor, type EtlEditorState } from './etlEditorReducer';
 
@@ -25,6 +28,39 @@ describe('etlEditorReducer', () => {
   it('adds a source', () => {
     const state = etlEditorReducer(loaded, { type: 'addSource', operator: SOURCE });
     expect(state.draft.graph.operators.get('orders')).toBe(SOURCE);
+    expect(isDirty(state)).toBe(true);
+  });
+
+  it('adds an operator after a table, placed on the canvas', () => {
+    const parent = loaded.draft.graph.operators.get('sales_1_2')!;
+    const operator = newSqlOperator(parent, { tblName: 'sales_1_3', dbDisplayName: 'ETL Database', tblDisplayName: 'sales_1_3' }, 'select 1');
+
+    const state = etlEditorReducer(loaded, { type: 'addOperator', operator, parentNames: ['sales_1_2'] });
+
+    expect(state.draft.graph.parentNames.get('sales_1_3')).toEqual(['sales_1_2']);
+    expect(readPosition(state.draft.extraData, PositionGroup.Operator, positionKey('sales_1_3'))).toBeDefined();
+    expect(leavesFromGraph(state.draft.graph).map(leaf => leaf.destTable.tblName)).toEqual(['sales_join_sales_copy', 'sales_1_3']);
+    expect(isDirty(state)).toBe(true);
+  });
+
+  it('adds a join with the source it brings', () => {
+    const left = loaded.draft.graph.operators.get('sales_1_2')!;
+    const join = newJoinOperator(left, SOURCE, { tblName: 'j', dbDisplayName: 'ETL Database', tblDisplayName: 'j' }, 'left', []);
+
+    const state = etlEditorReducer(loaded, { type: 'addOperator', operator: join, parentNames: ['sales_1_2', 'orders'], sources: [SOURCE] });
+
+    expect(state.draft.graph.operators.get('orders')).toBe(SOURCE);
+    expect(state.draft.graph.parentNames.get('j')).toEqual(['sales_1_2', 'orders']);
+  });
+
+  it('updates an operator in place, keeping what it reads', () => {
+    const operator = loaded.draft.graph.operators.get('sales_1_1')!;
+    const edited = operator.kind === 'sql' ? { ...operator, query: 'select 2' } : operator;
+
+    const state = etlEditorReducer(loaded, { type: 'updateOperator', operator: edited });
+
+    expect(state.draft.graph.operators.get('sales_1_1')).toBe(edited);
+    expect(state.draft.graph.parentNames).toBe(loaded.draft.graph.parentNames);
     expect(isDirty(state)).toBe(true);
   });
 

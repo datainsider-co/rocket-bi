@@ -4,6 +4,7 @@ import { downstreamNames, removeStepsText, type EtlDraft } from '../draft/etlDra
 import type { EtlEditorDispatch } from '../draft/useEtlEditorState';
 import { EtlMenuKey } from '../graph/etlMenu.utils';
 import type { EtlNodeRef } from '../graph/etlNodeRef';
+import { operatorDialogOf, type OperatorDialog } from '../operators/operators.utils';
 
 /** The table whose display name is being edited. */
 export interface TableRename {
@@ -12,10 +13,10 @@ export interface TableRename {
 }
 
 /**
- * What the box menus do: Remove (asking first when steps after it go too) and Edit Display Name. The other items open
- * dialogs that come with later steps.
+ * What the box menus do: Remove (asking first when steps after it go too), Edit Display Name, and the operators'
+ * dialogs (`openOperator`).
  */
-export function useNodeMenu(draft: EtlDraft, dispatch: EtlEditorDispatch) {
+export function useNodeMenu(draft: EtlDraft, dispatch: EtlEditorDispatch, openOperator: (dialog: OperatorDialog) => void) {
   const { modal } = App.useApp();
   const [renaming, setRenaming] = useState<TableRename>();
   const { graph } = draft;
@@ -25,6 +26,8 @@ export function useNodeMenu(draft: EtlDraft, dispatch: EtlEditorDispatch) {
       const operator = graph.operators.get(ref.tblName);
       if (!operator) return;
       if (key === EtlMenuKey.Rename) setRenaming({ tblName: ref.tblName, displayName: operator.destTable.tblDisplayName });
+      const dialog = operatorDialogOf(ref, key, operator);
+      if (dialog) openOperator(dialog);
       if (key !== EtlMenuKey.Remove) return;
 
       const remove = () => dispatch({ type: 'remove', ref });
@@ -41,7 +44,7 @@ export function useNodeMenu(draft: EtlDraft, dispatch: EtlEditorDispatch) {
         onOk: remove
       });
     },
-    [graph, dispatch, modal]
+    [graph, dispatch, modal, openOperator]
   );
 
   const submitRename = useCallback(
