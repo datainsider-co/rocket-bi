@@ -15,6 +15,8 @@ export interface FullscreenControls {
 
 export interface EditControls {
   dirty: boolean;
+  /** Save without changes too (Data Cook's Save dialog edits the schedule); `dirty` when left out. */
+  canSave?: boolean;
   saving: boolean;
   onSave: () => void;
   onDiscard: () => void;
@@ -49,7 +51,7 @@ export function ControlBarView({ zoom, fullscreen, edit }: ControlBarViewProps) 
           <Button disabled={!edit.dirty || edit.saving} onClick={edit.onDiscard}>
             Discard Changes
           </Button>
-          <Button type="primary" disabled={!edit.dirty} loading={edit.saving} onClick={edit.onSave}>
+          <Button type="primary" disabled={!(edit.canSave ?? edit.dirty)} loading={edit.saving} onClick={edit.onSave}>
             Save
           </Button>
         </div>
