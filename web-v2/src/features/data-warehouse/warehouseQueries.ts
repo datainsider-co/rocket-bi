@@ -1,6 +1,4 @@
 import { queryOptions } from '@tanstack/react-query';
-import type { JsonObject } from '@/core/json/json';
-import type { QueryService } from '@/core/query/QueryService';
 import type { RlsPolicyService } from '@/core/rls/RlsPolicyService';
 import type { DatabaseService } from '@/core/schema/DatabaseService';
 import type { TableRef } from '@/core/schema/SchemaEditService';
@@ -13,10 +11,6 @@ export const warehouseKeys = {
   all: ['warehouse'] as const,
   databases: schemaKeys.entries,
   table: ({ dbName, name }: TableRef) => ['warehouse', 'table', dbName, name] as const,
-  previews: ['warehouse', 'preview'] as const,
-  preview: (request: JsonObject) => ['warehouse', 'preview', request] as const,
-  /** The Query Editor's results; the run and its request follow. */
-  rawQuery: ['warehouse', 'raw-query'] as const,
   policies: ({ dbName, name }: TableRef) => ['warehouse', 'policies', dbName, name] as const
 };
 
@@ -36,14 +30,6 @@ export function tableDefinitionQueryOptions(service: TableService, table: TableR
     queryKey: warehouseKeys.table(table),
     queryFn: ({ signal }) => service.getTable(table, signal),
     refetchInterval: query => (query.state.data && isProcessing(query.state.data) ? PROCESSING_POLL_MS : false)
-  });
-}
-
-/** One page of a table's rows (Table Data); the request is the key, so each page and sort is cached apart. */
-export function tablePreviewQueryOptions(service: QueryService, request: JsonObject) {
-  return queryOptions({
-    queryKey: warehouseKeys.preview(request),
-    queryFn: ({ signal }) => service.query(request, signal)
   });
 }
 

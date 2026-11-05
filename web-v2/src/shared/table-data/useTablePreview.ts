@@ -3,10 +3,8 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useDi } from '@/app/di/DiContext';
 import { QueryService } from '@/core/query/QueryService';
 import type { TableSort } from '@/core/query/tableSort';
-import type { TableDefinition } from '@/core/schema/TableDefinition';
 import { toErrorMessage } from '@/shared/http/errorMessage';
-import { tablePreviewQueryOptions } from '../warehouseQueries';
-import { PREVIEW_PAGE_SIZE, previewColumns, previewRows, tablePreviewRequest, type PreviewColumn } from './schema.utils';
+import { PREVIEW_PAGE_SIZE, previewColumns, previewRows, tableDataKeys, tablePreviewRequest, type PreviewColumn, type PreviewTable } from './tableData.utils';
 
 export interface TablePreview {
   readonly columns: readonly PreviewColumn[];
@@ -24,14 +22,21 @@ export interface TablePreview {
   readonly retry: () => void;
 }
 
-/** The Table Data tab (v1 `ViewData`): the table's rows a page at a time, sorted on the server by one column. */
-export function useTablePreview(table: TableDefinition): TablePreview {
+/**
+ * A table's rows a page at a time, sorted on the server by one column (v1 `ViewData`, `PreviewTableData`). A new
+ * `version` reads the table again: Data Cook rebuilds its preview tables under the same names.
+ */
+export function useTablePreview(table: PreviewTable, version = ''): TablePreview {
   const service = useDi(QueryService);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PREVIEW_PAGE_SIZE);
   const [sort, setSort] = useState<TableSort>();
   const request = useMemo(() => tablePreviewRequest(table, page, pageSize, sort), [table, page, pageSize, sort]);
-  const query = useQuery({ ...tablePreviewQueryOptions(service, request), placeholderData: keepPreviousData });
+  const query = useQuery({
+    queryKey: tableDataKeys.page(request, version),
+    queryFn: ({ signal }) => service.query(request, signal),
+    placeholderData: keepPreviousData
+  });
   const response = query.data?.kind === 'json_table' ? query.data : undefined;
 
   return {

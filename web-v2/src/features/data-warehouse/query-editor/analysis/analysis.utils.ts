@@ -6,7 +6,7 @@ import { parameterDefinitionsOf, parameterToJson, type QueryParameter } from '@/
 import { parameterValues, runnableSql, syncParameters } from '@/core/query/rawQuery';
 import { isApiError } from '@/shared/http/ApiError';
 import { toErrorMessage } from '@/shared/http/errorMessage';
-import { toRun, type QueryRun } from '../queryEditor.utils';
+import { toRun, type QueryRun } from '@/shared/query-result/queryResult.utils';
 
 /**
  * A query analysis (v1 `QueryComponent.listAdhocInfo`): a dashboard of `directory_type: queries` whose first widget is

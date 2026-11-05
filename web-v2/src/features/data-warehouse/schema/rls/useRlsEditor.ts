@@ -10,6 +10,7 @@ import { RlsPolicyService } from '@/core/rls/RlsPolicyService';
 import type { TableRef } from '@/core/schema/SchemaEditService';
 import { toErrorMessage } from '@/shared/http/errorMessage';
 import { LEAVE_CONTENT, LEAVE_TITLE, useUnsavedGuard } from '@/shared/routing/useUnsavedGuard';
+import { tableDataKeys } from '@/shared/table-data/tableData.utils';
 import { warehouseKeys } from '../../warehouseQueries';
 import { newPolicyValues, policyValuesOf, rlsFormSchema, toRlsPolicy, type RlsFormValues } from './rls.utils';
 
@@ -48,7 +49,7 @@ export function useRlsEditor(table: TableRef, policies: readonly RlsPolicy[], on
     mutationFn: (values: RlsFormValues) => service.put(table, values.policies.map(toRlsPolicy)),
     onSuccess: saved => {
       queryClient.setQueryData(warehouseKeys.policies(table), saved);
-      void queryClient.invalidateQueries({ queryKey: warehouseKeys.previews });
+      void queryClient.invalidateQueries({ queryKey: tableDataKeys.all });
       void message.success('RLS policies saved');
       onDone();
     }

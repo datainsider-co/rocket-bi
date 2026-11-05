@@ -3,9 +3,8 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useDi } from '@/app/di/DiContext';
 import { QueryService } from '@/core/query/QueryService';
 import { toErrorMessage } from '@/shared/http/errorMessage';
-import { previewRows } from '../schema/schema.utils';
-import { warehouseKeys } from '../warehouseQueries';
-import { isWholeResult, rawQueryRequest, RESULT_PAGE_SIZE, resultColumns, type QueryRun, type ResultColumn } from './queryEditor.utils';
+import { previewRows } from '@/shared/table-data/tableData.utils';
+import { isWholeResult, queryResultKeys, rawQueryRequest, RESULT_PAGE_SIZE, resultColumns, type QueryRun, type ResultColumn } from './queryResult.utils';
 
 export interface QueryResult {
   /** The last Execute; nothing ran yet without one. */
@@ -37,7 +36,7 @@ export function useQueryRun(run: QueryRun | undefined): QueryResult {
   const request = useMemo(() => run && rawQueryRequest(run, whole ? 1 : page, pageSize), [run, whole, page, pageSize]);
   const query = useQuery({
     // The run's id is in the key: Execute asks the server again even for the same SQL.
-    queryKey: [...warehouseKeys.rawQuery, run?.id, request],
+    queryKey: queryResultKeys.run(run?.id, request),
     queryFn: ({ signal }) => service.query(request ?? {}, signal),
     enabled: request !== undefined,
     placeholderData: keepPreviousData,

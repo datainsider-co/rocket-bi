@@ -1,6 +1,6 @@
 import { Spin, Table, Typography } from 'antd';
-import { PREVIEW_ROW_KEY } from '../schema/schema.utils';
-import { RESULT_PAGE_SIZE } from './queryEditor.utils';
+import { PREVIEW_ROW_KEY } from '@/shared/table-data/tableData.utils';
+import { RESULT_PAGE_SIZE } from './queryResult.utils';
 import type { QueryResult } from './useQueryRun';
 
 type Row = Record<string, unknown>;

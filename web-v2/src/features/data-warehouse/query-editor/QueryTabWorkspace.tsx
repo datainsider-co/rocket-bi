@@ -7,7 +7,7 @@ import { TabsBarView } from './analysis/TabsBarView';
 import type { AnalysisSession } from './analysis/useAnalysisSession';
 import { ParameterModal } from './ParameterModal';
 import { QueryInputView } from './QueryInputView';
-import { QueryResultView } from './QueryResultView';
+import { QueryResultView } from '@/shared/query-result/QueryResultView';
 import { useQueryEditor } from './useQueryEditor';
 
 interface QueryTabWorkspaceProps {

@@ -1,11 +1,11 @@
 import { Button, Table, Typography } from 'antd';
 import type { TableProps } from 'antd';
-import { PREVIEW_ROW_KEY } from '../schema.utils';
-import type { TablePreview } from '../useTablePreview';
+import { PREVIEW_ROW_KEY } from './tableData.utils';
+import type { TablePreview } from './useTablePreview';
 
 type Row = Record<string, unknown>;
 
-/** The Table Data tab (v1 `ViewData`): a page of rows, sorted on the server by a header click. */
+/** A table's rows (v1 `ViewData`): a page at a time, sorted on the server by a header click. */
 export function TableDataView({ preview }: { preview: TablePreview }) {
   if (preview.error && preview.rows.length === 0) {
     return (

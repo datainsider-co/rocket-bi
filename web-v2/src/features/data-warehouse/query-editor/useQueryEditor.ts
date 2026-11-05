@@ -5,9 +5,10 @@ import type { CodeEditorHandle } from '@/shared/code-editor/CodeEditor';
 import type { EditorLanguage } from '@/shared/code-editor/codeEditor.utils';
 import type { AnalysisTab } from './analysis/analysis.utils';
 import type { TabEdit } from './analysis/analysisTabs';
-import { sqlToRun, toRun } from './queryEditor.utils';
+import { toRun } from '@/shared/query-result/queryResult.utils';
+import { sqlToRun } from './queryEditor.utils';
 import { useQueryParameters, type QueryParameters } from './useQueryParameters';
-import { useQueryRun, type QueryResult } from './useQueryRun';
+import { useQueryRun, type QueryResult } from '@/shared/query-result/useQueryRun';
 import { useResultExport } from './useResultExport';
 import { useSqlLanguage } from './useSqlLanguage';
 
