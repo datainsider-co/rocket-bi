@@ -75,6 +75,8 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
 - **Data cook** (Phase 7, [`DATA_COOK.md`](DATA_COOK.md)): DC0 to DC5 and DC6a done (real payloads, `core/data-cook`,
   routes and layout at v1's paths, the ETL listings, ETL History, Share, the editor's canvas); preview (DC6b) comes next. **Blocked by the server** on MySQL: SQL operators need
   database-qualified tables, joins fail on duplicate column names (DC0).
+- **Organization settings** (Phase 6, [`ORGANIZATION_SETTINGS.md`](ORGANIZATION_SETTINGS.md)): DataSource Config and
+  User Managements done (OS0 to OS5d); Overview, SSO, API keys, user activity and billing are not in scope yet.
 - **Data ingestion** (Phase 8, [`DATA_INGESTION.md`](DATA_INGESTION.md)): the MVP is done, DI0 to DI8 (listings, source and job actions, the JDBC source form, the job form and CSV import). The other source types come after the MVP.
 - **Share links (`?token=`)**: the Share dialog (M7b) creates directory tokens, which the server accepts; opening
   them without a session still needs client work, see Phase 3 M5b. **Blocked by the server**: MySQL `like` and
@@ -411,12 +413,15 @@ Plan, decisions and steps (DW0 to DW12) in [`DATA_WAREHOUSE.md`](DATA_WAREHOUSE.
 
 ### Phase 6: Organization settings
 
+Plan, decisions and steps (OS0 to OS5d) in [`ORGANIZATION_SETTINGS.md`](ORGANIZATION_SETTINGS.md). In scope for now:
+DataSource Config and User Managements only; both done (OS0 to OS5d).
+
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| Overview, user management, user detail | `screens/organization-settings`, `screens/user-management`, `di-core/admin` | 86 | Not started |
+| Overview, user management, user detail | `screens/organization-settings`, `screens/user-management`, `di-core/admin` | 86 | User management done (OS5a to OS5d): `features/organization` (layout with a sidebar by permission, user listing, New User, Login Method, user detail with profile, role, attributes, privileges, suspend, reset password, delete with transfer), `core/admin`. Left: Overview |
 | Token management, SSO | `token-management`, `sso-config` | – | Not started |
 | User activity log, system monitor (query/user usage) | `user-activity-log`, `system-monitor` | – | Not started |
-| ClickHouse / connector config | `connector-config`, `di-core/connector-config`. Done: first-run setup (`features/data-source/setup`, mounted in `AppLayout` instead of v1's redirect to the settings page): permission check, pick type → form with test connection, SSH tunnel and properties → schema fetch progress. ClickHouse and MySQL only (`core/connection`). Left: the DataSource settings page (listing, Update Schema, Refresh, Change/Edit; on hold), BigQuery/PostgreSQL/Redshift/Vertica | In progress |
+| ClickHouse / connector config | `connector-config`, `di-core/connector-config`. Done: first-run setup (`features/data-source/setup`, mounted in `AppLayout` instead of v1's redirect to the settings page): permission check, pick type → form with test connection, SSH tunnel and properties → schema fetch progress. The DataSource Config page (`features/data-source/config`, OS3) and all six server types: ClickHouse, MySQL, PostgreSQL, Redshift, Vertica, BigQuery (`core/connection`, OS4) | Done |
 | Plan and billing | `plan-and-billing`, `plan-detail`, `di-core/billing` | – | Not started |
 
 ### Phase 7: Data cook (ETL)
