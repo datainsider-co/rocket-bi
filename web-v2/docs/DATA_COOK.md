@@ -389,6 +389,58 @@ Chạy bằng curl và Playwright (v1 ở `localhost:5050`) trên docker local. 
   khác của ETL; mỗi lần chỉ build bảng mới; sửa SQL chỉ build các bảng sau nó; Save không build lại; server lưu đúng
   JSON; mở sửa Join / Manage Fields của ETL v1. Để lại ETL 11 có SQL, Manage Fields, Join cho DC8 / DC9.
 
+## Quyết định ở DC8 (2026-11-05)
+
+- **Kiểm trên server**:
+  - `chart/query` với `table_chart_setting` (Transform) và `flatten_pivot_table_chart_setting` (Pivot) đều trả một bảng
+    phẳng (`json_table_response`; Pivot ra cột `Offline - total_revenue`, ...).
+  - Server nhận Pivot với `flatten_pivot_table_chart_setting` nhưng **lưu thành `pivot_table_chart_setting`**, và
+    `preview_sync` của operator Pivot build cùng một bảng phẳng với cả hai class. v2 lưu class của server (không đổi
+    chữ ký sau Save); chỉ preview trong builder gửi class flatten.
+  - Server chuẩn hoá query khi lưu (thêm `aggregate_conditions`, `views`, `is_flatten`, `group_by_func`, ..., bỏ
+    `parameters`, `is_collapse`), nên chữ ký của một Transform / Pivot mới khác sau Save. Save chuyển kết quả preview
+    sang chữ ký mới (`signatureChanges`, `keepPreviews` trong `useSaveEtl`): bảng vẫn là bảng vừa build, không build lại.
+- **Builder nhúng** (`operators/chart`): dùng lại cây field (`useFieldTree` với `adhocTable` = bảng cha trong database
+  preview, field là `table_field` trên `preview_etl_<id>` như JSON v1), các zone (`ConfigPanel`), kéo thả và "click here"
+  của ChartBuilder trong `BuilderProvider` riêng, không controls, không measure / calculated field (bảng preview không
+  có). `ChartBuilderModalView` thêm `title` và cho bỏ tab Settings và chọn loại chart. Không cần
+  `DashboardControlsProvider`: preview của builder là bảng (`useBuilderResult`, `BuilderResultView`) chạy `chart/query`
+  có phân trang, không qua renderer của dashboard.
+- **Loại chart cố định**: Transform là Table (`flatten_table`) như v1. Builder v2 không có Flatten Pivot; Pivot dựng bằng
+  Pivot Table (zone giống hệt: Columns, Rows, Values), `current_chart_type` lưu là `flatten_pivot_table` như v1 và đọc
+  lại thành `pivot_table`.
+- **Builder state** lưu trong `extra_data.render_options` theo key của v1 (`positionKey`), viết cùng lúc với operator
+  (action `addOperator` / `updateOperator` có `renderOptions`), xoá khi bảng bị xoá (v1 `clearOperatorData`). Query lưu
+  `options: {}` như server. ETL không có render options (tạo bằng curl) mở builder trống trên query đã lưu, như v1.
+- Menu: Pivot Table, Transform Table trên bảng; Edit trên hình thoi của chúng.
+- **Đã kiểm bằng Playwright** trên `pnpm dev` với docker (ETL 11): thêm Transform (region, country) và Pivot (Columns
+  region, Rows sales_channel, Values sum units_sold), preview builder đúng bảng phẳng, mở lại Transform thấy đúng field;
+  mỗi lần thêm chỉ build bảng mới; Save không build lại. Force run trên server: Transform, Pivot, Save To Data Warehouse
+  chạy xong (lần chạy hỏng ở Join `Duplicate column name`, nợ backend DC0). v1 mở được ETL có Transform / Pivot do v2
+  lưu (chưa thử builder của v1 trên chúng).
+
+## Quyết định ở DC9 (2026-11-05)
+
+- **Kiểm trên server**: ETL ghi vào database và bảng chưa có thì **lần chạy tự tạo** (`dc9_autocreate.sales_copy`, 200
+  dòng). Nên v2 không tạo database khi bấm Add như v1; database mới chỉ là một tên tới lần chạy đầu (mất display name
+  riêng của nó, v1 cho đặt).
+- **Save To Data Warehouse** (`targets`): database và bảng là ô gõ có gợi ý (`AutoComplete`): chọn cái có sẵn hoặc gõ
+  tên mới (viết thường, ký tự khác thành `_`, như `makeNameFromDisplayName` của v1; tên có sẵn giữ nguyên). Bảng gợi ý
+  là bảng của database đã chọn. Type Update / Append; dưới form báo "will be created on the first run" hoặc câu cảnh
+  báo overwrite của v1. Lỗi: thiếu tên, tên bắt đầu bằng số. Mở từ menu bảng (Save To Data Warehouse) hoặc Edit của box;
+  action `persist` của reducer. Box Save To Database và email vẫn chỉ có Remove (sau MVP).
+- **Dialog Save** (`save`, v1 `SaveEtl`): tên (luật của DC6a), `ScheduleFields` không Minutely, Incremental Setting liệt
+  kê **mọi** bảng nguồn (v1 chọn từng bảng trong dropdown), mỗi bảng Full / Incremental, cột (bắt buộc khi Incremental)
+  và giá trị. Lưu chỉ các bảng Incremental theo `incrementalKey` (v1 bỏ Full khi lưu). Lịch đi qua form nên lưu lại một
+  lịch có sẵn thì `start_time` thành hôm nay cùng giờ (v1 cũng vậy); ETL chưa có lịch mở ra Recurring Daily như form của
+  Ingestion.
+- **Nút Save** mở dialog và bấm được khi ETL có bảng (v1), không chỉ khi có thay đổi: lịch và incremental chỉ sửa ở
+  dialog. `EditControls` (dùng chung với Relationship) thêm `canSave`. Lỗi server giữ dialog mở với câu lỗi; lưu xong
+  đóng dialog, ở lại trang.
+- **Đã kiểm bằng Playwright** trên `pnpm dev` với docker: Save To Data Warehouse của Pivot vào `DC9 Out` / `Pivot Region`
+  ra box `dc9_out` / `pivot_region`, dialog Save chọn Run only once; lần chạy ghi 2 dòng vào `dc9_out.pivot_region`.
+  375px không cuộn ngang trang; builder bị cắt chiều ngang trong dialog như ChartBuilder của dashboard.
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -402,8 +454,8 @@ Chạy bằng curl và Playwright (v1 ở `localhost:5050`) trên docker local. 
 | DC6a | **Trình sửa: khung.** Load / tạo lười, reducer trên đồ thị phẳng, canvas React Flow (nguồn, operator, đích, vị trí từ `extra_data`), thêm nguồn từ `DatabaseTree`, context menu, xoá / đổi tên operator, đổi tên ETL, Save (giữ lịch hiện có), hỏi khi rời trang có thay đổi | Xong (xem DC6a) |
 | DC6b | **Trình sửa: preview.** `preview_sync` theo nhánh, trạng thái loading / lỗi trên node, lỗi lan xuống, panel dữ liệu (`TableDataView` trên database preview), Retry, force refresh | Xong (xem DC6b) |
 | DC7 | **Operator không cần ChartBuilder.** SQL Query (`shared/code-editor`, autocomplete bảng của database preview), Join (chọn bảng thứ hai, kiểu join, nhiều điều kiện), Manage Fields (đổi tên, ẩn, đổi kiểu, thêm expression field, xem SQL qua `view_query`) | Xong (xem DC7) |
-| DC8 | **Transform và Pivot** bằng ChartBuilder nhúng (host mới, dựa trên phần tách host của DW11) | Chưa làm |
-| DC9 | **Đích và lưu.** Save To Data Warehouse (database / bảng có sẵn hoặc mới, Update / Append), dialog Save (tên, `ScheduleFields` không Minutely, incremental theo bảng nguồn) | Chưa làm |
+| DC8 | **Transform và Pivot** bằng ChartBuilder nhúng (host mới, dựa trên phần tách host của DW11) | Xong (xem DC8) |
+| DC9 | **Đích và lưu.** Save To Data Warehouse (database / bảng có sẵn hoặc mới, Update / Append), dialog Save (tên, `ScheduleFields` không Minutely, incremental theo bảng nguồn) | Xong (xem DC9) |
 | Sau MVP | Save To Database (5 loại, SSL / JKS), Send To Email, Python Query (nếu server chạy được) | Chưa làm |
 
 Thứ tự: DC0 → DC1 → DC2, rồi DC3, DC4, DC5 song song (thư mục riêng); DC6a → DC6b → DC7 và DC9 song song; DC8 (DW11
