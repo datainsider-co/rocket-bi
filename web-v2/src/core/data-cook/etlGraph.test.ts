@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fixture from './etl.fixture.json';
 import { etlOperatorFromJson, etlOperatorToJson, operatorParents, type EtlOperator } from './EtlOperator';
-import { baseTableName, etlGraphFromLeaves, leafNames, leavesFromGraph, uniqueTableName, type EtlGraph } from './etlGraph';
+import { ancestorNames, baseTableName, etlGraphFromLeaves, leafNames, leavesFromGraph, operatorTree, uniqueTableName, type EtlGraph } from './etlGraph';
 
 function source(tblName: string): EtlOperator {
   return {
@@ -151,6 +151,45 @@ describe('leavesFromGraph', () => {
     };
 
     expect(leavesFromGraph(graph).map(leaf => leaf.destTable.tblName)).toEqual(['z']);
+  });
+});
+
+describe('operatorTree', () => {
+  it('builds one table with everything it reads from', () => {
+    const graph = etlGraphFromLeaves(v1Leaves);
+
+    const tree = operatorTree(graph, 'sales_1_1');
+
+    expect(tree && etlOperatorToJson(tree)).toEqual(etlOperatorToJson(operatorParents(v1Leaves[1]!)[0]!));
+  });
+
+  it('is undefined for a table the graph lacks', () => {
+    expect(operatorTree(etlGraphFromLeaves(v1Leaves), 'gone')).toBeUndefined();
+  });
+});
+
+describe('ancestorNames', () => {
+  it('lists the tables a table reads from, directly or not', () => {
+    const graph = etlGraphFromLeaves(v1Leaves);
+
+    expect([...ancestorNames(graph, 'sales_1_2')]).toEqual(['sales_1_1', 'sales_1']);
+    expect([...ancestorNames(graph, 'sales_join_sales_copy')]).toEqual(['sales', 'sales_copy']);
+    expect(ancestorNames(graph, 'sales').size).toBe(0);
+  });
+
+  it('stops at a cycle', () => {
+    const graph: EtlGraph = {
+      operators: new Map([
+        ['x', sql('x', source('y'))],
+        ['y', sql('y', source('x'))]
+      ]),
+      parentNames: new Map([
+        ['x', ['y']],
+        ['y', ['x']]
+      ])
+    };
+
+    expect([...ancestorNames(graph, 'x')]).toEqual(['y', 'x']);
   });
 });
 

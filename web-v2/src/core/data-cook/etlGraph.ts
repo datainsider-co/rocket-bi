@@ -34,8 +34,8 @@ export function leafNames(graph: EtlGraph): string[] {
   return [...graph.operators.keys()].filter(name => !read.has(name));
 }
 
-/** The leaves as trees again, each with the graph's version of every operator it reads from. */
-export function leavesFromGraph(graph: EtlGraph): EtlOperator[] {
+/** Builds operators with the graph's version of every operator they read from, each once (a cycle stops a branch). */
+function treeBuilder(graph: EtlGraph): (name: string) => EtlOperator | undefined {
   const built = new Map<string, EtlOperator>();
   const build = (name: string, path: ReadonlySet<string>): EtlOperator | undefined => {
     const done = built.get(name);
@@ -48,7 +48,32 @@ export function leavesFromGraph(graph: EtlGraph): EtlOperator[] {
     built.set(name, result);
     return result;
   };
-  return leafNames(graph).flatMap(name => build(name, new Set()) ?? []);
+  return name => build(name, new Set());
+}
+
+/** The leaves as trees again, each with the graph's version of every operator it reads from. */
+export function leavesFromGraph(graph: EtlGraph): EtlOperator[] {
+  const build = treeBuilder(graph);
+  return leafNames(graph).flatMap(name => build(name) ?? []);
+}
+
+/** The operator writing `name` as a tree: what the server builds that table from. */
+export function operatorTree(graph: EtlGraph, name: string): EtlOperator | undefined {
+  return treeBuilder(graph)(name);
+}
+
+/** Every table `name` reads from, directly or not. */
+export function ancestorNames(graph: EtlGraph, name: string): Set<string> {
+  const found = new Set<string>();
+  const visit = (current: string) => {
+    for (const parent of graph.parentNames.get(current) ?? []) {
+      if (found.has(parent)) continue;
+      found.add(parent);
+      visit(parent);
+    }
+  };
+  visit(name);
+  return found;
 }
 
 /** `base`, or `base_1`, `base_2`, ... when taken (v1 `makeDestTableConfig`). */
