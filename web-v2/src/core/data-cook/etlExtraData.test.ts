@@ -8,6 +8,7 @@ import {
   readRenderOptions,
   readStagePosition,
   removePosition,
+  removeRenderOptions,
   thirdPartyPositionKey,
   writePosition,
   writeRenderOptions,
@@ -92,5 +93,21 @@ describe('render options', () => {
     expect(written).toEqual({ render_options: { sales_11: { current_chart_type: 'flatten_table' } } });
     expect(readRenderOptions(written, 'sales_1_1')).toEqual({ current_chart_type: 'flatten_table' });
     expect(readRenderOptions(v1ExtraData, 'sales')).toBeUndefined();
+  });
+});
+
+describe('removeRenderOptions', () => {
+  it("drops a table's builder state, under v1's key", () => {
+    const extraData = writeRenderOptions(writeRenderOptions({}, 'sales_1_1', { configs: {} }), 'other', { configs: {} });
+
+    const removed = removeRenderOptions(extraData, 'sales_1_1');
+
+    expect(readRenderOptions(removed, 'sales_1_1')).toBeUndefined();
+    expect(readRenderOptions(removed, 'other')).toEqual({ configs: {} });
+  });
+
+  it('gives the same extra data back when the table has none', () => {
+    const extraData = { render_options: {} };
+    expect(removeRenderOptions(extraData, 'sales')).toBe(extraData);
   });
 });

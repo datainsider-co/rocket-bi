@@ -88,3 +88,9 @@ export function readRenderOptions(extraData: JsonObject, tblName: string): JsonO
 export function writeRenderOptions(extraData: JsonObject, tblName: string, options: JsonObject): JsonObject {
   return { ...extraData, [RENDER_OPTIONS]: { ...asRecord(extraData[RENDER_OPTIONS]), [positionKey(tblName)]: options } };
 }
+
+export function removeRenderOptions(extraData: JsonObject, tblName: string): JsonObject {
+  if (readRenderOptions(extraData, tblName) === undefined) return extraData;
+  const { [positionKey(tblName)]: _removed, ...rest } = asRecord(extraData[RENDER_OPTIONS]);
+  return { ...extraData, [RENDER_OPTIONS]: rest };
+}
