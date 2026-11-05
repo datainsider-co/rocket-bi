@@ -1,4 +1,5 @@
 import type { DiModule } from '@/core/di/Container';
+import { AdminModule } from '@/core/admin/AdminModule';
 import { AuthModule } from '@/core/auth/AuthModule';
 import { ConnectionModule } from '@/core/connection/ConnectionModule';
 import { DashboardModule } from '@/core/dashboard/DashboardModule';
@@ -33,5 +34,6 @@ export const appModules: readonly DiModule[] = [
   UserModule,
   ShareModule,
   IngestionModule,
-  DataCookModule
+  DataCookModule,
+  AdminModule
 ];
