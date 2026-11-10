@@ -1,8 +1,16 @@
 /* v1 DashboardHeader.vue, DashboardControlBar.scss, DiButton.vue and _button.scss (btn-ghost, btn-icon-border). */
 
 .dashboard-header {
+  /* Over the body, for the shadow it casts once the body is scrolled. */
+  position: relative;
+  z-index: 2;
   padding: 13px 47px 0 28px;
   color: var(--text-color);
+}
+
+/* v1 `.dashboard-scrolling`. */
+.dashboard-page[data-scrolled='true'] .dashboard-header {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-header__bar {
@@ -53,6 +61,7 @@
 .dashboard-header__icon-button:hover,
 .dashboard-header__icon-button:focus-visible {
   background-color: var(--icon-hover-color, #d6d6d6);
+  color: #fff;
 }
 
 .dashboard-header__back {
@@ -85,7 +94,6 @@
   font: inherit;
   font-size: 14px;
   line-height: 1.4;
-  letter-spacing: 0.2px;
   cursor: pointer;
 }
 
@@ -98,7 +106,7 @@
 
 .dashboard-header-button:disabled {
   cursor: default;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .dashboard-header-button > i {
@@ -142,7 +150,7 @@
   color: var(--secondary-text-color);
   font: inherit;
   font-size: 12px;
-  line-height: 18px;
+  line-height: 1.4;
   text-align: left;
   white-space: nowrap;
   cursor: pointer;
@@ -154,7 +162,9 @@
   color: var(--text-color);
 }
 
-.dashboard-options-menu__item > i {
+.dashboard-options-menu__item > i,
+.dashboard-options-menu__item > svg {
+  flex-shrink: 0;
   width: 16px;
   height: 16px;
   font-size: 16px;
@@ -172,20 +182,14 @@
 
 .dashboard-page[data-mode='fullscreen'] .dashboard-header__bar,
 .dashboard-page[data-mode='tv'] .dashboard-header__bar {
-  min-height: 60px;
+  height: 60px;
   margin: 0;
 }
 
-.dashboard-page[data-mode='fullscreen'] .dashboard-header__right,
-.dashboard-page[data-mode='tv'] .dashboard-header__right {
-  opacity: 0;
-  transition: opacity 150ms;
-}
-
-.dashboard-page[data-mode='fullscreen'] .dashboard-header:hover .dashboard-header__right,
-.dashboard-page[data-mode='tv'] .dashboard-header:hover .dashboard-header__right,
-.dashboard-page .dashboard-header__right:focus-within {
-  opacity: 1;
+/* Hidden, not faded (v1). They stay while a menu of theirs is open: the pointer is then outside the header. */
+.dashboard-page[data-mode='fullscreen'] .dashboard-header:not(:hover, :has([aria-expanded='true'])) .dashboard-header__right,
+.dashboard-page[data-mode='tv'] .dashboard-header:not(:hover, :has([aria-expanded='true'])) .dashboard-header__right {
+  display: none;
 }
 
 /* Embedded: v1 embedded-dashboard-header. */
@@ -214,5 +218,24 @@
   /* v1 dashboard-control-bar--mobile: icons only. */
   .dashboard-header-button__title {
     display: none;
+  }
+}
+
+/* v1 kept an empty Reset Filters box between the date and the buttons: 4px more while there is nothing to reset. */
+.main-date-trigger + .dashboard-header__actions {
+  margin-left: 4px;
+}
+
+/* v1 `<transition name="fade" mode="out-in">` between the view and edit buttons: the new ones fade in. */
+.dashboard-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: dashboard-header-fade 0.25s;
+}
+
+@keyframes dashboard-header-fade {
+  from {
+    opacity: 0;
   }
 }

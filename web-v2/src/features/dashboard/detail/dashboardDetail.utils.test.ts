@@ -7,6 +7,7 @@ import {
   dashboardCssVars,
   dashboardErrorMessage,
   isNotFoundError,
+  isScrolledPast,
   radiusCss,
   tabPositions,
   topLevelPositions,
@@ -80,5 +81,25 @@ describe('errors', () => {
     expect(dashboardErrorMessage(new ApiError('nope', 401, 'not_allowed'))).toBe("You don't have permission to view dashboard");
     expect(dashboardErrorMessage(new ApiError('gone', 404, 'not_found'))).toBe('Dashboard not found');
     expect(dashboardErrorMessage(new Error('x'))).toBe('Load dashboard error!');
+  });
+});
+
+describe('isScrolledPast', () => {
+  it.each([
+    [0, 2000, 1000, false],
+    [10, 2000, 1000, false],
+    [11, 2000, 1000, true],
+    [1000, 2000, 1000, true]
+  ])('at %i of a %i high content in a %i high box: %s', (scrollTop, scrollHeight, clientHeight, expected) => {
+    expect(isScrolledPast(scrollTop, scrollHeight, clientHeight)).toBe(expected);
+  });
+
+  it('is never past when the content fits', () => {
+    expect(isScrolledPast(0, 1000, 1000)).toBe(false);
+  });
+
+  it('takes another ratio', () => {
+    expect(isScrolledPast(400, 2000, 1000, 0.5)).toBe(false);
+    expect(isScrolledPast(600, 2000, 1000, 0.5)).toBe(true);
   });
 });

@@ -622,6 +622,6 @@ describe('dashboard page', () => {
     });
 
     expect(await screen.findByText("You don't have permission to view dashboard", {}, SLOW)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Try Again' })).toBeInTheDocument();
   });
 });

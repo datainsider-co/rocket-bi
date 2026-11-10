@@ -1,0 +1,37 @@
+/* v1 `DashboardControlBar` in RLS View As mode: a bordered `DiButton` (`.rls-view-as`) and Exit View As. */
+
+.view-as-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.view-as-bar__user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 8px;
+  border: 1px solid #d6d6d6;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.view-as-bar__user:hover,
+.view-as-bar__user:focus-visible {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.view-as-bar__user > i {
+  font-size: 16px;
+}
+
+.view-as-bar__user > strong {
+  font-weight: 500;
+}

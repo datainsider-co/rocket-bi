@@ -11,6 +11,7 @@ import { useDashboardShare } from '../share/useDashboardShare';
 import { useViewAs } from '../view-as/useViewAs';
 import { DashboardPageView } from './DashboardPageView';
 import type { useDashboardPage } from './useDashboardPage';
+import { useScrolled } from './useScrolled';
 
 interface DashboardPageContentProps {
   page: ReturnType<typeof useDashboardPage>;
@@ -26,6 +27,7 @@ export function DashboardPageContent({ page, embedded, chartBuilder: ChartBuilde
   const mobile = useIsMobile();
   const access = useDashboardAccess(page.dashboard);
   const display = useDashboardDisplay();
+  const scrolled = useScrolled(display.viewportRef);
   const viewAs = useViewAs();
   const editing = useDashboardEditing({ dashboard: page.dashboard, permissions: access.permissions, available: !mobile && !embedded, chartBuilder });
   const { dashboard } = page;
@@ -42,7 +44,7 @@ export function DashboardPageContent({ page, embedded, chartBuilder: ChartBuilde
         headerFilters={page.headerFilters}
         load={{ isLoading: page.isLoading, error: page.error, onRetry: page.retry }}
         state={{ access, display, viewAs, editing }}
-        layout={{ mobile, embedded }}
+        layout={{ mobile, embedded, scrolled }}
         options={embedded ? {} : { onRelationship: relationship.open, onShare: share.open }}
         builder={
           ChartBuilder &&

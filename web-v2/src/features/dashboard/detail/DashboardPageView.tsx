@@ -28,6 +28,8 @@ export interface DashboardLayout {
   mobile: boolean;
   /** `/embedded/dashboard/:name` (v1 `EmbeddedDashboard`): the dashboard alone, with its title and date filter. */
   embedded: boolean;
+  /** The body is scrolled down: the header casts a shadow on it (v1 `.dashboard-scrolling`). */
+  scrolled?: boolean;
 }
 
 /** What the page lets the viewer do besides looking. */
@@ -69,15 +71,22 @@ export function DashboardPageView(props: DashboardPageViewProps) {
   const isEditing = editing.mode.editing;
 
   const page = (
-    <div className="dashboard-theme dashboard-page" data-dashboard-theme={theme.cssName} data-mode={mode} data-embedded={layout.embedded} data-editing={isEditing}>
+    <div
+      className="dashboard-theme dashboard-page"
+      data-dashboard-theme={theme.cssName}
+      data-mode={mode}
+      data-embedded={layout.embedded}
+      data-editing={isEditing}
+      data-scrolled={layout.scrolled === true}
+    >
       <DashboardHeaderView
         title={dashboard?.name ?? ''}
         onBack={full && mode === DashboardMode.View ? onBack : undefined}
         onRename={full && isEditing ? () => editing.dialogs.open({ kind: 'renameDashboard' }) : undefined}
+        filters={full && dashboard && !layout.mobile && <HeaderFilterBar />}
       >
         {dashboard && <DashboardControlBar dashboard={dashboard} state={state} layout={layout} options={options} />}
       </DashboardHeaderView>
-      {full && dashboard && !layout.mobile && <HeaderFilterBar />}
       <div ref={viewportRef} className="dashboard-page__body">
         <div
           ref={contentRef}

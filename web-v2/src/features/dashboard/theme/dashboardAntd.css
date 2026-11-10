@@ -103,6 +103,41 @@
     letter-spacing: 0.2px;
   }
 
+  /*
+    v1 `ContextMenu.vue` (the header's Adding): rows of an icon and 14px text, at least 200px wide, on the app's light
+    colors in every theme (its `--root` variables).
+  */
+  .dashboard-page .dashboard-context-menu .ant-dropdown-menu {
+    min-width: 200px;
+    border: var(--menu-border);
+    background: var(--secondary--root);
+  }
+
+  .dashboard-page .dashboard-context-menu .ant-dropdown-menu-item {
+    padding: 12px 16px;
+    color: var(--secondary-text-color--root);
+    line-height: 1.4;
+  }
+
+  .dashboard-page .dashboard-context-menu .ant-dropdown-menu-item:not(.ant-dropdown-menu-item-disabled):hover,
+  .dashboard-page .dashboard-context-menu .ant-dropdown-menu-item-active:not(.ant-dropdown-menu-item-disabled) {
+    background: var(--hover-color--root);
+    color: var(--text-color--root);
+  }
+
+  .dashboard-page .dashboard-context-menu .ant-dropdown-menu-item-disabled {
+    opacity: var(--normal-opacity, 0.5);
+  }
+
+  .dashboard-page .dashboard-context-menu .ant-dropdown-menu-item .ant-dropdown-menu-item-icon {
+    display: inline-flex;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-inline-end: 8px;
+    font-size: 16px;
+  }
+
   /* v1 `DiDropdown.scss` `.select-popover`: a 1px outline, items at 80% until hovered or chosen. */
   .dashboard-page .ant-select-dropdown {
     padding: 8px 0;

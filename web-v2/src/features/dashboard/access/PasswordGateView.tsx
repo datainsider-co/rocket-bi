@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Input, Modal, Typography } from 'antd';
+import { Button, Input, Modal } from 'antd';
+import './PasswordGate.css';
 
 const INPUT_ID = 'dashboard-password';
 
@@ -15,12 +16,31 @@ export function PasswordGateView({ onUnlock, onCancel }: PasswordGateViewProps) 
   const [error, setError] = useState<string>();
   const submit = () => setError(onUnlock(password));
   return (
-    <Modal open centered title="Password Validation" okText="Access" onOk={submit} onCancel={onCancel} maskClosable={false} keyboard={false} closable={false}>
-      <label htmlFor={INPUT_ID} className="mb-1 block">
+    <Modal
+      open
+      centered
+      className="password-gate"
+      width={500}
+      title="Password Validation"
+      maskClosable={false}
+      keyboard={false}
+      closable={false}
+      onCancel={onCancel}
+      footer={
+        <>
+          <Button onClick={onCancel}>Cancel</Button>
+          <Button type="primary" onClick={submit}>
+            Access
+          </Button>
+        </>
+      }
+    >
+      <label htmlFor={INPUT_ID} className="password-gate__label">
         Password
       </label>
       <Input.Password
         id={INPUT_ID}
+        variant="filled"
         autoComplete="new-password"
         placeholder="Enter password"
         value={password}
@@ -28,7 +48,9 @@ export function PasswordGateView({ onUnlock, onCancel }: PasswordGateViewProps) 
         onPressEnter={submit}
         status={error ? 'error' : undefined}
       />
-      {error && <Typography.Text type="danger">{error}</Typography.Text>}
+      <div className="password-gate__error" role="alert">
+        {error}
+      </div>
     </Modal>
   );
 }
