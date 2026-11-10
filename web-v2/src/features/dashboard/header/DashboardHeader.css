@@ -27,6 +27,8 @@
   font-size: 20px;
   font-weight: 500;
   line-height: 23.44px;
+  /* v1 headings (`themes/app.scss`). */
+  letter-spacing: 0.2px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

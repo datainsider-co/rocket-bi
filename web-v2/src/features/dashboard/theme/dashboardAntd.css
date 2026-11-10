@@ -1,0 +1,150 @@
+/*
+  antd on the dashboard page, where its tokens (`dashboardAntdTheme.ts`) do not reach: v1's modal, popover, menu and
+  control looks (`themes/scss/custom-boostrap-class.scss`, `custom-popover.scss`, `_button.scss`, `DiCustomModal.vue`).
+  In the `components` layer: over antd's own styles whatever their specificity, under the page's own CSS and Tailwind.
+  Popups are inside `.dashboard-page` (`DashboardThemeProvider`), so the theme's variables resolve in them.
+*/
+@layer components {
+  /* v1 `.btn-primary` / `.btn-secondary`: medium 14px with 0.18px spacing; a disabled primary stays solid, in grey. */
+  .dashboard-page .ant-btn {
+    letter-spacing: 0.18px;
+  }
+
+  .dashboard-page .ant-btn-color-primary.ant-btn-variant-solid:disabled,
+  .dashboard-page .ant-btn-color-primary.ant-btn-variant-solid.ant-btn-disabled {
+    border-color: transparent;
+    background: var(--accent-disabled-color, #bebebe);
+    color: var(--accent-text-color, #fff);
+  }
+
+  .dashboard-page .ant-btn-color-primary.ant-btn-variant-solid {
+    color: var(--accent-text-color, #fff);
+  }
+
+  /* v1 `.modal-content`, `.modal-header`, `DiCustomModal`: no rule under the header, title medium 24px. */
+  .dashboard-page .ant-modal .ant-modal-container {
+    padding: 0;
+    background: var(--modal-background-color);
+  }
+
+  .dashboard-page .ant-modal .ant-modal-header {
+    margin: 0;
+    padding: 16px 16px 0;
+    background: none;
+  }
+
+  .dashboard-page .ant-modal .ant-modal-title {
+    min-height: 28px;
+    color: var(--text-color);
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+
+  .dashboard-page .ant-modal .ant-modal-body {
+    padding: 16px;
+  }
+
+  .dashboard-page .ant-modal .ant-modal-footer {
+    margin: 0;
+    padding: 0 16px 16px;
+  }
+
+  /* v1 `.di-custom-modal--footer[size='small']`: Cancel at least 83x40, OK 122x40, 16px apart. */
+  .dashboard-page .ant-modal .ant-modal-footer > .ant-btn {
+    min-width: 83px;
+    height: 40px;
+  }
+
+  .dashboard-page .ant-modal .ant-modal-footer > .ant-btn-color-primary {
+    min-width: 122px;
+  }
+
+  .dashboard-page .ant-modal .ant-modal-footer > .ant-btn + .ant-btn {
+    margin-inline-start: 16px;
+  }
+
+  /* `modal.confirm` has no header, body or footer to carry the padding. */
+  .dashboard-page .ant-modal-confirm .ant-modal-container {
+    padding: 16px;
+  }
+
+  /* v1 `DiCustomModal` `.button-x`: a 24px round button. */
+  .dashboard-page .ant-modal .ant-modal-close {
+    top: 18px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: var(--text-color);
+    inset-inline-end: 16px;
+  }
+
+  /* v1 `.custom-b-popover`: 16px around the content, the menu's background and shadow. */
+  .dashboard-page .ant-popover .ant-popover-container {
+    padding: 16px;
+    border-radius: 4px;
+    background: var(--menu-background-color);
+    box-shadow: var(--menu-shadow);
+    color: var(--text-color);
+  }
+
+  /* v1 `.dropdown-menu`, `custom-vue-context.scss`: the items reach the panel's edges. */
+  .dashboard-page .ant-dropdown .ant-dropdown-menu {
+    min-width: 160px;
+    padding: 0;
+    border-radius: 4px;
+    background: var(--menu-background-color);
+    box-shadow: var(--menu-shadow);
+  }
+
+  .dashboard-page .ant-dropdown .ant-dropdown-menu-item,
+  .dashboard-page .ant-dropdown .ant-dropdown-menu-submenu-title {
+    border-radius: 0;
+    color: var(--text-color);
+    letter-spacing: 0.2px;
+  }
+
+  /* v1 `DiDropdown.scss` `.select-popover`: a 1px outline, items at 80% until hovered or chosen. */
+  .dashboard-page .ant-select-dropdown {
+    padding: 8px 0;
+    border-radius: 4px;
+    background: var(--menu-background-color);
+    outline: 1px solid #d6d6d6;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .dashboard-page .ant-select-dropdown .ant-select-item-option {
+    border-radius: 0;
+    color: var(--text-color);
+    opacity: 0.8;
+  }
+
+  .dashboard-page .ant-select-dropdown .ant-select-item-option-active,
+  .dashboard-page .ant-select-dropdown .ant-select-item-option-selected {
+    opacity: 1;
+  }
+
+  /* v1 `DiTab.vue`: the chosen tab is bold. */
+  .dashboard-page .ant-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+    font-weight: 700;
+  }
+
+  /* v1 `DiSlider.vue`: the handle is an accent dot with a 2px white edge, where antd draws a white dot with a ring. */
+  .dashboard-page .ant-slider .ant-slider-handle::after,
+  .dashboard-page .ant-slider .ant-slider-handle:hover::after,
+  .dashboard-page .ant-slider .ant-slider-handle:focus::after,
+  .dashboard-page .ant-slider .ant-slider-handle:active::after {
+    background: var(--accent);
+    box-shadow: 0 0 0 2px #fff;
+  }
+
+  .dashboard-page .ant-slider .ant-slider-track,
+  .dashboard-page .ant-slider:hover .ant-slider-track {
+    background: var(--accent);
+  }
+
+  /* v1 `custom-variables.scss`: tooltips take the menu's colors. */
+  .dashboard-page .ant-tooltip .ant-tooltip-container {
+    background: var(--menu-background-color);
+    color: var(--text-color);
+  }
+}

@@ -10,3 +10,11 @@ export function inDashboardPage(trigger: HTMLElement): HTMLElement {
 export function dashboardPageContainer(): HTMLElement {
   return document.querySelector<HTMLElement>('.dashboard-page') ?? document.body;
 }
+
+/**
+ * antd's `getPopupContainer` for the whole page (`DashboardThemeProvider`): menus and popovers pass their trigger,
+ * dialogs pass nothing.
+ */
+export function dashboardPopupContainer(trigger?: HTMLElement): HTMLElement {
+  return trigger ? inDashboardPage(trigger) : dashboardPageContainer();
+}

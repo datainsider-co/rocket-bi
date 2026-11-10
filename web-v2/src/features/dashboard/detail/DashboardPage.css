@@ -7,6 +7,45 @@
   min-height: 0;
   background: linear-gradient(131deg, var(--min-background-color) 2%, var(--max-background-color) 90%);
   color: var(--text-color);
+  /* v1 `body` (`themes/app.scss`); antd's `App` gives 1.57 otherwise. */
+  line-height: 1.4;
+}
+
+/*
+  v1 `themes/scss/scrollbar.scss`: no scrollbar shows anywhere, except on `.di-scroll-bar`, which the page's body is.
+  In the `components` layer, so a widget's own CSS can bring its scrollbar back.
+*/
+@layer components {
+  .dashboard-page * {
+    scrollbar-width: none;
+  }
+
+  .dashboard-page *::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dashboard-page .dashboard-page__body {
+    scrollbar-color: var(--scrollbar-background) transparent;
+    scrollbar-width: thin;
+  }
+
+  .dashboard-page .dashboard-page__body::-webkit-scrollbar {
+    display: block;
+    width: 16px;
+    height: 16px;
+  }
+
+  .dashboard-page .dashboard-page__body::-webkit-scrollbar-thumb {
+    border: 5px solid transparent;
+    border-radius: 8px;
+    background: var(--scrollbar-background);
+    background-clip: padding-box;
+  }
+
+  .dashboard-page .dashboard-page__body::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-hover);
+    background-clip: padding-box;
+  }
 }
 
 .dashboard-page__body {
@@ -44,7 +83,7 @@
   isolation: isolate;
   display: flex;
   flex-direction: column;
-  width: var(--dashboard-content-width, 100%);
+  width: var(--dashboard-content-width, 1024px);
   min-height: 100%;
   margin: 0 auto;
   padding: 25px 30px;

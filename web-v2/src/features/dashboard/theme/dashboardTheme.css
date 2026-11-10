@@ -498,3 +498,33 @@
   --dashboard-gradient-background-color: #1f2435;
   --default-dashboard-background-color: #00000019;
 }
+
+/*
+  v1 `body div[builder-default-style]` and `body .filter-popover-area-default-style`: ChartBuilder and the filter
+  popovers keep the default look whatever the dashboard's theme.
+*/
+.dashboard-theme [builder-default-style] {
+  --data-builder-bg: #f2f2f7;
+  --builder-panel-bg: #fff;
+  --menu-background-color: #fff;
+  --filter-accent-bg: var(--accent--root);
+  --filter-accent-color: #fff;
+}
+
+.dashboard-theme .filter-popover-area-default-style {
+  --tab-widget-background-active: var(--secondary);
+  --tab-widget-background-deactive: #f9f9fb;
+  --tab-border-color: #f0f0f0;
+  --menu-background-color: #fff;
+  --accent: #597fff;
+  --accent-active-color: #4160c2;
+  --header-bar-background-color: var(--accent);
+  --filter-accent-bg: var(--accent);
+  --filter-accent-color: #fff;
+  --accent-text-color: #fff;
+  --text-color: var(--text-color--root);
+  --secondary-text-color: var(--secondary-text-color--root);
+  --dashboard-panel-background-color: #fff;
+  --accent-hover-color: #4b6ee1;
+  --hover-color: #f9faff;
+}
