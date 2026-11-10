@@ -91,14 +91,15 @@
   padding-bottom: 32px;
 }
 
-.tab-widget__empty {
+/* v1 `#tabs-end`: with three tabs or more, an arrow that lists them. */
+.tab-widget__select {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  color: var(--text-color);
-  font-size: 16px;
-  letter-spacing: 0.27px;
-  line-height: 1.5;
-  text-align: center;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font-size: 14px;
+  cursor: pointer;
 }

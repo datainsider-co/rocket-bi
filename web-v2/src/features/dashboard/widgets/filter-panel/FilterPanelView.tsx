@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { Button, Empty } from 'antd';
+import { Button } from 'antd';
 import type { Position, WidgetId } from '@/core/dashboard/Position';
 import { DashboardGrid, type NestedGridEdit } from '../../grid/DashboardGrid';
 import { NESTED_GRID_MARGIN } from '../../grid/dashboardGrid.utils';
 import { GRID_NO_DRAG_CLASS } from '../../grid/DashboardGridView';
+import { EmptyNestedView } from '../EmptyNestedView';
 import type { FilterPanelLook } from './filterPanel.utils';
 import './FilterPanel.css';
 
@@ -16,6 +17,8 @@ interface FilterPanelViewProps {
   onApply: () => void;
   /** Edit mode: the panel's menu, at the end of the header (v1's gear). */
   actions?: ReactNode;
+  /** Edit mode: adds filters to the empty panel ("Click here to add"). */
+  onAdd?: () => void;
 }
 
 /**
@@ -23,7 +26,7 @@ interface FilterPanelViewProps {
  * and a footer with Apply, all on the panel's background. The filters show their changes at once; charts get them on
  * Apply.
  */
-export function FilterPanelView({ title, look, positions, grid, renderWidget, onApply, actions }: FilterPanelViewProps) {
+export function FilterPanelView({ title, look, positions, grid, renderWidget, onApply, actions, onAdd }: FilterPanelViewProps) {
   const isEmpty = Object.keys(positions).length === 0;
   return (
     <div className="filter-panel" style={{ background: look.background }}>
@@ -34,7 +37,7 @@ export function FilterPanelView({ title, look, positions, grid, renderWidget, on
       </div>
       <div className="filter-panel__body">
         {isEmpty ? (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Your panel is empty" />
+          <EmptyNestedView onAdd={onAdd}>Your panel is empty</EmptyNestedView>
         ) : (
           <DashboardGrid
             positions={positions}

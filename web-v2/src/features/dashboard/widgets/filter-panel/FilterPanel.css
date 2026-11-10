@@ -1,6 +1,7 @@
 /* v1 FilterPanelViewer.vue: a flat box on the panel's background, header 12px 12px 1px, body 6px, footer 50px. */
 
 .filter-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -31,9 +32,12 @@
   text-overflow: ellipsis;
 }
 
+/* v1 `.icon-config-widget`: at the panel's top right corner. */
 .filter-panel__actions {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
-  margin: -8px -8px -8px 0;
 }
 
 .filter-panel__body {
