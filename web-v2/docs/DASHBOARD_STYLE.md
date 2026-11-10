@@ -3,6 +3,17 @@
 Plan style lại trang `/dashboard/:name` của v2 (dashboard, chart builder và các dialog mở từ trang này) cho khớp v1.
 Lập ngày 2026-11-10.
 
+## Phạm vi: chỉ theme sáng
+
+Quyết định ngày 2026-11-10: v2 chỉ hỗ trợ theme sáng (`light_*`). Theme tối (`dark_*`) nằm ngoài phạm vi của plan này:
+
+- Không so ảnh, không sửa lệch và không ghi nợ kỹ thuật cho những gì chỉ xảy ra ở theme tối.
+- Các mục bên dưới chỉ liên quan tới theme tối đã được đánh dấu "bỏ"; những chỗ ghi "chưa kiểm theme tối" không còn là
+  việc phải làm.
+- Code theme tối đã có (biến trong `dash:theme/dashboardTheme.css`, entry trong `dashboardThemes.ts`) để nguyên, không
+  bảo trì. Chưa quyết dashboard đang lưu `dark_*` sẽ hiển thị thế nào (hiện vẫn vẽ theo theme tối, có lỗi đã biết ở
+  dialog và control antd).
+
 ## Cách lập và độ tin cậy
 
 - **Đọc code hai bên**: so SCSS / Vue của v1 với CSS / Tailwind / antd của v2, theo bốn mảng: khung trang, widget,
@@ -10,7 +21,7 @@ Lập ngày 2026-11-10.
 - **Chụp ảnh hai bên** bằng Playwright ở 1440×900 trên docker local (v1 `localhost:5050`, v2 `pnpm dev`), dashboard
   "v2 Sample", "v2 Filters", "v2 Builder", "test". Đã xem 9 cặp: view mode của Sample và Filters, menu Adding, menu
   widget, picker, builder rỗng, builder có data, tab Settings.
-- **Chưa kiểm**: theme tối, các dialog của dashboard, mobile (375px), trạng thái hover / drag, các loại chart ngoài
+- **Chưa kiểm**: các dialog của dashboard, mobile (375px), trạng thái hover / drag, các loại chart ngoài
   column, line, area, pie, donut, KPI, table.
 - Mỗi mục ghi một trong ba nhãn:
   - **[ảnh]**: thấy trên ảnh chụp.
@@ -58,15 +69,15 @@ Token sáng của v1 (`v1:themes/app-theme.scss:13-88`), dùng trong cả tài l
    - Picker hiện cả loại chart chưa hỗ trợ ở dạng disable (B7). v1 chỉ liệt kê loại dùng được.
    - Filter mode nằm trong danh sách condition (B23).
    - Background dashboard chỉ nhận URL (server không có endpoint upload).
-2. **Màu dialog trong theme tối.** [nghi] Đã quyết ngày 2026-11-10: làm theo v1. Còn phải chụp v1 để xác nhận
-   "theo v1" là luôn sáng, rồi sửa ở bước 4.
+2. **Màu dialog trong theme tối.** **Bỏ** (ngày 2026-11-10, chỉ hỗ trợ theme sáng). Phần còn lại của câu hỏi là
+   accent: ở theme sáng có accent khác (Anzac), dialog v1 có vẻ vẫn dùng `#597fff`; kiểm trước bước 4. Ghi chú cũ:
    - `dash:edit/settings/settings.css:1-5` ghi rằng dialog v1 đổi theo theme.
    - Đọc code v1 thì ngược lại: biến theme chỉ áp cho `body[dashboard-theme=…] #app` và `div[widget-preview-area]`
      (`v1:themes/dashboard-theme.scss:57-58`); `DiCustomModal` là `BModal` của bootstrap-vue, có vẻ render vào
      `<body>`, ngoài `#app`; dialog kiểu `EtlModal` mang `builder-default-style`, cũng về giá trị gốc
      (`v1:themes/app-theme.scss:1-3`).
    - Nếu đúng thì dialog v1 luôn sáng với accent `#597fff`, kể cả ở dashboard theme Anzac.
-   - Chụp một dashboard theme tối trên v1 trước khi làm bước 4.
+   - Chụp một dialog trên v1 ở theme Anzac trước khi làm bước 4.
    - Bằng chứng thêm từ bước 1: popover lịch main date của v1 (render ngoài `#app`) luôn sáng với accent `#597fff` ở
      Anzac và hai theme tối. Dialog thì vẫn chưa chụp.
 3. **Nhãn nút lưu trong builder.** Sửa chart có sẵn: ảnh v1 ghi "Save", v2 ghi "Update". [ảnh]
@@ -406,16 +417,16 @@ placeholder và chữ disabled của mọi control trong trang, kể cả builde
 
 Review bằng đọc code ở `f309a28f`, chưa nhìn trên app. Xếp theo mức ảnh hưởng tới các bước sau:
 
-1. **Dialog ở theme tối**: nền modal là `--modal-background-color` (luôn `#fff`), còn title, nút X và nút Cancel
-   theo `--text-color` / `--secondary-text-color` của theme (gần trắng). Quyết định mục 2 đầu tài liệu rồi sửa
-   `dash:theme/dashboardAntd.css` trước bước 4.
-2. **Theme antd của trang không có `algorithm`** nên theo mode của app, không theo nhóm `dark_*` / `light_*` của
+1. **Bỏ (theme tối).** Dialog ở theme tối: nền modal là `--modal-background-color` (luôn `#fff`), còn title, nút X và nút Cancel
+   theo `--text-color` / `--secondary-text-color` của theme (gần trắng).
+2. **Bỏ (theme tối).** Theme antd của trang không có `algorithm` nên theo mode của app, không theo nhóm `dark_*` / `light_*` của
    dashboard: Input, Checkbox, Tree, Table, DatePicker không được vá màu như dropdown và popover.
 3. **Scope mặc định port thiếu**: `[builder-default-style]` chỉ có 5 biến (v1 reset cả bộ biến sáng);
    `.filter-popover-area-default-style` không reset `--filter-color`, `--icon-color`, `--toggle-color`,
    `--scrollbar-*`, `--tab-filter-*`; `colorPrimary` của antd không đổi theo scope CSS (nên `MainDate.css` phải ép nền
    nút Apply). Cần một component scope gồm class reset đủ biến và `DashboardThemeProvider themeName="light_default"`
-   lồng, dùng cho lịch, popover filter, builder (B1) và dialog.
+   lồng, dùng cho lịch, popover filter, builder (B1) và dialog. Sau quyết định chỉ hỗ trợ theme sáng, phần reset
+   màu nền và chữ không còn cần; chỉ còn phần accent ở theme sáng có accent khác (Anzac).
 4. **CSS restyle antd ngoài `@layer components`**: `dash:access/PasswordGate.css`, `MainDate.css:249-256`,
    `DashboardHeader.css:125-135` (trùng với rule popover của F1). Input nền xám 42px và footer hai nút chia đôi là
    mẫu `DiCustomModal` mà D1, D12, B39 cần, hiện nằm riêng trong `.password-gate`. Bước 2 cũng thêm CSS ngoài layer ở
@@ -665,7 +676,7 @@ relationship editor; UI drill through.
   - v1: phải đăng nhập qua form (`#input-email`, `#input-password`); chỉ đặt cookie thì bị đưa về `/login`.
   - Script chụp nằm ở thư mục tạm của phiên làm việc, không có trong repo. Muốn dùng lâu dài thì chép vào repo cùng
     `playwright-core`.
-- Bổ sung vào bộ ảnh: một dashboard theme tối, một dashboard theme có accent khác (Anzac), mọi dialog ở bước 4, màn
+- Bổ sung vào bộ ảnh: một dashboard theme có accent khác (Anzac), mọi dialog ở bước 4, màn
   375px, hover của card và menu, lúc đang kéo field trong builder, builder của table và KPI.
 - Trước khi coi một bước là xong: `pnpm typecheck`, `pnpm lint`, `pnpm test:run`, `pnpm build`.
 
