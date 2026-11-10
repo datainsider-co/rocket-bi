@@ -51,14 +51,15 @@ Token sáng của v1 (`v1:themes/app-theme.scss:13-88`), dùng trong cả tài l
 ## Việc phải quyết định trước
 
 1. **Chỗ v2 cố ý khác v1.** Plan này coi là sửa về v1; muốn giữ thì bỏ mục tương ứng:
-   - Nút "⋮" hiện khi hover ở view mode (W10). v1 dùng hai nút 40px zoom và drilldown.
+   - ~~Nút "⋮" hiện khi hover ở view mode (W10).~~ Đã quyết ngày 2026-11-10: làm theo v1, xong ở bước 2.
    - Nền tooltip chart theo theme (W16). v1 để trắng mặc định của Highcharts.
    - Add Text một cột, HTML là Switch (D2).
    - Sort tab bằng nút lên / xuống (D5).
    - Picker hiện cả loại chart chưa hỗ trợ ở dạng disable (B7). v1 chỉ liệt kê loại dùng được.
    - Filter mode nằm trong danh sách condition (B23).
    - Background dashboard chỉ nhận URL (server không có endpoint upload).
-2. **Màu dialog trong theme tối.** [nghi]
+2. **Màu dialog trong theme tối.** [nghi] Đã quyết ngày 2026-11-10: làm theo v1. Còn phải chụp v1 để xác nhận
+   "theo v1" là luôn sáng, rồi sửa ở bước 4.
    - `dash:edit/settings/settings.css:1-5` ghi rằng dialog v1 đổi theo theme.
    - Đọc code v1 thì ngược lại: biến theme chỉ áp cho `body[dashboard-theme=…] #app` và `div[widget-preview-area]`
      (`v1:themes/dashboard-theme.scss:57-58`); `DiCustomModal` là `BModal` của bootstrap-vue, có vẻ render vào
@@ -329,6 +330,105 @@ trigger main date (180px, 14px); popover 646px; grid 48 cột, ô 32px, margin 1
 padding 15px, viền 1px `#e5e5e5`); app header 68px.
 
 ## Bước 2: Widget
+
+**Trạng thái: xong ngày 2026-11-10** (trừ các mục ghi "để lại" bên dưới). Đã đo và chụp hai bên ở 1440 px trên "v2
+Sample", "v2 Filters" (có `?filters=`), "v2 Builder", theme `light_default` và `dark_default` (đổi `theme_name` trong
+response). Chưa chụp được vì dữ liệu mẫu không có: drill down, KPI có so sánh / trend line, collapse và pivot table,
+tab widget từ 3 tab, tab / panel rỗng, ảnh lỗi, chart rỗng, inner filter dạng dropdown và dạng icon.
+
+| Mục | Kết quả | Nằm ở |
+|---|---|---|
+| W1, W3 | `Loading`, `ErrorState` ("Try Again") | `dash:widgets/chart/ChartWidgetView.tsx` |
+| W2 | Lớp phủ `--hover-color` .6 kèm spinner khi `isFetching` mà đã có data, cho mọi chart; table bỏ `loading` riêng của antd (pivot giữ cho lúc tải dòng con) | như trên, `.chart-status` trong `dash:widgets/WidgetContainer.css` |
+| W4 | `responseHasData` (port `hasData` của v1); chart query được mà không có data thì vẽ icon rỗng, không chữ (v1 truyền `emptyMessage` rỗng) | `v2:core/query/VisualizationResponse.ts` |
+| W5 | "Chart unsupported" ở góc trên trái; lỗi giới hạn parliament dùng `ErrorState` | `dash:charts/ChartRenderer.tsx` |
+| W6, W7 | Glyph 40px `di-icon-filter-small` / `di-icon-disable-filter`, chấm accent 8px; popover 256px không mũi tên theo số đo v1. Giữ title "Filters are off for this chart" khi tắt (v1 luôn ghi "All filters are applied") và nhãn công tắc trên một dòng (v1 xuống dòng trong ô 64px) | `dash:widgets/chart/AppliedFiltersView.tsx`, `AppliedFilters.css` |
+| W8 | Ba dạng như v1: card dưới 550px là icon mở popover (tab dọc hoặc danh sách có dấu check), còn lại là dải tab 210px cuộn ngang hoặc dropdown 28px theo `displayAs` | `dash:widgets/chart/InnerFilterView.tsx`, `InnerFilter.css`, `useNarrowCard.ts` |
+| W9 | **Không sửa padding.** Đo v1: panel 210px có 4px padding bên trong (`.action-more`), bằng v2. Sửa vị trí: v1 lùi 14px so với mép phải nút và cách nút 9px | `dash:widgets/menu/WidgetMenuView.tsx` |
+| W10 | Theo v1: bỏ "⋮" ở view mode. Nút zoom (`di-icon-zoom`, khi `enableIconZoom` và chart đổi được date function) và nút drilldown (`di-icon-drilldown`, khi `isEnableDrilldown`) 40px trên thanh action. Các việc còn lại nằm trong một menu chung (`chartMenuItems`), mở khi bấm vào điểm hoặc chuột phải trên card, chỉ liệt kê mục dùng được: Use as a filter, Change date function, Drill down, Drill through, Reset filter, Reset drill down, Download CSV / Excel | `dash:widgets/chart/ChartActionsView.tsx`, `chartMenus.utils.ts`, `useChartWidget.ts`, `dash:widgets/WidgetContainer.tsx` |
+| W11 | Icon `di-icon-filter-panel` / `di-icon-delete` (theo code v1), nhãn "Duplicate chart" cho chart | `dash:widgets/menu/menuIcons.utils.ts`, `dash:edit/editMenus.utils.ts` |
+| W12 | Class `chart-point-menu`: padding 4px 0, dòng 10px 12px, 14px, xám tới khi hover. Giữ thứ tự và câu `Use "X" as a filter` của v2 | `dash:widgets/chart/PointMenuView.tsx`, `dash:widgets/menu/WidgetMenu.css` |
+| W13 | Submenu mang class của menu (`popupClassName`), cao tối đa 350px có cuộn | như trên |
+| W14 | Panel drill down 300px như `DrilldownSetting`: breadcrumb (nhà = reset, từng giá trị = quay lại), chọn giá trị, rồi chọn field có ô search và nhóm Date / Text; field ngày bấm là drill theo năm, mũi tên mở danh sách date function. Mở từ nút drilldown hoặc từ mục "Drill down" của menu (tại chỗ bấm, có sẵn giá trị nếu bấm vào điểm) | `dash:widgets/chart/DrillPanelView.tsx`, `DrillPanel.tsx`, `DrillButton.tsx`, `drillPanel.utils.ts` |
+| W15 | Drill path nằm trong subtitle của Highcharts (HTML, giá trị đã escape; v1 ghi thẳng vào HTML), bấm bằng chuột hoặc Enter | `dash:charts/drillPath.ts`, `drillPath.css` |
+| W16 | Bỏ nền tooltip mặc định theo theme. Chart lưu `tooltip.backgroundColor` thì vẫn dùng giá trị đó, như v1 | `dash:charts/highchartsBase.ts` |
+| W18 | Nguyên nhân: Highcharts 11 vẽ nhãn HTML ngoài SVG nên `em` tính từ 14px của trang; 13 vẽ trong SVG (16px). Mặc định 11.2px cho nhãn trục X và 9.8px cho data label khi option không đặt cỡ; nhãn category không bị bỏ cách (`step: 1`) | `dash:charts/highchartsBase.ts` (`HTML_LABEL_FONT_SIZE`), `series/seriesChartOptions.ts`, `pie/pieChartOptions.ts` |
+| W19, W20 | `legend.itemStyle` một dòng có "…"; `legendSymbol: 'rectangle'` cho area | `dash:charts/highchartsBase.ts` |
+| W22, W23, W25, W26 | Icon 32px trong ô 48px (59 / 89px ở layout area); icon, khối title, giá trị cách nhau 28px; pill `3px 19px` bo 30px ở `top: 28px; right: 11px`; layout trend: giá trị và icon một hàng `space-between`, padding 15px 9px, phần trăm cách trên 44px | `dash:charts/kpi/` |
+| W29 | Đo v1: KPI nằm trong padding của card, bằng v2. Không sửa | |
+| W30 | Tooltip không mũi tên, padding 4px 8px, màu và font theo `options.tooltip`, đặt theo `align` | `dash:charts/kpi/KpiValue.tsx`, `kpi.utils.ts` |
+| W31 | Một caret ở cột đang sort (xuống = tăng dần như v1), bằng CSS trên sorter của antd | `dash:charts/table/FlattenTable.css` |
+| W32 | Cột chia đều card nhưng không hẹp hơn 150px, quá thì cuộn ngang (`DEFAULT_COLUMN_WIDTH` của v1) | `dash:charts/table/FlattenTableView.tsx` |
+| W33, W34 | Footer 25px cách trên 10px; "N rows", "Showing [n] entries" (10 / 20 / 30 / 50 / 100); card từ 400px trở xuống chỉ còn trang trước, hiện tại, sau. Pill theo **số đo** v1 (12px, cao 20px, trong suốt, trang hiện tại nền header): CSS scoped của `Pagination.vue` không tới được markup của bootstrap. Ẩn footer khi bảng hiện đủ từ 20 dòng trở xuống (`enablePagination`) | như trên, `table.utils.ts` (`hasPages`) |
+| W35, W36, W37, W38 | Bỏ hover dòng; scrollbar mảnh màu `--scrollbar-background`; path dấu cộng / trừ của v1, cách phải 5px; tooltip ô `6px 16px`, bo 1px, 15 dòng | `dash:charts/table/` |
+| W39 | `ic_help.svg` sau title của tab filter và tree filter, subtitle là `title` | `dash:charts/filter/FilterTitle.tsx` |
+| W40 | **Không sửa.** Đo v1: chữ tab là `#5f6368` (`btn-ghost` ép `!important`), bằng v2 | |
+| W41 | Danh sách cao tối đa 250px; màu popup đã có từ F1 | `dash:charts/filter/` |
+| W42 | Nút kéo: chấm accent trong viền trắng 2px, tổng 16px | `dash:charts/filter/FilterWidget.css` |
+| W43 | v1 có icon lịch bên trái (đã thấy trên ảnh). Đổi mũi tên sang `ic-16-arrow-down.svg`, xoay khi mở | `dash:charts/filter/DateSelectFilterView.tsx` |
+| W44 | Padding 4px, placeholder 12px | `dash:charts/filter/FilterWidget.css` |
+| W45 | **Không sửa.** Checkbox của v1 không có viền khi thiếu `deActiveColor` nên vô hình (bug v1, đã ghi ở `filterStyle.utils.ts`) | |
+| W46 | Mũi tên `di-icon-arrow-down` cuối thanh tab khi có từ 3 tab, mở danh sách tab | `dash:widgets/tab/TabNavView.tsx` |
+| W47 | "Your tab / panel is empty" và "**Click here** to add"; link chỉ có ở edit mode (như S5) | `dash:widgets/EmptyNestedView.tsx` |
+| W49 | Gear 32px (icon 14px, padding 9px) đặt tuyệt đối ở góc trên phải panel | `dash:widgets/filter-panel/FilterPanel.css` |
+| W50 | Nền `--hover-color` khi hover | `dash:widgets/menu/WidgetMenu.css` |
+| W51 | Ảnh phủ cả padding của card; spinner khi tải, lỗi không có nút thử lại, icon rỗng khi không có URL | `dash:widgets/image/ImageWidgetView.tsx` |
+
+Sửa thêm ngoài bảng: menu tại điểm bấm (`PointAnchor`) giờ render trong trang thay vì trong card, vì grid item dời
+bằng `transform` làm `position: fixed` tính từ card (menu của chart trong tab mở lệch chỗ). `colorTextQuaternary: '#ccc'` chuyển từ token của trang về riêng `Switch` (trước đó làm xám
+placeholder và chữ disabled của mọi control trong trang, kể cả builder).
+
+Để lại:
+
+- **W10**: menu chuột phải trên card không có "Use as a filter" và "Drill through" (v1 mở thêm một bảng chọn giá trị
+  của chart, `DimensionPicker`); hai mục này vẫn có khi bấm vào một điểm. Trên màn cảm ứng không có đường tới menu của
+  card (Download), như v1.
+- **W14**: panel lấy danh sách giá trị từ chính response chart đang vẽ (v1 query lại); danh sách field chưa có icon
+  kiểu dữ liệu như `FieldListingSearchable` của v1. Chưa so ảnh với v1 (dữ liệu mẫu không bật drill down; đã thử trên
+  v2 bằng cách bật `is_enable_drilldown` trong response).
+- **W53**: thanh zoom in / out (`ZoomControlBar`).
+- **W17**: v1 tính tick lúc chart còn cao 400px (mặc định của Highcharts) rồi co lại mà không tính lại, nên chart thấp
+  có nhiều tick hơn (cách nhau 19–38px). Đây là suy từ số đo ba chart, chưa thử trực tiếp trên v1. Số tick phụ thuộc
+  lịch sử kích thước, không ghim được bằng một option; v2 giữ cách tính chuẩn của Highcharts (72px một tick).
+- **W21**: ở card 231px, v1 ẩn bớt nhãn pie chồng nhau, v2 (Highcharts 13) vẽ đủ. Cỡ chữ đã khớp (9.8px).
+- **W24**: style prefix / postfix hai bên giống nhau trong code; phần lệch trên ảnh có lẽ do Montserrat chưa tải lúc
+  chụp v1 (chưa kiểm). Đã thêm 2px sau prefix / postfix rỗng như v1.
+- **W27, W28**: layout KPI không theme có trend line và bốn biến thể `displayAs` của thanh so sánh. Cần một KPI có so
+  sánh trong dữ liệu mẫu để so ảnh.
+- **W33**: không có nút first / last (antd Pagination không có); ô chọn số dòng là Select, v1 là ô nhập có gợi ý.
+- **W42**: số trong ô slicer và input filter chưa có dấu phân cách hàng nghìn như v1 ("9,958"); ô ngày của slicer
+  chưa đổi nền.
+- **W48, W52**: header dọc của filter panel; text widget dạng textarea.
+- Story: mới có `InnerFilterView.stories.tsx` (bọc `.dashboard-page` và `DashboardThemeProvider`). Các story cũ của
+  dashboard chỉ bọc `.dashboard-theme` nên không nhận token và CSS của F1; nên tách decorator này ra dùng chung.
+
+### Nợ từ review bước 0 và 1 (2026-11-10)
+
+Review bằng đọc code ở `f309a28f`, chưa nhìn trên app. Xếp theo mức ảnh hưởng tới các bước sau:
+
+1. **Dialog ở theme tối**: nền modal là `--modal-background-color` (luôn `#fff`), còn title, nút X và nút Cancel
+   theo `--text-color` / `--secondary-text-color` của theme (gần trắng). Quyết định mục 2 đầu tài liệu rồi sửa
+   `dash:theme/dashboardAntd.css` trước bước 4.
+2. **Theme antd của trang không có `algorithm`** nên theo mode của app, không theo nhóm `dark_*` / `light_*` của
+   dashboard: Input, Checkbox, Tree, Table, DatePicker không được vá màu như dropdown và popover.
+3. **Scope mặc định port thiếu**: `[builder-default-style]` chỉ có 5 biến (v1 reset cả bộ biến sáng);
+   `.filter-popover-area-default-style` không reset `--filter-color`, `--icon-color`, `--toggle-color`,
+   `--scrollbar-*`, `--tab-filter-*`; `colorPrimary` của antd không đổi theo scope CSS (nên `MainDate.css` phải ép nền
+   nút Apply). Cần một component scope gồm class reset đủ biến và `DashboardThemeProvider themeName="light_default"`
+   lồng, dùng cho lịch, popover filter, builder (B1) và dialog.
+4. **CSS restyle antd ngoài `@layer components`**: `dash:access/PasswordGate.css`, `MainDate.css:249-256`,
+   `DashboardHeader.css:125-135` (trùng với rule popover của F1). Input nền xám 42px và footer hai nút chia đôi là
+   mẫu `DiCustomModal` mà D1, D12, B39 cần, hiện nằm riêng trong `.password-gate`. Bước 2 cũng thêm CSS ngoài layer ở
+   `AppliedFilters.css`, `InnerFilter.css`, `FlattenTable.css` (theo cách các file widget sẵn có).
+5. **`getPopupContainer` truyền tay thừa** ở 11 chỗ sau khi F1 đã cấp qua `ConfigProvider`;
+   `popupContainer.ts` lấy `.dashboard-page` đầu tiên trong DOM.
+6. **Toast**: còn `message.*` ở `chart-builder/host/useChartSave.ts`, `field-actions/useTableRefresh.ts`,
+   `useFieldActions.ts`, `shared/relationship/useRelationshipEditActions.ts`, `features/share/`; `useToast` chưa có
+   `warning` / `loading`.
+7. **Biến không định nghĩa** (`--icon-hover-color`, `--accent-disabled-color`) và `#d6d6d6` ghi cứng dù có
+   `--line-d6d6d6`.
+8. Tài liệu lệch code: F1 ghi `ThemeContext.tsx` (nay là `v2:app/theme/appTheme.ts`); F3 ghi mọi popup mang class
+   `dashboard-popover` (code style theo `.dashboard-page .ant-*`).
 
 ### Trạng thái của widget
 
