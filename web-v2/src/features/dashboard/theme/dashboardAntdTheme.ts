@@ -15,8 +15,7 @@ export function dashboardAntdTheme(themeName: string): ThemeConfig {
       controlHeightLG: 40,
       controlPaddingHorizontal: 16,
       colorBgElevated: 'var(--menu-background-color)',
-      controlItemBgHover: 'var(--hover-color)',
-      colorTextQuaternary: '#ccc'
+      controlItemBgHover: 'var(--hover-color)'
     },
     components: {
       Button: {
@@ -37,7 +36,8 @@ export function dashboardAntdTheme(themeName: string): ThemeConfig {
       Dropdown: { paddingBlock: 12 },
       Tabs: { titleFontSize: 16, horizontalItemGutter: 32, itemHoverColor: accent, itemActiveColor: accent },
       Slider: { railSize: 6, handleSize: 14, handleSizeHover: 14, handleLineWidth: 2, handleLineWidthHover: 2, railBg: '#d8d8d8', railHoverBg: '#d8d8d8' },
-      Switch: { handleSizeSM: 10, trackHeightSM: 16, trackMinWidthSM: 27 }
+      // The off track; as a page token it would also grey every placeholder and disabled text.
+      Switch: { colorTextQuaternary: '#ccc', handleSizeSM: 10, trackHeightSM: 16, trackMinWidthSM: 27 }
     }
   };
 }
