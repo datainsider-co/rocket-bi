@@ -21,6 +21,7 @@ export interface TreeFilterState {
 
 interface TreeFilterViewProps {
   title?: string;
+  subtitle?: string;
   look: TreeFilterLook;
   tree: TreeFilterState;
   /** Single choice selects one node; otherwise nodes are checked. */
@@ -28,11 +29,11 @@ interface TreeFilterViewProps {
 }
 
 /** v1 `TreeSelection`: checkboxes, or one selected node in single choice; expanding a node loads its children. */
-export function TreeFilterView({ title, look, tree, singleChoice }: TreeFilterViewProps) {
+export function TreeFilterView({ title, subtitle, look, tree, singleChoice }: TreeFilterViewProps) {
   const { nodes, checkedKeys, expandedKeys, loading, onCheck, onExpand } = tree;
   return (
     <div className={`filter-widget filter-widget--padded ${GRID_NO_DRAG_CLASS}`} style={look.colors}>
-      <FilterTitle text={title} style={look.titleStyle} className="mb-2" />
+      <FilterTitle text={title} style={look.titleStyle} className="mb-2" help={subtitle} />
       <Spin spinning={loading} className="min-h-0 flex-1">
         <div className="h-full overflow-auto">
           <Tree

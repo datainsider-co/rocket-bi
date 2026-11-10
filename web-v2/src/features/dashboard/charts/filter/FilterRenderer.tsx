@@ -49,6 +49,7 @@ const EMPTY = { kind: 'table', headers: [], records: [], total: 0 } as const;
 export function FilterRenderer({ widget, viz, response, query, dashboardId, entry, onChange }: FilterRendererProps) {
   const options = viz.options;
   const title = titleText(options.title);
+  const subtitle = titleText(options.subtitle) || undefined;
   const table = response.kind === 'table' ? response : EMPTY;
   const selected = useMemo(() => selectionOf(entry), [entry]);
   const onSelect = (values: string[]) => onChange(selectionToControl(values));
@@ -60,6 +61,7 @@ export function FilterRenderer({ widget, viz, response, query, dashboardId, entr
       return (
         <TabFilterView
           title={title}
+          subtitle={subtitle}
           look={tabFilterLook(options as JsonObject)}
           options={functionMode ? functionOptions(widget.setting) : filterOptions(table, true)}
           selected={selected}
@@ -102,6 +104,7 @@ export function FilterRenderer({ widget, viz, response, query, dashboardId, entr
       return (
         <TreeFilter
           title={title}
+          subtitle={subtitle}
           look={{ titleStyle, colors: treeFilterCssVars(options as JsonObject) }}
           singleChoice={options['displayAs'] === TabFilterDisplay.SingleChoice}
           widget={widget}

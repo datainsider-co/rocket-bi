@@ -8,6 +8,7 @@ import { TabFilterOptionsView } from './TabFilterOptionsView';
 
 interface TabFilterViewProps {
   title?: string;
+  subtitle?: string;
   look: TabFilterLook;
   options: readonly FilterOption[];
   /** Empty means All. */
@@ -21,7 +22,7 @@ interface TabFilterViewProps {
  * v1 `TabFilter` (`DefaultTabFilter`): its title, a search box, then an All option plus one per value in filter mode,
  * one per column in tab control mode. Multi choice combines values; the others pick one.
  */
-export function TabFilterView({ title, look, options, selected, mode, onChange }: TabFilterViewProps) {
+export function TabFilterView({ title, subtitle, look, options, selected, mode, onChange }: TabFilterViewProps) {
   const [keyword, setKeyword] = useState('');
   const shown = useMemo(() => searchOptions(options, keyword), [options, keyword]);
   const withAll = mode === 'filter';
@@ -34,7 +35,7 @@ export function TabFilterView({ title, look, options, selected, mode, onChange }
       className={`filter-widget filter-widget--padded${look.inline ? ' filter-widget--inline' : ''} ${GRID_NO_DRAG_CLASS}`}
       style={tabFilterCssVars(look.colors)}
     >
-      <FilterTitle text={title} style={look.titleStyle} className={titleClass} />
+      <FilterTitle text={title} style={look.titleStyle} className={titleClass} help={subtitle} />
       {look.searchPlaceholder !== undefined && (
         <div className="mb-1 shrink-0">
           <FilterSearchInput value={keyword} placeholder={look.searchPlaceholder} onChange={setKeyword} />

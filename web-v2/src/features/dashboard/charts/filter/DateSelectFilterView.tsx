@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { DownOutlined } from '@ant-design/icons';
 import { Popover } from 'antd';
 import { GRID_NO_DRAG_CLASS } from '../../grid/DashboardGridView';
 import { inDashboardPage } from '../../theme/popupContainer';
@@ -16,7 +15,7 @@ interface DateSelectFilterViewProps {
   children: ReactNode;
 }
 
-/** v1 `DateSelectFilter2`: the title, then a bordered box with a calendar icon, the range and an arrow. */
+/** v1 `DateSelectFilter2`: the title, then a bordered box with a calendar icon, the range and v1's arrow, turned up while open. */
 export function DateSelectFilterView({ title, titleStyle, label, open, onOpenChange, children }: DateSelectFilterViewProps) {
   return (
     <div className={`filter-widget filter-widget--padded ${GRID_NO_DRAG_CLASS}`}>
@@ -35,7 +34,7 @@ export function DateSelectFilterView({ title, titleStyle, label, open, onOpenCha
         <button type="button" className="filter-date" aria-label={title ? `${title}: ${label}` : label} aria-expanded={open}>
           <i className="di-icon-calendar filter-date__icon" aria-hidden />
           <span className="filter-date__label">{label}</span>
-          <DownOutlined className="filter-date__arrow" aria-hidden />
+          <img className="filter-date__arrow" src="/icons/ic-16-arrow-down.svg" alt="" />
         </button>
       </Popover>
     </div>
