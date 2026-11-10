@@ -16,6 +16,16 @@
   --color-header: #597fff;
 }
 
+/*
+ * The app header's colors (v1 `HeaderBar.vue`). Inline, so the utilities read the variables where they are used: the
+ * dashboard page sets them on `<body>` per theme (`features/dashboard/theme`).
+ */
+@theme inline {
+  --color-header-bar: var(--header-bar-background-color, var(--color-header));
+  --color-header-active: var(--header-active-background-color, #fff);
+  --color-header-active-text: var(--header-text-active-color, var(--color-header));
+}
+
 @layer base {
   /* v1 `themes/app.scss`. */
   html {

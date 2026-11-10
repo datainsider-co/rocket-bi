@@ -1,5 +1,7 @@
 import type { ChartBuilderHost } from '../edit/chartBuilderBridge';
 import { DashboardThemeProvider } from '../theme/DashboardThemeProvider';
+import { getDashboardTheme } from '../theme/dashboardThemes';
+import { useBodyDashboardTheme } from '../theme/useBodyDashboardTheme';
 import { DashboardPageContent } from './DashboardPageContent';
 import { useDashboardPage } from './useDashboardPage';
 
@@ -11,6 +13,7 @@ interface DashboardPageProps {
 
 export function DashboardPage({ embedded = false, chartBuilder }: DashboardPageProps) {
   const page = useDashboardPage(embedded);
+  useBodyDashboardTheme(getDashboardTheme(page.dashboard?.setting.themeName ?? '').cssName);
   return (
     <DashboardThemeProvider themeName={page.dashboard?.setting.themeName}>
       <DashboardPageContent page={page} embedded={embedded} chartBuilder={chartBuilder} />

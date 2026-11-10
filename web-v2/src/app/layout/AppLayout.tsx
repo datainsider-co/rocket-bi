@@ -20,7 +20,7 @@ function isFullBleed(handle: unknown): boolean {
 export function AppLayout() {
   const fullBleed = useMatches().some(match => isFullBleed(match.handle));
   return (
-    <Layout className="h-dvh">
+    <Layout className="app-layout h-dvh">
       <HeaderBar />
       <Layout.Content className={`flex min-h-0 flex-col overflow-auto${fullBleed ? '' : ' p-6'}`}>
         <Outlet />
