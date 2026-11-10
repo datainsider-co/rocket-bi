@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type Highcharts from 'highcharts';
 import { asArray, getPath, asString } from '@/core/json/json';
+import type { DrilldownStep } from '@/core/query/drilldown';
 import type { Paging } from '@/core/query/QueryRequest';
 import type { TableSort } from '@/core/query/tableSort';
 import type { VisualizationResponse } from '@/core/query/VisualizationResponse';
@@ -8,8 +9,11 @@ import type { ChartViz } from '@/core/query/vizOptions';
 import type { ChartWidget } from '@/core/dashboard/Widget';
 import { isPivotTableSetting } from '@/core/query/pivotQuery';
 import type { SubRowQuery } from '../chart-data/useSubRowQuery';
+import { ErrorState } from '@/shared/status/ErrorState';
 import { HighchartsChart } from '@/shared/charts/HighchartsChart';
+import { drillIndexOf, withDrillPath } from './drillPath';
 import { titleText } from './highchartsBase';
+import './drillPath.css';
 import { buildKpi } from './kpi/kpi.utils';
 import { KpiDateRange, type KpiDateRangeProps } from './kpi/KpiDateRange';
 import { KpiView } from './kpi/KpiView';
@@ -30,7 +34,6 @@ import { ChartVizClass } from './vizClass';
 
 export interface TablePaging {
   paging: Paging;
-  loading: boolean;
   onPageChange: (paging: Paging) => void;
   sort?: TableSort;
   onSortChange: (sort: TableSort | undefined) => void;
@@ -60,6 +63,14 @@ export interface ChartRendererProps {
   table: TablePaging;
   crossFilter: CrossFilter;
   kpi?: KpiParts;
+  drillPath?: DrillPath;
+}
+
+/** Where the viewer drilled down to, drawn in a Highcharts chart's subtitle. */
+export interface DrillPath {
+  steps: readonly Pick<DrilldownStep, 'value' | 'name'>[];
+  /** Back to the chart as it was before step `index`. */
+  onBack: (index: number) => void;
 }
 
 /** What a number chart shows besides its response. */
@@ -74,17 +85,7 @@ const SERIES_CLASSES = new Set<string>([ChartVizClass.Series, ChartVizClass.Stac
 
 const FUNNEL_TYPES: Readonly<Record<string, FunnelType>> = { [ChartVizClass.Funnel]: 'funnel', [ChartVizClass.Pyramid]: 'pyramid' };
 
-/** The chart's title over why it shows nothing. */
-function ChartMessage({ title, message }: { title: string; message: string }) {
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-1 text-center">
-      <div className="truncate font-medium">{title}</div>
-      <div className="text-xs" style={{ color: 'var(--secondary-text-color)' }}>
-        {message}
-      </div>
-    </div>
-  );
-}
+const NO_STEPS: DrillPath['steps'] = [];
 
 /** A parliament with more dots than it allows says so instead of drawing (v1 `InvalidDataException`). */
 function chartErrorOf(viz: ChartViz, response: VisualizationResponse): string | undefined {
@@ -95,7 +96,7 @@ function chartErrorOf(viz: ChartViz, response: VisualizationResponse): string | 
  * Picks the renderer for a chart (v1 `ChartComponent`: by viz option class, tables by their response and setting). Charts not
  * ported yet say so instead of failing. Filters go through `FilterRenderer`.
  */
-export function ChartRenderer({ widget, viz, response, themeColors, table, crossFilter, kpi }: ChartRendererProps) {
+export function ChartRenderer({ widget, viz, response, themeColors, table, crossFilter, kpi, drillPath }: ChartRendererProps) {
   const { selected, onSelect, onPointMenu } = crossFilter;
   const highchartsOptions = useMemo(() => {
     if (SERIES_CLASSES.has(viz.className) && response.kind === 'series_one') {
@@ -123,8 +124,20 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
   );
   const tableColumns = useMemo(() => asArray(widget.setting['columns']), [widget.setting]);
 
-  if (highchartsOptions) {
-    return <HighchartsChart options={highchartsOptions} fill onPointContextMenu={(point, position) => onPointMenu(pointValue(point), position)} />;
+  const steps = drillPath?.steps ?? NO_STEPS;
+  const chartOptions = useMemo(() => highchartsOptions && withDrillPath(highchartsOptions, steps), [highchartsOptions, steps]);
+
+  if (chartOptions) {
+    const back = (target: EventTarget) => {
+      const index = drillIndexOf(target);
+      if (index !== undefined) drillPath?.onBack(index);
+    };
+    return (
+      // The drill path is HTML inside the chart's subtitle, so its clicks are caught here.
+      <div role="presentation" className="size-full" onClick={event => back(event.target)} onKeyDown={event => event.key === 'Enter' && back(event.target)}>
+        <HighchartsChart options={chartOptions} fill onPointContextMenu={(point, position) => onPointMenu(pointValue(point), position)} />
+      </div>
+    );
   }
   if (viz.className === ChartVizClass.Number && response.kind === 'series_one') {
     const dateRange = kpi?.dateRange && <KpiDateRange {...kpi.dateRange} />;
@@ -136,7 +149,6 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
       subtitle: titleText(viz.options.subtitle),
       response,
       paging: table.paging,
-      loading: table.loading,
       onPageChange: table.onPageChange,
       sort: table.sort,
       onSortChange: table.onSortChange,
@@ -147,8 +159,8 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
     if (isPivotTableSetting(widget.setting)) return <PivotTable {...tableProps} setting={widget.setting} options={viz.options} subRows={table.subRows} />;
     return isCollapseTableSetting(widget.setting) ? <CollapseTable {...tableProps} columns={tableColumns} /> : <FlattenTableView {...tableProps} />;
   }
-  const title = titleText(viz.options.title) ?? widget.name;
   const error = chartErrorOf(viz, response);
-  if (error) return <ChartMessage title={title} message={error} />;
-  return <ChartMessage title={title} message={`${viz.className || asString(widget.setting['class_name'])} is not supported yet`} />;
+  if (error) return <ErrorState message={error} />;
+  // v1 `ChartComponent`: a plain line in the card's corner.
+  return <div>Chart unsupported</div>;
 }

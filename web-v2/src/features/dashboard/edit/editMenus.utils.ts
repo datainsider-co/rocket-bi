@@ -49,7 +49,7 @@ export function widgetEditMenuItems(widget: Widget, permissions: DashboardPermis
     }
   }
   if (widget.kind !== 'tab' && widget.kind !== 'filter_panel') {
-    items.push(item('duplicate', 'Duplicate', () => handlers.duplicate(widget), canCopy));
+    items.push(item('duplicate', widget.kind === 'chart' ? 'Duplicate chart' : 'Duplicate', () => handlers.duplicate(widget), canCopy));
   }
   items.push(item('delete', 'Delete', () => handlers.remove(widget), canDelete));
   return items;

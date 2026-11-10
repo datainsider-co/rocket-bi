@@ -5,6 +5,7 @@ import { getDashboardTheme } from '../../theme/dashboardThemes';
 import { WidgetContainer } from '../WidgetContainer';
 import { AppliedFiltersView } from './AppliedFiltersView';
 import { ChartActionsView } from './ChartActionsView';
+import { DrillButton } from './DrillButton';
 import { ChartWidgetView } from './ChartWidgetView';
 import { InnerFilter } from './InnerFilter';
 import { useChartWidget } from './useChartWidget';
@@ -24,12 +25,13 @@ export function ChartWidget({ widget, dashboard }: ChartWidgetProps) {
         widget.chartFilter && <InnerFilter filter={widget.chartFilter} dashboardId={dashboard.id} headerRequests={chart.innerFilterRequests} />
       }
       appliedFilters={chart.appliedFilters.filters.length > 0 && <AppliedFiltersView {...chart.appliedFilters} />}
-      menuItems={editing ? widgetMenu(widget) : chart.widgetItems}
-      editing={editing}
+      editItems={editing ? widgetMenu(widget) : undefined}
+      zoomItems={chart.zoomItems}
+      drill={chart.drill.button && <DrillButton drill={chart.drill} />}
     />
   );
   return (
-    <WidgetContainer widget={widget} defaults={dashboard.setting.widgetSetting} actions={actions}>
+    <WidgetContainer widget={widget} defaults={dashboard.setting.widgetSetting} actions={actions} onContextMenu={editing ? undefined : chart.onCardMenu}>
       <ChartWidgetView widget={widget} dashboardId={dashboard.id} themeColors={getDashboardTheme(dashboard.setting.themeName).colors} chart={chart} />
     </WidgetContainer>
   );

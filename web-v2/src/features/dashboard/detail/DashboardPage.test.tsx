@@ -184,9 +184,9 @@ describe('dashboard page', () => {
     await userEvent.click(await screen.findByRole('columnheader', { name: /country/ }, SLOW));
     await waitFor(() => expect(tableQueries().at(-1)?.query_setting.sorts).toEqual([expect.objectContaining({ class_name: 'order_by', order: 'ASC' })]), SLOW);
 
-    // Its menu downloads every row as CSV.
+    // Its menu, a right click on the card, downloads every row as CSV.
     const table = document.querySelector<HTMLElement>('[data-widget-id="7"]')!;
-    await userEvent.click(within(table).getByRole('button', { name: 'Chart actions' }));
+    await userEvent.pointer({ keys: '[MouseRight]', target: within(table).getByRole('columnheader', { name: /country/ }) });
     await userEvent.click(await screen.findByText('Download CSV'));
     await waitFor(() => expect(queries.export).toHaveBeenCalledWith(expect.objectContaining({ chart_id: 7, from: -1, size: -1 }), 'csv'), SLOW);
     await waitFor(() => expect(saved).toHaveBeenCalled(), SLOW);
@@ -280,8 +280,9 @@ describe('dashboard page', () => {
     await screen.findByText('Sample', {}, SLOW);
     await waitFor(() => expect(permissions.permittedActions).toHaveBeenCalledWith('dashboard', 1, expect.arrayContaining(['download'])), SLOW);
     const table = document.querySelector<HTMLElement>('[data-widget-id="7"]')!;
-    // Nothing else is in the table's menu, so it has none.
-    expect(within(table).queryByRole('button', { name: 'Chart actions' })).not.toBeInTheDocument();
+    // Nothing else is in the table's menu, so a right click opens none.
+    await userEvent.pointer({ keys: '[MouseRight]', target: await within(table).findByRole('columnheader', { name: /country/ }, SLOW) });
+    expect(screen.queryByText('Download CSV')).not.toBeInTheDocument();
   });
 
   it('lays the dashboard over the app in full screen, and back', async () => {

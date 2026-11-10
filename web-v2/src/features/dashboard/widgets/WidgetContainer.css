@@ -40,22 +40,59 @@
   justify-content: flex-end;
 }
 
-/* v1 ChartHolder's action bar: the inner filter and filter icon stay, the view mode menu shows while hovering. */
+/* v1 ChartHolder's action bar: the inner filter, the filter icon, then the gear or the zoom and drilldown buttons. */
 .chart-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
 }
 
-@media (hover: hover) {
-  .chart-actions__hover {
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
+/* v1 StatusWidget: the chart stays under a veil with the spinner while its next data loads. */
+.chart-status {
+  width: 100%;
+  height: 100%;
+}
 
-  .widget-container:hover .chart-actions__hover,
-  .chart-actions__hover:focus-within,
-  .chart-actions__hover:has([aria-expanded='true']) {
-    opacity: 1;
-  }
+.chart-status__updating {
+  position: absolute;
+  inset: 0;
+  background: var(--hover-color);
+  opacity: 0.6;
+}
+
+/* v1 TabViewer / FilterPanelViewer `.text-info`: an empty tab or panel. */
+.empty-nested {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-color);
+  font-size: 16px;
+  letter-spacing: 0.27px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.empty-nested__add {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: bold;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* v1 ImageViewer: the image covers the whole card, its padding too. */
+.image-widget {
+  position: absolute;
+  inset: 0;
+}
+
+.image-widget img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }

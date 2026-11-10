@@ -179,3 +179,19 @@ export function visualizationResponseFromJson(value: unknown): VisualizationResp
       return { kind: 'unsupported', className };
   }
 }
+
+/** Whether a response has anything to draw (v1 `VisualizationResponse.hasData`); a chart without draws its empty state. */
+export function responseHasData(response: VisualizationResponse): boolean {
+  switch (response.kind) {
+    case 'series_one':
+    case 'series_two':
+      return response.series.some(series => series.data.length > 0);
+    case 'table':
+    case 'json_table':
+      return response.total !== 0;
+    case 'generic':
+      return response.records.length > 0;
+    case 'unsupported':
+      return true;
+  }
+}

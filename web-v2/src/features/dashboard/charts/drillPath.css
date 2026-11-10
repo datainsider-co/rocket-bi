@@ -1,0 +1,41 @@
+/* v1 BaseChart.scss: the drill down path inside a chart's subtitle. */
+
+.drilldown-subtitle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.drilldown-path {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  color: var(--text-color);
+  font-size: 12px;
+  cursor: default;
+}
+
+.drilldown-path__icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.drilldown-path__value {
+  cursor: pointer;
+}
+
+.drilldown-path__value:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.drilldown-path__arrow {
+  box-sizing: content-box;
+  width: 12px;
+  height: 12px;
+  padding: 0 2px;
+}
+
+.drilldown-path__current {
+  opacity: 0.6;
+}

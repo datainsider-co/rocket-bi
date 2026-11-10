@@ -1,0 +1,103 @@
+/* v1 ChartFilter and ChartFilterPopover: a chart's inner filter in its action bar. Tabs are `.filter-tab-item`. */
+
+.inner-filter {
+  display: flex;
+  margin-right: 4px;
+}
+
+/* A strip of tabs, at most 210px, scrolling sideways without a scrollbar (v1 vuescroll). */
+.inner-filter-tabs {
+  display: flex;
+  gap: 8px;
+  max-width: 210px;
+  margin-top: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.inner-filter-select.ant-select {
+  max-width: 140px;
+  height: 28px;
+  margin: 6px 8px 0 0;
+  border: none;
+  border-radius: 4px;
+  background: var(--tab-filter-dropdown-background);
+  color: var(--text-color);
+}
+
+/* `btn-icon-40 btn-ghost` around the 14px funnel. */
+.inner-filter-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0 0 4px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.inner-filter-button:hover,
+.inner-filter-button[aria-expanded='true'] {
+  background: var(--hover-color);
+}
+
+.inner-filter-button img {
+  width: 14px;
+  height: 14px;
+}
+
+@layer components {
+  .dashboard-page .inner-filter-popover .ant-popover-container {
+    padding: 8px;
+    border: var(--menu-border);
+  }
+}
+
+.inner-filter-options {
+  display: flex;
+  flex-direction: column;
+  min-width: 90px;
+  max-width: 210px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.inner-filter-options--tabs {
+  gap: 8px;
+}
+
+.inner-filter-options--tabs .filter-tab-item {
+  width: 100%;
+}
+
+.inner-filter-option {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.inner-filter-option:hover {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.inner-filter-option__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,0 +1,78 @@
+/* v1 ActionWidgetFilter: a 40px glyph with an accent dot while the header's filters reach the chart, and its popover. */
+
+.applied-filters-button {
+  position: relative;
+  display: block;
+  margin-right: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 40px;
+  line-height: 40px;
+  cursor: pointer;
+}
+
+.applied-filters-button:hover,
+.applied-filters-button[aria-expanded='true'] {
+  background: var(--hover-color);
+}
+
+.applied-filters-button > i {
+  display: block;
+}
+
+.applied-filters-button--on::after {
+  position: absolute;
+  top: 20%;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  content: '';
+  opacity: 0.8;
+}
+
+.applied-filters {
+  width: 256px;
+  color: var(--text-color);
+  font-size: 14px;
+  letter-spacing: 0.6px;
+  line-height: 1.5;
+  cursor: default;
+}
+
+.applied-filters__title {
+  font-weight: 600;
+  line-height: normal;
+}
+
+.applied-filters__divider {
+  height: 1px;
+  margin: 16px 0;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.applied-filters__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0 12px;
+  padding: 0;
+  list-style: none;
+  text-transform: capitalize;
+}
+
+.applied-filters__list span {
+  opacity: 0.5;
+  text-transform: none;
+}
+
+.applied-filters__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 27px;
+}

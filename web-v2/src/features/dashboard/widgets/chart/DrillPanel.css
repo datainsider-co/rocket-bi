@@ -1,0 +1,149 @@
+/* v1 DrilldownSetting.vue (`.popover-panel`, 300px wide): the drill down panel. Its popover gives the 16px padding. */
+
+.drill-panel {
+  display: flex;
+  flex-direction: column;
+  width: 268px;
+  max-height: 418px;
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.drill-panel__header {
+  max-width: 270px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  line-height: 1.5;
+}
+
+.drill-panel__crumb {
+  display: inline;
+  margin-right: 4px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+}
+
+button.drill-panel__crumb {
+  cursor: pointer;
+}
+
+button.drill-panel__crumb:hover {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.drill-panel__divider {
+  flex-shrink: 0;
+  margin: 16px 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.drill-panel__title {
+  margin-bottom: 5px;
+  letter-spacing: 0.6px;
+}
+
+.drill-panel__values,
+.drill-panel__fields {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-color: var(--scrollbar-background) transparent;
+  scrollbar-width: thin;
+}
+
+.drill-panel__values {
+  max-height: 300px;
+}
+
+.drill-panel__fields {
+  margin-top: 8px;
+}
+
+.drill-panel__group {
+  padding: 6px 0 2px;
+  color: var(--text-color);
+  font-weight: 600;
+  letter-spacing: 0.6px;
+}
+
+.drill-panel__field {
+  display: flex;
+  align-items: center;
+}
+
+/* v1 DataListing `.btn-row`: 14px rows, grey until hovered. */
+.drill-panel__row {
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  overflow: hidden;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  letter-spacing: 0.2px;
+  line-height: 1.4;
+  text-align: left;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.drill-panel__row:hover,
+.drill-panel__row:focus-visible {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.drill-panel__more {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 37px;
+  height: 37px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.drill-panel__more:hover,
+.drill-panel__more[aria-expanded='true'] {
+  background: var(--hover-color);
+}
+
+.drill-panel__none {
+  font-weight: 600;
+  letter-spacing: 0.6px;
+}
+
+.drill-panel__status {
+  height: 160px;
+}
+
+.drill-panel__levels {
+  min-width: 200px;
+  max-height: min(615px, 70vh);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+@layer components {
+  .dashboard-page .drill-panel-popover .ant-popover-container {
+    border: var(--menu-border);
+  }
+
+  .dashboard-page .drill-panel-levels .ant-popover-container {
+    padding: 0;
+    border: var(--menu-border);
+  }
+}

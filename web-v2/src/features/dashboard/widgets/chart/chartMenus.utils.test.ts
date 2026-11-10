@@ -1,72 +1,71 @@
 import { describe, expect, it, vi } from 'vitest';
-import { canExportSetting, LOAD_MORE_DASHBOARDS_KEY, pointMenuItems, widgetMenuItems, type PointMenuHandlers, type WidgetMenuHandlers } from './chartMenus.utils';
+import { canExportSetting, chartMenuItems, LOAD_MORE_DASHBOARDS_KEY, zoomMenuItems, type ChartMenuHandlers, type ChartMenuInput } from './chartMenus.utils';
 
 type Item = { key: string; label?: string; disabled?: boolean; onClick?: () => void; children?: Item[] };
 const keys = (items: unknown[]) => (items as Item[]).map(item => item.key);
 const find = (items: unknown[], key: string) => (items as Item[]).find(item => item.key === key)!;
 
-const region = { label: 'region', field: { field_name: 'region' }, isDate: false };
-const shipDate = { label: 'ship_date', field: { field_name: 'ship_date' }, isDate: true };
-
-function pointHandlers() {
+function handlers() {
   return {
-    useAsFilter: vi.fn<PointMenuHandlers['useAsFilter']>(),
-    drillDown: vi.fn<PointMenuHandlers['drillDown']>(),
+    useAsFilter: vi.fn<ChartMenuHandlers['useAsFilter']>(),
+    zoom: vi.fn<ChartMenuHandlers['zoom']>(),
+    openDrill: vi.fn<() => void>(),
     resetFilter: vi.fn<() => void>(),
     resetDrill: vi.fn<() => void>(),
-    drillThrough: vi.fn<PointMenuHandlers['drillThrough']>(),
-    loadMoreDashboards: vi.fn<() => void>()
+    drillThrough: vi.fn<ChartMenuHandlers['drillThrough']>(),
+    loadMoreDashboards: vi.fn<() => void>(),
+    download: vi.fn<ChartMenuHandlers['download']>()
   };
 }
 
-function widgetHandlers() {
-  return { zoom: vi.fn<WidgetMenuHandlers['zoom']>(), resetDrill: vi.fn<() => void>(), download: vi.fn<WidgetMenuHandlers['download']>() };
-}
+const nothing: ChartMenuInput = { canDrill: false, canResetFilter: false, canResetDrill: false, canExport: false };
+const sales = { id: 2, name: 'Sales' };
 
-describe('pointMenuItems', () => {
-  it('uses the value as a filter and drills into fields or date parts', () => {
-    const handlers = pointHandlers();
-    const items = pointMenuItems({ value: 'Asia', drill: { fields: [region, shipDate], loading: false }, canResetFilter: false, canResetDrill: true }, handlers);
-    expect(keys(items)).toEqual(['filter', 'drill', 'reset-filter', 'reset-drill']);
-    expect(find(items, 'reset-filter').disabled).toBe(true);
+describe('chartMenuItems', () => {
+  it('lists everything that applies to a clicked point, in order', () => {
+    const on = handlers();
+    const items = chartMenuItems(
+      { value: 'Asia', zoomLevel: 'to_year', canDrill: true, drillThrough: { dashboards: [sales], loading: false, hasMore: false }, canResetFilter: true, canResetDrill: true, canExport: true },
+      on
+    );
+    expect(keys(items)).toEqual(['filter', 'zoom', 'drill', 'drill-through', 'reset-filter', 'reset-drill', 'csv', 'xlsx']);
 
     find(items, 'filter').onClick!();
-    expect(handlers.useAsFilter).toHaveBeenCalledWith('Asia');
-    const drill = find(items, 'drill').children!;
-    drill[0]!.onClick!();
-    expect(handlers.drillDown).toHaveBeenCalledWith('Asia', region);
-    drill[1]!.children![0]!.onClick!();
-    expect(handlers.drillDown).toHaveBeenLastCalledWith('Asia', shipDate, 'to_year');
+    expect(on.useAsFilter).toHaveBeenCalledWith('Asia');
+    find(items, 'drill').onClick!();
+    expect(on.openDrill).toHaveBeenCalledOnce();
+    find(items, 'xlsx').onClick!();
+    expect(on.download).toHaveBeenCalledWith('xlsx');
   });
 
-  it('says when fields load or there are none, and hides what does not apply', () => {
-    const loading = pointMenuItems({ value: 'a', drill: { fields: [], loading: true }, canResetFilter: true, canResetDrill: false }, pointHandlers());
-    expect(find(loading, 'drill').children).toEqual([{ key: 'drill:loading', label: 'Loading...', disabled: true }]);
-    const none = pointMenuItems({ value: 'a', drill: { fields: [], loading: false }, canResetFilter: true, canResetDrill: false }, pointHandlers());
-    expect(find(none, 'drill').children![0]!.label).toBe('No field to drill down');
-    expect(keys(pointMenuItems({ value: 'a', canResetFilter: true, canResetDrill: false }, pointHandlers()))).toEqual(['filter', 'reset-filter']);
+  it('leaves out what does not apply, as v1 removed its disabled options', () => {
+    expect(chartMenuItems(nothing, handlers())).toEqual([]);
+    expect(keys(chartMenuItems({ ...nothing, value: 'a' }, handlers()))).toEqual(['filter']);
+  });
+
+  it('has no value items for a right click on the card', () => {
+    const drillThrough = { dashboards: [sales], loading: false, hasMore: false };
+    expect(keys(chartMenuItems({ ...nothing, canDrill: true, drillThrough, canExport: true }, handlers()))).toEqual(['drill', 'csv', 'xlsx']);
   });
 });
 
-describe('pointMenuItems drill through', () => {
-  const base = { value: 'Asia', canResetFilter: false, canResetDrill: false };
-  const sales = { id: 2, name: 'Sales' };
+describe('chartMenuItems drill through', () => {
+  const base = { ...nothing, value: 'Asia' };
 
   it('opens a listed dashboard and loads more on demand', () => {
-    const handlers = pointHandlers();
-    const items = pointMenuItems({ ...base, drillThrough: { dashboards: [sales], loading: false, hasMore: true } }, handlers);
-    expect(keys(items)).toEqual(['filter', 'drill-through', 'reset-filter']);
+    const on = handlers();
+    const items = chartMenuItems({ ...base, drillThrough: { dashboards: [sales], loading: false, hasMore: true } }, on);
     const [target, more] = find(items, 'drill-through').children!;
     target!.onClick!();
-    expect(handlers.drillThrough).toHaveBeenCalledWith(sales);
+    expect(on.drillThrough).toHaveBeenCalledWith(sales);
     expect(more).toMatchObject({ key: LOAD_MORE_DASHBOARDS_KEY, label: 'Load more' });
     more!.onClick!();
-    expect(handlers.loadMoreDashboards).toHaveBeenCalled();
+    expect(on.loadMoreDashboards).toHaveBeenCalled();
   });
 
   it('says when dashboards load or there are none', () => {
     const children = (drillThrough: { dashboards: (typeof sales)[]; loading: boolean; hasMore: boolean }) =>
-      find(pointMenuItems({ ...base, drillThrough }, pointHandlers()), 'drill-through').children!;
+      find(chartMenuItems({ ...base, drillThrough }, handlers()), 'drill-through').children!;
     expect(children({ dashboards: [], loading: true, hasMore: false })[0]).toMatchObject({ label: 'Loading...', disabled: true });
     expect(children({ dashboards: [], loading: false, hasMore: false })[0]!.label).toBe('No dashboard to drill through');
     expect(children({ dashboards: [sales], loading: true, hasMore: true })[1]).toMatchObject({ label: 'Loading...', disabled: true });
@@ -74,21 +73,13 @@ describe('pointMenuItems drill through', () => {
   });
 });
 
-describe('widgetMenuItems', () => {
-  it('offers date functions, reset and downloads', () => {
-    const handlers = widgetHandlers();
-    const items = widgetMenuItems({ zoomLevel: 'to_year', canResetDrill: true, canExport: true }, handlers);
-    expect(keys(items)).toEqual(['zoom', 'reset-drill', 'csv', 'xlsx']);
-    const levels = find(items, 'zoom').children!;
-    expect(levels.find(item => item.key === 'zoom:to_year')!.disabled).toBe(true);
-    levels.find(item => item.key === 'zoom:to_month')!.onClick!();
-    expect(handlers.zoom).toHaveBeenCalledWith('to_month');
-    find(items, 'xlsx').onClick!();
-    expect(handlers.download).toHaveBeenCalledWith('xlsx');
-  });
-
-  it('is empty when nothing applies', () => {
-    expect(widgetMenuItems({ canResetDrill: false, canExport: false }, widgetHandlers())).toEqual([]);
+describe('zoomMenuItems', () => {
+  it('offers every date function but the current one', () => {
+    const onZoom = vi.fn<(level: string) => void>();
+    const levels = zoomMenuItems('to_year', onZoom);
+    expect(find(levels, 'zoom:to_year').disabled).toBe(true);
+    find(levels, 'zoom:to_month').onClick!();
+    expect(onZoom).toHaveBeenCalledWith('to_month');
   });
 });
 

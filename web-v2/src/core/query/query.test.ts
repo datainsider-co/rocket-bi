@@ -4,7 +4,7 @@ import fixture from '@/core/dashboard/dashboard.fixture.json';
 import { HttpClientBuilder } from '@/shared/http/HttpClientBuilder';
 import { HttpQueryService } from './QueryService';
 import { toQueryRequestJson } from './QueryRequest';
-import { visualizationResponseFromJson } from './VisualizationResponse';
+import { responseHasData, visualizationResponseFromJson } from './VisualizationResponse';
 // `POST chart/query` replies from the local backend for the sample dashboard (records cut to 3).
 import responses from './queryResponses.fixture.json';
 
@@ -122,6 +122,24 @@ describe('visualizationResponseFromJson', () => {
 
   it('marks unknown responses', () => {
     expect(visualizationResponseFromJson({ class_name: 'map_response' })).toEqual({ kind: 'unsupported', className: 'map_response' });
+  });
+});
+
+describe('responseHasData', () => {
+  it('is false for series without points', () => {
+    expect(responseHasData({ kind: 'series_one', series: [{ name: 'a', data: [] }], xAxis: [], yAxis: [] })).toBe(false);
+    expect(responseHasData({ kind: 'series_one', series: [{ name: 'a', data: [null] }], xAxis: ['x'], yAxis: [] })).toBe(true);
+    expect(responseHasData({ kind: 'series_two', series: [], total: 0 })).toBe(false);
+  });
+
+  it('goes by the total of tables and the rows of generic responses', () => {
+    expect(responseHasData({ kind: 'table', headers: ['a'], records: [], total: 0 })).toBe(false);
+    expect(responseHasData({ kind: 'json_table', headers: [], records: [], total: 3 })).toBe(true);
+    expect(responseHasData({ kind: 'generic', headers: [], records: [] })).toBe(false);
+  });
+
+  it('leaves unknown responses to the renderer', () => {
+    expect(responseHasData({ kind: 'unsupported', className: 'x' })).toBe(true);
   });
 });
 
