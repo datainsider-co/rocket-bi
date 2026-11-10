@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { App } from 'antd';
 import { DateMode } from '@/core/query/dateRanges';
+import { useToast } from '@/shared/toast/useToast';
 import { dateSelectionOf } from '../../charts/filter/filter.utils';
 import { MAIN_DATE_ID, type MainDateState } from '../controls.utils';
 import { useDashboardControls } from '../DashboardControlsContext';
@@ -21,7 +22,8 @@ const ALL_TIME: MainDateState = { mode: DateMode.AllTime, dates: [] };
  */
 export function useMainDateFilter(editing?: MainDateEditing) {
   const { mainDate, controls, setMainDate, removeMainDate } = useDashboardControls();
-  const { message, modal } = App.useApp();
+  const { modal } = App.useApp();
+  const toast = useToast();
   /** The Choose Default Time Range popover is open (v1 `isResetMainDateFlow`). */
   const [choosing, setChoosing] = useState(false);
 
@@ -30,10 +32,10 @@ export function useMainDateFilter(editing?: MainDateEditing) {
       try {
         await editing?.save(mode);
       } catch {
-        void message.error(failure);
+        toast.error(failure);
       }
     },
-    [editing, message]
+    [editing, toast]
   );
 
   const setUp = useCallback(

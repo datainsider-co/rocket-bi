@@ -5,6 +5,7 @@ import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { WidgetId } from '@/core/dashboard/Position';
 import type { ChartWidget, TabWidget, Widget } from '@/core/dashboard/Widget';
 import { childWidgetIds, copyWidgetJson, NEW_WIDGET_POSITION, newFilterPanelJson, newTabWidgetJson } from '@/core/dashboard/widgetJson';
+import { useToast } from '@/shared/toast/useToast';
 import type { ChartBuilderBridge } from './chartBuilderBridge';
 import { copiedText, copyPosition, isPasteError, pastedWidget } from './dashboardEdit.utils';
 import type { AddHandlers, WidgetEditHandlers } from './editMenus.utils';
@@ -31,17 +32,18 @@ function isTyping(target: EventTarget | null): boolean {
  * Copy and paste go through the system clipboard, so a widget can move between dashboards; Ctrl+V pastes too.
  */
 export function useWidgetEditActions({ dashboard, editor, editing, openDialog, release, chartBuilder, clipboard = navigator.clipboard }: WidgetEditActionsInput) {
-  const { message, modal } = App.useApp();
+  const { modal } = App.useApp();
+  const toast = useToast();
 
   const run = useCallback(
     async (task: () => Promise<unknown>, failure: string) => {
       try {
         await task();
       } catch {
-        void message.error(failure);
+        toast.error(failure);
       }
     },
-    [message]
+    [toast]
   );
 
   const pasteText = useCallback(
@@ -49,13 +51,13 @@ export function useWidgetEditActions({ dashboard, editor, editing, openDialog, r
       if (!editor) return;
       const pasted = pastedWidget(text, window.location.origin);
       if (isPasteError(pasted)) {
-        void message.error(pasted.error);
+        toast.error(pasted.error);
         return;
       }
       const position = { ...NEW_WIDGET_POSITION.text, ...pasted.size, row: -1, column: -1 };
       void run(() => editor.createWidget(copyWidgetJson(pasted.json), position), 'Failed to paste chart');
     },
-    [editor, message, run]
+    [editor, toast, run]
   );
 
   useEffect(() => {
@@ -87,7 +89,7 @@ export function useWidgetEditActions({ dashboard, editor, editing, openDialog, r
     copy: target =>
       void run(async () => {
         await clipboard.writeText(copiedText(target, positionOf(target), window.location.href));
-        void message.success('Copied');
+        toast.success('Copied');
       }, 'Copy chart failed, please try again later'),
     duplicate: target =>
       void run(
@@ -109,7 +111,7 @@ export function useWidgetEditActions({ dashboard, editor, editing, openDialog, r
           }, 'Can not remove widget, refresh page and try again')
       })
     };
-  }, [positions, editor, openDialog, release, chartBuilder, clipboard, message, modal, run]);
+  }, [positions, editor, openDialog, release, chartBuilder, clipboard, toast, modal, run]);
 
   const tab = useMemo(
     (): TabEditHandlers => ({
