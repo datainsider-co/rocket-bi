@@ -3,29 +3,39 @@ import type { MenuProps } from 'antd';
 import { GRID_NO_DRAG_CLASS } from '../../grid/DashboardGridView';
 import { WidgetMenuView } from '../menu/WidgetMenuView';
 
+type MenuItems = NonNullable<MenuProps['items']>;
+
 interface ChartActionsViewProps {
   /** The chart's inner filter, if it has one. */
   innerFilter?: ReactNode;
   /** The header filters' icon, rendering nothing without header filters. */
   appliedFilters?: ReactNode;
-  menuItems: NonNullable<MenuProps['items']>;
-  /** Edit mode: the menu is v1's gear with the widget's edit items; in view mode, dots shown while hovering the card. */
-  editing: boolean;
+  /** Edit mode: the widget's edit items behind v1's gear. */
+  editItems?: MenuItems;
+  /** View mode: the date functions behind the zoom button, when the chart shows it. */
+  zoomItems?: MenuItems;
+  /** View mode: the drilldown button, when the chart shows it. */
+  drill?: ReactNode;
 }
 
-/** The chart's action bar (v1 `ChartHolder` `#action-bar`): its inner filter, the applied filters and its menu. */
-export function ChartActionsView({ innerFilter, appliedFilters, menuItems, editing }: ChartActionsViewProps) {
-  if (!innerFilter && !appliedFilters && menuItems.length === 0) return null;
+/**
+ * The chart's action bar (v1 `ChartHolder` `#action-bar`): its inner filter, the applied filters, then the gear in
+ * edit mode or, in view mode, the zoom and drilldown buttons of charts that turn them on (v1 `ActionWidgetMore`). The
+ * rest of a chart's actions are in its menu (a click on a point, a right click on the card).
+ */
+export function ChartActionsView({ innerFilter, appliedFilters, editItems, zoomItems, drill }: ChartActionsViewProps) {
+  if (!innerFilter && !appliedFilters && !editItems?.length && !zoomItems && !drill) return null;
   return (
     <div className={`chart-actions ${GRID_NO_DRAG_CLASS}`}>
       {innerFilter}
       {appliedFilters}
-      {editing ? (
-        <WidgetMenuView items={menuItems} label="Widget actions" trigger="setting" />
+      {editItems ? (
+        <WidgetMenuView items={editItems} label="Widget actions" trigger="setting" />
       ) : (
-        <span className="chart-actions__hover">
-          <WidgetMenuView items={menuItems} label="Chart actions" trigger="more" />
-        </span>
+        <>
+          {zoomItems && <WidgetMenuView items={zoomItems} label="Zoom" trigger="zoom" />}
+          {drill}
+        </>
       )}
     </div>
   );

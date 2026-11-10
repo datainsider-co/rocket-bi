@@ -7,6 +7,7 @@ import type { NestedGridEdit } from '../grid/DashboardGrid';
 import { ChartWidget } from './chart/ChartWidget';
 import { FilterPanel } from './filter-panel/FilterPanel';
 import { ImageWidgetView } from './image/ImageWidgetView';
+import { menuAction } from './menu/menuAction.utils';
 import { WidgetMenuView } from './menu/WidgetMenuView';
 import { TabWidget } from './tab/TabWidget';
 import { TextWidgetView } from './text/TextWidgetView';
@@ -49,8 +50,19 @@ export function WidgetRenderer({ widget, dashboard, mobile, renderWidget }: Widg
       return <TabWidget widget={widget} dashboard={dashboard} mobile={mobile} renderWidget={renderWidget} />;
     case 'filter_panel': {
       const edit: NestedGridEdit = { editable: editing, onPositionsChange };
-      const actions = editing && <WidgetMenuView items={tabMenu(widget)} label="Widget actions" trigger="setting" />;
-      return <FilterPanel widget={widget} dashboard={dashboard} mobile={mobile} renderWidget={renderWidget} edit={edit} actions={actions} />;
+      const items = editing ? tabMenu(widget) : [];
+      const actions = editing && <WidgetMenuView items={items} label="Widget actions" trigger="setting" size="panel" />;
+      return (
+        <FilterPanel
+          widget={widget}
+          dashboard={dashboard}
+          mobile={mobile}
+          renderWidget={renderWidget}
+          edit={edit}
+          actions={actions}
+          onAdd={menuAction(items, 'add-filters')}
+        />
+      );
     }
     default:
       return (

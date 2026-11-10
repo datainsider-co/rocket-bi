@@ -8,6 +8,11 @@ export const ChartVizClass = {
   Pie: 'highcharts_pie_chart_setting',
   /** Drawn as a pie: v1 `DonutChart` is `PieChart` with a hole (`innerSize` in its options). */
   Donut: 'donut_chart_setting',
+  /** Read from a generic response (`generic_chart_setting`). */
+  VariablePie: 'variablepie_chart_setting',
+  Funnel: 'highcharts_funnel_chart_setting',
+  Pyramid: 'highcharts_pyramid_chart_setting',
+  Parliament: 'parliament_setting',
   Number: 'number_chart_setting',
   TabFilter: 'tab_filter_chart_setting',
   Dropdown: 'dropdown_filter_chart_setting',

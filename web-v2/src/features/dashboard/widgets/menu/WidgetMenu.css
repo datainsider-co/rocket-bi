@@ -35,12 +35,19 @@
 }
 
 .widget-menu-button--small:hover {
+  background: var(--hover-color);
   color: var(--header-color);
 }
 
+/* v1 FilterPanelViewer `.icon-config-widget`: the gear, 14px with 9px around it. */
+.widget-menu-button--panel {
+  width: 32px;
+  height: 32px;
+}
+
 .widget-menu .ant-dropdown-menu {
-  width: 210px;
-  margin-top: 4px;
+  box-sizing: content-box;
+  width: 202px;
   padding: 4px;
   border: var(--menu-border);
   border-radius: 4px;
@@ -84,4 +91,43 @@
   padding: 4px 8px;
   color: var(--secondary-text-color);
   font-size: 12px;
+}
+
+/* v1 ZoomSettingContextMenu: a submenu of date functions scrolls past 350px. */
+.widget-menu.ant-dropdown-menu-submenu .ant-dropdown-menu,
+.chart-point-menu.ant-dropdown-menu-submenu .ant-dropdown-menu {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+/*
+  v1 WidgetContextMenu (`vue-context`, `DataListing`): the menu of a clicked point. Rows of 14px text, 6px 12px around a
+  line with 4px margins, grey until hovered.
+*/
+@layer components {
+  .dashboard-page .chart-point-menu .ant-dropdown-menu {
+    padding: 4px 0;
+    border: var(--menu-border);
+  }
+
+  .dashboard-page .chart-point-menu .ant-dropdown-menu-item,
+  .dashboard-page .chart-point-menu .ant-dropdown-menu-submenu-title {
+    padding: 10px 12px;
+    color: var(--secondary-text-color);
+    font-size: 14px;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .dashboard-page .chart-point-menu .ant-dropdown-menu-submenu-title {
+    padding-inline-end: 28px;
+  }
+
+  .dashboard-page .chart-point-menu .ant-dropdown-menu-item:not(.ant-dropdown-menu-item-disabled):hover,
+  .dashboard-page .chart-point-menu .ant-dropdown-menu-item-active:not(.ant-dropdown-menu-item-disabled),
+  .dashboard-page .chart-point-menu .ant-dropdown-menu-submenu-title:hover,
+  .dashboard-page .chart-point-menu .ant-dropdown-menu-submenu-active > .ant-dropdown-menu-submenu-title {
+    background: var(--hover-color);
+    color: var(--text-color);
+  }
 }

@@ -1,13 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { ClickhouseConnection } from '@/core/connection/ClickhouseConnection';
 import { ConnectionType } from '@/core/connection/ConnectionType';
+import { BigQueryConnection } from '@/core/connection/BigQueryConnection';
 import { MySqlConnection } from '@/core/connection/MySqlConnection';
+import { PostgreSqlConnection } from '@/core/connection/PostgreSqlConnection';
+import { RedshiftConnection } from '@/core/connection/RedshiftConnection';
+import { VerticaConnection } from '@/core/connection/VerticaConnection';
 import type { ConnectionFormValues } from './connectionForm.utils';
 import {
   TEST_SSH_TIMEOUT_MS,
   connectionFormSchema,
   defaultFormValues,
   hasSshTunnel,
+  jsonObjectError,
   toConnection,
   toFormValues
 } from './connectionForm.utils';
@@ -111,6 +116,12 @@ describe('toFormValues', () => {
       useSsl: true,
       username: 'default',
       password: 'p',
+      database: '',
+      catalog: '',
+      isLoadBalance: false,
+      projectId: '',
+      credentials: '',
+      location: '',
       ssh: { host: 'b', port: '22', username: 'u', publicKey: 'k' },
       properties: [{ key: 'ssl.mode', value: 'strict' }]
     });
@@ -125,7 +136,7 @@ describe('toFormValues', () => {
 });
 
 describe('defaultFormValues', () => {
-  it.each([ConnectionType.Clickhouse, ConnectionType.MySql])('starts %s empty', type => {
+  it.each(Object.values(ConnectionType))('starts %s empty', type => {
     expect(defaultFormValues(type)).toMatchObject({ type, host: '', port: '', httpPort: '', properties: [] });
   });
 });
@@ -182,5 +193,105 @@ describe('toConnection', () => {
     toConnection(values);
 
     expect(values).toEqual(copy);
+  });
+});
+
+const SSH = { host: 'b', port: '22', username: 'u', publicKey: 'k' };
+const CREDENTIALS = '{"project_id": "p"}';
+
+function jdbcValues(type: ConnectionType, overrides: Partial<ConnectionFormValues> = {}): ConnectionFormValues {
+  return { ...defaultFormValues(type), host: 'db', port: '5432', username: 'u', ...overrides };
+}
+
+describe('jsonObjectError', () => {
+  it.each([
+    ['', 'Credentials is required!'],
+    ['  ', 'Credentials is required!'],
+    ['{', 'Credentials must be valid JSON'],
+    ['[]', 'Credentials must be a JSON object'],
+    ['null', 'Credentials must be a JSON object'],
+    ['"text"', 'Credentials must be a JSON object']
+  ])('%j → %s', (text, message) => {
+    expect(jsonObjectError(text, 'Credentials')).toBe(message);
+  });
+
+  it('accepts an object', () => {
+    expect(jsonObjectError(CREDENTIALS, 'Credentials')).toBeUndefined();
+  });
+});
+
+describe('connectionFormSchema, the OS4 types', () => {
+  it.each([ConnectionType.PostgreSql, ConnectionType.Redshift])('requires the %s database', type => {
+    expect(errorsOf(jdbcValues(type))).toEqual({ database: 'Database is required!' });
+    expect(errorsOf(jdbcValues(type, { database: 'd' }))).toEqual({});
+  });
+
+  it('requires Vertica host, port and username, not the catalog', () => {
+    expect(errorsOf(jdbcValues(ConnectionType.Vertica))).toEqual({});
+    expect(errorsOf(jdbcValues(ConnectionType.Vertica, { host: '', port: '', username: '' }))).toEqual({
+      host: 'Host is required!',
+      port: 'Port is required!',
+      username: 'Username is required!'
+    });
+  });
+
+  it('requires the BigQuery fields and nothing else', () => {
+    expect(errorsOf(defaultFormValues(ConnectionType.BigQuery))).toEqual({
+      credentials: 'Credentials is required!',
+      projectId: 'Project ID is required!',
+      location: 'Location is required!'
+    });
+    expect(
+      errorsOf({ ...defaultFormValues(ConnectionType.BigQuery), credentials: CREDENTIALS, projectId: 'p', location: 'US' })
+    ).toEqual({});
+  });
+
+  it('ignores a half-filled tunnel on PostgreSQL, which has none', () => {
+    expect(errorsOf(jdbcValues(ConnectionType.PostgreSql, { database: 'd', ssh: { ...NO_SSH, host: 'b' } }))).toEqual({});
+  });
+});
+
+describe('toFormValues and toConnection, the OS4 types', () => {
+  it('maps PostgreSQL without a tunnel', () => {
+    const connection = toConnection(jdbcValues(ConnectionType.PostgreSql, { database: ' d ', ssh: SSH }));
+
+    expect(connection).toBeInstanceOf(PostgreSqlConnection);
+    expect(connection).toMatchObject({ host: 'db', port: 5432, database: 'd', tunnelConfig: undefined });
+  });
+
+  it('maps Redshift with its tunnel', () => {
+    const connection = toConnection(jdbcValues(ConnectionType.Redshift, { database: 'd', ssh: SSH }));
+
+    expect(connection).toBeInstanceOf(RedshiftConnection);
+    expect(connection.tunnelConfig).toMatchObject({ host: 'b', port: 22 });
+  });
+
+  it('maps Vertica catalog and load balancing', () => {
+    const connection = toConnection(jdbcValues(ConnectionType.Vertica, { catalog: ' c ', isLoadBalance: true }));
+
+    expect(connection).toBeInstanceOf(VerticaConnection);
+    expect(connection).toMatchObject({ catalog: 'c', isLoadBalance: true });
+  });
+
+  it('maps BigQuery and drops the properties it has none of', () => {
+    const connection = toConnection({
+      ...defaultFormValues(ConnectionType.BigQuery),
+      projectId: ' p ',
+      credentials: CREDENTIALS,
+      location: 'asia-east1',
+      properties: [{ key: 'a', value: '1' }]
+    });
+
+    expect(connection).toBeInstanceOf(BigQueryConnection);
+    expect(connection).toMatchObject({ projectId: 'p', credentials: CREDENTIALS, location: 'asia-east1', properties: {} });
+  });
+
+  it.each([
+    jdbcValues(ConnectionType.PostgreSql, { database: 'd' }),
+    jdbcValues(ConnectionType.Redshift, { database: 'd', ssh: SSH }),
+    jdbcValues(ConnectionType.Vertica, { catalog: 'c', isLoadBalance: true, properties: [{ key: 'k', value: 'v' }] }),
+    { ...defaultFormValues(ConnectionType.BigQuery), projectId: 'p', credentials: CREDENTIALS, location: 'US' }
+  ])('round-trips $type', formValues => {
+    expect(toFormValues(toConnection(formValues))).toEqual(formValues);
   });
 });

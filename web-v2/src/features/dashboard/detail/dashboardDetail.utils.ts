@@ -60,6 +60,15 @@ export function tabPositions(dashboard: Dashboard, tab: TabItem): Record<WidgetI
   return positions;
 }
 
+/**
+ * Whether a scroller is past `ratio` of the way to its end (v1 `onScrollDashboard`, 1%): the header then casts a
+ * shadow on the dashboard. Never when there is nothing to scroll.
+ */
+export function isScrolledPast(scrollTop: number, scrollHeight: number, clientHeight: number, ratio = 0.01): boolean {
+  const range = scrollHeight - clientHeight;
+  return range > 0 && scrollTop / range > ratio;
+}
+
 export function isNotFoundError(error: unknown): boolean {
   return isApiError(error) && (error.status === 404 || error.reason === 'not_found');
 }

@@ -14,10 +14,12 @@ export interface BuilderActions {
 }
 
 export interface BuilderSlots {
-  types: ReactNode;
+  /** None where the chart type is fixed (Data Cook's Transform and Pivot). */
+  types?: ReactNode;
   tree: ReactNode;
   panel: ReactNode;
-  settings: ReactNode;
+  /** None hides the Builder and Settings tabs. */
+  settings?: ReactNode;
   preview: ReactNode;
 }
 
@@ -36,10 +38,13 @@ interface ChartBuilderModalViewProps {
   slots: BuilderSlots;
   /** The chart card's background, from its viz options. */
   previewBackground: string;
+  /** v1's "Chart Builder" by default. */
+  title?: string;
 }
 
-export function ChartBuilderModalView({ actions, slots, previewBackground }: ChartBuilderModalViewProps) {
+export function ChartBuilderModalView({ actions, slots, previewBackground, title = 'Chart Builder' }: ChartBuilderModalViewProps) {
   const [tab, setTab] = useState<Tab>('builder');
+  const hasSettings = slots.settings !== undefined;
   return (
     <Modal
       open
@@ -53,24 +58,26 @@ export function ChartBuilderModalView({ actions, slots, previewBackground }: Cha
       styles={{ body: { height: 'min(735px, calc(100vh - 100px))' } }}
     >
       <div className="flex h-full">
-        <nav className="flex w-20 shrink-0 flex-col gap-1 border-0 border-r border-solid border-black/10 pr-3" aria-label="Builder tabs">
-          {TABS.map(item => (
-            <button
-              key={item.key}
-              type="button"
-              aria-pressed={tab === item.key}
-              onClick={() => setTab(item.key)}
-              className={`flex cursor-pointer flex-col items-center gap-1 rounded border-0 px-2 py-2 text-xs ${tab === item.key ? 'bg-[var(--color-brand)]/10 text-[var(--color-brand)]' : 'bg-transparent text-inherit hover:bg-black/5'}`}
-            >
-              <i className={`${item.icon} text-lg`} aria-hidden />
-              {item.label}
-            </button>
-          ))}
-        </nav>
-        <div className="flex min-w-0 flex-1 flex-col pl-4">
+        {hasSettings && (
+          <nav className="flex w-20 shrink-0 flex-col gap-1 border-0 border-r border-solid border-black/10 pr-3" aria-label="Builder tabs">
+            {TABS.map(item => (
+              <button
+                key={item.key}
+                type="button"
+                aria-pressed={tab === item.key}
+                onClick={() => setTab(item.key)}
+                className={`flex cursor-pointer flex-col items-center gap-1 rounded border-0 px-2 py-2 text-xs ${tab === item.key ? 'bg-[var(--color-brand)]/10 text-[var(--color-brand)]' : 'bg-transparent text-inherit hover:bg-black/5'}`}
+              >
+                <i className={`${item.icon} text-lg`} aria-hidden />
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        )}
+        <div className={`flex min-w-0 flex-1 flex-col ${hasSettings ? 'pl-4' : ''}`}>
           <header className="flex items-center gap-2 pb-3">
             <Typography.Title level={4} className="m-0!">
-              Chart Builder
+              {title}
             </Typography.Title>
             <Button className="ml-auto" onClick={actions.onCancel}>
               Cancel

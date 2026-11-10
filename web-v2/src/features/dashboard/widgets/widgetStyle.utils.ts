@@ -65,6 +65,10 @@ export function widgetCssVars(widget: Widget, defaults: WidgetSetting): CSSPrope
   return {
     '--widget-background-color': backgroundCss(widget, defaults),
     '--widget-border-radius': radiusCss(border.radius),
+    '--widget-border-radius-top-left': `${border.radius.topLeft}px`,
+    '--widget-border-radius-top-right': `${border.radius.topRight}px`,
+    '--widget-border-radius-bottom-left': `${border.radius.bottomLeft}px`,
+    '--widget-border-radius-bottom-right': `${border.radius.bottomRight}px`,
     '--widget-padding': widgetPadding(widget, defaults),
     '--widget-border-width': `${border.width}px`,
     '--widget-border-color': borderColorCss(border),

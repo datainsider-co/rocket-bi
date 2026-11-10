@@ -6,6 +6,7 @@ import { featureFlags } from '@/app/featureFlags';
 import { RouteErrorPage } from '@/app/error/RouteErrorPage';
 import { AppLayout, type AppRouteHandle } from '@/app/layout/AppLayout';
 import { PageLoading } from '@/app/layout/PageLoading';
+import { ORGANIZATION_SETTINGS_PATH } from '@/app/layout/header/header.utils';
 import { redirectIfLoggedIn, requireSession } from '@/app/routeGuards';
 import { AuthLayout } from '@/features/auth/AuthLayout';
 import { DataCookSection, getDataCookSection } from '@/features/data-cook/dataCook.utils';
@@ -98,6 +99,34 @@ const warehouseRoutes: RouteObject[] = [
   }
 ];
 
+/**
+ * Organization Settings at v1's paths. Only User Managements and DataSource Config are migrated; v1's other pages
+ * (Overview, SSO, API keys, ...) are Not found.
+ */
+const organizationRoute: RouteObject = {
+  path: ORGANIZATION_SETTINGS_PATH,
+  ...lazyPage(() => import('@/features/organization/layout/OrganizationSettingsLayout'), m => m.OrganizationSettingsLayout),
+  children: [
+    {
+      index: true,
+      ...lazyPage(() => import('@/features/organization/layout/OrganizationIndexPage'), m => m.OrganizationIndexPage)
+    },
+    {
+      path: 'user-management',
+      ...lazyPage(() => import('@/features/organization/users/list/UsersPage'), m => m.UsersPage)
+    },
+    {
+      path: 'user-management/:username',
+      ...lazyPage(() => import('@/features/organization/users/detail/UserDetailPage'), m => m.UserDetailPage)
+    },
+    {
+      path: 'clickhouse-config',
+      ...lazyPage(() => import('@/features/organization/layout/DataSourceConfigRoute'), m => m.DataSourceConfigRoute)
+    },
+    { path: '*', element: <NotFoundPage /> }
+  ]
+};
+
 /** Every route of the app. Add a feature's page here; keep the page component in its feature folder. */
 export const appRoutes: RouteObject[] = [
   {
@@ -154,6 +183,7 @@ export const appRoutes: RouteObject[] = [
               },
               ...warehouseRoutes,
               ...ingestionRoutes,
+              organizationRoute,
               { path: '*', element: <NotFoundPage /> }
             ]
           }

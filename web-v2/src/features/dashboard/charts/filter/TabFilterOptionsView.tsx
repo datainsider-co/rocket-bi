@@ -23,6 +23,8 @@ export function TabFilterOptionsView({ items, displayAs, direction, checked, onP
         value={items.find(item => checked(item.value))?.value}
         onChange={onPick}
         showSearch={{ optionFilterProp: 'label' }}
+        // v1 `DiDropdown`: the list scrolls past 250px.
+        listHeight={250}
         options={[...items]}
       />
     );

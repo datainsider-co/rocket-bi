@@ -3,7 +3,7 @@ import type { TableColumnsType } from 'antd';
 import type { SorterResult } from 'antd/es/table/interface';
 import { asArray, asRecord, asString, type JsonObject } from '@/core/json/json';
 import type { TableSort } from '@/core/query/tableSort';
-import type { TableHeader } from '@/core/query/VisualizationResponse';
+import type { JsonTableResponse, TableHeader } from '@/core/query/VisualizationResponse';
 import type { VizOptions } from '@/core/query/vizOptions';
 import type { DecorateColumn } from './columnDecorations';
 import { createNumberFormat, DisplayUnit } from '../numberFormat';
@@ -135,4 +135,9 @@ export function headerColumnOf(setting: JsonObject): HeaderColumnOf {
     const column = columnOfLabel(columns, header.label);
     return column ? { name: asString(column['name']), column } : { name: header.label, column: {} };
   };
+}
+
+/** v1 `enablePagination`: no footer for a table that shows all of its 20 rows or less. */
+export function hasPages(response: Pick<JsonTableResponse, 'total' | 'records'>): boolean {
+  return response.total !== response.records.length || response.total > 20;
 }

@@ -37,6 +37,19 @@
   text-overflow: ellipsis;
 }
 
+/* v1 `ic_help.svg`, 8px after the title: the subtitle on hover. */
+.filter-title-row {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  min-width: 0;
+}
+
+.filter-title-row__help {
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
 .filter-title--inline {
   max-width: 41%;
   margin-right: 8px;
@@ -169,8 +182,14 @@
   font-size: 14px;
 }
 
+/* v1 `input-filter.scss`: 4px beside the text, a 12px placeholder (`_input_placeholder.scss`). */
 .filter-input.ant-input {
-  padding: 0 8px;
+  padding: 0 4px;
+}
+
+.filter-input.ant-input::placeholder,
+.filter-input .ant-input-number-input::placeholder {
+  font-size: 12px;
 }
 
 .filter-input.ant-input-number {
@@ -179,7 +198,7 @@
 
 .filter-input .ant-input-number-input {
   height: 30px;
-  padding: 0 8px;
+  padding: 0 4px;
   color: var(--secondary-text-color);
 }
 
@@ -195,7 +214,7 @@
   color: var(--text-color);
 }
 
-/* Ion range slider, round skin: a 6px line, the range in the accent color, 16px handles with a white ring. */
+/* Ion range slider, round skin: a 6px line, the range in the accent color, 16px handles: a 2px white edge around a dot. */
 .filter-slider.ant-slider-horizontal {
   flex-shrink: 0;
   height: 16px;
@@ -238,10 +257,12 @@
 .filter-slider .ant-slider-handle-dragging::after {
   inset-block-start: 0;
   inset-inline-start: 0;
+  box-sizing: border-box;
   width: 16px;
   height: 16px;
+  border: 2px solid #fff;
   background: var(--accent);
-  box-shadow: 0 0 0 2px #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* DateSelectFilter2: DiCalendar's input in a bordered box. */
@@ -276,8 +297,12 @@
 }
 
 .filter-date__arrow {
-  font-size: 12px;
-  color: var(--secondary-text-color);
+  width: 16px;
+  height: 16px;
+}
+
+.filter-date[aria-expanded='true'] .filter-date__arrow {
+  transform: rotate(180deg);
 }
 
 /* TreeSelection */

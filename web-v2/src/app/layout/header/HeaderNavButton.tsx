@@ -13,8 +13,8 @@ interface HeaderNavButtonProps {
 
 const BASE =
   'flex cursor-pointer items-center gap-1.5 rounded-lg border-0 px-3 py-2 text-sm tracking-[0.2px] whitespace-nowrap no-underline transition-colors max-sm:px-2 max-sm:py-1';
-const IDLE = 'bg-transparent text-white hover:bg-white hover:text-header';
-const HIGHLIGHT = 'bg-white text-header hover:text-header';
+const IDLE = 'bg-transparent text-white hover:bg-header-active hover:text-header-active-text';
+const HIGHLIGHT = 'bg-header-active text-header-active-text hover:text-header-active-text';
 
 /** One header entry (v1 `.header-bar-item.navigator`). Labels hide below `lg`, as in v1. */
 export function HeaderNavButton({ icon, label, active, to, open = false }: HeaderNavButtonProps) {
@@ -36,7 +36,10 @@ export function HeaderNavButton({ icon, label, active, to, open = false }: Heade
   return (
     <button type="button" title={label} aria-label={label} className={`${className} font-[inherit]`}>
       {content}
-      <CaretDownIcon open={open} />
+      {/* v1 `ml-1`: 4px from the label, inside the 6px gap. */}
+      <span className="-ml-0.5 flex">
+        <CaretDownIcon open={open} />
+      </span>
     </button>
   );
 }

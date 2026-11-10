@@ -1,4 +1,15 @@
 import Deneric from 'deneric2';
+import { asRecord } from '@/core/json/json';
+
+/**
+ * Keeps keys exactly as sent. Not `Deneric.Map`: it reads and writes keys as dot paths, so a key such as `ssl.mode`
+ * would turn into a nested object.
+ */
+function toProperties(value: unknown): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(asRecord(value)).filter((entry): entry is [string, string] => typeof entry[1] === 'string')
+  );
+}
 
 /** Personal data. Field names follow the backend `UserProfile` case class. */
 export class UserProfile extends Deneric {
@@ -30,11 +41,15 @@ export class UserProfile extends Deneric {
       dob: ['dob', Number],
       avatar: ['avatar', String],
       alreadyConfirmed: ['already_confirmed', Boolean],
-      properties: ['properties', Deneric.Map(String)],
       updatedTime: ['updated_time', Number],
       createdTime: ['created_time', Number]
     });
     this.fromJson(json);
+    this.properties = toProperties(asRecord(json)['properties']);
+  }
+
+  override toJson(): Record<string, unknown> {
+    return { ...(super.toJson() as Record<string, unknown>), properties: { ...this.properties } };
   }
 
   /** Same fallback order as v1's `getName`. */

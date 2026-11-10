@@ -1,9 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { ClickhouseConnection } from './ClickhouseConnection';
 import { createConnection, parseConnection } from './Connection';
-import { ConnectionType, isConnectionType } from './ConnectionType';
+import { ConnectionType, isConnectionType, supportsProperties, supportsSshTunnel } from './ConnectionType';
+import { BigQueryConnection } from './BigQueryConnection';
+import fixture from './connectionTypes.fixture.json';
 import { MySqlConnection } from './MySqlConnection';
+import { PostgreSqlConnection } from './PostgreSqlConnection';
+import { RedshiftConnection } from './RedshiftConnection';
 import { SshConfig } from './SshConfig';
+import { VerticaConnection } from './VerticaConnection';
 
 /** Shape of `GET connection` from the local backend. */
 const CLICKHOUSE_JSON = {
@@ -53,7 +58,7 @@ describe('parseConnection', () => {
     expect(connection?.tunnelConfig).toBeUndefined();
   });
 
-  it.each([{ class_name: 'bigquery_connection' }, {}, null, undefined, 'clickhouse_connection'])(
+  it.each([{ class_name: 'snowflake_connection' }, {}, null, undefined, 'clickhouse_connection'])(
     'returns undefined for %j',
     json => {
       expect(parseConnection(json)).toBeUndefined();
@@ -128,13 +133,17 @@ describe('connection toJson', () => {
 describe('createConnection', () => {
   it.each([
     [ConnectionType.Clickhouse, ClickhouseConnection],
-    [ConnectionType.MySql, MySqlConnection]
+    [ConnectionType.MySql, MySqlConnection],
+    [ConnectionType.PostgreSql, PostgreSqlConnection],
+    [ConnectionType.Redshift, RedshiftConnection],
+    [ConnectionType.Vertica, VerticaConnection],
+    [ConnectionType.BigQuery, BigQueryConnection]
   ])('creates an empty %s', (type, expected) => {
     const connection = createConnection(type);
 
     expect(connection).toBeInstanceOf(expected);
     expect(connection.className).toBe(type);
-    expect(connection.host).toBe('');
+    expect(connection.properties).toEqual({});
   });
 });
 
@@ -142,9 +151,68 @@ describe('isConnectionType', () => {
   it.each([
     ['clickhouse_connection', true],
     ['mysql_connection', true],
-    ['bigquery_connection', false],
+    ['bigquery_connection', true],
+    ['vertica_connection', true],
+    ['snowflake_connection', false],
     [undefined, false]
   ])('%s → %s', (value, expected) => {
     expect(isConnectionType(value)).toBe(expected);
+  });
+});
+
+describe('the types added in OS4', () => {
+  it.each([
+    ['testPostgreSql', PostgreSqlConnection],
+    ['testRedshift', RedshiftConnection],
+    ['testVertica', VerticaConnection],
+    ['testBigQuery', BigQueryConnection]
+  ] as const)('reads and writes the %s request unchanged', (name, expected) => {
+    const json = fixture[name].request.source;
+
+    const connection = parseConnection(json);
+
+    expect(connection).toBeInstanceOf(expected);
+    expect(JSON.parse(JSON.stringify(connection?.toJson()))).toEqual(json);
+  });
+
+  it('reads the Vertica catalog and load balancing', () => {
+    expect(parseConnection(fixture.testVertica.request.source)).toMatchObject({ catalog: 'db', isLoadBalance: false });
+  });
+
+  it('never sends a tunnel for PostgreSQL, which the server ignores', () => {
+    const connection = new PostgreSqlConnection({ host: 'h', tunnel_config: { host: 'b', port: 22 } });
+    connection.tunnelConfig = new SshConfig({ host: 'b' });
+
+    expect(connection.toJson()).not.toHaveProperty('tunnel_config');
+  });
+
+  it('keeps a Redshift tunnel', () => {
+    const connection = new RedshiftConnection({ tunnel_config: { host: 'b', port: 22, username: 'u', public_key: 'k' } });
+
+    expect(connection.toJson()).toMatchObject({ tunnel_config: { host: 'b', port: 22 } });
+  });
+
+  it('sends BigQuery without tunnel, properties or an empty location', () => {
+    const connection = new BigQueryConnection({ project_id: 'p', credentials: '{}', properties: { a: '1' } });
+
+    expect(JSON.parse(JSON.stringify(connection.toJson()))).toEqual({
+      class_name: 'bigquery_connection',
+      project_id: 'p',
+      credentials: '{}'
+    });
+  });
+});
+
+describe('connection capabilities', () => {
+  it.each([
+    [ConnectionType.Clickhouse, true, true],
+    [ConnectionType.MySql, true, true],
+    [ConnectionType.PostgreSql, false, true],
+    [ConnectionType.Redshift, true, true],
+    [ConnectionType.Vertica, true, true],
+    [ConnectionType.BigQuery, false, false]
+  ])('%s: tunnel %s, properties %s', (type, tunnel, properties) => {
+    expect(supportsSshTunnel(type)).toBe(tunnel);
+    expect(supportsProperties(type)).toBe(properties);
   });
 });

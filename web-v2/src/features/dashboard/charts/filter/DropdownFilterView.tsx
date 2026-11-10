@@ -29,6 +29,8 @@ export function DropdownFilterView({ title, titleStyle, options, selected, onCha
         value={selected[0] ?? ALL}
         onChange={value => onChange(value === ALL ? [] : [value])}
         showSearch={{ optionFilterProp: 'label' }}
+        // v1 `DiDropdown`: the list scrolls past 250px.
+        listHeight={250}
         options={[{ label: 'Show all', value: ALL }, ...options]}
       />
     </div>

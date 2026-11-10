@@ -32,13 +32,15 @@ export function OtherTab({ viz, onChange, chartType }: OtherTabProps) {
       )}
       <div className="flex gap-3">
         <SelectSetting className="flex-1" label="Decimal point" options={DECIMAL_POINTS} value={textAt(viz, 'decimalPoint', '.')} onChange={decimalPoint => onChange({ decimalPoint })} />
-        <SelectSetting
-          className="flex-1"
-          label="Thousand separator"
-          options={THOUSAND_SEPARATORS}
-          value={textAt(viz, 'thousandSep', ',')}
-          onChange={thousandSep => onChange({ thousandSep })}
-        />
+        {shown.thousandSeparator && (
+          <SelectSetting
+            className="flex-1"
+            label="Thousand separator"
+            options={THOUSAND_SEPARATORS}
+            value={textAt(viz, 'thousandSep', ',')}
+            onChange={thousandSep => onChange({ thousandSep })}
+          />
+        )}
       </div>
       {toggle('affectedByFilter', true, 'Enable external filter')}
       {shown.crossFilter && toggle('isCrossFilter', false, 'Enable cross filter')}

@@ -1,0 +1,90 @@
+/* v1 `DiLoading.vue`, `ErrorWidget.vue` and `EmptyWidget.vue`: what a page, a widget or a preview shows instead of its content. */
+
+.status-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-loading--full {
+  width: 100%;
+  height: 100%;
+}
+
+.status-loading__icon {
+  width: 24px;
+  height: 24px;
+  animation: status-loading-spin 2s linear infinite;
+}
+
+@keyframes status-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.status-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 15px;
+  overflow: auto;
+}
+
+.status-error__icon {
+  margin-bottom: 17px;
+  color: var(--secondary-text-color, #5f6368);
+  font-size: 58px;
+  user-select: none;
+}
+
+.status-error__message {
+  display: -webkit-box;
+  flex-shrink: 1;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-color, #4f4f4f);
+  font-size: 14px;
+  font-weight: 400;
+  text-align: center;
+  text-overflow: ellipsis;
+  cursor: default;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.status-error__retry {
+  margin-top: 24px;
+  padding: 2px 17px;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent, #597fff);
+  color: var(--accent-text-color, #fff);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.18px;
+  cursor: pointer;
+}
+
+.status-error__retry:hover {
+  background: var(--accent-hover-color, #3463ff);
+}
+
+.status-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.status-empty__text {
+  font-size: 16px;
+  text-align: center;
+}

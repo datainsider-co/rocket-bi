@@ -105,7 +105,12 @@ page's dependencies (zod, Highcharts, ...) stay out of the main bundle; anything
 - Styling: antd components and theme tokens first, Tailwind utilities for layout, spacing and one-off sizes. Tailwind
   runs without preflight (`src/app/global.css`); antd's CSS-in-JS is put in `@layer antd` by `StyleProvider layer`,
   ordered before `utilities`, so a Tailwind class on an antd component wins. Brand values (`colorPrimary` #0066ff,
-  Roboto) are set once in `ThemeContext` and mirrored as `--color-brand` / `--font-sans` in `global.css`.
+  Roboto) and v1's shapes are set once in `app/theme/appTheme.ts` and mirrored as `--color-brand` / `--font-sans` in
+  `global.css`. The dashboard page adds its theme's accent and renders its popups inside the page
+  (`features/dashboard/theme/DashboardThemeProvider.tsx`); CSS that restyles antd goes in `@layer components`. While
+  open, the page also puts its theme on `<body>` (`useBodyDashboardTheme`), which is how the app header takes the
+  theme's colors (`--color-header-bar` and friends in `global.css`).
+- Loading, error and empty states: `shared/status/` (`Loading`, `ErrorState`, `EmptyData`). Toasts: `shared/toast/useToast.ts`.
 - Forms: react-hook-form with a zod schema (`zodResolver`); schemas live in the feature's `*.utils.ts` and are unit
   tested. Lay fields out with antd via `features/auth/FormField.tsx` (move it to `shared/` when a second feature
   needs it).

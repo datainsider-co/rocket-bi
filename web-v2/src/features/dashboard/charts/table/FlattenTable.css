@@ -173,22 +173,173 @@
   color: var(--ft-row-odd-color, var(--row-odd-color, var(--secondary-text-color)));
 }
 
-.flatten-table .ant-table-tbody > tr:hover > td {
-  background: var(--hover-color);
+/* v1 has no row hover; antd's is taken off. */
+.flatten-table .ant-table-tbody > tr.ant-table-row:hover > td.ant-table-cell-row-hover {
+  background: inherit;
+}
+
+.flatten-table .ant-table-tbody > .flatten-table__row--even:hover > td {
+  background: var(--ft-row-even-bg, var(--row-even-background-color, transparent));
+}
+
+.flatten-table .ant-table-tbody > .flatten-table__row--odd:hover > td {
+  background: var(--ft-row-odd-bg, var(--row-odd-background-color, #00000003));
+}
+
+/*
+  v1 `TableHeaderRenderEngine.renderSortElement`: one caret, 8px after the title, on the sorted column only; down for
+  ascending, up for descending. antd's pair of arrows is cut down to the active one, turned over.
+*/
+.flatten-table .ant-table-thead th.ant-table-column-has-sorters:hover,
+.flatten-table .ant-table-thead th.ant-table-column-sort {
+  background: linear-gradient(var(--ft-header-bg, var(--header-background-color, #f5f5f5)), var(--ft-header-bg, var(--header-background-color, #f5f5f5)))
+    var(--ft-card-bg, var(--chart-background-color, transparent));
+}
+
+.flatten-table .ant-table-column-sorters {
+  justify-content: flex-start;
+}
+
+.flatten-table .ant-table-column-sorters .ant-table-column-title {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.flatten-table .ant-table-column-sorter {
+  display: none;
+  margin-inline-start: 8px;
+  color: inherit;
+}
+
+.flatten-table th.ant-table-column-sort .ant-table-column-sorter {
+  display: flex;
+}
+
+.flatten-table .ant-table-column-sorter-inner > .anticon {
+  display: none;
+  margin: 0;
+  color: inherit;
+  font-size: 12px;
+  transform: rotate(180deg);
+}
+
+.flatten-table .ant-table-column-sorter-inner > .anticon.active {
+  display: inline-flex;
+}
+
+/* v1 `Table.scss` `.custom-scroll-bar`: a 5px bar. The page hides scrollbars (`DashboardPage.css`), so it is asked for. */
+.flatten-table__body .ant-table {
+  scrollbar-color: var(--scrollbar-background) transparent;
+  scrollbar-width: thin;
+}
+
+/* v1 `TableStyle.scss` `.table-chart-pagination-content`: a 25px footer, 10px under the rows. */
+.flatten-table {
+  container-type: inline-size;
 }
 
 .flatten-table .ant-pagination {
   align-items: center;
-  margin: 8px 0 0 !important;
+  min-height: 25px;
+  margin: 10px 0 0 !important;
   /* v1: the pages take the header's text color, which reads on the table's theme. */
-  color: var(--ft-header-color, var(--secondary-text-color));
+  color: var(--ft-header-color, var(--table-header-color, var(--secondary-text-color)));
 }
 
-/* v1's footer: the row count on the left, the pages on the right. */
+/* The row count on the left, "Showing [n] entries" 15px before the pages on the right. */
 .flatten-table .ant-pagination-total-text {
-  margin-inline-end: auto;
-  color: var(--ft-header-color, var(--text-color));
+  display: flex;
+  flex: 1;
+  align-items: center;
+  height: 25px;
+  margin-inline-end: 15px;
+  color: inherit;
   font-size: 14px;
+  line-height: 25px;
+}
+
+.flatten-table__total-rows {
+  margin-right: auto;
+}
+
+.flatten-table__per-page {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+}
+
+.flatten-table__per-page .ant-select {
+  width: 35px;
+  height: 25px;
+  padding: 0;
+  color: inherit;
+  font-size: 12px;
+  text-align: center;
+  text-decoration: underline;
+}
+
+/*
+  v1 `Pagination.vue`, as it renders (its scoped `.page-link` colors never reach bootstrap's markup): 12px pills, 4px
+  apart, clear until current, which takes the header's background.
+*/
+.flatten-table .ant-pagination .ant-pagination-item,
+.flatten-table .ant-pagination .ant-pagination-prev,
+.flatten-table .ant-pagination .ant-pagination-next {
+  min-width: 23px;
+  height: 20px;
+  margin-inline: 4px 0;
+  border: none;
+  border-radius: 800px;
+  background: transparent;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.flatten-table .ant-pagination .ant-pagination-item a,
+.flatten-table .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.flatten-table .ant-pagination .ant-pagination-next .ant-pagination-item-link,
+.flatten-table .ant-pagination .ant-pagination-item-ellipsis {
+  padding: 0 8px;
+  color: var(--ft-header-color, var(--table-header-color, var(--secondary-text-color)));
+  font-size: 12px;
+}
+
+.flatten-table .ant-pagination .ant-pagination-item-active {
+  background: var(--ft-header-bg, var(--header-background-color, #f5f5f5));
+}
+
+.flatten-table .ant-pagination .ant-pagination-disabled {
+  opacity: 0.5;
+}
+
+/* v1 `handleResponsiveForPagingControl`: at 400px or less, only the previous, current and next page. */
+@container (max-width: 400px) {
+  .flatten-table .ant-pagination-total-text > * {
+    display: none;
+  }
+
+  .flatten-table .ant-pagination .ant-pagination-item:not(.ant-pagination-item-active),
+  .flatten-table .ant-pagination .ant-pagination-jump-prev,
+  .flatten-table .ant-pagination .ant-pagination-jump-next {
+    display: none;
+  }
+}
+
+/* v1 `.custom-table-tooltip`: 6px 16px around at most 15 lines, 30vw wide. */
+.table-cell-tooltip .ant-tooltip-container {
+  display: -webkit-box;
+  max-width: 30vw;
+  max-height: 320px;
+  min-height: 0;
+  padding: 6px 16px;
+  overflow: hidden;
+  border-radius: 1px;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: pre-wrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 15;
 }
 
 /* A cell's data bar behind its text, and its icon beside it (v1 `data-bar-panel`, `icon-bar`). */
@@ -226,7 +377,7 @@
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  margin-right: 8px;
+  margin-right: 5px;
   padding: 0;
   border: none;
   background: none;

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ChartType } from '@/core/chart-builder/chartType';
 import type { VisualizationResponse } from '@/core/query/VisualizationResponse';
-import { hasStackTab, seriesResponseOf, settingsKindOf } from './settingsPanel.utils';
+import { hasStackTab, isLegendFirst, seriesResponseOf, settingsKindOf } from './settingsPanel.utils';
 
 describe('settingsKindOf', () => {
   it.each([ChartType.Column, ChartType.Bar, ChartType.Lollipop, ChartType.Line, ChartType.Spline, ChartType.LineInverted, ChartType.Area, ChartType.AreaInverted])('gives %s the series settings', chartType => {
@@ -12,8 +12,12 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(chartType)).toBe('stacked');
   });
 
-  it.each([ChartType.Pie, ChartType.SemiPie, ChartType.Donut])('gives %s the pie settings', chartType => {
+  it.each([ChartType.Pie, ChartType.SemiPie, ChartType.Donut, ChartType.VariablePie, ChartType.Funnel, ChartType.Pyramid])('gives %s the pie settings', chartType => {
     expect(settingsKindOf(chartType)).toBe('pie');
+  });
+
+  it('gives the parliament its own settings', () => {
+    expect(settingsKindOf(ChartType.Parliament)).toBe('parliament');
   });
 
   it('gives number charts and tables their settings', () => {
@@ -29,6 +33,15 @@ describe('settingsKindOf', () => {
 
   it.each(['arearange', 'gauge'])('has none yet for %s', chartType => {
     expect(settingsKindOf(chartType)).toBeUndefined();
+  });
+});
+
+describe('isLegendFirst', () => {
+  it('puts the legend first on pies, after the title on funnels and pyramids, like v1', () => {
+    expect(isLegendFirst(ChartType.Pie)).toBe(true);
+    expect(isLegendFirst(ChartType.VariablePie)).toBe(true);
+    expect(isLegendFirst(ChartType.Funnel)).toBe(false);
+    expect(isLegendFirst(ChartType.Pyramid)).toBe(false);
   });
 });
 

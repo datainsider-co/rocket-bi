@@ -67,6 +67,8 @@ describe('widgetCssVars', () => {
       '--widget-padding': '8px',
       '--widget-border-width': '0px',
       '--widget-border-radius': '20px',
+      '--widget-border-radius-top-left': '20px',
+      '--widget-border-radius-bottom-right': '20px',
       '--text-color': '#4f4f4f',
       '--widget-primary-font-size': '18px',
       '--widget-primary-font-weight': 'bold',

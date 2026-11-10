@@ -1,5 +1,11 @@
 import type { MouseEvent } from 'react';
 
+/** v1 `TableBodyRenderEngine.MINUS_ICON` / `PLUS_ICON`: the signs' own paths, with their rounded ends. */
+const MINUS =
+  'M11.81 8.664c.127 0 .19-.064.19-.19v-.796c0-.127-.063-.19-.19-.19H4.19c-.127 0-.19.063-.19.19v.796c0 .126.063.19.19.19h7.62z';
+const PLUS =
+  'M8.398 12c.126 0 .19-.063.19-.19V8.74c0-.051.025-.076.076-.076h3.146c.127 0 .19-.064.19-.19v-.796c0-.127-.063-.19-.19-.19H8.664c-.05 0-.076-.025-.076-.076V4.19c0-.127-.064-.19-.19-.19h-.796c-.127 0-.19.063-.19.19v3.222c0 .05-.025.076-.076.076H4.19c-.127 0-.19.063-.19.19v.796c0 .126.063.19.19.19h3.146c.051 0 .076.025.076.075v3.071c0 .127.063.19.19.19h.796z';
+
 interface CollapseToggleProps {
   expanded: boolean;
   /** Rows without a next group show a gap in its place, so the names stay aligned. */
@@ -26,10 +32,7 @@ export function CollapseToggle({ expanded, expandable, onToggle }: CollapseToggl
     >
       <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
         <rect width="16" height="16" fill="var(--ft-toggle-bg, var(--toggle-color, #ffffff19))" />
-        <g fill="var(--ft-toggle-color, var(--text-color, #ffffff66))">
-          <rect x="4" y="7.4" width="8" height="1.2" />
-          {!expanded && <rect x="7.4" y="4" width="1.2" height="8" />}
-        </g>
+        <path fill="var(--ft-toggle-color, var(--text-color, #ffffff66))" d={expanded ? MINUS : PLUS} />
       </svg>
     </button>
   );

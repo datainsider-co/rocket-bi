@@ -1,27 +1,38 @@
-import { Button, Result, Spin } from 'antd';
+import { DashboardSetting } from '@/core/dashboard/DashboardSetting';
+import { ErrorState } from '@/shared/status/ErrorState';
+import { Loading } from '@/shared/status/Loading';
 import { DashboardPermissionsProvider } from '../access/DashboardPermissionsContext';
 import { PasswordGateView } from '../access/PasswordGateView';
 import { DashboardEditProvider } from '../edit/DashboardEditContext';
 import { SettingButtonView } from '../edit/settings/SettingButtonView';
 import { ViewAsProvider } from '../view-as/ViewAsContext';
 import { DashboardCanvas } from './DashboardCanvas';
+import { dashboardCssVars } from './dashboardDetail.utils';
 import type { DashboardPageViewProps } from './DashboardPageView';
+
+/** The content box before there is a dashboard: v1's default setting, as wide as the page. */
+const DEFAULT_VARS = dashboardCssVars(new DashboardSetting());
 
 /** The page below its header: loading, the error, the password, or the dashboard with what the viewer may do on it. */
 export function DashboardPageBody({ dashboard, load, state, layout, onBack }: DashboardPageViewProps) {
   const { access, viewAs, editing } = state;
-  if (load.isLoading || (dashboard && access.lock === 'checking')) return <Spin className="flex! h-full items-center justify-center" />;
+  // v1 drew both inside the content box.
+  if (load.isLoading || (dashboard && access.lock === 'checking')) {
+    return (
+      <div className="dashboard-content" style={DEFAULT_VARS}>
+        <div className="dashboard-content__status">
+          <Loading />
+        </div>
+      </div>
+    );
+  }
   if (load.error || !dashboard) {
     return (
-      <Result
-        status="warning"
-        title={load.error ?? 'Load dashboard error!'}
-        extra={
-          <Button type="primary" onClick={load.onRetry}>
-            Retry
-          </Button>
-        }
-      />
+      <div className="dashboard-content" style={DEFAULT_VARS}>
+        <div className="dashboard-content__status">
+          <ErrorState message={load.error ?? 'Load dashboard error!'} onRetry={load.onRetry} />
+        </div>
+      </div>
     );
   }
   // Nothing is queried until the password is given.
@@ -36,7 +47,12 @@ export function DashboardPageBody({ dashboard, load, state, layout, onBack }: Da
           handlers={editing.actions.widget}
           tabHandlers={editing.actions.tab}
         >
-          <DashboardCanvas dashboard={dashboard} mobile={layout.mobile} corner={editing.mode.editing && <SettingButtonView items={editing.settingMenu} />} />
+          <DashboardCanvas
+            dashboard={dashboard}
+            mobile={layout.mobile}
+            corner={editing.mode.editing && <SettingButtonView items={editing.settingMenu} />}
+            onAddChart={editing.mode.editing ? editing.actions.add.addChart : undefined}
+          />
         </DashboardEditProvider>
       </ViewAsProvider>
     </DashboardPermissionsProvider>

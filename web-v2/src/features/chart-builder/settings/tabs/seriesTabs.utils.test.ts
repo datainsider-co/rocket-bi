@@ -10,6 +10,7 @@ import {
   dataLabelRevert,
   dataLabelSettingsOf,
   displayRevert,
+  labelPositionOf,
   seriesNameRevert,
   dualAxisRevert,
   dualAxisToggle,
@@ -217,12 +218,32 @@ describe('boundToggle', () => {
 describe('dataLabelPath / dataLabelSettingsOf', () => {
   it('puts series labels under series, with a condition', () => {
     expect(dataLabelPath(ChartType.Line)).toBe('plotOptions.series.dataLabels');
-    expect(dataLabelSettingsOf(ChartType.Line)).toEqual({ labelFormat: false, distance: false, condition: true });
+    expect(dataLabelSettingsOf(ChartType.Line)).toEqual({ labelFormat: false, distance: false, position: false, condition: true });
   });
 
   it('puts pie labels under pie, with a format and distance', () => {
     expect(dataLabelPath(ChartType.Donut)).toBe('plotOptions.pie.dataLabels');
-    expect(dataLabelSettingsOf(ChartType.Pie)).toEqual({ labelFormat: true, distance: true, condition: false });
+    expect(dataLabelSettingsOf(ChartType.Pie)).toEqual({ labelFormat: true, distance: true, position: false, condition: false });
+  });
+
+  it('puts funnel and pyramid labels under their own type, with a format and a position', () => {
+    expect(dataLabelPath(ChartType.Funnel)).toBe('plotOptions.funnel.dataLabels');
+    expect(dataLabelPath(ChartType.Pyramid)).toBe('plotOptions.pyramid.dataLabels');
+    expect(dataLabelSettingsOf(ChartType.Pyramid)).toEqual({ labelFormat: true, distance: false, position: true, condition: false });
+  });
+
+  it('puts variable pie labels under series, with nothing more, like v1', () => {
+    expect(dataLabelPath(ChartType.VariablePie)).toBe('plotOptions.series.dataLabels');
+    expect(dataLabelSettingsOf(ChartType.VariablePie)).toEqual({ labelFormat: false, distance: false, position: false, condition: false });
+  });
+});
+
+describe('labelPositionOf', () => {
+  it('reads the boolean v1 stored as inside or outside', () => {
+    const viz = (inside: unknown) => ({ plotOptions: { funnel: { dataLabels: { inside } } } }) as VizOptions;
+    expect(labelPositionOf(viz(true), 'plotOptions.funnel.dataLabels')).toBe('inside');
+    expect(labelPositionOf(viz(false), 'plotOptions.funnel.dataLabels')).toBe('outside');
+    expect(labelPositionOf({}, 'plotOptions.funnel.dataLabels')).toBe('outside');
   });
 });
 
@@ -239,6 +260,12 @@ describe('dataLabelRevert', () => {
 
   it('resets pie labels with their format and distance', () => {
     expect(dataLabelRevert(ChartType.Pie)).toMatchObject({ 'plotOptions.pie.dataLabels.labelFormat': 'name_and_value', 'plotOptions.pie.dataLabels.distance': 30 });
+  });
+
+  it('puts funnel labels back outside, where v1 reverted a key nothing reads', () => {
+    const changes = dataLabelRevert(ChartType.Funnel);
+    expect(changes).toMatchObject({ 'plotOptions.funnel.dataLabels.inside': false, 'plotOptions.funnel.dataLabels.labelFormat': 'name_and_value' });
+    expect(changes).not.toHaveProperty(['plotOptions.funnel.dataLabels.distance']);
   });
 });
 

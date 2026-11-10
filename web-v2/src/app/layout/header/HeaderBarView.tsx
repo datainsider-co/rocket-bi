@@ -24,7 +24,7 @@ export function HeaderBarView({ brand, navItems, pathname, account, theme }: Hea
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-[999] flex h-[68px] shrink-0 items-center justify-between gap-2 bg-header px-8 max-sm:px-4">
+    <header className="sticky top-0 z-[999] flex h-[68px] shrink-0 items-center justify-between gap-2 bg-header-bar px-8 max-sm:px-4">
       <CompanyBrand brand={brand} />
 
       <nav aria-label="Main" className="flex items-center gap-3 max-md:hidden">

@@ -7,6 +7,59 @@
   min-height: 0;
   background: linear-gradient(131deg, var(--min-background-color) 2%, var(--max-background-color) 90%);
   color: var(--text-color);
+  /* v1 `body` (`themes/app.scss`); antd's `App` gives 1.57 otherwise. */
+  line-height: 1.4;
+}
+
+/*
+  v1 drew the gradient over the whole screen and the app header on it (`--header-bar-background-color` is see-through
+  in the dark themes). With the theme on `<body>` (`useBodyDashboardTheme`), the gradient is the body's and the app's
+  layout and the page let it through; full screen and TV mode cover the app, so they keep their own.
+*/
+body.dashboard-theme {
+  background: linear-gradient(131deg, var(--min-background-color) 2%, var(--max-background-color) 90%) fixed;
+}
+
+body.dashboard-theme .app-layout,
+body.dashboard-theme .dashboard-page[data-mode='view'] {
+  background: none;
+}
+
+/*
+  v1 `themes/scss/scrollbar.scss`: no scrollbar shows anywhere, except on `.di-scroll-bar`, which the page's body is.
+  In the `components` layer, so a widget's own CSS can bring its scrollbar back.
+*/
+@layer components {
+  .dashboard-page * {
+    scrollbar-width: none;
+  }
+
+  .dashboard-page *::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dashboard-page .dashboard-page__body {
+    scrollbar-color: var(--scrollbar-background) transparent;
+    scrollbar-width: thin;
+  }
+
+  .dashboard-page .dashboard-page__body::-webkit-scrollbar {
+    display: block;
+    width: 16px;
+    height: 16px;
+  }
+
+  .dashboard-page .dashboard-page__body::-webkit-scrollbar-thumb {
+    border: 5px solid transparent;
+    border-radius: 8px;
+    background: var(--scrollbar-background);
+    background-clip: padding-box;
+  }
+
+  .dashboard-page .dashboard-page__body::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-hover);
+    background-clip: padding-box;
+  }
 }
 
 .dashboard-page__body {
@@ -35,6 +88,12 @@
   z-index: 999;
 }
 
+/* v1 `.dashboard-fullscreen-mode`. v1 scaled the dashboard to the screen in both modes; here only TV mode does. */
+.dashboard-page[data-mode='fullscreen'] .dashboard-page__body,
+.dashboard-page[data-mode='tv'] .dashboard-page__body {
+  padding: 4px 4px 15px;
+}
+
 .dashboard-page[data-mode='tv'] .dashboard-page__body {
   overflow: hidden;
 }
@@ -44,7 +103,7 @@
   isolation: isolate;
   display: flex;
   flex-direction: column;
-  width: var(--dashboard-content-width, 100%);
+  width: var(--dashboard-content-width, 1024px);
   min-height: 100%;
   margin: 0 auto;
   padding: 25px 30px;
@@ -67,6 +126,50 @@
   position: absolute;
   top: -19px;
   right: -14px;
+}
+
+/* Loading and the load error, in the middle of the content box (v1 `.dashboard--content--loading`, `--error`). */
+.dashboard-content__status {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+/* v1 `EmptyDashboard.vue`. */
+.dashboard-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-empty__icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 15px;
+  object-fit: contain;
+}
+
+.dashboard-empty__text {
+  color: var(--text-color);
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: 0.27px;
+  text-align: center;
+}
+
+.dashboard-empty__link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .dashboard-content::before,
@@ -126,7 +229,7 @@
   background: none;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .dashboard-content {
     width: 100%;
     padding: 22px 20px;

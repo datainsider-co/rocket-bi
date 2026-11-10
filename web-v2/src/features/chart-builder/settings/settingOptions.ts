@@ -95,3 +95,16 @@ export const LABEL_FORMATS: readonly SettingOption[] = [
   { label: 'Data percent', value: 'name_and_percent' },
   { label: 'Data', value: 'name' }
 ];
+
+/** v1 `LabelPositionOptions`: a funnel's labels on its sections or beside them. v1 stored `inside` as a boolean. */
+export const LABEL_POSITIONS: readonly SettingOption[] = [
+  { label: 'Inside', value: 'inside' },
+  { label: 'Outside', value: 'outside' }
+];
+
+/** v1 `ParliamentLayoutTab`: how a parliament lays its dots out. */
+export const PARLIAMENT_LAYOUTS: readonly SettingOption[] = [
+  { label: 'Parliament', value: 'parliament' },
+  { label: 'Rectangle', value: 'rectangle' },
+  { label: 'Circle', value: 'circle' }
+];

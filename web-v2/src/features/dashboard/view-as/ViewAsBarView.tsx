@@ -1,6 +1,6 @@
-import { EyeOutlined, LogoutOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
 import type { SuggestedUser } from '@/core/user/UserService';
+import { HeaderButton } from '../header/HeaderButton';
+import './ViewAsBar.css';
 
 interface ViewAsBarViewProps {
   user: SuggestedUser;
@@ -12,13 +12,13 @@ interface ViewAsBarViewProps {
 export function ViewAsBarView({ user, onChange, onExit }: ViewAsBarViewProps) {
   const { profile } = user;
   return (
-    <span className="flex items-center gap-1">
-      <Button icon={<EyeOutlined />} title={profile.email} onClick={onChange}>
-        View As: <strong>{profile.displayName}</strong>
-      </Button>
-      <Button type="text" icon={<LogoutOutlined />} onClick={onExit}>
-        Exit View As
-      </Button>
+    <span className="view-as-bar">
+      <button type="button" className="view-as-bar__user" title={profile.email} onClick={onChange}>
+        <i className="di-icon-view-as" aria-hidden />
+        View As:
+        <strong>{profile.displayName}</strong>
+      </button>
+      <HeaderButton icon="di-icon-exit-view-as" title="Exit View As" onClick={onExit} />
     </span>
   );
 }

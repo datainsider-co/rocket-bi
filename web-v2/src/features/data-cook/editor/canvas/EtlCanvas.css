@@ -43,6 +43,11 @@
   fill: var(--etl-accent);
 }
 
+/* Out of a table whose preview failed (v1 drew them red). */
+.etl-canvas .etl-edge--error .react-flow__edge-path {
+  stroke: var(--etl-error);
+}
+
 .etl-handle.react-flow__handle {
   opacity: 0;
   pointer-events: none;
@@ -70,6 +75,20 @@
 
 .etl-table {
   max-width: 300px;
+}
+
+/* The table shown below the canvas. */
+.etl-table--shown {
+  border-color: var(--etl-accent);
+}
+
+.etl-table--error,
+.etl-table--error:hover {
+  border-color: var(--etl-error);
+}
+
+.etl-table__error {
+  color: var(--etl-error);
 }
 
 .etl-table__db {

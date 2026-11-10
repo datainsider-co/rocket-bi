@@ -1,0 +1,34 @@
+/* v1 `themes/scss/_toast.scss`: a white card at the bottom right, a bold colored title over the greyed message. */
+@layer components {
+  .ant-notification .di-toast.ant-notification-notice {
+    width: 410px;
+    max-width: calc(100vw - 32px);
+    padding: 16px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .ant-notification .di-toast .ant-notification-notice-title {
+    margin-bottom: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.27px;
+  }
+
+  .ant-notification .di-toast--success .ant-notification-notice-title {
+    color: #07bc40;
+  }
+
+  .ant-notification .di-toast--error .ant-notification-notice-title {
+    color: #cc4426;
+  }
+
+  .ant-notification .di-toast .ant-notification-notice-description {
+    color: #4f4f4f;
+    font-size: 16px;
+    letter-spacing: 0.27px;
+    word-break: break-word;
+    opacity: 0.5;
+  }
+}

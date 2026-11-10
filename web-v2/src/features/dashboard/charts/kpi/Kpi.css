@@ -7,9 +7,89 @@
   overflow: hidden;
 }
 
+/* v1 `.kpi-widget`: the icon, then the title and subtitle, then the value, 28px apart. */
 .kpi--themed {
-  gap: 16px;
+  position: relative;
   padding: 18px 11px;
+}
+
+.kpi--themed > .kpi__icon,
+.kpi--themed > .kpi__info {
+  margin-bottom: 28px;
+}
+
+/* v1 `.trend-line-kpi-widget--content`: the value and the icon on one row, the icon at the right. */
+.kpi--trend {
+  position: relative;
+  padding: 15px 9px;
+}
+
+.kpi__trend-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 11px;
+}
+
+.kpi--trend > .kpi__info,
+.kpi--trend > .kpi__percentage {
+  position: relative;
+  z-index: 1;
+}
+
+/* v1 `.trend-area-kpi-widget--content`: the icon beside the title, the value 14px under it with the pill after. */
+.kpi--area {
+  position: relative;
+}
+
+.kpi__area-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+}
+
+.kpi__area-value {
+  display: flex;
+  margin-top: 14px;
+}
+
+.kpi__area-value .kpi__percentage {
+  margin-left: 20px;
+}
+
+/* v1 `.kpi-widget--icon`. */
+.kpi__icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+}
+
+.kpi__icon i {
+  font-size: 32px;
+}
+
+.kpi__icon--large {
+  width: 89px;
+  height: 89px;
+  margin-right: 28px;
+}
+
+.kpi__icon--large i {
+  font-size: 59px;
+}
+
+.kpi__info {
+  min-width: 0;
+}
+
+.kpi__info-subtitle {
+  margin-top: 8px;
 }
 
 .kpi--plain {
@@ -104,24 +184,29 @@
   font-size: 14px;
 }
 
-.kpi--themed {
-  position: relative;
-}
-
 .kpi__percentage {
   font-size: 14px;
-  font-weight: 500;
   white-space: nowrap;
 }
 
-/* v1 NormalLayout: the comparison as a pill at the top right. */
+/* v1 `.percentage`: the comparison as a pill. */
 .kpi__percentage--pill {
-  position: absolute;
-  top: 45.5px;
-  right: 24px;
-  padding: 2px 8px;
+  width: fit-content;
+  padding: 3px 19px;
   border: 1px solid currentColor;
-  border-radius: 12px;
+  border-radius: 30px;
+}
+
+/* v1 `.kpi-widget--percentage .percentage`: at the card's top right, 28px and 11px in from its padding. */
+.kpi__percentage--corner {
+  position: absolute;
+  top: 28px;
+  right: 11px;
+}
+
+/* v1 `.trend-line-kpi-widget--percentage`. */
+.kpi__percentage--under {
+  margin-top: 44px;
 }
 
 .kpi__trend {

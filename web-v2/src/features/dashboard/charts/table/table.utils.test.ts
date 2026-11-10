@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import responses from '@/core/query/queryResponses.fixture.json';
 import { visualizationResponseFromJson, type JsonTableResponse, type TableHeader } from '@/core/query/VisualizationResponse';
 import type { VizOptions } from '@/core/query/vizOptions';
-import { headerColumnOf, tableCellText, tableNumberFormat, toColumns, toRows, toTableSort } from './table.utils';
+import { hasPages, headerColumnOf, tableCellText, tableNumberFormat, toColumns, toRows, toTableSort } from './table.utils';
 
 const response = visualizationResponseFromJson(responses.table_chart_setting) as JsonTableResponse;
 
@@ -124,5 +124,16 @@ describe('headerColumnOf', () => {
 
   it('copes with a setting without columns', () => {
     expect(headerColumnOf({})(header('0', 'region'))).toEqual({ name: 'region', column: {} });
+  });
+});
+
+describe('hasPages', () => {
+  it('is false when every row of a short table is shown', () => {
+    expect(hasPages({ total: 2, records: [{}, {}] })).toBe(false);
+  });
+
+  it('is true for more rows than shown, or more than 20', () => {
+    expect(hasPages({ total: 5, records: [{}, {}] })).toBe(true);
+    expect(hasPages({ total: 21, records: Array.from({ length: 21 }, () => ({})) })).toBe(true);
   });
 });

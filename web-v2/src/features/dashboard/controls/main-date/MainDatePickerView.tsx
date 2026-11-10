@@ -20,8 +20,11 @@ export function MainDatePickerView({ label, open, onOpenChange, children }: Main
       trigger="click"
       placement="bottom"
       arrow={false}
+      // v1: 9px under the trigger.
+      align={{ offset: [0, 9] }}
       content={children}
-      classNames={{ root: 'dashboard-popover' }}
+      // Light in every theme: v1 rendered it outside the themed `#app`.
+      classNames={{ root: 'dashboard-popover filter-popover-area-default-style' }}
       getPopupContainer={inDashboardPage}
       destroyOnHidden
     >

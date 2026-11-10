@@ -4,13 +4,12 @@ import { App } from 'antd';
 import { useDi } from '@/app/di/DiContext';
 import type { EtlJob } from '@/core/data-cook/EtlJob';
 import { EtlService } from '@/core/data-cook/EtlService';
-import { SchemaService } from '@/core/schema/SchemaService';
 import type { TreeTable } from '@/shared/database-tree/databaseTree.utils';
 import { toErrorMessage } from '@/shared/http/errorMessage';
-import { databasesQueryOptions } from '@/shared/schema/schemaQueries';
-import { dataCookKeys } from '../../dataCookQueries';
+import { etlsChanged } from '../../dataCookQueries';
 import { alreadySourceText, findSource, newSourceOperator, type EtlDraft } from '../draft/etlDraft.utils';
 import type { EtlEditorDispatch } from '../draft/useEtlEditorState';
+import { useLoadSource } from './useLoadSource';
 
 export interface AddSourceDialog {
   readonly isOpen: boolean;
@@ -27,25 +26,22 @@ export interface AddSourceDialog {
  */
 export function useAddSource(draft: EtlDraft, dispatch: EtlEditorDispatch, onCreated: (etl: EtlJob) => void): AddSourceDialog {
   const service = useDi(EtlService);
-  const schema = useDi(SchemaService);
+  const loadSource = useLoadSource();
   const queryClient = useQueryClient();
   const { message } = App.useApp();
   const [isOpen, setOpen] = useState(false);
 
   const add = useMutation({
     mutationFn: async (table: TreeTable) => {
-      const [json, databases] = await Promise.all([
-        service.getSourceTable(table.dbName, table.name),
-        queryClient.fetchQuery(databasesQueryOptions(schema))
-      ]);
+      const { json, dbDisplayName } = await loadSource(table);
+      // Created once the table is read, so a table that can't be read leaves no empty ETL.
       const created = draft.etl.id === 0 ? await service.create(draft.displayName) : undefined;
-      const dbDisplayName = databases.find(database => database.name === table.dbName)?.displayName || table.dbName;
       return { json, dbDisplayName, created };
     },
     onSuccess: ({ json, dbDisplayName, created }) => {
       if (created) {
         dispatch({ type: 'created', etl: created });
-        void queryClient.invalidateQueries({ queryKey: dataCookKeys.all });
+        void etlsChanged(queryClient);
         onCreated(created);
       }
       dispatch({ type: 'addSource', operator: newSourceOperator(json, dbDisplayName, new Set(draft.graph.operators.keys())) });

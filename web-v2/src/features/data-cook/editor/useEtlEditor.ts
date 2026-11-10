@@ -8,12 +8,15 @@ import { etlEditorPath, isEtlEditorPath } from '../dataCook.utils';
 import { useEtlCanvas } from './canvas/useEtlCanvas';
 import { useNodeMenu } from './canvas/useNodeMenu';
 import { useEtlEditorState } from './draft/useEtlEditorState';
+import { useOperatorDialog } from './operators/useOperatorDialog';
+import { useEditorPreview } from './preview/useEditorPreview';
+import { usePersistDialog } from './targets/usePersistDialog';
 import { useSaveEtl } from './save/useSaveEtl';
 import { useAddSource } from './source/useAddSource';
 
 /**
- * The ETL editor (v1 `ManageEtlJob` + `ManageEtlOperator`): the draft, its canvas, Add Source, Save, the renames and
- * the leave guard. `onCreated` tells the page the new ETL's id before the URL moves to it.
+ * The ETL editor (v1 `ManageEtlJob` + `ManageEtlOperator`): the draft, its canvas and preview, the operator dialogs,
+ * Add Source, Save, the renames and the leave guard. `onCreated` tells the page the new ETL's id before the URL moves to it.
  */
 export function useEtlEditor(initial: EtlJob, onCreated: (id: EtlId) => void) {
   const { draft, dirty, dispatch } = useEtlEditorState(initial);
@@ -40,20 +43,33 @@ export function useEtlEditor(initial: EtlJob, onCreated: (id: EtlId) => void) {
   );
 
   const source = useAddSource(draft, dispatch, follow);
-  const { save, isSaving } = useSaveEtl(draft, dispatch, follow);
-  const menu = useNodeMenu(draft, dispatch);
-  const canvas = useEtlCanvas(draft, dispatch, menu.onMenu);
+  const saving = useSaveEtl(dispatch, follow);
+  const [isSaveOpen, setSaveOpen] = useState(false);
+  const preview = useEditorPreview(draft);
+  const operator = useOperatorDialog(draft, dispatch, preview.tables, preview.show);
+  const persist = usePersistDialog(draft, dispatch);
+  const menu = useNodeMenu(draft, dispatch, { operator: operator.open, persist: persist.open });
+  const canvas = useEtlCanvas(draft, dispatch, menu.onMenu, preview.canvas);
   const [isRenaming, setRenaming] = useState(false);
 
   return {
     draft,
     canvas,
+    preview: preview.panel,
+    previews: preview.tables,
+    operator,
+    persist,
     source,
     menu,
     edit: {
       dirty,
-      saving: isSaving,
-      onSave: useCallback(() => save(), [save]),
+      // v1: Save whenever there is something to save; the dialog edits the schedule and the run modes too.
+      canSave: dirty || draft.graph.operators.size > 0,
+      saving: saving.isSaving,
+      onSave: useCallback(() => {
+        saving.reset();
+        setSaveOpen(true);
+      }, [saving]),
       // The Relationship editor's words.
       onDiscard: useCallback(
         () =>
@@ -65,6 +81,13 @@ export function useEtlEditor(initial: EtlJob, onCreated: (id: EtlId) => void) {
           }),
         [modal, dispatch]
       )
+    },
+    saveDialog: {
+      isOpen: isSaveOpen,
+      saving: saving.isSaving,
+      error: saving.error,
+      close: useCallback(() => setSaveOpen(false), []),
+      submit: useCallback((etl: EtlJob) => saving.save(etl, () => setSaveOpen(false)), [saving])
     },
     rename: {
       isOpen: isRenaming,

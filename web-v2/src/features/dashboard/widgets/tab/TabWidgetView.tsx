@@ -5,6 +5,8 @@ import type { TabWidget } from '@/core/dashboard/Widget';
 import { tabPositions } from '../../detail/dashboardDetail.utils';
 import { DashboardGrid, type NestedGridEdit } from '../../grid/DashboardGrid';
 import { NESTED_GRID_MARGIN } from '../../grid/dashboardGrid.utils';
+import { EmptyNestedView } from '../EmptyNestedView';
+import { menuAction } from '../menu/menuAction.utils';
 import { TabNavView, type TabMenus } from './TabNavView';
 import { openTabIndex, tabHeaderCssVars, type TabHeaderStyle } from './tabWidget.utils';
 import './TabWidget.css';
@@ -33,9 +35,9 @@ export function TabWidgetView({ widget, dashboard, mobile, renderWidget, edit, a
       <TabNavView tabs={widget.tabItems} active={open} onActiveChange={onActiveChange} menus={edit.menus} />
       <div className="tab-widget__body" role="tabpanel" aria-label={tab?.name}>
         {!tab ? (
-          <div className="tab-widget__empty">There are no open tabs</div>
+          <EmptyNestedView>There are no open tabs</EmptyNestedView>
         ) : tab.widgetIds.length === 0 ? (
-          <div className="tab-widget__empty">Your tab is empty</div>
+          <EmptyNestedView onAdd={edit.menus && menuAction(edit.menus.tab(open), 'add-widgets')}>Your tab is empty</EmptyNestedView>
         ) : (
           <div className="tab-widget__grid">
             <DashboardGrid

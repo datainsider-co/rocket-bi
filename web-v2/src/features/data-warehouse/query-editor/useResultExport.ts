@@ -4,7 +4,8 @@ import { useDi } from '@/app/di/DiContext';
 import { QueryService, type ExportType } from '@/core/query/QueryService';
 import { saveBlob } from '@/shared/download/saveBlob';
 import { toErrorMessage } from '@/shared/http/errorMessage';
-import { EXPORT_FILE_NAME, exportRequest, type QueryRun } from './queryEditor.utils';
+import type { QueryRun } from '@/shared/query-result/queryResult.utils';
+import { EXPORT_FILE_NAME, exportRequest } from './queryEditor.utils';
 
 /** Download CSV / Excel (v1 `QueryComponent.handleExport`): every row of the last run, with its parameter values. */
 export function useResultExport(run: QueryRun | undefined): (type: ExportType) => Promise<void> {

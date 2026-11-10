@@ -1,15 +1,164 @@
-/* v1 FilterBar.vue / InternalFilterPanel.scss: chips on the theme's filter color, faded while off. */
+/* v1 FilterBar.vue, InternalFilterPanel.scss and ChipButton.vue: the filters under the dashboard header's bar. */
 
 .header-filter-bar {
-  padding: 8px 15px 0;
+  display: flex;
+  align-items: center;
+  min-height: 60px;
+  max-height: 120px;
+  overflow: hidden;
+}
+
+.header-filter-bar__title {
+  flex: none;
+  opacity: 0.8;
+  letter-spacing: 0.2px;
+}
+
+.header-filter-bar__list {
+  display: flex;
+  flex-wrap: wrap;
+  /* Each as high as its own content: one without chips is lower (v1). */
+  align-items: flex-start;
+  max-height: 120px;
+  margin-left: 12px;
+  overflow-y: auto;
 }
 
 .header-filter {
+  display: flex;
   max-width: 100%;
+  margin: 6px 0 6px 12px;
+  padding: 12px 16px;
+  border-radius: 4px;
   background: var(--filter-color);
   color: var(--text-color);
 }
 
+/* v1 `viewPanelStyle`: off, only the background fades (white to 40%; the dark themes' 30% black to 12%, v1 10%). */
 .header-filter[data-enabled='false'] {
+  background: color-mix(in srgb, var(--filter-color) 40%, transparent);
+}
+
+.header-filter__display {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 20px;
+  margin-right: 16px;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+}
+
+/* v1 `.disabled`. */
+.header-filter[data-enabled='false'] .header-filter__display {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.header-filter__edit {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.header-filter__condition {
+  margin: 0 4px;
   opacity: 0.5;
+}
+
+.header-filter__empty {
+  color: var(--accent);
+}
+
+.header-filter__chip {
+  display: flex;
+  align-items: center;
+  margin: 1px 4px 0;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--accent);
+}
+
+.header-filter__chip:hover {
+  opacity: 0.9;
+}
+
+.header-filter__chip-title {
+  max-width: 250px;
+  padding: 2px 0;
+  overflow: hidden;
+  color: var(--accent-text-color);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.17px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* The +N chip has no x: v1 kept its title's right margin. */
+.header-filter__chip-title:last-child {
+  margin-right: 4px;
+}
+
+/* v1 `.btn-icon-border`. */
+.header-filter__chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-left: 4px;
+  padding: 0;
+  border: none;
+  border-radius: 24px;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.header-filter__chip-remove:hover,
+.header-filter__chip-remove:focus-visible {
+  background: var(--icon-hover-color, #d6d6d6);
+  color: #fff;
+}
+
+.header-filter__eye {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-color);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.header-filter__eye > i {
+  box-sizing: content-box;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  opacity: 0.4;
+}
+
+@media (max-width: 991px) {
+  .header-filter__display {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 583px) {
+  .header-filter-bar__list {
+    max-height: 60px;
+  }
 }

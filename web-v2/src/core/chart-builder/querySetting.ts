@@ -36,10 +36,23 @@ const stacked: SettingBuilder = {
   build: configs => ({ ...series.build(configs), breakdown: firstColumn(configs, 'breakdown_optional') })
 };
 
-const pie: SettingBuilder = {
-  className: 'pie_chart_setting',
+/** A legend and a value (v1 `PieQuerySettingHandler`, and Funnel's, Pyramid's and Parliament's under their own class). */
+const legendValue = (className: string): SettingBuilder => ({
+  className,
   canBuild: configs => filled(configs, 'legend') && filled(configs, 'value'),
   build: configs => ({ legend: firstColumn(configs, 'legend'), value: firstColumn(configs, 'value') })
+});
+
+const pie = legendValue('pie_chart_setting');
+
+/**
+ * The variable pie (v1 `VariablepieQuerySettingHandler`): a generic setting, its columns being the legend, the value and
+ * the weight when there is one.
+ */
+const variablePie: SettingBuilder = {
+  className: 'generic_chart_setting',
+  canBuild: pie.canBuild,
+  build: configs => ({ columns: ['legend', 'value', 'weight'].flatMap(key => columns(configs, key).slice(0, 1)) })
 };
 
 const number: SettingBuilder = {
@@ -141,6 +154,10 @@ const BUILDERS: Readonly<Record<ChartType, SettingBuilder>> = {
   [T.Pie]: pie,
   [T.SemiPie]: pie,
   [T.Donut]: pie,
+  [T.VariablePie]: variablePie,
+  [T.Funnel]: legendValue('funnel_chart_setting'),
+  [T.Pyramid]: legendValue('pyramid_chart_setting'),
+  [T.Parliament]: legendValue('parliament_chart_setting'),
   [T.Number]: number,
   [T.Table]: table,
   [T.CollapseTable]: groupTable,

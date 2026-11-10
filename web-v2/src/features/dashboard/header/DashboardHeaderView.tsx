@@ -7,12 +7,14 @@ interface DashboardHeaderViewProps {
   onBack?: () => void;
   /** The pencil after the title, in edit mode. */
   onRename?: () => void;
+  /** The header filters, under the bar. */
+  filters?: ReactNode;
   /** The right side: main date, Reset Filters and the mode's buttons. */
   children: ReactNode;
 }
 
-/** v1 `DashboardHeader`: back chevron, the dashboard's name (with rename while editing), then the control bar. */
-export function DashboardHeaderView({ title, onBack, onRename, children }: DashboardHeaderViewProps) {
+/** v1 `DashboardHeader`: back chevron, the dashboard's name (with rename while editing), then the control bar; the header filters under them. */
+export function DashboardHeaderView({ title, onBack, onRename, filters, children }: DashboardHeaderViewProps) {
   return (
     <header className="dashboard-header">
       <div className="dashboard-header__bar">
@@ -33,6 +35,7 @@ export function DashboardHeaderView({ title, onBack, onRename, children }: Dashb
         </div>
         <div className="dashboard-header__right">{children}</div>
       </div>
+      {filters}
     </header>
   );
 }

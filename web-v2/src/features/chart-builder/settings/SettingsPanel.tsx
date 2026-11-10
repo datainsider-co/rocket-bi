@@ -9,6 +9,7 @@ import { formattingChoicesOf } from './table/formattingTabs.utils';
 import { hasCollapseTab } from './table/tableTabs.utils';
 import { FilterSettingsView } from './FilterSettingsView';
 import { NumberSettingsView } from './NumberSettingsView';
+import { ParliamentSettingsView } from './ParliamentSettingsView';
 import { PieSettingsView } from './PieSettingsView';
 import { SeriesSettingsView } from './SeriesSettingsView';
 import { StackedSettingsView } from './StackedSettingsView';
@@ -46,6 +47,8 @@ export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPa
       return <StackedSettingsView {...tab} response={seriesResponse} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
     case 'pie':
       return <PieSettingsView {...tab} themeColors={themeColors} />;
+    case 'parliament':
+      return <ParliamentSettingsView {...tab} themeColors={themeColors} />;
     case 'number':
       return <NumberSettingsView {...tab} dateFields={dateFields} />;
     case 'table':

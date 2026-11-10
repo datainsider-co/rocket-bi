@@ -3,6 +3,7 @@ import { Popover } from 'antd';
 import { inDashboardPage } from '../theme/popupContainer';
 import { HeaderButton } from './HeaderButton';
 import type { OptionItem } from './headerOptions.utils';
+import { RelationshipIcon } from './RelationshipIcon';
 
 interface DashboardOptionsMenuViewProps {
   items: readonly OptionItem[];
@@ -25,7 +26,8 @@ export function DashboardOptionsMenuView({ items }: DashboardOptionsMenuViewProp
             item.onSelect();
           }}
         >
-          <i className={item.icon} aria-hidden />
+          {/* v1 drew this one as an SVG; the font's glyph of the same name is another drawing. */}
+          {item.key === 'relationship' ? <RelationshipIcon /> : <i className={item.icon} aria-hidden />}
           <span>{item.label}</span>
         </button>
       ))}

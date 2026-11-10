@@ -1,8 +1,13 @@
-/* Overrides for react-grid-layout/css/styles.css. */
+/* Overrides for react-grid-layout/css/styles.css, after v1 `themes/scss/gridstack.scss`. */
 
+/* Not clipped (v1 `.grid-stack-item-content`): the card's shadow and outline show around it; its body clips itself. */
 .dashboard-grid__item {
   box-sizing: border-box;
-  overflow: hidden;
+}
+
+/* v1 `.grid-stack-animate`: 0.3s; the library stops it on the widget being moved. */
+.dashboard-grid > .react-grid-item {
+  transition-duration: 0.3s;
 }
 
 .dashboard-grid--editable > .dashboard-grid__item {
@@ -15,16 +20,21 @@
   z-index: var(--dashboard-grid-top-z) !important;
 }
 
-.dashboard-grid > .react-grid-placeholder {
-  z-index: var(--dashboard-grid-top-z);
-  background: var(--color-brand);
-  opacity: 0.15;
-  border-radius: 4px;
+.dashboard-grid > .react-grid-item.react-draggable-dragging > :not(.react-resizable-handle),
+.dashboard-grid > .react-grid-item.resizing > :not(.react-resizable-handle) {
+  opacity: 0.8;
 }
 
-/* gridstack (v1) without `alwaysShowResizeHandle`: a widget's resize handles show while hovering it. */
-@media (hover: hover) {
-  .dashboard-grid > .dashboard-grid__item:not(:hover, .resizing) > .react-resizable-handle {
-    opacity: 0;
-  }
+.dashboard-grid > .react-grid-placeholder {
+  z-index: var(--dashboard-grid-top-z);
+  box-sizing: border-box;
+  border: 1px dashed lightgray;
+  background: none;
+  opacity: 1;
+  transition-duration: 0s;
+}
+
+/* v1 hid gridstack's corner glyphs: only the cursor tells where a widget resizes. */
+.dashboard-grid > .dashboard-grid__item > .react-resizable-handle {
+  opacity: 0;
 }

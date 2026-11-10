@@ -5,7 +5,7 @@ import { useShareLink } from './link/useShareLink';
 import { useSharePassword } from './link/useSharePassword';
 import type { SharePeopleSectionProps } from './people/SharePeopleSection';
 import { useSharePeople } from './people/useSharePeople';
-import { useUserSearch } from './people/useUserSearch';
+import { useUserSearch } from '@/shared/user/useUserSearch';
 import type { ShareOptions, ShareTarget } from './share.utils';
 import { embedCode, levelOptions, peopleResourceOf, shareLink, sharedSummary } from './share.utils';
 import { useApplyShare } from './useApplyShare';

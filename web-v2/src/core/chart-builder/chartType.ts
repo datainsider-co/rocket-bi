@@ -26,6 +26,12 @@ export const ChartType = {
   Pie: 'pie',
   SemiPie: 'semi_pie',
   Donut: 'Donut',
+  /** A pie whose slices also differ in depth, by an optional Weight (v1 `VariablepieChartOption`). */
+  VariablePie: 'variablepie',
+  Funnel: 'funnel',
+  Pyramid: 'pyramid',
+  /** One dot per unit of each value, in a half circle by default (Highcharts item series). v1 spells it capitalised too. */
+  Parliament: 'Parliament',
   TabFilter: 'tab_filter',
   SingleChoice: 'single_choice',
   MultiChoice: 'multi_choice',

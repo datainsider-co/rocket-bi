@@ -1,3 +1,5 @@
+import type { EtlOperator } from '@/core/data-cook/EtlOperator';
+
 /** Menus of the canvas boxes (v1 `TableContextMenu`, `OperatorContextMenu` and the saved box menus). */
 
 export interface EtlMenuItem {
@@ -21,10 +23,11 @@ export const EtlMenuKey = {
   Remove: 'remove'
 } as const;
 
-/** Operators and destinations open with the steps that build their dialogs (DC7 to DC9). */
+/** Save To Database and Send To Email come after the MVP (`DATA_COOK.md`). */
 export const NOT_SUPPORTED_YET = 'Not supported yet';
 
 const later = (key: string, label: string): EtlMenuItem => ({ key, label, disabled: true, title: NOT_SUPPORTED_YET });
+const item = (key: string, label: string): EtlMenuItem => ({ key, label });
 const REMOVE: EtlMenuItem = { key: EtlMenuKey.Remove, label: 'Remove', danger: true };
 
 /**
@@ -33,23 +36,28 @@ const REMOVE: EtlMenuItem = { key: EtlMenuKey.Remove, label: 'Remove', danger: t
  */
 export function tableMenu(isSource: boolean): EtlMenuItem[] {
   return [
-    later(EtlMenuKey.Join, 'Join Table'),
-    later(EtlMenuKey.ManageFields, 'Manage Fields'),
-    later(EtlMenuKey.Sql, 'SQL Query'),
-    later(EtlMenuKey.Pivot, 'Pivot Table'),
-    later(EtlMenuKey.Transform, 'Transform Table'),
-    later(EtlMenuKey.SaveToDataWarehouse, 'Save To Data Warehouse'),
+    item(EtlMenuKey.Join, 'Join Table'),
+    item(EtlMenuKey.ManageFields, 'Manage Fields'),
+    item(EtlMenuKey.Sql, 'SQL Query'),
+    item(EtlMenuKey.Pivot, 'Pivot Table'),
+    item(EtlMenuKey.Transform, 'Transform Table'),
+    item(EtlMenuKey.SaveToDataWarehouse, 'Save To Data Warehouse'),
     ...(isSource ? [] : [{ key: EtlMenuKey.Rename, label: 'Edit Display Name' }]),
     REMOVE
   ];
 }
 
-/** An operator's shape: Edit opens its dialog, Remove takes it and its table away. */
-export function operatorMenu(): EtlMenuItem[] {
-  return [later(EtlMenuKey.Edit, 'Edit'), REMOVE];
+/** The operators whose dialog v2 has (DC7, DC8). */
+const EDITABLE: ReadonlySet<EtlOperator['kind']> = new Set(['sql', 'join', 'manageFields', 'transform', 'pivot']);
+
+/** An operator's shape: Edit opens its dialog, Remove takes it and its table away. Python Query stays read-only. */
+export function operatorMenu(kind: EtlOperator['kind']): EtlMenuItem[] {
+  if (EDITABLE.has(kind)) return [item(EtlMenuKey.Edit, 'Edit'), REMOVE];
+  const title = kind === 'python' || kind === 'unsupported' ? 'Not supported' : NOT_SUPPORTED_YET;
+  return [{ key: EtlMenuKey.Edit, label: 'Edit', disabled: true, title }, REMOVE];
 }
 
-/** A Save To Data Warehouse, Save To Database or email box. */
-export function boxMenu(): EtlMenuItem[] {
-  return [later(EtlMenuKey.Edit, 'Edit'), REMOVE];
+/** A Save To Data Warehouse, Save To Database or email box. Only Save To Data Warehouse has a dialog (DC9). */
+export function boxMenu(type: 'persist' | 'thirdParty' | 'email'): EtlMenuItem[] {
+  return [type === 'persist' ? item(EtlMenuKey.Edit, 'Edit') : later(EtlMenuKey.Edit, 'Edit'), REMOVE];
 }

@@ -4,7 +4,8 @@ import {
   EtlOperatorClassName,
   etlOperatorFromJson,
   type EtlOperator,
-  type GetDataOperator
+  type GetDataOperator,
+  type PersistConfiguration
 } from '@/core/data-cook/EtlOperator';
 import { etlGraphFromLeaves, leavesFromGraph, uniqueTableName, type EtlGraph } from '@/core/data-cook/etlGraph';
 import {
@@ -12,8 +13,10 @@ import {
   positionKey,
   readPosition,
   removePosition,
+  removeRenderOptions,
   thirdPartyPositionKey,
-  writePosition
+  writePosition,
+  writeRenderOptions
 } from '@/core/data-cook/etlExtraData';
 import { asString, type JsonObject } from '@/core/json/json';
 import { layoutEtl } from '../graph/etlLayout.utils';
@@ -95,11 +98,11 @@ export function downstreamNames(graph: EtlGraph, tblName: string): string[] {
   return [...found].filter(name => graph.operators.has(name));
 }
 
-/** Every box drawn for `tblName`, so a removed table leaves no position behind. */
+/** Every box drawn for `tblName` and its builder state, so a removed table leaves nothing behind (v1 `clearOperatorData`). */
 function withoutPositions(extraData: JsonObject, tblName: string, thirdParties: number): JsonObject {
   const key = positionKey(tblName);
   const groups = [PositionGroup.Table, PositionGroup.Operator, PositionGroup.SavedTable, PositionGroup.SavedEmail];
-  let result = groups.reduce((data, group) => removePosition(data, group, key), extraData);
+  let result = groups.reduce((data, group) => removePosition(data, group, key), removeRenderOptions(extraData, tblName));
   for (let index = 0; index < thirdParties; index += 1) {
     result = removePosition(result, PositionGroup.SavedThirdParty, thirdPartyPositionKey(tblName, index));
   }
@@ -127,9 +130,24 @@ function updateOperator(draft: EtlDraft, tblName: string, update: (operator: Etl
   return { ...draft, graph: withOperators(draft.graph, new Map(draft.graph.operators).set(tblName, update(operator))) };
 }
 
+/** The ChartBuilder state of a Transform or Pivot, kept in `extra_data` as v1 did; none leaves what is there. */
+export function withRenderOptions(draft: EtlDraft, tblName: string, renderOptions: JsonObject | undefined): EtlDraft {
+  return renderOptions ? { ...draft, extraData: writeRenderOptions(draft.extraData, tblName, renderOptions) } : draft;
+}
+
+/** An edited operator in place of the one writing the same table; what it reads stays (v1 `handleUpdateOperator`). */
+export function replaceOperator(draft: EtlDraft, operator: EtlOperator): EtlDraft {
+  return updateOperator(draft, operator.destTable.tblName, () => operator);
+}
+
 /** v1 "Edit Display Name": only the display name changes; the table keeps its name. */
 export function renameTable(draft: EtlDraft, tblName: string, displayName: string): EtlDraft {
   return updateOperator(draft, tblName, operator => ({ ...operator, destTable: { ...operator.destTable, tblDisplayName: displayName } }));
+}
+
+/** Save To Data Warehouse of a table, added or edited (v1 `handleSaveToDataWareHouse`). */
+export function setPersist(draft: EtlDraft, tblName: string, persist: PersistConfiguration): EtlDraft {
+  return updateOperator(draft, tblName, operator => (operator.kind === 'sendEmail' ? operator : { ...operator, persist }));
 }
 
 /** Remove of a Save To Data Warehouse box. */

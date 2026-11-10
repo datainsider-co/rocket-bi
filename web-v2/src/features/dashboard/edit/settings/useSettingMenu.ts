@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { App } from 'antd';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
+import { useToast } from '@/shared/toast/useToast';
 import type { EditDialog } from '../editDialogs';
 import type { DashboardEditor } from '../useDashboardEditor';
 import { autoRefreshOf, errorMessage, settingDraft, withAutoRefresh } from './dashboardSettings.utils';
@@ -11,7 +11,7 @@ import { settingMenuItems, type SettingMenuItem } from './settingMenu.utils';
  * an auto refresh interval is saved as soon as it is picked (v1 `selectRefreshInterval`).
  */
 export function useSettingMenu(dashboard: Dashboard | undefined, editor: DashboardEditor, openDialog: (dialog: EditDialog) => void): SettingMenuItem[] {
-  const { message } = App.useApp();
+  const toast = useToast();
   return useMemo(() => {
     if (!dashboard) return [];
     const draft = settingDraft(dashboard);
@@ -20,8 +20,8 @@ export function useSettingMenu(dashboard: Dashboard | undefined, editor: Dashboa
       onEditWidgets: () => openDialog({ kind: 'editWidgets' }),
       onThemes: () => openDialog({ kind: 'themes' }),
       onAutoRefresh: intervalMs => {
-        editor.saveSetting(withAutoRefresh(draft, intervalMs)).catch((error: unknown) => void message.error(errorMessage(error)));
+        editor.saveSetting(withAutoRefresh(draft, intervalMs)).catch((error: unknown) => toast.error(errorMessage(error)));
       }
     });
-  }, [dashboard, editor, openDialog, message]);
+  }, [dashboard, editor, openDialog, toast]);
 }

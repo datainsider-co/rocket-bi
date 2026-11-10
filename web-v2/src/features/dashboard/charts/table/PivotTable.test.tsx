@@ -36,7 +36,6 @@ function renderTable(subRows?: SubRowQuery) {
         options={{} as VizOptions}
         subRows={subRows}
         paging={{ from: 0, size: 20 }}
-        loading={false}
         onPageChange={vi.fn<(paging: Paging) => void>()}
         onSortChange={onSortChange}
         numberFormat={tableNumberFormat({})}

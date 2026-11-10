@@ -15,20 +15,21 @@ import { buildChartQuery, isAffectedByFilter } from '../../controls/chartQuery.u
 import type { ControlEntry } from '../../controls/controls.utils';
 import { useDashboardPermissions } from '../../access/DashboardPermissionsContext';
 import { useDashboardControls } from '../../controls/DashboardControlsContext';
-import { canExportSetting, LOAD_MORE_DASHBOARDS_KEY, pointMenuItems, widgetMenuItems } from './chartMenus.utils';
+import { canExportSetting, chartMenuItems, LOAD_MORE_DASHBOARDS_KEY, zoomMenuItems } from './chartMenus.utils';
 import { useChartExport } from './useChartExport';
 import { useChartView } from './useChartView';
-import { useDrillFields } from './useDrillFields';
 import { useDrillThrough } from './useDrillThrough';
 
 const FIRST_PAGE: Paging = { from: 0, size: DEFAULT_PAGE_SIZE };
 const KEEP_OPEN_KEYS = [LOAD_MORE_DASHBOARDS_KEY];
 const NO_REQUESTS: readonly FilterRequestJson[] = [];
 
-/** A clicked point waiting for the viewer to pick an action. */
+type Position = { x: number; y: number };
+
+/** The chart's menu, open at a clicked point (with its value) or at a right click on the card. */
 export interface PointMenu {
-  value: string;
-  position: { x: number; y: number };
+  value?: string;
+  position: Position;
 }
 
 /**
@@ -40,6 +41,8 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
   const { controls, widgets, entryOf, setControl, headerFilters, headerRequests } = useDashboardControls();
   const [paging, setPaging] = useState<Paging>(FIRST_PAGE);
   const [pointMenu, setPointMenu] = useState<PointMenu | null>(null);
+  /** The drill down panel opened from the menu, where the menu was. */
+  const [drillPanel, setDrillPanel] = useState<PointMenu | null>(null);
   const view = useChartView(widget);
   const { canDownload } = useDashboardPermissions();
 
@@ -54,7 +57,6 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
   const { pickDateRange } = view;
   const kpi = useMemo<KpiParts>(() => ({ trend, dateRange: dateRange && { value: dateRange, onChange: pickDateRange } }), [trend, dateRange, pickDateRange]);
   const download = useChartExport(widget, dashboardId, query);
-  const drillChoices = useDrillFields(view.viewed.setting, view.drillColumn, pointMenu !== null);
   const drillThrough = useDrillThrough(view.viewed.setting, pointMenu?.value, dashboardId);
   const activeFilters = useMemo(
     () => headerFilters.filter(filter => headerRequests.some(request => request.filter_id === filter.id)),
@@ -76,33 +78,33 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
 
   const close = () => setPointMenu(null);
   const canResetDrill = view.view.drills.length > 0;
-  const pointItems = pointMenu
-    ? pointMenuItems(
+  const zoomLevel = canZoom(view.viewed.setting) ? zoomLevelOf(view.viewed.setting) : undefined;
+  const filter = isFilterViz(viz);
+  // v1 `WidgetContextMenu`: one list for a clicked point and for a right click on the card, without what does not apply.
+  const menuItems = pointMenu
+    ? chartMenuItems(
         {
           value: pointMenu.value,
-          drill: view.drillColumn ? drillChoices : undefined,
+          zoomLevel,
+          canDrill: view.drillColumn !== undefined,
           drillThrough: drillThrough.choices,
           canResetFilter: selected.length > 0,
-          canResetDrill
+          canResetDrill,
+          canExport: canDownload && canExportSetting(widget.setting, filter)
         },
         {
           useAsFilter: value => onSelect([value]),
-          drillDown: view.drillDown,
+          zoom: view.zoom,
+          openDrill: () => setDrillPanel(pointMenu),
           resetFilter: () => onSelect([]),
           resetDrill: view.reset,
           drillThrough: drillThrough.drillThrough,
-          loadMoreDashboards: drillThrough.loadMore
+          loadMoreDashboards: drillThrough.loadMore,
+          download: type => void download(type)
         }
       )
     : [];
-  const widgetItems = widgetMenuItems(
-    {
-      zoomLevel: canZoom(view.viewed.setting) ? zoomLevelOf(view.viewed.setting) : undefined,
-      canResetDrill,
-      canExport: canDownload && canExportSetting(widget.setting, isFilterViz(viz))
-    },
-    { zoom: view.zoom, resetDrill: view.reset, download: type => void download(type) }
-  );
+  const options = viz.options as { enableIconZoom?: boolean; isEnableDrilldown?: boolean };
 
   return {
     viz,
@@ -112,15 +114,32 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
     kpi,
     entry,
     setEntry,
-    table: { paging, loading: data.isFetching, onPageChange: setPaging, sort: view.view.sort, onSortChange, subRows },
+    table: { paging, onPageChange: setPaging, sort: view.view.sort, onSortChange, subRows },
     crossFilter: { selected, onSelect, onPointMenu },
     drillPath: { steps: view.view.drills.map(drill => drill.step), onBack: view.back },
-    pointMenu: { position: pointMenu?.position, items: pointItems, keepOpenKeys: KEEP_OPEN_KEYS, onClose: close },
+    pointMenu: { position: pointMenu?.position, items: menuItems, keepOpenKeys: KEEP_OPEN_KEYS, onClose: close },
+    /** A right click on the card, off any point: the same menu without a value. Filters have none. */
+    onCardMenu: filter ? undefined : (position: Position) => setPointMenu({ position }),
+    /** The drill down: what its panel reads and does, and where the panel is when the menu opened it. */
+    drill: {
+      column: view.drillColumn,
+      setting: view.viewed.setting,
+      response: data.data,
+      steps: view.view.drills.map(drill => drill.step),
+      back: view.back,
+      reset: view.reset,
+      drillDown: view.drillDown,
+      panel: drillPanel,
+      closePanel: () => setDrillPanel(null),
+      /** v1 `enableDrilldownIcon`: the card's drilldown button, when the chart's options turn drill down on. */
+      button: options.isEnableDrilldown === true && view.drillColumn !== undefined
+    },
+    /** v1 `ActionWidgetMore.canZoom`: the card's zoom button and its date functions, when the options show it. */
+    zoomItems: options.enableIconZoom === true && zoomLevel ? zoomMenuItems(zoomLevel, view.zoom) : undefined,
     /** The header's filters as this chart sees them (v1 `ActionWidgetFilter`); none when the header has none. */
     appliedFilters: { filters: activeFilters, on: filtersOn, onToggle: view.toggleFilters },
     /** What the chart's inner filter queries with besides its own setting. */
-    innerFilterRequests: appliedRequests,
-    widgetItems
+    innerFilterRequests: appliedRequests
   };
 }
 

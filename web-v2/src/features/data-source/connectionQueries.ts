@@ -1,4 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
+import type { Connection } from '@/core/connection/Connection';
 import type { ConnectionService } from '@/core/connection/ConnectionService';
 
 /** Everything under `connection` is invalidated together once the connection changes. */
@@ -15,8 +16,16 @@ export function connectionExistsQueryOptions(service: ConnectionService) {
   return queryOptions({ queryKey: connectionKeys.exists, queryFn: () => service.exists() });
 }
 
+/**
+ * The saved connection; `undefined` for a type v2 can't read. Cached as `null`, since a query can't hold `undefined`
+ * (it would fail as an error).
+ */
 export function connectionQueryOptions(service: ConnectionService) {
-  return queryOptions({ queryKey: connectionKeys.detail, queryFn: () => service.get() });
+  return queryOptions({
+    queryKey: connectionKeys.detail,
+    queryFn: async () => (await service.get()) ?? null,
+    select: (connection): Connection | undefined => connection ?? undefined
+  });
 }
 
 /**

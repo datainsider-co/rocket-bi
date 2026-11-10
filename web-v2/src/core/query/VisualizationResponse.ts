@@ -68,12 +68,19 @@ export interface MinMaxValue {
   readonly max: number;
 }
 
+/** Rows of plain values, one per column of a generic setting (`generic_chart_response`): the variable pie. */
+export interface GenericResponse {
+  readonly kind: 'generic';
+  readonly headers: readonly string[];
+  readonly records: readonly (readonly unknown[])[];
+}
+
 export interface UnsupportedResponse {
   readonly kind: 'unsupported';
   readonly className: string;
 }
 
-export type VisualizationResponse = SeriesOneResponse | SeriesTwoResponse | TableResponse | JsonTableResponse | UnsupportedResponse;
+export type VisualizationResponse = SeriesOneResponse | SeriesTwoResponse | TableResponse | JsonTableResponse | GenericResponse | UnsupportedResponse;
 
 function toNullableNumber(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
@@ -166,7 +173,25 @@ export function visualizationResponseFromJson(value: unknown): VisualizationResp
         total: asNumber(json['total'], asArray(json['records']).length),
         ...minMaxValuesOf(json['min_max_values'])
       };
+    case 'generic_chart_response':
+      return { kind: 'generic', headers: stringList(json['headers']), records: asArray(json['records']).map(asArray) };
     default:
       return { kind: 'unsupported', className };
+  }
+}
+
+/** Whether a response has anything to draw (v1 `VisualizationResponse.hasData`); a chart without draws its empty state. */
+export function responseHasData(response: VisualizationResponse): boolean {
+  switch (response.kind) {
+    case 'series_one':
+    case 'series_two':
+      return response.series.some(series => series.data.length > 0);
+    case 'table':
+    case 'json_table':
+      return response.total !== 0;
+    case 'generic':
+      return response.records.length > 0;
+    case 'unsupported':
+      return true;
   }
 }

@@ -72,9 +72,13 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
 - **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 to CB6, CB7a, CB7b, CB7c and CB8 done, CB7d next) for the chart types
   v2 already renders; the other chart types (scatter, area range, ...) follow, each with its builder handler. ChartBuilder
   plugs into edit mode as the `ChartBuilderHost` the dashboard route gives `DashboardPage`.
-- **Data cook** (Phase 7, [`DATA_COOK.md`](DATA_COOK.md)): DC0 to DC5 and DC6a done (real payloads, `core/data-cook`,
-  routes and layout at v1's paths, the ETL listings, ETL History, Share, the editor's canvas); preview (DC6b) comes next. **Blocked by the server** on MySQL: SQL operators need
-  database-qualified tables, joins fail on duplicate column names (DC0).
+- **Data cook** (Phase 7, [`DATA_COOK.md`](DATA_COOK.md)): the MVP is done, DC0 to DC9 (real payloads,
+  `core/data-cook`, routes and layout at v1's paths, the ETL listings, ETL History, Share, the editor's canvas, its
+  preview, SQL Query, Join, Manage Fields, Transform and Pivot with an embedded ChartBuilder, Save To Data Warehouse and
+  the Save dialog). Save To Database, Send To Email and Python Query come after the MVP. **Blocked by the server** on
+  MySQL: SQL operators need database-qualified tables, joins fail on duplicate column names (DC0).
+- **Organization settings** (Phase 6, [`ORGANIZATION_SETTINGS.md`](ORGANIZATION_SETTINGS.md)): DataSource Config and
+  User Managements done (OS0 to OS5d); Overview, SSO, API keys, user activity and billing are not in scope yet.
 - **Data ingestion** (Phase 8, [`DATA_INGESTION.md`](DATA_INGESTION.md)): the MVP is done, DI0 to DI8 (listings, source and job actions, the JDBC source form, the job form and CSV import). The other source types come after the MVP.
 - **Share links (`?token=`)**: the Share dialog (M7b) creates directory tokens, which the server accepts; opening
   them without a session still needs client work, see Phase 3 M5b. **Blocked by the server**: MySQL `like` and
@@ -123,7 +127,7 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 |---|---|---|---|
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
 | Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | Done (plan below): M0 to M6; share token blocked by the server |
-| Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI (with comparison and trend line, CB7a), flat table (styled by its options and per-column formatting, CB7b1, CB7b2) with server sort (M2, M4a), collapse table (rows expanding into their groups, CB7b3), pivot table (columns across, rows expanding into the next row group, total row, CB7b4), stacked column / bar and circular bar (series in the server's stacks or the ones picked in settings, CB7c), lollipop (CB7c); drilldown, date function and export work on them (M4a). Next: scatter, bubble, area / column range, the rest |
+| Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI (with comparison and trend line, CB7a), flat table (styled by its options and per-column formatting, CB7b1, CB7b2) with server sort (M2, M4a), collapse table (rows expanding into their groups, CB7b3), pivot table (columns across, rows expanding into the next row group, total row, CB7b4), stacked column / bar and circular bar (series in the server's stacks or the ones picked in settings, CB7c), lollipop (CB7c), funnel, pyramid, variable pie and parliament (CB7e1); drilldown, date function and export work on them (M4a). Next: scatter, bubble, area / column range, the rest |
 | Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Title style, choice colours and v1's sizes done in M7e. Left: the filter panel's vertical header, the date select's min/max dates as calendar bounds |
 | Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Done (M4a, M4b). Left: maps |
 | Embedded dashboard | route `/embedded/dashboard/:name` | – | Done (M5b) with the session cookie; with a share token once the server allows it |
@@ -375,7 +379,7 @@ Suggested order: the common series charts (Column/Bar/Line/Area/Pie) and Kpi, th
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Dashboard edit mode (layout, add/remove/resize widgets, settings) | `screens/dashboard-detail` | (see above) | Done (M6); adding or configuring a chart and its inner filter with ChartBuilder (CB5) |
-| Chart builder | `screens/chart-builder`, `screens/dashboard-detail/components/data-builder-modal` | 53 | In progress: plan, decisions and steps (CB0 to CB8) in [`CHART_BUILDER.md`](CHART_BUILDER.md); CB0 to CB6, CB7a, CB7b1 to CB7b4, CB7c and CB8 done |
+| Chart builder | `screens/chart-builder`, `screens/dashboard-detail/components/data-builder-modal` | 53 | In progress: plan, decisions and steps (CB0 to CB8) in [`CHART_BUILDER.md`](CHART_BUILDER.md); CB0 to CB6, CB7a, CB7b1 to CB7b4, CB7c, CB7e1 (Funnel, Pyramid, Variable Pie, Parliament) and CB8 done |
 | Query/Viz setting resolvers and handlers | `src/shared/resolver`, `src/shared/module/ChartBuilderModule.ts`, `web/docs/CREATE_CHART_FLOW.md` | – | Done for the chart types in scope (CB1, `core/chart-builder`) |
 | Chart settings (Settings tab) | `src/shared/settings` | 140 | Done with ChartBuilder (CB6) for the chart types it builds; the table's style tabs, field and conditional formatting done (CB7b1, CB7b2), the collapse table's (CB7b3) and the pivot table's, with its Total tab (CB7b4); the stacked charts' (series names, Stack tab) and the lollipop's (series tabs) (CB7c) |
 
@@ -411,12 +415,15 @@ Plan, decisions and steps (DW0 to DW12) in [`DATA_WAREHOUSE.md`](DATA_WAREHOUSE.
 
 ### Phase 6: Organization settings
 
+Plan, decisions and steps (OS0 to OS5d) in [`ORGANIZATION_SETTINGS.md`](ORGANIZATION_SETTINGS.md). In scope for now:
+DataSource Config and User Managements only; both done (OS0 to OS5d).
+
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| Overview, user management, user detail | `screens/organization-settings`, `screens/user-management`, `di-core/admin` | 86 | Not started |
+| Overview, user management, user detail | `screens/organization-settings`, `screens/user-management`, `di-core/admin` | 86 | User management done (OS5a to OS5d): `features/organization` (layout with a sidebar by permission, user listing, New User, Login Method, user detail with profile, role, attributes, privileges, suspend, reset password, delete with transfer), `core/admin`. Left: Overview |
 | Token management, SSO | `token-management`, `sso-config` | – | Not started |
 | User activity log, system monitor (query/user usage) | `user-activity-log`, `system-monitor` | – | Not started |
-| ClickHouse / connector config | `connector-config`, `di-core/connector-config`. Done: first-run setup (`features/data-source/setup`, mounted in `AppLayout` instead of v1's redirect to the settings page): permission check, pick type → form with test connection, SSH tunnel and properties → schema fetch progress. ClickHouse and MySQL only (`core/connection`). Left: the DataSource settings page (listing, Update Schema, Refresh, Change/Edit; on hold), BigQuery/PostgreSQL/Redshift/Vertica | In progress |
+| ClickHouse / connector config | `connector-config`, `di-core/connector-config`. Done: first-run setup (`features/data-source/setup`, mounted in `AppLayout` instead of v1's redirect to the settings page): permission check, pick type → form with test connection, SSH tunnel and properties → schema fetch progress. The DataSource Config page (`features/data-source/config`, OS3) and all six server types: ClickHouse, MySQL, PostgreSQL, Redshift, Vertica, BigQuery (`core/connection`, OS4) | Done |
 | Plan and billing | `plan-and-billing`, `plan-detail`, `di-core/billing` | – | Not started |
 
 ### Phase 7: Data cook (ETL)
@@ -425,7 +432,7 @@ Plan, decisions and steps (DC0 to DC9) in [`DATA_COOK.md`](DATA_COOK.md).
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| My ETL, shared, history, trash, ETL editor | `screens/data-cook` (`/data-warehouse/data-cook`), `di-core/data-cook` | 70 | In progress: DC0 to DC6a done (payloads, `core/data-cook`, routes and layout, listings, history, share, editor canvas); DC6b next |
+| My ETL, shared, history, trash, ETL editor | `screens/data-cook` (`/data-warehouse/data-cook`), `di-core/data-cook` | 70 | MVP done: DC0 to DC9 (listings, history, share, editor with preview, SQL Query, Join, Manage Fields, Transform, Pivot, Save To Data Warehouse, Save dialog); Save To Database, Send To Email, Python Query after the MVP |
 
 ### Phase 8: Data ingestion
 

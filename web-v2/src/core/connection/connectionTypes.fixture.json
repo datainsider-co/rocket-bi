@@ -1,0 +1,121 @@
+{
+  "_comment": "OS0 (2026-11-04): connection/test for the four types v2 lacks, against the local docker stack (no PostgreSQL, Redshift, Vertica or BigQuery there, so only the request shape and the error are real). Passwords are <password>.",
+  "connection": {
+    "method": "GET",
+    "path": "connection",
+    "status": 200,
+    "response": {
+      "class_name": "mysql_connection",
+      "org_id": 0,
+      "host": "rocket-bi-mysql",
+      "port": 3306,
+      "username": "root",
+      "password": "<password>",
+      "properties": {},
+      "created_at": 1793022887760,
+      "updated_at": 1793022887760
+    }
+  },
+  "testBigQuery": {
+    "method": "POST",
+    "path": "connection/test",
+    "status": 500,
+    "request": {
+      "source": {
+        "class_name": "bigquery_connection",
+        "project_id": "p",
+        "credentials": "{}",
+        "location": "US"
+      }
+    },
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "unable to connect to bigquery, cause Error reading credentials from stream, 'type' field not specified."
+    }
+  },
+  "testMySqlOk": {
+    "method": "POST",
+    "path": "connection/test",
+    "status": 200,
+    "request": {
+      "source": {
+        "class_name": "mysql_connection",
+        "host": "rocket-bi-mysql",
+        "port": 3306,
+        "username": "root",
+        "password": "<password>",
+        "properties": {}
+      }
+    },
+    "response": {
+      "success": true
+    }
+  },
+  "testPostgreSql": {
+    "method": "POST",
+    "path": "connection/test",
+    "status": 500,
+    "request": {
+      "source": {
+        "class_name": "postgresql_connection",
+        "host": "rocket-bi-mysql",
+        "port": 5432,
+        "username": "u",
+        "password": "<password>",
+        "database": "db",
+        "properties": {}
+      }
+    },
+    "response": {
+      "code": 500,
+      "reason": "db_execute_error",
+      "message": "Error while testing connection, cause: Connection to rocket-bi-mysql:5432 refused. Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections.",
+      "cause": "Connection to rocket-bi-mysql:5432 refused. Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections."
+    }
+  },
+  "testRedshift": {
+    "method": "POST",
+    "path": "connection/test",
+    "status": 500,
+    "request": {
+      "source": {
+        "class_name": "redshift_connection",
+        "host": "rocket-bi-mysql",
+        "port": 5439,
+        "username": "u",
+        "password": "<password>",
+        "database": "db",
+        "properties": {}
+      }
+    },
+    "response": {
+      "code": 500,
+      "reason": "internal_error",
+      "message": "Failed to load driver class com.amazon.redshift.jdbc42.Driver in either of HikariConfig class loader or Thread context classloader"
+    }
+  },
+  "testVertica": {
+    "method": "POST",
+    "path": "connection/test",
+    "status": 500,
+    "request": {
+      "source": {
+        "class_name": "vertica_connection",
+        "host": "rocket-bi-mysql",
+        "port": 5433,
+        "username": "u",
+        "password": "<password>",
+        "catalog": "db",
+        "is_load_balance": false,
+        "properties": {}
+      }
+    },
+    "response": {
+      "code": 500,
+      "reason": "db_execute_error",
+      "message": "Error while testing connection, cause: [Vertica][VJDBC](100176) Failed to connect to host rocket-bi-mysql on port 5433. Reason: Failed to establish a connection to the primary server or any backup address due to network error",
+      "cause": "[Vertica][VJDBC](100176) Failed to connect to host rocket-bi-mysql on port 5433. Reason: Failed to establish a connection to the primary server or any backup address due to network error"
+    }
+  }
+}

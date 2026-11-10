@@ -16,10 +16,11 @@ interface FilterPanelProps {
   edit: NestedGridEdit;
   /** Edit mode: the panel's menu, shown in its header. */
   actions?: ReactNode;
+  onAdd?: () => void;
 }
 
 /** A filter panel (v1 `GroupFilter`): only its first tab is ever shown, as in v1. */
-export function FilterPanel({ widget, dashboard, mobile, renderWidget, edit, actions }: FilterPanelProps) {
+export function FilterPanel({ widget, dashboard, mobile, renderWidget, edit, actions, onAdd }: FilterPanelProps) {
   const { applyPanel } = useDashboardControls();
   const tab = widget.tabItems[0];
   const positions = useMemo(() => (tab ? tabPositions(dashboard, tab) : {}), [dashboard, tab]);
@@ -33,6 +34,7 @@ export function FilterPanel({ widget, dashboard, mobile, renderWidget, edit, act
       renderWidget={renderWidget}
       onApply={() => applyPanel(widget.id)}
       actions={actions}
+      onAdd={onAdd}
     />
   );
 }

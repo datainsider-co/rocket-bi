@@ -236,16 +236,32 @@ export const DATA_LABEL_DEFAULTS = {
 } as const;
 
 const PIES = new Set<string>([ChartType.Pie, ChartType.SemiPie, ChartType.Donut]);
+const FUNNELS = new Set<string>([ChartType.Funnel, ChartType.Pyramid]);
 
-/** Where the chart's data labels live (v1 `DataLabelTab.seriesKey`). */
+/**
+ * Where the chart's data labels live (v1 `DataLabelTab.seriesKey`): under its own Highcharts type, a series' and the
+ * variable pie's under `series`.
+ */
 export function dataLabelPath(chartType: string): string {
-  return PIES.has(chartType) ? 'plotOptions.pie.dataLabels' : 'plotOptions.series.dataLabels';
+  if (PIES.has(chartType)) return 'plotOptions.pie.dataLabels';
+  if (FUNNELS.has(chartType)) return `plotOptions.${chartType}.dataLabels`;
+  if (chartType === ChartType.Parliament) return 'plotOptions.item.dataLabels';
+  return 'plotOptions.series.dataLabels';
 }
 
-/** Which data label settings a chart has: label format and distance on pies, a min / max condition on series. */
+/**
+ * Which data label settings a chart has (v1 `DataLabelTab`): label format on pies, funnels and pyramids, distance on
+ * pies, inside or outside on funnels and pyramids, a min / max condition on series.
+ */
 export function dataLabelSettingsOf(chartType: string) {
   const pie = PIES.has(chartType);
-  return { labelFormat: pie, distance: pie, condition: !pie };
+  const funnel = FUNNELS.has(chartType);
+  return { labelFormat: pie || funnel, distance: pie, position: funnel, condition: !pie && !funnel && chartType !== ChartType.VariablePie };
+}
+
+/** v1 stored the position as `inside`, a boolean. */
+export function labelPositionOf(viz: VizOptions, path: string): string {
+  return get(viz, `${path}.inside`) === true ? 'inside' : 'outside';
 }
 
 /** v1 `DataLabelTab.handleRevert`. */
@@ -260,6 +276,8 @@ export function dataLabelRevert(chartType: string): VizChanges {
     [`${path}.displayUnit`]: 'default',
     ...(shown.labelFormat && { [`${path}.labelFormat`]: DATA_LABEL_DEFAULTS.labelFormat }),
     ...(shown.distance && { [`${path}.distance`]: DATA_LABEL_DEFAULTS.distance }),
+    // v1 reverted `position`, a key nothing reads; the position is `inside`.
+    ...(shown.position && { [`${path}.inside`]: false }),
     ...(shown.condition && {
       [`${path}.condition.enabled`]: false,
       [`${path}.condition.min`]: { enabled: false, value: DATA_LABEL_DEFAULTS.min },

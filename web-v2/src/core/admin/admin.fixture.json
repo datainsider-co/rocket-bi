@@ -1,0 +1,1192 @@
+{
+  "_comment": "OS0 (2026-11-04): user management on the local docker stack. Passwords are <password>. Users os0.editor@example.com and os0.viewer@example.com (password 123456) are left for the next steps; os0.delete* users were deleted. changePermissions*Sudo* ran on the editor (a viewer gets changePermissionsSudoOnViewer).",
+  "activate": {
+    "method": "POST",
+    "path": "admin/users/up-331ced5a-fad0-4fc5-afc0-c524c41f5248/activate",
+    "status": 200,
+    "response": true
+  },
+  "allPermissionsViewer": {
+    "method": "GET",
+    "path": "admin/permissions/up-331ced5a-fad0-4fc5-afc0-c524c41f5248",
+    "status": 200,
+    "response": [
+      "0:view_data"
+    ]
+  },
+  "changeGroup": {
+    "method": "POST",
+    "path": "admin/permissions/up-331ced5a-fad0-4fc5-afc0-c524c41f5248/group",
+    "status": 200,
+    "request": {
+      "user_group": "Editor"
+    },
+    "response": {
+      "success": true
+    }
+  },
+  "changeGroupEditorToViewer": {
+    "method": "POST",
+    "path": "admin/permissions/up-270aa6f0-9262-4720-ba41-29858a7f2544/group",
+    "status": 200,
+    "request": {
+      "user_group": "Viewer"
+    },
+    "response": {
+      "success": true
+    }
+  },
+  "changePermissionsExclude": {
+    "method": "PUT",
+    "path": "admin/permissions/up-331ced5a-fad0-4fc5-afc0-c524c41f5248/change",
+    "status": 200,
+    "request": {
+      "include_permissions": [],
+      "exclude_permissions": [
+        "user:view:*"
+      ]
+    },
+    "response": true
+  },
+  "changePermissionsExcludeChildOfSudo": {
+    "method": "PUT",
+    "path": "admin/permissions/up-270aa6f0-9262-4720-ba41-29858a7f2544/change",
+    "status": 200,
+    "request": {
+      "include_permissions": [],
+      "exclude_permissions": [
+        "user:delete:*"
+      ]
+    },
+    "response": true
+  },
+  "changePermissionsInclude": {
+    "method": "PUT",
+    "path": "admin/permissions/up-331ced5a-fad0-4fc5-afc0-c524c41f5248/change",
+    "status": 200,
+    "request": {
+      "include_permissions": [
+        "database:view:*",
+        "user:view:*"
+      ],
+      "exclude_permissions": []
+    },
+    "response": true
+  },
+  "changePermissionsSudo": {
+    "method": "PUT",
+    "path": "admin/permissions/up-270aa6f0-9262-4720-ba41-29858a7f2544/change",
+    "status": 200,
+    "request": {
+      "include_permissions": [
+        "user:*:*"
+      ],
+      "exclude_permissions": []
+    },
+    "response": true
+  },
+  "changePermissionsSudoOnViewer": {
+    "method": "PUT",
+    "path": "admin/permissions/<viewer>/change",
+    "status": 400,
+    "request": {
+      "include_permissions": [
+        "user:*:*"
+      ],
+      "exclude_permissions": []
+    },
+    "response": {
+      "code": 400,
+      "reason": "bad_request",
+      "message": "Target user is not an editor, can not be assigned edit permissions."
+    }
+  },
+  "changePermissionsSudoToChild": {
+    "method": "PUT",
+    "path": "admin/permissions/up-270aa6f0-9262-4720-ba41-29858a7f2544/change",
+    "status": 200,
+    "request": {
+      "include_permissions": [
+        "user:view:*",
+        "database:*:*"
+      ],
+      "exclude_permissions": [
+        "user:*:*"
+      ]
+    },
+    "response": true
+  },
+  "createDuplicate": {
+    "method": "POST",
+    "path": "admin/users/create",
+    "status": 400,
+    "request": {
+      "email": "os0.editor@example.com",
+      "password": "<password>",
+      "full_name": "Dup",
+      "first_name": "Dup",
+      "last_name": "Dup",
+      "user_group": "Viewer"
+    },
+    "response": {
+      "code": 400,
+      "reason": "email_existed",
+      "message": "The email is already existed: os0.editor@example.com"
+    }
+  },
+  "createEditor": {
+    "method": "POST",
+    "path": "admin/users/create",
+    "status": 200,
+    "request": {
+      "email": "os0.editor@example.com",
+      "password": "<password>",
+      "full_name": "OS0 Editor",
+      "first_name": "OS0",
+      "last_name": "Editor",
+      "user_group": "Editor"
+    },
+    "response": {
+      "user_info": {
+        "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+        "roles": [],
+        "is_active": true,
+        "created_time": 1793806473828,
+        "permissions": []
+      },
+      "user_profile": {
+        "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+        "full_name": "OS0 Editor",
+        "last_name": "Editor",
+        "first_name": "OS0",
+        "email": "os0.editor@example.com",
+        "mobile_phone": "",
+        "gender": -1,
+        "avatar": "",
+        "already_confirmed": true,
+        "properties": {},
+        "updated_time": 1793806473833,
+        "created_time": 1793806473833
+      }
+    }
+  },
+  "createViewer": {
+    "method": "POST",
+    "path": "admin/users/create",
+    "status": 200,
+    "request": {
+      "email": "os0.viewer@example.com",
+      "password": "<password>",
+      "full_name": "OS0 Viewer",
+      "first_name": "OS0",
+      "last_name": "Viewer",
+      "user_group": "Viewer"
+    },
+    "response": {
+      "user_info": {
+        "username": "up-331ced5a-fad0-4fc5-afc0-c524c41f5248",
+        "roles": [],
+        "is_active": true,
+        "created_time": 1793806473855,
+        "permissions": []
+      },
+      "user_profile": {
+        "username": "up-331ced5a-fad0-4fc5-afc0-c524c41f5248",
+        "full_name": "OS0 Viewer",
+        "last_name": "Viewer",
+        "first_name": "OS0",
+        "email": "os0.viewer@example.com",
+        "mobile_phone": "",
+        "gender": -1,
+        "avatar": "",
+        "already_confirmed": true,
+        "properties": {},
+        "updated_time": 1793806473857,
+        "created_time": 1793806473857
+      }
+    }
+  },
+  "deactivate": {
+    "method": "POST",
+    "path": "admin/users/up-331ced5a-fad0-4fc5-afc0-c524c41f5248/deactivate",
+    "status": 200,
+    "response": true
+  },
+  "deleteNoTransfer": {
+    "method": "DELETE",
+    "path": "user-data/up-553e69aa-3827-488d-bcb7-711f98473af5",
+    "status": 200,
+    "request": {
+      "username": "up-553e69aa-3827-488d-bcb7-711f98473af5"
+    },
+    "response": {
+      "success": true
+    },
+    "_folderAfter": {
+      "status": 404
+    }
+  },
+  "deleteTransfer": {
+    "method": "DELETE",
+    "path": "user-data/up-275bec0f-ac59-48c6-9198-b6e77862e466",
+    "status": 200,
+    "request": {
+      "username": "up-275bec0f-ac59-48c6-9198-b6e77862e466",
+      "transfer_to_email": "hello@gmail.com"
+    },
+    "response": {
+      "success": true
+    },
+    "_folderAfter": {
+      "status": 200
+    }
+  },
+  "deleteUnknownEmail": {
+    "method": "DELETE",
+    "path": "user-data/up-0c21a039-3c65-4eff-a42f-1c9e7f3b74e9",
+    "status": 404,
+    "request": {
+      "username": "up-0c21a039-3c65-4eff-a42f-1c9e7f3b74e9",
+      "transfer_to_email": "nobody.os0@nowhere.example"
+    },
+    "response": {
+      "code": 404,
+      "reason": "not_found",
+      "message": "User with email nobody.os0@nowhere.example is not found"
+    },
+    "_folderAfter": {
+      "status": 200
+    }
+  },
+  "detail": {
+    "method": "GET",
+    "path": "admin/users/up-270aa6f0-9262-4720-ba41-29858a7f2544",
+    "status": 200,
+    "response": {
+      "user": {
+        "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+        "roles": [],
+        "is_active": true,
+        "created_time": 1793806473828,
+        "permissions": [
+          "0:edit_data",
+          "0:view_data"
+        ]
+      },
+      "profile": {
+        "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+        "full_name": "OS0 Editor",
+        "last_name": "Editor",
+        "first_name": "OS0",
+        "email": "os0.editor@example.com",
+        "mobile_phone": "",
+        "gender": -1,
+        "avatar": "",
+        "already_confirmed": true,
+        "properties": {},
+        "updated_time": 1793806473833,
+        "created_time": 1793806473833
+      },
+      "user_group": "Editor"
+    }
+  },
+  "detailAfterEditorToViewer": {
+    "method": "GET",
+    "path": "admin/users/up-270aa6f0-9262-4720-ba41-29858a7f2544",
+    "status": 200,
+    "response": {
+      "user": {
+        "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+        "roles": [],
+        "is_active": true,
+        "created_time": 1793806473828,
+        "permissions": [
+          "0:user:view:*",
+          "0:database:*:*",
+          "0:view_data"
+        ]
+      },
+      "profile": {
+        "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+        "full_name": "OS0 Editor Edited",
+        "last_name": "Editor Edited",
+        "first_name": "OS0",
+        "email": "os0.editor@example.com",
+        "mobile_phone": "0987654321",
+        "gender": 1,
+        "dob": 946684800000,
+        "avatar": "",
+        "already_confirmed": true,
+        "properties": {
+          "ssl.mode": "c",
+          "region_code": "VN"
+        },
+        "updated_time": 1793806474091,
+        "created_time": 1793806473833
+      },
+      "user_group": "Viewer"
+    }
+  },
+  "editProfile": {
+    "method": "PUT",
+    "path": "admin/users/up-270aa6f0-9262-4720-ba41-29858a7f2544",
+    "status": 200,
+    "request": {
+      "full_name": "OS0 Editor Edited",
+      "first_name": "OS0",
+      "last_name": "Editor Edited",
+      "mobile_phone": "0123456789",
+      "gender": 1,
+      "dob": 946684800000,
+      "avatar": "https://example.com/a.png"
+    },
+    "response": {
+      "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+      "full_name": "OS0 Editor Edited",
+      "last_name": "Editor Edited",
+      "first_name": "OS0",
+      "email": "os0.editor@example.com",
+      "mobile_phone": "0123456789",
+      "gender": 1,
+      "dob": 946684800000,
+      "avatar": "https://example.com/a.png",
+      "already_confirmed": true,
+      "properties": {},
+      "updated_time": 1793806474050,
+      "created_time": 1793806473833
+    }
+  },
+  "editProfileClearAvatar": {
+    "method": "PUT",
+    "path": "admin/users/up-270aa6f0-9262-4720-ba41-29858a7f2544",
+    "status": 200,
+    "request": {
+      "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+      "avatar": ""
+    },
+    "response": {
+      "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+      "full_name": "OS0 Editor Edited",
+      "last_name": "Editor Edited",
+      "first_name": "OS0",
+      "email": "os0.editor@example.com",
+      "mobile_phone": "0987654321",
+      "gender": 1,
+      "dob": 946684800000,
+      "avatar": "",
+      "already_confirmed": true,
+      "properties": {},
+      "updated_time": 1793806474069,
+      "created_time": 1793806473833
+    }
+  },
+  "editProfileOneField": {
+    "method": "PUT",
+    "path": "admin/users/up-270aa6f0-9262-4720-ba41-29858a7f2544",
+    "status": 200,
+    "request": {
+      "mobile_phone": "0987654321"
+    },
+    "response": {
+      "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+      "full_name": "OS0 Editor Edited",
+      "last_name": "Editor Edited",
+      "first_name": "OS0",
+      "email": "os0.editor@example.com",
+      "mobile_phone": "0987654321",
+      "gender": 1,
+      "dob": 946684800000,
+      "avatar": "https://example.com/a.png",
+      "already_confirmed": true,
+      "properties": {},
+      "updated_time": 1793806474060,
+      "created_time": 1793806473833
+    }
+  },
+  "groupAfterChange": {
+    "method": "GET",
+    "path": "admin/permissions/up-331ced5a-fad0-4fc5-afc0-c524c41f5248/group",
+    "status": 200,
+    "response": {
+      "user_group": "Editor"
+    }
+  },
+  "groupEditor": {
+    "method": "GET",
+    "path": "admin/permissions/up-270aa6f0-9262-4720-ba41-29858a7f2544/group",
+    "status": 200,
+    "response": {
+      "user_group": "Editor"
+    }
+  },
+  "groupViewer": {
+    "method": "GET",
+    "path": "admin/permissions/up-331ced5a-fad0-4fc5-afc0-c524c41f5248/group",
+    "status": 200,
+    "response": {
+      "user_group": "Viewer"
+    }
+  },
+  "isPermittedAfterEditorToViewer": {
+    "method": "POST",
+    "path": "admin/permissions/up-270aa6f0-9262-4720-ba41-29858a7f2544/is_permitted",
+    "status": 200,
+    "request": {
+      "permissions": [
+        "user:view:*",
+        "database:*:*",
+        "database:view:*"
+      ]
+    },
+    "response": {
+      "user:view:*": true,
+      "database:*:*": true,
+      "database:view:*": true
+    }
+  },
+  "isPermittedAfterExclude": {
+    "method": "POST",
+    "path": "admin/permissions/up-331ced5a-fad0-4fc5-afc0-c524c41f5248/is_permitted",
+    "status": 200,
+    "request": {
+      "permissions": [
+        "database:view:*",
+        "user:view:*"
+      ]
+    },
+    "response": {
+      "database:view:*": true,
+      "user:view:*": false
+    }
+  },
+  "isPermittedAfterExcludeChildOfSudo": {
+    "method": "POST",
+    "path": "admin/permissions/up-270aa6f0-9262-4720-ba41-29858a7f2544/is_permitted",
+    "status": 200,
+    "request": {
+      "permissions": [
+        "user:*:*",
+        "user:view:*",
+        "user:delete:*"
+      ]
+    },
+    "response": {
+      "user:*:*": true,
+      "user:view:*": true,
+      "user:delete:*": true
+    }
+  },
+  "isPermittedAfterInclude": {
+    "method": "POST",
+    "path": "admin/permissions/up-331ced5a-fad0-4fc5-afc0-c524c41f5248/is_permitted",
+    "status": 200,
+    "request": {
+      "permissions": [
+        "database:view:*",
+        "user:view:*",
+        "database:*:*",
+        "user:*:*"
+      ]
+    },
+    "response": {
+      "database:view:*": true,
+      "user:view:*": true,
+      "database:*:*": false,
+      "user:*:*": false
+    }
+  },
+  "isPermittedAfterSudo": {
+    "method": "POST",
+    "path": "admin/permissions/up-270aa6f0-9262-4720-ba41-29858a7f2544/is_permitted",
+    "status": 200,
+    "request": {
+      "permissions": [
+        "user:*:*",
+        "user:view:*",
+        "user:delete:*"
+      ]
+    },
+    "response": {
+      "user:*:*": true,
+      "user:view:*": true,
+      "user:delete:*": true
+    }
+  },
+  "isPermittedAfterSudoToChild": {
+    "method": "POST",
+    "path": "admin/permissions/up-270aa6f0-9262-4720-ba41-29858a7f2544/is_permitted",
+    "status": 200,
+    "request": {
+      "permissions": [
+        "user:*:*",
+        "user:view:*",
+        "user:delete:*",
+        "database:*:*",
+        "database:view:*"
+      ]
+    },
+    "response": {
+      "user:*:*": false,
+      "database:*:*": true,
+      "user:delete:*": false,
+      "user:view:*": true,
+      "database:view:*": true
+    }
+  },
+  "isPermittedEditorAfterCreate": {
+    "method": "POST",
+    "path": "admin/permissions/up-270aa6f0-9262-4720-ba41-29858a7f2544/is_permitted",
+    "status": 200,
+    "request": {
+      "permissions": [
+        "organization:manage:connection",
+        "organization:edit:*",
+        "organization:delete:*",
+        "organization:*:*",
+        "user:view:*",
+        "user:create:*",
+        "user:edit:*",
+        "user:reset_password:*",
+        "user:suspend:*",
+        "user:delete:*",
+        "permission:view:*",
+        "permission:assign:*",
+        "login_method:manage",
+        "user_activity:view:*",
+        "user:*:*",
+        "billing:edit:*",
+        "billing:*:*",
+        "ingestion_source:view:*",
+        "ingestion_source:create:*",
+        "ingestion_source:edit:*",
+        "ingestion_source:delete:*",
+        "ingestion_source:*:*",
+        "ingestion_job:view:*",
+        "ingestion_job:create:*",
+        "ingestion_job:edit:*",
+        "ingestion_job:delete:*",
+        "ingestion_job:force_run:*",
+        "ingestion_job:kill:*",
+        "ingestion_history:view:*",
+        "ingestion_job:*:*",
+        "database:view:*",
+        "database:create:*",
+        "database:edit:*",
+        "database:delete:*",
+        "database:share:*",
+        "query_analysis:*:*",
+        "relationship:*:*",
+        "rls:*:*",
+        "database:*:*",
+        "insight:*:*",
+        "etl:*:*",
+        "apikey:*:*",
+        "insight:*:view",
+        "query_analysis:*:view"
+      ]
+    },
+    "response": {
+      "user:reset_password:*": false,
+      "ingestion_job:view:*": false,
+      "database:create:*": false,
+      "organization:edit:*": false,
+      "relationship:*:*": false,
+      "billing:edit:*": false,
+      "user:*:*": false,
+      "ingestion_source:view:*": false,
+      "user:edit:*": false,
+      "permission:assign:*": false,
+      "user_activity:view:*": false,
+      "ingestion_source:create:*": false,
+      "ingestion_source:*:*": false,
+      "login_method:manage": false,
+      "query_analysis:*:view": false,
+      "database:*:*": false,
+      "ingestion_source:edit:*": false,
+      "insight:*:*": false,
+      "user:delete:*": false,
+      "user:suspend:*": false,
+      "rls:*:*": false,
+      "database:edit:*": false,
+      "permission:view:*": false,
+      "database:share:*": false,
+      "billing:*:*": false,
+      "ingestion_job:edit:*": false,
+      "user:view:*": false,
+      "organization:*:*": false,
+      "database:delete:*": false,
+      "organization:manage:connection": false,
+      "ingestion_job:delete:*": false,
+      "ingestion_job:*:*": false,
+      "ingestion_job:kill:*": false,
+      "user:create:*": false,
+      "insight:*:view": false,
+      "apikey:*:*": false,
+      "etl:*:*": false,
+      "ingestion_job:create:*": false,
+      "database:view:*": false,
+      "organization:delete:*": false,
+      "query_analysis:*:*": false,
+      "ingestion_history:view:*": false,
+      "ingestion_source:delete:*": false,
+      "ingestion_job:force_run:*": false
+    }
+  },
+  "isPermittedViewerAfterCreate": {
+    "method": "POST",
+    "path": "admin/permissions/up-331ced5a-fad0-4fc5-afc0-c524c41f5248/is_permitted",
+    "status": 200,
+    "request": {
+      "permissions": [
+        "organization:manage:connection",
+        "organization:edit:*",
+        "organization:delete:*",
+        "organization:*:*",
+        "user:view:*",
+        "user:create:*",
+        "user:edit:*",
+        "user:reset_password:*",
+        "user:suspend:*",
+        "user:delete:*",
+        "permission:view:*",
+        "permission:assign:*",
+        "login_method:manage",
+        "user_activity:view:*",
+        "user:*:*",
+        "billing:edit:*",
+        "billing:*:*",
+        "ingestion_source:view:*",
+        "ingestion_source:create:*",
+        "ingestion_source:edit:*",
+        "ingestion_source:delete:*",
+        "ingestion_source:*:*",
+        "ingestion_job:view:*",
+        "ingestion_job:create:*",
+        "ingestion_job:edit:*",
+        "ingestion_job:delete:*",
+        "ingestion_job:force_run:*",
+        "ingestion_job:kill:*",
+        "ingestion_history:view:*",
+        "ingestion_job:*:*",
+        "database:view:*",
+        "database:create:*",
+        "database:edit:*",
+        "database:delete:*",
+        "database:share:*",
+        "query_analysis:*:*",
+        "relationship:*:*",
+        "rls:*:*",
+        "database:*:*",
+        "insight:*:*",
+        "etl:*:*",
+        "apikey:*:*",
+        "insight:*:view",
+        "query_analysis:*:view"
+      ]
+    },
+    "response": {
+      "user:reset_password:*": false,
+      "ingestion_job:view:*": false,
+      "database:create:*": false,
+      "organization:edit:*": false,
+      "relationship:*:*": false,
+      "billing:edit:*": false,
+      "user:*:*": false,
+      "ingestion_source:view:*": false,
+      "user:edit:*": false,
+      "permission:assign:*": false,
+      "user_activity:view:*": false,
+      "ingestion_source:create:*": false,
+      "ingestion_source:*:*": false,
+      "login_method:manage": false,
+      "query_analysis:*:view": false,
+      "database:*:*": false,
+      "ingestion_source:edit:*": false,
+      "insight:*:*": false,
+      "user:delete:*": false,
+      "user:suspend:*": false,
+      "rls:*:*": false,
+      "database:edit:*": false,
+      "permission:view:*": false,
+      "database:share:*": false,
+      "billing:*:*": false,
+      "ingestion_job:edit:*": false,
+      "user:view:*": false,
+      "organization:*:*": false,
+      "database:delete:*": false,
+      "organization:manage:connection": false,
+      "ingestion_job:delete:*": false,
+      "ingestion_job:*:*": false,
+      "ingestion_job:kill:*": false,
+      "user:create:*": false,
+      "insight:*:view": false,
+      "apikey:*:*": false,
+      "etl:*:*": false,
+      "ingestion_job:create:*": false,
+      "database:view:*": false,
+      "organization:delete:*": false,
+      "query_analysis:*:*": false,
+      "ingestion_history:view:*": false,
+      "ingestion_source:delete:*": false,
+      "ingestion_job:force_run:*": false
+    }
+  },
+  "loginMethods": {
+    "method": "GET",
+    "path": "user/auth/login_methods",
+    "status": 200,
+    "response": {
+      "gg": {
+        "is_active": false,
+        "whitelist_email": [],
+        "client_ids": [
+          "147123631762-p2149desosmqr59un7mbjm2p65k566gh.apps.googleusercontent.com"
+        ],
+        "organization_id": 0,
+        "oauth_type": "gg",
+        "name": "Google",
+        "valid": true
+      }
+    }
+  },
+  "loginMethodsAfterUpdate": {
+    "method": "GET",
+    "path": "user/auth/login_methods",
+    "status": 200,
+    "response": {
+      "gg": {
+        "is_active": false,
+        "whitelist_email": [
+          "example.com"
+        ],
+        "client_ids": [
+          "147123631762-p2149desosmqr59un7mbjm2p65k566gh.apps.googleusercontent.com"
+        ],
+        "organization_id": 0,
+        "oauth_type": "gg",
+        "name": "Google",
+        "valid": true
+      }
+    }
+  },
+  "resetPassword": {
+    "method": "PUT",
+    "path": "admin/users/up-331ced5a-fad0-4fc5-afc0-c524c41f5248/reset_password",
+    "status": 200,
+    "response": {
+      "is_success": true
+    },
+    "_loginWithDefaultPassword": 200
+  },
+  "search": {
+    "method": "POST",
+    "path": "admin/users/search/v2?from=0&size=20",
+    "status": 200,
+    "response": {
+      "total": 4,
+      "data": [
+        {
+          "user": {
+            "username": "up-331ced5a-fad0-4fc5-afc0-c524c41f5248",
+            "roles": [],
+            "is_active": true,
+            "created_time": 1793806473855,
+            "permissions": []
+          },
+          "profile": {
+            "username": "up-331ced5a-fad0-4fc5-afc0-c524c41f5248",
+            "full_name": "OS0 Viewer",
+            "last_name": "Viewer",
+            "first_name": "OS0",
+            "email": "os0.viewer@example.com",
+            "mobile_phone": "",
+            "gender": -1,
+            "avatar": "",
+            "already_confirmed": true,
+            "properties": {},
+            "updated_time": 1793806473857,
+            "created_time": 1793806473857
+          }
+        },
+        {
+          "user": {
+            "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+            "roles": [],
+            "is_active": true,
+            "created_time": 1793806473828,
+            "permissions": []
+          },
+          "profile": {
+            "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+            "full_name": "OS0 Editor",
+            "last_name": "Editor",
+            "first_name": "OS0",
+            "email": "os0.editor@example.com",
+            "mobile_phone": "",
+            "gender": -1,
+            "avatar": "",
+            "already_confirmed": true,
+            "properties": {},
+            "updated_time": 1793806473833,
+            "created_time": 1793806473833
+          }
+        },
+        {
+          "user": {
+            "username": "up-860803c8-e3be-4afb-b88b-743817456dfc",
+            "roles": [],
+            "is_active": true,
+            "created_time": 1793295998659,
+            "permissions": []
+          },
+          "profile": {
+            "username": "up-860803c8-e3be-4afb-b88b-743817456dfc",
+            "full_name": "DW0 Viewer",
+            "last_name": "Viewer",
+            "first_name": "DW0",
+            "email": "dw0.viewer@example.com",
+            "mobile_phone": "",
+            "gender": -1,
+            "avatar": "",
+            "already_confirmed": true,
+            "properties": {},
+            "updated_time": 1793295998664,
+            "created_time": 1793295998664
+          }
+        },
+        {
+          "user": {
+            "username": "root",
+            "roles": [],
+            "is_active": true,
+            "created_time": 1792599231000,
+            "permissions": []
+          },
+          "profile": {
+            "username": "root",
+            "full_name": "root",
+            "email": "hello@gmail.com",
+            "gender": 0,
+            "already_confirmed": true,
+            "updated_time": 1792599231000,
+            "created_time": 1792599231000
+          }
+        }
+      ]
+    }
+  },
+  "searchApiKeyUsers": {
+    "method": "POST",
+    "path": "admin/users/search/v2?from=0&size=20&user_type=api_key",
+    "status": 200,
+    "response": {
+      "total": 0,
+      "data": []
+    }
+  },
+  "searchInactive": {
+    "method": "POST",
+    "path": "admin/users/search/v2?from=0&size=20&is_active=false",
+    "status": 200,
+    "response": {
+      "total": 4,
+      "data": [
+        {
+          "user": {
+            "username": "up-331ced5a-fad0-4fc5-afc0-c524c41f5248",
+            "roles": [],
+            "is_active": true,
+            "created_time": 1793806473855,
+            "permissions": []
+          },
+          "profile": {
+            "username": "up-331ced5a-fad0-4fc5-afc0-c524c41f5248",
+            "full_name": "OS0 Viewer",
+            "last_name": "Viewer",
+            "first_name": "OS0",
+            "email": "os0.viewer@example.com",
+            "mobile_phone": "",
+            "gender": -1,
+            "avatar": "",
+            "already_confirmed": true,
+            "properties": {},
+            "updated_time": 1793806473857,
+            "created_time": 1793806473857
+          }
+        },
+        {
+          "user": {
+            "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+            "roles": [],
+            "is_active": true,
+            "created_time": 1793806473828,
+            "permissions": []
+          },
+          "profile": {
+            "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+            "full_name": "OS0 Editor",
+            "last_name": "Editor",
+            "first_name": "OS0",
+            "email": "os0.editor@example.com",
+            "mobile_phone": "",
+            "gender": -1,
+            "avatar": "",
+            "already_confirmed": true,
+            "properties": {},
+            "updated_time": 1793806473833,
+            "created_time": 1793806473833
+          }
+        },
+        {
+          "user": {
+            "username": "up-860803c8-e3be-4afb-b88b-743817456dfc",
+            "roles": [],
+            "is_active": true,
+            "created_time": 1793295998659,
+            "permissions": []
+          },
+          "profile": {
+            "username": "up-860803c8-e3be-4afb-b88b-743817456dfc",
+            "full_name": "DW0 Viewer",
+            "last_name": "Viewer",
+            "first_name": "DW0",
+            "email": "dw0.viewer@example.com",
+            "mobile_phone": "",
+            "gender": -1,
+            "avatar": "",
+            "already_confirmed": true,
+            "properties": {},
+            "updated_time": 1793295998664,
+            "created_time": 1793295998664
+          }
+        },
+        {
+          "user": {
+            "username": "root",
+            "roles": [],
+            "is_active": true,
+            "created_time": 1792599231000,
+            "permissions": []
+          },
+          "profile": {
+            "username": "root",
+            "full_name": "root",
+            "email": "hello@gmail.com",
+            "gender": 0,
+            "already_confirmed": true,
+            "updated_time": 1792599231000,
+            "created_time": 1792599231000
+          }
+        }
+      ]
+    }
+  },
+  "searchKeyword": {
+    "method": "POST",
+    "path": "admin/users/search/v2?from=0&size=20&keyword=os0",
+    "status": 200,
+    "response": {
+      "total": 2,
+      "data": [
+        {
+          "user": {
+            "username": "up-331ced5a-fad0-4fc5-afc0-c524c41f5248",
+            "roles": [],
+            "is_active": true,
+            "created_time": 1793806473855,
+            "permissions": []
+          },
+          "profile": {
+            "username": "up-331ced5a-fad0-4fc5-afc0-c524c41f5248",
+            "full_name": "OS0 Viewer",
+            "last_name": "Viewer",
+            "first_name": "OS0",
+            "email": "os0.viewer@example.com",
+            "mobile_phone": "",
+            "gender": -1,
+            "avatar": "",
+            "already_confirmed": true,
+            "properties": {},
+            "updated_time": 1793806473857,
+            "created_time": 1793806473857
+          }
+        },
+        {
+          "user": {
+            "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+            "roles": [],
+            "is_active": true,
+            "created_time": 1793806473828,
+            "permissions": []
+          },
+          "profile": {
+            "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+            "full_name": "OS0 Editor",
+            "last_name": "Editor",
+            "first_name": "OS0",
+            "email": "os0.editor@example.com",
+            "mobile_phone": "",
+            "gender": -1,
+            "avatar": "",
+            "already_confirmed": true,
+            "properties": {},
+            "updated_time": 1793806473833,
+            "created_time": 1793806473833
+          }
+        }
+      ]
+    }
+  },
+  "searchSuspended": {
+    "method": "POST",
+    "path": "admin/users/search/v2?from=0&size=20&keyword=os0.viewer",
+    "status": 200,
+    "response": {
+      "total": 1,
+      "data": [
+        {
+          "user": {
+            "username": "up-331ced5a-fad0-4fc5-afc0-c524c41f5248",
+            "roles": [],
+            "is_active": false,
+            "created_time": 1793806473855,
+            "permissions": []
+          },
+          "profile": {
+            "username": "up-331ced5a-fad0-4fc5-afc0-c524c41f5248",
+            "full_name": "OS0 Viewer",
+            "last_name": "Viewer",
+            "first_name": "OS0",
+            "email": "os0.viewer@example.com",
+            "mobile_phone": "",
+            "gender": -1,
+            "avatar": "",
+            "already_confirmed": true,
+            "properties": {},
+            "updated_time": 1793806473857,
+            "created_time": 1793806473857
+          }
+        }
+      ]
+    }
+  },
+  "setProperties": {
+    "method": "PUT",
+    "path": "admin/users/up-270aa6f0-9262-4720-ba41-29858a7f2544/property",
+    "status": 200,
+    "request": {
+      "properties": {
+        "My Field": "a",
+        "ssl.mode": "b",
+        "region_code": "VN"
+      },
+      "deleted_property_keys": []
+    },
+    "response": {
+      "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+      "full_name": "OS0 Editor Edited",
+      "last_name": "Editor Edited",
+      "first_name": "OS0",
+      "email": "os0.editor@example.com",
+      "mobile_phone": "0987654321",
+      "gender": 1,
+      "dob": 946684800000,
+      "avatar": "",
+      "already_confirmed": true,
+      "properties": {
+        "My Field": "a",
+        "ssl.mode": "b",
+        "region_code": "VN"
+      },
+      "updated_time": 1793806474080,
+      "created_time": 1793806473833
+    }
+  },
+  "setPropertiesPartial": {
+    "method": "PUT",
+    "path": "admin/users/up-270aa6f0-9262-4720-ba41-29858a7f2544/property",
+    "status": 200,
+    "request": {
+      "properties": {
+        "ssl.mode": "c"
+      },
+      "deleted_property_keys": [
+        "My Field"
+      ]
+    },
+    "response": {
+      "username": "up-270aa6f0-9262-4720-ba41-29858a7f2544",
+      "full_name": "OS0 Editor Edited",
+      "last_name": "Editor Edited",
+      "first_name": "OS0",
+      "email": "os0.editor@example.com",
+      "mobile_phone": "0987654321",
+      "gender": 1,
+      "dob": 946684800000,
+      "avatar": "",
+      "already_confirmed": true,
+      "properties": {
+        "ssl.mode": "c",
+        "region_code": "VN"
+      },
+      "updated_time": 1793806474090,
+      "created_time": 1793806473833
+    }
+  },
+  "suggest": {
+    "method": "POST",
+    "path": "user/profile/suggest",
+    "status": 200,
+    "request": {
+      "keyword": "hello",
+      "from": 0,
+      "size": 100
+    },
+    "response": {
+      "total": 1,
+      "data": [
+        {
+          "username": "root",
+          "full_name": "root",
+          "email": "hello@gmail.com",
+          "gender": 0,
+          "already_confirmed": true,
+          "updated_time": 1792599231000,
+          "created_time": 1792599231000
+        }
+      ]
+    }
+  },
+  "updateLoginMethods": {
+    "method": "PUT",
+    "path": "admin/setting/login_methods",
+    "status": 200,
+    "request": {
+      "gg": {
+        "is_active": false,
+        "whitelist_email": [],
+        "client_ids": [
+          "147123631762-p2149desosmqr59un7mbjm2p65k566gh.apps.googleusercontent.com"
+        ],
+        "organization_id": 0,
+        "oauth_type": "gg",
+        "name": "Google"
+      }
+    },
+    "response": {
+      "gg": {
+        "is_active": false,
+        "whitelist_email": [
+          "example.com"
+        ],
+        "client_ids": [
+          "147123631762-p2149desosmqr59un7mbjm2p65k566gh.apps.googleusercontent.com"
+        ],
+        "organization_id": 0,
+        "oauth_type": "gg",
+        "name": "Google",
+        "valid": true
+      }
+    }
+  }
+}
