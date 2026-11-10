@@ -56,6 +56,8 @@ export interface KpiModel {
   valueStyle: CSSProperties;
   prefixStyle: CSSProperties;
   postfixStyle: CSSProperties;
+  /** The exact value's tooltip (v1 `tooltipStyle`, `tooltipConfig`): its colors and font, on the side the value aligns to. */
+  tooltip: { style: CSSProperties; placement: 'top' | 'topLeft' | 'topRight' };
   background?: string;
   icon?: { className: string; style: CSSProperties };
   /** The comparison with another period, when asked for and the compared value is known. */
@@ -88,6 +90,16 @@ function heading(value: unknown): Heading | undefined {
 
 function affixText(affix: Affix | undefined): string {
   return affix?.enabled === false ? '' : (affix?.text ?? '');
+}
+
+const TOOLTIP_PLACEMENT = { left: 'topLeft', right: 'topRight' } as const;
+
+function tooltipOf(value: unknown, align: unknown): KpiModel['tooltip'] {
+  const { backgroundColor, valueColor, fontFamily } = (value ?? {}) as { backgroundColor?: string; valueColor?: string; fontFamily?: string };
+  return {
+    style: { background: backgroundColor, color: valueColor, fontFamily },
+    placement: TOOLTIP_PLACEMENT[align as keyof typeof TOOLTIP_PLACEMENT] ?? 'top'
+  };
 }
 
 function layoutOf(theme: unknown, trendOn: boolean): KpiLayout {
@@ -125,6 +137,7 @@ export function buildKpi(options: VizOptions, response: SeriesOneResponse, trend
     valueStyle: { ...textCss(style, '36px'), justifyContent: alignToFlex(align) },
     prefixStyle: textCss(prefix?.style, '36px'),
     postfixStyle: textCss(postfix?.style, '36px'),
+    tooltip: tooltipOf(options['tooltip'], align),
     background: typeof options.background === 'string' ? options.background : undefined,
     icon: icon?.enabled
       ? {

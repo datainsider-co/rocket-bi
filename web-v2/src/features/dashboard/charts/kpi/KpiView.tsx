@@ -42,26 +42,26 @@ export function KpiView({ kpi, dateRange }: KpiViewProps) {
       );
     case 'trend':
       return (
-        <div className="kpi kpi--themed kpi--trend">
-          <div className="flex items-center gap-4">
-            <KpiIcon icon={kpi.icon} />
+        <div className="kpi kpi--trend">
+          <div className="kpi__trend-header">
             <KpiValue kpi={kpi} />
+            <KpiIcon icon={kpi.icon} />
           </div>
           <KpiHeading kpi={kpi} />
-          <KpiPercentage comparison={kpi.comparison} className="mt-6" />
+          <KpiPercentage comparison={kpi.comparison} className="kpi__percentage--pill kpi__percentage--under" />
           <KpiTrendChart trend={kpi.trend} className="kpi__trend--right" />
         </div>
       );
     case 'area':
       return (
-        <div className="kpi kpi--themed kpi--area">
-          <div className="flex items-start gap-4">
+        <div className="kpi kpi--area">
+          <div className="kpi__area-content">
             <KpiIcon icon={kpi.icon} large />
-            <div className="flex min-w-0 flex-col gap-2">
+            <div className="min-w-0">
               <KpiHeading kpi={kpi} />
-              <div className="flex items-center gap-5">
+              <div className="kpi__area-value">
                 <KpiValue kpi={kpi} />
-                <KpiPercentage comparison={kpi.comparison} />
+                <KpiPercentage comparison={kpi.comparison} className="kpi__percentage--pill" />
               </div>
             </div>
           </div>
@@ -74,7 +74,7 @@ export function KpiView({ kpi, dateRange }: KpiViewProps) {
           <KpiIcon icon={kpi.icon} />
           <KpiHeading kpi={kpi} />
           <KpiValue kpi={kpi} />
-          <KpiPercentage comparison={kpi.comparison} className="kpi__percentage--pill" />
+          <KpiPercentage comparison={kpi.comparison} className="kpi__percentage--pill kpi__percentage--corner" />
         </div>
       );
   }
