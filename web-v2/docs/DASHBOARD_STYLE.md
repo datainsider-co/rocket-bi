@@ -66,6 +66,8 @@ Token sáng của v1 (`v1:themes/app-theme.scss:13-88`), dùng trong cả tài l
      (`v1:themes/app-theme.scss:1-3`).
    - Nếu đúng thì dialog v1 luôn sáng với accent `#597fff`, kể cả ở dashboard theme Anzac.
    - Chụp một dashboard theme tối trên v1 trước khi làm bước 4.
+   - Bằng chứng thêm từ bước 1: popover lịch main date của v1 (render ngoài `#app`) luôn sáng với accent `#597fff` ở
+     Anzac và hai theme tối. Dialog thì vẫn chưa chụp.
 3. **Nhãn nút lưu trong builder.** Sửa chart có sẵn: ảnh v1 ghi "Save", v2 ghi "Update". [ảnh]
 
 ## Bước 0: Nền tảng
@@ -247,6 +249,52 @@ Chép từ `web/src/assets` sang `web-v2/public` (v2 chưa có file nào trùng 
 ## Bước 1: Khung trang dashboard
 
 Ảnh view mode của "v2 Sample" và "v2 Filters" gần trùng v1; phần lệch nằm ở các mục dưới.
+
+**Trạng thái: xong ngày 2026-11-10** (trừ các mục ghi "để lại" bên dưới). Đã đo và chụp hai bên ở 1440×900 trên
+"v2 Filters" với theme `light_default`, `light_theme1` (Anzac), `dark_default`, `dark_theme2` (đổi `theme_name` trong
+response, không sửa dữ liệu): app header, header dashboard, thanh filter (`?filters=`), menu Options, menu Adding, lịch
+main date khớp v1 trong 1px. Chưa chụp được: password gate, View As, full screen của v1 (Chromium headless không vào
+được full screen), mobile.
+
+| Mục | Kết quả | Nằm ở |
+|---|---|---|
+| S1 | Bỏ `overflow: hidden` ở grid item | `dash:grid/DashboardGrid.css` |
+| S2 | Theme đặt thêm lên `<body>` khi trang mở; app header đọc `--header-bar-background-color`, `--header-active-background-color`, `--header-text-active-color`; gradient vẽ trên `<body>` để header theme tối nằm trên gradient như v1 | `dash:theme/useBodyDashboardTheme.ts`, `v2:app/global.css` (`@theme inline`), `v2:app/layout/header/`, `dash:detail/DashboardPage.css` |
+| S3 | Icon từng dòng, min 200px, dòng 43.6px, màu `--root` (luôn sáng như `ContextMenu` v1), mở lệch dưới 9px, căn trái nút | `dash:header/HeaderActionsView.tsx`, `.dashboard-context-menu` trong `dash:theme/dashboardAntd.css` |
+| S4 | Viết lại theo số đo v1, nằm trong `.dashboard-header`; chip accent, mắt `di-icon-eye` / `di-icon-eye-close`; tắt thì chỉ nền mờ và nhóm chữ opacity .3, không bấm được (v1 `.disabled`) | `dash:controls/header-filters/` |
+| S5 | `EmptyDashboardView`; link "Click here" chỉ có ở edit mode | `dash:detail/EmptyDashboardView.tsx` |
+| S6 | `Loading` / `ErrorState` trong card nội dung, card dùng setting mặc định (rộng 100%). Nút là "Try Again" | `dash:detail/DashboardPageBody.tsx` |
+| S7 | Rộng 500, title 20px, input nền `#f2f2f7` cao 42, lỗi `--danger`, hai nút chia đôi footer cao 42 | `dash:access/PasswordGateView.tsx`, `PasswordGate.css` |
+| S8 | Shadow khi cuộn quá 1% | `dash:detail/useScrolled.ts`, `isScrolledPast` |
+| S9 | Thân padding 4px; cụm phải `display: none`, hiện khi hover header hoặc khi menu của nó đang mở | `dash:detail/DashboardPage.css`, `dash:header/DashboardHeader.css` |
+| S10 | **Không sửa.** Đo trên v1: `height: 37px` là content-box, ô ngày cao 39px, bằng v2. Thay vào đó sửa bề rộng trigger (236px như v1, trước là 228px) và khoảng cách 8px tới cụm nút | `dash:controls/main-date/MainDate.css` |
+| S11 | Thêm `color: #fff` | `dash:header/DashboardHeader.css` |
+| S12 | Đã đo v1: letter-spacing `normal`, disabled .5. Sửa cả hai; nút header giờ trùng v1 từng px | như trên |
+| S13 | Nút viền 28px, `di-icon-view-as`, tên weight 500; thoát là `HeaderButton` với `di-icon-exit-view-as` | `dash:view-as/ViewAsBarView.tsx`, `ViewAsBar.css` |
+| S14 | Đã so ảnh: glyph font là hình khác. Chép SVG của v1 | `dash:header/RelationshipIcon.tsx` |
+| S15 | Cụm nút mỗi mode fade vào 0.25s (v1 `ic-fade.scss`); không fade ra | `dash:header/HeaderActionsView.tsx` |
+| S16 | Đã đo `v-calendar`: popover lệch dưới 9px; 5px trên header lịch; thứ cách header 27px; tuần đầu cách thứ 6px; luôn chừa 6 tuần (cao 273px); title letter-spacing .6px | `dash:controls/main-date/` |
+| S17 | Lịch v1 **luôn sáng, accent `#597fff`** ở mọi theme (đã chụp Anzac và hai theme tối). Popover lịch mang `filter-popover-area-default-style`. Trước đó ở theme tối chữ của v2 trắng trên nền trắng | `dash:controls/main-date/MainDatePickerView.tsx` |
+| S18–S21 | Placeholder nét đứt; nội dung .8 khi kéo / resize; ẩn mọi glyph resize; dời .3s | `dash:grid/DashboardGrid.css` |
+| S22 | 768px | `dash:detail/DashboardPage.css` |
+| S23 | Nguyên nhân: mũi tên của hai mục có menu cách nhãn 6px, v1 4px (`ml-1`). Bốn mục giờ trùng v1 (836.1 / 971 / 1146.2 / 1297.3) | `v2:app/layout/header/HeaderNavButton.tsx` |
+
+Sửa thêm ngoài bảng: dòng menu Options cao 48.8px như v1 (line-height 1.4, trước là 50px).
+
+Để lại:
+
+- **S5**: v1 có link "Click here" cả ở view mode; v2 chỉ mở được ChartBuilder trong edit mode nên view mode chỉ có dòng
+  "Your dashboard is empty".
+- **S9**: nút back vẫn ẩn ở full screen / TV (v1 hiện khi hover; v2 có test khẳng định là ẩn). Full screen vẫn cuộn
+  được: v1 ẩn overflow vì scale dashboard ở cả hai mode, v2 chỉ scale ở TV.
+- **S4**: nội dung popover sửa filter (`FilterEditorView`) chưa style theo `InternalFilterPopover` của v1; mới nhận
+  theme từ F1. Ở theme tối, v1 tắt filter thì alpha nền là .4 (đậm hơn lúc bật, do v1 xét dark mode của app chứ
+  không phải theme dashboard); v2 để .12.
+- **S7, S13**: làm theo code v1, chưa có ảnh v1 để so.
+- **S3**: menu gear (`.dashboard-setting-menu`) cùng là `ContextMenu` ở v1 nhưng v2 đang dùng màu theme và số đo hơi
+  khác (padding 11px, icon 14px); chưa gộp về `.dashboard-context-menu`.
+- **S15**: thay đổi này bọc cụm nút trong `.dashboard-header__actions`.
+- `.dashboard-theme` giờ có trên cả `<body>` lẫn `.dashboard-page` (trang embedded và story vẫn cần cái sau).
 
 | # | Phần | v1 | v2 | Việc cần làm | Nhãn |
 |---|---|---|---|---|---|
