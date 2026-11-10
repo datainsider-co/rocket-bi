@@ -12,11 +12,13 @@ interface HeaderFilterBarViewProps {
 export function HeaderFilterBarView({ filters, onChange, onRemove }: HeaderFilterBarViewProps) {
   if (filters.length === 0) return null;
   return (
-    <section className="header-filter-bar flex flex-wrap items-center gap-2" aria-label="Filters">
-      <span className="font-medium">Filters ({filters.length})</span>
-      {filters.map(filter => (
-        <HeaderFilterItemView key={filter.id} filter={filter} onChange={onChange} onRemove={() => onRemove(filter.id)} />
-      ))}
+    <section className="header-filter-bar" aria-label="Filters">
+      <span className="header-filter-bar__title">Filters ({filters.length})</span>
+      <div className="header-filter-bar__list">
+        {filters.map(filter => (
+          <HeaderFilterItemView key={filter.id} filter={filter} onChange={onChange} onRemove={() => onRemove(filter.id)} />
+        ))}
+      </div>
     </section>
   );
 }

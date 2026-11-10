@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
-import { Button, Popover, Tag } from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
+import { Popover } from 'antd';
 import type { InternalFilter } from '@/core/query/internalFilter';
 import { FilterEditorView } from './FilterEditorView';
 import { filterChips, withoutChip } from './headerFilters.utils';
@@ -16,7 +16,7 @@ interface HeaderFilterItemViewProps {
 
 /**
  * One header filter (v1 `InternalFilterPanel`): its name, condition and values, a popover to edit it and an eye to
- * turn it off without removing it.
+ * turn it off without removing it. Off, only the eye still answers, as in v1.
  */
 export function HeaderFilterItemView({ filter, onChange, onRemove }: HeaderFilterItemViewProps) {
   const [editing, setEditing] = useState(false);
@@ -39,39 +39,49 @@ export function HeaderFilterItemView({ filter, onChange, onRemove }: HeaderFilte
   );
 
   return (
-    <div className="header-filter flex items-center gap-1 rounded-md py-1 pr-1 pl-2" data-enabled={filter.enabled}>
+    <div className="header-filter" data-enabled={filter.enabled}>
+      {/* Any click in the group opens the editor (v1 `showPopover` on the chips too), but a chip's x. */}
       <Popover open={editing} onOpenChange={setEditing} trigger="click" placement="bottomLeft" content={editor} destroyOnHidden>
-        <button type="button" className="flex min-w-0 cursor-pointer items-center gap-1 border-0 bg-transparent p-0 text-inherit" aria-label={`Edit filter ${filter.name}`}>
-          <span className="font-medium whitespace-nowrap">{filter.name}</span>
-          <span className="whitespace-nowrap opacity-60">{filter.condition}</span>
-          {chips.length === 0 ? (
-            <span className="whitespace-nowrap opacity-60">Click to filter</span>
-          ) : (
-            chips.slice(0, MAX_CHIPS).map((chip, index) => (
-              <Tag
-                key={`${index}-${chip}`}
-                className="m-0!"
-                closable
-                onClose={event => {
-                  event.preventDefault();
+        <div className="header-filter__display">
+          <button type="button" className="header-filter__edit" disabled={!filter.enabled} aria-label={`Edit filter ${filter.name}`}>
+            <span>{filter.name}</span>
+            <span className="header-filter__condition">{filter.condition}</span>
+            {chips.length === 0 && <span className="header-filter__empty">Click to filter</span>}
+          </button>
+          {chips.slice(0, MAX_CHIPS).map((chip, index) => (
+            <span key={`${index}-${chip}`} className="header-filter__chip">
+              <span className="header-filter__chip-title" title={chip}>
+                {chip}
+              </span>
+              <button
+                type="button"
+                className="header-filter__chip-remove"
+                disabled={!filter.enabled}
+                aria-label={`Remove ${chip} from ${filter.name}`}
+                onClick={event => {
                   event.stopPropagation();
                   onChange(withoutChip(filter, index));
                 }}
               >
-                {chip}
-              </Tag>
-            ))
+                <CloseOutlined />
+              </button>
+            </span>
+          ))}
+          {hidden > 0 && (
+            <span className="header-filter__chip">
+              <span className="header-filter__chip-title">+{hidden}</span>
+            </span>
           )}
-          {hidden > 0 && <Tag className="m-0!">+{hidden}</Tag>}
-        </button>
+        </div>
       </Popover>
-      <Button
-        type="text"
-        size="small"
-        icon={filter.enabled ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+      <button
+        type="button"
+        className="header-filter__eye"
         aria-label={filter.enabled ? `Turn off ${filter.name}` : `Turn on ${filter.name}`}
         onClick={() => onChange({ ...filter, enabled: !filter.enabled })}
-      />
+      >
+        <i className={filter.enabled ? 'di-icon-eye' : 'di-icon-eye-close'} aria-hidden />
+      </button>
     </div>
   );
 }
