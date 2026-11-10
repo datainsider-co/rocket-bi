@@ -1,8 +1,9 @@
 import { createContext, use, useCallback, useMemo, useState, type ReactNode } from 'react';
 import { StyleProvider } from '@ant-design/cssinjs';
-import { ConfigProvider, theme } from 'antd';
+import { ConfigProvider } from 'antd';
+import { appTheme, type ThemeMode } from './appTheme';
 
-export type ThemeMode = 'light' | 'dark';
+export type { ThemeMode };
 
 interface ThemeState {
   mode: ThemeMode;
@@ -10,12 +11,6 @@ interface ThemeState {
 }
 
 const ThemeContext = createContext<ThemeState | null>(null);
-
-/** v1 brand: `--accent-2` and the Roboto font from `web/src/themes`. */
-const BRAND_TOKEN = {
-  colorPrimary: '#0066ff',
-  fontFamily: "Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
-};
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -27,16 +22,13 @@ export function ThemeProvider({ children, initialMode = 'light' }: ThemeProvider
   const [mode, setMode] = useState<ThemeMode>(initialMode);
   const toggleMode = useCallback(() => setMode(prev => (prev === 'light' ? 'dark' : 'light')), []);
   const value = useMemo(() => ({ mode, toggleMode }), [mode, toggleMode]);
+  const antdTheme = useMemo(() => appTheme(mode), [mode]);
 
   return (
     <ThemeContext value={value}>
       {/* antd styles go into `@layer antd` so Tailwind utilities can override them (see app/global.css). */}
       <StyleProvider layer>
-        <ConfigProvider
-          theme={{ token: BRAND_TOKEN, algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm }}
-        >
-          {children}
-        </ConfigProvider>
+        <ConfigProvider theme={antdTheme}>{children}</ConfigProvider>
       </StyleProvider>
     </ThemeContext>
   );
