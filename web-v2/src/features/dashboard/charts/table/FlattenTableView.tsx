@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { Table, type TablePaginationConfig, type TableProps } from 'antd';
+import { Select, Table, type TablePaginationConfig, type TableProps } from 'antd';
 import type { Paging } from '@/core/query/QueryRequest';
 import type { TableSort } from '@/core/query/tableSort';
 import type { JsonTableResponse } from '@/core/query/VisualizationResponse';
@@ -11,7 +11,7 @@ import { TABLE_COMPONENTS } from './tableComponents';
 import type { TableLook } from './tableStyle.utils';
 import { TableTooltipContext } from './TableTooltipContext';
 import { TableTotalRow, type TableTotals } from './TableTotalRow';
-import { toColumns, toRows, toTableSort, type CellNumberFormat, type SortableHeader, type TableRow } from './table.utils';
+import { hasPages, toColumns, toRows, toTableSort, type CellNumberFormat, type SortableHeader, type TableRow } from './table.utils';
 import './FlattenTable.css';
 
 /** A collapse or pivot table's rows with their groups below them, and the ones expanded (`useRowExpansion`). */
@@ -26,7 +26,8 @@ export interface FlattenTableViewProps {
   subtitle?: string;
   response: JsonTableResponse;
   paging: Paging;
-  loading: boolean;
+  /** Rows under a row are loading; the page's own load is the widget's veil. */
+  loading?: boolean;
   onPageChange: (paging: Paging) => void;
   sort?: TableSort;
   onSortChange: (sort: TableSort | undefined) => void;
@@ -49,6 +50,16 @@ export interface FlattenTableViewProps {
 
 const WIDE = { x: 'max-content' } as const;
 
+/** v1 `CustomTable.DEFAULT_COLUMN_WIDTH`: columns share the card, but none gets narrower; past that the table scrolls. */
+const MIN_COLUMN_WIDTH = 150;
+
+/** v1 `PaginationComponent.PER_PAGE_LIST_ITEMS`. */
+const PAGE_SIZES = [10, 20, 30, 50, 100].map(value => ({ value, label: String(value) }));
+
+function countLeaves(headers: JsonTableResponse['headers']): number {
+  return headers.reduce((count, header) => count + (header.children.length > 0 ? countLeaves(header.children) : 1), 0);
+}
+
 const stripeOf = (_row: TableRow, index: number) => (index % 2 === 0 ? 'flatten-table__row--even' : 'flatten-table__row--odd');
 
 /** antd's tree rows driven by the collapse table's expanded keys, with v1's toggle and 12px per level. */
@@ -61,7 +72,10 @@ function expandableOf(collapse: RowCollapse): TableProps<TableRow>['expandable']
   };
 }
 
-/** v1's footer: the row count and the server's pages. */
+/**
+ * v1's footer (`Pagination.vue`): the row count, "Showing [n] entries" and the server's pages as pills. On a card of
+ * 400px or less only the previous, current and next page stay (`FlattenTable.css`).
+ */
 function paginationOf(paging: Paging, total: number, onPageChange: (paging: Paging) => void): TablePaginationConfig {
   return {
     size: 'small',
@@ -69,7 +83,26 @@ function paginationOf(paging: Paging, total: number, onPageChange: (paging: Pagi
     pageSize: paging.size,
     total,
     showSizeChanger: false,
-    showTotal: count => `${count} rows`,
+    showLessItems: true,
+    showTotal: count => (
+      <>
+        <span className="flatten-table__total-rows">{count} rows</span>
+        <span className="flatten-table__per-page">
+          Showing
+          <Select
+            size="small"
+            variant="borderless"
+            aria-label="Rows per page"
+            suffixIcon={null}
+            popupMatchSelectWidth={false}
+            value={paging.size}
+            options={PAGE_SIZES}
+            onChange={size => onPageChange({ from: 0, size })}
+          />
+          entries
+        </span>
+      </>
+    ),
     onChange: (page, size) => onPageChange({ from: (page - 1) * size, size })
   };
 }
@@ -83,6 +116,7 @@ function paginationOf(paging: Paging, total: number, onPageChange: (paging: Pagi
 export function FlattenTableView(props: FlattenTableViewProps) {
   const { title, subtitle, response, paging, loading, onPageChange, sort, onSortChange, numberFormat, look, decorate, collapse, sortable, totals, paged = true, wide = false } = props;
   const columns = useMemo(() => toColumns(response.headers, sort, numberFormat, decorate, sortable), [response.headers, sort, numberFormat, decorate, sortable]);
+  const scroll = useMemo(() => (wide ? WIDE : { x: countLeaves(response.headers) * MIN_COLUMN_WIDTH }), [wide, response.headers]);
   const flatRows = useMemo(() => toRows(response.records, paging.from), [response.records, paging.from]);
   const rows = collapse?.rows ?? flatRows;
   const expandedKeys = collapse?.expandedKeys;
@@ -119,9 +153,10 @@ export function FlattenTableView(props: FlattenTableViewProps) {
             dataSource={rows}
             loading={loading}
             expandable={collapse && expandableOf(collapse)}
-            scroll={wide ? WIDE : undefined}
+            scroll={scroll}
+            showSorterTooltip={false}
             summary={totals ? renderTotals : undefined}
-            pagination={paged && paginationOf(paging, response.total, onPageChange)}
+            pagination={paged && hasPages(response) && paginationOf(paging, response.total, onPageChange)}
             onChange={(_pagination, _filters, sorter, { action }) => action === 'sort' && onSortChange(toTableSort(sorter))}
           />
         </TableTooltipContext>

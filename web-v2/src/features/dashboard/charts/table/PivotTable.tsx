@@ -34,7 +34,7 @@ export function PivotTable({ setting, options, subRows, sort, onSortChange, ...t
   return (
     <FlattenTableView
       {...table}
-      loading={table.loading || loading}
+      loading={loading}
       sort={shownSort}
       onSortChange={next => onSortChange(sortByColumnName(next, sortColumns))}
       collapse={collapse}

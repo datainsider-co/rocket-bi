@@ -18,7 +18,6 @@ function renderTable(onSortChange = vi.fn<(sort: TableSort | undefined) => void>
       response={response}
       columns={columns}
       paging={{ from: 0, size: 20 }}
-      loading={false}
       onPageChange={vi.fn<(paging: Paging) => void>()}
       onSortChange={onSortChange}
       numberFormat={tableNumberFormat({})}
@@ -44,7 +43,8 @@ describe('CollapseTable', () => {
 
   it("sorts by the column a header shows, not by the header's label", async () => {
     const onSortChange = renderTable();
-    await userEvent.click(screen.getByText('total_revenue by region'));
+    // With a scroll width antd also draws a hidden row that measures the columns, titles included.
+    await userEvent.click(screen.getByRole('columnheader', { name: 'total_revenue by region' }));
     expect(onSortChange).toHaveBeenCalledWith({ column: 'total_revenue', direction: 'ASC' });
   });
 });
