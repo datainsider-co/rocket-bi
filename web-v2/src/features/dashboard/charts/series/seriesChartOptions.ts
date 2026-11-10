@@ -3,7 +3,7 @@ import { cloneDeep, merge } from 'lodash-es';
 import type { SeriesItem, SeriesOneResponse } from '@/core/query/VisualizationResponse';
 import { vizKey, type VizOptions } from '@/core/query/vizOptions';
 import { createNumberFormat } from '../numberFormat';
-import { BASE_CONFIG, axisLabel, chartColors, isInsideCondition, titleText, type MinMaxCondition } from '../highchartsBase';
+import { BASE_CONFIG, HTML_LABEL_FONT_SIZE, axisLabel, chartColors, isInsideCondition, labelFontSize, titleText, type MinMaxCondition } from '../highchartsBase';
 
 /** v1 `SeriesChartOption.DEFAULT_SETTING`. */
 const SERIES_DEFAULTS = {
@@ -102,7 +102,7 @@ function seriesList(options: VizOptions, response: SeriesOneResponse, timestampX
   });
 }
 
-type DataLabels = { displayUnit?: string; condition?: MinMaxCondition; style?: { color?: string } };
+type DataLabels = { displayUnit?: string; condition?: MinMaxCondition; style?: { color?: string; fontSize?: string } };
 
 function dataLabelsOf(options: VizOptions): DataLabels {
   return ((options.plotOptions?.series as Record<string, unknown> | undefined)?.['dataLabels'] ?? {}) as DataLabels;
@@ -142,6 +142,9 @@ export function buildSeriesChartOptions({ options: stored, response, themeColors
             labels: {
               // v1: HTML labels, so they take the page's font size and keep their full text when rotated.
               useHTML: true,
+              // Highcharts 11 never skipped an HTML category label; 13 shows every other one when they get tight.
+              step: 1,
+              style: { fontSize: labelFontSize((xAxis[0]?.['labels'] as { style?: unknown } | undefined)?.style, HTML_LABEL_FONT_SIZE.axis) },
               formatter(this: Highcharts.AxisLabelsFormatterContextObject) {
                 return axisLabel(String(this.value), xAxis[0]);
               }
@@ -169,6 +172,7 @@ export function buildSeriesChartOptions({ options: stored, response, themeColors
         },
         dataLabels: {
           useHTML: true,
+          style: { fontSize: labelFontSize(dataLabels.style, HTML_LABEL_FONT_SIZE.dataLabel) },
           formatter(this: Highcharts.Point) {
             const y = this.y ?? 0;
             return isInsideCondition(y, dataLabels.condition) ? `<div style="color: ${labelColor}">${format(y)}</div>` : '';

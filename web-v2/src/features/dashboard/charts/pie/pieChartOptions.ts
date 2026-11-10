@@ -2,7 +2,7 @@ import type Highcharts from 'highcharts';
 import { merge } from 'lodash-es';
 import type { SeriesTwoResponse } from '@/core/query/VisualizationResponse';
 import type { VizOptions } from '@/core/query/vizOptions';
-import { BASE_CONFIG, chartColors, titleText } from '../highchartsBase';
+import { BASE_CONFIG, HTML_LABEL_FONT_SIZE, chartColors, labelFontSize, titleText } from '../highchartsBase';
 import { labelSettingsOf, pointLabel, pointNumberFormat, pointTooltip } from './pointText';
 
 export { PieLabelFormat } from './pointText';
@@ -37,6 +37,7 @@ interface PieOptionsInput {
 export function buildPieChartOptions({ options, response, themeColors, selected = [], onSelect }: PieOptionsInput): Highcharts.Options {
   const labels = labelSettingsOf(options, 'plotOptions.pie.dataLabels');
   const format = pointNumberFormat(options, labels.displayUnit);
+  const storedLabelStyle = (options.plotOptions?.pie?.dataLabels as { style?: unknown } | undefined)?.style;
 
   const manual: Highcharts.Options = {
     chart: { type: 'pie' },
@@ -65,6 +66,7 @@ export function buildPieChartOptions({ options, response, themeColors, selected 
         },
         dataLabels: {
           useHTML: true,
+          style: { fontSize: labelFontSize(storedLabelStyle, HTML_LABEL_FONT_SIZE.dataLabel) },
           formatter(this: Highcharts.Point) {
             return pointLabel(this, labels, format);
           }

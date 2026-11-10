@@ -14,9 +14,14 @@ export const BASE_CONFIG = {
     itemMarginTop: 5,
     symbolHeight: 10,
     backgroundColor: '#00000000',
-    navigation: { activeColor: 'var(--accent)', arrowSize: 10 }
+    navigation: { activeColor: 'var(--accent)', arrowSize: 10 },
+    // Highcharts 11 (v1) cut a long item with "…" on one line; 13 wraps it unless told not to.
+    itemStyle: { textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
   },
   plotOptions: {
+    // Highcharts 11's legend symbol for areas; 13 draws a line with a band under it.
+    area: { legendSymbol: 'rectangle' },
+    areaspline: { legendSymbol: 'rectangle' },
     pie: {
       allowPointSelect: true,
       cursor: 'pointer',
@@ -41,11 +46,21 @@ export const BASE_CONFIG = {
       fontStyle: 'var(--widget-secondary-font-style, normal)'
     }
   },
-  /** The theme's tooltip for charts that don't set one (v1 left Highcharts' white). */
-  tooltip: { backgroundColor: 'var(--tooltip-background-color)' },
   credits: { enabled: false },
   exporting: { enabled: false }
 };
+
+/**
+ * Font sizes of HTML labels without a size of their own. Highcharts 11 (v1) drew them outside the SVG, so their `em`
+ * sizes counted from the page's 14px; 13 draws them inside it, where they count from the chart's 16px.
+ */
+export const HTML_LABEL_FONT_SIZE = { axis: '11.2px', dataLabel: '9.8px' } as const;
+
+/** The stored style's font size, or the default for HTML labels. */
+export function labelFontSize(style: unknown, fallback: string): string {
+  const size = (style as { fontSize?: unknown } | undefined)?.fontSize;
+  return typeof size === 'string' && size !== '' ? size : fallback;
+}
 
 /** v1 `ChartOption.colors`: the theme palette unless the chart picked its own colors. */
 export function chartColors(options: VizOptions, themeColors: readonly string[]): string[] {
