@@ -1,9 +1,9 @@
 import { useReducer } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DateMode } from '@/core/query/dateRanges';
+import { DashboardStoryFrame } from '../../theme/DashboardStoryFrame';
 import { MainDateCalendarView } from './MainDateCalendarView';
 import { calendarReducer } from './mainDate.utils';
-import '../../theme/dashboardTheme.css';
 import '../../header/DashboardHeader.css';
 import './MainDate.css';
 
@@ -19,7 +19,7 @@ function Playground({ editing }: { editing: boolean }) {
   );
   const log = (name: string) => () => console.info(name);
   return (
-    <div className="dashboard-theme" data-dashboard-theme="light-default" style={{ display: 'inline-block', boxShadow: 'var(--menu-shadow)' }}>
+    <DashboardStoryFrame style={{ display: 'inline-block', boxShadow: 'var(--menu-shadow)' }}>
       <MainDateCalendarView
         state={state}
         today={today}
@@ -33,7 +33,7 @@ function Playground({ editing }: { editing: boolean }) {
         }}
         edit={editing ? { onRemove: log('remove'), onEditMainDate: log('edit main date') } : undefined}
       />
-    </div>
+    </DashboardStoryFrame>
   );
 }
 
