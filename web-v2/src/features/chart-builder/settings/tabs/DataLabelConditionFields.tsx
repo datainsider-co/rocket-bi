@@ -36,7 +36,7 @@ export function DataLabelConditionFields({ viz, onChange, path, disabled }: Data
   return (
     <>
       <ToggleSetting label="Condition" disabled={disabled} value={on} onChange={enabled => onChange({ [`${path}.enabled`]: enabled })} />
-      <div className="flex gap-3">
+      <div className="settings-row">
         {bound('min', 'Min')}
         {bound('max', 'Max')}
       </div>

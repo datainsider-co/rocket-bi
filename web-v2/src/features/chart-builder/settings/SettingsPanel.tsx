@@ -18,6 +18,7 @@ import { TableSettingsView } from './TableSettingsView';
 import { axisTitlesOf, seriesChoicesOf } from './tabs/seriesTabs.utils';
 import { useChartSettings } from './useChartSettings';
 import { useFilterDefault } from './useFilterDefault';
+import './Settings.css';
 
 interface SettingsPanelProps {
   /** The preview's data, for the settings that list its series. */
@@ -40,22 +41,25 @@ export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPa
   const tab = { viz, onChange, chartType };
 
   const filterKind = filterControlKindOf(chartType);
-  switch (settingsKindOf(chartType)) {
-    case 'series':
-      return <SeriesSettingsView {...tab} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
-    case 'stacked':
-      return <StackedSettingsView {...tab} response={seriesResponse} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
-    case 'pie':
-      return <PieSettingsView {...tab} themeColors={themeColors} />;
-    case 'parliament':
-      return <ParliamentSettingsView {...tab} themeColors={themeColors} />;
-    case 'number':
-      return <NumberSettingsView {...tab} dateFields={dateFields} />;
-    case 'table':
-      return <TableSettingsView {...tab} columns={columns} collapsible={hasCollapseTab(chartType, setting)} />;
-    case 'filter':
-      return filterKind && <FilterSettingsView {...tab} kind={filterKind} hasStep={setting !== undefined && slicerKind(setting) !== 'date'} defaultValue={defaultValue} />;
-    default:
-      return <p className="m-0 text-black/45">The chart&apos;s settings are not available yet.</p>;
-  }
+  const panels = () => {
+    switch (settingsKindOf(chartType)) {
+      case 'series':
+        return <SeriesSettingsView {...tab} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
+      case 'stacked':
+        return <StackedSettingsView {...tab} response={seriesResponse} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
+      case 'pie':
+        return <PieSettingsView {...tab} themeColors={themeColors} />;
+      case 'parliament':
+        return <ParliamentSettingsView {...tab} themeColors={themeColors} />;
+      case 'number':
+        return <NumberSettingsView {...tab} dateFields={dateFields} />;
+      case 'table':
+        return <TableSettingsView {...tab} columns={columns} collapsible={hasCollapseTab(chartType, setting)} />;
+      case 'filter':
+        return filterKind && <FilterSettingsView {...tab} kind={filterKind} hasStep={setting !== undefined && slicerKind(setting) !== 'date'} defaultValue={defaultValue} />;
+      default:
+        return <p className="chart-settings__none">The chart&apos;s settings are not available yet.</p>;
+    }
+  };
+  return <div className="chart-settings">{panels()}</div>;
 }

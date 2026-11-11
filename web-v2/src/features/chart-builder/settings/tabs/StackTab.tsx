@@ -6,7 +6,7 @@ import type { TabProps } from './tabProps';
 export function StackTab({ viz, onChange }: TabProps) {
   const stacking = stackingOf(viz);
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <ToggleSetting label="Stack" value={stacking !== 'none'} onChange={enabled => onChange(stackChanges(enabled ? 'value' : 'none'))} />
       <ToggleSetting label="Percentage" disabled={stacking === 'none'} value={stacking === 'percent'} onChange={enabled => onChange(stackChanges(enabled ? 'percent' : 'value'))} />
     </div>

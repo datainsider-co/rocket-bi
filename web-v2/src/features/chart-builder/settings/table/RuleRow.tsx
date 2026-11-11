@@ -28,7 +28,7 @@ export function RuleRow({ rule, kind, invalid, onChange, onRemove }: RuleRowProp
   const text = (condition: JsonObject) => asString(condition['value'], String(condition['value'] ?? ''));
   return (
     <div className={`flex flex-wrap items-end gap-2 rounded border border-solid p-2 ${invalid ? 'border-[var(--ant-color-error,#ff4d4f)]' : 'border-black/10'}`}>
-      <SelectSetting className="w-20" label="If value" options={FIRST_CONDITIONS} value={type} onChange={setFirst('conditionType')} />
+      <SelectSetting className="settings-size" label="If value" options={FIRST_CONDITIONS} value={type} onChange={setFirst('conditionType')} />
       {type !== 'blank' && <TextSetting className="w-20" label="Value" value={text(first)} onChange={setFirst('value')} />}
       {ranged && (
         <>
@@ -40,7 +40,7 @@ export function RuleRow({ rule, kind, invalid, onChange, onRemove }: RuleRowProp
       {kind === 'color' ? (
         <ColorSetting className="w-28" label="Then" value={asString(value['value'], '#d2f4ff')} onChange={color => onChange({ ...value, value: color })} />
       ) : (
-        <SelectSetting className="w-20" label="Then" options={ICON_CHOICES} value={asString(value['value'], '🔴')} onChange={icon => onChange({ ...value, value: icon })} />
+        <SelectSetting className="settings-size" label="Then" options={ICON_CHOICES} value={asString(value['value'], '🔴')} onChange={icon => onChange({ ...value, value: icon })} />
       )}
       <Button type="text" size="small" icon={<CloseOutlined />} aria-label="Remove rule" onClick={onRemove} />
     </div>

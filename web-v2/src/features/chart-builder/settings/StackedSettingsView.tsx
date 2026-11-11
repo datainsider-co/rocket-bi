@@ -1,6 +1,5 @@
-import { Collapse } from 'antd';
 import type { SeriesOneResponse } from '@/core/query/VisualizationResponse';
-import { settingItemsOf } from './settingItems';
+import { SettingsCollapse } from './SettingsCollapse';
 import type { SettingOption } from './settingOptions';
 import { BackgroundTab } from './tabs/BackgroundTab';
 import { ColorTab } from './tabs/ColorTab';
@@ -44,5 +43,5 @@ export function StackedSettingsView({ viz, onChange, chartType, response, series
     { key: 'tooltip', label: 'Tooltip', children: <TooltipTab {...tab} /> },
     { key: 'other', label: 'Other', children: <OtherTab {...tab} chartType={chartType} /> }
   ];
-  return <Collapse ghost size="small" defaultActiveKey={['title']} items={settingItemsOf(items)} />;
+  return <SettingsCollapse items={items} defaultOpen={['title']} />;
 }

@@ -23,10 +23,10 @@ export function SlicerControlTab({ viz, onChange, hasStep, defaultValue }: Slice
     />
   );
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       {hasStep && <NumberSetting className="w-32" label="Step" min={0} value={numberAt(viz, 'step', 1)} onChange={step => onChange({ step: step > 0 ? step : 1 })} />}
       <DefaultValueField label="Default comparison" {...defaultValue} />
-      <div className="flex gap-3">
+      <div className="settings-row">
         {comparison('from', 'From')}
         {comparison('to', 'To')}
       </div>

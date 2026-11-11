@@ -1,10 +1,9 @@
-import { Collapse } from 'antd';
 import { ComparisonTab } from './number/ComparisonTab';
 import type { DateFieldChoice } from './number/comparisonTab.utils';
 import { KpiIconTab } from './number/KpiIconTab';
 import { KpiThemeTab } from './number/KpiThemeTab';
 import { NumberLabelTab } from './number/NumberLabelTab';
-import { settingItemsOf } from './settingItems';
+import { SettingsCollapse } from './SettingsCollapse';
 import { BackgroundTab } from './tabs/BackgroundTab';
 import { OtherTab } from './tabs/OtherTab';
 import type { TabProps } from './tabs/tabProps';
@@ -30,5 +29,5 @@ export function NumberSettingsView({ viz, onChange, chartType, dateFields }: Num
     { key: 'background', label: 'Background', children: <BackgroundTab {...tab} /> },
     { key: 'other', label: 'Other', children: <OtherTab {...tab} chartType={chartType} /> }
   ];
-  return <Collapse ghost size="small" defaultActiveKey={['title']} items={settingItemsOf(items)} />;
+  return <SettingsCollapse items={items} defaultOpen={['title']} />;
 }

@@ -12,8 +12,8 @@ import { ScaleForm } from './ScaleForm';
 export function ColorFormatForm({ config, onChange }: { config: JsonObject; onChange: (config: JsonObject) => void }) {
   const rules = asArray(asRecord(config['rules'])['colorRules']);
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-3">
+    <div className="settings-stack">
+      <div className="settings-row">
         <SelectSetting className="flex-1" label="Format by" options={FORMAT_BY} value={asString(config['formatType'], 'scale')} onChange={type => onChange(withValue(config, 'formatType', type))} />
         <SelectSetting className="flex-1" label="Apply to" options={APPLY_TO} value={asString(config['applyTo'], 'values_only')} onChange={applyTo => onChange(withValue(config, 'applyTo', applyTo))} />
       </div>

@@ -12,8 +12,8 @@ import type { TabProps } from './tabProps';
  */
 export function TooltipTab({ viz, onChange }: TabProps) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-3">
+    <div className="settings-stack">
+      <div className="settings-row">
         <ColorSetting className="flex-1" label="Color" value={textAt(viz, 'tooltip.style.color', TOOLTIP_DEFAULTS.color)} onChange={color => onChange({ 'tooltip.style.color': color })} />
         <ColorSetting
           className="flex-1"

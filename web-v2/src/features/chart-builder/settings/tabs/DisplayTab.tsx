@@ -27,7 +27,7 @@ export function DisplayTab({ viz, onChange, series }: DisplayTabProps) {
   const set = (path: string) => (value: unknown) => onChange({ [seriesPath(key, path)]: value });
   const dualAxis = boolAt(viz, 'yAxis[1].visible', false) && series.length > 1;
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <SelectSetting label="Series" options={series} value={key} onChange={setPicked} />
       <TextSetting label="Display name" value={textAt(viz, seriesPath(key, 'name'), current.label)} onChange={set('name')} />
       {hasMarker(type) && <ToggleSetting label="Show marker" value={boolAt(viz, seriesPath(key, 'marker.enabled'), false)} onChange={set('marker.enabled')} />}

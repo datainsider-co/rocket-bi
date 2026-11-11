@@ -16,8 +16,8 @@ export function ScaleForm({ scale, invalid, onChange }: ScaleFormProps) {
   const empty = asRecord(value['default']);
   const set = (key: string) => (next: unknown) => onChange({ ...value, [key]: next });
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-end gap-3">
+    <div className="settings-stack">
+      <div className="settings-row settings-row--end">
         <SelectSetting
           className="flex-1"
           label="Default formatting"
@@ -26,7 +26,7 @@ export function ScaleForm({ scale, invalid, onChange }: ScaleFormProps) {
           onChange={type => onChange({ ...value, default: { ...empty, formattingType: type } })}
         />
         {empty['formattingType'] === 'specific_color' && (
-          <ColorSetting className="w-32" label="Color" value={asString(empty['specificColor'], '#d2f4ff')} onChange={color => onChange({ ...value, default: { ...empty, specificColor: color } })} />
+          <ColorSetting label="Color" value={asString(empty['specificColor'], '#d2f4ff')} onChange={color => onChange({ ...value, default: { ...empty, specificColor: color } })} />
         )}
       </div>
       <BoundFields label="Minimum" defaultLabel="Lowest value" bound={value['min']} withColor invalid={invalid.includes('min')} onChange={set('min')} />

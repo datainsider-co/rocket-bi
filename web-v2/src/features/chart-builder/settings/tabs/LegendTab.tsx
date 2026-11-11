@@ -17,7 +17,7 @@ export function LegendTab({ viz, onChange }: TabProps) {
   const manualHeight = numberAt(viz, 'legend.maxHeight', Number.NaN);
   const hasManualHeight = !Number.isNaN(manualHeight);
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <ToggleSetting label="On" value={!off} onChange={set('enabled')} />
       <SelectSetting label="Position" options={VERTICAL_ALIGNS} disabled={off} value={textAt(viz, 'legend.verticalAlign', D.verticalAlign)} onChange={set('verticalAlign')} />
       <SelectSetting label="Layout" options={LEGEND_LAYOUTS} disabled={off} value={textAt(viz, 'legend.layout', D.layout)} onChange={set('layout')} />
@@ -29,10 +29,10 @@ export function LegendTab({ viz, onChange }: TabProps) {
         value={textAt(viz, 'legend.itemStyle.fontFamily', D.fontFamily)}
         onChange={font => onChange(legendStyleChanges('fontFamily', font))}
       />
-      <div className="flex items-end gap-3">
-        <ColorSetting className="w-32" label="Font color" disabled={off} value={textAt(viz, 'legend.itemStyle.color', D.color)} onChange={color => onChange(legendStyleChanges('color', color))} />
+      <div className="settings-row settings-row--end">
+        <ColorSetting label="Font color" disabled={off} value={textAt(viz, 'legend.itemStyle.color', D.color)} onChange={color => onChange(legendStyleChanges('color', color))} />
         <SelectSetting
-          className="w-20"
+          className="settings-size"
           label="Text size"
           options={FONT_SIZES}
           disabled={off}

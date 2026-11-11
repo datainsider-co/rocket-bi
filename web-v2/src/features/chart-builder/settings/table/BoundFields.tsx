@@ -24,7 +24,7 @@ export function BoundFields({ label, defaultLabel, bound, withColor, toggle = fa
   return (
     <div className="flex flex-col gap-2">
       {toggle ? <ToggleSetting label={label} value={!off} onChange={set('enabled')} /> : <span className="text-sm font-medium">{label}</span>}
-      <div className="flex items-end gap-3">
+      <div className="settings-row settings-row--end">
         <SelectSetting
           className="flex-1"
           label="Type"
@@ -37,7 +37,7 @@ export function BoundFields({ label, defaultLabel, bound, withColor, toggle = fa
           onChange={set('type')}
         />
         {value['type'] === 'custom' && <TextSetting className="w-28" label={invalid ? 'Value (a number)' : 'Value'} disabled={off} value={asString(value['value'], String(value['value'] ?? ''))} onChange={set('value')} />}
-        {withColor && <ColorSetting className="w-32" label="Color" disabled={off} value={asString(value['color'], '#d2f4ff')} onChange={set('color')} />}
+        {withColor && <ColorSetting label="Color" disabled={off} value={asString(value['color'], '#d2f4ff')} onChange={set('color')} />}
       </div>
     </div>
   );

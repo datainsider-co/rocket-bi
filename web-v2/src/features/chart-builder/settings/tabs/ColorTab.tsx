@@ -15,7 +15,7 @@ export function ColorTab({ viz, onChange, themeColors }: ColorTabProps) {
   const auto = boolAt(viz, 'themeColor.enabled', true);
   const colors = paletteColorsOf(viz, themeColors);
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <ToggleSetting label="Auto" value={auto} onChange={enabled => onChange(themeColorToggle(enabled, colors))} />
       <div className="grid grid-cols-2 gap-3">
         {colors.map((color, index) => (

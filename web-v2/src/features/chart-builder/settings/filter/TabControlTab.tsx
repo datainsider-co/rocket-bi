@@ -22,10 +22,10 @@ export function TabControlTab({ viz, onChange, chartType, defaultValue }: TabCon
   const colors = tabFilterColors(viz, displayAs);
   const searchOn = boolAt(viz, 'search.enabled', true);
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       {shown.direction && <SelectSetting label="Position" options={DIRECTIONS} value={textAt(viz, 'direction', 'row')} onChange={direction => onChange({ direction })} />}
       {shown.colors && (
-        <div className="flex gap-3">
+        <div className="settings-row">
           <ColorSetting className="flex-1" label="Inactive background" value={colors.deActive} onChange={color => onChange({ [keys.deActive]: color })} />
           <ColorSetting className="flex-1" label="Active background" value={colors.active} onChange={color => onChange({ [keys.active]: color })} />
         </div>

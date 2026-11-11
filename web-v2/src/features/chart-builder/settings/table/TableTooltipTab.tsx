@@ -9,8 +9,8 @@ import { TABLE_TOOLTIP_DEFAULTS as D, tableTooltipRevert } from './tableTabs.uti
 /** v1 table `TooltipTab`: the cell tooltip's text color, background and font. */
 export function TableTooltipTab({ viz, onChange }: TabProps) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-3">
+    <div className="settings-stack">
+      <div className="settings-row">
         <ColorSetting className="flex-1" label="Color" value={textAt(viz, 'tooltip.valueColor', D.valueColor)} onChange={color => onChange({ 'tooltip.valueColor': color })} />
         <ColorSetting className="flex-1" label="Background color" value={textAt(viz, 'tooltip.backgroundColor', D.backgroundColor)} onChange={color => onChange({ 'tooltip.backgroundColor': color })} />
       </div>

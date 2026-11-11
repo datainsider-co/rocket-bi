@@ -14,7 +14,7 @@ export function AxisGridFields({ viz, onChange, axis, disabled }: AxisFieldProps
   return (
     <>
       <ToggleSetting label="Gridlines" disabled={disabled} value={width !== 0} onChange={enabled => onChange(gridToggle(axis, enabled))} />
-      <div className="flex gap-3">
+      <div className="settings-row">
         <ColorSetting
           className="flex-1"
           label="Grid color"

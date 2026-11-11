@@ -17,9 +17,9 @@ export function OtherTab({ viz, onChange, chartType }: OtherTabProps) {
     <ToggleSetting label={label} value={boolAt(viz, key, fallback)} onChange={value => onChange({ [key]: value })} />
   );
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       {shown.numberFormat && (
-        <div className="flex gap-3">
+        <div className="settings-row">
           <SelectSetting
             className="flex-1"
             label="Display unit"
@@ -30,7 +30,7 @@ export function OtherTab({ viz, onChange, chartType }: OtherTabProps) {
           <SelectSetting className="w-24" label="Precision" options={PRECISIONS} value={numberAt(viz, 'precision', 2)} onChange={precision => onChange({ precision })} />
         </div>
       )}
-      <div className="flex gap-3">
+      <div className="settings-row">
         <SelectSetting className="flex-1" label="Decimal point" options={DECIMAL_POINTS} value={textAt(viz, 'decimalPoint', '.')} onChange={decimalPoint => onChange({ decimalPoint })} />
         {shown.thousandSeparator && (
           <SelectSetting

@@ -12,11 +12,11 @@ import { HEADER_DEFAULTS as D, headerRevert } from './tableTabs.utils';
 export function TableHeaderTab({ viz, onChange }: TabProps) {
   const set = (path: string) => (value: unknown) => onChange({ [`header.${path}`]: value });
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <SelectSetting label="Font family" options={FONT_FAMILIES} value={textAt(viz, 'header.style.fontFamily', D.fontFamily)} onChange={set('style.fontFamily')} />
-      <div className="flex items-end gap-3">
-        <ColorSetting className="w-32" label="Font color" value={textAt(viz, 'header.style.color', D.color)} onChange={set('style.color')} />
-        <SelectSetting className="w-20" label="Text size" options={FONT_SIZES} value={textAt(viz, 'header.style.fontSize', D.fontSize)} onChange={set('style.fontSize')} />
+      <div className="settings-row settings-row--end">
+        <ColorSetting label="Font color" value={textAt(viz, 'header.style.color', D.color)} onChange={set('style.color')} />
+        <SelectSetting className="settings-size" label="Text size" options={FONT_SIZES} value={textAt(viz, 'header.style.fontSize', D.fontSize)} onChange={set('style.fontSize')} />
         <AlignSetting label="Alignment" value={textAt(viz, 'header.align', D.align)} onChange={set('align')} />
       </div>
       <ColorSetting className="w-40" label="Background color" value={textAt(viz, 'header.backgroundColor', D.backgroundColor)} onChange={set('backgroundColor')} />

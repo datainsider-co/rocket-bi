@@ -39,7 +39,7 @@ export function ComparisonTab({ viz, onChange, dateFields }: ComparisonTabProps)
   const trendOn = rangeOn && boolAt(viz, 'trendLine.enabled', false);
   const fieldKey = dateFieldKeyOf(viz);
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <ToggleSetting label="Date range" value={rangeOn} onChange={enabled => onChange(dataRangeToggle(viz, enabled, dateFields, new Date()))} />
       <SelectSetting
         label="Date field"
@@ -63,9 +63,9 @@ export function ComparisonTab({ viz, onChange, dateFields }: ComparisonTabProps)
         />
       )}
       <ToggleSetting label="Trend line" disabled={!rangeOn} value={trendOn} onChange={enabled => onChange({ 'trendLine.enabled': enabled })} />
-      <div className="flex gap-3">
+      <div className="settings-row">
         <SelectSetting className="flex-1" label="Display as" options={TREND_TYPES} disabled={!trendOn} value={textAt(viz, 'trendLine.displayAs', 'line')} onChange={displayAs => onChange({ 'trendLine.displayAs': displayAs })} />
-        <ColorSetting className="w-32" label="Trend color" disabled={!trendOn} value={textAt(viz, 'trendLine.color', '#007126')} onChange={color => onChange({ 'trendLine.color': color })} />
+        <ColorSetting label="Trend color" disabled={!trendOn} value={textAt(viz, 'trendLine.color', '#007126')} onChange={color => onChange({ 'trendLine.color': color })} />
       </div>
       <SelectSetting label="Trend by" options={TREND_BYS} disabled={!trendOn} value={textAt(viz, 'trendLine.trendBy', 'Month of')} onChange={trendBy => onChange({ 'trendLine.trendBy': trendBy })} />
       <RevertButton onRevert={() => onChange(comparisonRevert())} />

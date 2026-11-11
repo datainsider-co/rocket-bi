@@ -24,7 +24,7 @@ export function ConditionalFormattingTab({ viz, onChange, columns }: TabProps & 
   const column = numeric.find(choice => choice.value === picked) ?? numeric[0];
   if (!column) return <p className="m-0 text-sm text-black/45">Add a number column to format it by its values.</p>;
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <SelectSetting label="Select field" options={numeric} value={column.value} onChange={setPicked} />
       {TYPES.map(({ type, label }) => (
         <FormattingRow

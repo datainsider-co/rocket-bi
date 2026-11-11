@@ -21,9 +21,9 @@ export function AxisTitleFields({ viz, onChange, axis, disabled, defaultTitle }:
       <ToggleSetting label="Axis title" disabled={disabled} value={boolAt(viz, `${axis}.title.enabled`, true)} onChange={set('title.enabled')} />
       <TextSetting label="Title text" placeholder="Input Axis Title" disabled={off} value={textAt(viz, `${axis}.title.text`, defaultTitle)} onChange={set('title.text')} />
       <SelectSetting label="Font family" options={FONT_FAMILIES} disabled={off} value={textAt(viz, `${axis}.title.style.fontFamily`, AXIS_DEFAULTS.font)} onChange={set('title.style.fontFamily')} />
-      <div className="flex gap-3">
-        <ColorSetting className="w-32" label="Font color" disabled={off} value={textAt(viz, `${axis}.title.style.color`, AXIS_DEFAULTS.color)} onChange={set('title.style.color')} />
-        <SelectSetting className="w-20" label="Text size" options={FONT_SIZES} disabled={off} value={textAt(viz, `${axis}.title.style.fontSize`, AXIS_DEFAULTS.fontSize)} onChange={set('title.style.fontSize')} />
+      <div className="settings-row">
+        <ColorSetting label="Font color" disabled={off} value={textAt(viz, `${axis}.title.style.color`, AXIS_DEFAULTS.color)} onChange={set('title.style.color')} />
+        <SelectSetting className="settings-size" label="Text size" options={FONT_SIZES} disabled={off} value={textAt(viz, `${axis}.title.style.fontSize`, AXIS_DEFAULTS.fontSize)} onChange={set('title.style.fontSize')} />
       </div>
     </>
   );

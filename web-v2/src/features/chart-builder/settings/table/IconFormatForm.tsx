@@ -9,8 +9,8 @@ export function IconFormatForm({ config, onChange }: { config: JsonObject; onCha
   const rules = asArray(asRecord(config['rules'])['iconRules']);
   const set = (key: string) => (value: string) => onChange(withValue(config, key, value));
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-3">
+    <div className="settings-stack">
+      <div className="settings-row">
         <SelectSetting className="flex-1" label="Apply to" options={APPLY_TO} value={asString(config['applyTo'], 'values_only')} onChange={set('applyTo')} />
         <SelectSetting className="flex-1" label="Icon layout" options={ICON_LAYOUTS} value={asString(config['layout'], 'left')} onChange={set('layout')} />
         <SelectSetting className="flex-1" label="Icon alignment" options={ICON_ALIGNS} value={asString(config['align'], 'center')} onChange={set('align')} />

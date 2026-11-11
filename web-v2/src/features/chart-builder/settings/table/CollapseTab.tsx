@@ -7,8 +7,8 @@ import { TOGGLE_ICON_DEFAULTS as D, toggleIconRevert } from './tableTabs.utils';
 /** v1 `CollapseTab` (Collapsed And Expanded): the colors of the plus / minus square that expands a row. */
 export function CollapseTab({ viz, onChange }: TabProps) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-3">
+    <div className="settings-stack">
+      <div className="settings-row">
         <ColorSetting
           className="flex-1"
           label="Background color"

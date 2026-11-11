@@ -8,8 +8,8 @@ import { treeControlRevert } from './filterTabs.utils';
 /** v1 `TreeFilterControlTab`: the checkboxes' colors and the default selection. */
 export function TreeControlTab({ viz, onChange, defaultValue }: TabProps & { defaultValue: DefaultValueFieldProps }) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-3">
+    <div className="settings-stack">
+      <div className="settings-row">
         <ColorSetting className="flex-1" label="Inactive background" value={textAt(viz, 'deActiveColor', '#9799AC')} onChange={deActiveColor => onChange({ deActiveColor })} />
         <ColorSetting
           className="flex-1"

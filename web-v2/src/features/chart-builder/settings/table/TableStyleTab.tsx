@@ -6,7 +6,7 @@ import { TABLE_THEME_OPTIONS, tableThemeChanges, tableThemeOf } from './tableTab
 /** v1 table `StyleTab`: a theme restyles the grid, header, rows, total row (when there is one), title and card at once. */
 export function TableStyleTab({ viz, onChange, totals = false }: TabProps & { totals?: boolean }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <SelectSetting label="Select style" options={TABLE_THEME_OPTIONS} value={tableThemeOf(viz)} onChange={key => onChange(tableThemeChanges(key, totals))} />
       <RevertButton onRevert={() => onChange(tableThemeChanges('default', totals))} />
     </div>

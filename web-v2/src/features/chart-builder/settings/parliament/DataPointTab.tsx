@@ -12,7 +12,7 @@ export const MAX_DATA_POINT = 1000;
  */
 export function DataPointTab({ viz, onChange }: TabProps) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <NumberSetting label="Max data point" min={1} value={numberAt(viz, 'maxDataPoint', MAX_DATA_POINT)} onChange={maxDataPoint => onChange({ maxDataPoint })} />
       <RevertButton onRevert={() => onChange({ maxDataPoint: MAX_DATA_POINT })} />
     </div>

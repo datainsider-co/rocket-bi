@@ -19,7 +19,7 @@ export function SeriesNameTab({ viz, onChange, series }: SeriesNameTabProps) {
   if (!current) return <p className="m-0 text-sm text-black/45">The series show once the chart has data.</p>;
   const path = seriesPath(current.value, 'name');
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <SelectSetting label="Series" options={series} value={current.value} onChange={setPicked} />
       <TextSetting label="Display name" value={textAt(viz, path, current.label)} onChange={name => onChange({ [path]: name })} />
       <RevertButton onRevert={() => onChange(seriesNameRevert(current.value, current.label))} />
