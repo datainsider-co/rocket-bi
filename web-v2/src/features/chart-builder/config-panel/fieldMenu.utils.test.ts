@@ -16,9 +16,10 @@ const tables = tableNodesOf([
 ]);
 
 describe('fieldMenuItems', () => {
-  it('lists each table with its fields, nested columns one level deeper', () => {
+  it('lists each table over its fields, nested columns one level deeper', () => {
     expect(fieldMenuItems(tables)).toEqual([
       {
+        type: 'group',
         key: 'table:sales',
         label: 'sales',
         children: [

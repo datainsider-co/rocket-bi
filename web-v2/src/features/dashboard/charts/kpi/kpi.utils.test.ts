@@ -52,7 +52,17 @@ describe('buildKpi', () => {
     const trendOn = { dataRange: { enabled: true }, trendLine: { enabled: true } };
     expect(buildKpi({ theme: 'style_2', ...trendOn }, response).layout).toBe('trend');
     expect(buildKpi({ theme: 'style_area_1' }, response).layout).toBe('area');
-    expect(buildKpi({ ...trendOn }, response).layout).toBe('plain');
+  });
+
+  it('picks the plain layout by what the card shows besides the value', () => {
+    expect(buildKpi({ dataRange: { enabled: true } }, response).layout).toBe('plainComparison');
+    expect(buildKpi({ dataRange: { enabled: true }, comparison: { enabled: true } }, response)).toMatchObject({ layout: 'plainComparison', valueStyle: { justifyContent: 'center' } });
+    expect(buildKpi({ dataRange: { enabled: true }, trendLine: { enabled: true } }, response).layout).toBe('plainTrend');
+    expect(buildKpi({ trendLine: { enabled: true } }, response).layout).toBe('plain');
+  });
+
+  it('draws a plain trend line in green or red', () => {
+    expect(buildKpi({ dataRange: { enabled: true }, trendLine: { enabled: true, color: '#abc' } }, response, [1]).trend?.color).toBe('#4dcf36');
   });
 
   it('adds the comparison and the trend line once their data is in', () => {

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { CaretDownOutlined, CaretRightOutlined } from '@ant-design/icons';
 import type { NestedNode } from './fieldTree.utils';
 import { FieldRowView } from './FieldRowView';
 
@@ -8,12 +7,12 @@ export function NestedFieldsView({ node }: { node: NestedNode }) {
   const [open, setOpen] = useState(false);
   return (
     <div>
-      <button type="button" className="flex w-full cursor-pointer items-center gap-2 rounded border-0 bg-transparent px-2 py-1.5 text-left text-inherit hover:bg-black/5" aria-expanded={open} onClick={() => setOpen(!open)}>
-        {open ? <CaretDownOutlined aria-hidden /> : <CaretRightOutlined aria-hidden />}
-        <span className="truncate">{node.title}</span>
+      <button type="button" className="field-tree__nested" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <i className={`field-tree__caret fa ${open ? 'fa-caret-down' : 'fa-caret-right'}`} aria-hidden />
+        <span className="field-tree__name">{node.title}</span>
       </button>
       {open && (
-        <div className="pl-5">
+        <div className="field-tree__children">
           {node.fields.map(field => (
             <FieldRowView key={field.key} node={field} />
           ))}

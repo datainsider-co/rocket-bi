@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { boolAt, numberAt, textAt } from '../vizValue.utils';
 import { DASH_STYLES, type SettingOption } from '../settingOptions';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { TextSetting } from '../fields/TextSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { TextSetting } from '@/shared/settings/fields/TextSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { displayRevert, hasDash, hasMarker, seriesPath, seriesTypeOf } from './seriesTabs.utils';
 import type { TabProps } from './tabProps';
 
@@ -27,7 +27,7 @@ export function DisplayTab({ viz, onChange, series }: DisplayTabProps) {
   const set = (path: string) => (value: unknown) => onChange({ [seriesPath(key, path)]: value });
   const dualAxis = boolAt(viz, 'yAxis[1].visible', false) && series.length > 1;
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <SelectSetting label="Series" options={series} value={key} onChange={setPicked} />
       <TextSetting label="Display name" value={textAt(viz, seriesPath(key, 'name'), current.label)} onChange={set('name')} />
       {hasMarker(type) && <ToggleSetting label="Show marker" value={boolAt(viz, seriesPath(key, 'marker.enabled'), false)} onChange={set('marker.enabled')} />}

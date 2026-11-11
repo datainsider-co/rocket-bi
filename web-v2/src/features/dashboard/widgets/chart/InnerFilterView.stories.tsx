@@ -1,7 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { DashboardThemeProvider } from '../../theme/DashboardThemeProvider';
-import '../../theme/dashboardTheme.css';
+import { DashboardStoryFrame } from '../../theme/DashboardStoryFrame';
 import '../../charts/filter/FilterWidget.css';
 import { InnerFilterView, type InnerFilterViewProps } from './InnerFilterView';
 
@@ -28,12 +27,9 @@ const meta = {
   args: { asTabs: true, compact: false },
   decorators: [
     Story => (
-      // The page's class and provider, so antd takes the dashboard's tokens and CSS as on the real page.
-      <div className="dashboard-theme dashboard-page" data-dashboard-theme="light-default" style={{ padding: 24, minHeight: 320 }}>
-        <DashboardThemeProvider themeName="light_default">
-          <Story />
-        </DashboardThemeProvider>
-      </div>
+      <DashboardStoryFrame style={{ padding: 24, minHeight: 320 }}>
+        <Story />
+      </DashboardStoryFrame>
     )
   ]
 } satisfies Meta<typeof Playground>;

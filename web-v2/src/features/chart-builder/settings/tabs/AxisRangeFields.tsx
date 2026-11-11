@@ -1,6 +1,6 @@
 import { boolAt, numberAt } from '../vizValue.utils';
-import { NumberSetting } from '../fields/NumberSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { NumberSetting } from '@/shared/settings/fields/NumberSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import type { AxisFieldProps } from './axisFieldProps';
 import { AXIS_DEFAULTS, boundToggle } from './seriesTabs.utils';
 
@@ -22,7 +22,7 @@ export function AxisRangeFields({ viz, onChange, axis, disabled }: AxisFieldProp
   return (
     <>
       <ToggleSetting label="Config min max" disabled={disabled} value={on} onChange={enabled => onChange({ [`${condition}.enabled`]: enabled })} />
-      <div className="flex gap-3">
+      <div className="settings-row">
         {bound('min', 'Min')}
         {bound('max', 'Max')}
       </div>

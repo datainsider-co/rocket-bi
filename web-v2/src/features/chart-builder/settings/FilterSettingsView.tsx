@@ -1,9 +1,8 @@
-import { Collapse } from 'antd';
 import type { DefaultValueFieldProps } from './filter/DefaultValueField';
 import { FilterControlTab } from './filter/FilterControlTab';
 import { FilterTitleTab } from './filter/FilterTitleTab';
 import { isInnerFilter, type FilterControlKind } from './filter/filterTabs.utils';
-import { settingItemsOf } from './settingItems';
+import { SettingsCollapse } from '@/shared/settings/SettingsCollapse';
 import { BackgroundTab } from './tabs/BackgroundTab';
 import { OtherTab } from './tabs/OtherTab';
 import type { TabProps } from './tabs/tabProps';
@@ -27,5 +26,5 @@ export function FilterSettingsView({ viz, onChange, chartType, kind, hasStep, de
     ...(inner ? [] : [{ key: 'background', label: 'Background', children: <BackgroundTab {...tab} /> }]),
     { key: 'other', label: 'Other', children: <OtherTab {...tab} chartType={chartType} /> }
   ];
-  return <Collapse ghost size="small" defaultActiveKey={['title', 'controls']} items={settingItemsOf(items)} />;
+  return <SettingsCollapse items={items} defaultOpen={['title', 'controls']} />;
 }

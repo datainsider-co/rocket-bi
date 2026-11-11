@@ -1,4 +1,3 @@
-import { Collapse } from 'antd';
 import { DataPointTab } from './parliament/DataPointTab';
 import { ParliamentLayoutTab } from './parliament/ParliamentLayoutTab';
 import { BackgroundTab } from './tabs/BackgroundTab';
@@ -8,7 +7,7 @@ import { OtherTab } from './tabs/OtherTab';
 import type { TabProps } from './tabs/tabProps';
 import { TitleTab } from './tabs/TitleTab';
 import { TooltipTab } from './tabs/TooltipTab';
-import { settingItemsOf } from './settingItems';
+import { SettingsCollapse } from '@/shared/settings/SettingsCollapse';
 
 interface ParliamentSettingsViewProps extends TabProps {
   chartType: string;
@@ -28,5 +27,5 @@ export function ParliamentSettingsView({ viz, onChange, chartType, themeColors }
     { key: 'tooltip', label: 'Tooltip', children: <TooltipTab {...tab} /> },
     { key: 'other', label: 'Other', children: <OtherTab {...tab} chartType={chartType} /> }
   ];
-  return <Collapse ghost size="small" defaultActiveKey={['title']} items={settingItemsOf(items)} />;
+  return <SettingsCollapse items={items} defaultOpen={['title']} />;
 }

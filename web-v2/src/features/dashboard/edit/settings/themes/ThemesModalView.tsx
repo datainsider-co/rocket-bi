@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Button, Modal, Switch } from 'antd';
 import type { JsonObject } from '@/core/json/json';
-import { dashboardPageContainer } from '../../../theme/popupContainer';
 import { DashboardThemeType } from '../../../theme/dashboardThemes';
 import { booleanAt, DARK_THEMES, LIGHT_THEMES, stringAt, withPath, withTheme, type ThemeOption } from '../dashboardSettings.utils';
 import { useSettingSubmit } from '../useSettingSubmit';
@@ -43,7 +42,6 @@ export function ThemesModalView({ initial, onSubmit, onCancel }: ThemesModalView
       maskClosable={!saving}
       keyboard={!saving}
       onCancel={onCancel}
-      getContainer={dashboardPageContainer}
       classNames={{ root: 'theme-dialog' }}
       title="Dashboard Setting"
       footer={

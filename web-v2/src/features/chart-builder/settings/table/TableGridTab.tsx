@@ -1,8 +1,8 @@
 import { boolAt, textAt } from '../vizValue.utils';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import type { TabProps } from '../tabs/tabProps';
 import { GRID_DEFAULTS as D, gridRevert, THICKNESSES } from './tableTabs.utils';
 
@@ -16,7 +16,7 @@ export function TableGridTab({ viz, onChange, pivot = false }: TabProps & { pivo
     <ToggleSetting label={label} value={boolAt(viz, `grid.${path}`, fallback)} onChange={value => onChange({ [`grid.${path}`]: value })} />
   );
   const line = (direction: 'vertical' | 'horizontal', label: string) => (
-    <div className="flex gap-3">
+    <div className="settings-row">
       <ColorSetting className="flex-1" label={label} value={textAt(viz, `grid.${direction}.color`, D.color)} onChange={color => onChange({ [`grid.${direction}.color`]: color })} />
       <SelectSetting
         className="w-24"
@@ -28,7 +28,7 @@ export function TableGridTab({ viz, onChange, pivot = false }: TabProps & { pivo
     </div>
   );
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       {line('vertical', 'Vertical grid color')}
       {toggle('vertical.applyHeader', 'Header', D.vertical.applyHeader)}
       {toggle('vertical.applyBody', 'Body', D.vertical.applyBody)}

@@ -1,9 +1,9 @@
 import { numberAt, textAt } from '../vizValue.utils';
 import { DASH_STYLES } from '../settingOptions';
-import { ColorSetting } from '../fields/ColorSetting';
-import { NumberSetting } from '../fields/NumberSetting';
-import { SelectSetting } from '../fields/SelectSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { NumberSetting } from '@/shared/settings/fields/NumberSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import type { AxisFieldProps } from './axisFieldProps';
 import { AXIS_DEFAULTS, gridToggle } from './seriesTabs.utils';
 
@@ -14,7 +14,7 @@ export function AxisGridFields({ viz, onChange, axis, disabled }: AxisFieldProps
   return (
     <>
       <ToggleSetting label="Gridlines" disabled={disabled} value={width !== 0} onChange={enabled => onChange(gridToggle(axis, enabled))} />
-      <div className="flex gap-3">
+      <div className="settings-row">
         <ColorSetting
           className="flex-1"
           label="Grid color"

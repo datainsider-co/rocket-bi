@@ -3,6 +3,7 @@ import { FieldChoicesContext } from '@/features/chart-builder/config-panel/Field
 import { BuilderDndProvider } from '@/features/chart-builder/dnd/BuilderDndProvider';
 import { FieldTreeView } from '@/features/chart-builder/field-tree/FieldTreeView';
 import { ChartBuilderModalView } from '@/features/chart-builder/modal/ChartBuilderModalView';
+import { BuilderScope } from '@/features/chart-builder/theme/BuilderScope';
 import { BuilderResultView } from './BuilderResultView';
 import { useEtlChartBuilder, type EtlChartBuilderInput } from './useEtlChartBuilder';
 
@@ -10,15 +11,16 @@ import { useEtlChartBuilder, type EtlChartBuilderInput } from './useEtlChartBuil
 export function EtlChartBuilder({ title, ...input }: EtlChartBuilderInput & { title: string }) {
   const { tree, nodes, result, actions } = useEtlChartBuilder(input);
   return (
-    <FieldChoicesContext value={nodes}>
-      <BuilderDndProvider>
-        <ChartBuilderModalView
-          title={title}
-          actions={actions}
-          previewBackground="#fff"
-          slots={{ tree: <FieldTreeView {...tree} />, panel: <ConfigPanel />, preview: <BuilderResultView result={result} /> }}
-        />
-      </BuilderDndProvider>
-    </FieldChoicesContext>
+    <BuilderScope>
+      <FieldChoicesContext value={nodes}>
+        <BuilderDndProvider>
+          <ChartBuilderModalView
+            title={title}
+            actions={actions}
+            slots={{ tree: <FieldTreeView {...tree} />, panel: <ConfigPanel />, preview: <BuilderResultView result={result} /> }}
+          />
+        </BuilderDndProvider>
+      </FieldChoicesContext>
+    </BuilderScope>
   );
 }

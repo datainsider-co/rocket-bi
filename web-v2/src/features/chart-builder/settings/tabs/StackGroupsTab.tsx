@@ -1,5 +1,5 @@
-import { SelectSetting } from '../fields/SelectSetting';
-import { TextSetting } from '../fields/TextSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { TextSetting } from '@/shared/settings/fields/TextSetting';
 import { STACKINGS, stackGroupChange, stackingValueOf, type StackGroupRow } from './stackedTabs.utils';
 import type { TabProps } from './tabProps';
 
@@ -11,7 +11,7 @@ interface StackGroupsTabProps extends TabProps {
 /** v1 `StackTab`: stacked by value or percentage, and the stack each series goes into. */
 export function StackGroupsTab({ viz, onChange, groups }: StackGroupsTabProps) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <SelectSetting label="Stack" options={STACKINGS} value={stackingValueOf(viz)} onChange={stacking => onChange({ 'plotOptions.series.stacking': stacking })} />
       {groups.map(group => (
         <TextSetting key={group.key} label={group.name} placeholder="Input Stack Group" value={group.stack} onChange={value => onChange(stackGroupChange(group.key, value))} />

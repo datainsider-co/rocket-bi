@@ -1,10 +1,10 @@
 import { tabFilterColors } from '@/features/dashboard/charts/filter/filterStyle.utils';
 import { boolAt, textAt } from '../vizValue.utils';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { TextSetting } from '../fields/TextSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { TextSetting } from '@/shared/settings/fields/TextSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import type { TabProps } from '../tabs/tabProps';
 import { DefaultValueField, type DefaultValueFieldProps } from './DefaultValueField';
 import { DIRECTIONS, displayAsOf, tabColorKeys, tabControlRevert, tabControlSettingsOf } from './filterTabs.utils';
@@ -22,10 +22,10 @@ export function TabControlTab({ viz, onChange, chartType, defaultValue }: TabCon
   const colors = tabFilterColors(viz, displayAs);
   const searchOn = boolAt(viz, 'search.enabled', true);
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       {shown.direction && <SelectSetting label="Position" options={DIRECTIONS} value={textAt(viz, 'direction', 'row')} onChange={direction => onChange({ direction })} />}
       {shown.colors && (
-        <div className="flex gap-3">
+        <div className="settings-row">
           <ColorSetting className="flex-1" label="Inactive background" value={colors.deActive} onChange={color => onChange({ [keys.deActive]: color })} />
           <ColorSetting className="flex-1" label="Active background" value={colors.active} onChange={color => onChange({ [keys.active]: color })} />
         </div>

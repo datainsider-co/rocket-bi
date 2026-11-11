@@ -9,6 +9,7 @@ import { tabHeaderStyleOf } from '../widgets/tab/tabWidget.utils';
 import {
   applyButtonStyleOf,
   moveInOrder,
+  movedTo,
   tabItemMenuItems,
   tabWidgetMenuItems,
   widgetLabel,
@@ -149,21 +150,43 @@ describe('tab style', () => {
   it("reads v1's header and Apply button, with defaults", () => {
     expect(tabHeaderStyleOf(tab)).toEqual({
       position: 'horizontal',
+      fontFamily: 'Roboto',
       fontSize: '14px',
       color: 'var(--text-color)',
       activeBackground: 'var(--tab-widget-background-active)',
       inactiveBackground: 'var(--tab-widget-background-deactive)'
     });
     const panel = widgetFromJson({ ...newFilterPanelJson(), id: 9 }) as TabWidget;
-    expect(applyButtonStyleOf(panel)).toEqual({ title: 'Apply', color: 'var(--accent-text-color)', background: 'var(--accent)' });
+    expect(tabHeaderStyleOf(panel).activeBackground).toBe('var(--chart-background-color)');
+    expect(applyButtonStyleOf(panel)).toEqual({
+      align: 'right',
+      title: 'Apply',
+      fontFamily: 'Roboto',
+      fontSize: '14px',
+      color: 'var(--accent-text-color)',
+      background: 'var(--accent)'
+    });
   });
 
   it('writes them back over the stored JSON', () => {
-    const header = { ...tabHeaderStyleOf(tab), position: 'vertical' as const, fontSize: '16px' };
-    const json = withTabStyle(tab, header, { title: 'Go', color: '#fff', background: '#000' });
+    const header = { ...tabHeaderStyleOf(tab), position: 'vertical' as const, fontFamily: 'Barlow', fontSize: '16px' };
+    const apply = { align: 'center', title: 'Go', fontFamily: 'Montserrat', fontSize: '18px', color: '#fff', background: '#000' };
+    const json = withTabStyle(tab, header, apply);
     const written = widgetFromJson(json) as TabWidget;
     expect(tabHeaderStyleOf(written)).toEqual(header);
-    expect(applyButtonStyleOf(written).title).toBe('Go');
-    expect(json['extra_data']).toMatchObject({ current_chart_type: 'tab', header: { font_family: 'Roboto' } });
+    expect(applyButtonStyleOf(written)).toEqual(apply);
+    expect(json['extra_data']).toMatchObject({ current_chart_type: 'tab', header: { font_family: 'Barlow' }, footer: { align: 'center', apply: { font_family: 'Montserrat' } } });
+  });
+});
+
+describe('movedTo', () => {
+  it('puts a dragged tab where it was dropped', () => {
+    expect(movedTo([0, 1, 2, 3], 0, 2)).toEqual([1, 2, 0, 3]);
+    expect(movedTo([0, 1, 2, 3], 3, 1)).toEqual([0, 3, 1, 2]);
+  });
+
+  it('keeps the order for a position outside it', () => {
+    expect(movedTo([0, 1], -1, 1)).toEqual([0, 1]);
+    expect(movedTo([0, 1], 0, 2)).toEqual([0, 1]);
   });
 });

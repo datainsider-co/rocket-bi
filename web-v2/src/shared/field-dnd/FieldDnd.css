@@ -1,0 +1,69 @@
+/*
+  v1 `DropArea.vue`, `DropItem.vue`, `ConfigDraggable.scss`: a zone fields are dropped into. A grey box; while a drag
+  could land in it, a dashed accent border. Colors fall back to the app's where no dashboard theme is set.
+*/
+.field-zone {
+  position: relative;
+  border: 1px solid var(--primary, #f2f2f7);
+  border-radius: 4px;
+  background: var(--primary, #f2f2f7);
+}
+
+.field-zone--accepting {
+  border: 1.5px dashed var(--accent, var(--color-brand));
+}
+
+.field-zone--disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* v1 `.draggable`: the items 8px in from the box and 8px apart. */
+.field-zone__items {
+  margin: 8px;
+}
+
+.field-zone__entry + .field-zone__entry {
+  margin-top: 8px;
+}
+
+/* What follows the items (the hint) sits against the box's bottom, as v1's pinned `.tutorial-drop` did. */
+.field-zone__items + .field-zone__after {
+  margin-top: -3px;
+}
+
+/* v1 `DropItem` `.divider`: a 2px accent line, 8px in, in a hit area that overlaps the items around it. */
+.field-zone__gap {
+  position: relative;
+  margin: -8px 8px;
+  padding: 8px 0;
+  pointer-events: none;
+}
+
+.field-zone__gap-line {
+  height: 2px;
+  border-radius: 4px;
+}
+
+.field-zone__gap--over .field-zone__gap-line {
+  background: var(--accent, var(--color-brand));
+}
+
+.field-zone__item {
+  border-radius: 4px;
+  transition: background-color 0.15s;
+}
+
+/* v1 `.sortable-chosen` / `:active`. */
+.field-zone__item--over {
+  background: var(--active-color, rgb(89 127 255 / 5%));
+}
+
+.field-zone__item--dragging {
+  opacity: 0.4;
+}
+
+/* The line after the last item takes no room: v1's items end at the last one. */
+.field-zone__items > .field-zone__gap:last-child {
+  margin-bottom: -10px;
+}

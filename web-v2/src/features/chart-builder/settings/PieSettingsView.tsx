@@ -1,4 +1,3 @@
-import { Collapse } from 'antd';
 import { BackgroundTab } from './tabs/BackgroundTab';
 import { ColorTab } from './tabs/ColorTab';
 import { DataLabelTab } from './tabs/DataLabelTab';
@@ -7,7 +6,7 @@ import { OtherTab } from './tabs/OtherTab';
 import type { TabProps } from './tabs/tabProps';
 import { TitleTab } from './tabs/TitleTab';
 import { TooltipTab } from './tabs/TooltipTab';
-import { settingItemsOf } from './settingItems';
+import { SettingsCollapse } from '@/shared/settings/SettingsCollapse';
 import { isLegendFirst } from './settingsPanel.utils';
 
 interface PieSettingsViewProps extends TabProps {
@@ -31,5 +30,5 @@ export function PieSettingsView({ viz, onChange, chartType, themeColors }: PieSe
     { key: 'tooltip', label: 'Tooltip', children: <TooltipTab {...tab} /> },
     { key: 'other', label: 'Other', children: <OtherTab {...tab} chartType={chartType} /> }
   ];
-  return <Collapse ghost size="small" defaultActiveKey={['title']} items={settingItemsOf(items)} />;
+  return <SettingsCollapse items={items} defaultOpen={['title']} />;
 }

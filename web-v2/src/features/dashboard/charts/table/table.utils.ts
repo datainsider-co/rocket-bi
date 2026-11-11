@@ -141,3 +141,18 @@ export function headerColumnOf(setting: JsonObject): HeaderColumnOf {
 export function hasPages(response: Pick<JsonTableResponse, 'total' | 'records'>): boolean {
   return response.total !== response.records.length || response.total > 20;
 }
+
+/** The offset of the last page's first row; 0 for an empty table or a page size that is not positive. */
+export function lastPageStart(total: number, size: number): number {
+  if (total <= 0 || size <= 0) return 0;
+  return Math.floor((total - 1) / size) * size;
+}
+
+/**
+ * Whether the footer lists `page`: v1's `b-pagination` (`limit` 3, no ellipsis) shows the current page with its
+ * neighbours, the first or last three pages at either end, and nothing else.
+ */
+export function isPageListed(page: number, current: number, lastPage: number): boolean {
+  const start = Math.max(1, Math.min(current - 1, lastPage - 2));
+  return page >= start && page <= start + 2;
+}

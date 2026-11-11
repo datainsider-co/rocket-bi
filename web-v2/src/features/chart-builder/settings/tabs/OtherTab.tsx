@@ -1,7 +1,7 @@
 import { boolAt, numberAt, textAt } from '../vizValue.utils';
 import { DECIMAL_POINTS, DISPLAY_UNITS, PRECISIONS, THOUSAND_SEPARATORS } from '../settingOptions';
-import { SelectSetting } from '../fields/SelectSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { defaultDisplayUnit, displayUnitPath, otherSettingsOf } from './commonTabs.utils';
 import type { TabProps } from './tabProps';
 
@@ -17,9 +17,9 @@ export function OtherTab({ viz, onChange, chartType }: OtherTabProps) {
     <ToggleSetting label={label} value={boolAt(viz, key, fallback)} onChange={value => onChange({ [key]: value })} />
   );
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       {shown.numberFormat && (
-        <div className="flex gap-3">
+        <div className="settings-row">
           <SelectSetting
             className="flex-1"
             label="Display unit"
@@ -30,7 +30,7 @@ export function OtherTab({ viz, onChange, chartType }: OtherTabProps) {
           <SelectSetting className="w-24" label="Precision" options={PRECISIONS} value={numberAt(viz, 'precision', 2)} onChange={precision => onChange({ precision })} />
         </div>
       )}
-      <div className="flex gap-3">
+      <div className="settings-row">
         <SelectSetting className="flex-1" label="Decimal point" options={DECIMAL_POINTS} value={textAt(viz, 'decimalPoint', '.')} onChange={decimalPoint => onChange({ decimalPoint })} />
         {shown.thousandSeparator && (
           <SelectSetting

@@ -313,6 +313,31 @@
   opacity: 0.5;
 }
 
+/* First and last (v1 `b-pagination`): pills of their own inside antd's previous and next items. */
+.flatten-table .ant-pagination .ant-pagination-prev,
+.flatten-table .ant-pagination .ant-pagination-next {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.flatten-table__page-jump {
+  min-width: 23px;
+  height: 20px;
+  padding: 0 4px;
+  border: none;
+  border-radius: 800px;
+  background: transparent;
+  color: var(--ft-header-color, var(--table-header-color, var(--secondary-text-color)));
+  font-size: 12px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.flatten-table__page-jump:disabled {
+  cursor: not-allowed;
+}
+
 /* v1 `handleResponsiveForPagingControl`: at 400px or less, only the previous, current and next page. */
 @container (max-width: 400px) {
   .flatten-table .ant-pagination-total-text > * {
@@ -320,6 +345,7 @@
   }
 
   .flatten-table .ant-pagination .ant-pagination-item:not(.ant-pagination-item-active),
+  .flatten-table__page-jump,
   .flatten-table .ant-pagination .ant-pagination-jump-prev,
   .flatten-table .ant-pagination .ant-pagination-jump-next {
     display: none;

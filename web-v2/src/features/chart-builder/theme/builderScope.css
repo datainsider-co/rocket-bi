@@ -1,0 +1,161 @@
+/*
+  v1's menus in the builder (`data-builder/custom/vue-context.scss`, `.v-context { text-align: center }`): a white
+  panel in the menu shadow, rows of 14px secondary text 8px around (left aligned as it renders, whatever its
+  `text-align: center` says); the row in use ends with an accent check instead of a fill; a group's title in bold.
+*/
+.builder-scope .ant-dropdown .ant-dropdown-menu {
+  min-width: 82px;
+  max-height: calc(100vh - 50px);
+  padding: 0;
+  overflow-y: auto;
+  border: none;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: var(--menu-shadow);
+}
+
+.builder-scope .ant-dropdown .ant-dropdown-menu-item,
+.builder-scope .ant-dropdown .ant-dropdown-menu-submenu-title {
+  padding: 8px;
+  border-radius: 0;
+  color: var(--secondary-text-color);
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.builder-scope .ant-dropdown .ant-dropdown-menu-item:not(.ant-dropdown-menu-item-disabled):hover,
+.builder-scope .ant-dropdown .ant-dropdown-menu-item-active:not(.ant-dropdown-menu-item-disabled),
+.builder-scope .ant-dropdown .ant-dropdown-menu-submenu-title:hover {
+  background: var(--active-color);
+  color: var(--text-color);
+}
+
+.builder-scope .ant-dropdown .ant-dropdown-menu-item-selected {
+  background: none;
+  color: var(--secondary-text-color);
+}
+
+.builder-scope .ant-dropdown .ant-dropdown-menu-item-selected::after {
+  margin-left: 24px;
+  color: var(--accent);
+  content: '✓';
+}
+
+.builder-scope .ant-dropdown .ant-dropdown-menu-item-group-title {
+  padding: 8px;
+  color: var(--text-color);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.builder-scope .ant-dropdown .ant-dropdown-menu-item-group-list {
+  margin: 0;
+}
+
+/* v1 `SelectFieldContext`: the tables and their fields, at most 250 by 316, each name on one line. */
+.builder-scope .builder-field-menu .ant-dropdown-menu {
+  width: 250px;
+  max-height: 316px;
+}
+
+.builder-scope .builder-field-menu .ant-dropdown-menu-item {
+  padding: 8px 16px;
+}
+
+.builder-scope .builder-field-menu .ant-dropdown-menu-title-content {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*
+  v1 `DiCustomModal` in its "full" form, used by the builder's small dialogs: grey fields without border (inputs 42px,
+  dropdowns 40px), labels 14 / 18 over them, and a footer of two buttons 42px tall sharing its width.
+*/
+.builder-dialog.ant-modal .ant-form-item {
+  margin-bottom: 8px;
+}
+
+.builder-dialog.ant-modal .ant-form-item-label {
+  padding-bottom: 8px;
+}
+
+.builder-dialog.ant-modal .ant-form-item-label > label {
+  height: auto;
+  color: var(--text-color);
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.builder-dialog.ant-modal .ant-input,
+.builder-dialog.ant-modal .ant-select {
+  border-color: transparent;
+  border-radius: 4px;
+  background: var(--primary, #f2f2f7);
+  box-shadow: none;
+}
+
+.builder-dialog.ant-modal .ant-input {
+  height: 42px;
+  padding: 0 12px;
+}
+
+.builder-dialog.ant-modal .ant-select {
+  width: 100%;
+  height: 40px;
+}
+
+.builder-dialog.ant-modal .ant-modal-footer {
+  display: flex;
+  gap: 16px;
+}
+
+.builder-dialog.ant-modal .ant-modal-footer > .ant-btn {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  margin-inline-start: 0;
+}
+
+/* v1 `ConfigModal`'s header: "Config Data" at 16px over the source at 12px, on one line. */
+.builder-dialog__title {
+  color: var(--text-color);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+.builder-dialog__subtitle {
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--secondary-text-color);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: normal;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.builder-dialog__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* v1 `DiToggle` with `label-at="left"` and `is-fill`: the label, then the switch at the row's end. */
+.builder-dialog__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 0 4px;
+  font-size: 14px;
+}
+
+.builder-dialog__toggle label {
+  flex: 1;
+  cursor: pointer;
+}

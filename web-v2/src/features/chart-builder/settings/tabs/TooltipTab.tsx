@@ -1,8 +1,8 @@
 import { textAt } from '../vizValue.utils';
 import { FONT_FAMILIES } from '../settingOptions';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
 import { TOOLTIP_DEFAULTS, tooltipRevert } from './commonTabs.utils';
 import type { TabProps } from './tabProps';
 
@@ -12,8 +12,8 @@ import type { TabProps } from './tabProps';
  */
 export function TooltipTab({ viz, onChange }: TabProps) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-3">
+    <div className="settings-stack">
+      <div className="settings-row">
         <ColorSetting className="flex-1" label="Color" value={textAt(viz, 'tooltip.style.color', TOOLTIP_DEFAULTS.color)} onChange={color => onChange({ 'tooltip.style.color': color })} />
         <ColorSetting
           className="flex-1"

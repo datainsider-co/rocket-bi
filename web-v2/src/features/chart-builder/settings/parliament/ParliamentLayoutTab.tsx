@@ -1,6 +1,6 @@
 import { textAt } from '../vizValue.utils';
 import { PARLIAMENT_LAYOUTS } from '../settingOptions';
-import { SelectSetting } from '../fields/SelectSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
 import type { TabProps } from '../tabs/tabProps';
 
 /** v1 `ParliamentLayoutTab`: the dots in a half circle, a rectangle or a full circle. */

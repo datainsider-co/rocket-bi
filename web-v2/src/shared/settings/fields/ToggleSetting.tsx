@@ -1,4 +1,5 @@
 import { Switch } from 'antd';
+import '../Settings.css';
 
 interface ToggleSettingProps {
   label: string;
@@ -7,12 +8,12 @@ interface ToggleSettingProps {
   onChange: (value: boolean) => void;
 }
 
-/** An on / off setting, its label on the left (v1 `ToggleSetting`). */
+/** An on / off setting: the switch, then its label (v1 `ToggleSetting`). */
 export function ToggleSetting({ label, value, disabled, onChange }: ToggleSettingProps) {
   return (
-    <label className="flex items-center justify-between gap-2">
-      <span className="text-sm">{label}</span>
+    <label className={`toggle-setting${disabled ? ' toggle-setting--disabled' : ''}`}>
       <Switch size="small" checked={value} disabled={disabled} onChange={onChange} />
+      <span>{label}</span>
     </label>
   );
 }

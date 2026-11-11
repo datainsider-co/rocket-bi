@@ -1,0 +1,180 @@
+/*
+  The dashboard's dialog shells, measured on v1 at 1440 px: `DiCustomModal` (`CustomDialog`), `EtlModal`
+  (`HeaderDialog`) and the confirmation (`ConfirmDialogView`). Over `dashboardAntd.css`, which gives every modal of the
+  page v1's paddings, title and corners.
+*/
+@layer components {
+  /* v1 `DiCustomModal`, `buttonSize="full"`: two 40px buttons sharing the footer, 16px apart. */
+  .dashboard-page .custom-dialog .ant-modal-footer {
+    display: flex;
+    gap: 16px;
+    padding-top: 17px;
+  }
+
+  .dashboard-page .custom-dialog .ant-modal-footer > .ant-btn,
+  .dashboard-page .custom-dialog .ant-modal-footer > .ant-btn + .ant-btn {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    margin-inline-start: 0;
+  }
+
+  /* v1 `DiInputComponent`: a 14 / 18 label 8px over a grey field without border, 42px tall. */
+  .custom-dialog__label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  .dashboard-page .custom-dialog .ant-input,
+  .dashboard-page .custom-dialog .ant-input-affix-wrapper {
+    height: 42px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 4px;
+    background: #f2f2f7;
+    box-shadow: none;
+    color: var(--text-color);
+    font-size: 14px;
+  }
+
+  .dashboard-page .custom-dialog .ant-input-affix-wrapper > .ant-input {
+    height: auto;
+    padding: 0;
+    background: none;
+  }
+
+  .dashboard-page .custom-dialog .ant-input::placeholder {
+    color: #677883;
+  }
+
+  /* v1 `.di-custom-modal--error`, and the `error` slot of the input. */
+  .custom-dialog__error {
+    margin-top: 8px;
+    color: var(--danger);
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  /* v1 `EtlModal`: grey around its panels, or white (`secondary-background-color`). */
+  .dashboard-page .header-dialog--grey .ant-modal-container {
+    background: var(--primary);
+  }
+
+  .dashboard-page .header-dialog .ant-modal-title {
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: normal;
+  }
+
+  .header-dialog__header {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .header-dialog__titles {
+    flex: 1;
+    min-width: 0;
+    margin-right: 16px;
+  }
+
+  /* bootstrap's `h4`; the dialogs with a subtitle set their own `.title`. */
+  .header-dialog__title {
+    margin-bottom: 8px;
+    font-size: 21px;
+    line-height: 1.4;
+  }
+
+  .header-dialog__title--large {
+    margin-bottom: 4px;
+    font-size: 24px;
+  }
+
+  .header-dialog__subtitle {
+    margin-bottom: 12px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  /* v1 `.cancel-button` (a bordered `DiButton` 24.67px tall) and `.submit-button` (`btn-sm`, 4px 16px). */
+  .dashboard-page .header-dialog .header-dialog__cancel,
+  .dashboard-page .header-dialog .header-dialog__submit {
+    flex: none;
+    height: 25px;
+    border-radius: 4px;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: normal;
+  }
+
+  .dashboard-page .header-dialog .header-dialog__cancel {
+    margin-right: 16px;
+    padding: 0 8px;
+  }
+
+  .dashboard-page .header-dialog .header-dialog__submit {
+    height: 24px;
+    padding: 0 16px;
+  }
+
+  /* v1's sweetalert confirmation: 398px, a 48px warning ring, the title in bold and two 42px buttons. */
+  .dashboard-page .confirm-dialog .ant-modal-container {
+    padding: 16px;
+    text-align: center;
+  }
+
+  .dashboard-page .confirm-dialog .ant-modal-body {
+    padding: 0;
+  }
+
+  .confirm-dialog__icon {
+    box-sizing: border-box;
+    width: 48px;
+    height: 48px;
+    margin: 8px auto 0;
+    border: 3px solid #ffab00;
+    border-radius: 50%;
+    color: #ffab00;
+    font-weight: 500;
+    font-size: 36.8px;
+    line-height: 42px;
+    user-select: none;
+  }
+
+  .confirm-dialog__title {
+    margin: 12px 0 8px;
+    color: var(--text-color);
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 19px;
+    letter-spacing: 0.2px;
+  }
+
+  .confirm-dialog__message {
+    margin: 0 22px;
+    color: var(--text-color);
+    font-size: 14px;
+    line-height: 16px;
+    overflow-wrap: break-word;
+  }
+
+  .confirm-dialog__actions {
+    display: flex;
+    gap: 9px;
+    margin-top: 32px;
+    padding: 4px;
+  }
+
+  .dashboard-page .confirm-dialog .confirm-dialog__actions > .ant-btn {
+    flex: 1;
+    height: 42px;
+    font-weight: 400;
+    letter-spacing: normal;
+  }
+
+  .dashboard-page .confirm-dialog .confirm-dialog__actions > .ant-btn-variant-outlined {
+    color: var(--text-color);
+  }
+}

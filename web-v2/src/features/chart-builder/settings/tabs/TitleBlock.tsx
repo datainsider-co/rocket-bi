@@ -1,11 +1,11 @@
 import { textAt, boolAt } from '../vizValue.utils';
 import { FONT_FAMILIES, FONT_SIZES } from '../settingOptions';
-import { AlignSetting } from '../fields/AlignSetting';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { TextSetting } from '../fields/TextSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { AlignSetting } from '@/shared/settings/fields/AlignSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { TextSetting } from '@/shared/settings/fields/TextSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { TITLE_DEFAULTS, titleRevert, type TitleKey } from './commonTabs.utils';
 import type { TabProps } from './tabProps';
 
@@ -26,13 +26,13 @@ export function TitleBlock({ viz, onChange, toggles, name }: TitleBlockProps) {
   const set = (path: string) => (value: unknown) => onChange({ [`${name}.${path}`]: value });
   const { name: label, placeholder } = LABELS[name];
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       {toggles && <ToggleSetting label={label} value={boolAt(viz, `${name}.enabled`, defaults.enabled)} onChange={set('enabled')} />}
       <TextSetting label={`${label} text`} placeholder={placeholder} value={textAt(viz, `${name}.text`, defaults.text)} onChange={set('text')} />
       <SelectSetting label="Font family" options={FONT_FAMILIES} value={textAt(viz, `${name}.style.fontFamily`, defaults.fontFamily)} onChange={set('style.fontFamily')} />
-      <div className="flex items-end gap-3">
-        <ColorSetting className="w-32" label="Font color" value={textAt(viz, `${name}.style.color`, defaults.color)} onChange={set('style.color')} />
-        <SelectSetting className="w-20" label="Text size" options={FONT_SIZES} value={textAt(viz, `${name}.style.fontSize`, defaults.fontSize)} onChange={set('style.fontSize')} />
+      <div className="settings-row settings-row--end">
+        <ColorSetting label="Font color" value={textAt(viz, `${name}.style.color`, defaults.color)} onChange={set('style.color')} />
+        <SelectSetting className="settings-size" label="Text size" options={FONT_SIZES} value={textAt(viz, `${name}.style.fontSize`, defaults.fontSize)} onChange={set('style.fontSize')} />
         <AlignSetting label="Alignment" value={textAt(viz, `${name}.align`, defaults.align)} onChange={set('align')} />
       </div>
       <RevertButton onRevert={() => onChange(titleRevert(name))} />

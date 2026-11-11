@@ -13,7 +13,7 @@ interface MenuLinkViewProps {
 export function MenuLinkView({ label, ariaLabel, items, selected, onSelect }: MenuLinkViewProps) {
   return (
     <Dropdown trigger={['click']} disabled={items.length === 0} menu={{ items, selectable: true, selectedKeys: [selected], onClick: ({ key }) => onSelect(key) }}>
-      <button type="button" aria-label={ariaLabel} className="cursor-pointer rounded border-0 bg-transparent px-1 text-inherit underline decoration-dotted hover:bg-black/5">
+      <button type="button" aria-label={ariaLabel} className="zone-link">
         {label}
       </button>
     </Dropdown>

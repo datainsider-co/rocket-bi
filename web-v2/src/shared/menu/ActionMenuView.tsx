@@ -17,10 +17,12 @@ interface ActionMenuViewProps<T extends string> {
   target: string;
   /** The row the menu also opens on with a right click (v1 opened these menus that way only). */
   children: ReactNode;
+  /** Keeps the "..." in sight instead of showing it on hover. */
+  pinned?: boolean;
 }
 
-/** A tree row with a "..." menu, shown on hover, that also opens on right click. */
-export function ActionMenuView<T extends string>({ items, onAction, target, children }: ActionMenuViewProps<T>) {
+/** A tree row with a "..." menu, shown on hover unless pinned, that also opens on right click. */
+export function ActionMenuView<T extends string>({ items, onAction, target, children, pinned = false }: ActionMenuViewProps<T>) {
   const menu = { items: items.map(item => ({ key: item.key, label: item.label, danger: item.danger })), onClick: ({ key }: { key: string }) => onAction(key as T) };
   return (
     <Dropdown trigger={['contextMenu']} menu={menu}>
@@ -30,7 +32,7 @@ export function ActionMenuView<T extends string>({ items, onAction, target, chil
           <Button
             type="text"
             size="small"
-            className={`${FIELD_NO_DRAG_CLASS} shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 aria-expanded:opacity-100`}
+            className={`${FIELD_NO_DRAG_CLASS} shrink-0 ${pinned ? '' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 aria-expanded:opacity-100'}`}
             icon={<MoreOutlined />}
             aria-label={`Actions of ${target}`}
           />

@@ -1,0 +1,18 @@
+/*
+  The layer the dashboard's dialogs render in (`DialogScope`). It carries the dashboard page's classes for the theme
+  variables and the CSS that restyles antd, but is no page: it covers the screen without taking clicks, and only what
+  is put in it (dialogs, popups) does.
+*/
+.dialog-scope.dashboard-page {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: block;
+  min-height: 0;
+  background: none;
+  pointer-events: none;
+}
+
+.dialog-scope > * {
+  pointer-events: auto;
+}

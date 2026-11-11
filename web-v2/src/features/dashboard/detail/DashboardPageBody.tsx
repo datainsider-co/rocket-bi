@@ -2,6 +2,7 @@ import { DashboardSetting } from '@/core/dashboard/DashboardSetting';
 import { ErrorState } from '@/shared/status/ErrorState';
 import { Loading } from '@/shared/status/Loading';
 import { DashboardPermissionsProvider } from '../access/DashboardPermissionsContext';
+import { DialogScope } from '../theme/DialogScope';
 import { PasswordGateView } from '../access/PasswordGateView';
 import { DashboardEditProvider } from '../edit/DashboardEditContext';
 import { SettingButtonView } from '../edit/settings/SettingButtonView';
@@ -36,7 +37,13 @@ export function DashboardPageBody({ dashboard, load, state, layout, onBack }: Da
     );
   }
   // Nothing is queried until the password is given.
-  if (access.lock === 'locked') return <PasswordGateView onUnlock={access.onUnlock} onCancel={onBack} />;
+  if (access.lock === 'locked') {
+    return (
+      <DialogScope>
+        <PasswordGateView onUnlock={access.onUnlock} onCancel={onBack} />
+      </DialogScope>
+    );
+  }
   return (
     <DashboardPermissionsProvider permissions={access.permissions}>
       <ViewAsProvider user={viewAs.user}>

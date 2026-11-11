@@ -1,6 +1,6 @@
 import { boolAt } from '../vizValue.utils';
-import { RevertButton } from '../fields/RevertButton';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { AxisGridFields } from './AxisGridFields';
 import { AxisLabelFields } from './AxisLabelFields';
 import { AxisRangeFields } from './AxisRangeFields';
@@ -21,7 +21,7 @@ export function DualYAxisTab({ viz, onChange, defaultTitle, seriesKeys }: DualYA
   const visible = boolAt(viz, `${AXIS}.visible`, false);
   const group = { viz, onChange, axis: AXIS, disabled: !visible };
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <ToggleSetting label="On" value={visible} onChange={next => onChange(dualAxisToggle(next, seriesKeys))} />
       <AxisLabelFields {...group} />
       <AxisTitleFields {...group} defaultTitle={defaultTitle} />

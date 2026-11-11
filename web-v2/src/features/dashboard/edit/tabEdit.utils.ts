@@ -68,6 +68,15 @@ export function moveInOrder(order: readonly number[], index: number, step: -1 | 
   return next;
 }
 
+/** `order` with the entry at `from` taken out and put back at `to` (v1 `SortModal`'s drag). */
+export function movedTo(order: readonly number[], from: number, to: number): number[] {
+  if (from < 0 || from >= order.length || to < 0 || to >= order.length) return [...order];
+  const next = [...order];
+  const [moved] = next.splice(from, 1);
+  next.splice(to, 0, moved!);
+  return next;
+}
+
 /**
  * What can go into a tab (v1 `widgetInDashboard`): widgets on the dashboard itself, not other tabs. A filter panel
  * takes filters only (v1 `FilterableSetting`).
@@ -144,19 +153,36 @@ export function tabItemMenuItems(widget: TabWidget, index: number, permissions: 
   ];
 }
 
-/** The filter panel's Apply button (v1 `footer.apply`). */
+/** The filter panel's footer (v1 `footer`): where Apply sits, and how it looks (`footer.apply`). */
 export interface ApplyButtonStyle {
+  align: string;
   title: string;
+  fontFamily: string;
+  fontSize: string;
   color: string;
   background: string;
 }
 
+/** v1 `GroupFilter.defaultSetting().footer`, what Revert puts back. */
+export const DEFAULT_APPLY_BUTTON: ApplyButtonStyle = {
+  align: 'right',
+  title: 'Apply',
+  fontFamily: 'Roboto',
+  fontSize: '14px',
+  color: 'var(--accent-text-color)',
+  background: 'var(--accent)'
+};
+
 export function applyButtonStyleOf(widget: TabWidget): ApplyButtonStyle {
-  const apply = asRecord(getPath(widget.json, ['extra_data', 'footer', 'apply']));
+  const footer = asRecord(getPath(widget.json, ['extra_data', 'footer']));
+  const apply = asRecord(footer['apply']);
   return {
-    title: asString(apply['title']) || 'Apply',
-    color: asString(apply['color'], 'var(--accent-text-color)'),
-    background: asString(apply['background'], 'var(--accent)')
+    align: asString(footer['align']) || DEFAULT_APPLY_BUTTON.align,
+    title: asString(apply['title']) || DEFAULT_APPLY_BUTTON.title,
+    fontFamily: asString(apply['font_family']) || DEFAULT_APPLY_BUTTON.fontFamily,
+    fontSize: asString(apply['font_size']) || DEFAULT_APPLY_BUTTON.fontSize,
+    color: asString(apply['color'], DEFAULT_APPLY_BUTTON.color),
+    background: asString(apply['background'], DEFAULT_APPLY_BUTTON.background)
   };
 }
 
@@ -172,12 +198,19 @@ export function withTabStyle(widget: TabWidget, header: TabHeaderStyle, apply?: 
       header: {
         ...storedHeader,
         position: header.position,
+        font_family: header.fontFamily,
         font_size: header.fontSize,
         color: header.color,
         active: { ...asRecord(storedHeader['active']), background: header.activeBackground },
         in_active: { ...asRecord(storedHeader['in_active']), background: header.inactiveBackground }
       },
-      ...(apply && { footer: { ...footer, apply: { ...asRecord(footer['apply']), title: apply.title, color: apply.color, background: apply.background } } })
+      ...(apply && {
+        footer: {
+          ...footer,
+          align: apply.align,
+          apply: { ...asRecord(footer['apply']), title: apply.title, font_family: apply.fontFamily, font_size: apply.fontSize, color: apply.color, background: apply.background }
+        }
+      })
     }
   };
 }

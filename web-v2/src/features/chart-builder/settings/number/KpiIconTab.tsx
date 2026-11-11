@@ -1,8 +1,8 @@
 import { boolAt, textAt } from '../vizValue.utils';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import type { TabProps } from '../tabs/tabProps';
 import { IconGridView } from './IconGridView';
 import { ICON_SHAPES, iconRevert, iconToggle, kpiIconDefaults } from './numberTabs.utils';
@@ -15,10 +15,10 @@ export function KpiIconTab({ viz, onChange }: TabProps) {
   const background = textAt(viz, 'icon.background', defaults.background);
   const set = (path: string) => (value: string) => onChange({ [`icon.${path}`]: value });
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <ToggleSetting label="Show icon" value={!off} onChange={enabled => onChange(iconToggle(enabled, viz))} />
       <IconGridView value={textAt(viz, 'icon.iconClass', defaults.iconClass)} color={color} background={background} disabled={off} onChange={set('iconClass')} />
-      <div className="flex gap-3">
+      <div className="settings-row">
         <ColorSetting className="flex-1" label="Icon color" disabled={off} value={color} onChange={set('color')} />
         <ColorSetting className="flex-1" label="Background" disabled={off} value={background} onChange={set('background')} />
       </div>

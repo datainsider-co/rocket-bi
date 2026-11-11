@@ -1,4 +1,4 @@
-import { asBoolean, asRecord, asString, getPath, type JsonObject } from '@/core/json/json';
+import { asBoolean, asNumber, asRecord, asString, getPath, isRecord, type JsonObject } from '@/core/json/json';
 import type { Position, WidgetId } from './Position';
 import { WidgetClassName, type TabItem, type Widget } from './Widget';
 
@@ -21,22 +21,33 @@ export const NEW_WIDGET_POSITION = {
 
 /** v1 `TextWidget.getRenderStyle` options, kept in `extra_data.style_settings`. */
 export interface TextStyle {
+  fontFamily: string;
   fontSize: string;
   fontColor: string;
-  textAlign: 'left' | 'center' | 'right';
+  /** 0 to 100. */
+  opacity: number;
+  /** `left`, `center`, `right`, or the theme variable a new text starts with. */
+  textAlign: string;
   isBold: boolean;
   isItalic: boolean;
   isUnderline: boolean;
+  /** The card's color behind the text, and how much of it shows (0 to 100). */
+  background: string;
+  backgroundOpacity: number;
 }
 
-/** v1 `TextWidget.defaultStyleSettings`, with the theme's variables for colors. */
+/** v1 `TextWidget.defaultStyleSettings`, with the theme's variables for colors and the font. */
 export const DEFAULT_TEXT_STYLE: TextStyle = {
+  fontFamily: 'var(--widget-primary-font-family, Roboto)',
   fontSize: '12px',
   fontColor: 'var(--text-color)',
-  textAlign: 'left',
+  opacity: 100,
+  textAlign: 'var(--widget-primary-font-align, center)',
   isBold: false,
   isItalic: false,
-  isUnderline: false
+  isUnderline: false,
+  background: 'var(--chart-background-color)',
+  backgroundOpacity: 100
 };
 
 export interface TextContent {
@@ -51,11 +62,18 @@ function styleSettings(json: JsonObject): JsonObject {
 
 export function textStyleOf(json: JsonObject): TextStyle {
   const style = styleSettings(json);
-  const align = style['text_align'];
+  const align = asString(style['text_align']);
+  const isAlign = align === 'left' || align === 'center' || align === 'right' || align.startsWith('var(');
+  // v1: a widget saved before style settings takes their defaults; one with settings, the getter's `left`.
+  const hasSettings = isRecord(getPath(json, ['extra_data', 'style_settings']));
   return {
+    fontFamily: asString(style['font_family']) || DEFAULT_TEXT_STYLE.fontFamily,
     fontSize: asString(style['font_size'], DEFAULT_TEXT_STYLE.fontSize),
     fontColor: asString(style['font_color'], DEFAULT_TEXT_STYLE.fontColor),
-    textAlign: align === 'center' || align === 'right' ? align : 'left',
+    opacity: asNumber(style['opacity'], DEFAULT_TEXT_STYLE.opacity),
+    background: asString(style['background']) || DEFAULT_TEXT_STYLE.background,
+    backgroundOpacity: asNumber(style['background_opacity'], DEFAULT_TEXT_STYLE.backgroundOpacity),
+    textAlign: isAlign ? align : hasSettings ? 'left' : DEFAULT_TEXT_STYLE.textAlign,
     isBold: asBoolean(style['is_bold']),
     isItalic: asBoolean(style['is_italic']),
     isUnderline: asBoolean(style['is_underline'])
@@ -80,12 +98,13 @@ export function textWidgetJson(json: JsonObject, { content, isHtmlRender, style 
       current_chart_type: WidgetClassName.Text,
       ...extraData,
       style_settings: {
-        opacity: 100,
-        background_opacity: 100,
-        font_family: 'Roboto',
         ...styleSettings(json),
+        font_family: style.fontFamily,
         font_size: style.fontSize,
         font_color: style.fontColor,
+        opacity: style.opacity,
+        background: style.background,
+        background_opacity: style.backgroundOpacity,
         text_align: style.textAlign,
         is_bold: style.isBold,
         is_italic: style.isItalic,

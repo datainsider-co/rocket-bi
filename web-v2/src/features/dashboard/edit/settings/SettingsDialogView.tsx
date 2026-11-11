@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Button, Modal, Tabs } from 'antd';
 import type { JsonObject } from '@/core/json/json';
-import { dashboardPageContainer } from '../../theme/popupContainer';
 import { useSettingSubmit } from './useSettingSubmit';
 import type { SettingsSectionProps } from './settingsSection';
 import './settings.css';
@@ -43,7 +42,6 @@ export function SettingsDialogView({ id, title, icon, tabs, initial, onSubmit, o
       maskClosable={!saving}
       keyboard={!saving}
       onCancel={onCancel}
-      getContainer={dashboardPageContainer}
       classNames={{ root: `setting-dialog setting-dialog--${id}` }}
       title={
         <span id={id} className="setting-dialog__title">

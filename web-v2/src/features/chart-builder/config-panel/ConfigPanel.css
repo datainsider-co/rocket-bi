@@ -1,0 +1,336 @@
+/* v1 `ConfigBuilder`, `DropArea`, `ConfigDraggable`, `DraggableItem`, `FilterDraggable`, `FilterItem`: the builder's zones. */
+.config-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--text-color);
+}
+
+.config-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* A zone's title: medium 14px with 0.6px spacing, "(optional)" in secondary text 5px after. */
+.config-zone__title {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 0.6px;
+  user-select: none;
+}
+
+.config-zone__optional {
+  margin-left: 5px;
+  color: var(--secondary-text-color);
+}
+
+/* v1 `.tutorial-drop`: the drag glyph, the hint and "click here" in the accent, centered, 16px around. */
+.drop-hint {
+  padding: 16px;
+  letter-spacing: 0.2px;
+  text-align: center;
+  user-select: none;
+}
+
+.drop-hint img {
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.drop-hint__link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.drop-hint__link:hover {
+  color: var(--accent-hover-color, var(--accent));
+  text-decoration: underline;
+}
+
+/* v1 `.items` of a dropped field: 8px around a row of links, the name in bold, the "..." on hover. */
+.zone-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 8px;
+  letter-spacing: 0.2px;
+}
+
+.zone-item__contents {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  min-width: 0;
+}
+
+/* v1 `a.select-function`: underlined secondary text, 4px beside it. */
+.zone-link {
+  padding: 0 4px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--secondary-text-color);
+  font: inherit;
+  letter-spacing: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.zone-link:hover,
+.zone-link:focus-visible,
+.zone-item__name:hover,
+.zone-item__name:focus-visible {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.zone-link:disabled {
+  cursor: default;
+}
+
+/* v1 `label.display-name`. */
+.zone-item__name {
+  min-width: 0;
+  max-width: 100%;
+  padding: 0 4px;
+  overflow: hidden;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--secondary-text-color);
+  font: inherit;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: inherit;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+button.zone-item__name {
+  cursor: pointer;
+}
+
+/* v1 `.display-n-element`. */
+.zone-item__top {
+  padding: 0 4px;
+  font-weight: 700;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+/* v1 `.more-icon`: a round 20px button, shown while the row is hovered. */
+.zone-more {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 24px;
+  background: none;
+  color: var(--secondary-text-color);
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.zone-item:hover .zone-more,
+.condition-item:hover .zone-more,
+.zone-more:focus-visible,
+.zone-more[aria-expanded='true'],
+.zone-more--pinned {
+  opacity: 1;
+}
+
+.zone-more:hover {
+  background: var(--line-d6d6d6, #d6d6d6);
+  color: #fff;
+}
+
+/* v1 `FilterDraggable`: each AND group a card on the hover color, "Or" between groups. */
+.filter-zone__groups {
+  margin: 8px;
+}
+
+.filter-zone__group {
+  min-width: 0;
+  margin: 8px 0;
+  padding: 0;
+  border: none;
+}
+
+.filter-zone__group > .field-zone {
+  border-color: var(--hover-color);
+  background: var(--hover-color);
+}
+
+.filter-zone__group > .field-zone--accepting {
+  border: 1px solid var(--accent);
+}
+
+.filter-zone__group > .field-zone > .field-zone__items {
+  margin: 0;
+  padding: 8px;
+}
+
+/* v1 `.drop-and-label`: "AND" in the group's top right corner while a field is dragged. */
+.filter-zone__and {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  display: none;
+  padding: 6px 8px;
+  border-radius: 0 4px;
+  background: var(--accent);
+  color: var(--accent-text-color, #fff);
+  font-weight: 300;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.filter-zone__group:has(> .field-zone--accepting) {
+  position: relative;
+}
+
+.filter-zone__group:has(> .field-zone--accepting) .filter-zone__and {
+  display: block;
+}
+
+.filter-zone__or {
+  color: var(--secondary-text-color);
+  text-align: center;
+}
+
+/* v1 `FilterItem` `.item`: the column in bold, the condition faded, its values as accent chips. */
+.condition-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 4px 8px;
+  letter-spacing: 0.2px;
+}
+
+.condition-item__body {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin-right: 16px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.condition-item__type {
+  margin: 0 4px;
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+.condition-item__empty {
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* v1 `ChipButton`. */
+.condition-chip {
+  max-width: 100%;
+  padding: 0 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--accent-text-color, #fff);
+  font-size: 12px;
+  line-height: 25px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* v1 `InternalFilterPopover`: 380px, 16px around (20px at the right), a deeper shadow, opening over the condition. */
+.condition-popover.ant-popover .ant-popover-container {
+  padding: 16px 20px 16px 16px;
+  border-radius: 4px;
+  background: var(--menu-background-color, #fff);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 16%);
+}
+
+.condition-editor {
+  display: flex;
+  flex-direction: column;
+  width: 380px;
+  color: var(--text-color);
+}
+
+.condition-editor__title {
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.6px;
+}
+
+.condition-editor__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.condition-editor__none {
+  color: var(--secondary-text-color);
+}
+
+.condition-editor__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  letter-spacing: 0.18px;
+}
+
+/* v1's ghost delete button: the bin at 16px, red while hovered. */
+.condition-editor__remove {
+  display: flex;
+  margin: -8px auto -8px -8px;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--text-color);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.condition-editor__remove:hover,
+.condition-editor__remove:focus-visible {
+  background: var(--hover-color);
+  color: var(--danger);
+}
+
+.condition-editor__footer .ant-btn {
+  height: 42px;
+  padding: 0 27px;
+}
+
+/* v1 `[border-accent]`: Cancel outlined and lettered in the accent. */
+.condition-editor__footer .condition-editor__cancel.ant-btn {
+  padding: 0 15px;
+  border-color: var(--accent);
+  color: var(--accent);
+}

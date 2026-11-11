@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { FilterCondition, type InternalFilter } from '@/core/query/internalFilter';
+import { DashboardStoryFrame } from '../../theme/DashboardStoryFrame';
 import { HeaderFilterBarView } from './HeaderFilterBarView';
-import '../../theme/dashboardTheme.css';
 
 const field = (name: string, type: string) => ({ class_name: 'table_field', db_name: 'sample_v2', tbl_name: 'sales', field_name: name, field_type: type });
 
@@ -18,13 +18,13 @@ const filters: InternalFilter[] = [
 function Playground() {
   const [items, setItems] = useState(filters);
   return (
-    <div className="dashboard-theme" data-dashboard-theme="light-default">
+    <DashboardStoryFrame>
       <HeaderFilterBarView
         filters={items}
         onChange={next => setItems(current => current.map(item => (item.id === next.id ? next : item)))}
         onRemove={id => setItems(current => current.filter(item => item.id !== id))}
       />
-    </div>
+    </DashboardStoryFrame>
   );
 }
 

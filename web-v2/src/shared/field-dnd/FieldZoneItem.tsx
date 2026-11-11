@@ -2,6 +2,7 @@ import { useCallback, type ReactNode } from 'react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { useFieldDnd } from './FieldDndContext';
 import { sourceData, targetData, type ZoneId } from './fieldDnd.utils';
+import './FieldDnd.css';
 
 export interface FieldItemState {
   /** This item is the one being dragged. */
@@ -48,7 +49,7 @@ export function FieldZoneItem({ zoneId, itemKey, index, disabled, children }: Fi
       ref={ref}
       {...draggable.attributes}
       {...draggable.listeners}
-      className={`rounded transition-colors ${over ? 'bg-(--color-brand)/10' : ''} ${draggable.isDragging ? 'opacity-40' : ''}`}
+      className={`field-zone__item${over ? ' field-zone__item--over' : ''}${draggable.isDragging ? ' field-zone__item--dragging' : ''}`}
     >
       {children({ dragging: draggable.isDragging, over })}
     </div>

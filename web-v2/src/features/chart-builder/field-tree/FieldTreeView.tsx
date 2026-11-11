@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { SearchOutlined } from '@ant-design/icons';
-import { Button, Input, Segmented, Select, type InputRef } from 'antd';
+import { Input, Select, type InputRef } from 'antd';
 import type { ChartControl } from '@/core/chart-builder/chartControls';
 import { ControlListView } from './ControlListView';
 import type { DatabaseSelect, TreeTables } from './fieldTree.utils';
 import { TableTreeView } from './TableTreeView';
+import './FieldTree.css';
 
 type Tab = 'database' | 'control';
+
+const TABS: readonly { key: Tab; label: string; icon: string }[] = [
+  { key: 'database', label: 'Database', icon: 'di-icon-database' },
+  { key: 'control', label: 'Chart Control', icon: 'di-icon-filter-control' }
+];
 
 export interface FieldTreeViewProps {
   /** The database dropdown; none for an ad hoc chart, which only searches. */
@@ -19,7 +24,7 @@ export interface FieldTreeViewProps {
 
 /**
  * The builder's field tree (v1 `DatabaseListing`): a Database tab with the database dropdown, a search toggled from it,
- * and the tables; a Chart Control tab with the dashboard's controls.
+ * and the tables; a Chart Control tab with the dashboard's controls. The search placeholders are v1's.
  */
 export function FieldTreeView({ databases, search, tables, controls }: FieldTreeViewProps) {
   const [tab, setTab] = useState<Tab>('database');
@@ -32,46 +37,51 @@ export function FieldTreeView({ databases, search, tables, controls }: FieldTree
   const onDatabaseTab = tab === 'database' || !controls;
   const showSelect = onDatabaseTab && databases && !searchOpen;
 
+  const searching = search.keyword.trim() !== '';
+
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2">
+    <div className={`field-tree${controls ? '' : ' field-tree--plain'}`}>
       {controls && (
-        <Segmented<Tab>
-          block
-          size="small"
-          className="text-xs"
-          value={tab}
-          onChange={setTab}
-          options={[
-            { value: 'database', label: 'Database', icon: <i className="di-icon-database" aria-hidden /> },
-            { value: 'control', label: 'Chart Control', icon: <i className="di-icon-filter-control" aria-hidden /> }
-          ]}
-        />
-      )}
-      {showSelect ? (
-        <div className="flex items-center gap-2">
-          <Select
-            className="min-w-0 flex-1"
-            showSearch
-            optionFilterProp="label"
-            placeholder="Select database"
-            value={databases.value}
-            options={databases.options.map(option => ({ value: option.name, label: option.displayName }))}
-            onChange={databases.onChange}
-          />
-          <Button type="text" icon={<SearchOutlined />} aria-label="Search tables and columns" onClick={() => setSearchOpen(true)} />
+        <div className="field-tree__tabs" role="tablist">
+          {TABS.map(item => (
+            <button key={item.key} type="button" role="tab" className="field-tree__tab" aria-selected={tab === item.key} onClick={() => setTab(item.key)}>
+              <i className={item.icon} aria-hidden />
+              {item.label}
+            </button>
+          ))}
         </div>
-      ) : (
-        <Input
-          ref={searchRef}
-          allowClear
-          prefix={<SearchOutlined aria-hidden />}
-          placeholder={onDatabaseTab ? 'Search tables & columns...' : 'Search chart controls...'}
-          value={search.keyword}
-          onChange={event => search.onChange(event.target.value)}
-          onBlur={() => search.keyword === '' && setSearchOpen(false)}
-        />
       )}
-      <div className="min-h-0 flex-1 overflow-auto">{onDatabaseTab ? <TableTreeView tables={tables} /> : <ControlListView controls={controls} />}</div>
+      <div className="field-tree__listing">
+        {showSelect ? (
+          <div className="field-tree__select-row">
+            <Select
+              showSearch
+              optionFilterProp="label"
+              placeholder="Select database"
+              value={databases.value}
+              options={databases.options.map(option => ({ value: option.name, label: option.displayName }))}
+              onChange={databases.onChange}
+            />
+            <button type="button" className="field-tree__search-button" aria-label="Search tables and columns" onClick={() => setSearchOpen(true)}>
+              <img src="/icons/ic_search.svg" alt="" width={16} height={16} />
+            </button>
+          </div>
+        ) : (
+          <Input
+            ref={searchRef}
+            className="field-tree__search"
+            allowClear
+            prefix={<img src="/icons/ic_search.svg" alt="" width={16} height={16} />}
+            placeholder={onDatabaseTab ? 'Search tables & columns...' : 'Search tab controls...'}
+            value={search.keyword}
+            onChange={event => search.onChange(event.target.value)}
+            onBlur={() => search.keyword === '' && setSearchOpen(false)}
+          />
+        )}
+        <div className="field-tree__body">
+          {onDatabaseTab ? <TableTreeView tables={tables} searching={searching} /> : <ControlListView controls={controls} searching={searching} />}
+        </div>
+      </div>
     </div>
   );
 }

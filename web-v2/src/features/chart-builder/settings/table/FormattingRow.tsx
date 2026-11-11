@@ -1,4 +1,5 @@
-import { Button, Switch } from 'antd';
+import { Switch } from 'antd';
+import '@/shared/settings/Settings.css';
 
 interface FormattingRowProps {
   label: string;
@@ -7,15 +8,19 @@ interface FormattingRowProps {
   onAdvanced: () => void;
 }
 
-/** One conditional formatting: on / off, and its dialog (v1 `ToggleTextButtonSetting`). */
+/** One conditional formatting (v1 `ToggleTextButtonSetting`): on / off, and its dialog while it is on. */
 export function FormattingRow({ label, value, onToggle, onAdvanced }: FormattingRowProps) {
   return (
-    <div className="flex items-center gap-2">
-      <Switch size="small" checked={value} aria-label={label} onChange={onToggle} />
-      <span className="flex-1 text-sm">{label}</span>
-      <Button size="small" type="link" onClick={onAdvanced}>
-        Advanced controls
-      </Button>
+    <div className="formatting-row">
+      <label className="toggle-setting">
+        <Switch size="small" checked={value} onChange={onToggle} />
+        <span>{label}</span>
+      </label>
+      {value && (
+        <button type="button" className="formatting-row__advanced" onClick={onAdvanced}>
+          Advanced controls
+        </button>
+      )}
     </div>
   );
 }

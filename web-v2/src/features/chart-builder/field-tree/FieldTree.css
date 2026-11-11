@@ -1,0 +1,277 @@
+/* v1 `DatabaseListing` (`DatabaseListing.scss`, `SlVueTreeDark.css`): the builder's field tree. */
+.field-tree {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* The Database / Chart Control bar: two equal cells flush with the panel's top, the open one white and in the accent. */
+.field-tree__tabs {
+  display: flex;
+  flex-shrink: 0;
+  height: 40px;
+  margin-bottom: 12px;
+}
+
+.field-tree__tab {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: var(--secondary-2, #fafafb);
+  color: var(--text-color);
+  font: inherit;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: normal;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+}
+
+.field-tree__tab i {
+  margin-right: 2px;
+  font-size: 16px;
+}
+
+.field-tree__tab[aria-selected='true'] {
+  background: var(--builder-panel-bg, var(--secondary));
+  color: var(--accent);
+}
+
+.field-tree__tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.field-tree__listing {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0 12px 12px;
+}
+
+.field-tree--plain .field-tree__listing {
+  padding-top: 12px;
+}
+
+/* The database dropdown (32px, a light grey border) and the round search button. */
+.field-tree__select-row {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+}
+
+.field-tree__select-row .ant-select {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  border-color: #d6d6d6;
+  border-radius: 4px;
+}
+
+.field-tree__search-button {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.field-tree__search-button:hover,
+.field-tree__search-button:focus-visible {
+  background: var(--hover-color);
+}
+
+/* v1 `DiSearchInput`: 34px, white, a pale border. */
+.field-tree__search.ant-input-affix-wrapper {
+  flex-shrink: 0;
+  height: 34px;
+  padding: 0 8px;
+  border-color: rgb(231 235 238);
+  border-radius: 4px;
+  background: #fff;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.field-tree__body {
+  flex: 1;
+  min-height: 0;
+  margin-top: 8px;
+  overflow: auto;
+}
+
+.field-tree__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A table: 12px medium, the caret, the table glyph, then its "..." always shown. */
+.field-tree__table {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  height: 41px;
+  padding: 3px 0 0 5px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-color);
+  font: inherit;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: normal;
+  letter-spacing: 0.17px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.field-tree__caret {
+  flex-shrink: 0;
+  width: 16px;
+  font-size: 16px;
+}
+
+.field-tree__table .di-icon-table {
+  flex-shrink: 0;
+  margin-right: 4px;
+  font-size: 12px;
+}
+
+.field-tree__name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.field-tree__table:focus-visible,
+.field-tree__nested:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* A table's columns, 18px in. */
+.field-tree__children {
+  padding-left: 18px;
+}
+
+/* A column: a 36px row, grey until hovered. */
+.field-tree__field {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  border-radius: 4px;
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  line-height: 36px;
+  letter-spacing: 0.2px;
+  cursor: grab;
+}
+
+.field-tree__field:hover {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.field-tree__field > svg,
+.field-tree__field > img {
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+.field-tree__field-name {
+  min-width: 0;
+  margin-right: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.field-tree__field-name--italic {
+  font-style: italic;
+}
+
+.field-tree__nested {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.field-tree__nested:hover {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+/* v1 `.drag-image`: the row picked up, 200px wide in a thin accent border, a move glyph before the icon. */
+.field-tree__field--dragging {
+  width: 200px;
+  height: auto;
+  padding: 3px 16px;
+  border: 1px solid rgb(85 119 255 / 60%);
+  border-radius: 0;
+  background: #fff;
+  color: var(--text-color);
+  cursor: grabbing;
+}
+
+.field-tree__move {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
+}
+
+/* v1 `EmptyDirectory` and the search's "No found ...": the folder glyph over a line of text, in the middle. */
+.field-tree__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--secondary-text-color);
+  text-align: center;
+}
+
+.field-tree__empty img {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 15px;
+}
+
+.field-tree__empty--directory {
+  font-size: 16px;
+  font-family: Barlow, var(--font-sans, sans-serif);
+  line-height: 1.5;
+  letter-spacing: 0.27px;
+}
+
+.field-tree__status {
+  height: 100%;
+}

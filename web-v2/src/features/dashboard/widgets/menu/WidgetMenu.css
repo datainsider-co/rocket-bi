@@ -123,6 +123,23 @@
     padding-inline-end: 28px;
   }
 
+  /* v1 `DimensionPicker`: "Select a dimension" over the chart's values, which scroll. */
+  .dashboard-page .chart-point-menu .ant-dropdown-menu-item-group-title {
+    padding: 8px;
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .dashboard-page .chart-point-menu .ant-dropdown-menu-item-group-list {
+    min-width: 200px;
+    max-height: 300px;
+    margin: 0;
+    overflow-y: auto;
+    scrollbar-color: var(--scrollbar-background) transparent;
+    scrollbar-width: thin;
+  }
+
   .dashboard-page .chart-point-menu .ant-dropdown-menu-item:not(.ant-dropdown-menu-item-disabled):hover,
   .dashboard-page .chart-point-menu .ant-dropdown-menu-item-active:not(.ant-dropdown-menu-item-disabled),
   .dashboard-page .chart-point-menu .ant-dropdown-menu-submenu-title:hover,

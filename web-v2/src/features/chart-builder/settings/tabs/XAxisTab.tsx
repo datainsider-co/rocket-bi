@@ -1,6 +1,6 @@
 import { boolAt } from '../vizValue.utils';
-import { RevertButton } from '../fields/RevertButton';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { AxisGridFields } from './AxisGridFields';
 import { AxisLabelFields } from './AxisLabelFields';
 import { AxisTitleFields } from './AxisTitleFields';
@@ -20,7 +20,7 @@ export function XAxisTab({ viz, onChange, defaultTitle, grid = false }: XAxisTab
   const visible = boolAt(viz, `${AXIS}.visible`, true);
   const group = { viz, onChange, axis: AXIS, disabled: !visible };
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <ToggleSetting label="On" value={visible} onChange={next => onChange({ [`${AXIS}.visible`]: next })} />
       <AxisLabelFields {...group} />
       <AxisTitleFields {...group} defaultTitle={defaultTitle} />

@@ -1,6 +1,6 @@
 import { numberAt } from '../vizValue.utils';
-import { NumberSetting } from '../fields/NumberSetting';
-import { RevertButton } from '../fields/RevertButton';
+import { NumberSetting } from '@/shared/settings/fields/NumberSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
 import type { TabProps } from '../tabs/tabProps';
 
 /** What a new parliament allows (v1 `ParliamentChartOption.getDefaultChartOption`). */
@@ -12,7 +12,7 @@ export const MAX_DATA_POINT = 1000;
  */
 export function DataPointTab({ viz, onChange }: TabProps) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="settings-stack">
       <NumberSetting label="Max data point" min={1} value={numberAt(viz, 'maxDataPoint', MAX_DATA_POINT)} onChange={maxDataPoint => onChange({ maxDataPoint })} />
       <RevertButton onRevert={() => onChange({ maxDataPoint: MAX_DATA_POINT })} />
     </div>

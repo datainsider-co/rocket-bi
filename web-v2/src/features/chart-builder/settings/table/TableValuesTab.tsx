@@ -1,9 +1,9 @@
 import { boolAt, textAt } from '../vizValue.utils';
 import { FONT_FAMILIES, FONT_SIZES } from '../settingOptions';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import type { TabProps } from '../tabs/tabProps';
 import { VALUE_DEFAULTS as D, valuesRevert } from './tableTabs.utils';
 
@@ -12,19 +12,19 @@ export function TableValuesTab({ viz, onChange }: TabProps) {
   const set = (path: string) => (value: unknown) => onChange({ [`value.${path}`]: value });
   const color = (path: string, label: string, fallback: string) => <ColorSetting className="flex-1" label={label} value={textAt(viz, `value.${path}`, fallback)} onChange={set(path)} />;
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-3">
+    <div className="settings-stack">
+      <div className="settings-row">
         {color('color', 'Font color', D.color)}
         {color('backgroundColor', 'Background color', D.backgroundColor)}
       </div>
-      <div className="flex gap-3">
+      <div className="settings-row">
         {color('alternateColor', 'Alternate font color', D.alternateColor)}
         {color('alternateBackgroundColor', 'Alternate background color', D.alternateBackgroundColor)}
       </div>
       <ToggleSetting label="Text wrap" value={boolAt(viz, 'value.style.isWordWrap', D.isWordWrap)} onChange={set('style.isWordWrap')} />
-      <div className="flex gap-3">
+      <div className="settings-row">
         <SelectSetting className="flex-1" label="Font family" options={FONT_FAMILIES} value={textAt(viz, 'value.style.fontFamily', D.fontFamily)} onChange={set('style.fontFamily')} />
-        <SelectSetting className="w-20" label="Size" options={FONT_SIZES} value={textAt(viz, 'value.style.fontSize', D.fontSize)} onChange={set('style.fontSize')} />
+        <SelectSetting className="settings-size" label="Size" options={FONT_SIZES} value={textAt(viz, 'value.style.fontSize', D.fontSize)} onChange={set('style.fontSize')} />
       </div>
       <RevertButton onRevert={() => onChange(valuesRevert())} />
     </div>

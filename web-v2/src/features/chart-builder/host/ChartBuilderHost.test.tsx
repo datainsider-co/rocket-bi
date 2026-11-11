@@ -67,18 +67,19 @@ describe('ChartBuilderHost', () => {
     const user = userEvent.setup();
     renderHost({ kind: 'addChart' });
     const types = screen.getByRole('list', { name: 'Chart types' });
-    expect(within(types).getByRole('button', { name: 'Area Range' })).toBeDisabled();
+    // Like v1, only the types that can be built are offered.
+    expect(within(types).queryByRole('button', { name: 'Area Range' })).not.toBeInTheDocument();
     await user.click(within(types).getByRole('button', { name: 'Pie' }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByRole('region', { name: 'Legend' })).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Add' })).toBeDisabled();
-    expect(within(dialog).getByText('Drag and drop fields into the zones to build the chart')).toBeInTheDocument();
+    expect(within(dialog).getByText('How to create a Pie Chart?')).toBeInTheDocument();
   });
 
   it('closes when the picker is cancelled', async () => {
     const user = userEvent.setup();
     const { onClose } = renderHost({ kind: 'addChart' });
-    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.keyboard('{Escape}');
     expect(onClose).toHaveBeenCalled();
   });
 

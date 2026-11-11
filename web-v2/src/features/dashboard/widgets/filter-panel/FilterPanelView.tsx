@@ -19,6 +19,8 @@ interface FilterPanelViewProps {
   actions?: ReactNode;
   /** Edit mode: adds filters to the empty panel ("Click here to add"). */
   onAdd?: () => void;
+  /** In Config's preview: the look alone, with a working-looking Apply and no filters. */
+  preview?: boolean;
 }
 
 /**
@@ -26,7 +28,7 @@ interface FilterPanelViewProps {
  * and a footer with Apply, all on the panel's background. The filters show their changes at once; charts get them on
  * Apply.
  */
-export function FilterPanelView({ title, look, positions, grid, renderWidget, onApply, actions, onAdd }: FilterPanelViewProps) {
+export function FilterPanelView({ title, look, positions, grid, renderWidget, onApply, actions, onAdd, preview = false }: FilterPanelViewProps) {
   const isEmpty = Object.keys(positions).length === 0;
   return (
     <div className="filter-panel" style={{ background: look.background }}>
@@ -36,7 +38,7 @@ export function FilterPanelView({ title, look, positions, grid, renderWidget, on
         {actions && <span className={`filter-panel__actions ${GRID_NO_DRAG_CLASS}`}>{actions}</span>}
       </div>
       <div className="filter-panel__body">
-        {isEmpty ? (
+        {preview ? null : isEmpty ? (
           <EmptyNestedView onAdd={onAdd}>Your panel is empty</EmptyNestedView>
         ) : (
           <DashboardGrid
@@ -51,7 +53,7 @@ export function FilterPanelView({ title, look, positions, grid, renderWidget, on
         )}
       </div>
       <div className={`filter-panel__footer ${GRID_NO_DRAG_CLASS}`} style={{ justifyContent: look.align }}>
-        <Button className="filter-panel__apply" type="primary" style={look.apply} disabled={isEmpty} onClick={onApply}>
+        <Button className="filter-panel__apply" type="primary" style={look.apply} disabled={isEmpty && !preview} onClick={onApply}>
           {look.applyTitle}
         </Button>
       </div>

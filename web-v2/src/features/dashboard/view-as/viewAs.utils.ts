@@ -1,14 +1,12 @@
+import type { UserProfile } from '@/core/user/UserProfile';
 import type { SuggestedUser } from '@/core/user/UserService';
 
-export interface UserOption {
-  value: string;
-  label: string;
-  email: string;
-}
-
-/** The users to pick from, by username (v1 `RLSViewAsModal` suggestion list). */
-export function userOptions(users: readonly SuggestedUser[]): UserOption[] {
-  return users.map(({ profile }) => ({ value: profile.username, label: profile.displayName, email: profile.email }));
+/**
+ * A user's attributes as v1 `RLSViewAsModal` lists them, `name = value`. v1 put the names in snake case; they are
+ * shown as stored here, since that is how row level security rules name them.
+ */
+export function attributeChips(profile: Pick<UserProfile, 'properties'>): string[] {
+  return Object.entries(profile.properties).map(([name, value]) => `${name} = ${value}`);
 }
 
 export function findUser(users: readonly SuggestedUser[], username: string | undefined): SuggestedUser | undefined {

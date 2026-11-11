@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { App } from 'antd';
 import { withoutChartFilter } from '@/core/chart-builder/chartWidget';
 import type { Dashboard } from '@/core/dashboard/Dashboard';
 import type { WidgetId } from '@/core/dashboard/Position';
 import type { ChartWidget, TabWidget, Widget } from '@/core/dashboard/Widget';
 import { childWidgetIds, copyWidgetJson, NEW_WIDGET_POSITION, newFilterPanelJson, newTabWidgetJson } from '@/core/dashboard/widgetJson';
+import { useConfirm } from '../dialogs/ConfirmContext';
 import { useToast } from '@/shared/toast/useToast';
 import type { ChartBuilderBridge } from './chartBuilderBridge';
 import { copiedText, copyPosition, isPasteError, pastedWidget } from './dashboardEdit.utils';
@@ -32,7 +32,7 @@ function isTyping(target: EventTarget | null): boolean {
  * Copy and paste go through the system clipboard, so a widget can move between dashboards; Ctrl+V pastes too.
  */
 export function useWidgetEditActions({ dashboard, editor, editing, openDialog, release, chartBuilder, clipboard = navigator.clipboard }: WidgetEditActionsInput) {
-  const { modal } = App.useApp();
+  const confirm = useConfirm();
   const toast = useToast();
 
   const run = useCallback(
@@ -97,11 +97,9 @@ export function useWidgetEditActions({ dashboard, editor, editing, openDialog, r
         'Can not duplicate widget, refresh page and try again'
       ),
     remove: target =>
-      void modal.confirm({
+      confirm({
         title: 'Remove widget',
-        content: 'Are you sure that you want to remove this widget?',
-        okText: 'Yes',
-        cancelText: 'No',
+        message: 'Are you sure that you want to remove this widget?',
         onOk: () =>
           run(async () => {
             // The children of a tab land on the dashboard, in free slots (v1 left them where they were in the tab).
@@ -111,7 +109,7 @@ export function useWidgetEditActions({ dashboard, editor, editing, openDialog, r
           }, 'Can not remove widget, refresh page and try again')
       })
     };
-  }, [positions, editor, openDialog, release, chartBuilder, clipboard, toast, modal, run]);
+  }, [positions, editor, openDialog, release, chartBuilder, clipboard, toast, confirm, run]);
 
   const tab = useMemo(
     (): TabEditHandlers => ({

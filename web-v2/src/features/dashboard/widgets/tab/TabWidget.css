@@ -39,6 +39,7 @@
   background: var(--tab-inactive-background);
   color: var(--tab-color);
   font-size: var(--tab-font-size);
+  font-family: var(--tab-font-family);
   line-height: 1.4;
 }
 

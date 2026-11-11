@@ -1,0 +1,325 @@
+/*
+  v1 `PanelHeader.vue`, `setting-style.scss`, `TabStyle.scss` and the settings' controls: the builder's Settings tab,
+  and the dashboard's Config tab dialog. Everything inside a `.chart-settings` takes the look.
+*/
+.chart-settings {
+  color: var(--text-color);
+}
+
+/* A panel's header: a rule above (none on the first), the arrow at the left, the title in medium capitals. */
+.chart-settings .ant-collapse {
+  border: none;
+  border-radius: 0;
+  background: none;
+}
+
+.chart-settings .ant-collapse > .ant-collapse-item {
+  border: none;
+  border-top: 1px solid rgb(95 99 104 / 10%);
+  border-radius: 0;
+}
+
+.chart-settings .ant-collapse > .ant-collapse-item:first-child {
+  border-top: none;
+}
+
+.chart-settings .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+  align-items: center;
+  height: 40px;
+  padding: 12px 0;
+  color: var(--text-color);
+  line-height: normal;
+}
+
+.chart-settings .ant-collapse .ant-collapse-expand-icon {
+  height: 16px;
+  margin-inline-end: 8px;
+  padding-inline-end: 0;
+}
+
+.chart-settings__panel-title {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: normal;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.chart-settings .ant-collapse .ant-collapse-content,
+.chart-settings .ant-collapse .ant-collapse-panel {
+  border: none;
+  background: none;
+}
+
+.chart-settings .ant-collapse .ant-collapse-body,
+.chart-settings .ant-collapse .ant-collapse-content > .ant-collapse-content-box {
+  padding: 0 0 16px;
+}
+
+/* Settings one under another, 16px apart; several on a row, 12px apart. */
+.settings-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-row {
+  display: flex;
+  gap: 12px;
+}
+
+.settings-row--end {
+  align-items: flex-end;
+}
+
+/* v1's widths of a color (`small`) and a text size on a row. */
+.settings-color {
+  flex-shrink: 0;
+  width: 115px;
+}
+
+.settings-size {
+  flex-shrink: 0;
+  width: 64px;
+  margin-right: 4px;
+}
+
+/* v1's `small` dropdown: 11.2px text. */
+.chart-settings .settings-size .ant-select {
+  font-size: 11.2px;
+}
+
+.chart-settings .ant-input::placeholder {
+  font-size: 12px;
+}
+
+/* A setting: its label in secondary text 4px over its control. */
+.setting-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.setting-label {
+  margin-bottom: 4px;
+  color: var(--secondary-text-color);
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+/* v1 `InputSetting`, `DropdownSetting`: 33px boxes on the grey of the page, without border. */
+.chart-settings .ant-input,
+.chart-settings .ant-input-number,
+.chart-settings .ant-input-affix-wrapper,
+.chart-settings .ant-select,
+.chart-settings .ant-picker {
+  height: 33px;
+  border-color: transparent;
+  border-radius: 4px;
+  background: var(--primary, #f2f2f7);
+  box-shadow: none;
+  color: var(--secondary-text-color);
+  font-size: 14px;
+}
+
+.chart-settings .ant-input,
+.chart-settings .ant-input-number-input {
+  padding-inline: 8px;
+  color: var(--secondary-text-color);
+}
+
+.chart-settings .ant-input-number-input {
+  height: 31px;
+}
+
+.chart-settings .ant-select {
+  padding-inline: 8px;
+}
+
+.chart-settings .ant-input:focus,
+.chart-settings .ant-input-number-focused,
+.chart-settings .ant-select-focused,
+.chart-settings .ant-picker-focused {
+  border-color: transparent;
+}
+
+.chart-settings .ant-input-disabled,
+.chart-settings .ant-input-number-disabled,
+.chart-settings .ant-select-disabled {
+  opacity: 0.5;
+}
+
+/* v1 `ColorPicker.vue`: the hex, then the swatch that opens the picker, as one box. */
+.color-setting {
+  display: flex;
+  height: 33px;
+  border-radius: 4px;
+  background: var(--primary, #f2f2f7);
+}
+
+.color-setting .ant-input {
+  flex: 1;
+  min-width: 0;
+  padding-inline-end: 0;
+  border-radius: 4px 0 0 4px;
+  background: none;
+}
+
+.color-setting__swatch {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 0 8px 0 0;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  background: none;
+  cursor: pointer;
+}
+
+.color-setting__swatch span {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--line-d6d6d6, #d6d6d6);
+  border-radius: 4px;
+}
+
+.color-setting--disabled {
+  opacity: 0.5;
+}
+
+.color-setting--disabled .color-setting__swatch {
+  cursor: not-allowed;
+}
+
+/* v1 `AlignSetting`: three bare glyphs, the picked one in the accent. */
+.align-setting {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.align-setting > legend {
+  padding: 0;
+}
+
+.align-setting__options {
+  display: flex;
+  align-items: center;
+  height: 34px;
+}
+
+.align-setting__option {
+  display: flex;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--secondary-text-color);
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.align-setting__option:first-child {
+  padding-left: 0;
+}
+
+.align-setting__option:last-child {
+  padding-right: 0;
+}
+
+/* v1's outer glyphs fill a wider box (8px on one side only), which sets them 36px from the middle one. */
+.align-setting__option:first-child svg,
+.align-setting__option:last-child svg {
+  width: 24px;
+}
+
+.align-setting__option[aria-pressed='true'] {
+  color: var(--accent);
+}
+
+.align-setting__option:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+/* v1 `ToggleSetting`: the switch, then its label. */
+.toggle-setting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 27px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.toggle-setting--disabled {
+  cursor: not-allowed;
+}
+
+/* v1 `SliderSetting`: the number in a 42px box, then the track. */
+.slider-setting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider-setting .ant-input-number {
+  flex-shrink: 0;
+  width: 42px;
+  height: 34px;
+}
+
+.slider-setting .ant-input-number-input {
+  padding-inline: 4px;
+  text-align: center;
+}
+
+.slider-setting .ant-slider {
+  flex: 1;
+  margin: 0 7px;
+}
+
+/* v1 `.revert-button`: accent text at the right. */
+.revert-setting {
+  align-self: flex-end;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.revert-setting:hover,
+.revert-setting:focus-visible {
+  color: var(--accent-hover-color, var(--accent));
+}
+
+/* v1 `ToggleTextButtonSetting`: the toggle at the left, "Advanced controls" at the right while it is on. */
+.formatting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 27px;
+}
+
+.formatting-row__advanced {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.chart-settings__none {
+  margin: 0;
+  color: var(--secondary-text-color);
+}

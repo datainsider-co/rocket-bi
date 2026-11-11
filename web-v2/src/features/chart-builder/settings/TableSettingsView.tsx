@@ -1,6 +1,5 @@
-import { Collapse } from 'antd';
 import { ChartType } from '@/core/chart-builder/chartType';
-import { settingItemsOf } from './settingItems';
+import { SettingsCollapse } from '@/shared/settings/SettingsCollapse';
 import { CollapseTab } from './table/CollapseTab';
 import { ConditionalFormattingTab } from './table/ConditionalFormattingTab';
 import { FieldFormattingTab } from './table/FieldFormattingTab';
@@ -54,5 +53,5 @@ export function TableSettingsView({ viz, onChange, chartType, columns, collapsib
     { key: 'tooltip', label: 'Tooltip', children: <TableTooltipTab {...tab} /> },
     { key: 'other', label: 'Other', children: <OtherTab {...tab} chartType={chartType} /> }
   ];
-  return <Collapse ghost size="small" defaultActiveKey={['title', 'style']} items={settingItemsOf(items)} />;
+  return <SettingsCollapse items={items} defaultOpen={['title', 'style']} />;
 }

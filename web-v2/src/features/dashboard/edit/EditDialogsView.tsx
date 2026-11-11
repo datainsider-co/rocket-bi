@@ -1,5 +1,4 @@
 import type { Dashboard } from '@/core/dashboard/Dashboard';
-import { tabHeaderStyleOf } from '../widgets/tab/tabWidget.utils';
 import type { EditDialogs } from './useEditDialogs';
 import { ImageUrlModalView } from './ImageUrlModalView';
 import { PickWidgetsModalView } from './PickWidgetsModalView';
@@ -9,10 +8,23 @@ import { EditDashboardModalView } from './settings/EditDashboardModalView';
 import { EditWidgetsModalView } from './settings/EditWidgetsModalView';
 import { ThemesModalView } from './settings/themes/ThemesModalView';
 import { SortTabsModalView } from './SortTabsModalView';
-import { applyButtonStyleOf, widgetLabel, widgetsOfTab, widgetsToAdd } from './tabEdit.utils';
+import { pickOptionOf } from './pickWidgets.utils';
+import { widgetsOfTab, widgetsToAdd } from './tabEdit.utils';
 import { TabStyleModalView } from './TabStyleModalView';
 import { TextEditorModalView } from './TextEditorModalView';
 import { initialTextContent } from './textEditor.utils';
+
+const NEW_WIDGET = {};
+
+/** v1's words for moving widgets into a tab or a filter panel, and out of it (`TabViewer`, `FilterPanelViewer`). */
+function pickTexts(mode: 'add' | 'remove', isPanel: boolean) {
+  const what = isPanel ? 'filter' : 'chart';
+  const where = isPanel ? 'panel' : 'tab';
+  const title = isPanel ? 'Filter' : 'Chart';
+  return mode === 'add'
+    ? { title: `Add ${title}`, subtitle: `Select ${what} to add to this ${where}`, actionName: 'Add', emptyText: `No ${what}s have been added to this ${where}` }
+    : { title: `Remove ${title}`, subtitle: `Remove ${what} from this ${where}`, actionName: 'Remove', emptyText: `No ${what}s have been removed from this ${where}` };
+}
 
 const SETTING_DIALOGS = { themes: ThemesModalView, editDashboard: EditDashboardModalView, editWidgets: EditWidgetsModalView };
 
@@ -26,10 +38,14 @@ export function EditDialogsView({ dialogs, dashboard }: EditDialogsViewProps) {
   const { dialog, close } = dialogs;
   switch (dialog?.kind) {
     case 'text':
+      if (!dashboard) return null;
       return (
         <TextEditorModalView
           title={dialog.widget ? 'Edit Text' : 'Add Text'}
           initial={initialTextContent(dialog.widget)}
+          json={dialog.widget?.json ?? NEW_WIDGET}
+          defaults={dashboard.setting.widgetSetting}
+          themeName={dashboard.setting.themeName}
           onSubmit={dialogs.submitText}
           onCancel={close}
         />
@@ -66,33 +82,14 @@ export function EditDialogsView({ dialogs, dashboard }: EditDialogsViewProps) {
       if (!dashboard) return null;
       const { widget, index, mode } = dialog;
       const isPanel = widget.kind === 'filter_panel';
-      const what = isPanel ? 'filter' : 'chart';
       const widgets = mode === 'add' ? widgetsToAdd(dashboard, widget) : widgetsOfTab(dashboard, widget, index);
-      return (
-        <PickWidgetsModalView
-          title={`${mode === 'add' ? 'Add' : 'Remove'} ${isPanel ? 'Filter' : 'Chart'}`}
-          actionName={mode === 'add' ? 'Add' : 'Remove'}
-          emptyText={mode === 'add' ? `No ${what} on the dashboard to add` : `No ${what} in this ${isPanel ? 'panel' : 'tab'}`}
-          options={widgets.map(item => ({ id: item.id, label: widgetLabel(item) }))}
-          onSubmit={dialogs.submitPicked}
-          onCancel={close}
-        />
-      );
+      return <PickWidgetsModalView {...pickTexts(mode, isPanel)} options={widgets.map(pickOptionOf)} onSubmit={dialogs.submitPicked} onCancel={close} />;
     }
     case 'sortTabs':
       return <SortTabsModalView names={dialog.widget.tabItems.map(tab => tab.name)} onSubmit={dialogs.submitOrder} onCancel={close} />;
-    case 'tabStyle': {
-      const isPanel = dialog.widget.kind === 'filter_panel';
-      return (
-        <TabStyleModalView
-          title={isPanel ? 'Filter Panel Setting' : 'Tab Setting'}
-          header={tabHeaderStyleOf(dialog.widget)}
-          apply={isPanel ? applyButtonStyleOf(dialog.widget) : undefined}
-          onSubmit={dialogs.submitTabStyle}
-          onCancel={close}
-        />
-      );
-    }
+    case 'tabStyle':
+      if (!dashboard) return null;
+      return <TabStyleModalView widget={dialog.widget} themeName={dashboard.setting.themeName} onSubmit={dialogs.submitTabStyle} onCancel={close} />;
     case 'themes':
     case 'editDashboard':
     case 'editWidgets': {
