@@ -23,7 +23,7 @@ interface ZoneViewProps {
 export function ZoneView({ zone, items, fields, onChange, onConfig, onRemove }: ZoneViewProps) {
   const full = zone.maxItems !== undefined && items.length >= zone.maxItems;
   return (
-    <section className="flex flex-col gap-1" aria-label={zone.title}>
+    <section className="config-zone" aria-label={zone.title}>
       <ZoneTitleView title={zone.title} optional={zone.optional} />
       <FieldDropZone
         zoneId={zone.key}

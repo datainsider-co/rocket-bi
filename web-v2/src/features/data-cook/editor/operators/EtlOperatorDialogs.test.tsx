@@ -231,9 +231,9 @@ describe('operator dialogs', { timeout: 20_000 }, () => {
     await pickMenu('Actions of sales_1_2', title, events);
     const builder = (await screen.findByRole('heading', { name: title })).closest<HTMLElement>('.ant-modal')!;
     expect(within(builder).getByText('Drag and drop fields into the zones to build the table')).toBeInTheDocument();
-    // "click here" lists the table, then its columns.
+    // "click here" lists the table's name over its columns.
     await events.click(within(builder).getAllByRole('button', { name: 'click here' })[0]!);
-    await events.hover(await findMenuItem('sales_1_2'));
+    expect((await screen.findAllByTitle('sales_1_2')).some(element => element.closest('.builder-field-menu'))).toBe(true);
     await events.click(await findMenuItem('region'));
     expect(await within(builder).findByText('Asia')).toBeInTheDocument();
     const asked = vi.mocked(query).mock.lastCall![0]['query_setting'] as Record<string, unknown>;

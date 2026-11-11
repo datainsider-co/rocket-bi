@@ -1,11 +1,12 @@
-import { MoreOutlined } from '@ant-design/icons';
-import { Button, Dropdown, type MenuProps } from 'antd';
+import { Dropdown, type MenuProps } from 'antd';
 import { familyOptionsOf, typeOptionsOf } from '@/core/chart-builder/functionOptions';
 import type { FunctionData } from '@/core/chart-builder/FunctionData';
+import { FIELD_NO_DRAG_CLASS } from '@/shared/field-dnd/FieldPointerSensor';
 import type { TableNode } from '../field-tree/fieldTree.utils';
 import type { DroppedField } from '../state/builderState.utils';
 import { FieldMenuView } from './FieldMenuView';
 import { MenuLinkView } from './MenuLinkView';
+import './ConfigPanel.css';
 import { showsFamily, showsType, SORT_OPTIONS, topNLabel, withFamily } from './zoneItem.utils';
 
 /** The item's "..." menu. */
@@ -38,8 +39,8 @@ export function ZoneItemView({ item, sorting, tables, onChange, onPickField, men
   const source = [item.tableName, item.columnName].filter(Boolean).join('.');
 
   return (
-    <div className="flex min-h-8 items-center gap-1 rounded bg-black/[0.03] py-1 pr-1 pl-2">
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1">
+    <div className="zone-item">
+      <div className="zone-item__contents">
         {showsFamily(item) && (
           <MenuLinkView
             label={item.functionFamily}
@@ -59,11 +60,13 @@ export function ZoneItemView({ item, sorting, tables, onChange, onPickField, men
           />
         )}
         {item.dynamicFunction ? (
-          <span className="truncate font-medium">{item.name}</span>
+          <span className="zone-item__name" title={item.name}>
+            {item.name}
+          </span>
         ) : (
           // v1 `handleClickChangeField`: the name opens the tables to swap the field.
           <FieldMenuView tables={tables} onPick={onPickField}>
-            <button type="button" title={source || item.name} aria-label={`Change field of ${item.name}`} className="min-w-0 cursor-pointer truncate border-0 bg-transparent p-0 font-medium text-inherit">
+            <button type="button" title={source || item.name} aria-label={`Change field of ${item.name}`} className="zone-item__name">
               {item.name}
             </button>
           </FieldMenuView>
@@ -71,16 +74,19 @@ export function ZoneItemView({ item, sorting, tables, onChange, onPickField, men
         {sorting && (
           <MenuLinkView label={item.sorting} ariaLabel={`Sorting of ${item.name}`} items={asItems(SORT_OPTIONS)} selected={item.sorting} onSelect={value => onChange({ ...item, sorting: value })} />
         )}
-        {topN && <span className="text-xs whitespace-nowrap text-black/45">{topN}</span>}
+        {topN && <span className="zone-item__top">{topN}</span>}
       </div>
       <Dropdown
         trigger={['click']}
         menu={{
-          items: [...(menu.onEditMeasure ? [{ key: 'measure', label: 'Edit Measure' }] : []), { key: 'config', label: 'Config' }, { key: 'remove', label: 'Remove', danger: true }],
+          // v1 lists Remove like the others.
+          items: [...(menu.onEditMeasure ? [{ key: 'measure', label: 'Edit Measure' }] : []), { key: 'config', label: 'Config' }, { key: 'remove', label: 'Remove' }],
           onClick: ({ key }) => (key === 'measure' ? menu.onEditMeasure?.() : key === 'config' ? menu.onConfig() : menu.onRemove())
         }}
       >
-        <Button type="text" size="small" icon={<MoreOutlined />} aria-label={`More actions for ${item.name}`} />
+        <button type="button" className={`zone-more ${FIELD_NO_DRAG_CLASS}`} aria-label={`More actions for ${item.name}`}>
+          <i className="di-icon-three-dot" aria-hidden />
+        </button>
       </Dropdown>
     </div>
   );

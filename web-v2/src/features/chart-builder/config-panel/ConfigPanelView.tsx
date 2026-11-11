@@ -8,6 +8,7 @@ import { configZonesOf, filterGroupsOf, hasFilterZone } from '../dnd/builderDnd.
 import { FilterZoneView, type FilterZoneViewProps } from './filter/FilterZoneView';
 import { ItemConfigModal, type EditedItem } from './ItemConfigModal';
 import { ZoneView } from './ZoneView';
+import './ConfigPanel.css';
 
 export interface ConfigPanelViewProps {
   data: BuilderData;
@@ -32,7 +33,7 @@ export interface ConfigPanelViewProps {
 export function ConfigPanelView({ data, onItemChange, onItemRemove, fields, filter }: ConfigPanelViewProps) {
   const [edited, setEdited] = useState<EditedItem>();
   return (
-    <div className="flex flex-col gap-4">
+    <div className="config-panel">
       {configZonesOf(data.chartType).map(zone => (
         <ZoneView
           key={`${data.chartType}.${zone.key}`}

@@ -18,6 +18,7 @@ export function FieldMenuView({ tables, accepts = anyField, onPick, children }: 
   return (
     <Dropdown
       trigger={['click']}
+      classNames={{ root: 'builder-field-menu' }}
       disabled={items.length === 0}
       menu={{
         items,

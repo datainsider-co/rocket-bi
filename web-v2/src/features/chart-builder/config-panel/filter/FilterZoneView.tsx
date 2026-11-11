@@ -8,6 +8,7 @@ import { DropHintView } from '../DropHintView';
 import { filterableField } from '../fieldMenu.utils';
 import { ZoneTitleView } from '../ZoneTitleView';
 import { ConditionItemView } from './ConditionItemView';
+import '../ConfigPanel.css';
 
 export interface FilterZoneViewProps {
   groups: readonly [groupId: number, conditions: readonly ConditionData[]][];
@@ -21,47 +22,55 @@ export interface FilterZoneViewProps {
 }
 
 /**
- * The Filters zone (v1 `FilterDraggable`): and-groups, or-ed together. A field dropped on a group joins it; dropped
- * anywhere else in the zone, it starts a new group.
+ * The Filters zone (v1 `FilterDraggable`): and-groups, each a card, or-ed together. A field dropped on a group joins it
+ * ("AND" shows in the card's corner while dragging); dropped anywhere else in the zone, it starts a new group. Unlike
+ * v1 the hint stays under the groups, so a group can also be added by click.
  */
 export function FilterZoneView({ groups, chipsOf, renderEditor, onRemove, tables, onAddField, onSwapField }: FilterZoneViewProps) {
   return (
-    <section className="flex flex-col gap-1" aria-label="Filters">
+    <section className="config-zone" aria-label="Filters">
       <ZoneTitleView title="Filters" optional />
       <FieldDropZone
         zoneId={FILTER_ZONE}
         itemKeys={[]}
         renderItem={() => null}
         placeholder={
-          <div className="flex flex-col gap-1">
-            {groups.map(([groupId, conditions], index) => (
-              <Fragment key={groupId}>
-                {index > 0 && <div className="text-center text-xs text-black/45">OR</div>}
-                <fieldset aria-label="AND group" className="m-0 min-w-0 border-0 p-0">
-                  <FieldDropZone
-                    zoneId={groupZoneId(groupId)}
-                    itemKeys={conditions.map(condition => String(condition.id))}
-                    renderItem={position => {
-                      const condition = conditions[position];
-                      return (
-                        condition && (
-                          <ConditionItemView
-                            condition={condition}
-                            chips={chipsOf(condition)}
-                            tables={tables}
-                            onPickField={field => onSwapField(condition, field)}
-                            renderEditor={close => renderEditor(condition, close)}
-                            onRemove={() => onRemove(condition)}
-                          />
-                        )
-                      );
-                    }}
-                  />
-                </fieldset>
-              </Fragment>
-            ))}
+          <>
+            {groups.length > 0 && (
+              <div className="filter-zone__groups">
+                {groups.map(([groupId, conditions], index) => (
+                  <Fragment key={groupId}>
+                    {index > 0 && <div className="filter-zone__or">Or</div>}
+                    <fieldset aria-label="AND group" className="filter-zone__group">
+                      <span className="filter-zone__and" aria-hidden>
+                        AND
+                      </span>
+                      <FieldDropZone
+                        zoneId={groupZoneId(groupId)}
+                        itemKeys={conditions.map(condition => String(condition.id))}
+                        renderItem={position => {
+                          const condition = conditions[position];
+                          return (
+                            condition && (
+                              <ConditionItemView
+                                condition={condition}
+                                chips={chipsOf(condition)}
+                                tables={tables}
+                                onPickField={field => onSwapField(condition, field)}
+                                renderEditor={close => renderEditor(condition, close)}
+                                onRemove={() => onRemove(condition)}
+                              />
+                            )
+                          );
+                        }}
+                      />
+                    </fieldset>
+                  </Fragment>
+                ))}
+              </div>
+            )}
             <DropHintView tables={tables} accepts={filterableField} onPick={onAddField} />
-          </div>
+          </>
         }
       />
     </section>

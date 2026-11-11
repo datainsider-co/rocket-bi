@@ -13,8 +13,8 @@ export const anyField: FieldFilter = () => true;
 export const filterableField: FieldFilter = node => node.role !== 'measure';
 
 /**
- * The tables and their fields as a menu (v1 `SelectFieldContext.showTableAndFields`): a submenu per table, nested
- * columns one level deeper. Tables left without fields are left out.
+ * The tables and their fields as a menu (v1 `SelectFieldContext.showTableAndFields`): one list, each table's name
+ * over its fields, nested columns one level deeper. Tables left without fields are left out.
  */
 export function fieldMenuItems(tables: readonly TableNode[], accepts: FieldFilter = anyField): MenuItems {
   return tables.flatMap(table => {
@@ -23,7 +23,7 @@ export function fieldMenuItems(tables: readonly TableNode[], accepts: FieldFilte
       const fields = item.fields.filter(accepts).map(field => ({ key: field.key, label: field.title }));
       return fields.length > 0 ? [{ key: item.key, label: item.title, children: fields }] : [];
     });
-    return children.length > 0 ? [{ key: `table:${table.key}`, label: table.title, children }] : [];
+    return children.length > 0 ? [{ type: 'group' as const, key: `table:${table.key}`, label: table.title, children }] : [];
   });
 }
 
