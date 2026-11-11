@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { DoubleLeftOutlined, DoubleRightOutlined } from '@ant-design/icons';
 import { Select, Table, type TablePaginationConfig, type TableProps } from 'antd';
 import type { Paging } from '@/core/query/QueryRequest';
 import type { TableSort } from '@/core/query/tableSort';
@@ -7,11 +8,12 @@ import { GRID_NO_DRAG_CLASS } from '../../grid/DashboardGridView';
 import { collapseRowClassName, shownRowIndexes } from './collapseTable.utils';
 import type { DecorateColumn } from './columnDecorations';
 import { CollapseToggle } from './CollapseToggle';
+import { PageEdgeItem } from './PageEdgeItem';
 import { TABLE_COMPONENTS } from './tableComponents';
 import type { TableLook } from './tableStyle.utils';
 import { TableTooltipContext } from './TableTooltipContext';
 import { TableTotalRow, type TableTotals } from './TableTotalRow';
-import { hasPages, toColumns, toRows, toTableSort, type CellNumberFormat, type SortableHeader, type TableRow } from './table.utils';
+import { hasPages, isPageListed, lastPageStart, toColumns, toRows, toTableSort, type CellNumberFormat, type SortableHeader, type TableRow } from './table.utils';
 import './FlattenTable.css';
 
 /** A collapse or pivot table's rows with their groups below them, and the ones expanded (`useRowExpansion`). */
@@ -73,13 +75,16 @@ function expandableOf(collapse: RowCollapse): TableProps<TableRow>['expandable']
 }
 
 /**
- * v1's footer (`Pagination.vue`): the row count, "Showing [n] entries" and the server's pages as pills. On a card of
- * 400px or less only the previous, current and next page stay (`FlattenTable.css`).
+ * v1's footer (`Pagination.vue`): the row count, "Showing [n] entries" and three of the server's pages as pills between
+ * first / previous and next / last. On a card of 400px or less only the previous, current and next page stay
+ * (`FlattenTable.css`).
  */
 function paginationOf(paging: Paging, total: number, onPageChange: (paging: Paging) => void): TablePaginationConfig {
+  const current = Math.floor(paging.from / paging.size) + 1;
+  const lastPage = Math.ceil(total / paging.size);
   return {
     size: 'small',
-    current: Math.floor(paging.from / paging.size) + 1,
+    current,
     pageSize: paging.size,
     total,
     showSizeChanger: false,
@@ -103,6 +108,26 @@ function paginationOf(paging: Paging, total: number, onPageChange: (paging: Pagi
         </span>
       </>
     ),
+    itemRender: (page, type, element) => {
+      // v1 lists three pages and no ellipsis: antd's first / last page and its jumps are left out.
+      if (type === 'jump-prev' || type === 'jump-next') return null;
+      if (type === 'page') return isPageListed(page, current, lastPage) ? element : null;
+      if (type === 'prev') {
+        return (
+          <PageEdgeItem edge="first" icon={<DoubleLeftOutlined />} onJump={() => onPageChange({ from: 0, size: paging.size })}>
+            {element}
+          </PageEdgeItem>
+        );
+      }
+      if (type === 'next') {
+        return (
+          <PageEdgeItem edge="last" icon={<DoubleRightOutlined />} onJump={() => onPageChange({ from: lastPageStart(total, paging.size), size: paging.size })}>
+            {element}
+          </PageEdgeItem>
+        );
+      }
+      return element;
+    },
     onChange: (page, size) => onPageChange({ from: (page - 1) * size, size })
   };
 }

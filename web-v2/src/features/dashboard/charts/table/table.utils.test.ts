@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import responses from '@/core/query/queryResponses.fixture.json';
 import { visualizationResponseFromJson, type JsonTableResponse, type TableHeader } from '@/core/query/VisualizationResponse';
 import type { VizOptions } from '@/core/query/vizOptions';
-import { hasPages, headerColumnOf, tableCellText, tableNumberFormat, toColumns, toRows, toTableSort } from './table.utils';
+import { hasPages, headerColumnOf, tableCellText, tableNumberFormat, toColumns, toRows, toTableSort, lastPageStart, isPageListed } from './table.utils';
 
 const response = visualizationResponseFromJson(responses.table_chart_setting) as JsonTableResponse;
 
@@ -135,5 +135,35 @@ describe('hasPages', () => {
   it('is true for more rows than shown, or more than 20', () => {
     expect(hasPages({ total: 5, records: [{}, {}] })).toBe(true);
     expect(hasPages({ total: 21, records: Array.from({ length: 21 }, () => ({})) })).toBe(true);
+  });
+});
+
+describe('lastPageStart', () => {
+  it.each([
+    [95, 20, 80],
+    [100, 20, 80],
+    [101, 20, 100],
+    [5, 20, 0],
+    [0, 20, 0],
+    [10, 0, 0],
+    [-3, 20, 0]
+  ])('of %i rows by %i is %i', (total, size, start) => {
+    expect(lastPageStart(total, size)).toBe(start);
+  });
+});
+
+describe('isPageListed', () => {
+  const listed = (current: number, lastPage: number) => Array.from({ length: lastPage }, (_, index) => index + 1).filter(page => isPageListed(page, current, lastPage));
+
+  it.each([
+    [1, 10, [1, 2, 3]],
+    [2, 10, [1, 2, 3]],
+    [5, 10, [4, 5, 6]],
+    [9, 10, [8, 9, 10]],
+    [10, 10, [8, 9, 10]],
+    [1, 2, [1, 2]],
+    [1, 1, [1]]
+  ])('on page %i of %i lists %j', (current, lastPage, pages) => {
+    expect(listed(current, lastPage)).toEqual(pages);
   });
 });
