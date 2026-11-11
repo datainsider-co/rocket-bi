@@ -1,23 +1,4 @@
 /*
-  The layer ChartBuilder renders in (`BuilderScope`). It carries the dashboard page's classes for the theme variables
-  and the CSS that restyles antd, but is no page: it covers the screen without taking clicks, and only what is put in
-  it (dialogs, popups) does.
-*/
-.builder-scope.dashboard-page {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: block;
-  min-height: 0;
-  background: none;
-  pointer-events: none;
-}
-
-.builder-scope > * {
-  pointer-events: auto;
-}
-
-/*
   v1's menus in the builder (`data-builder/custom/vue-context.scss`, `.v-context { text-align: center }`): a white
   panel in the menu shadow, rows of 14px secondary text 8px around (left aligned as it renders, whatever its
   `text-align: center` says); the row in use ends with an accent check instead of a fill; a group's title in bold.
