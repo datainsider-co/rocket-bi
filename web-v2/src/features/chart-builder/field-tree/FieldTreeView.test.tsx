@@ -63,7 +63,7 @@ describe('FieldTreeView', () => {
     renderTree({ controls });
     await userEvent.click(screen.getByText('Chart Control'));
     expect(screen.getByText('Region tab')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Search chart controls...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search tab controls...')).toBeInTheDocument();
     expect(screen.queryByText('sales')).not.toBeInTheDocument();
   });
 
@@ -74,7 +74,7 @@ describe('FieldTreeView', () => {
 
   it('says when there is nothing to list', () => {
     renderTree({ tables: tables({ nodes: [] }) });
-    expect(screen.getByText('No fields available')).toBeInTheDocument();
+    expect(screen.getByText('Database empty')).toBeInTheDocument();
   });
 
   it('opens a table menu and a measure menu, also on right click', async () => {
