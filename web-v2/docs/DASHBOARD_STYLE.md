@@ -565,6 +565,49 @@ v2 không có file CSS nào trong `features/chart-builder`, `shared/database-tre
 `shared/properties`; mọi style là class Tailwind hoặc mặc định antd. Builder của v1 đặt `--data-builder-bg #f2f2f7`
 và `--builder-panel-bg #fff` (`v1:themes/dashboard-theme.scss:311-314`).
 
+**Trạng thái: làm ngày 2026-11-11, xong B1–B39 trừ B38** (còn lại ghi ở "để lại" bên dưới). Đã đo DOM và chụp hai bên ở
+1440×900 trên "v2 Builder" (chart 31, column), theme `light_default`: khung, cây field, vùng Type, các zone, Filters,
+menu function, "View all", tab Settings (Title & Subtitle) khớp v1 trong vài px. Chỉ chụp v2 (script không mở được
+trên v1): popover điều kiện, dialog Config, picker, hint. Chưa chụp: builder ở dashboard có accent khác (Anzac),
+builder của Data Cook và của query editor, lúc đang kéo field, các tab Settings ngoài Title & Subtitle.
+
+| Mục | Kết quả | Nằm ở |
+|---|---|---|
+| B1 | `BuilderScope`: một lớp phủ màn hình mang `.dashboard-theme.dashboard-page[data-dashboard-theme=light-default]` và `[builder-default-style]`, có `ConfigProvider` (token `light_default`, popup render trong lớp này) và `App` riêng. Builder ở dashboard, query editor và Data Cook đều bọc trong nó, nên luôn sáng với accent `#597fff` và nhận CSS antd của F1 kể cả ngoài trang dashboard. Preview bọc lại `.dashboard-theme` của dashboard để chart giữ theme | `cb:theme/BuilderScope.tsx`, `builderScope.css`, `cb:host/ChartBuilderHost.tsx`, `v2:features/data-cook/…/EtlChartBuilder.tsx` |
+| B2–B6 | Modal bo 20px, padding 0, cao 640–735px; rail 134px (item 40px, thanh accent 6px); vùng làm việc xám padding `18px 13px 20px 11px`; title 24px/400; hai nút 64px cách 16px; cột 238 / 385 (padding `0 15px` theo số đo) / 631, cách 8px | `cb:modal/ChartBuilderModalView.tsx`, `ChartBuilderModal.css` |
+| B7 | Picker 800px không header, không X (Esc hoặc bấm ngoài để huỷ), title giữa 24px/500, card 118×126. Chỉ liệt kê loại dựng được, như v1 | `cb:picker/ChartTypePickerModal.tsx`, `ChartTypeCardsView.tsx`, `ChartTypes.css` |
+| B8 | "Type" + "View all", dải ô 60×60 cuộn ngang (ô đang chọn tự cuộn vào giữa), popover 600×450 gồm các card, mở từ mép phải nút. Vùng Type đứng yên, các zone cuộn bên dưới | `cb:picker/ChartTypeStripView.tsx` |
+| B9–B13 | Thanh tab 40px hai ô; dropdown 32px và nút search tròn `ic_search.svg`; dòng bảng 41px (caret Font Awesome, "⋯" luôn hiện), dòng field 36px / 12px, thụt 18px (số đo; plan ghi 20px), hover `--hover-color`; ghost 200px viền accent có `move.svg`; trạng thái rỗng như v1; placeholder "Search tab controls..." | `cb:field-tree/`, `FieldTree.css`, `v2:shared/menu/ActionMenuView.tsx` (`pinned`) |
+| B14 | Icon measure là SVG "fx" trên nền accent của v1 (`FunctionIcon.vue`); icon kiểu cột đổi sang accent. Chữ nghiêng giữ như cũ, chưa kiểm v1 | `cb:field-tree/FieldLabelView.tsx` |
+| B15–B19 | Title zone 14px/500/.6px, cách ô 16px; ô nền `#f2f2f7` viền 1px cùng màu (số đo; plan ghi 1.5px), nét đứt accent khi nhận kéo; hint `ic-drag.svg` căn giữa padding 16px, "click here" màu accent; item không nền, link gạch liền, tên đậm, "⋯" hiện khi hover dòng; vạch chèn thụt 8px | `v2:shared/field-dnd/FieldDnd.css`, `cb:config-panel/ConfigPanel.css` |
+| B20 | Menu trong builder: trắng, `--menu-shadow`, dòng 8px, hover `--active-color`, dòng đang chọn có "✓" accent. Căn **trái** (v1 ghi `text-align: center` nhưng render ra căn trái). Menu "click here" là một danh sách: tên bảng đậm rồi các field, 250×316. Remove là dòng thường | `cb:theme/builderScope.css`, `cb:config-panel/fieldMenu.utils.ts` |
+| B21, B22 | Nhóm AND là card `--hover-color`; nhãn "AND" ở góc khi đang kéo; "Or" giữa các nhóm; tên đậm, kiểu điều kiện opacity .5, chip accent chữ trắng 12px, "Click to filter" màu accent | `cb:config-panel/filter/`, `ConfigPanel.css` |
+| B23 | Popover 380px, padding `16px 20px 16px 16px`, shadow `0 4px 12px rgba(0,0,0,.16)`, mở phía trên; title semi-bold .6px; thân margin 24px; `di-icon-delete` (hover đỏ), Cancel viền accent, Apply primary, cao 42px | `cb:config-panel/filter/ConditionEditorView.tsx` |
+| B24, B25, B27 | Panel `#fafafb` padding 16px có title "Visualization"; chart nằm trên card widget cỡ mặc định của loại chart (`cột × 27.5 − 16`, `dòng × 32 − 16`) ở giữa panel, theo widget setting của dashboard; loading / lỗi dùng F4 | `cb:preview/PreviewCardView.tsx`, `preview.utils.ts`, `PreviewView.tsx` |
+| B26 | Hint theo loại chart: `idea.svg`, "How to create a …?", các dòng hướng dẫn và hình minh hoạ (port `HintChartData.ts` thành `chartHints.json`, 31 loại) | `cb:preview/PreviewHintView.tsx`, `chartHint.utils.ts` |
+| B28–B36 | Header panel 40px có đường kẻ, mũi tên bên trái (xuống khi mở, như v1), title 14px/500 viết hoa; label 14px `#5f6368` cách 4px; dòng cách 16px; ô 33px nền `#f2f2f7` không viền; ô màu là ô hex + swatch 20px (115px); cỡ chữ 64px / 11.2px; toggle bên trái label; slider có ô số 42px; align là ba glyph bootstrap; Revert là chữ accent căn phải | `cb:settings/Settings.css`, `SettingsCollapse.tsx`, `cb:settings/fields/` |
+| B37 | "Advanced controls" chỉ hiện khi toggle bật | `cb:settings/table/FormattingRow.tsx` |
+| B39 | 500px, không X, "Config **Data**" 16px và dòng nguồn 12px, field xếp dọc nền xám (input 42px, dropdown 40px), toggle có label bên trái, hai nút 42px chia đôi footer | `cb:config-panel/ItemConfigModal.tsx`, `.builder-dialog` trong `builderScope.css` |
+
+Để lại:
+
+- **B38, B40, B41, B42**: icon "?" cạnh label; dialog Formula, Update table by query, Conditional formatting. Chưa làm.
+- **B5**: nút lưu khi sửa chart vẫn ghi "Update" (code v1 ghi `'Update'`, bản v1 đang chạy ở docker ghi "Save"); mục 3
+  ở đầu tài liệu chưa quyết.
+- **B7, B8**: v2 dựng được nhiều loại hơn bản v1 đang chạy (Spline, các loại Inverted Axes, …) nên danh sách dài hơn.
+- **B17**: Filters vẫn giữ hint "click here" dưới các nhóm (v1 chỉ hiện khi chưa có filter), để còn thêm nhóm bằng bấm.
+- **B22**: chip của v1 có nút "×" bỏ từng giá trị; v2 chưa có.
+- **B23**: nội dung popover (Select điều kiện, Radio Manual Input / Chart Control, danh sách checkbox) vẫn là control antd.
+- **B26**: loại chart không có hint thì v2 ghi "Drag and drop your fields to create a … chart." (v1: "Learn to create …
+  Chart here" với link). Ba hình `hint-drilldown-*` v1 tham chiếu không có trong repo.
+- **B31**: ô màu vẫn hiện "Theme" cho màu theo theme (v1 hiện hex); popover là antd `ColorPicker`, chưa có "Reset to
+  default" và Cancel / OK.
+- **B28–B36**: mới so ảnh tab Title & Subtitle. Các tab khác dùng chung control nên đổi theo, nhưng chưa xem từng tab;
+  `RuleRow`, `SlicerControlTab` còn class bề rộng Tailwind cũ.
+- `BuilderScope` mang class `dashboard-page` để dùng lại CSS antd của F1. `dashboardPageContainer()` lấy
+  `.dashboard-page` đầu tiên trong DOM: ở Data Cook và query editor đó là lớp của builder.
+- Preview của query editor (`ChartTabResult`) không truyền `card` nên chart vẫn vẽ kín khung, như trước.
+
 ### Khung
 
 | # | Phần | v1 | v2 | Việc cần làm | Nhãn |
