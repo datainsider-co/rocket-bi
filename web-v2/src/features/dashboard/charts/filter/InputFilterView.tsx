@@ -1,6 +1,7 @@
 import { Input, InputNumber } from 'antd';
 import { GRID_NO_DRAG_CLASS } from '../../grid/DashboardGridView';
 import { FilterTitle } from './FilterTitle';
+import { groupThousands, ungroupThousands } from './numberInput.utils';
 
 interface InputFilterViewProps {
   title?: string;
@@ -28,11 +29,13 @@ export function InputFilterView({ title, value, placeholder, isNumber, onChange 
           aria-label={title}
           className="filter-input min-w-0 flex-1"
           controls={false}
+          formatter={text => groupThousands(String(text ?? ''))}
+          parser={ungroupThousands}
           // Re-mounts when the value changes elsewhere (Reset Filters), so the box shows it.
           key={value}
           defaultValue={value === '' ? undefined : value}
           placeholder={placeholder}
-          onBlur={event => commit(event.target.value.replaceAll(',', ''))}
+          onBlur={event => commit(ungroupThousands(event.target.value))}
           onPressEnter={event => event.currentTarget.blur()}
         />
       ) : (

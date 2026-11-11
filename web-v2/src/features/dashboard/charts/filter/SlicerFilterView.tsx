@@ -3,13 +3,14 @@ import { DatePicker, InputNumber, Slider } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { GRID_NO_DRAG_CLASS } from '../../grid/DashboardGridView';
 import { FilterTitle } from './FilterTitle';
+import { groupThousands, ungroupThousands } from './numberInput.utils';
 import type { SlicerKind, SlicerRange } from './slicerFilter.utils';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** An input's text as a number; `null` when empty or not a number. */
 function parseInput(text: string): number | null {
-  const number = Number(text.replaceAll(',', ''));
+  const number = Number(ungroupThousands(text));
   return text.trim() === '' || Number.isNaN(number) ? null : number;
 }
 
@@ -32,6 +33,8 @@ export function SlicerFilterView({ title, titleStyle, kind, bounds, range, step,
   const [dragging, setDragging] = useState<SlicerRange | null>(null);
   const [from, to] = dragging ?? range;
   const isDate = kind === 'date';
+  // v1 `useFormat`: plain numbers are grouped by thousands; a date part (a year) is not.
+  const grouping = kind === 'number' ? { formatter: (value: number | string | undefined) => groupThousands(String(value ?? '')), parser: ungroupThousands } : undefined;
 
   const commit = (next: SlicerRange) => {
     setDragging(null);
@@ -54,8 +57,9 @@ export function SlicerFilterView({ title, titleStyle, kind, bounds, range, step,
           <>
             <InputNumber
               aria-label="From"
-              className="filter-input w-1/2!"
+              className="filter-input filter-input--slicer w-1/2!"
               controls={false}
+              {...grouping}
               key={`from-${from}`}
               defaultValue={from}
               onBlur={event => commit([toNumber(parseInput(event.target.value), from), to])}
@@ -63,8 +67,9 @@ export function SlicerFilterView({ title, titleStyle, kind, bounds, range, step,
             />
             <InputNumber
               aria-label="To"
-              className="filter-input w-1/2!"
+              className="filter-input filter-input--slicer w-1/2!"
               controls={false}
+              {...grouping}
               key={`to-${to}`}
               defaultValue={to}
               onBlur={event => commit([from, toNumber(parseInput(event.target.value), to)])}
