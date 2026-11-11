@@ -98,7 +98,7 @@ export function ChartBuilderModalView({ actions, slots, previewBackground, title
             ) : (
               <div className="w-[36rem] shrink-0 overflow-auto pr-1">{slots.settings}</div>
             )}
-            <div className="min-w-0 flex-1 rounded border border-solid border-black/10 p-3" style={{ background: previewBackground }}>
+            <div className="relative min-w-0 flex-1 rounded border border-solid border-black/10 p-3" style={{ background: previewBackground }}>
               {slots.preview}
             </div>
           </div>

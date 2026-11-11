@@ -3,7 +3,7 @@ import type { SeriesOneResponse } from '@/core/query/VisualizationResponse';
 import type { VizOptions } from '@/core/query/vizOptions';
 import { createNumberFormat } from '../numberFormat';
 import { titleText } from '../highchartsBase';
-import { isTrendLineOn, kpiComparisonOf, kpiTrendOf, type KpiComparison, type KpiTrend } from './kpiComparison.utils';
+import { hasComparisonArea, isTrendLineOn, kpiComparisonOf, kpiTrendOf, type KpiComparison, type KpiTrend } from './kpiComparison.utils';
 
 interface TextStyle {
   color?: string;
@@ -36,12 +36,15 @@ interface Heading {
 }
 
 /**
- * v1 picks the KPI's layout by `options.theme`: without one, `NoneThemeLayout` (title and value centered in the card,
- * the trend line below); `style_area_1`, `AreaLayout` (the trend line along the bottom); any other theme,
- * `TrendLineLayout` with a trend line (drawn on the right), else `NormalLayout` (icon, title and value from the top
- * left).
+ * v1 picks the KPI's layout by `options.theme`. Without one, `NoneThemeLayout`: title and value centered in the card
+ * (`plain`); with a date range, the range above the value and the comparison under it (`plainComparison`); with a
+ * trend line, title and value at the left, the comparison at the right and the trend line below (`plainTrend`).
+ * `style_area_1`, `AreaLayout` (the trend line along the bottom); any other theme, `TrendLineLayout` with a trend line
+ * (drawn on the right), else `NormalLayout` (icon, title and value from the top left).
  */
-export type KpiLayout = 'plain' | 'themed' | 'trend' | 'area';
+export type KpiLayout = 'plain' | 'plainComparison' | 'plainTrend' | 'themed' | 'trend' | 'area';
+
+const PLAIN_LAYOUTS: ReadonlySet<KpiLayout> = new Set<KpiLayout>(['plain', 'plainComparison', 'plainTrend']);
 
 /** What the KPI card shows (v1 `NumberWidget` + its layouts). */
 export interface KpiModel {
@@ -102,10 +105,16 @@ function tooltipOf(value: unknown, align: unknown): KpiModel['tooltip'] {
   };
 }
 
-function layoutOf(theme: unknown, trendOn: boolean): KpiLayout {
-  if (typeof theme !== 'string' || theme === '') return 'plain';
+function plainLayoutOf(options: VizOptions): KpiLayout {
+  if (isTrendLineOn(options)) return 'plainTrend';
+  return hasComparisonArea(options) ? 'plainComparison' : 'plain';
+}
+
+function layoutOf(options: VizOptions): KpiLayout {
+  const theme = options['theme'];
+  if (typeof theme !== 'string' || theme === '') return plainLayoutOf(options);
   if (theme === 'style_area_1') return 'area';
-  return trendOn ? 'trend' : 'themed';
+  return isTrendLineOn(options) ? 'trend' : 'themed';
 }
 
 /** The KPI from its options, its response and, with a trend line, the trend's values. */
@@ -120,11 +129,12 @@ export function buildKpi(options: VizOptions, response: SeriesOneResponse, trend
   const postfix = options['postfix'] as Affix | undefined;
   const icon = options['icon'] as KpiIcon | undefined;
   const hasValue = typeof value === 'number';
-  const layout = layoutOf(options['theme'], isTrendLineOn(options));
+  const layout = layoutOf(options);
+  const plain = PLAIN_LAYOUTS.has(layout);
   const comparison = kpiComparisonOf(options, hasValue ? value : undefined, response.compareValue, format);
-  const trend = kpiTrendOf(options, trendData, comparison, layout !== 'plain');
+  const trend = kpiTrendOf(options, trendData, comparison, !plain);
   // v1 aligns the plain layout's value bar to the center by default, the themed one's value to the left.
-  const align = options['align'] ?? (layout === 'plain' ? 'center' : 'left');
+  const align = options['align'] ?? (plain ? 'center' : 'left');
 
   return {
     layout,

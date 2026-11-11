@@ -92,6 +92,17 @@
   margin-top: 8px;
 }
 
+/*
+ * v1 `.number-widget-container` is laid out against the card's body, not inside its padding, so the layouts without
+ * theme cover the whole card. (The themed ones draw no such container and stay inside the padding.)
+ */
+.kpi--plain,
+.kpi--plain-trend {
+  position: absolute;
+  inset: 0;
+  height: auto;
+}
+
 .kpi--plain {
   align-items: center;
   justify-content: center;
@@ -134,14 +145,19 @@
 }
 
 /* v1 `.display-value`: medium-text(20px, 2.57px), the value bar spanning the card. */
-.kpi--plain .kpi__value {
-  width: 100%;
+.kpi--plain .kpi__value,
+.kpi--plain-trend .kpi__value {
   max-width: 100%;
+  line-height: normal;
   overflow: hidden;
   color: var(--text-color);
   font-weight: 500;
   letter-spacing: 2.57px;
   text-overflow: ellipsis;
+}
+
+.kpi--plain .kpi__value {
+  width: 100%;
 }
 
 /* v1 DateRangeDropdown (`.comparison-title`, `.date-range-dropdown`): the range in secondary text, a down arrow after. */
@@ -175,13 +191,98 @@
   font-size: 12px;
 }
 
-/* v1 PercentageBar (`default` style): the icon, the change without sign and the compared value. */
-.kpi__bar {
+/* v1 PercentageBar: a 24px trend icon, then 14px medium text; only the icon and the change take the trend's color. */
+.kpi__bar-line {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 8px;
+  color: var(--text-color);
+  font-weight: 500;
   font-size: 14px;
+  line-height: normal;
+  letter-spacing: 0.23px;
+  white-space: nowrap;
+}
+
+.kpi__bar-line i {
+  margin-right: 8px;
+  color: var(--kpi-trend-color);
+  font-size: 24px;
+}
+
+.kpi__bar-change {
+  color: var(--kpi-trend-color);
+}
+
+.kpi__bar--default .kpi__bar-change {
+  margin-right: 4px;
+}
+
+.kpi__bar--text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.kpi__bar--text > .kpi__bar-line + .kpi__bar-line {
+  margin-top: 4px;
+}
+
+/* v1 `.comparison-number-widget`: the title, the range and the value 12px, 8px and 12px above what follows. */
+.kpi--comparison > .kpi__header,
+.kpi--comparison > .kpi__value {
+  margin-bottom: 12px;
+}
+
+/*
+ * v1 `.kpi-number-widget`: the title and the value at the left, the comparison and the range at the right, in the
+ * upper two thirds of the card; the trend line in the rest.
+ */
+.kpi--plain-trend .kpi__summary {
+  display: flex;
+  flex: 2;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  margin: 0 16px;
+}
+
+.kpi__summary-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.kpi__summary-info {
+  display: flex;
+  flex: 2;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;
+}
+
+.kpi__summary-info > .kpi__header {
+  margin-bottom: 4px;
+}
+
+.kpi__summary-info .kpi__title {
+  text-align: left !important;
+}
+
+.kpi__summary-info .kpi__subtitle {
+  display: none;
+}
+
+.kpi__summary-comparison > .kpi__bar {
+  margin-bottom: 8px;
+  padding: 0 var(--widget-padding, 8px);
+}
+
+.kpi__summary-comparison .kpi__bar-line {
+  justify-content: flex-end;
+}
+
+.kpi__summary-comparison > .kpi__date-range {
+  margin-bottom: 0;
 }
 
 .kpi__percentage {
@@ -213,11 +314,22 @@
   min-height: 0;
 }
 
-/* v1 NoneThemeLayout: the trend line fills the card below the value. */
+/*
+ * v1 `.kpi-number-widget--body`: the lower third of the card. v1 draws the trend line there as a chart widget of its
+ * own, so it sits in a card inside the card: the chart background, the card's corners and padding.
+ */
+.kpi__trend-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  padding: var(--widget-padding, 15px);
+  border-radius: var(--widget-border-radius, 20px);
+  background: var(--chart-background-color);
+}
+
 .kpi__trend--below {
   flex: 1;
   width: 100%;
-  margin-top: 8px;
 }
 
 /* v1 TrendLineLayout: on the right, under the header row, faded on its left. */
