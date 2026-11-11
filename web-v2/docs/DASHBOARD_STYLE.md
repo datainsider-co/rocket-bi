@@ -64,13 +64,14 @@ Token sáng của v1 (`v1:themes/app-theme.scss:13-88`), dùng trong cả tài l
 1. **Chỗ v2 cố ý khác v1.** Plan này coi là sửa về v1; muốn giữ thì bỏ mục tương ứng:
    - ~~Nút "⋮" hiện khi hover ở view mode (W10).~~ Đã quyết ngày 2026-11-10: làm theo v1, xong ở bước 2.
    - Nền tooltip chart theo theme (W16). v1 để trắng mặc định của Highcharts.
-   - Add Text một cột, HTML là Switch (D2).
-   - Sort tab bằng nút lên / xuống (D5).
+   - ~~Add Text một cột, HTML là Switch (D2).~~ Làm theo v1 ở bước 4.
+   - ~~Sort tab bằng nút lên / xuống (D5).~~ Làm theo v1 ở bước 4 (kéo thả; phím mũi tên vẫn dời được dòng đang focus).
    - Picker hiện cả loại chart chưa hỗ trợ ở dạng disable (B7). v1 chỉ liệt kê loại dùng được.
    - Filter mode nằm trong danh sách condition (B23).
    - Background dashboard chỉ nhận URL (server không có endpoint upload).
 2. **Màu dialog trong theme tối.** **Bỏ** (ngày 2026-11-10, chỉ hỗ trợ theme sáng). Phần còn lại của câu hỏi là
-   accent: ở theme sáng có accent khác (Anzac), dialog v1 có vẻ vẫn dùng `#597fff`; kiểm trước bước 4. Ghi chú cũ:
+   accent, **đã kiểm ngày 2026-11-11**: trên v1 ở theme Anzac, mọi dialog (Rename, Add Text, Sort, Add Chart, Config
+   Tab, xác nhận xoá) nằm ngoài `#app` và dùng accent `#597fff`. v2 làm theo ở bước 4 (`DialogScope`). Ghi chú cũ:
    - `dash:edit/settings/settings.css:1-5` ghi rằng dialog v1 đổi theo theme.
    - Đọc code v1 thì ngược lại: biến theme chỉ áp cho `body[dashboard-theme=…] #app` và `div[widget-preview-area]`
      (`v1:themes/dashboard-theme.scss:57-58`); `DiCustomModal` là `BModal` của bootstrap-vue, có vẻ render vào
@@ -436,7 +437,7 @@ Review bằng đọc code ở `f309a28f`, chưa nhìn trên app. Xếp theo mứ
    theo `--text-color` / `--secondary-text-color` của theme (gần trắng).
 2. **Bỏ (theme tối).** Theme antd của trang không có `algorithm` nên theo mode của app, không theo nhóm `dark_*` / `light_*` của
    dashboard: Input, Checkbox, Tree, Table, DatePicker không được vá màu như dropdown và popover.
-3. **Scope mặc định port thiếu**: `[builder-default-style]` chỉ có 5 biến (v1 reset cả bộ biến sáng);
+3. **Xong ở bước 4 (`DialogScope`) cho dialog; lịch và popover filter vẫn như cũ.** Scope mặc định port thiếu: `[builder-default-style]` chỉ có 5 biến (v1 reset cả bộ biến sáng);
    `.filter-popover-area-default-style` không reset `--filter-color`, `--icon-color`, `--toggle-color`,
    `--scrollbar-*`, `--tab-filter-*`; `colorPrimary` của antd không đổi theo scope CSS (nên `MainDate.css` phải ép nền
    nút Apply). Cần một component scope gồm class reset đủ biến và `DashboardThemeProvider themeName="light_default"`
@@ -446,7 +447,7 @@ Review bằng đọc code ở `f309a28f`, chưa nhìn trên app. Xếp theo mứ
    `DashboardHeader.css:125-135` (trùng với rule popover của F1). Input nền xám 42px và footer hai nút chia đôi là
    mẫu `DiCustomModal` mà D1, D12, B39 cần, hiện nằm riêng trong `.password-gate`. Bước 2 cũng thêm CSS ngoài layer ở
    `AppliedFilters.css`, `InnerFilter.css`, `FlattenTable.css` (theo cách các file widget sẵn có).
-5. **`getPopupContainer` truyền tay thừa** ở 11 chỗ sau khi F1 đã cấp qua `ConfigProvider`;
+5. **`getPopupContainer` truyền tay thừa** ở 11 chỗ (bước 4 đã gỡ ở ba dialog settings) sau khi F1 đã cấp qua `ConfigProvider`;
    `popupContainer.ts` lấy `.dashboard-page` đầu tiên trong DOM.
 6. **Toast**: còn `message.*` ở `chart-builder/host/useChartSave.ts`, `field-actions/useTableRefresh.ts`,
    `useFieldActions.ts`, `shared/relationship/useRelationshipEditActions.ts`, `features/share/`; `useToast` chưa có
@@ -704,7 +705,44 @@ condition; theme tối; các tab setting ngoài Title và Legend.
 
 ## Bước 4: Dialog của dashboard
 
-Chỉ ba dialog settings mount trong trang; các dialog khác render vào `<body>` với token của app. Sửa cùng F3.
+**Trạng thái: làm ngày 2026-11-11, xong D1–D12** (còn lại ghi ở "để lại" bên dưới). Đã đo DOM và chụp hai bên ở
+1440×900 trên "v2 Sample" với theme `light_theme1` (Anzac): Rename, Add Text, Sort, Add Chart, Config Tab, xác nhận xoá
+trùng v1 về kích thước khung và vị trí nút (lệch vài px: nút Save của header rộng hơn 2px, preview của Config Tab hẹp hơn 4.5px). Chỉ chụp v2: View As, Share, Relationship, Edit
+Dashboard, Themes, Config của filter panel. Chưa chụp: Password, Image, Edit Widgets, mobile.
+
+| Mục | Kết quả | Nằm ở |
+|---|---|---|
+| Scope | `DialogScope`: lớp phủ màn hình mang `.dashboard-theme.dashboard-page[data-dashboard-theme=light-default]`, có `ConfigProvider` (token `light_default`) và `App` riêng; mọi dialog của trang và popup của chúng render trong đó nên luôn sáng với accent `#597fff`, như v1. `BuilderScope` giờ là `DialogScope` thêm class của builder. Ba dialog settings bỏ `getContainer` truyền tay | `dash:theme/DialogScope.tsx`, `dialogScope.css`, `dash:detail/DashboardPageView.tsx`, `DashboardPageContent.tsx`, `DashboardPageBody.tsx` |
+| Khung | Ba khung dùng chung: `CustomDialog` (`DiCustomModal`: không X, input nền xám 42px, hai nút 40px chia đôi footer), `HeaderDialog` (`EtlModal`: title bên trái, Cancel 25px và nút chính 24px bên phải header, nền trắng hoặc xám), `ConfirmDialogView`. Có story `Dashboard/Dialogs` | `dash:dialogs/` |
+| D1 | `CustomDialog` 500px, label trên input, nút "Rename", lỗi tại chỗ. Dialog Image (chỉ có ở v2) dùng cùng khung | `dash:edit/RenameModalView.tsx`, `ImageUrlModalView.tsx` |
+| D2 | 1071px; header icon `add-text.svg`; hai nửa 495×400: tab Text / HTML (màu `#0066ff` như v1), mô tả, textarea xám; "Review" vẽ widget thật trên theme của dashboard. Dải config: font family 161, cỡ 100, B / I / U, align, màu, opacity chữ; nhóm Background (màu, opacity). Text mới căn theo `--widget-primary-font-align` (giữa) như v1 | `dash:edit/TextEditorModalView.tsx`, `TextEditor.css`, `textEditor.utils.ts`, `v2:core/dashboard/widgetJson.ts` (`TextStyle`) |
+| D3 | `HeaderDialog` 1200px nền xám, thân 600px: preview trên theme của dashboard bên trái, cột setting trắng 350px bên phải dùng control của tab Settings trong builder. Tab: Position, Font family, màu + cỡ, Background active / inactive, Revert. Filter panel: ba panel Header, Apply (Footer title, font, màu, cỡ, align, Apply Background), Background, mỗi panel có Revert | `dash:edit/TabStyleModalView.tsx`, `TabStylePreview.tsx`, `tabEdit.utils.ts`, `dash:widgets/tab/tabWidget.utils.ts` |
+| D4 | `HeaderDialog` 444px trắng, title 24px và subtitle, ô search, danh sách 400px gồm dòng 46px (icon loại chart, tên 14px/500, ô check SVG của v1). Câu chữ của v1 | `dash:edit/PickWidgetsModalView.tsx`, `pickWidgets.utils.ts` |
+| D5 | "Sort Orders" / "Drag to customize the order", dòng 46px kéo thả (`@dnd-kit/core`), `di-icon-drag` | `dash:edit/SortTabsModalView.tsx`, `movedTo` trong `tabEdit.utils.ts` |
+| D6 | Password gate render trong `DialogScope` (style đã làm ở S7) | `dash:detail/DashboardPageBody.tsx` |
+| D7 | `CustomDialog` 560px, label "Select user", input 42px, gợi ý hiện dưới input khi gõ (dòng user 40px), chọn xong hiện card user và chip thuộc tính, nút "Apply". Chip ghi tên thuộc tính như đã lưu (v1 đổi sang snake case) | `dash:view-as/ViewAsModalView.tsx`, `ViewAsModal.css`, `attributeChips` |
+| D8, D9, D10 | Không sửa code riêng: title 24px/500, X tròn 24px, nút primary `#597fff` đã có từ F1 và `DialogScope` (đã đo trên v2) | |
+| D11 | Thân min-height 480; bỏ override nền và hover của nút primary (giờ lấy `--accent-hover-color` từ F1) | `dash:edit/settings/settings.css` |
+| D12 | **Khác plan**: trên v1 đang chạy, xoá widget hỏi bằng sweetalert ("Remove widget", No / Yes), không phải `ConfirmationModal`. Làm theo số đo đó: 398px, vòng cảnh báo 48px `#ffab00`, title 16px/700, hai nút 42px, nền mờ `rgba(0,0,0,.4)`. `ConfirmProvider` + `useConfirm()` thay `modal.confirm` ở xoá widget, rời edit mode, xoá main date | `dash:dialogs/ConfirmDialogView.tsx`, `ConfirmContext.tsx` |
+
+Sửa thêm ngoài bảng: control setting của builder (`fields/`, `SettingsCollapse`, `Settings.css`) chuyển sang
+`v2:shared/settings/` vì dashboard giờ cũng dùng; `ThemeColorInput` bỏ.
+
+Để lại:
+
+- **D2**: v1 cuộn textarea và Review cùng nhau; v2 không. Ô màu là antd `ColorPicker` (như B31). Chiều cao widget mới
+  vẫn lấy mặc định (v1 lấy theo chiều cao Review).
+- **D3**: trên v1 đang chạy, Config tab của tab widget mẫu (thiếu `extra_data.header`) bị lỗi nên cột setting trống;
+  phần setting làm theo code v1, chưa có ảnh để so. Ô màu hiện "Theme" cho màu theo theme (B31). Preview của filter
+  panel không vẽ các filter bên trong.
+- **D4**: v2 liệt kê cả text và ảnh (v1 chỉ chart); loại chart v1 không có icon thì v2 dùng icon chung.
+- **D7**: chưa chụp được v1 (script không mở được dialog); làm theo code v1.
+- **D12**: `shared/relationship/useRelationshipEditActions.ts` và `shared/routing/useUnsavedGuard.ts` vẫn dùng
+  `modal.confirm` (dùng chung ngoài trang dashboard).
+- Input trong dialog không tự focus khi mở (v1 có `autofocus`; rule lint `jsx-a11y/no-autofocus`).
+- `PasswordGate.css` vẫn giữ style riêng, chưa chuyển sang `CustomDialog`.
+- CSS của `settings.css` và `Settings.css` không nằm trong layer nên thắng CSS trong `@layer components`; hai rule của
+  bước này phải đặt ngoài layer (`.tab-style__half`, `.text-editor__color`).
 
 | # | Dialog | v1 | v2 | Việc cần làm | Nhãn |
 |---|---|---|---|---|---|
