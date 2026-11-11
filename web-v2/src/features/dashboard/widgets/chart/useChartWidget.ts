@@ -15,13 +15,14 @@ import { buildChartQuery, isAffectedByFilter } from '../../controls/chartQuery.u
 import type { ControlEntry } from '../../controls/controls.utils';
 import { useDashboardPermissions } from '../../access/DashboardPermissionsContext';
 import { useDashboardControls } from '../../controls/DashboardControlsContext';
-import { canExportSetting, chartMenuItems, LOAD_MORE_DASHBOARDS_KEY, zoomMenuItems } from './chartMenus.utils';
+import { canDrillThrough } from '@/core/query/drillThrough';
+import { dimensionValues } from './drillPanel.utils';
+import { canExportSetting, chartMenuItems, dimensionMenuItems, drillThroughMenuItems, staysOpen, zoomMenuItems, type ChartMenuHandlers, type ValuePick } from './chartMenus.utils';
 import { useChartExport } from './useChartExport';
 import { useChartView } from './useChartView';
 import { useDrillThrough } from './useDrillThrough';
 
 const FIRST_PAGE: Paging = { from: 0, size: DEFAULT_PAGE_SIZE };
-const KEEP_OPEN_KEYS = [LOAD_MORE_DASHBOARDS_KEY];
 const NO_REQUESTS: readonly FilterRequestJson[] = [];
 
 type Position = { x: number; y: number };
@@ -29,6 +30,8 @@ type Position = { x: number; y: number };
 /** The chart's menu, open at a clicked point (with its value) or at a right click on the card. */
 export interface PointMenu {
   value?: string;
+  /** The card's menu went on to pick a value for this (v1 `DimensionPicker`); the menu lists the values, then what follows. */
+  pick?: ValuePick;
   position: Position;
 }
 
@@ -80,30 +83,40 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
   const canResetDrill = view.view.drills.length > 0;
   const zoomLevel = canZoom(view.viewed.setting) ? zoomLevelOf(view.viewed.setting) : undefined;
   const filter = isFilterViz(viz);
+  const values = useMemo(() => dimensionValues(data.data), [data.data]);
+  const menuHandlers: ChartMenuHandlers = {
+    useAsFilter: value => onSelect([value]),
+    pickValue: pick => pointMenu && setPointMenu({ ...pointMenu, pick }),
+    zoom: view.zoom,
+    openDrill: () => setDrillPanel(pointMenu),
+    resetFilter: () => onSelect([]),
+    resetDrill: view.reset,
+    drillThrough: drillThrough.drillThrough,
+    loadMoreDashboards: drillThrough.loadMore,
+    download: type => void download(type)
+  };
   // v1 `WidgetContextMenu`: one list for a clicked point and for a right click on the card, without what does not apply.
-  const menuItems = pointMenu
-    ? chartMenuItems(
-        {
-          value: pointMenu.value,
-          zoomLevel,
-          canDrill: view.drillColumn !== undefined,
-          drillThrough: drillThrough.choices,
-          canResetFilter: selected.length > 0,
-          canResetDrill,
-          canExport: canDownload && canExportSetting(widget.setting, filter)
-        },
-        {
-          useAsFilter: value => onSelect([value]),
-          zoom: view.zoom,
-          openDrill: () => setDrillPanel(pointMenu),
-          resetFilter: () => onSelect([]),
-          resetDrill: view.reset,
-          drillThrough: drillThrough.drillThrough,
-          loadMoreDashboards: drillThrough.loadMore,
-          download: type => void download(type)
-        }
-      )
-    : [];
+  const mainMenuItems = () =>
+    chartMenuItems(
+      {
+        value: pointMenu?.value,
+        zoomLevel,
+        canDrill: view.drillColumn !== undefined,
+        drillThrough: drillThrough.choices,
+        pickFor: values.length === 0 ? [] : canDrillThrough(view.viewed.setting) ? ['filter', 'drill-through'] : ['filter'],
+        canResetFilter: selected.length > 0,
+        canResetDrill,
+        canExport: canDownload && canExportSetting(widget.setting, filter)
+      },
+      menuHandlers
+    );
+  // The card's menu, one step on: the chart's values to pick from, then for a drill through the dashboards to open.
+  const pickMenuItems = (menu: PointMenu) => {
+    if (menu.value !== undefined) return drillThrough.choices ? drillThroughMenuItems(drillThrough.choices, menuHandlers) : [];
+    if (menu.pick === 'filter') return dimensionMenuItems(values, value => onSelect([value]));
+    return dimensionMenuItems(values, value => setPointMenu({ ...menu, value }), true);
+  };
+  const menuItems = !pointMenu ? [] : pointMenu.pick ? pickMenuItems(pointMenu) : mainMenuItems();
   const options = viz.options as { enableIconZoom?: boolean; isEnableDrilldown?: boolean };
 
   return {
@@ -117,7 +130,7 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
     table: { paging, onPageChange: setPaging, sort: view.view.sort, onSortChange, subRows },
     crossFilter: { selected, onSelect, onPointMenu },
     drillPath: { steps: view.view.drills.map(drill => drill.step), onBack: view.back },
-    pointMenu: { position: pointMenu?.position, items: menuItems, keepOpenKeys: KEEP_OPEN_KEYS, onClose: close },
+    pointMenu: { position: pointMenu?.position, items: menuItems, staysOpen, onClose: close },
     /** A right click on the card, off any point: the same menu without a value. Filters have none. */
     onCardMenu: filter ? undefined : (position: Position) => setPointMenu({ position }),
     /** The drill down: what its panel reads and does, and where the panel is when the menu opened it. */
