@@ -1,6 +1,6 @@
 import { numberAt } from '../vizValue.utils';
-import { NumberSetting } from '../fields/NumberSetting';
-import { RevertButton } from '../fields/RevertButton';
+import { NumberSetting } from '@/shared/settings/fields/NumberSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
 import type { TabProps } from '../tabs/tabProps';
 
 /** What a new parliament allows (v1 `ParliamentChartOption.getDefaultChartOption`). */

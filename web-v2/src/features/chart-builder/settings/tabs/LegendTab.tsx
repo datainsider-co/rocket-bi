@@ -1,12 +1,12 @@
 import { boolAt, numberAt, textAt } from '../vizValue.utils';
 import { FONT_FAMILIES, FONT_SIZES, LEGEND_LAYOUTS, VERTICAL_ALIGNS } from '../settingOptions';
-import { AlignSetting } from '../fields/AlignSetting';
-import { ColorSetting } from '../fields/ColorSetting';
-import { NumberSetting } from '../fields/NumberSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { TextSetting } from '../fields/TextSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { AlignSetting } from '@/shared/settings/fields/AlignSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { NumberSetting } from '@/shared/settings/fields/NumberSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { TextSetting } from '@/shared/settings/fields/TextSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { LEGEND_DEFAULTS as D, legendHeightToggle, legendRevert, legendStyleChanges } from './seriesTabs.utils';
 import type { TabProps } from './tabProps';
 

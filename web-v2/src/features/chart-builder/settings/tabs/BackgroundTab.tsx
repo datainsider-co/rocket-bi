@@ -1,6 +1,6 @@
 import { textAt } from '../vizValue.utils';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
 import { THEME_BACKGROUND } from './commonTabs.utils';
 import type { TabProps } from './tabProps';
 

@@ -1,8 +1,8 @@
 import { textAt } from '../vizValue.utils';
 import { FONT_FAMILIES } from '../settingOptions';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
 import type { TabProps } from '../tabs/tabProps';
 import { TABLE_TOOLTIP_DEFAULTS as D, tableTooltipRevert } from './tableTabs.utils';
 

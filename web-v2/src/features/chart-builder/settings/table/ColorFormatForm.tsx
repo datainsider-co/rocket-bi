@@ -1,5 +1,5 @@
 import { asArray, asRecord, asString, type JsonObject } from '@/core/json/json';
-import { SelectSetting } from '../fields/SelectSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
 import { APPLY_TO, FORMAT_BY } from './formattingOptions';
 import { invalidBounds, invalidRules, withValue } from './formattingTabs.utils';
 import { RulesForm } from './RulesForm';

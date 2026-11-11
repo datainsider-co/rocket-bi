@@ -1,6 +1,6 @@
 import { boolAt } from '../vizValue.utils';
-import { RevertButton } from '../fields/RevertButton';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { AxisGridFields } from './AxisGridFields';
 import { AxisLabelFields } from './AxisLabelFields';
 import { AxisRangeFields } from './AxisRangeFields';

@@ -1,5 +1,5 @@
 import { Switch } from 'antd';
-import '../Settings.css';
+import '@/shared/settings/Settings.css';
 
 interface FormattingRowProps {
   label: string;

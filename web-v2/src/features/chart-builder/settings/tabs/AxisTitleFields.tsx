@@ -1,9 +1,9 @@
 import { boolAt, textAt } from '../vizValue.utils';
 import { FONT_FAMILIES, FONT_SIZES } from '../settingOptions';
-import { ColorSetting } from '../fields/ColorSetting';
-import { SelectSetting } from '../fields/SelectSetting';
-import { TextSetting } from '../fields/TextSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { TextSetting } from '@/shared/settings/fields/TextSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import type { AxisFieldProps } from './axisFieldProps';
 import { AXIS_DEFAULTS } from './seriesTabs.utils';
 

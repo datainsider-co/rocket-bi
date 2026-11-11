@@ -1,6 +1,6 @@
 import { textAt } from '../vizValue.utils';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
 import type { TabProps } from '../tabs/tabProps';
 import { TOGGLE_ICON_DEFAULTS as D, toggleIconRevert } from './tableTabs.utils';
 

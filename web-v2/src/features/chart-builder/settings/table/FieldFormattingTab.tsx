@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { DISPLAY_UNITS, PRECISIONS } from '../settingOptions';
 import { boolAt, numberAt, textAt } from '../vizValue.utils';
-import { AlignSetting } from '../fields/AlignSetting';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { AlignSetting } from '@/shared/settings/fields/AlignSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import type { TabProps } from '../tabs/tabProps';
 import { FIELD_DEFAULTS as D, fieldApplyChanges, fieldFormattingRevert, fieldPath, type ColumnChoice } from './formattingTabs.utils';
 

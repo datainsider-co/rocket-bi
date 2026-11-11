@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { boolAt } from '../vizValue.utils';
-import { SelectSetting } from '../fields/SelectSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
 import type { TabProps } from '../tabs/tabProps';
 import { ConditionalFormattingModal } from './ConditionalFormattingModal';
 import { conditionalPath, formattingOf, formattingSave, formattingToggle, defaultFormatting, type ColumnChoice, type FormattingType } from './formattingTabs.utils';

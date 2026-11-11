@@ -1,5 +1,5 @@
 import { Select } from 'antd';
-import type { SettingOption } from '../settingOptions';
+import type { SettingOption } from '../settingOption';
 import { SettingField } from './SettingField';
 
 interface SelectSettingProps<T extends string | number> {

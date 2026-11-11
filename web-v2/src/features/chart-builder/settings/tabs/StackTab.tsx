@@ -1,4 +1,4 @@
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { stackChanges, stackingOf } from './seriesTabs.utils';
 import type { TabProps } from './tabProps';
 

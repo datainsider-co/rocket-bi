@@ -1,5 +1,5 @@
 import type { SeriesOneResponse } from '@/core/query/VisualizationResponse';
-import { SettingsCollapse } from './SettingsCollapse';
+import { SettingsCollapse } from '@/shared/settings/SettingsCollapse';
 import type { SettingOption } from './settingOptions';
 import { BackgroundTab } from './tabs/BackgroundTab';
 import { ColorTab } from './tabs/ColorTab';

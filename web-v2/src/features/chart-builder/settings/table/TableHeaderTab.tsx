@@ -1,10 +1,10 @@
 import { boolAt, textAt } from '../vizValue.utils';
 import { FONT_FAMILIES, FONT_SIZES } from '../settingOptions';
-import { AlignSetting } from '../fields/AlignSetting';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { AlignSetting } from '@/shared/settings/fields/AlignSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import type { TabProps } from '../tabs/tabProps';
 import { HEADER_DEFAULTS as D, headerRevert } from './tableTabs.utils';
 

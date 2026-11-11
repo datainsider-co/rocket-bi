@@ -1,7 +1,7 @@
 import { boolAt, numberAt } from '../vizValue.utils';
 import { MAX_COMPARISONS, MIN_COMPARISONS } from '../settingOptions';
-import { NumberSetting } from '../fields/NumberSetting';
-import { SelectSetting } from '../fields/SelectSetting';
+import { NumberSetting } from '@/shared/settings/fields/NumberSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
 import type { TabProps } from '../tabs/tabProps';
 import { DefaultValueField, type DefaultValueFieldProps } from './DefaultValueField';
 

@@ -1,5 +1,5 @@
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
 import type { TabProps } from '../tabs/tabProps';
 import { TABLE_THEME_OPTIONS, tableThemeChanges, tableThemeOf } from './tableTabs.utils';
 

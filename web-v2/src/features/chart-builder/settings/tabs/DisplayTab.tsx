@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { boolAt, numberAt, textAt } from '../vizValue.utils';
 import { DASH_STYLES, type SettingOption } from '../settingOptions';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { TextSetting } from '../fields/TextSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { TextSetting } from '@/shared/settings/fields/TextSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { displayRevert, hasDash, hasMarker, seriesPath, seriesTypeOf } from './seriesTabs.utils';
 import type { TabProps } from './tabProps';
 

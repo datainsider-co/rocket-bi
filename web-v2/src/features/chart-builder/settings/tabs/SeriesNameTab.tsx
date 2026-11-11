@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { textAt } from '../vizValue.utils';
 import type { SettingOption } from '../settingOptions';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { TextSetting } from '../fields/TextSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { TextSetting } from '@/shared/settings/fields/TextSetting';
 import { seriesNameRevert, seriesPath } from './seriesTabs.utils';
 import type { TabProps } from './tabProps';
 

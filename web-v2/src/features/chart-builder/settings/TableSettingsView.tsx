@@ -1,5 +1,5 @@
 import { ChartType } from '@/core/chart-builder/chartType';
-import { SettingsCollapse } from './SettingsCollapse';
+import { SettingsCollapse } from '@/shared/settings/SettingsCollapse';
 import { CollapseTab } from './table/CollapseTab';
 import { ConditionalFormattingTab } from './table/ConditionalFormattingTab';
 import { FieldFormattingTab } from './table/FieldFormattingTab';

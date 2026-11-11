@@ -1,7 +1,7 @@
 import { boolAt, numberAt, textAt } from '../vizValue.utils';
 import { DECIMAL_POINTS, DISPLAY_UNITS, PRECISIONS, THOUSAND_SEPARATORS } from '../settingOptions';
-import { SelectSetting } from '../fields/SelectSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { defaultDisplayUnit, displayUnitPath, otherSettingsOf } from './commonTabs.utils';
 import type { TabProps } from './tabProps';
 

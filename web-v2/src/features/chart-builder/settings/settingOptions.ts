@@ -1,9 +1,8 @@
 /** The choices of v1's settings (`shared/settings/common/options`), with the values v1 stored. */
 
-export interface SettingOption<T extends string | number = string> {
-  readonly label: string;
-  readonly value: T;
-}
+import type { SettingOption } from '@/shared/settings/settingOption';
+
+export type { SettingOption };
 
 export const PRIMARY_FONT = 'var(--widget-primary-font-family, Roboto)';
 export const SECONDARY_FONT = 'var(--widget-secondary-font-family, Roboto)';

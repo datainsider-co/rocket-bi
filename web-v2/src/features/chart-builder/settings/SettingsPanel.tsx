@@ -18,7 +18,7 @@ import { TableSettingsView } from './TableSettingsView';
 import { axisTitlesOf, seriesChoicesOf } from './tabs/seriesTabs.utils';
 import { useChartSettings } from './useChartSettings';
 import { useFilterDefault } from './useFilterDefault';
-import './Settings.css';
+import '@/shared/settings/Settings.css';
 
 interface SettingsPanelProps {
   /** The preview's data, for the settings that list its series. */

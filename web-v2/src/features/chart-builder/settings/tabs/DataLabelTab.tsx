@@ -1,10 +1,10 @@
 import { boolAt, numberAt, textAt } from '../vizValue.utils';
 import { FONT_FAMILIES, FONT_SIZES, LABEL_FORMATS, LABEL_POSITIONS } from '../settingOptions';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { SliderSetting } from '../fields/SliderSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { SliderSetting } from '@/shared/settings/fields/SliderSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { DataLabelConditionFields } from './DataLabelConditionFields';
 import { DATA_LABEL_DEFAULTS as D, dataLabelPath, dataLabelRevert, dataLabelSettingsOf, labelPositionOf } from './seriesTabs.utils';
 import type { TabProps } from './tabProps';

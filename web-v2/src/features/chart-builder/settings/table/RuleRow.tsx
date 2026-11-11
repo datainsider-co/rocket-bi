@@ -1,9 +1,9 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { asRecord, asString, type JsonObject } from '@/core/json/json';
-import { ColorSetting } from '../fields/ColorSetting';
-import { SelectSetting } from '../fields/SelectSetting';
-import { TextSetting } from '../fields/TextSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { TextSetting } from '@/shared/settings/fields/TextSetting';
 import { FIRST_CONDITIONS, SECOND_CONDITIONS, VALUE_TYPES } from './formattingOptions';
 import { ICON_CHOICES } from './formattingTabs.utils';
 

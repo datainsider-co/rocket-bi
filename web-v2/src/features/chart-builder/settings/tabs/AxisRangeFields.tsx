@@ -1,6 +1,6 @@
 import { boolAt, numberAt } from '../vizValue.utils';
-import { NumberSetting } from '../fields/NumberSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { NumberSetting } from '@/shared/settings/fields/NumberSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import type { AxisFieldProps } from './axisFieldProps';
 import { AXIS_DEFAULTS, boundToggle } from './seriesTabs.utils';
 

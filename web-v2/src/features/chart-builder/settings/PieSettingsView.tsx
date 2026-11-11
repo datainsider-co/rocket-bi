@@ -6,7 +6,7 @@ import { OtherTab } from './tabs/OtherTab';
 import type { TabProps } from './tabs/tabProps';
 import { TitleTab } from './tabs/TitleTab';
 import { TooltipTab } from './tabs/TooltipTab';
-import { SettingsCollapse } from './SettingsCollapse';
+import { SettingsCollapse } from '@/shared/settings/SettingsCollapse';
 import { isLegendFirst } from './settingsPanel.utils';
 
 interface PieSettingsViewProps extends TabProps {

@@ -1,9 +1,9 @@
 import { textAt } from '../vizValue.utils';
 import { FONT_FAMILIES, PRIMARY_FONT_SIZES } from '../settingOptions';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { TextSetting } from '../fields/TextSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { TextSetting } from '@/shared/settings/fields/TextSetting';
 import type { TabProps } from '../tabs/tabProps';
 import { NUMBER_LABEL_DEFAULTS as D, numberLabelRevert } from './numberTabs.utils';
 

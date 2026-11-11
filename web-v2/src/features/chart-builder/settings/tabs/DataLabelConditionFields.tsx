@@ -1,8 +1,8 @@
 import { boolAt, numberAt } from '../vizValue.utils';
 import { MAX_COMPARISONS, MIN_COMPARISONS } from '../settingOptions';
-import { NumberSetting } from '../fields/NumberSetting';
-import { SelectSetting } from '../fields/SelectSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { NumberSetting } from '@/shared/settings/fields/NumberSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { boundToggle, DATA_LABEL_DEFAULTS } from './seriesTabs.utils';
 import type { TabProps } from './tabProps';
 

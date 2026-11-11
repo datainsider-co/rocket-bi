@@ -1,5 +1,5 @@
-import { SelectSetting } from '../fields/SelectSetting';
-import { TextSetting } from '../fields/TextSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { TextSetting } from '@/shared/settings/fields/TextSetting';
 import { STACKINGS, stackGroupChange, stackingValueOf, type StackGroupRow } from './stackedTabs.utils';
 import type { TabProps } from './tabProps';
 

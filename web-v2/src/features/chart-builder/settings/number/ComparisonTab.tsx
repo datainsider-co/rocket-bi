@@ -1,11 +1,11 @@
 import { COMPARE_MODE_OPTIONS, CompareMode, TREND_BY_OPTIONS } from '@/core/query/comparison';
 import { DATE_MODE_OPTIONS, DateMode } from '@/core/query/dateRanges';
 import { boolAt, textAt } from '../vizValue.utils';
-import { ColorSetting } from '../fields/ColorSetting';
-import { DateRangeSetting } from '../fields/DateRangeSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { SelectSetting } from '../fields/SelectSetting';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { DateRangeSetting } from '@/shared/settings/fields/DateRangeSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import type { TabProps } from '../tabs/tabProps';
 import {
   compareModeChanges,

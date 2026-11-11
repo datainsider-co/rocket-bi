@@ -1,4 +1,7 @@
-/* v1 `PanelHeader.vue`, `setting-style.scss`, `TabStyle.scss` and the settings' controls: the builder's Settings tab. */
+/*
+  v1 `PanelHeader.vue`, `setting-style.scss`, `TabStyle.scss` and the settings' controls: the builder's Settings tab,
+  and the dashboard's Config tab dialog. Everything inside a `.chart-settings` takes the look.
+*/
 .chart-settings {
   color: var(--text-color);
 }

@@ -1,6 +1,6 @@
 import { asRecord, asString, type JsonObject } from '@/core/json/json';
-import { ColorSetting } from '../fields/ColorSetting';
-import { SelectSetting } from '../fields/SelectSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { SelectSetting } from '@/shared/settings/fields/SelectSetting';
 import { BoundFields } from './BoundFields';
 import { EMPTY_FORMATTING } from './formattingOptions';
 

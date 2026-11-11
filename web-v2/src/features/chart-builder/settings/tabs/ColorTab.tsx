@@ -1,7 +1,7 @@
 import { boolAt } from '../vizValue.utils';
-import { ColorSetting } from '../fields/ColorSetting';
-import { RevertButton } from '../fields/RevertButton';
-import { ToggleSetting } from '../fields/ToggleSetting';
+import { ColorSetting } from '@/shared/settings/fields/ColorSetting';
+import { RevertButton } from '@/shared/settings/fields/RevertButton';
+import { ToggleSetting } from '@/shared/settings/fields/ToggleSetting';
 import { paletteColorsOf, themeColorRevert, themeColorToggle } from './commonTabs.utils';
 import type { TabProps } from './tabProps';
 

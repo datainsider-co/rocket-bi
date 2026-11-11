@@ -2,7 +2,7 @@ import type { DefaultValueFieldProps } from './filter/DefaultValueField';
 import { FilterControlTab } from './filter/FilterControlTab';
 import { FilterTitleTab } from './filter/FilterTitleTab';
 import { isInnerFilter, type FilterControlKind } from './filter/filterTabs.utils';
-import { SettingsCollapse } from './SettingsCollapse';
+import { SettingsCollapse } from '@/shared/settings/SettingsCollapse';
 import { BackgroundTab } from './tabs/BackgroundTab';
 import { OtherTab } from './tabs/OtherTab';
 import type { TabProps } from './tabs/tabProps';

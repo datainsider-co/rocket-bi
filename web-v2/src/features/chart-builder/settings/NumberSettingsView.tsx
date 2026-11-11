@@ -3,7 +3,7 @@ import type { DateFieldChoice } from './number/comparisonTab.utils';
 import { KpiIconTab } from './number/KpiIconTab';
 import { KpiThemeTab } from './number/KpiThemeTab';
 import { NumberLabelTab } from './number/NumberLabelTab';
-import { SettingsCollapse } from './SettingsCollapse';
+import { SettingsCollapse } from '@/shared/settings/SettingsCollapse';
 import { BackgroundTab } from './tabs/BackgroundTab';
 import { OtherTab } from './tabs/OtherTab';
 import type { TabProps } from './tabs/tabProps';

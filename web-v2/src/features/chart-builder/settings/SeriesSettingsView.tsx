@@ -1,4 +1,4 @@
-import { SettingsCollapse } from './SettingsCollapse';
+import { SettingsCollapse } from '@/shared/settings/SettingsCollapse';
 import type { SettingOption } from './settingOptions';
 import { hasStackTab } from './settingsPanel.utils';
 import { BackgroundTab } from './tabs/BackgroundTab';
