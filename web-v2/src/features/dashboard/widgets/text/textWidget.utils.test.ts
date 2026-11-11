@@ -6,8 +6,8 @@ const text = (styleSettings?: Record<string, unknown>) =>
   widgetFromJson({ class_name: 'text_widget', id: 1, content: '', extra_data: { style_settings: styleSettings } }) as TextWidget;
 
 describe('textRenderStyle', () => {
-  it('falls back to v1 defaults', () => {
-    expect(textRenderStyle(text())).toEqual({
+  it("falls back to v1's getter defaults for settings that are missing", () => {
+    expect(textRenderStyle(text({}))).toEqual({
       color: 'var(--text-color)',
       fontSize: '13px',
       textAlign: 'left',
@@ -17,6 +17,22 @@ describe('textRenderStyle', () => {
       fontStyle: undefined,
       textDecoration: undefined
     });
+  });
+
+  it("uses v1's default style settings for a widget saved without any", () => {
+    expect(textRenderStyle(text())).toMatchObject({ color: 'var(--text-color)', fontSize: '12px', fontFamily: 'var(--widget-primary-font-family, Roboto)' });
+  });
+
+  it('takes the old color and size of a widget saved without style settings', () => {
+    const old = widgetFromJson({ class_name: 'text_widget', id: 1, content: '', text_color: '#abc', font_size: '20px', extra_data: {} }) as TextWidget;
+    expect(textRenderStyle(old)).toMatchObject({ color: '#abc', fontSize: '20px' });
+    const empty = widgetFromJson({ class_name: 'text_widget', id: 1, content: '', text_color: '', font_size: '', extra_data: {} }) as TextWidget;
+    expect(textRenderStyle(empty)).toMatchObject({ color: 'var(--text-color)', fontSize: '12px' });
+  });
+
+  it('ignores the old color and size once the widget has style settings', () => {
+    const widget = widgetFromJson({ class_name: 'text_widget', id: 1, content: '', text_color: '#abc', font_size: '20px', extra_data: { style_settings: {} } }) as TextWidget;
+    expect(textRenderStyle(widget)).toMatchObject({ color: 'var(--text-color)', fontSize: '13px' });
   });
 
   it('reads the stored style settings', () => {
