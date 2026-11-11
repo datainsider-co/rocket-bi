@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { ConfirmProvider } from '../dialogs/ConfirmContext';
 import { DashboardThemeProvider } from './DashboardThemeProvider';
 import { getDashboardTheme } from './dashboardThemes';
 import './dashboardTheme.css';
@@ -17,7 +18,9 @@ interface DashboardStoryFrameProps {
 export function DashboardStoryFrame({ children, themeName = 'light_default', style }: DashboardStoryFrameProps) {
   return (
     <div className="dashboard-theme dashboard-page" data-dashboard-theme={getDashboardTheme(themeName).cssName} style={style}>
-      <DashboardThemeProvider themeName={themeName}>{children}</DashboardThemeProvider>
+      <DashboardThemeProvider themeName={themeName}>
+        <ConfirmProvider>{children}</ConfirmProvider>
+      </DashboardThemeProvider>
     </div>
   );
 }

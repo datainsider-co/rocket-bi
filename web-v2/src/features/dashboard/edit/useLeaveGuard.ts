@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { App } from 'antd';
 import { useBlocker } from 'react-router';
+import { useConfirm } from '../dialogs/ConfirmContext';
 import { leavesDashboard } from './editMenus.utils';
 
 /**
@@ -8,7 +8,7 @@ import { leavesDashboard } from './editMenus.utils';
  * tab with an unsaved layout.
  */
 export function useLeaveGuard(active: boolean, dirty: boolean, dashboardId: number | undefined) {
-  const { modal } = App.useApp();
+  const confirm = useConfirm();
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
       active && dashboardId !== undefined && currentLocation.pathname !== nextLocation.pathname && leavesDashboard(nextLocation.pathname, dashboardId)
@@ -24,15 +24,15 @@ export function useLeaveGuard(active: boolean, dirty: boolean, dashboardId: numb
       if (leave) blocker.proceed();
       else blocker.reset();
     };
-    modal.confirm({
+    confirm({
       title: 'Leave edit mode?',
-      content: 'Changes to the layout you have not saved will be lost.',
+      message: 'Changes to the layout you have not saved will be lost.',
       okText: 'Leave',
       cancelText: 'Stay',
       onOk: () => settle(true),
       onCancel: () => settle(false)
     });
-  }, [blocker, modal]);
+  }, [blocker, confirm]);
 
   useEffect(() => {
     if (!active || !dirty) return;

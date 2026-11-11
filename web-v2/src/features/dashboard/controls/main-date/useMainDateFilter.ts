@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { App } from 'antd';
 import { DateMode } from '@/core/query/dateRanges';
 import { useToast } from '@/shared/toast/useToast';
+import { useConfirm } from '../../dialogs/ConfirmContext';
 import { dateSelectionOf } from '../../charts/filter/filter.utils';
 import { MAIN_DATE_ID, type MainDateState } from '../controls.utils';
 import { useDashboardControls } from '../DashboardControlsContext';
@@ -22,7 +22,7 @@ const ALL_TIME: MainDateState = { mode: DateMode.AllTime, dates: [] };
  */
 export function useMainDateFilter(editing?: MainDateEditing) {
   const { mainDate, controls, setMainDate, removeMainDate } = useDashboardControls();
-  const { modal } = App.useApp();
+  const confirm = useConfirm();
   const toast = useToast();
   /** The Choose Default Time Range popover is open (v1 `isResetMainDateFlow`). */
   const [choosing, setChoosing] = useState(false);
@@ -49,17 +49,15 @@ export function useMainDateFilter(editing?: MainDateEditing) {
 
   const remove = useCallback(
     () =>
-      void modal.confirm({
+      confirm({
         title: 'Remove main date filter',
-        content: 'Are you sure that you want to remove the main date filter?',
-        okText: 'Yes',
-        cancelText: 'No',
+        message: 'Are you sure that you want to remove the main date filter?',
         onOk: () => {
           removeMainDate();
           return save(undefined, 'Remove the main date filter failed');
         }
       }),
-    [modal, removeMainDate, save]
+    [confirm, removeMainDate, save]
   );
 
   return {

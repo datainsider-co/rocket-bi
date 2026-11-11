@@ -1,4 +1,5 @@
 import type { ChartBuilderHost } from '../edit/chartBuilderBridge';
+import { ConfirmProvider } from '../dialogs/ConfirmContext';
 import { DashboardThemeProvider } from '../theme/DashboardThemeProvider';
 import { getDashboardTheme } from '../theme/dashboardThemes';
 import { useBodyDashboardTheme } from '../theme/useBodyDashboardTheme';
@@ -16,7 +17,9 @@ export function DashboardPage({ embedded = false, chartBuilder }: DashboardPageP
   useBodyDashboardTheme(getDashboardTheme(page.dashboard?.setting.themeName ?? '').cssName);
   return (
     <DashboardThemeProvider themeName={page.dashboard?.setting.themeName}>
-      <DashboardPageContent page={page} embedded={embedded} chartBuilder={chartBuilder} />
+      <ConfirmProvider>
+        <DashboardPageContent page={page} embedded={embedded} chartBuilder={chartBuilder} />
+      </ConfirmProvider>
     </DashboardThemeProvider>
   );
 }
