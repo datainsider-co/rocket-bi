@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
-import { Button, Modal, Typography } from 'antd';
+import { Button, Modal } from 'antd';
 import type { BuilderMode } from '../host/builderSession.utils';
+import './ChartBuilderModal.css';
 
 type Tab = 'builder' | 'settings';
 
@@ -29,78 +30,71 @@ const TABS: readonly { key: Tab; label: string; icon: string }[] = [
 ];
 
 /**
- * The builder (v1 `ChartBuilderModal` + `ChartBuilderController`): Builder and Settings tabs on the left, Cancel and
- * Add / Update on top, the field tree and the zones, and the preview. Rendered in place rather than in a portal, so
- * the dashboard's theme variables reach the preview.
+ * The builder (v1 `ChartBuilderModal` + `ChartBuilderController`): Builder and Settings on the left rail, Cancel and
+ * Add / Update on top, then the field tree and the zones (or the settings) and the preview under "Visualization".
+ * Rendered in place rather than in a portal, inside `BuilderScope`.
  */
 interface ChartBuilderModalViewProps {
   actions: BuilderActions;
   slots: BuilderSlots;
-  /** The chart card's background, from its viz options. */
-  previewBackground: string;
   /** v1's "Chart Builder" by default. */
   title?: string;
 }
 
-export function ChartBuilderModalView({ actions, slots, previewBackground, title = 'Chart Builder' }: ChartBuilderModalViewProps) {
+export function ChartBuilderModalView({ actions, slots, title = 'Chart Builder' }: ChartBuilderModalViewProps) {
   const [tab, setTab] = useState<Tab>('builder');
   const hasSettings = slots.settings !== undefined;
   return (
     <Modal
       open
       centered
+      className="chart-builder-modal"
       footer={null}
       closable={false}
-      maskClosable={false}
+      mask={{ closable: false }}
       keyboard={false}
       getContainer={false}
       width="min(1400px, calc(100vw - 32px))"
-      styles={{ body: { height: 'min(735px, calc(100vh - 100px))' } }}
     >
-      <div className="flex h-full">
+      <div className="chart-builder">
         {hasSettings && (
-          <nav className="flex w-20 shrink-0 flex-col gap-1 border-0 border-r border-solid border-black/10 pr-3" aria-label="Builder tabs">
+          <nav className="chart-builder__bar" aria-label="Builder tabs">
             {TABS.map(item => (
-              <button
-                key={item.key}
-                type="button"
-                aria-pressed={tab === item.key}
-                onClick={() => setTab(item.key)}
-                className={`flex cursor-pointer flex-col items-center gap-1 rounded border-0 px-2 py-2 text-xs ${tab === item.key ? 'bg-[var(--color-brand)]/10 text-[var(--color-brand)]' : 'bg-transparent text-inherit hover:bg-black/5'}`}
-              >
-                <i className={`${item.icon} text-lg`} aria-hidden />
+              <button key={item.key} type="button" className="chart-builder__bar-item" aria-pressed={tab === item.key} onClick={() => setTab(item.key)}>
+                <i className={item.icon} aria-hidden />
                 {item.label}
               </button>
             ))}
           </nav>
         )}
-        <div className={`flex min-w-0 flex-1 flex-col ${hasSettings ? 'pl-4' : ''}`}>
-          <header className="flex items-center gap-2 pb-3">
-            <Typography.Title level={4} className="m-0!">
-              {title}
-            </Typography.Title>
-            <Button className="ml-auto" onClick={actions.onCancel}>
-              Cancel
-            </Button>
-            <Button type="primary" disabled={!actions.canSave} loading={actions.saving} onClick={actions.onSave}>
-              {actions.mode === 'add' ? 'Add' : 'Update'}
-            </Button>
-          </header>
-          <div className="flex min-h-0 flex-1 gap-4">
-            {tab === 'builder' ? (
-              <>
-                <div className="w-60 shrink-0">{slots.tree}</div>
-                <div className="flex w-80 shrink-0 flex-col gap-4 overflow-auto pr-1">
-                  {slots.types}
-                  {slots.panel}
-                </div>
-              </>
-            ) : (
-              <div className="w-[36rem] shrink-0 overflow-auto pr-1">{slots.settings}</div>
-            )}
-            <div className="relative min-w-0 flex-1 rounded border border-solid border-black/10 p-3" style={{ background: previewBackground }}>
-              {slots.preview}
+        <div className="chart-builder__main">
+          <header className="chart-builder__header">
+            <h3 className="chart-builder__title">{title}</h3>
+            <div className="chart-builder__buttons">
+              <Button onClick={actions.onCancel}>Cancel</Button>
+              <Button type="primary" disabled={!actions.canSave} loading={actions.saving} onClick={actions.onSave}>
+                {actions.mode === 'add' ? 'Add' : 'Update'}
+              </Button>
             </div>
+          </header>
+          <div className="chart-builder__body">
+            <div className="chart-builder__config">
+              {tab === 'builder' ? (
+                <>
+                  <div className="chart-builder__panel chart-builder__panel--tree">{slots.tree}</div>
+                  <div className="chart-builder__panel chart-builder__panel--zones">
+                    {slots.types && <div className="chart-builder__types">{slots.types}</div>}
+                    <div className="chart-builder__zones">{slots.panel}</div>
+                  </div>
+                </>
+              ) : (
+                <div className="chart-builder__panel chart-builder__panel--settings">{slots.settings}</div>
+              )}
+            </div>
+            <section className="chart-builder__viz" aria-label="Visualization">
+              <div className="chart-builder__viz-title">Visualization</div>
+              <div className="chart-builder__viz-body">{slots.preview}</div>
+            </section>
           </div>
         </div>
       </div>

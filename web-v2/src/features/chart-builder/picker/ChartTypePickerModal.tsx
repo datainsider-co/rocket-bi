@@ -1,6 +1,8 @@
-import { Modal, Tooltip, Typography } from 'antd';
+import { Modal } from 'antd';
 import type { PickerItem } from '@/core/chart-builder/chartCatalogue';
-import { CHART_ICON_PATH } from '../field-tree/fieldTree.utils';
+import { ChartTypeCardsView } from './ChartTypeCardsView';
+import { buildableTypes } from './chartTypes.utils';
+import './ChartTypes.css';
 
 interface ChartTypePickerModalProps {
   items: readonly PickerItem[];
@@ -9,29 +11,17 @@ interface ChartTypePickerModalProps {
 }
 
 /**
- * Picks the type of a new chart (v1 `VisualizeSelectionModal`). Types v2 can't build yet stay in the grid, disabled,
- * so the picker reads like v1's.
+ * Picks the type of a new chart (v1 `VisualizeSelectionModal`): no header and no close button, the title and its line
+ * centered over the cards of the types that can be built. Escape or a click outside cancels.
  */
 export function ChartTypePickerModal({ items, onPick, onCancel }: ChartTypePickerModalProps) {
   return (
-    <Modal open centered width={820} footer={null} title="Select A Visualization" onCancel={onCancel}>
-      <Typography.Paragraph type="secondary">Select a visualization to start. Don&apos;t worry, you could change it later</Typography.Paragraph>
-      <ul className="m-0 grid max-h-[60vh] list-none grid-cols-[repeat(auto-fill,minmax(110px,1fr))] gap-2 overflow-auto p-0" aria-label="Chart types">
-        {items.map(item => {
-          const button = (
-            <button
-              type="button"
-              disabled={!item.buildable}
-              onClick={() => onPick(item.type)}
-              className="flex h-full w-full cursor-pointer flex-col items-center gap-2 rounded-lg border border-solid border-black/10 bg-transparent p-3 text-inherit hover:border-[var(--color-brand)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-black/10"
-            >
-              <img src={CHART_ICON_PATH + item.icon} alt="" className="h-10 w-10" />
-              <span className="text-center text-xs">{item.title}</span>
-            </button>
-          );
-          return <li key={item.type}>{item.buildable ? button : <Tooltip title="Not available yet">{button}</Tooltip>}</li>;
-        })}
-      </ul>
+    <Modal open centered className="chart-type-picker" width={800} footer={null} closable={false} getContainer={false} onCancel={onCancel} aria-labelledby="chart-type-picker-title">
+      <h4 id="chart-type-picker-title" className="chart-type-picker__title">
+        Select A Visualization
+      </h4>
+      <p className="chart-type-picker__subtitle">Select a visualization to start. Don&apos;t worry, you could change it later</p>
+      <ChartTypeCardsView items={buildableTypes(items)} onPick={onPick} />
     </Modal>
   );
 }

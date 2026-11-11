@@ -1,0 +1,179 @@
+/* v1 `VisualizationItem.vue`, `VisualizationItemListing.vue`, `VisualizeSelectionModal.vue`: picking a chart type. */
+
+/* A type as a card: its 48px icon over its title, grey until hovered or picked. */
+.chart-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 118px;
+  height: 126px;
+  padding: 24px 12px;
+  border: 1px solid var(--primary, #f2f2f7);
+  border-radius: 4px;
+  background: var(--primary, #f2f2f7);
+  font: inherit;
+  cursor: pointer;
+}
+
+.chart-type-card img {
+  width: 48px;
+  height: 48px;
+}
+
+.chart-type-card__title {
+  margin-top: 12px;
+  color: var(--secondary-text-color);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: normal;
+  letter-spacing: 0.23px;
+  text-align: center;
+}
+
+.chart-type-card:hover,
+.chart-type-card:focus-visible,
+.chart-type-card[aria-pressed='true'] {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.chart-type-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The builder's "Type" row: the title, "View all", then the strip of 60px tiles. */
+.chart-type-strip__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 21px;
+  margin-bottom: 16px;
+}
+
+.chart-type-strip__title {
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 0.6px;
+  user-select: none;
+}
+
+.chart-type-strip__all {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--secondary-text-color);
+  font: inherit;
+  line-height: 21px;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+}
+
+.chart-type-strip__all:hover,
+.chart-type-strip__all:focus-visible,
+.chart-type-strip__all[aria-expanded='true'] {
+  background: var(--hover-color);
+  color: var(--text-color);
+}
+
+.chart-type-strip__all img {
+  margin-left: 6px;
+}
+
+.chart-type-strip__list {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+  background: var(--primary, #f2f2f7);
+  list-style: none;
+  scrollbar-width: none;
+}
+
+.chart-type-tile {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  padding: 10px;
+  border: 1px solid var(--primary, #f2f2f7);
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 2px 8px 0 rgb(0 0 0 / 8%);
+  cursor: pointer;
+}
+
+.chart-type-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chart-type-tile:hover,
+.chart-type-tile:focus-visible,
+.chart-type-tile[aria-pressed='true'] {
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* "View all": every type as a card, 600 by 450. */
+.chart-type-all {
+  width: 600px;
+  height: 450px;
+  padding: 4px;
+  overflow-y: auto;
+}
+
+.chart-type-all .chart-type-cards {
+  padding-bottom: 20px;
+}
+
+.chart-type-all .chart-type-cards > li {
+  margin: 10px;
+}
+
+.chart-type-all-popover.ant-popover .ant-popover-container {
+  padding: 0;
+  border: var(--menu-border);
+}
+
+/* The picker of a new chart: no header, the title and its line centered over the cards. */
+.chart-type-picker.ant-modal .ant-modal-body {
+  padding: 24px;
+  text-align: center;
+}
+
+.chart-type-picker__title {
+  margin: 0;
+  color: var(--text-color);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+}
+
+.chart-type-picker__subtitle {
+  margin: 0 0 16px;
+  color: var(--secondary-text-color);
+  font-size: 14px;
+}
+
+.chart-type-picker .chart-type-cards {
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.chart-type-picker .chart-type-cards > li {
+  margin: 12px;
+}

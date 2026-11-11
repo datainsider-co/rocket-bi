@@ -1,0 +1,240 @@
+{
+  "pie": {
+    "name": "Pie Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Pie Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-pie.svg"
+  },
+  "funnel": {
+    "name": "Funnel Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Funnel Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-funnel.svg"
+  },
+  "pyramid": {
+    "name": "Pyramid Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Pyramid Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-pyramid.svg"
+  },
+  "area": {
+    "name": "Area Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Area Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-area.svg"
+  },
+  "column": {
+    "name": "Column Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Column Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-column.svg"
+  },
+  "bar": {
+    "name": "Bar Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Bar Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-bar.svg"
+  },
+  "line": {
+    "name": "Line Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Line Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-line.svg"
+  },
+  "histogram": {
+    "name": "Histogram Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Histogram Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-histogram.svg"
+  },
+  "pareto": {
+    "name": "Pareto Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Pareto Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-pareto.svg"
+  },
+  "bell_curve": {
+    "name": "Bell Curve Chart",
+    "texts": [
+      "- Drag the Value properties you want to display on the Bell Curve Chart."
+    ],
+    "image": "hint-bell-curve.svg"
+  },
+  "scatter": {
+    "name": "Scatter Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Scatter Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-scatter.svg"
+  },
+  "bubble_chart": {
+    "name": "Bubble Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Bubble Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-bubble.svg"
+  },
+  "kpi": {
+    "name": "Number Chart",
+    "texts": [
+      "- Drag the Value properties you want to display on the Number Chart."
+    ],
+    "image": "hint-number.svg"
+  },
+  "column_drilldown": {
+    "name": "Drilldown Column Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Drilldown Column Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ]
+  },
+  "pie_drilldown": {
+    "name": "Drilldown Pie Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Drilldown Pie Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ]
+  },
+  "bar_drilldown": {
+    "name": "Drilldown Bar Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Drilldown Bar Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ]
+  },
+  "heatmap": {
+    "name": "Heat maps Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Heat maps Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-heatmap.svg"
+  },
+  "gauge": {
+    "name": "Gauges Chart",
+    "texts": [
+      "- Drag the Value properties you want to display on the Gauges Chart."
+    ],
+    "image": "hint-gauges.svg"
+  },
+  "map": {
+    "name": "Map Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Map Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-map.svg"
+  },
+  "Parliament": {
+    "name": "Parliament Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Parliament Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-parliament.svg"
+  },
+  "pivot_table": {
+    "name": "Pivot Table Chart",
+    "texts": [
+      "- Drag the Rows properties you want to display on the Pivot Table.",
+      "- Drag the Columns properties you want to display on the Pivot Table.",
+      "- Drag the Values corresponding to the rows and columns properties."
+    ],
+    "image": "hint-pivot-table.svg"
+  },
+  "stack_bar": {
+    "name": "Stacked Bar Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Stacked Bar Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-stack-bar.svg"
+  },
+  "stack_column": {
+    "name": "Stacked Column Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Stacked Column Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-stack-column.svg"
+  },
+  "table": {
+    "name": "Table Chart",
+    "texts": [
+      "- Drag the Columns properties you want to display on the Table Chart."
+    ],
+    "image": "hint-table.svg"
+  },
+  "tree_map": {
+    "name": "Tree Maps Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Tree Maps Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-treemap.svg"
+  },
+  "wordcloud": {
+    "name": "Word Cloud Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Word Cloud Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-word-cloud.svg"
+  },
+  "spider_web": {
+    "name": "Spider Web Chart",
+    "texts": [
+      "- Drag the Legend properties you want to display on the Spider Web Chart.",
+      "- Drag the values corresponding to the Legend properties."
+    ],
+    "image": "hint-spider-web.svg"
+  },
+  "tab_filter": {
+    "name": "Tab Filter",
+    "texts": [
+      "- Drag the Value properties you want to display on the Tab Filter."
+    ],
+    "image": "hint-tabfilter.svg"
+  },
+  "single_choice": {
+    "name": "Single Choice",
+    "texts": [
+      "- Drag the Value properties you want to display on the Single Choice."
+    ],
+    "image": "hint-singlechoice.svg"
+  },
+  "multi_choice": {
+    "name": "Multi Choice",
+    "texts": [
+      "- Drag the Value properties you want to display on the Multi Choice."
+    ],
+    "image": "hint-multichoice.svg"
+  },
+  "drop_down": {
+    "name": "Dropdown",
+    "texts": [
+      "- Drag the Value properties you want to display on the Dropdown."
+    ],
+    "image": "hint-dropdown.svg"
+  }
+}
