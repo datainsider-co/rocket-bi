@@ -7,6 +7,7 @@ import { useIsMobile } from '../grid/useIsMobile';
 import { refreshIntervalOf } from '../mode/dashboardMode.utils';
 import { useDashboardDisplay } from '../mode/useDashboardDisplay';
 import { useRelationshipModal } from '../relationship/useRelationshipModal';
+import { DialogScope } from '../theme/DialogScope';
 import { useDashboardShare } from '../share/useDashboardShare';
 import { useViewAs } from '../view-as/useViewAs';
 import { DashboardPageView } from './DashboardPageView';
@@ -58,8 +59,12 @@ export function DashboardPageContent({ page, embedded, chartBuilder: ChartBuilde
         }
         onBack={page.goBack}
       />
-      {share.modal}
-      {relationship.modal}
+      {(share.modal || relationship.modal) && (
+        <DialogScope>
+          {share.modal}
+          {relationship.modal}
+        </DialogScope>
+      )}
     </>
   );
 }

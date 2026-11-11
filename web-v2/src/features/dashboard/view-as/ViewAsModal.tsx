@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { SuggestedUser } from '@/core/user/UserService';
 import { useUserSuggestions } from './useUserSuggestions';
-import { findUser, userOptions } from './viewAs.utils';
+import { findUser } from './viewAs.utils';
 import { ViewAsModalView } from './ViewAsModalView';
 
 interface ViewAsModalProps {
@@ -16,7 +16,7 @@ export function ViewAsModal({ onPick, onCancel }: ViewAsModalProps) {
   const users = suggestions.data?.users ?? [];
   return (
     <ViewAsModalView
-      options={userOptions(users)}
+      users={users.map(user => user.profile)}
       loading={suggestions.isFetching}
       onSearch={setKeyword}
       onPick={username => {

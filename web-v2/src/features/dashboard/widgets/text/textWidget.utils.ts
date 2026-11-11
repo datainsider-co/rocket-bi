@@ -18,7 +18,7 @@ export function textRenderStyle(widget: TextWidget): CSSProperties {
   return {
     color: asString(styleSetting(widget, 'font_color')) || legacy('text_color') || 'var(--text-color)',
     fontSize: asString(styleSetting(widget, 'font_size')) || legacy('font_size') || (hasSettings ? '13px' : '12px'),
-    textAlign: asString(styleSetting(widget, 'text_align'), 'left') as CSSProperties['textAlign'],
+    textAlign: (asString(styleSetting(widget, 'text_align')) || (hasSettings ? 'left' : 'var(--widget-primary-font-align, center)')) as CSSProperties['textAlign'],
     fontFamily: asString(styleSetting(widget, 'font_family')) || (hasSettings ? 'Roboto' : 'var(--widget-primary-font-family, Roboto)'),
     opacity: asNumber(styleSetting(widget, 'opacity'), 100) / 100,
     fontWeight: asBoolean(styleSetting(widget, 'is_bold')) ? 'bold' : undefined,

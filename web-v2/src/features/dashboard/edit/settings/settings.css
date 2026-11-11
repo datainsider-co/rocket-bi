@@ -1,7 +1,7 @@
 /*
   v1 DiCustomModal, DiTab and the settings components (DashboardSettingModal, DashboardSizeSetting, WidgetTextSetting,
   ...). The gear and its menu take the dashboard theme's colors, like the header's Options. The dialogs render inside
-  the dashboard page for its `--accent`, but keep light surfaces and text in every theme (v1 turned them dark).
+  the dashboard's dialog layer (`DialogScope`): light, with the default accent, whatever the dashboard's theme.
 */
 
 /* The gear at the dashboard's top right in edit mode (v1 `.dashboard--content--setting`). */
@@ -107,7 +107,7 @@
 
 /* v1 #edit-dashboard-setting and #widget-setting-modal .modal-body min-height. */
 .setting-dialog .ant-modal-body {
-  min-height: 469px;
+  min-height: 480px;
 }
 
 .setting-dialog--widget-setting-modal .ant-modal-body {
@@ -177,17 +177,6 @@
 
 .setting-dialog__ok {
   min-width: 122px;
-}
-
-.setting-dialog .ant-btn-primary:not(:disabled),
-.theme-dialog .ant-btn-primary:not(:disabled) {
-  background: var(--accent, #597fff);
-}
-
-.setting-dialog .ant-btn-primary:not(:disabled):hover,
-.theme-dialog .ant-btn-primary:not(:disabled):hover {
-  background: var(--accent, #597fff);
-  opacity: 0.85;
 }
 
 /* One tab's content. */

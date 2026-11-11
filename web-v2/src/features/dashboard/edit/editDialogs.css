@@ -1,0 +1,183 @@
+/* The edit mode's dialogs, measured on v1 at 1440 px. Their shells are in `dialogs/dialogs.css`. */
+@layer components {
+  /* v1 `AddChartModal`: a search box over 400px of rows 46px tall, each an icon, a name and a check. */
+  .pick-widgets {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+  }
+
+  /* v1 `DiSearchInput[border]`. */
+  .dashboard-page .pick-widgets .pick-widgets__search {
+    flex: none;
+    height: 34px;
+    margin-bottom: 8px;
+    padding: 0 8px 0 14px;
+    border: 1px solid rgb(231, 235, 238);
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  .dashboard-page .pick-widgets .pick-widgets__search .ant-input-prefix {
+    margin-inline-end: 8px;
+  }
+
+  .dashboard-page .pick-widgets .pick-widgets__search .ant-input {
+    color: var(--text-color);
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  .dashboard-page .pick-widgets .pick-widgets__search .ant-input::placeholder {
+    color: var(--secondary-text-color);
+    font-size: 14px;
+  }
+
+  .pick-widgets__list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .pick-widgets__item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 46px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text-color);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .pick-widgets__item:hover {
+    background: var(--hover-color);
+  }
+
+  .pick-widgets__icon {
+    flex: none;
+    width: 24px;
+    height: 24px;
+  }
+
+  .pick-widgets__name {
+    flex: 1;
+    min-width: 0;
+    margin: 0 16px;
+    overflow: hidden;
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .pick-widgets__check {
+    flex: none;
+  }
+
+  /* v1 centers the text in three quarters of the height. */
+  .pick-widgets__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 75%;
+    text-align: center;
+  }
+
+  /* v1 `SortModal`: 400px of rows 46px tall, the name in bold and a drag icon at the end. */
+  .sort-tabs {
+    height: 400px;
+    overflow-y: auto;
+  }
+
+  .sort-tabs__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 46px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text-color);
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: move;
+    touch-action: none;
+  }
+
+  .sort-tabs__row:hover,
+  .sort-tabs__row--ghost {
+    background: var(--hover-color);
+  }
+
+  .sort-tabs__row[data-dragging='true'] {
+    opacity: 0.4;
+  }
+
+  .sort-tabs__name {
+    min-width: 0;
+    overflow: hidden;
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .sort-tabs__row > .di-icon-drag {
+    flex: none;
+    font-size: 14px;
+  }
+
+  /*
+    v1 `TabSettingModal`: 600px tall; the widget on the dashboard's background at the left, and a white column of
+    settings 350px wide (16px around) at the right.
+  */
+  .tab-style {
+    display: flex;
+    height: 600px;
+  }
+
+  .tab-style__preview {
+    flex: 1;
+    min-width: 0;
+    margin-right: 16px;
+    border-radius: 4px;
+    background: var(--dashboard-gradient-background-color, transparent);
+  }
+
+  /* v1: a fifth of the height above the tab widget, which takes half of it. */
+  .tab-style__tab {
+    height: 50%;
+    margin-top: 120px;
+  }
+
+  .tab-style__panel {
+    height: 100%;
+  }
+
+  .tab-style__settings {
+    box-sizing: border-box;
+    flex: none;
+    width: 350px;
+    padding: 16px;
+    overflow-y: auto;
+    border-radius: 4px;
+    background: var(--secondary);
+  }
+
+  /* v1's `half` size of a color: two share a row. */
+  .tab-style__halves {
+    justify-content: space-between;
+  }
+}
+
+/* Outside the layer, like `shared/settings/Settings.css` whose color width (`small`, 115px) this replaces. */
+.tab-style__half {
+  flex-shrink: 0;
+  width: 145px;
+}

@@ -1,0 +1,248 @@
+/* v1 `EditTextModal.vue` and `PreviewText.vue`, measured at 1440 px. */
+@layer components {
+  .dashboard-page .text-editor .ant-modal-header {
+    padding: 20px 35px 0;
+  }
+
+  .dashboard-page .text-editor .ant-modal-title {
+    min-height: 25px;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: normal;
+  }
+
+  .text-editor__title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .dashboard-page .text-editor .ant-modal-body {
+    padding: 0 35px 22px;
+  }
+
+  /* Cancel 83 by 40 and Save 122 by 40, 14px apart. */
+  .dashboard-page .text-editor .ant-modal-footer {
+    padding: 1px 35px 30px;
+  }
+
+  .dashboard-page .text-editor .ant-modal-footer > .ant-btn + .ant-btn {
+    margin-inline-start: 14px;
+  }
+
+  /* Two halves 400px tall, 11px apart: what is typed, and the widget it makes. */
+  .text-editor__panels {
+    display: flex;
+    gap: 11px;
+    height: 400px;
+  }
+
+  .text-editor__panel {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* v1's `a-tabs`: 14px tabs 32px apart in the brand blue, whatever the accent. */
+  .dashboard-page .text-editor .text-editor__modes {
+    flex: none;
+    width: fit-content;
+    height: 46px;
+    margin-top: 5px;
+  }
+
+  .dashboard-page .text-editor .text-editor__modes .ant-tabs-nav {
+    margin: 0;
+  }
+
+  .dashboard-page .text-editor .text-editor__modes .ant-tabs-nav::before {
+    border-color: #e8e8e8;
+  }
+
+  .dashboard-page .text-editor .text-editor__modes .ant-tabs-tab {
+    padding: 12px 0;
+    color: rgba(0, 0, 0, 0.65);
+    font-size: 14px;
+    line-height: 21px;
+  }
+
+  .dashboard-page .text-editor .text-editor__modes .ant-tabs-tab .ant-tabs-tab-btn {
+    font-weight: 400;
+  }
+
+  .dashboard-page .text-editor .text-editor__modes .ant-tabs-tab:hover,
+  .dashboard-page .text-editor .text-editor__modes .ant-tabs-tab-active .ant-tabs-tab-btn {
+    color: #0066ff;
+  }
+
+  .dashboard-page .text-editor .text-editor__modes .ant-tabs-tab .ant-tabs-tab-icon {
+    margin-inline-end: 12px;
+  }
+
+  .dashboard-page .text-editor .text-editor__modes .ant-tabs-ink-bar {
+    background: #0066ff;
+  }
+
+  /* The right half's only "tab": bold, over a 44px bar. */
+  .text-editor__review-title {
+    position: relative;
+    flex: none;
+    width: fit-content;
+    height: 46px;
+    margin-top: 5px;
+    padding: 12px 0;
+    box-sizing: border-box;
+    color: var(--text-color);
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 21px;
+  }
+
+  .text-editor__review-title::after {
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    width: 44px;
+    height: 2px;
+    background: #0066ff;
+    content: '';
+  }
+
+  .text-editor__description {
+    flex: none;
+    min-height: 39.2px;
+    margin: 0;
+    padding: 16px 0 24px;
+    color: #8e8e93;
+    font-size: 14px;
+    line-height: 19.6px;
+  }
+
+  .dashboard-page .text-editor .text-editor__input {
+    flex: 1;
+    min-height: 0;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    background: #f2f2f7;
+    box-shadow: none;
+    color: var(--text-color);
+    font-size: 14px;
+    line-height: 21px;
+    resize: none;
+  }
+
+  /* The widget on a strip of the page's grey, at the dashboard's theme. */
+  .text-editor__review {
+    flex: 1;
+    min-height: 0;
+    padding: 16px;
+    overflow: auto;
+    background: #f2f2f7;
+  }
+
+  .text-editor__card {
+    position: relative;
+    height: fit-content;
+    min-height: 100px;
+  }
+
+  .text-editor__card > .widget-container {
+    min-height: 100px;
+  }
+
+  /* The settings under both halves: a hairline box, "Text" then "Background", each a row of 40px controls 8px apart. */
+  .text-editor__config {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 17px;
+    padding: 21.6px 14px 22.4px;
+    border: 1px solid #f0f0f0;
+  }
+
+  .text-editor__group-title {
+    font-size: 14px;
+    line-height: 15.263px;
+  }
+
+  .text-editor__group-title--medium {
+    font-weight: 500;
+  }
+
+  .text-editor__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+  }
+
+  .dashboard-page .text-editor .text-editor__family {
+    width: 161px;
+  }
+
+  .dashboard-page .text-editor .text-editor__size {
+    width: 100px;
+  }
+
+  .dashboard-page .text-editor .text-editor__controls .ant-select {
+    border-color: #e7ebee;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  /* v1 `FontStyleSetting` / `AlignSettingV2`: joined 40px buttons, the pressed ones grey. */
+  .text-editor__buttons {
+    display: flex;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  .text-editor__buttons > button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 40px;
+    margin-left: -1px;
+    padding: 0;
+    border: 1px solid #e7ebee;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .text-editor__buttons--wide > button {
+    width: 75.7px;
+  }
+
+  .text-editor__buttons > button:first-child {
+    margin-left: 0;
+    border-radius: 4px 0 0 4px;
+  }
+
+  .text-editor__buttons > button:last-child {
+    border-radius: 0 4px 4px 0;
+  }
+
+  .text-editor__buttons > button:hover {
+    background: #f0f0f0;
+  }
+
+  .text-editor__buttons > button[aria-pressed='true'] {
+    background: #d6d6d6;
+  }
+
+  .text-editor__percent {
+    width: 184px;
+  }
+}
+
+/* Outside the layer, to win over `settings.css`'s color field (not layered): v1's is 78px wide with a hairline border. */
+.text-editor .text-editor__color {
+  width: 78px;
+  border-color: #f0f0f0;
+}

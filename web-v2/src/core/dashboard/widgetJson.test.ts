@@ -19,20 +19,26 @@ describe('textWidgetJson', () => {
   it('builds a new text widget the server accepts', () => {
     const json = textWidgetJson({}, content);
     expect(json).toMatchObject({ class_name: 'text_widget', id: -1, content: 'Hello', is_html_render: false });
-    expect(json['extra_data']).toMatchObject({ current_chart_type: 'text_widget', style_settings: { font_size: '20px', is_bold: true, opacity: 100 } });
+    expect(json['extra_data']).toMatchObject({ current_chart_type: 'text_widget', style_settings: { font_size: '20px', is_bold: true, opacity: 100, font_family: DEFAULT_TEXT_STYLE.fontFamily, background_opacity: 100 } });
     expect(widgetFromJson(json).kind).toBe('text');
   });
 
   it('keeps what the stored widget has besides', () => {
-    const stored = { class_name: 'text_widget', id: 10, owner_id: 'root', extra_data: { other: 1, style_settings: { background: 'red' } } };
-    const json = textWidgetJson(stored, content);
-    expect(json).toMatchObject({ id: 10, owner_id: 'root', extra_data: { other: 1, style_settings: { background: 'red', font_size: '20px' } } });
+    const stored = { class_name: 'text_widget', id: 10, owner_id: 'root', extra_data: { other: 1, style_settings: { background: 'red', later: true } } };
+    const json = textWidgetJson(stored, { ...content, style: { ...content.style, background: '#00ff00', backgroundOpacity: 40 } });
+    expect(json).toMatchObject({
+      id: 10,
+      owner_id: 'root',
+      extra_data: { other: 1, style_settings: { later: true, background: '#00ff00', background_opacity: 40, font_size: '20px' } }
+    });
   });
 
   it('reads the style back, with defaults for what is missing', () => {
     expect(textStyleOf(textWidgetJson({}, content))).toEqual(content.style);
     expect(textStyleOf({})).toEqual(DEFAULT_TEXT_STYLE);
     expect(textStyleOf({ extra_data: { style_settings: { text_align: 'justify' } } }).textAlign).toBe('left');
+    // A widget without style settings takes v1's defaults: the theme's alignment.
+    expect(textStyleOf({}).textAlign).toBe('var(--widget-primary-font-align, center)');
   });
 });
 

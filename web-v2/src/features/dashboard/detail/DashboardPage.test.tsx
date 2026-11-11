@@ -313,9 +313,9 @@ describe('dashboard page', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Options' }));
     await userEvent.click(await screen.findByText('View As', {}, SLOW));
-    await userEvent.click(screen.getByRole('combobox', { name: 'User' }));
-    await userEvent.click(await screen.findByTitle('root', {}, SLOW));
-    await userEvent.click(screen.getByRole('button', { name: 'View As' }));
+    await userEvent.type(screen.getByRole('combobox', { name: 'Select user' }), 'ro');
+    await userEvent.click(await screen.findByText('hello@gmail.com', {}, SLOW));
+    await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
 
     // The KPI (3) is queried again as root, with the profile the server sent.
     const root = { username: 'root', full_name: 'root', email: 'hello@gmail.com', gender: 0 };
@@ -453,7 +453,7 @@ describe('dashboard page', () => {
 
       await userEvent.click(within(tabs()).getByRole('button', { name: 'Actions of tab Pie' }));
       await userEvent.click(await screen.findByText('Add chart'));
-      await userEvent.click(await screen.findByRole('checkbox', { name: 'Note' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Note' }));
       await userEvent.click(screen.getByRole('button', { name: 'Add' }));
       await waitFor(() => expect(lastEdit()?.tab_items[0]?.widget_ids).toEqual([11, 10]), SLOW);
 
@@ -471,7 +471,8 @@ describe('dashboard page', () => {
 
       await userEvent.click(within(tabs).getAllByRole('button', { name: 'Widget actions' })[0]!);
       await userEvent.click(await screen.findByText('Config tab'));
-      await userEvent.click(await screen.findByText('Left'));
+      await userEvent.click(await screen.findByRole('combobox', { name: /Position/ }));
+      await userEvent.click(await screen.findByTitle('Vertical'));
       await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Save' }));
 
       await waitFor(() => expect(dashboards.editWidget).toHaveBeenCalled(), SLOW);

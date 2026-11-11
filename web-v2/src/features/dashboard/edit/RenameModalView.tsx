@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Input, Modal } from 'antd';
+import { Input } from 'antd';
+import { CustomDialog } from '../dialogs/CustomDialog';
 
 interface RenameModalViewProps {
   title: string;
@@ -12,7 +13,7 @@ interface RenameModalViewProps {
   required?: boolean;
 }
 
-/** v1 `DiRenameModal`: one name, saved on Enter or OK. */
+/** v1 `DiRenameModal`: one name in a grey field under its label, saved on Enter or Rename; errors show under the field. */
 export function RenameModalView({ title, label, initial, onSubmit, onCancel, required = false }: RenameModalViewProps) {
   const [name, setName] = useState(initial);
   const [saving, setSaving] = useState(false);
@@ -33,12 +34,17 @@ export function RenameModalView({ title, label, initial, onSubmit, onCancel, req
   };
 
   return (
-    <Modal open centered title={title} okText="Save" okButtonProps={{ disabled: invalid, loading: saving }} onOk={() => void submit()} onCancel={onCancel}>
-      <label htmlFor="rename-input" className="mb-1 block">
+    <CustomDialog title={title} okText="Rename" okDisabled={invalid} saving={saving} onOk={() => void submit()} onCancel={onCancel}>
+      <label htmlFor="rename-input" className="custom-dialog__label">
         {label}
       </label>
-      <Input id="rename-input" value={name} onChange={event => setName(event.target.value)} onPressEnter={() => void submit()} status={error ? 'error' : undefined} />
-      {error && <div className="mt-1 text-red-500">{error}</div>}
-    </Modal>
+      <Input id="rename-input" autoComplete="off" placeholder="Input your title" value={name} onChange={event => setName(event.target.value)} onPressEnter={() => void submit()} />
+      {invalid && <div className="custom-dialog__error">Field is required.</div>}
+      {error && (
+        <div className="custom-dialog__error" role="alert" title={error}>
+          {error}
+        </div>
+      )}
+    </CustomDialog>
   );
 }

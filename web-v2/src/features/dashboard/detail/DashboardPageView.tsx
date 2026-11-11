@@ -11,6 +11,7 @@ import { DashboardHeaderView } from '../header/DashboardHeaderView';
 import type { DashboardOptionHandlers } from '../header/headerOptions.utils';
 import { DashboardMode } from '../mode/dashboardMode.utils';
 import type { DashboardDisplay } from '../mode/useDashboardDisplay';
+import { DialogScope } from '../theme/DialogScope';
 import { getDashboardTheme } from '../theme/dashboardThemes';
 import type { ViewAs } from '../view-as/useViewAs';
 import { ViewAsModal } from '../view-as/ViewAsModal';
@@ -96,8 +97,12 @@ export function DashboardPageView(props: DashboardPageViewProps) {
           <DashboardPageBody {...props} />
         </div>
       </div>
-      {viewAs.picking && <ViewAsModal onPick={viewAs.onPick} onCancel={viewAs.onCancel} />}
-      <EditDialogsView dialogs={editing.dialogs} dashboard={dashboard} />
+      {(viewAs.picking || editing.dialogs.dialog) && (
+        <DialogScope>
+          {viewAs.picking && <ViewAsModal onPick={viewAs.onPick} onCancel={viewAs.onCancel} />}
+          <EditDialogsView dialogs={editing.dialogs} dashboard={dashboard} />
+        </DialogScope>
+      )}
       {builder}
     </div>
   );

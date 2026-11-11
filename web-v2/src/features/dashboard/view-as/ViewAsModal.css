@@ -1,0 +1,50 @@
+/* v1 `RLSViewAsModal`, `UserItemListing` and `ChipButton`. */
+@layer components {
+  .view-as-dialog__label {
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+
+  .dashboard-page .view-as-dialog .ant-select {
+    height: 42px;
+  }
+
+  /* The matches: 40px user rows 16px around, in the menu's panel. */
+  .dashboard-page .view-as-dialog .ant-select-dropdown {
+    padding: 0;
+    outline: none;
+    border: var(--menu-border);
+    box-shadow: var(--menu-shadow);
+  }
+
+  .dashboard-page .view-as-dialog .ant-select-dropdown .ant-select-item-option {
+    padding: 16px;
+    opacity: 1;
+  }
+
+  .view-as-dialog__user {
+    display: flex;
+    margin: 16px 0;
+  }
+
+  .view-as-dialog__attributes {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .view-as-dialog__chip {
+    max-width: 266px;
+    height: 20px;
+    margin: 4px 4px 0;
+    padding: 0 8px;
+    overflow: hidden;
+    border-radius: 4px;
+    background: var(--accent);
+    color: var(--accent-text-color);
+    font-size: 12px;
+    line-height: 20px;
+    letter-spacing: 0.17px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}

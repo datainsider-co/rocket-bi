@@ -20,7 +20,12 @@ describe('textRenderStyle', () => {
   });
 
   it("uses v1's default style settings for a widget saved without any", () => {
-    expect(textRenderStyle(text())).toMatchObject({ color: 'var(--text-color)', fontSize: '12px', fontFamily: 'var(--widget-primary-font-family, Roboto)' });
+    expect(textRenderStyle(text())).toMatchObject({
+      color: 'var(--text-color)',
+      fontSize: '12px',
+      fontFamily: 'var(--widget-primary-font-family, Roboto)',
+      textAlign: 'var(--widget-primary-font-align, center)'
+    });
   });
 
   it('takes the old color and size of a widget saved without style settings', () => {

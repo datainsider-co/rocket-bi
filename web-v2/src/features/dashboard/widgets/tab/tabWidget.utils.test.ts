@@ -19,7 +19,7 @@ describe('openTabIndex', () => {
 describe('tabHeaderCssVars', () => {
   it('maps the header style to the variables TabWidget.css reads', () => {
     expect(
-      tabHeaderCssVars({ position: 'horizontal', fontSize: '16px', color: '#111', activeBackground: '#fff', inactiveBackground: '#eee' })
-    ).toEqual({ '--tab-font-size': '16px', '--tab-color': '#111', '--tab-active-background': '#fff', '--tab-inactive-background': '#eee' });
+      tabHeaderCssVars({ position: 'horizontal', fontFamily: 'Barlow', fontSize: '16px', color: '#111', activeBackground: '#fff', inactiveBackground: '#eee' })
+    ).toEqual({ '--tab-font-family': 'Barlow', '--tab-font-size': '16px', '--tab-color': '#111', '--tab-active-background': '#fff', '--tab-inactive-background': '#eee' });
   });
 });
