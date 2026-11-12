@@ -8,7 +8,7 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(chartType)).toBe('series');
   });
 
-  it.each([ChartType.StackedColumn, ChartType.StackedBar, ChartType.CircularBar])('gives %s the stacked settings', chartType => {
+  it.each([ChartType.StackedColumn, ChartType.StackedBar, ChartType.CircularBar, ChartType.WindRose])('gives %s the stacked settings', chartType => {
     expect(settingsKindOf(chartType)).toBe('stacked');
   });
 

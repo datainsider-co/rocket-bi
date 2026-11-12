@@ -46,6 +46,10 @@ describe('buildSetting', () => {
     expect(withoutBreakdown).not.toHaveProperty('breakdown');
     const breakdown = buildSetting(data(ChartType.CircularBar, { x_axis: [x], y_axis: [y], breakdown_optional: [item({ id: 3 })] }), { options: {} });
     expect(asRecord(breakdown?.['breakdown'])['name']).toBe('region');
+    expect(buildSetting(data(ChartType.WindRose, { x_axis: [x], y_axis: [y], breakdown_optional: [item({ id: 3 })] }), { options: {} })).toMatchObject({
+      class_name: 'series_chart_setting',
+      breakdown: { name: 'region' }
+    });
     expect(canBuildSetting(data(ChartType.StackedBar, { x_axis: [x], breakdown_optional: [x] }))).toBe(false);
   });
 

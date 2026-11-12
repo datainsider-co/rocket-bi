@@ -72,6 +72,16 @@ describe('buildStackedChartOptions', () => {
     expect(circular.pane).toMatchObject({ size: '85%', innerSize: '20%', endAngle: 270 });
   });
 
+  it('draws a wind rose as stacked columns round its polar pane', () => {
+    const viz = { chart: { polar: true, type: 'column' }, plotOptions: { series: { stacking: 'normal' } } } as VizOptions;
+    const windRose = buildStackedChartOptions({ options: viz, response, themeColors: THEME, timestampXAxis: false });
+    expect(windRose.chart).toMatchObject({ polar: true, type: 'column' });
+    expect(windRose.plotOptions?.series).toMatchObject({ stacking: 'normal' });
+    const series = (windRose.series ?? []) as { type?: string; stack?: string }[];
+    expect(series.length).toBeGreaterThan(0);
+    expect(series.every(item => item.type === 'column' && item.stack !== undefined)).toBe(true);
+  });
+
   it('pairs timestamps with values on a datetime axis', () => {
     const timed: SeriesOneResponse = { kind: 'series_one', xAxis: ['1000'], yAxis: [], series: [{ name: 'a', data: [1] }] };
     const built = buildStackedChartOptions({ options: {}, response: timed, themeColors: THEME, timestampXAxis: true });

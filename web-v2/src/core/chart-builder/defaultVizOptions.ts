@@ -186,6 +186,9 @@ const circularBar = () => ({
   tooltip: stackedTooltip
 });
 
+/** v1 `WindRoseChartOption.getDefaultChartOption`: the stacked columns' options on a polar pane. */
+const windRose = () => ({ ...stacked('column'), chart: { polar: true, type: 'column' } });
+
 const pieTooltip = { backgroundColor: TOOLTIP_BACKGROUND, style: secondaryStyle() };
 
 /** v1 `PieChartOption.getDefaultChartOption` and `getDefaultSemiPieOption` (source). */
@@ -500,6 +503,7 @@ const DEFAULTS: Readonly<Record<ChartType, Defaults>> = {
   [T.StackedColumn]: stackedDefaults('stacking_series_chart_setting', () => stacked('column')),
   [T.StackedBar]: stackedDefaults('stacking_series_chart_setting', () => stacked('bar')),
   [T.CircularBar]: stackedDefaults('circular_bar_chart_setting', circularBar),
+  [T.WindRose]: stackedDefaults('wind_rose_setting', windRose),
   [T.LineInverted]: seriesDefaults(() => invertedSeries('line')),
   [T.AreaInverted]: seriesDefaults(() => invertedSeries('area')),
   [T.AreaRange]: { className: 'generic_chart_setting', options: () => range({ type: 'arearange', zooming: { type: 'x' } }, { area: { stacking: 'value' } }) },

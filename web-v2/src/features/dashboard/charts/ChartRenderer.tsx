@@ -83,7 +83,7 @@ export interface KpiParts {
   dateRange?: KpiDateRangeProps;
 }
 
-const SERIES_CLASSES = new Set<string>([ChartVizClass.Series, ChartVizClass.StackedSeries, ChartVizClass.CircularBar]);
+const SERIES_CLASSES = new Set<string>([ChartVizClass.Series, ChartVizClass.StackedSeries, ChartVizClass.CircularBar, ChartVizClass.WindRose]);
 
 const FUNNEL_TYPES: Readonly<Record<string, FunnelType>> = { [ChartVizClass.Funnel]: 'funnel', [ChartVizClass.Pyramid]: 'pyramid' };
 

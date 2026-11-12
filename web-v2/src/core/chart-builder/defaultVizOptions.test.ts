@@ -59,6 +59,11 @@ describe('defaultVizOptions', () => {
       class_name: 'generic_chart_setting',
       options: { chart: { type: 'columnrange', inverted: true }, legend: { enabled: false }, y_axis: [{ visible: true }, { visible: false }] }
     });
+    expect(defaultVizOptions(ChartType.WindRose)).toMatchObject({
+      class_name: 'wind_rose_setting',
+      stacking_group: {},
+      options: { chart: { polar: true, type: 'column' }, plot_options: { series: { stacking: 'normal' } }, legend: { enabled: true } }
+    });
     expect(defaultVizOptions(ChartType.Scatter)).toMatchObject({
       class_name: 'highcharts_scatter_chart_setting',
       options: { num_data_point: 1000, theme_color: { enabled: true }, plot_options: { series: { marker: { enabled: true } } }, x_axis: [{ grid_line_width: 0.5 }] }

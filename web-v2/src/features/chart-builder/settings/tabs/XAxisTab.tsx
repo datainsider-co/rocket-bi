@@ -13,17 +13,19 @@ interface XAxisTabProps extends TabProps {
   defaultTitle: string;
   /** The gridlines, on by default when shown (v1: scatter, bubble and the circular bar). */
   grid?: boolean;
+  /** The axis title's fields; v1's wind rose has none. */
+  title?: boolean;
 }
 
 /** v1 `XAxisTab`. */
-export function XAxisTab({ viz, onChange, defaultTitle, grid = false }: XAxisTabProps) {
+export function XAxisTab({ viz, onChange, defaultTitle, grid = false, title = true }: XAxisTabProps) {
   const visible = boolAt(viz, `${AXIS}.visible`, true);
   const group = { viz, onChange, axis: AXIS, disabled: !visible };
   return (
     <div className="settings-stack">
       <ToggleSetting label="On" value={visible} onChange={next => onChange({ [`${AXIS}.visible`]: next })} />
       <AxisLabelFields {...group} />
-      <AxisTitleFields {...group} defaultTitle={defaultTitle} />
+      {title && <AxisTitleFields {...group} defaultTitle={defaultTitle} />}
       {grid && <AxisGridFields {...group} />}
       <RevertButton onRevert={() => onChange(xAxisRevert(defaultTitle, grid ? AXIS_DEFAULTS.gridLineWidth : '0'))} />
     </div>

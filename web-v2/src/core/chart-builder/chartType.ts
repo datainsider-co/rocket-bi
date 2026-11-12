@@ -27,6 +27,8 @@ export const ChartType = {
   StackedBar: 'stack_bar',
   /** The stacked bar on a polar pane (v1 `CircularChartOption`). */
   CircularBar: 'circular_bar',
+  /** Stacked columns on a polar pane (v1 `WindRoseChartOption`, drawn by `StackingSeriesChart`). */
+  WindRose: 'wind_rose',
   Pie: 'pie',
   SemiPie: 'semi_pie',
   Donut: 'Donut',

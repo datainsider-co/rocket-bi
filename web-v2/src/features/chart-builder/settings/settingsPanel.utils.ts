@@ -13,7 +13,7 @@ const SERIES = new Set<string>([
   ChartType.AreaInverted
 ]);
 
-const STACKED = new Set<string>([ChartType.StackedColumn, ChartType.StackedBar, ChartType.CircularBar]);
+const STACKED = new Set<string>([ChartType.StackedColumn, ChartType.StackedBar, ChartType.CircularBar, ChartType.WindRose]);
 
 /** The pie family's tabs (v1 `PieSetting`, `DonutSetting`, `VariablepieSetting`, `FunnelSetting`, `PyramidSetting`). */
 const PIES = new Set<string>([ChartType.Pie, ChartType.SemiPie, ChartType.Donut, ChartType.VariablePie, ChartType.Funnel, ChartType.Pyramid]);

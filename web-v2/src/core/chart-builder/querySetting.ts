@@ -177,6 +177,7 @@ const BUILDERS: Readonly<Record<ChartType, SettingBuilder>> = {
   [T.StackedColumn]: stacked,
   [T.StackedBar]: stacked,
   [T.CircularBar]: stacked,
+  [T.WindRose]: stacked,
   [T.Pie]: pie,
   [T.SemiPie]: pie,
   [T.Donut]: pie,

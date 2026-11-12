@@ -132,8 +132,6 @@ export interface ChartTypeInfo {
   readonly zones: readonly ZoneConfig[];
   /** Whether the Sorting and Filters zones show (v1 `extraPanels`). */
   readonly extraZones: boolean;
-  /** `false` for the types that show Filters without Sorting (v1 `FILTER_CONFIGS` alone: scatter, bubble). */
-  readonly sortable?: boolean;
 }
 
 const T = ChartType;
@@ -170,13 +168,14 @@ export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.SemiPie, 'Semi Pie', 'ic_pie.svg', PIE_ZONES),
   chart(T.VariablePie, 'Variable Pie', 'ic_variable_pie.svg', VARIABLE_PIE_ZONES),
   chart(T.Donut, 'Donut', 'ic_donut.svg', PIE_ZONES),
-  { ...chart(T.Scatter, 'Scatter', 'ic_scatter.svg', SCATTER_ZONES), sortable: false },
-  { ...chart(T.Bubble, 'Bubble', 'ic_bubble.svg', BUBBLE_ZONES), sortable: false },
+  chart(T.Scatter, 'Scatter', 'ic_scatter.svg', SCATTER_ZONES),
+  chart(T.Bubble, 'Bubble', 'ic_bubble.svg', BUBBLE_ZONES),
   chart(T.Funnel, 'Funnel', 'ic_funnel.svg', PIE_ZONES),
   chart(T.Pyramid, 'Pyramid', 'ic_pyramid.svg', PIE_ZONES),
   chart(T.StackedColumn, 'Stacked Column', 'ic_stack_column.svg', stackedZones()),
   chart(T.StackedBar, 'Stacked Bar', 'ic_stack_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
   chart(T.CircularBar, 'Circular Bar', 'ic_circular_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
+  chart(T.WindRose, 'Wind Rose', 'ic_win_rose_chart.svg', stackedZones()),
   filter(T.TabFilter, 'Tab', 'ic_tab_filter.svg', VALUES_ZONES),
   filter(T.SingleChoice, 'Single choice', 'ic_single_choice.svg', VALUES_ZONES),
   filter(T.MultiChoice, 'Multi choice', 'ic_multi_choice.svg', VALUES_ZONES),
@@ -210,7 +209,6 @@ const OTHER_ICONS: Readonly<Record<string, string>> = {
   map: 'ic_map.svg',
   spider_web: 'ic-spider-chart.svg',
   sankey: 'ic_sankey.svg',
-  wind_rose: 'ic_win_rose_chart.svg',
   line_stock: 'ic_linestock.svg'
 };
 
@@ -261,7 +259,7 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   ['map', 'Map'],
   ['spider_web', 'Spider Web'],
   ['sankey', 'Sankey Diagram'],
-  ['wind_rose', 'Wind Rose'],
+  [T.WindRose, 'Wind Rose'],
   ['line_stock', 'Line Stock']
 ];
 

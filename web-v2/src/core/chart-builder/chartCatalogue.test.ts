@@ -105,6 +105,8 @@ describe('defaultFunctionOf', () => {
     [ChartType.AreaRange, 'max', 'double', 'Aggregation', 'Maximum'],
     [ChartType.ColumnRange, 'min', 'string', 'Aggregation', 'Count all'],
     [ChartType.ColumnRange, 'max', 'int32', 'Aggregation', 'Maximum'],
+    [ChartType.WindRose, 'breakdown_optional', 'string', 'Group By', ''],
+    [ChartType.WindRose, 'y_axis', 'double', 'Aggregation', 'Sum'],
     [ChartType.Scatter, 'x_axis', 'double', 'None', ''],
     [ChartType.Scatter, 'y_axis', 'datetime', 'None', ''],
     [ChartType.Scatter, 'legend_optional', 'string', 'None', ''],
