@@ -29,6 +29,7 @@ import { buildPieChartOptions } from './pie/pieChartOptions';
 import { buildVariablePieChartOptions } from './pie/variablePieChartOptions';
 import { buildPointChartOptions, type PointChartType } from './point/pointChartOptions';
 import { buildRangeChartOptions, isRangeChart } from './range/rangeChartOptions';
+import { buildWordCloudChartOptions } from './word-cloud/wordCloudChartOptions';
 import { buildSeriesChartOptions, isTimestampFunction } from './series/seriesChartOptions';
 import { buildStackedChartOptions } from './series/stackedChartOptions';
 import { FlattenTableView } from './table/FlattenTableView';
@@ -121,6 +122,7 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
     if (viz.className === ChartVizClass.Parliament && response.kind === 'series_two' && !chartErrorOf(viz, response)) {
       return buildParliamentChartOptions({ options: viz.options, response, themeColors });
     }
+    if (viz.className === ChartVizClass.WordCloud && response.kind === 'word_cloud') return buildWordCloudChartOptions({ options: viz.options, response, themeColors });
     if (viz.className === ChartVizClass.VariablePie && response.kind === 'generic') return buildVariablePieChartOptions({ options: viz.options, response, themeColors });
     if (viz.className === ChartVizClass.Generic && response.kind === 'generic' && isRangeChart(viz.options)) {
       return buildRangeChartOptions({ options: viz.options, response, themeColors });

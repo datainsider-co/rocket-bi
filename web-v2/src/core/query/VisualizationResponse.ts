@@ -84,12 +84,26 @@ export interface GenericResponse {
   readonly records: readonly (readonly unknown[])[];
 }
 
+/** Words and how much each weighs (`word_cloud_response`). */
+export interface WordCloudResponse {
+  readonly kind: 'word_cloud';
+  readonly name: string;
+  readonly data: readonly { readonly name: string; readonly weight: number }[];
+}
+
 export interface UnsupportedResponse {
   readonly kind: 'unsupported';
   readonly className: string;
 }
 
-export type VisualizationResponse = SeriesOneResponse | SeriesTwoResponse | TableResponse | JsonTableResponse | GenericResponse | UnsupportedResponse;
+export type VisualizationResponse =
+  | SeriesOneResponse
+  | SeriesTwoResponse
+  | TableResponse
+  | JsonTableResponse
+  | GenericResponse
+  | WordCloudResponse
+  | UnsupportedResponse;
 
 function toNullableNumber(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
@@ -183,6 +197,15 @@ export function visualizationResponseFromJson(value: unknown): VisualizationResp
       };
     case 'generic_chart_response':
       return { kind: 'generic', headers: stringList(json['headers']), records: asArray(json['records']).map(asArray) };
+    case 'word_cloud_response':
+      return {
+        kind: 'word_cloud',
+        name: asString(json['name']),
+        data: asArray(json['data']).map(item => {
+          const word = asRecord(item);
+          return { name: asString(word['name']), weight: asNumber(word['weight']) };
+        })
+      };
     default:
       return { kind: 'unsupported', className };
   }
@@ -199,6 +222,8 @@ export function responseHasData(response: VisualizationResponse): boolean {
       return response.total !== 0;
     case 'generic':
       return response.records.length > 0;
+    case 'word_cloud':
+      return response.data.length > 0;
     case 'unsupported':
       return true;
   }

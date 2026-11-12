@@ -90,7 +90,7 @@ const BUBBLE_ZONES = [
   zone('legend_optional', 'Legend', [F.GroupBy, F.Aggregation], { text: groupBy, number: sum, date: byYear }, { maxItems: 1, optional: true })
 ];
 
-/** v1 `PIE_CONFIGS`, also Funnel's and Pyramid's. */
+/** v1 `PIE_CONFIGS`, also Funnel's and Pyramid's, and the same as `WORD_CLOUD_CONFIGS`. */
 const PIE_ZONES = [groupZone('legend', 'Legend'), aggregationZone('value', 'Value', { maxItems: 1 })];
 /** v1 `VARIWIDE_CONFIGS`: the pie's zones and an optional Weight, the depth of each slice. */
 const VARIABLE_PIE_ZONES = [...PIE_ZONES, aggregationZone('weight', 'Weight', { maxItems: 1, optional: true })];
@@ -172,6 +172,7 @@ export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.Bubble, 'Bubble', 'ic_bubble.svg', BUBBLE_ZONES),
   chart(T.Funnel, 'Funnel', 'ic_funnel.svg', PIE_ZONES),
   chart(T.Pyramid, 'Pyramid', 'ic_pyramid.svg', PIE_ZONES),
+  chart(T.WordCloud, 'Word Cloud', 'ic_word_cloud.svg', PIE_ZONES),
   chart(T.StackedColumn, 'Stacked Column', 'ic_stack_column.svg', stackedZones()),
   chart(T.StackedBar, 'Stacked Bar', 'ic_stack_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
   chart(T.CircularBar, 'Circular Bar', 'ic_circular_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
@@ -203,7 +204,6 @@ const OTHER_ICONS: Readonly<Record<string, string>> = {
   gauge: 'ic_gauge.svg',
   bullet: 'ic_bullet_chart.svg',
   heatmap: 'ic_heatmap.svg',
-  wordcloud: 'ic_word_cloud.svg',
   tree_map: 'ic_tree_map.svg',
   histogram: 'ic_histogram.svg',
   map: 'ic_map.svg',
@@ -250,7 +250,7 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   ['gauge', 'Gauges'],
   ['bullet', 'Bullet Graph'],
   ['heatmap', 'Heat maps'],
-  ['wordcloud', 'Word Cloud'],
+  [T.WordCloud, 'Word Cloud'],
   ['tree_map', 'Tree maps'],
   [T.StackedColumn, 'Stacked Column'],
   [T.StackedBar, 'Stacked Bar'],

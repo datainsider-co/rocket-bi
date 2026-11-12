@@ -23,7 +23,7 @@ const POINTS = new Set<string>([ChartType.Scatter, ChartType.Bubble]);
 
 const TABLES = new Set<string>([ChartType.Table, ChartType.CollapseTable, ChartType.PivotTable]);
 
-export type SettingsKind = 'series' | 'stacked' | 'point' | 'pie' | 'parliament' | 'number' | 'table' | 'filter';
+export type SettingsKind = 'series' | 'stacked' | 'point' | 'wordCloud' | 'pie' | 'parliament' | 'number' | 'table' | 'filter';
 
 /** Which settings a chart type has (v1 picked the component by viz option class); `undefined` while v2 has none. */
 export function settingsKindOf(chartType: string): SettingsKind | undefined {
@@ -32,6 +32,7 @@ export function settingsKindOf(chartType: string): SettingsKind | undefined {
   if (POINTS.has(chartType)) return 'point';
   if (PIES.has(chartType)) return 'pie';
   if (chartType === ChartType.Parliament) return 'parliament';
+  if (chartType === ChartType.WordCloud) return 'wordCloud';
   if (chartType === ChartType.Number) return 'number';
   if (TABLES.has(chartType)) return 'table';
   return filterControlKindOf(chartType) ? 'filter' : undefined;

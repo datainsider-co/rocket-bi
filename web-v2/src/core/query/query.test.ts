@@ -54,6 +54,14 @@ describe('visualizationResponseFromJson', () => {
     });
   });
 
+  it('reads the words of a word cloud and their weights', () => {
+    const json = { class_name: 'word_cloud_response', name: '', data: [{ name: 'Albania', weight: 2104 }, { name: 'Algeria', weight: 9681 }] };
+    const response = visualizationResponseFromJson(json);
+    expect(response).toEqual({ kind: 'word_cloud', name: '', data: [{ name: 'Albania', weight: 2104 }, { name: 'Algeria', weight: 9681 }] });
+    expect(responseHasData(response)).toBe(true);
+    expect(responseHasData(visualizationResponseFromJson({ class_name: 'word_cloud_response', data: [] }))).toBe(false);
+  });
+
   it("keeps a scatter's and a bubble's points as the server sent them", () => {
     const json = { class_name: 'series_two_response', series: [{ name: 'Online', data: [[651.21, 9247, 3.5]] }] };
     const response = visualizationResponseFromJson(json);

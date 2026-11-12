@@ -19,6 +19,7 @@ export const ChartVizClass = {
   Funnel: 'highcharts_funnel_chart_setting',
   Pyramid: 'highcharts_pyramid_chart_setting',
   Parliament: 'parliament_setting',
+  WordCloud: 'word_cloud_chart_setting',
   Number: 'number_chart_setting',
   TabFilter: 'tab_filter_chart_setting',
   Dropdown: 'dropdown_filter_chart_setting',

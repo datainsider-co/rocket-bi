@@ -237,6 +237,17 @@ const variablePie = () => ({
   tooltip: seriesTooltip
 });
 
+/** v1 `WordCloudChartOption.getDefaultChartOption`. */
+const wordCloud = () => ({
+  chart: { type: 'wordcloud' },
+  title: title(),
+  subtitle: subtitle(),
+  affectedByFilter: true,
+  themeColor: { enabled: true },
+  background: BACKGROUND,
+  tooltip: { backgroundColor: TOOLTIP_BACKGROUND, style: secondaryStyle() }
+});
+
 const funnelLabels = { dataLabels: { enabled: true, style: { color: TEXT_COLOR } } };
 
 /**
@@ -517,6 +528,7 @@ const DEFAULTS: Readonly<Record<ChartType, Defaults>> = {
   [T.Funnel]: { className: 'highcharts_funnel_chart_setting', options: funnel },
   [T.Pyramid]: { className: 'highcharts_pyramid_chart_setting', options: pyramid },
   [T.Parliament]: { className: 'parliament_setting', options: parliament },
+  [T.WordCloud]: { className: 'word_cloud_chart_setting', options: wordCloud },
   [T.Number]: { className: 'number_chart_setting', options: number },
   [T.Table]: { className: 'flatten_table_setting', options: table },
   [T.CollapseTable]: { className: 'table_chart_setting', options: collapseTable },

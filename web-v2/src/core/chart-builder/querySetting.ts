@@ -187,6 +187,7 @@ const BUILDERS: Readonly<Record<ChartType, SettingBuilder>> = {
   [T.Funnel]: legendValue('funnel_chart_setting'),
   [T.Pyramid]: legendValue('pyramid_chart_setting'),
   [T.Parliament]: legendValue('parliament_chart_setting'),
+  [T.WordCloud]: legendValue('word_cloud_chart_setting'),
   [T.Number]: number,
   [T.Table]: table,
   [T.CollapseTable]: groupTable,

@@ -66,6 +66,13 @@ describe('buildSetting', () => {
     expect(canBuildSetting(data(ChartType.Funnel, { legend: configs.legend }))).toBe(false);
   });
 
+  it('builds the word cloud from its legend and its value', () => {
+    const value = item({ id: 2, name: 'units', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Maximum' });
+    const setting = buildSetting(data(ChartType.WordCloud, { legend: [item({})], value: [value] }), { options: {} });
+    expect(setting).toMatchObject({ class_name: 'word_cloud_chart_setting', legend: { name: 'region' }, value: { name: 'units' } });
+    expect(canBuildSetting(data(ChartType.WordCloud, { legend: [item({})] }))).toBe(false);
+  });
+
   it.each([ChartType.AreaRange, ChartType.ColumnRange])('builds %s as generic columns: the x axis, the minimum and the maximum', chartType => {
     const xAxis = item({});
     const min = item({ id: 2, name: 'lowest', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Minimum' });

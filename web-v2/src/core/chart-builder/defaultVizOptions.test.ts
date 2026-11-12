@@ -59,6 +59,10 @@ describe('defaultVizOptions', () => {
       class_name: 'generic_chart_setting',
       options: { chart: { type: 'columnrange', inverted: true }, legend: { enabled: false }, y_axis: [{ visible: true }, { visible: false }] }
     });
+    expect(defaultVizOptions(ChartType.WordCloud)).toMatchObject({
+      class_name: 'word_cloud_chart_setting',
+      options: { chart: { type: 'wordcloud' }, theme_color: { enabled: true }, affected_by_filter: true }
+    });
     expect(defaultVizOptions(ChartType.WindRose)).toMatchObject({
       class_name: 'wind_rose_setting',
       stacking_group: {},

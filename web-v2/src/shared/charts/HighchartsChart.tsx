@@ -2,13 +2,14 @@ import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReactModule, { type HighchartsReactRefObject } from 'highcharts-react-official';
 // Polar panes (circular bar), the lollipop series, which builds on the dumbbell, the funnel and pyramid, the variable
-// pie and the item series (parliament); each registers itself on import.
+// pie, the item series (parliament) and the word cloud; each registers itself on import.
 import 'highcharts/highcharts-more';
 import 'highcharts/modules/dumbbell';
 import 'highcharts/modules/lollipop';
 import 'highcharts/modules/funnel';
 import 'highcharts/modules/variable-pie';
 import 'highcharts/modules/item-series';
+import 'highcharts/modules/wordcloud';
 import { withThemedTooltip } from './tooltipTheme';
 
 /**

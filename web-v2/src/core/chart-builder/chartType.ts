@@ -38,6 +38,8 @@ export const ChartType = {
   Scatter: 'scatter',
   /** Scatter with a third value as each dot's size (v1 `BubbleChartOption`). */
   Bubble: 'bubble_chart',
+  /** Words sized by a value (v1 `WordCloudChartOption`). */
+  WordCloud: 'wordcloud',
   Funnel: 'funnel',
   Pyramid: 'pyramid',
   /** One dot per unit of each value, in a half circle by default (Highcharts item series). v1 spells it capitalised too. */

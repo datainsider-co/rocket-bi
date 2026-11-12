@@ -18,6 +18,7 @@ import { seriesResponseOf, settingsKindOf } from './settingsPanel.utils';
 import { TableSettingsView } from './TableSettingsView';
 import { axisTitlesOf, seriesChoicesOf } from './tabs/seriesTabs.utils';
 import { useChartSettings } from './useChartSettings';
+import { WordCloudSettingsView } from './WordCloudSettingsView';
 import { useFilterDefault } from './useFilterDefault';
 import '@/shared/settings/Settings.css';
 
@@ -54,6 +55,8 @@ export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPa
         return <PieSettingsView {...tab} themeColors={themeColors} />;
       case 'parliament':
         return <ParliamentSettingsView {...tab} themeColors={themeColors} />;
+      case 'wordCloud':
+        return <WordCloudSettingsView {...tab} themeColors={themeColors} />;
       case 'number':
         return <NumberSettingsView {...tab} dateFields={dateFields} />;
       case 'table':

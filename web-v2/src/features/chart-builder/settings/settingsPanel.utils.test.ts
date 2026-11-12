@@ -20,8 +20,9 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(chartType)).toBe('point');
   });
 
-  it('gives the parliament its own settings', () => {
+  it('gives the parliament and the word cloud their own settings', () => {
     expect(settingsKindOf(ChartType.Parliament)).toBe('parliament');
+    expect(settingsKindOf(ChartType.WordCloud)).toBe('wordCloud');
   });
 
   it('gives number charts and tables their settings', () => {
