@@ -309,10 +309,8 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
  * applied the sorts and filters left from another chart type, which the user could neither see nor remove.
  */
 function visibleData(data: BuilderData): BuilderData {
-  const info = chartTypeInfoOf(data.chartType);
-  if (info?.extraZones === false) return { ...data, configs: withoutKey(data.configs, SORTING_ZONE.key), filters: {} };
-  // Scatter and bubble have Filters without Sorting.
-  return info?.sortable === false ? { ...data, configs: withoutKey(data.configs, SORTING_ZONE.key) } : data;
+  if (chartTypeInfoOf(data.chartType)?.extraZones !== false) return data;
+  return { ...data, configs: withoutKey(data.configs, SORTING_ZONE.key), filters: {} };
 }
 
 /**

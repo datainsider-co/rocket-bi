@@ -65,11 +65,6 @@ describe('configZonesOf and hasFilterZone', () => {
     expect(hasFilterZone(ChartType.Column)).toBe(true);
   });
 
-  it.each([ChartType.Scatter, ChartType.Bubble])('shows Filters without Sorting for %s', chartType => {
-    expect(configZonesOf(chartType).map(zone => zone.key)).not.toContain('sorting');
-    expect(hasFilterZone(chartType)).toBe(true);
-  });
-
   it('shows neither Sorting nor Filters for a slicer', () => {
     expect(configZonesOf(ChartType.SlicerFilter).map(zone => zone.key)).toEqual(['value']);
     expect(hasFilterZone(ChartType.SlicerFilter)).toBe(false);

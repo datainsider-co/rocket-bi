@@ -24,7 +24,7 @@ export function PointSettingsView({ viz, onChange, chartType, axisTitles, themeC
     { key: 'title', label: 'Title & Subtitle', children: <TitleTab {...tab} toggles={false} /> },
     { key: 'general', label: 'General', children: <DataPointTab {...tab} /> },
     { key: 'legend', label: 'Legend', children: <LegendTab {...tab} /> },
-    { key: 'x-axis', label: 'X Axis', children: <XAxisTab {...tab} defaultTitle={axisTitles.x} /> },
+    { key: 'x-axis', label: 'X Axis', children: <XAxisTab {...tab} defaultTitle={axisTitles.x} grid /> },
     { key: 'y-axis', label: 'Y Axis', children: <YAxisTab {...tab} defaultTitle={axisTitles.y} /> },
     { key: 'color', label: 'Data Color', children: <ColorTab {...tab} themeColors={themeColors} /> },
     { key: 'background', label: 'Background', children: <BackgroundTab {...tab} /> },
