@@ -8,7 +8,7 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(chartType)).toBe('series');
   });
 
-  it.each([ChartType.StackedColumn, ChartType.StackedBar, ChartType.CircularBar])('gives %s the stacked settings', chartType => {
+  it.each([ChartType.StackedColumn, ChartType.StackedBar, ChartType.CircularBar, ChartType.WindRose])('gives %s the stacked settings', chartType => {
     expect(settingsKindOf(chartType)).toBe('stacked');
   });
 
@@ -16,8 +16,13 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(chartType)).toBe('pie');
   });
 
-  it('gives the parliament its own settings', () => {
+  it.each([ChartType.Scatter, ChartType.Bubble])('gives %s the point settings', chartType => {
+    expect(settingsKindOf(chartType)).toBe('point');
+  });
+
+  it('gives the parliament and the word cloud their own settings', () => {
     expect(settingsKindOf(ChartType.Parliament)).toBe('parliament');
+    expect(settingsKindOf(ChartType.WordCloud)).toBe('wordCloud');
   });
 
   it('gives number charts and tables their settings', () => {
@@ -31,7 +36,7 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(chartType)).toBe('filter');
   });
 
-  it.each(['arearange', 'gauge'])('has none yet for %s', chartType => {
+  it.each([ChartType.AreaRange, ChartType.ColumnRange, 'gauge'])('has none yet for %s', chartType => {
     expect(settingsKindOf(chartType)).toBeUndefined();
   });
 });

@@ -8,7 +8,7 @@ const shipDate = { label: 'Ship date', field: { field_name: 'ship_date' }, isDat
 describe('dimensionValues', () => {
   it('reads the categories of a series chart and the names of pie slices', () => {
     expect(dimensionValues({ kind: 'series_one', series: [], xAxis: ['Asia', 'Europe'], yAxis: [] })).toEqual(['Asia', 'Europe']);
-    expect(dimensionValues({ kind: 'series_two', series: [{ name: 's', data: [['Online', 1], ['Offline', 2]] }], total: 3 })).toEqual(['Online', 'Offline']);
+    expect(dimensionValues({ kind: 'series_two', series: [{ name: 's', data: [['Online', 1], ['Offline', 2]], points: [] }], total: 3 })).toEqual(['Online', 'Offline']);
   });
 
   it('is empty for other responses', () => {

@@ -13,6 +13,8 @@ const groupBy: FunctionInfo = { family: FunctionFamily.GroupBy, type: '' };
 const byYear: FunctionInfo = { family: FunctionFamily.DateHistogram, type: DateFunctionType.Year };
 const sum: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.Sum };
 const countAll: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.CountAll };
+const minimum: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.Minimum };
+const maximum: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.Maximum };
 const countDistinct: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.CountDistinct };
 const none: FunctionInfo = { family: FunctionFamily.None, type: '' };
 
@@ -64,7 +66,31 @@ const stackedZones = (xTitle?: string, yTitle?: string): ZoneConfig[] => [
   groupZone('breakdown_optional', 'Breakdown', { optional: true })
 ];
 
-/** v1 `PIE_CONFIGS`, also Funnel's and Pyramid's. */
+/** v1 `AREA_RANGE_CONFIGS`, also Column Range's: one X-Axis, and a number's minimum and maximum by default. */
+const RANGE_ZONES = [
+  groupZone('x_axis', 'X-Axis'),
+  zone('min', 'Min Value', [F.Aggregation], { ...AGGREGATION_DEFAULTS, number: minimum }, { maxItems: 1 }),
+  zone('max', 'Max Value', [F.Aggregation], { ...AGGREGATION_DEFAULTS, number: maximum }, { maxItems: 1 })
+];
+
+/** v1 `SCATTER_CONFIGS`: rows as they are by default; the Legend may group, and then the axes aggregate (`functionConvertor`). */
+const SCATTER_ZONES = [
+  zone('x_axis', 'X-Axis', [F.None, F.Aggregation], NONE_DEFAULTS, { maxItems: 1 }),
+  zone('y_axis', 'Y-Axis', [F.None, F.Aggregation], NONE_DEFAULTS, { maxItems: 1 }),
+  zone('legend_optional', 'Legend', [F.None, F.GroupBy, F.DateHistogram], NONE_DEFAULTS, { maxItems: 1, optional: true })
+];
+
+const BUBBLE_DEFAULTS: ZoneDefaults = { ...AGGREGATION_DEFAULTS, date: byYear };
+const bubbleZone = (key: string, title: string) => zone(key, title, [F.Aggregation, F.DateHistogram], BUBBLE_DEFAULTS, { maxItems: 1 });
+/** v1 `BUBBLE_CONFIGS`: three aggregated values (position and size) and an optional Legend. */
+const BUBBLE_ZONES = [
+  bubbleZone('x_axis', 'X-Axis'),
+  bubbleZone('y_axis', 'Y-Axis'),
+  bubbleZone('value', 'Value'),
+  zone('legend_optional', 'Legend', [F.GroupBy, F.Aggregation], { text: groupBy, number: sum, date: byYear }, { maxItems: 1, optional: true })
+];
+
+/** v1 `PIE_CONFIGS`, also Funnel's and Pyramid's, and the same as `WORD_CLOUD_CONFIGS`. */
 const PIE_ZONES = [groupZone('legend', 'Legend'), aggregationZone('value', 'Value', { maxItems: 1 })];
 /** v1 `VARIWIDE_CONFIGS`: the pie's zones and an optional Weight, the depth of each slice. */
 const VARIABLE_PIE_ZONES = [...PIE_ZONES, aggregationZone('weight', 'Weight', { maxItems: 1, optional: true })];
@@ -132,7 +158,9 @@ export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.LineInverted, 'Line Inverted Axes', 'ic_line_chart.svg', seriesZones()),
   chart(T.Area, 'Area', 'ic_chart_area.svg', seriesZones()),
   chart(T.AreaInverted, 'Area Inverted Axes', 'ic_chart_area.svg', seriesZones()),
+  chart(T.AreaRange, 'Area Range', 'ic_chart_area.svg', RANGE_ZONES),
   chart(T.Column, 'Column', 'ic_column.svg', seriesZones()),
+  chart(T.ColumnRange, 'Column Range', 'ic_column.svg', RANGE_ZONES),
   chart(T.Bar, 'Bar', 'ic_bar.svg', seriesZones('Y-Axis', 'X-Axis')),
   chart(T.Lollipop, 'Lollipop', 'ic_lollipop.svg', seriesZones()),
   chart(T.Parliament, 'Parliament', 'ic_parliament.svg', PARLIAMENT_ZONES),
@@ -140,11 +168,15 @@ export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.SemiPie, 'Semi Pie', 'ic_pie.svg', PIE_ZONES),
   chart(T.VariablePie, 'Variable Pie', 'ic_variable_pie.svg', VARIABLE_PIE_ZONES),
   chart(T.Donut, 'Donut', 'ic_donut.svg', PIE_ZONES),
+  chart(T.Scatter, 'Scatter', 'ic_scatter.svg', SCATTER_ZONES),
+  chart(T.Bubble, 'Bubble', 'ic_bubble.svg', BUBBLE_ZONES),
   chart(T.Funnel, 'Funnel', 'ic_funnel.svg', PIE_ZONES),
   chart(T.Pyramid, 'Pyramid', 'ic_pyramid.svg', PIE_ZONES),
+  chart(T.WordCloud, 'Word Cloud', 'ic_word_cloud.svg', PIE_ZONES),
   chart(T.StackedColumn, 'Stacked Column', 'ic_stack_column.svg', stackedZones()),
   chart(T.StackedBar, 'Stacked Bar', 'ic_stack_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
   chart(T.CircularBar, 'Circular Bar', 'ic_circular_bar.svg', stackedZones('Y-Axis', 'X-Axis')),
+  chart(T.WindRose, 'Wind Rose', 'ic_win_rose_chart.svg', stackedZones()),
   filter(T.TabFilter, 'Tab', 'ic_tab_filter.svg', VALUES_ZONES),
   filter(T.SingleChoice, 'Single choice', 'ic_single_choice.svg', VALUES_ZONES),
   filter(T.MultiChoice, 'Multi choice', 'ic_multi_choice.svg', VALUES_ZONES),
@@ -167,22 +199,16 @@ export function chartTypeInfoOf(chartType: string): ChartTypeInfo | undefined {
 /** v1's icons (`ALL_ICON_MAP`) for the chart types v2 doesn't build yet, which dashboards still hold. */
 const OTHER_ICONS: Readonly<Record<string, string>> = {
   flatten_pivot_table: 'ic_pivot_table.svg',
-  arearange: 'ic_chart_area.svg',
-  column_range: 'ic_column.svg',
-  scatter: 'ic_scatter.svg',
-  bubble_chart: 'ic_bubble.svg',
   pareto: 'ic_pareto.svg',
   bell_curve: 'ic_bell_curve.svg',
   gauge: 'ic_gauge.svg',
   bullet: 'ic_bullet_chart.svg',
   heatmap: 'ic_heatmap.svg',
-  wordcloud: 'ic_word_cloud.svg',
   tree_map: 'ic_tree_map.svg',
   histogram: 'ic_histogram.svg',
   map: 'ic_map.svg',
   spider_web: 'ic-spider-chart.svg',
   sankey: 'ic_sankey.svg',
-  wind_rose: 'ic_win_rose_chart.svg',
   line_stock: 'ic_linestock.svg'
 };
 
@@ -205,9 +231,9 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   [T.LineInverted, 'Line Inverted Axes'],
   [T.Area, 'Area'],
   [T.AreaInverted, 'Area Inverted Axes'],
-  ['arearange', 'Area Range'],
+  [T.AreaRange, 'Area Range'],
   [T.Column, 'Column'],
-  ['column_range', 'Column Range'],
+  [T.ColumnRange, 'Column Range'],
   [T.Bar, 'Bar'],
   [T.Lollipop, 'Lollipop'],
   [T.Parliament, 'Parliament'],
@@ -215,8 +241,8 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   [T.SemiPie, 'Semi Pie'],
   [T.VariablePie, 'Variable Pie'],
   [T.Donut, 'Donut'],
-  ['scatter', 'Scatter'],
-  ['bubble_chart', 'Bubble'],
+  [T.Scatter, 'Scatter'],
+  [T.Bubble, 'Bubble'],
   [T.Funnel, 'Funnel'],
   [T.Pyramid, 'Pyramid'],
   ['pareto', 'Pareto'],
@@ -224,7 +250,7 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   ['gauge', 'Gauges'],
   ['bullet', 'Bullet Graph'],
   ['heatmap', 'Heat maps'],
-  ['wordcloud', 'Word Cloud'],
+  [T.WordCloud, 'Word Cloud'],
   ['tree_map', 'Tree maps'],
   [T.StackedColumn, 'Stacked Column'],
   [T.StackedBar, 'Stacked Bar'],
@@ -233,7 +259,7 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   ['map', 'Map'],
   ['spider_web', 'Spider Web'],
   ['sankey', 'Sankey Diagram'],
-  ['wind_rose', 'Wind Rose'],
+  [T.WindRose, 'Wind Rose'],
   ['line_stock', 'Line Stock']
 ];
 

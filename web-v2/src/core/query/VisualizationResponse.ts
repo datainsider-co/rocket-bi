@@ -24,10 +24,19 @@ export interface SeriesOneResponse {
   readonly compareValue?: number;
 }
 
-/** Pie and other name/value charts (`series_two_response`): each point is `[name, value]`. */
+/** One series of a `series_two_response`. */
+export interface SeriesTwoItem {
+  readonly name: string;
+  /** Each point as `[name, value]`: pies and the other name/value charts. */
+  readonly data: readonly (readonly [string, number])[];
+  /** Each point as the server sent it: a scatter's `[x, y]`, a bubble's `[x, y, size]`. */
+  readonly points: readonly (readonly unknown[])[];
+}
+
+/** Pie and other name/value charts, scatters and bubbles (`series_two_response`). */
 export interface SeriesTwoResponse {
   readonly kind: 'series_two';
-  readonly series: readonly { readonly name: string; readonly data: readonly (readonly [string, number])[] }[];
+  readonly series: readonly SeriesTwoItem[];
   readonly total: number;
 }
 
@@ -75,12 +84,26 @@ export interface GenericResponse {
   readonly records: readonly (readonly unknown[])[];
 }
 
+/** Words and how much each weighs (`word_cloud_response`). */
+export interface WordCloudResponse {
+  readonly kind: 'word_cloud';
+  readonly name: string;
+  readonly data: readonly { readonly name: string; readonly weight: number }[];
+}
+
 export interface UnsupportedResponse {
   readonly kind: 'unsupported';
   readonly className: string;
 }
 
-export type VisualizationResponse = SeriesOneResponse | SeriesTwoResponse | TableResponse | JsonTableResponse | GenericResponse | UnsupportedResponse;
+export type VisualizationResponse =
+  | SeriesOneResponse
+  | SeriesTwoResponse
+  | TableResponse
+  | JsonTableResponse
+  | GenericResponse
+  | WordCloudResponse
+  | UnsupportedResponse;
 
 function toNullableNumber(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
@@ -148,12 +171,11 @@ export function visualizationResponseFromJson(value: unknown): VisualizationResp
         kind: 'series_two',
         series: asArray(json['series']).map(item => {
           const series = asRecord(item);
+          const points = asArray(series['data']).map(asArray);
           return {
             name: asString(series['name']),
-            data: asArray(series['data']).map(point => {
-              const [name, y] = asArray(point);
-              return [String(name ?? ''), asNumber(y)] as const;
-            })
+            data: points.map(([name, y]) => [String(name ?? ''), asNumber(y)] as const),
+            points
           };
         }),
         total: asNumber(json['total'])
@@ -175,6 +197,15 @@ export function visualizationResponseFromJson(value: unknown): VisualizationResp
       };
     case 'generic_chart_response':
       return { kind: 'generic', headers: stringList(json['headers']), records: asArray(json['records']).map(asArray) };
+    case 'word_cloud_response':
+      return {
+        kind: 'word_cloud',
+        name: asString(json['name']),
+        data: asArray(json['data']).map(item => {
+          const word = asRecord(item);
+          return { name: asString(word['name']), weight: asNumber(word['weight']) };
+        })
+      };
     default:
       return { kind: 'unsupported', className };
   }
@@ -191,6 +222,8 @@ export function responseHasData(response: VisualizationResponse): boolean {
       return response.total !== 0;
     case 'generic':
       return response.records.length > 0;
+    case 'word_cloud':
+      return response.data.length > 0;
     case 'unsupported':
       return true;
   }

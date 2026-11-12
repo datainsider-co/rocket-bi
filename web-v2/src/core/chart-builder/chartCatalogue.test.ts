@@ -78,7 +78,9 @@ describe('chartIconOf', () => {
     [ChartType.Donut, 'ic_donut.svg'],
     [ChartType.PivotTable, 'ic_pivot_table.svg'],
     [ChartType.CircularBar, 'ic_circular_bar.svg'],
-    ['arearange', 'ic_chart_area.svg'],
+    [ChartType.AreaRange, 'ic_chart_area.svg'],
+    [ChartType.Scatter, 'ic_scatter.svg'],
+    ['gauge', 'ic_gauge.svg'],
     ['unknown', 'chart_control.svg']
   ])('%s has %s', (chartType, icon) => {
     expect(chartIconOf(chartType)).toBe(icon);
@@ -98,6 +100,22 @@ describe('defaultFunctionOf', () => {
     [ChartType.PivotTable, 'columns', 'int32', 'Group By', ''],
     [ChartType.PivotTable, 'rows', 'datetime', 'Date histogram', 'Year'],
     [ChartType.PivotTable, 'values', 'datetime', 'Aggregation', 'Count all'],
+    [ChartType.AreaRange, 'x_axis', 'datetime', 'Date histogram', 'Year'],
+    [ChartType.AreaRange, 'min', 'double', 'Aggregation', 'Minimum'],
+    [ChartType.AreaRange, 'max', 'double', 'Aggregation', 'Maximum'],
+    [ChartType.ColumnRange, 'min', 'string', 'Aggregation', 'Count all'],
+    [ChartType.ColumnRange, 'max', 'int32', 'Aggregation', 'Maximum'],
+    [ChartType.WordCloud, 'legend', 'datetime', 'Date histogram', 'Year'],
+    [ChartType.WordCloud, 'value', 'string', 'Aggregation', 'Count all'],
+    [ChartType.WindRose, 'breakdown_optional', 'string', 'Group By', ''],
+    [ChartType.WindRose, 'y_axis', 'double', 'Aggregation', 'Sum'],
+    [ChartType.Scatter, 'x_axis', 'double', 'None', ''],
+    [ChartType.Scatter, 'y_axis', 'datetime', 'None', ''],
+    [ChartType.Scatter, 'legend_optional', 'string', 'None', ''],
+    [ChartType.Bubble, 'x_axis', 'double', 'Aggregation', 'Sum'],
+    [ChartType.Bubble, 'y_axis', 'string', 'Aggregation', 'Count all'],
+    [ChartType.Bubble, 'value', 'datetime', 'Date histogram', 'Year'],
+    [ChartType.Bubble, 'legend_optional', 'string', 'Group By', ''],
     [ChartType.TabFilter, 'values', 'int64', 'Aggregation', 'Sum'],
     [ChartType.SlicerFilter, 'value', 'int32', 'None', '']
   ])('%s %s starts a %s column as %s %s', (chartType, key, type, family, functionType) => {
@@ -169,7 +187,7 @@ describe('pickerItemsOf', () => {
     expect(items[0]).toEqual({ type: 'flatten_table', title: 'Table', icon: 'ic_table.svg', buildable: true });
     expect(items[1]).toEqual({ type: 'table', title: 'Collapse Table', icon: 'ic_collapse_table.svg', buildable: true });
     expect(items[2]).toEqual({ type: 'pivot_table', title: 'Pivot Table', icon: 'ic_pivot_table.svg', buildable: true });
-    expect(items.find(item => item.type === 'arearange')).toMatchObject({ buildable: false });
+    expect(items.find(item => item.type === 'gauge')).toMatchObject({ buildable: false });
     expect(items.find(item => item.type === 'Parliament')).toEqual({ type: 'Parliament', title: 'Parliament', icon: 'ic_parliament.svg', buildable: true });
     expect(items.at(-1)).toMatchObject({ type: 'multi_tree_filter', buildable: true });
     expect(items.filter(item => item.buildable)).toHaveLength(CHART_TYPES.length - 2);

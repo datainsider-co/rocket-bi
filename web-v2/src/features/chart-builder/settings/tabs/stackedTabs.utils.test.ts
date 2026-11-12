@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ChartType } from '@/core/chart-builder/chartType';
 import type { SeriesOneResponse } from '@/core/query/VisualizationResponse';
-import { hasStackGroups, stackedAxisSettingsOf, stackGroupChange, stackGroupsOf, stackingValueOf } from './stackedTabs.utils';
+import { hasSeriesNameTab, hasStackGroups, stackedAxisSettingsOf, stackGroupChange, stackGroupsOf, stackingValueOf } from './stackedTabs.utils';
 
 const response: SeriesOneResponse = {
   kind: 'series_one',
@@ -55,7 +55,19 @@ describe('stackGroupChange', () => {
 
 describe('stackedAxisSettingsOf', () => {
   it('gives the circular bar x gridlines and no y range, the others the reverse', () => {
-    expect(stackedAxisSettingsOf(ChartType.CircularBar)).toEqual({ xGrid: true, yRange: false });
-    expect(stackedAxisSettingsOf(ChartType.StackedColumn)).toEqual({ xGrid: false, yRange: true });
+    expect(stackedAxisSettingsOf(ChartType.CircularBar)).toEqual({ xGrid: true, yRange: false, titles: true });
+    expect(stackedAxisSettingsOf(ChartType.StackedColumn)).toEqual({ xGrid: false, yRange: true, titles: true });
+  });
+
+  it('gives the wind rose neither axis titles, x gridlines nor a y range', () => {
+    expect(stackedAxisSettingsOf(ChartType.WindRose)).toEqual({ xGrid: false, yRange: false, titles: false });
+  });
+});
+
+describe('hasSeriesNameTab', () => {
+  it('is there for every stacked chart but the wind rose', () => {
+    expect(hasSeriesNameTab(ChartType.StackedBar)).toBe(true);
+    expect(hasSeriesNameTab(ChartType.CircularBar)).toBe(true);
+    expect(hasSeriesNameTab(ChartType.WindRose)).toBe(false);
   });
 });

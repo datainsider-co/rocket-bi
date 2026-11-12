@@ -45,7 +45,16 @@ export function stackGroupChange(key: string, group: string): VizChanges {
   return { [`stackingGroup.${key}`]: trimmed === '' ? undefined : trimmed };
 }
 
-/** Which axis settings a stacked chart has (v1 `XAxisTab.enableSettingGridLine`, `YAxisTab.isShowMinMaxConfig`). */
+/**
+ * Which axis settings a stacked chart has (v1 `XAxisTab.enableSettingGridLine`, `YAxisTab.isShowMinMaxConfig`). The
+ * wind rose has v1's spider axis tabs: no axis titles and no value range.
+ */
 export function stackedAxisSettingsOf(chartType: string) {
-  return { xGrid: chartType === ChartType.CircularBar, yRange: chartType !== ChartType.CircularBar };
+  const windRose = chartType === ChartType.WindRose;
+  return { xGrid: chartType === ChartType.CircularBar, yRange: chartType !== ChartType.CircularBar && !windRose, titles: !windRose };
+}
+
+/** The Display tab, where series are renamed; v1 `WindRoseSetting` has none. */
+export function hasSeriesNameTab(chartType: string): boolean {
+  return chartType !== ChartType.WindRose;
 }

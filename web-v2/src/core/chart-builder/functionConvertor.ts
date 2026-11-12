@@ -1,5 +1,5 @@
 import { ChartType } from './chartType';
-import { DateFunctionType, FunctionFamily, type FunctionData } from './FunctionData';
+import { AggregationType, DateFunctionType, FunctionFamily, type FunctionData } from './FunctionData';
 import { FieldKind, fieldKindOf } from './functions';
 
 type Configs = Readonly<Record<string, readonly FunctionData[]>>;
@@ -48,4 +48,34 @@ export function convertRowMode(chartType: string, zone: string, configs: Configs
       items.map(item => (item.id === updated.id || item.dynamicFunction || rowModeOf(item) === mode ? item : toMode(item, mode)))
     ])
   );
+}
+
+/** v1 `FunctionConvertor.convertToAggregation`: numbers summed, text and dates counted; measures and other fields keep their function. */
+function toAggregation(item: FunctionData): FunctionData {
+  const kind = fieldKindOf(item.field);
+  if (kind !== FieldKind.Text && kind !== FieldKind.Number && kind !== FieldKind.Date) return item;
+  return { ...item, functionFamily: FunctionFamily.Aggregation, functionType: kind === FieldKind.Number ? AggregationType.Sum : AggregationType.CountAll };
+}
+
+/**
+ * After a scatter's Legend switches between grouping and listing rows, the axes follow it (v1
+ * `ScatterFunctionConvertor`): with a grouping legend they aggregate, one dot per group; with a plain one they list rows.
+ * An axis already aggregating keeps its function (v1 reset it to the default) and chart controls are left as they are.
+ * v1's `BubbleFunctionConvertor` only reacts to a switch its zones don't offer, so bubbles have no rule.
+ */
+export function convertScatterAxes(chartType: string, zone: string, configs: Configs, updated: FunctionData, previous: FunctionData | undefined): Configs {
+  const mode = rowModeOf(updated);
+  if (chartType !== ChartType.Scatter || zone !== 'legend_optional' || mode === 'unknown' || mode === rowModeOf(previous)) return configs;
+  const convert = (item: FunctionData) => {
+    if (item.dynamicFunction) return item;
+    if (mode === 'none') return toMode(item, 'none');
+    return item.functionFamily === FunctionFamily.Aggregation ? item : toAggregation(item);
+  };
+  return Object.fromEntries(Object.entries(configs).map(([key, items]) => [key, key === zone ? items : items.map(convert)]));
+}
+
+/** Every chart type's rule for the other items after one changed its function (v1 `FunctionConvertResolver`). */
+export function convertFunctions(chartType: string, zone: string, configs: Configs, updated: FunctionData, previous: FunctionData | undefined): Configs {
+  const byRowMode = convertRowMode(chartType, zone, configs, updated, previous);
+  return byRowMode === configs ? convertScatterAxes(chartType, zone, configs, updated, previous) : byRowMode;
 }

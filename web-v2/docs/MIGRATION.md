@@ -69,8 +69,8 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
   and the dashboard through M7: every filter widget, header filters, drilldown, drill through, downloads, permissions,
   password, full screen and TV mode, auto refresh, View As, embedded route, edit mode without ChartBuilder, Share, Relationship (React Flow), and
   header, settings and widgets that look like v1 (checked with Playwright screenshots against v1).
-- **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 to CB6, CB7a, CB7b, CB7c and CB8 done, CB7d next) for the chart types
-  v2 already renders; the other chart types (scatter, area range, ...) follow, each with its builder handler. ChartBuilder
+- **Next**: ChartBuilder (Phase 4, [`CHART_BUILDER.md`](CHART_BUILDER.md), CB0 to CB6, CB7a, CB7b, CB7c, CB7d and CB8 done, the rest of CB7e next) for the chart types
+  v2 already renders; the other chart types (tree map, heat map, ...) follow, each with its builder handler. ChartBuilder
   plugs into edit mode as the `ChartBuilderHost` the dashboard route gives `DashboardPage`.
 - **Data cook** (Phase 7, [`DATA_COOK.md`](DATA_COOK.md)): the MVP is done, DC0 to DC9 (real payloads,
   `core/data-cook`, routes and layout at v1's paths, the ETL listings, ETL History, Share, the editor's canvas, its
@@ -127,7 +127,7 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 |---|---|---|---|
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
 | Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | Done (plan below): M0 to M6; share token blocked by the server |
-| Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI (with comparison and trend line, CB7a), flat table (styled by its options and per-column formatting, CB7b1, CB7b2) with server sort (M2, M4a), collapse table (rows expanding into their groups, CB7b3), pivot table (columns across, rows expanding into the next row group, total row, CB7b4), stacked column / bar and circular bar (series in the server's stacks or the ones picked in settings, CB7c), lollipop (CB7c), funnel, pyramid, variable pie and parliament (CB7e1); drilldown, date function and export work on them (M4a). Next: scatter, bubble, area / column range, the rest |
+| Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI (with comparison and trend line, CB7a), flat table (styled by its options and per-column formatting, CB7b1, CB7b2) with server sort (M2, M4a), collapse table (rows expanding into their groups, CB7b3), pivot table (columns across, rows expanding into the next row group, total row, CB7b4), stacked column / bar and circular bar (series in the server's stacks or the ones picked in settings, CB7c), lollipop (CB7c), funnel, pyramid, variable pie and parliament (CB7e1), area range and column range (CB7d1, from a generic response; both name their categories and show "low - high" in the tooltip, which v1 did for columns only), scatter and bubble (CB7d2; **blocked by the server** on MySQL: a bubble whose values are Sum or Average, the default for numbers, gets 400 "need 3 numeric columns"), wind rose (CB7f1, the stacked chart on a polar pane), word cloud (CB7e2; drilldown and cross filter on it are left, and a Sum or Average value hits the same server error as the bubble's); drilldown, date function and export work on them (M4a). Next: tree map, heat map, gauges, bullet, the rest |
 | Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Title style, choice colours and v1's sizes done in M7e. Left: the filter panel's vertical header, the date select's min/max dates as calendar bounds |
 | Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Done (M4a, M4b). Left: maps |
 | Embedded dashboard | route `/embedded/dashboard/:name` | – | Done (M5b) with the session cookie; with a share token once the server allows it |
@@ -354,6 +354,16 @@ Decisions (M7e):
 - **Left**: submenus (date function, drill down) in antd's look, column charts' y-axis steps (v1 20M, v2 25M on
   Revenue by region), table per-field formatting, conditional colours and totals; a dashboard saved with a dark theme
   was not checked end to end.
+
+Fixes after an audit of tabs and filter panels (2026-11-12, checked in headless Chromium against the local backend):
+
+- **Resize handles above the card** (`grid/DashboardGrid.css`): a card's body (`z-index` 2) covered the handles of
+  text, image and chart widgets, on the dashboard and inside tabs and panels, so a press on a corner moved the widget.
+- **A new widget is scrolled into view** (`edit/useRevealNewWidgets`): it takes the first free slot, usually below the
+  fold, so Add tab / Add panel filters looked like nothing happened. Covers every way of adding (Add menu, dialogs,
+  paste, duplicate, ChartBuilder). v1 didn't scroll.
+- **Open**: the empty "Add Chart" / "Add Filter" picker keeps v1's message, which doesn't say why nothing is listed;
+  a widget moved into a tab keeps its column count, so it is small there (both as v1).
 
 v1 bugs not carried over: resize listener never removed, text edits saved twice, query settings mutated in place,
 inner filters kept after reset, the always-null `mainDateFilterRequest`, unsanitized text widget HTML, data label

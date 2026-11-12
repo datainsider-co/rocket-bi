@@ -41,6 +41,21 @@ export interface QueryRequestInput {
   compareRequest?: JsonObject;
 }
 
+/** v1 `ScatterQuerySetting.getSize` / `BubbleQuerySetting`: these ask for their first rows, as many as "Max data point" says. */
+const DATA_POINT_SETTINGS = new Set(['scatter_chart_setting', 'bubble_chart_setting']);
+export const DEFAULT_DATA_POINTS = 1000;
+
+/**
+ * The page a setting queries: a table's is the one it shows (`tablePaging`), a scatter's or bubble's its first
+ * `num_data_point` rows, and everything else has none (all rows).
+ */
+export function pagingOf(setting: JsonObject, tablePaging: Paging): Paging | undefined {
+  if (!isPagedSetting(setting)) return undefined;
+  if (!DATA_POINT_SETTINGS.has(settingClassName(setting))) return tablePaging;
+  const stored = Number(getPath(setting, ['options', 'options', 'num_data_point']));
+  return { from: 0, size: Number.isFinite(stored) && stored > 0 ? stored : DEFAULT_DATA_POINTS };
+}
+
 export function settingClassName(setting: JsonObject): string {
   return asString(setting['class_name']);
 }

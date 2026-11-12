@@ -5,14 +5,21 @@ export const ChartVizClass = {
   StackedSeries: 'stacking_series_chart_setting',
   /** Drawn like the stacked charts, on a polar pane (v1 `CircularChartOption`). */
   CircularBar: 'circular_bar_chart_setting',
+  /** Drawn like the stacked charts, its columns round a polar pane (v1 `WindRoseChartOption`). */
+  WindRose: 'wind_rose_setting',
   Pie: 'highcharts_pie_chart_setting',
   /** Drawn as a pie: v1 `DonutChart` is `PieChart` with a hole (`innerSize` in its options). */
   Donut: 'donut_chart_setting',
   /** Read from a generic response (`generic_chart_setting`). */
   VariablePie: 'variablepie_chart_setting',
+  /** Area Range and Column Range (v1 `GenericChartOption`), told apart by `chart.type`; read from a generic response. */
+  Generic: 'generic_chart_setting',
+  Scatter: 'highcharts_scatter_chart_setting',
+  Bubble: 'highcharts_bubble_chart_setting',
   Funnel: 'highcharts_funnel_chart_setting',
   Pyramid: 'highcharts_pyramid_chart_setting',
   Parliament: 'parliament_setting',
+  WordCloud: 'word_cloud_chart_setting',
   Number: 'number_chart_setting',
   TabFilter: 'tab_filter_chart_setting',
   Dropdown: 'dropdown_filter_chart_setting',

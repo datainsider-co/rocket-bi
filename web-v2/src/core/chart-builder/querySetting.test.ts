@@ -35,7 +35,7 @@ describe('buildSetting', () => {
   });
 
   it('is undefined for a chart type v2 does not build', () => {
-    expect(buildSetting(data('arearange', { columns: [item({})] }), { options: {} })).toBeUndefined();
+    expect(buildSetting(data('gauge', { columns: [item({})] }), { options: {} })).toBeUndefined();
   });
 
   it('builds the stacked charts as series with their breakdown, which is optional', () => {
@@ -46,6 +46,10 @@ describe('buildSetting', () => {
     expect(withoutBreakdown).not.toHaveProperty('breakdown');
     const breakdown = buildSetting(data(ChartType.CircularBar, { x_axis: [x], y_axis: [y], breakdown_optional: [item({ id: 3 })] }), { options: {} });
     expect(asRecord(breakdown?.['breakdown'])['name']).toBe('region');
+    expect(buildSetting(data(ChartType.WindRose, { x_axis: [x], y_axis: [y], breakdown_optional: [item({ id: 3 })] }), { options: {} })).toMatchObject({
+      class_name: 'series_chart_setting',
+      breakdown: { name: 'region' }
+    });
     expect(canBuildSetting(data(ChartType.StackedBar, { x_axis: [x], breakdown_optional: [x] }))).toBe(false);
   });
 
@@ -60,6 +64,44 @@ describe('buildSetting', () => {
       expect(buildSetting(data(chartType, configs), { options: {} })).toStrictEqual({ ...pie, class_name: className });
     }
     expect(canBuildSetting(data(ChartType.Funnel, { legend: configs.legend }))).toBe(false);
+  });
+
+  it('builds the word cloud from its legend and its value', () => {
+    const value = item({ id: 2, name: 'units', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Maximum' });
+    const setting = buildSetting(data(ChartType.WordCloud, { legend: [item({})], value: [value] }), { options: {} });
+    expect(setting).toMatchObject({ class_name: 'word_cloud_chart_setting', legend: { name: 'region' }, value: { name: 'units' } });
+    expect(canBuildSetting(data(ChartType.WordCloud, { legend: [item({})] }))).toBe(false);
+  });
+
+  it.each([ChartType.AreaRange, ChartType.ColumnRange])('builds %s as generic columns: the x axis, the minimum and the maximum', chartType => {
+    const xAxis = item({});
+    const min = item({ id: 2, name: 'lowest', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Minimum' });
+    const max = item({ id: 3, name: 'highest', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Maximum' });
+    const setting = buildSetting(data(chartType, { max: [max], x_axis: [xAxis], min: [min] }), { options: {} });
+    expect(setting).toMatchObject({ class_name: 'generic_chart_setting' });
+    expect(asArray(setting?.['columns']).map(column => asRecord(column)['name'])).toEqual(['region', 'lowest', 'highest']);
+    expect(canBuildSetting(data(chartType, { x_axis: [xAxis], min: [min] }))).toBe(false);
+    expect(canBuildSetting(data(chartType, { min: [min], max: [max] }))).toBe(false);
+  });
+
+  it('builds a scatter from its axes, with its legend when it has one, and a bubble with its value', () => {
+    const x = item({ id: 1, name: 'price', field: field('unit_price', 'double'), function_family: 'None' });
+    const y = item({ id: 2, name: 'units', field: field('units_sold', 'int32'), function_family: 'None' });
+    const value = item({ id: 3, name: 'profit', field: field('total_profit', 'double'), function_family: 'Aggregation', function_type: 'Sum' });
+    const legend = item({ id: 4 });
+    const nameOf = (setting: ReturnType<typeof buildSetting>, key: string) => asRecord(setting?.[key])['name'];
+
+    const scatter = buildSetting(data(ChartType.Scatter, { x_axis: [x], y_axis: [y] }), { options: {} });
+    expect(scatter).toMatchObject({ class_name: 'scatter_chart_setting' });
+    expect([nameOf(scatter, 'x_axis'), nameOf(scatter, 'y_axis')]).toEqual(['price', 'units']);
+    expect(scatter).not.toHaveProperty('legend');
+    expect(nameOf(buildSetting(data(ChartType.Scatter, { x_axis: [x], y_axis: [y], legend_optional: [legend] }), { options: {} }), 'legend')).toBe('region');
+    expect(canBuildSetting(data(ChartType.Scatter, { x_axis: [x] }))).toBe(false);
+
+    const bubble = buildSetting(data(ChartType.Bubble, { x_axis: [x], y_axis: [y], value: [value], legend_optional: [legend] }), { options: {} });
+    expect(bubble).toMatchObject({ class_name: 'bubble_chart_setting' });
+    expect([nameOf(bubble, 'x_axis'), nameOf(bubble, 'y_axis'), nameOf(bubble, 'value'), nameOf(bubble, 'legend')]).toEqual(['price', 'units', 'profit', 'region']);
+    expect(canBuildSetting(data(ChartType.Bubble, { x_axis: [x], y_axis: [y] }))).toBe(false);
   });
 
   it('builds the variable pie as generic columns: the legend, the value and the weight when it has one', () => {

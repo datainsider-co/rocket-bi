@@ -3,7 +3,7 @@ import { asRecord } from '@/core/json/json';
 import fixture from '@/core/dashboard/dashboard.fixture.json';
 import { HttpClientBuilder } from '@/shared/http/HttpClientBuilder';
 import { HttpQueryService } from './QueryService';
-import { toQueryRequestJson } from './QueryRequest';
+import { pagingOf, toQueryRequestJson } from './QueryRequest';
 import { responseHasData, visualizationResponseFromJson } from './VisualizationResponse';
 // `POST chart/query` replies from the local backend for the sample dashboard (records cut to 3).
 import responses from './queryResponses.fixture.json';
@@ -49,9 +49,23 @@ describe('visualizationResponseFromJson', () => {
   it('reads pie points as name and value', () => {
     expect(visualizationResponseFromJson(responses.pie_chart_setting)).toEqual({
       kind: 'series_two',
-      series: [{ name: 'sales_channel', data: [['Offline', 587060], ['Online', 441986]] }],
+      series: [{ name: 'sales_channel', data: [['Offline', 587060], ['Online', 441986]], points: [['Offline', 587060], ['Online', 441986]] }],
       total: 1029046
     });
+  });
+
+  it('reads the words of a word cloud and their weights', () => {
+    const json = { class_name: 'word_cloud_response', name: '', data: [{ name: 'Albania', weight: 2104 }, { name: 'Algeria', weight: 9681 }] };
+    const response = visualizationResponseFromJson(json);
+    expect(response).toEqual({ kind: 'word_cloud', name: '', data: [{ name: 'Albania', weight: 2104 }, { name: 'Algeria', weight: 9681 }] });
+    expect(responseHasData(response)).toBe(true);
+    expect(responseHasData(visualizationResponseFromJson({ class_name: 'word_cloud_response', data: [] }))).toBe(false);
+  });
+
+  it("keeps a scatter's and a bubble's points as the server sent them", () => {
+    const json = { class_name: 'series_two_response', series: [{ name: 'Online', data: [[651.21, 9247, 3.5]] }] };
+    const response = visualizationResponseFromJson(json);
+    expect(response.kind === 'series_two' && response.series[0]?.points).toEqual([[651.21, 9247, 3.5]]);
   });
 
   it('reads generic rows as they are, a value per column', () => {
@@ -169,5 +183,25 @@ describe('HttpQueryService', () => {
     // Body accepted by the local backend.
     expect(bodies[0]).toEqual({ query_request: { query_setting: {} }, user_profile: user });
     expect(response.kind).toBe('series_two');
+  });
+});
+
+describe('pagingOf', () => {
+  const page = { from: 40, size: 20 };
+  const withPoints = (className: string, numDataPoint?: unknown) => ({ class_name: className, options: { options: { num_data_point: numDataPoint } } });
+
+  it('gives a table the page it shows, and other charts none', () => {
+    expect(pagingOf({ class_name: 'table_chart_setting' }, page)).toBe(page);
+    expect(pagingOf({ class_name: 'series_chart_setting' }, page)).toBeUndefined();
+  });
+
+  it.each(['scatter_chart_setting', 'bubble_chart_setting'])('asks for the first rows of a %s, as many as its max data point', className => {
+    expect(pagingOf(withPoints(className, 250), page)).toEqual({ from: 0, size: 250 });
+    expect(pagingOf(withPoints(className, '500'), page)).toEqual({ from: 0, size: 500 });
+  });
+
+  it.each([undefined, 0, -5, 'many'])('falls back to 1000 rows for a max data point of %s', numDataPoint => {
+    expect(pagingOf(withPoints('scatter_chart_setting', numDataPoint), page)).toEqual({ from: 0, size: 1000 });
+    expect(pagingOf({ class_name: 'bubble_chart_setting' }, page)).toEqual({ from: 0, size: 1000 });
   });
 });

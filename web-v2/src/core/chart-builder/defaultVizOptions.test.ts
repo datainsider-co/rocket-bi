@@ -19,7 +19,7 @@ describe('defaultVizOptions', () => {
   });
 
   it('has none for a type v2 does not build', () => {
-    expect(defaultVizOptions('arearange')).toBeUndefined();
+    expect(defaultVizOptions('gauge')).toBeUndefined();
   });
 
   it('builds the types v1 lacked from its source', () => {
@@ -51,6 +51,32 @@ describe('defaultVizOptions', () => {
       class_name: 'variablepie_chart_setting',
       options: { chart: { type: 'variablepie' }, x_axis: [], plot_options: { series: { data_labels: { enabled: false } } } }
     });
+    expect(defaultVizOptions(ChartType.AreaRange)).toMatchObject({
+      class_name: 'generic_chart_setting',
+      options: { chart: { type: 'arearange', zooming: { type: 'x' } }, legend: { enabled: false }, plot_options: { area: { stacking: 'value' } } }
+    });
+    expect(defaultVizOptions(ChartType.ColumnRange)).toMatchObject({
+      class_name: 'generic_chart_setting',
+      options: { chart: { type: 'columnrange', inverted: true }, legend: { enabled: false }, y_axis: [{ visible: true }, { visible: false }] }
+    });
+    expect(defaultVizOptions(ChartType.WordCloud)).toMatchObject({
+      class_name: 'word_cloud_chart_setting',
+      options: { chart: { type: 'wordcloud' }, theme_color: { enabled: true }, affected_by_filter: true }
+    });
+    expect(defaultVizOptions(ChartType.WindRose)).toMatchObject({
+      class_name: 'wind_rose_setting',
+      stacking_group: {},
+      options: { chart: { polar: true, type: 'column' }, plot_options: { series: { stacking: 'normal' } }, legend: { enabled: true } }
+    });
+    expect(defaultVizOptions(ChartType.Scatter)).toMatchObject({
+      class_name: 'highcharts_scatter_chart_setting',
+      options: { num_data_point: 1000, theme_color: { enabled: true }, plot_options: { series: { marker: { enabled: true } } }, x_axis: [{ grid_line_width: 0.5 }] }
+    });
+    expect(defaultVizOptions(ChartType.Bubble)).toMatchObject({
+      class_name: 'highcharts_bubble_chart_setting',
+      options: { num_data_point: 1000, legend: { enabled: true }, plot_options: { series: { marker: { line_width: 0 } } } }
+    });
+    expect(defaultVizOptions(ChartType.Bubble)?.['options']).not.toHaveProperty('theme_color');
     expect(defaultVizOptions(ChartType.Parliament)).toMatchObject({ class_name: 'parliament_setting', options: { max_data_point: 1000, plot_options: { item: { data_labels: { enabled: false } } } } });
   });
 

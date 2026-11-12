@@ -27,6 +27,9 @@ import { buildFunnelChartOptions, type FunnelType } from './funnel/funnelChartOp
 import { buildParliamentChartOptions, parliamentLimitError } from './parliament/parliamentChartOptions';
 import { buildPieChartOptions } from './pie/pieChartOptions';
 import { buildVariablePieChartOptions } from './pie/variablePieChartOptions';
+import { buildPointChartOptions, type PointChartType } from './point/pointChartOptions';
+import { buildRangeChartOptions, isRangeChart } from './range/rangeChartOptions';
+import { buildWordCloudChartOptions } from './word-cloud/wordCloudChartOptions';
 import { buildSeriesChartOptions, isTimestampFunction } from './series/seriesChartOptions';
 import { buildStackedChartOptions } from './series/stackedChartOptions';
 import { FlattenTableView } from './table/FlattenTableView';
@@ -81,9 +84,11 @@ export interface KpiParts {
   dateRange?: KpiDateRangeProps;
 }
 
-const SERIES_CLASSES = new Set<string>([ChartVizClass.Series, ChartVizClass.StackedSeries, ChartVizClass.CircularBar]);
+const SERIES_CLASSES = new Set<string>([ChartVizClass.Series, ChartVizClass.StackedSeries, ChartVizClass.CircularBar, ChartVizClass.WindRose]);
 
 const FUNNEL_TYPES: Readonly<Record<string, FunnelType>> = { [ChartVizClass.Funnel]: 'funnel', [ChartVizClass.Pyramid]: 'pyramid' };
+
+const POINT_TYPES: Readonly<Record<string, PointChartType>> = { [ChartVizClass.Scatter]: 'scatter', [ChartVizClass.Bubble]: 'bubble' };
 
 const NO_STEPS: DrillPath['steps'] = [];
 
@@ -109,10 +114,19 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
     }
     const funnelType = FUNNEL_TYPES[viz.className];
     if (funnelType && response.kind === 'series_two') return buildFunnelChartOptions({ type: funnelType, options: viz.options, response, themeColors });
+    const pointType = POINT_TYPES[viz.className];
+    if (pointType && response.kind === 'series_two') {
+      const nameOf = (key: string) => asString(getPath(widget.setting, [key, 'name']));
+      return buildPointChartOptions({ type: pointType, options: viz.options, response, themeColors, names: { x: nameOf('x_axis'), y: nameOf('y_axis'), value: nameOf('value') } });
+    }
     if (viz.className === ChartVizClass.Parliament && response.kind === 'series_two' && !chartErrorOf(viz, response)) {
       return buildParliamentChartOptions({ options: viz.options, response, themeColors });
     }
+    if (viz.className === ChartVizClass.WordCloud && response.kind === 'word_cloud') return buildWordCloudChartOptions({ options: viz.options, response, themeColors });
     if (viz.className === ChartVizClass.VariablePie && response.kind === 'generic') return buildVariablePieChartOptions({ options: viz.options, response, themeColors });
+    if (viz.className === ChartVizClass.Generic && response.kind === 'generic' && isRangeChart(viz.options)) {
+      return buildRangeChartOptions({ options: viz.options, response, themeColors });
+    }
     return undefined;
   }, [viz, response, themeColors, widget.setting, selected, onSelect, onPointMenu]);
   const tableFormat = useMemo(() => tableNumberFormat(viz.options), [viz.options]);

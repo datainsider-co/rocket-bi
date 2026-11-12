@@ -14,7 +14,11 @@ export const ChartType = {
   LineInverted: 'line_inverted',
   Area: 'area',
   AreaInverted: 'area_inverted',
+  /** A band between a minimum and a maximum per X-Axis value (v1 `GenericChartOption`, a generic query setting). */
+  AreaRange: 'arearange',
   Column: 'column',
+  /** The same as bars, one from its minimum to its maximum; v1 draws it with inverted axes. */
+  ColumnRange: 'column_range',
   Bar: 'bar',
   /** A series chart drawn with Highcharts' lollipop series (v1 `SeriesChartOption`, chart type `lollipop`). */
   Lollipop: 'lollipop',
@@ -23,11 +27,19 @@ export const ChartType = {
   StackedBar: 'stack_bar',
   /** The stacked bar on a polar pane (v1 `CircularChartOption`). */
   CircularBar: 'circular_bar',
+  /** Stacked columns on a polar pane (v1 `WindRoseChartOption`, drawn by `StackingSeriesChart`). */
+  WindRose: 'wind_rose',
   Pie: 'pie',
   SemiPie: 'semi_pie',
   Donut: 'Donut',
   /** A pie whose slices also differ in depth, by an optional Weight (v1 `VariablepieChartOption`). */
   VariablePie: 'variablepie',
+  /** One dot per row, or per group once its Legend groups (v1 `ScatterChartOption`). */
+  Scatter: 'scatter',
+  /** Scatter with a third value as each dot's size (v1 `BubbleChartOption`). */
+  Bubble: 'bubble_chart',
+  /** Words sized by a value (v1 `WordCloudChartOption`). */
+  WordCloud: 'wordcloud',
   Funnel: 'funnel',
   Pyramid: 'pyramid',
   /** One dot per unit of each value, in a half circle by default (Highcharts item series). v1 spells it capitalised too. */

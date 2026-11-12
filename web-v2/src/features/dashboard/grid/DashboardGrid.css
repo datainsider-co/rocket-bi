@@ -34,7 +34,11 @@
   transition-duration: 0s;
 }
 
-/* v1 hid gridstack's corner glyphs: only the cursor tells where a widget resizes. */
+/*
+ * v1 hid gridstack's corner glyphs: only the cursor tells where a widget resizes. Above the widget's card, whose body
+ * and action bar have their own z-indexes (`WidgetContainer.css`) and would take the press, dragging the widget instead.
+ */
 .dashboard-grid > .dashboard-grid__item > .react-resizable-handle {
+  z-index: 4;
   opacity: 0;
 }

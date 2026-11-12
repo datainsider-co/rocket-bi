@@ -99,6 +99,52 @@ const invertedSeries = (type: string) =>
     { layout: 'vertical', align: 'right', verticalAlign: 'top', floating: true, enabled: true, itemStyle: { color: TEXT_COLOR }, title: legendTitle }
   );
 
+/**
+ * v1 `GenericChartOption.getDefaultAreaRangeOption` / `getDefaultColumnRangeOption` (source): the series options without
+ * a legend; the area zooms along x, the columns lie on inverted axes.
+ */
+const range = (chart: JsonObject, plotOptions: JsonObject = {}) => ({
+  ...seriesBase(chart, bottomLegend(false)),
+  plotOptions: {
+    ...plotOptions,
+    series: { lineWidth: 2, dashStyle: 'Solid', dataLabels: { enabled: false, style: { ...secondaryStyle(), color: TEXT_COLOR, textOutline: 0 } } }
+  }
+});
+
+const pointAxis = (extra: JsonObject = {}) => ({
+  visible: true,
+  ...extra,
+  gridLineDashStyle: 'Solid',
+  labels: { style: { color: TEXT_COLOR } },
+  title: { style: { color: TEXT_COLOR }, text: '', enabled: true }
+});
+
+const pointBase = (marker: JsonObject) => ({
+  legend: bottomLegend(),
+  title: title(),
+  subtitle: subtitle(),
+  affectedByFilter: true,
+  background: BACKGROUND,
+  tooltip: { backgroundColor: TOOLTIP_BACKGROUND, style: secondaryStyle() },
+  plotOptions: { series: { marker, dataLabels: { enabled: false, style: secondaryStyle() } } },
+  numDataPoint: 1000
+});
+
+/** v1 `ScatterChartOption.getDefaultChartOption` (source): the x axis has no grid line color of its own. */
+const scatter = () => ({
+  ...pointBase({ enabled: true }),
+  themeColor: { enabled: true },
+  xAxis: [pointAxis({ gridLineWidth: 0.5 })],
+  yAxis: [pointAxis({ gridLineColor: GRID_LINE_COLOR, gridLineWidth: '0.5' })]
+});
+
+/** v1 `BubbleChartOption.getDefaultChartOption` (source): no `themeColor`, which reads as the theme's colors. */
+const bubble = () => ({
+  ...pointBase({ lineWidth: 0 }),
+  xAxis: [pointAxis({ gridLineColor: GRID_LINE_COLOR, gridLineWidth: 0.5 })],
+  yAxis: [pointAxis({ gridLineColor: GRID_LINE_COLOR, gridLineWidth: 0.5 })]
+});
+
 const stackedAxis = (gridLineWidth: string, extra: JsonObject = {}, labels: JsonObject = {}) => ({
   visible: true,
   ...extra,
@@ -139,6 +185,9 @@ const circularBar = () => ({
   yAxis: [stackedAxis('0.5', { endOnTick: true })],
   tooltip: stackedTooltip
 });
+
+/** v1 `WindRoseChartOption.getDefaultChartOption`: the stacked columns' options on a polar pane. */
+const windRose = () => ({ ...stacked('column'), chart: { polar: true, type: 'column' } });
 
 const pieTooltip = { backgroundColor: TOOLTIP_BACKGROUND, style: secondaryStyle() };
 
@@ -186,6 +235,17 @@ const variablePie = () => ({
   xAxis: [],
   yAxis: [],
   tooltip: seriesTooltip
+});
+
+/** v1 `WordCloudChartOption.getDefaultChartOption`. */
+const wordCloud = () => ({
+  chart: { type: 'wordcloud' },
+  title: title(),
+  subtitle: subtitle(),
+  affectedByFilter: true,
+  themeColor: { enabled: true },
+  background: BACKGROUND,
+  tooltip: { backgroundColor: TOOLTIP_BACKGROUND, style: secondaryStyle() }
 });
 
 const funnelLabels = { dataLabels: { enabled: true, style: { color: TEXT_COLOR } } };
@@ -454,15 +514,21 @@ const DEFAULTS: Readonly<Record<ChartType, Defaults>> = {
   [T.StackedColumn]: stackedDefaults('stacking_series_chart_setting', () => stacked('column')),
   [T.StackedBar]: stackedDefaults('stacking_series_chart_setting', () => stacked('bar')),
   [T.CircularBar]: stackedDefaults('circular_bar_chart_setting', circularBar),
+  [T.WindRose]: stackedDefaults('wind_rose_setting', windRose),
   [T.LineInverted]: seriesDefaults(() => invertedSeries('line')),
   [T.AreaInverted]: seriesDefaults(() => invertedSeries('area')),
+  [T.AreaRange]: { className: 'generic_chart_setting', options: () => range({ type: 'arearange', zooming: { type: 'x' } }, { area: { stacking: 'value' } }) },
+  [T.ColumnRange]: { className: 'generic_chart_setting', options: () => range({ type: 'columnrange', inverted: true }) },
   [T.Pie]: { className: 'highcharts_pie_chart_setting', options: () => pie(false) },
   [T.SemiPie]: { className: 'highcharts_pie_chart_setting', options: () => pie(true) },
   [T.Donut]: { className: 'donut_chart_setting', options: donut },
   [T.VariablePie]: { className: 'variablepie_chart_setting', options: variablePie },
+  [T.Scatter]: { className: 'highcharts_scatter_chart_setting', options: scatter },
+  [T.Bubble]: { className: 'highcharts_bubble_chart_setting', options: bubble },
   [T.Funnel]: { className: 'highcharts_funnel_chart_setting', options: funnel },
   [T.Pyramid]: { className: 'highcharts_pyramid_chart_setting', options: pyramid },
   [T.Parliament]: { className: 'parliament_setting', options: parliament },
+  [T.WordCloud]: { className: 'word_cloud_chart_setting', options: wordCloud },
   [T.Number]: { className: 'number_chart_setting', options: number },
   [T.Table]: { className: 'flatten_table_setting', options: table },
   [T.CollapseTable]: { className: 'table_chart_setting', options: collapseTable },

@@ -11,12 +11,14 @@ import { FilterSettingsView } from './FilterSettingsView';
 import { NumberSettingsView } from './NumberSettingsView';
 import { ParliamentSettingsView } from './ParliamentSettingsView';
 import { PieSettingsView } from './PieSettingsView';
+import { PointSettingsView } from './PointSettingsView';
 import { SeriesSettingsView } from './SeriesSettingsView';
 import { StackedSettingsView } from './StackedSettingsView';
 import { seriesResponseOf, settingsKindOf } from './settingsPanel.utils';
 import { TableSettingsView } from './TableSettingsView';
 import { axisTitlesOf, seriesChoicesOf } from './tabs/seriesTabs.utils';
 import { useChartSettings } from './useChartSettings';
+import { WordCloudSettingsView } from './WordCloudSettingsView';
 import { useFilterDefault } from './useFilterDefault';
 import '@/shared/settings/Settings.css';
 
@@ -47,10 +49,14 @@ export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPa
         return <SeriesSettingsView {...tab} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
       case 'stacked':
         return <StackedSettingsView {...tab} response={seriesResponse} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
+      case 'point':
+        return <PointSettingsView {...tab} axisTitles={axisTitles} themeColors={themeColors} />;
       case 'pie':
         return <PieSettingsView {...tab} themeColors={themeColors} />;
       case 'parliament':
         return <ParliamentSettingsView {...tab} themeColors={themeColors} />;
+      case 'wordCloud':
+        return <WordCloudSettingsView {...tab} themeColors={themeColors} />;
       case 'number':
         return <NumberSettingsView {...tab} dateFields={dateFields} />;
       case 'table':

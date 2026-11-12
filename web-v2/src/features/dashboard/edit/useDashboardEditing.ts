@@ -10,6 +10,7 @@ import { useDashboardEditor } from './useDashboardEditor';
 import { useEditDialogs } from './useEditDialogs';
 import { useEditMode } from './useEditMode';
 import { useLeaveGuard } from './useLeaveGuard';
+import { useRevealNewWidgets } from './useRevealNewWidgets';
 import { useWidgetEditActions } from './useWidgetEditActions';
 
 interface DashboardEditingInput {
@@ -27,6 +28,7 @@ export function useDashboardEditing({ dashboard, permissions, available, chartBu
   const dialogs = useEditDialogs(editor, mode.release);
   const actions = useWidgetEditActions({ dashboard: mode.shown, editor, editing: mode.editing, openDialog: dialogs.open, release: mode.release, chartBuilder });
   useLeaveGuard(mode.editing, mode.dirty, dashboard?.id);
+  useRevealNewWidgets(dashboard, mode.editing);
   // v1 `DashboardStore.updateMainDateFilter`: the whole setting, saved like the settings dialog does.
   const mainDate = useMemo(
     (): MainDateEditing => ({
