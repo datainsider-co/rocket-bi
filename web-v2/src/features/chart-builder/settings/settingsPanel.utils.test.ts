@@ -16,6 +16,10 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(chartType)).toBe('pie');
   });
 
+  it.each([ChartType.Scatter, ChartType.Bubble])('gives %s the point settings', chartType => {
+    expect(settingsKindOf(chartType)).toBe('point');
+  });
+
   it('gives the parliament its own settings', () => {
     expect(settingsKindOf(ChartType.Parliament)).toBe('parliament');
   });

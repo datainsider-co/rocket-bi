@@ -24,10 +24,19 @@ export interface SeriesOneResponse {
   readonly compareValue?: number;
 }
 
-/** Pie and other name/value charts (`series_two_response`): each point is `[name, value]`. */
+/** One series of a `series_two_response`. */
+export interface SeriesTwoItem {
+  readonly name: string;
+  /** Each point as `[name, value]`: pies and the other name/value charts. */
+  readonly data: readonly (readonly [string, number])[];
+  /** Each point as the server sent it: a scatter's `[x, y]`, a bubble's `[x, y, size]`. */
+  readonly points: readonly (readonly unknown[])[];
+}
+
+/** Pie and other name/value charts, scatters and bubbles (`series_two_response`). */
 export interface SeriesTwoResponse {
   readonly kind: 'series_two';
-  readonly series: readonly { readonly name: string; readonly data: readonly (readonly [string, number])[] }[];
+  readonly series: readonly SeriesTwoItem[];
   readonly total: number;
 }
 
@@ -148,12 +157,11 @@ export function visualizationResponseFromJson(value: unknown): VisualizationResp
         kind: 'series_two',
         series: asArray(json['series']).map(item => {
           const series = asRecord(item);
+          const points = asArray(series['data']).map(asArray);
           return {
             name: asString(series['name']),
-            data: asArray(series['data']).map(point => {
-              const [name, y] = asArray(point);
-              return [String(name ?? ''), asNumber(y)] as const;
-            })
+            data: points.map(([name, y]) => [String(name ?? ''), asNumber(y)] as const),
+            points
           };
         }),
         total: asNumber(json['total'])

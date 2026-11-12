@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { JsonObject } from '@/core/json/json';
 import { ChartType } from './chartType';
 import { functionDataFromJson, type FunctionData } from './FunctionData';
-import { convertRowMode } from './functionConvertor';
+import { convertFunctions, convertRowMode, convertScatterAxes } from './functionConvertor';
 
 const item = (id: number, family: string, fieldType = 'string', extra: JsonObject = {}) =>
   functionDataFromJson({ id, name: `f${id}`, function_family: family, function_type: '', field: { class_name: 'table_field', field_type: fieldType }, sorting: 'Unsorted', is_nested: false, ...extra });
@@ -57,5 +57,69 @@ describe('convertRowMode', () => {
     const toNone = { ...before, functionFamily: 'None' };
     expect(convertRowMode(ChartType.Table, 'sorting', configs, toNone, before)).toBe(configs);
     expect(convertRowMode(ChartType.Column, 'columns', configs, toNone, before)).toBe(configs);
+  });
+});
+
+describe('convertScatterAxes', () => {
+  const legendOf = (family: string) => item(3, family);
+  const axes = { x_axis: [item(1, 'None', 'double')], y_axis: [item(2, 'None', 'datetime')] };
+
+  it('aggregates the axes once the legend groups: numbers summed, the rest counted', () => {
+    const updated = legendOf('Group By');
+    const configs = { ...axes, legend_optional: [updated] };
+    expect(families(convertScatterAxes(ChartType.Scatter, 'legend_optional', configs, updated, legendOf('None')))).toEqual({
+      x_axis: [['Aggregation', 'Sum']],
+      y_axis: [['Aggregation', 'Count all']],
+      legend_optional: [['Group By', '']]
+    });
+  });
+
+  it('keeps an axis that already aggregates, and chart controls', () => {
+    const updated = legendOf('Date histogram');
+    const average = { ...item(1, 'Aggregation', 'double'), functionType: 'Average' };
+    const control = item(2, 'None', 'double', { dynamic_function: { id: 9 } });
+    const configs = { x_axis: [average], y_axis: [control], legend_optional: [updated] };
+    const converted = convertScatterAxes(ChartType.Scatter, 'legend_optional', configs, updated, legendOf('None'));
+    expect(converted['x_axis']?.[0]).toBe(average);
+    expect(converted['y_axis']?.[0]).toBe(control);
+  });
+
+  it('lists rows again once the legend stops grouping', () => {
+    const updated = legendOf('None');
+    const configs = { x_axis: [item(1, 'Aggregation', 'double')], y_axis: [item(2, 'Aggregation')], legend_optional: [updated] };
+    expect(families(convertScatterAxes(ChartType.Scatter, 'legend_optional', configs, updated, legendOf('Group By')))).toEqual({
+      x_axis: [['None', '']],
+      y_axis: [['None', '']],
+      legend_optional: [['None', '']]
+    });
+  });
+
+  it('leaves the configs as they are for another zone, another chart type, or a legend that keeps its mode', () => {
+    const updated = legendOf('Group By');
+    const configs = { ...axes, legend_optional: [updated] };
+    expect(convertScatterAxes(ChartType.Scatter, 'x_axis', configs, updated, legendOf('None'))).toBe(configs);
+    expect(convertScatterAxes(ChartType.Bubble, 'legend_optional', configs, updated, legendOf('None'))).toBe(configs);
+    expect(convertScatterAxes(ChartType.Scatter, 'legend_optional', configs, updated, legendOf('Date histogram'))).toBe(configs);
+  });
+
+  it('does not change its input', () => {
+    const updated = legendOf('Group By');
+    const configs = { ...axes, legend_optional: [updated] };
+    const before = JSON.stringify(configs);
+    convertScatterAxes(ChartType.Scatter, 'legend_optional', configs, updated, legendOf('None'));
+    expect(JSON.stringify(configs)).toBe(before);
+  });
+});
+
+describe('convertFunctions', () => {
+  it("applies the table's rule and the scatter's, and nothing for other types", () => {
+    const before = item(1, 'None');
+    const grouped = { ...before, functionFamily: 'Group By' };
+    const table = { columns: [grouped, item(2, 'None')] };
+    expect(families(convertFunctions(ChartType.Table, 'columns', table, grouped, before))['columns']).toEqual([['Group By', ''], ['Group By', '']]);
+    const scatter = { x_axis: [item(2, 'None', 'double')], legend_optional: [grouped] };
+    expect(families(convertFunctions(ChartType.Scatter, 'legend_optional', scatter, grouped, before))['x_axis']).toEqual([['Aggregation', 'Sum']]);
+    const column = { x_axis: [grouped], y_axis: [item(2, 'None')] };
+    expect(convertFunctions(ChartType.Column, 'x_axis', column, grouped, before)).toBe(column);
   });
 });

@@ -11,6 +11,7 @@ import { FilterSettingsView } from './FilterSettingsView';
 import { NumberSettingsView } from './NumberSettingsView';
 import { ParliamentSettingsView } from './ParliamentSettingsView';
 import { PieSettingsView } from './PieSettingsView';
+import { PointSettingsView } from './PointSettingsView';
 import { SeriesSettingsView } from './SeriesSettingsView';
 import { StackedSettingsView } from './StackedSettingsView';
 import { seriesResponseOf, settingsKindOf } from './settingsPanel.utils';
@@ -47,6 +48,8 @@ export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPa
         return <SeriesSettingsView {...tab} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
       case 'stacked':
         return <StackedSettingsView {...tab} response={seriesResponse} series={series} axisTitles={axisTitles} themeColors={themeColors} />;
+      case 'point':
+        return <PointSettingsView {...tab} axisTitles={axisTitles} themeColors={themeColors} />;
       case 'pie':
         return <PieSettingsView {...tab} themeColors={themeColors} />;
       case 'parliament':

@@ -32,6 +32,10 @@ export const ChartType = {
   Donut: 'Donut',
   /** A pie whose slices also differ in depth, by an optional Weight (v1 `VariablepieChartOption`). */
   VariablePie: 'variablepie',
+  /** One dot per row, or per group once its Legend groups (v1 `ScatterChartOption`). */
+  Scatter: 'scatter',
+  /** Scatter with a third value as each dot's size (v1 `BubbleChartOption`). */
+  Bubble: 'bubble_chart',
   Funnel: 'funnel',
   Pyramid: 'pyramid',
   /** One dot per unit of each value, in a half circle by default (Highcharts item series). v1 spells it capitalised too. */

@@ -73,6 +73,23 @@ const RANGE_ZONES = [
   zone('max', 'Max Value', [F.Aggregation], { ...AGGREGATION_DEFAULTS, number: maximum }, { maxItems: 1 })
 ];
 
+/** v1 `SCATTER_CONFIGS`: rows as they are by default; the Legend may group, and then the axes aggregate (`functionConvertor`). */
+const SCATTER_ZONES = [
+  zone('x_axis', 'X-Axis', [F.None, F.Aggregation], NONE_DEFAULTS, { maxItems: 1 }),
+  zone('y_axis', 'Y-Axis', [F.None, F.Aggregation], NONE_DEFAULTS, { maxItems: 1 }),
+  zone('legend_optional', 'Legend', [F.None, F.GroupBy, F.DateHistogram], NONE_DEFAULTS, { maxItems: 1, optional: true })
+];
+
+const BUBBLE_DEFAULTS: ZoneDefaults = { ...AGGREGATION_DEFAULTS, date: byYear };
+const bubbleZone = (key: string, title: string) => zone(key, title, [F.Aggregation, F.DateHistogram], BUBBLE_DEFAULTS, { maxItems: 1 });
+/** v1 `BUBBLE_CONFIGS`: three aggregated values (position and size) and an optional Legend. */
+const BUBBLE_ZONES = [
+  bubbleZone('x_axis', 'X-Axis'),
+  bubbleZone('y_axis', 'Y-Axis'),
+  bubbleZone('value', 'Value'),
+  zone('legend_optional', 'Legend', [F.GroupBy, F.Aggregation], { text: groupBy, number: sum, date: byYear }, { maxItems: 1, optional: true })
+];
+
 /** v1 `PIE_CONFIGS`, also Funnel's and Pyramid's. */
 const PIE_ZONES = [groupZone('legend', 'Legend'), aggregationZone('value', 'Value', { maxItems: 1 })];
 /** v1 `VARIWIDE_CONFIGS`: the pie's zones and an optional Weight, the depth of each slice. */
@@ -115,6 +132,8 @@ export interface ChartTypeInfo {
   readonly zones: readonly ZoneConfig[];
   /** Whether the Sorting and Filters zones show (v1 `extraPanels`). */
   readonly extraZones: boolean;
+  /** `false` for the types that show Filters without Sorting (v1 `FILTER_CONFIGS` alone: scatter, bubble). */
+  readonly sortable?: boolean;
 }
 
 const T = ChartType;
@@ -151,6 +170,8 @@ export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.SemiPie, 'Semi Pie', 'ic_pie.svg', PIE_ZONES),
   chart(T.VariablePie, 'Variable Pie', 'ic_variable_pie.svg', VARIABLE_PIE_ZONES),
   chart(T.Donut, 'Donut', 'ic_donut.svg', PIE_ZONES),
+  { ...chart(T.Scatter, 'Scatter', 'ic_scatter.svg', SCATTER_ZONES), sortable: false },
+  { ...chart(T.Bubble, 'Bubble', 'ic_bubble.svg', BUBBLE_ZONES), sortable: false },
   chart(T.Funnel, 'Funnel', 'ic_funnel.svg', PIE_ZONES),
   chart(T.Pyramid, 'Pyramid', 'ic_pyramid.svg', PIE_ZONES),
   chart(T.StackedColumn, 'Stacked Column', 'ic_stack_column.svg', stackedZones()),
@@ -178,8 +199,6 @@ export function chartTypeInfoOf(chartType: string): ChartTypeInfo | undefined {
 /** v1's icons (`ALL_ICON_MAP`) for the chart types v2 doesn't build yet, which dashboards still hold. */
 const OTHER_ICONS: Readonly<Record<string, string>> = {
   flatten_pivot_table: 'ic_pivot_table.svg',
-  scatter: 'ic_scatter.svg',
-  bubble_chart: 'ic_bubble.svg',
   pareto: 'ic_pareto.svg',
   bell_curve: 'ic_bell_curve.svg',
   gauge: 'ic_gauge.svg',
@@ -224,8 +243,8 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   [T.SemiPie, 'Semi Pie'],
   [T.VariablePie, 'Variable Pie'],
   [T.Donut, 'Donut'],
-  ['scatter', 'Scatter'],
-  ['bubble_chart', 'Bubble'],
+  [T.Scatter, 'Scatter'],
+  [T.Bubble, 'Bubble'],
   [T.Funnel, 'Funnel'],
   [T.Pyramid, 'Pyramid'],
   ['pareto', 'Pareto'],

@@ -19,7 +19,7 @@ describe('defaultVizOptions', () => {
   });
 
   it('has none for a type v2 does not build', () => {
-    expect(defaultVizOptions('scatter')).toBeUndefined();
+    expect(defaultVizOptions('gauge')).toBeUndefined();
   });
 
   it('builds the types v1 lacked from its source', () => {
@@ -59,6 +59,15 @@ describe('defaultVizOptions', () => {
       class_name: 'generic_chart_setting',
       options: { chart: { type: 'columnrange', inverted: true }, legend: { enabled: false }, y_axis: [{ visible: true }, { visible: false }] }
     });
+    expect(defaultVizOptions(ChartType.Scatter)).toMatchObject({
+      class_name: 'highcharts_scatter_chart_setting',
+      options: { num_data_point: 1000, theme_color: { enabled: true }, plot_options: { series: { marker: { enabled: true } } }, x_axis: [{ grid_line_width: 0.5 }] }
+    });
+    expect(defaultVizOptions(ChartType.Bubble)).toMatchObject({
+      class_name: 'highcharts_bubble_chart_setting',
+      options: { num_data_point: 1000, legend: { enabled: true }, plot_options: { series: { marker: { line_width: 0 } } } }
+    });
+    expect(defaultVizOptions(ChartType.Bubble)?.['options']).not.toHaveProperty('theme_color');
     expect(defaultVizOptions(ChartType.Parliament)).toMatchObject({ class_name: 'parliament_setting', options: { max_data_point: 1000, plot_options: { item: { data_labels: { enabled: false } } } } });
   });
 

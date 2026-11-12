@@ -18,14 +18,18 @@ const STACKED = new Set<string>([ChartType.StackedColumn, ChartType.StackedBar, 
 /** The pie family's tabs (v1 `PieSetting`, `DonutSetting`, `VariablepieSetting`, `FunnelSetting`, `PyramidSetting`). */
 const PIES = new Set<string>([ChartType.Pie, ChartType.SemiPie, ChartType.Donut, ChartType.VariablePie, ChartType.Funnel, ChartType.Pyramid]);
 
+/** Scatter and bubble (v1 `ScatterSetting`, `BubbleSetting`). */
+const POINTS = new Set<string>([ChartType.Scatter, ChartType.Bubble]);
+
 const TABLES = new Set<string>([ChartType.Table, ChartType.CollapseTable, ChartType.PivotTable]);
 
-export type SettingsKind = 'series' | 'stacked' | 'pie' | 'parliament' | 'number' | 'table' | 'filter';
+export type SettingsKind = 'series' | 'stacked' | 'point' | 'pie' | 'parliament' | 'number' | 'table' | 'filter';
 
 /** Which settings a chart type has (v1 picked the component by viz option class); `undefined` while v2 has none. */
 export function settingsKindOf(chartType: string): SettingsKind | undefined {
   if (SERIES.has(chartType)) return 'series';
   if (STACKED.has(chartType)) return 'stacked';
+  if (POINTS.has(chartType)) return 'point';
   if (PIES.has(chartType)) return 'pie';
   if (chartType === ChartType.Parliament) return 'parliament';
   if (chartType === ChartType.Number) return 'number';

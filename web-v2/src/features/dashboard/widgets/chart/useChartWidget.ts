@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ChartWidget } from '@/core/dashboard/Widget';
-import { DEFAULT_PAGE_SIZE, isPagedSetting, type FilterRequestJson, type Paging } from '@/core/query/QueryRequest';
+import { DEFAULT_PAGE_SIZE, pagingOf, type FilterRequestJson, type Paging } from '@/core/query/QueryRequest';
 import type { TableSort } from '@/core/query/tableSort';
 import { vizFromSetting } from '@/core/query/vizOptions';
 import { zoomLevelOf, canZoom } from '@/core/query/zoom';
@@ -53,7 +53,7 @@ export function useChartWidget(widget: ChartWidget, dashboardId: number) {
   const appliedRequests = filtersOn ? headerRequests : NO_REQUESTS;
   const viz = useMemo(() => vizFromSetting(widget.setting), [widget.setting]);
   const query = useMemo(() => buildChartQuery(view.viewed, controls, widgets, appliedRequests), [view.viewed, controls, widgets, appliedRequests]);
-  const data = useWidgetData(view.viewed, { dashboardId, query, paging: isPagedSetting(widget.setting) ? paging : undefined });
+  const data = useWidgetData(view.viewed, { dashboardId, query, paging: pagingOf(widget.setting, paging) });
   const trend = useKpiTrend(view.viewed, query, dashboardId);
   const subRows = useSubRowQuery(widget.id, query, dashboardId);
   const dateRange = useMemo(() => kpiDateRangeOf(view.viewed.setting), [view.viewed.setting]);

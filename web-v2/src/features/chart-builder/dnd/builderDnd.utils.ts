@@ -32,7 +32,7 @@ const isFilterZone = (zoneId: ZoneId) => zoneId === FILTER_ZONE || zoneId.starts
 export function configZonesOf(chartType: string): readonly ZoneConfig[] {
   const info = chartTypeInfoOf(chartType);
   if (!info) return [];
-  return info.extraZones ? [...info.zones, SORTING_ZONE] : info.zones;
+  return info.extraZones && info.sortable !== false ? [...info.zones, SORTING_ZONE] : info.zones;
 }
 
 export function hasFilterZone(chartType: string): boolean {

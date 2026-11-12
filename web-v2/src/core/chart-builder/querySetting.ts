@@ -65,6 +65,20 @@ const range: SettingBuilder = {
   build: configs => ({ columns: ['x_axis', 'min', 'max'].flatMap(key => columns(configs, key).slice(0, 1)) })
 };
 
+/** v1 `ScatterQuerySettingHandler`: two axes, each one column, and a legend when there is one. */
+const scatter: SettingBuilder = {
+  className: 'scatter_chart_setting',
+  canBuild: configs => filled(configs, 'x_axis') && filled(configs, 'y_axis'),
+  build: configs => ({ x_axis: firstColumn(configs, 'x_axis'), y_axis: firstColumn(configs, 'y_axis'), legend: firstColumn(configs, 'legend_optional') })
+};
+
+/** v1 `BubbleQuerySettingHandler`: the scatter's columns and the value each bubble is sized by. */
+const bubble: SettingBuilder = {
+  className: 'bubble_chart_setting',
+  canBuild: configs => scatter.canBuild(configs) && filled(configs, 'value'),
+  build: configs => ({ ...scatter.build(configs), value: firstColumn(configs, 'value') })
+};
+
 const number: SettingBuilder = {
   className: 'number_chart_setting',
   canBuild: configs => filled(configs, 'value'),
@@ -167,6 +181,8 @@ const BUILDERS: Readonly<Record<ChartType, SettingBuilder>> = {
   [T.SemiPie]: pie,
   [T.Donut]: pie,
   [T.VariablePie]: variablePie,
+  [T.Scatter]: scatter,
+  [T.Bubble]: bubble,
   [T.Funnel]: legendValue('funnel_chart_setting'),
   [T.Pyramid]: legendValue('pyramid_chart_setting'),
   [T.Parliament]: legendValue('parliament_chart_setting'),

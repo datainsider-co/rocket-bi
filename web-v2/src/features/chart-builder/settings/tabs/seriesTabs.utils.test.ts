@@ -126,6 +126,10 @@ describe('displayRevert', () => {
 });
 
 describe('axisTitlesOf', () => {
+  it('reads the single y axis column of a scatter or a bubble', () => {
+    expect(axisTitlesOf({ x_axis: { name: 'Price' }, y_axis: { name: 'Units' } })).toMatchObject({ x: 'Price', y: 'Units' });
+  });
+
   it("names the axes after the zones' fields", () => {
     const setting = { x_axis: { name: 'Region' }, y_axis: [{ name: 'Revenue' }, { name: 'Profit' }] };
     expect(axisTitlesOf(setting)).toEqual({ x: 'Region', y: 'Revenue', dual: 'Profit' });

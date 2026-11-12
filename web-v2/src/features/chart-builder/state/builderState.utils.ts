@@ -4,7 +4,7 @@ import { chartTypeInfoOf, defaultFunctionOf, newFunctionData, SORTING_ZONE, type
 import { newConditionData, type ConditionData } from '@/core/chart-builder/ConditionData';
 import { suggestConfigs } from '@/core/chart-builder/configSuggestion';
 import { defaultVizOptions, vizOptionsForType } from '@/core/chart-builder/defaultVizOptions';
-import { convertRowMode } from '@/core/chart-builder/functionConvertor';
+import { convertFunctions } from '@/core/chart-builder/functionConvertor';
 import { SortType, type FunctionData } from '@/core/chart-builder/FunctionData';
 import { isSameFieldKind } from '@/core/chart-builder/functions';
 import { optionsAfterConvert, optionsAfterRemove } from '@/core/chart-builder/optionCleanup';
@@ -166,7 +166,7 @@ function updateItem(state: BuilderState, zone: string, item: FunctionData): Buil
   const previous = items.find(current => current.id === item.id);
   if (!previous) return state;
   const updated = { ...configs, [zone]: items.map(current => (current.id === item.id ? item : current)) };
-  const converted = convertRowMode(chartType, zone, updated, item, previous);
+  const converted = convertFunctions(chartType, zone, updated, item, previous);
   const options = converted === updated ? state.options : optionsAfterConvert(chartType, state.options);
   return withConfigs({ ...state, options }, converted);
 }
@@ -309,8 +309,10 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
  * applied the sorts and filters left from another chart type, which the user could neither see nor remove.
  */
 function visibleData(data: BuilderData): BuilderData {
-  if (chartTypeInfoOf(data.chartType)?.extraZones !== false) return data;
-  return { ...data, configs: withoutKey(data.configs, SORTING_ZONE.key), filters: {} };
+  const info = chartTypeInfoOf(data.chartType);
+  if (info?.extraZones === false) return { ...data, configs: withoutKey(data.configs, SORTING_ZONE.key), filters: {} };
+  // Scatter and bubble have Filters without Sorting.
+  return info?.sortable === false ? { ...data, configs: withoutKey(data.configs, SORTING_ZONE.key) } : data;
 }
 
 /**

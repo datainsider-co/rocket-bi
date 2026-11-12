@@ -27,6 +27,7 @@ import { buildFunnelChartOptions, type FunnelType } from './funnel/funnelChartOp
 import { buildParliamentChartOptions, parliamentLimitError } from './parliament/parliamentChartOptions';
 import { buildPieChartOptions } from './pie/pieChartOptions';
 import { buildVariablePieChartOptions } from './pie/variablePieChartOptions';
+import { buildPointChartOptions, type PointChartType } from './point/pointChartOptions';
 import { buildRangeChartOptions, isRangeChart } from './range/rangeChartOptions';
 import { buildSeriesChartOptions, isTimestampFunction } from './series/seriesChartOptions';
 import { buildStackedChartOptions } from './series/stackedChartOptions';
@@ -86,6 +87,8 @@ const SERIES_CLASSES = new Set<string>([ChartVizClass.Series, ChartVizClass.Stac
 
 const FUNNEL_TYPES: Readonly<Record<string, FunnelType>> = { [ChartVizClass.Funnel]: 'funnel', [ChartVizClass.Pyramid]: 'pyramid' };
 
+const POINT_TYPES: Readonly<Record<string, PointChartType>> = { [ChartVizClass.Scatter]: 'scatter', [ChartVizClass.Bubble]: 'bubble' };
+
 const NO_STEPS: DrillPath['steps'] = [];
 
 /** A parliament with more dots than it allows says so instead of drawing (v1 `InvalidDataException`). */
@@ -110,6 +113,11 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
     }
     const funnelType = FUNNEL_TYPES[viz.className];
     if (funnelType && response.kind === 'series_two') return buildFunnelChartOptions({ type: funnelType, options: viz.options, response, themeColors });
+    const pointType = POINT_TYPES[viz.className];
+    if (pointType && response.kind === 'series_two') {
+      const nameOf = (key: string) => asString(getPath(widget.setting, [key, 'name']));
+      return buildPointChartOptions({ type: pointType, options: viz.options, response, themeColors, names: { x: nameOf('x_axis'), y: nameOf('y_axis'), value: nameOf('value') } });
+    }
     if (viz.className === ChartVizClass.Parliament && response.kind === 'series_two' && !chartErrorOf(viz, response)) {
       return buildParliamentChartOptions({ options: viz.options, response, themeColors });
     }

@@ -115,7 +115,9 @@ export const AXIS_DEFAULTS = {
 
 /** The default axis titles: the names of the zones' fields (v1 `getDefaultText`). */
 export function axisTitlesOf(setting: JsonObject | undefined) {
-  const yAxis = asArray(setting?.['y_axis']);
+  // A series chart has a list of y axis columns; a scatter or a bubble has one.
+  const stored = setting?.['y_axis'];
+  const yAxis = Array.isArray(stored) ? asArray(stored) : [stored];
   return {
     x: asString(asRecord(setting?.['x_axis'])['name']),
     y: asString(asRecord(yAxis[0])['name'], 'Untitled'),

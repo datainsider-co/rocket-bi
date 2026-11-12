@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { JsonObject } from '@/core/json/json';
 import { widgetFromJson, type ChartWidget } from '@/core/dashboard/Widget';
-import { DEFAULT_PAGE_SIZE, isPagedSetting, type Paging } from '@/core/query/QueryRequest';
+import { DEFAULT_PAGE_SIZE, pagingOf, type Paging } from '@/core/query/QueryRequest';
 import { vizFromSetting } from '@/core/query/vizOptions';
 import { useKpiTrend } from '@/features/dashboard/chart-data/useKpiTrend';
 import { useSubRowQuery } from '@/features/dashboard/chart-data/useSubRowQuery';
@@ -37,7 +37,7 @@ export function usePreview(json: JsonObject | undefined, dashboardId: number) {
   );
   const [page, setPage] = useState({ setting: widget.setting, paging: FIRST_PAGE });
   const paging = page.setting === widget.setting ? page.paging : FIRST_PAGE;
-  const data = useWidgetData(widget, { dashboardId, query, paging: isPagedSetting(widget.setting) ? paging : undefined, enabled: chart !== undefined });
+  const data = useWidgetData(widget, { dashboardId, query, paging: pagingOf(widget.setting, paging), enabled: chart !== undefined });
   const trend = useKpiTrend(widget, query, dashboardId);
   const subRows = useSubRowQuery(widget.id, query, dashboardId);
   // The range is only shown here: it is changed in the Date Range tab.

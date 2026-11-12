@@ -6,7 +6,7 @@ import { buildParliamentChartOptions, maxDataPointOf, parliamentLimitError } fro
 const THEME = ['#111111', '#222222'];
 const response: SeriesTwoResponse = {
   kind: 'series_two',
-  series: [{ name: 'party', data: [['Blue', 120], ['Red', 80]] }],
+  series: [{ name: 'party', data: [['Blue', 120], ['Red', 80]], points: [] }],
   total: 200
 };
 

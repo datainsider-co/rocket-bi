@@ -111,6 +111,40 @@ const range = (chart: JsonObject, plotOptions: JsonObject = {}) => ({
   }
 });
 
+const pointAxis = (extra: JsonObject = {}) => ({
+  visible: true,
+  ...extra,
+  gridLineDashStyle: 'Solid',
+  labels: { style: { color: TEXT_COLOR } },
+  title: { style: { color: TEXT_COLOR }, text: '', enabled: true }
+});
+
+const pointBase = (marker: JsonObject) => ({
+  legend: bottomLegend(),
+  title: title(),
+  subtitle: subtitle(),
+  affectedByFilter: true,
+  background: BACKGROUND,
+  tooltip: { backgroundColor: TOOLTIP_BACKGROUND, style: secondaryStyle() },
+  plotOptions: { series: { marker, dataLabels: { enabled: false, style: secondaryStyle() } } },
+  numDataPoint: 1000
+});
+
+/** v1 `ScatterChartOption.getDefaultChartOption` (source): the x axis has no grid line color of its own. */
+const scatter = () => ({
+  ...pointBase({ enabled: true }),
+  themeColor: { enabled: true },
+  xAxis: [pointAxis({ gridLineWidth: 0.5 })],
+  yAxis: [pointAxis({ gridLineColor: GRID_LINE_COLOR, gridLineWidth: '0.5' })]
+});
+
+/** v1 `BubbleChartOption.getDefaultChartOption` (source): no `themeColor`, which reads as the theme's colors. */
+const bubble = () => ({
+  ...pointBase({ lineWidth: 0 }),
+  xAxis: [pointAxis({ gridLineColor: GRID_LINE_COLOR, gridLineWidth: 0.5 })],
+  yAxis: [pointAxis({ gridLineColor: GRID_LINE_COLOR, gridLineWidth: 0.5 })]
+});
+
 const stackedAxis = (gridLineWidth: string, extra: JsonObject = {}, labels: JsonObject = {}) => ({
   visible: true,
   ...extra,
@@ -474,6 +508,8 @@ const DEFAULTS: Readonly<Record<ChartType, Defaults>> = {
   [T.SemiPie]: { className: 'highcharts_pie_chart_setting', options: () => pie(true) },
   [T.Donut]: { className: 'donut_chart_setting', options: donut },
   [T.VariablePie]: { className: 'variablepie_chart_setting', options: variablePie },
+  [T.Scatter]: { className: 'highcharts_scatter_chart_setting', options: scatter },
+  [T.Bubble]: { className: 'highcharts_bubble_chart_setting', options: bubble },
   [T.Funnel]: { className: 'highcharts_funnel_chart_setting', options: funnel },
   [T.Pyramid]: { className: 'highcharts_pyramid_chart_setting', options: pyramid },
   [T.Parliament]: { className: 'parliament_setting', options: parliament },
