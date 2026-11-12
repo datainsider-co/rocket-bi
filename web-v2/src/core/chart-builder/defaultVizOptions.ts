@@ -99,6 +99,18 @@ const invertedSeries = (type: string) =>
     { layout: 'vertical', align: 'right', verticalAlign: 'top', floating: true, enabled: true, itemStyle: { color: TEXT_COLOR }, title: legendTitle }
   );
 
+/**
+ * v1 `GenericChartOption.getDefaultAreaRangeOption` / `getDefaultColumnRangeOption` (source): the series options without
+ * a legend; the area zooms along x, the columns lie on inverted axes.
+ */
+const range = (chart: JsonObject, plotOptions: JsonObject = {}) => ({
+  ...seriesBase(chart, bottomLegend(false)),
+  plotOptions: {
+    ...plotOptions,
+    series: { lineWidth: 2, dashStyle: 'Solid', dataLabels: { enabled: false, style: { ...secondaryStyle(), color: TEXT_COLOR, textOutline: 0 } } }
+  }
+});
+
 const stackedAxis = (gridLineWidth: string, extra: JsonObject = {}, labels: JsonObject = {}) => ({
   visible: true,
   ...extra,
@@ -456,6 +468,8 @@ const DEFAULTS: Readonly<Record<ChartType, Defaults>> = {
   [T.CircularBar]: stackedDefaults('circular_bar_chart_setting', circularBar),
   [T.LineInverted]: seriesDefaults(() => invertedSeries('line')),
   [T.AreaInverted]: seriesDefaults(() => invertedSeries('area')),
+  [T.AreaRange]: { className: 'generic_chart_setting', options: () => range({ type: 'arearange', zooming: { type: 'x' } }, { area: { stacking: 'value' } }) },
+  [T.ColumnRange]: { className: 'generic_chart_setting', options: () => range({ type: 'columnrange', inverted: true }) },
   [T.Pie]: { className: 'highcharts_pie_chart_setting', options: () => pie(false) },
   [T.SemiPie]: { className: 'highcharts_pie_chart_setting', options: () => pie(true) },
   [T.Donut]: { className: 'donut_chart_setting', options: donut },

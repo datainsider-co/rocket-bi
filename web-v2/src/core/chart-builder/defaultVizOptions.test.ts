@@ -19,7 +19,7 @@ describe('defaultVizOptions', () => {
   });
 
   it('has none for a type v2 does not build', () => {
-    expect(defaultVizOptions('arearange')).toBeUndefined();
+    expect(defaultVizOptions('scatter')).toBeUndefined();
   });
 
   it('builds the types v1 lacked from its source', () => {
@@ -50,6 +50,14 @@ describe('defaultVizOptions', () => {
     expect(defaultVizOptions(ChartType.VariablePie)).toMatchObject({
       class_name: 'variablepie_chart_setting',
       options: { chart: { type: 'variablepie' }, x_axis: [], plot_options: { series: { data_labels: { enabled: false } } } }
+    });
+    expect(defaultVizOptions(ChartType.AreaRange)).toMatchObject({
+      class_name: 'generic_chart_setting',
+      options: { chart: { type: 'arearange', zooming: { type: 'x' } }, legend: { enabled: false }, plot_options: { area: { stacking: 'value' } } }
+    });
+    expect(defaultVizOptions(ChartType.ColumnRange)).toMatchObject({
+      class_name: 'generic_chart_setting',
+      options: { chart: { type: 'columnrange', inverted: true }, legend: { enabled: false }, y_axis: [{ visible: true }, { visible: false }] }
     });
     expect(defaultVizOptions(ChartType.Parliament)).toMatchObject({ class_name: 'parliament_setting', options: { max_data_point: 1000, plot_options: { item: { data_labels: { enabled: false } } } } });
   });

@@ -31,7 +31,7 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(chartType)).toBe('filter');
   });
 
-  it.each(['arearange', 'gauge'])('has none yet for %s', chartType => {
+  it.each([ChartType.AreaRange, ChartType.ColumnRange, 'gauge'])('has none yet for %s', chartType => {
     expect(settingsKindOf(chartType)).toBeUndefined();
   });
 });

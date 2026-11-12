@@ -13,6 +13,8 @@ const groupBy: FunctionInfo = { family: FunctionFamily.GroupBy, type: '' };
 const byYear: FunctionInfo = { family: FunctionFamily.DateHistogram, type: DateFunctionType.Year };
 const sum: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.Sum };
 const countAll: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.CountAll };
+const minimum: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.Minimum };
+const maximum: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.Maximum };
 const countDistinct: FunctionInfo = { family: FunctionFamily.Aggregation, type: AggregationType.CountDistinct };
 const none: FunctionInfo = { family: FunctionFamily.None, type: '' };
 
@@ -62,6 +64,13 @@ const seriesZones = (xTitle = 'X-Axis', yTitle = 'Y-Axis'): ZoneConfig[] => [
 const stackedZones = (xTitle?: string, yTitle?: string): ZoneConfig[] => [
   ...seriesZones(xTitle, yTitle),
   groupZone('breakdown_optional', 'Breakdown', { optional: true })
+];
+
+/** v1 `AREA_RANGE_CONFIGS`, also Column Range's: one X-Axis, and a number's minimum and maximum by default. */
+const RANGE_ZONES = [
+  groupZone('x_axis', 'X-Axis'),
+  zone('min', 'Min Value', [F.Aggregation], { ...AGGREGATION_DEFAULTS, number: minimum }, { maxItems: 1 }),
+  zone('max', 'Max Value', [F.Aggregation], { ...AGGREGATION_DEFAULTS, number: maximum }, { maxItems: 1 })
 ];
 
 /** v1 `PIE_CONFIGS`, also Funnel's and Pyramid's. */
@@ -132,7 +141,9 @@ export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.LineInverted, 'Line Inverted Axes', 'ic_line_chart.svg', seriesZones()),
   chart(T.Area, 'Area', 'ic_chart_area.svg', seriesZones()),
   chart(T.AreaInverted, 'Area Inverted Axes', 'ic_chart_area.svg', seriesZones()),
+  chart(T.AreaRange, 'Area Range', 'ic_chart_area.svg', RANGE_ZONES),
   chart(T.Column, 'Column', 'ic_column.svg', seriesZones()),
+  chart(T.ColumnRange, 'Column Range', 'ic_column.svg', RANGE_ZONES),
   chart(T.Bar, 'Bar', 'ic_bar.svg', seriesZones('Y-Axis', 'X-Axis')),
   chart(T.Lollipop, 'Lollipop', 'ic_lollipop.svg', seriesZones()),
   chart(T.Parliament, 'Parliament', 'ic_parliament.svg', PARLIAMENT_ZONES),
@@ -167,8 +178,6 @@ export function chartTypeInfoOf(chartType: string): ChartTypeInfo | undefined {
 /** v1's icons (`ALL_ICON_MAP`) for the chart types v2 doesn't build yet, which dashboards still hold. */
 const OTHER_ICONS: Readonly<Record<string, string>> = {
   flatten_pivot_table: 'ic_pivot_table.svg',
-  arearange: 'ic_chart_area.svg',
-  column_range: 'ic_column.svg',
   scatter: 'ic_scatter.svg',
   bubble_chart: 'ic_bubble.svg',
   pareto: 'ic_pareto.svg',
@@ -205,9 +214,9 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   [T.LineInverted, 'Line Inverted Axes'],
   [T.Area, 'Area'],
   [T.AreaInverted, 'Area Inverted Axes'],
-  ['arearange', 'Area Range'],
+  [T.AreaRange, 'Area Range'],
   [T.Column, 'Column'],
-  ['column_range', 'Column Range'],
+  [T.ColumnRange, 'Column Range'],
   [T.Bar, 'Bar'],
   [T.Lollipop, 'Lollipop'],
   [T.Parliament, 'Parliament'],

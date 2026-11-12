@@ -68,7 +68,7 @@ describe('ChartBuilderHost', () => {
     renderHost({ kind: 'addChart' });
     const types = screen.getByRole('list', { name: 'Chart types' });
     // Like v1, only the types that can be built are offered.
-    expect(within(types).queryByRole('button', { name: 'Area Range' })).not.toBeInTheDocument();
+    expect(within(types).queryByRole('button', { name: 'Scatter' })).not.toBeInTheDocument();
     await user.click(within(types).getByRole('button', { name: 'Pie' }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByRole('region', { name: 'Legend' })).toBeInTheDocument();

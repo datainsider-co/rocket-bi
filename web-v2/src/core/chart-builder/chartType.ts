@@ -14,7 +14,11 @@ export const ChartType = {
   LineInverted: 'line_inverted',
   Area: 'area',
   AreaInverted: 'area_inverted',
+  /** A band between a minimum and a maximum per X-Axis value (v1 `GenericChartOption`, a generic query setting). */
+  AreaRange: 'arearange',
   Column: 'column',
+  /** The same as bars, one from its minimum to its maximum; v1 draws it with inverted axes. */
+  ColumnRange: 'column_range',
   Bar: 'bar',
   /** A series chart drawn with Highcharts' lollipop series (v1 `SeriesChartOption`, chart type `lollipop`). */
   Lollipop: 'lollipop',

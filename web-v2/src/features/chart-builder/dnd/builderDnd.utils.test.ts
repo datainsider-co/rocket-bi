@@ -71,8 +71,8 @@ describe('configZonesOf and hasFilterZone', () => {
   });
 
   it('has no zones for a type v2 does not build', () => {
-    expect(configZonesOf('arearange')).toEqual([]);
-    expect(hasFilterZone('arearange')).toBe(false);
+    expect(configZonesOf('scatter')).toEqual([]);
+    expect(hasFilterZone('scatter')).toBe(false);
   });
 });
 

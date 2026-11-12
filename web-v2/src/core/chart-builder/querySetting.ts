@@ -55,6 +55,16 @@ const variablePie: SettingBuilder = {
   build: configs => ({ columns: ['legend', 'value', 'weight'].flatMap(key => columns(configs, key).slice(0, 1)) })
 };
 
+/**
+ * Area Range and Column Range (v1 `AreaRangeQuerySettingHandler`): a generic setting, its columns being the X-Axis, the
+ * minimum and the maximum.
+ */
+const range: SettingBuilder = {
+  className: 'generic_chart_setting',
+  canBuild: configs => ['x_axis', 'min', 'max'].every(key => filled(configs, key)),
+  build: configs => ({ columns: ['x_axis', 'min', 'max'].flatMap(key => columns(configs, key).slice(0, 1)) })
+};
+
 const number: SettingBuilder = {
   className: 'number_chart_setting',
   canBuild: configs => filled(configs, 'value'),
@@ -145,7 +155,9 @@ const BUILDERS: Readonly<Record<ChartType, SettingBuilder>> = {
   [T.LineInverted]: series,
   [T.Area]: series,
   [T.AreaInverted]: series,
+  [T.AreaRange]: range,
   [T.Column]: series,
+  [T.ColumnRange]: range,
   [T.Bar]: series,
   [T.Lollipop]: series,
   [T.StackedColumn]: stacked,

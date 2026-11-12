@@ -27,6 +27,7 @@ import { buildFunnelChartOptions, type FunnelType } from './funnel/funnelChartOp
 import { buildParliamentChartOptions, parliamentLimitError } from './parliament/parliamentChartOptions';
 import { buildPieChartOptions } from './pie/pieChartOptions';
 import { buildVariablePieChartOptions } from './pie/variablePieChartOptions';
+import { buildRangeChartOptions, isRangeChart } from './range/rangeChartOptions';
 import { buildSeriesChartOptions, isTimestampFunction } from './series/seriesChartOptions';
 import { buildStackedChartOptions } from './series/stackedChartOptions';
 import { FlattenTableView } from './table/FlattenTableView';
@@ -113,6 +114,9 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
       return buildParliamentChartOptions({ options: viz.options, response, themeColors });
     }
     if (viz.className === ChartVizClass.VariablePie && response.kind === 'generic') return buildVariablePieChartOptions({ options: viz.options, response, themeColors });
+    if (viz.className === ChartVizClass.Generic && response.kind === 'generic' && isRangeChart(viz.options)) {
+      return buildRangeChartOptions({ options: viz.options, response, themeColors });
+    }
     return undefined;
   }, [viz, response, themeColors, widget.setting, selected, onSelect, onPointMenu]);
   const tableFormat = useMemo(() => tableNumberFormat(viz.options), [viz.options]);

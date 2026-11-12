@@ -10,6 +10,8 @@ export const ChartVizClass = {
   Donut: 'donut_chart_setting',
   /** Read from a generic response (`generic_chart_setting`). */
   VariablePie: 'variablepie_chart_setting',
+  /** Area Range and Column Range (v1 `GenericChartOption`), told apart by `chart.type`; read from a generic response. */
+  Generic: 'generic_chart_setting',
   Funnel: 'highcharts_funnel_chart_setting',
   Pyramid: 'highcharts_pyramid_chart_setting',
   Parliament: 'parliament_setting',

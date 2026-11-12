@@ -35,7 +35,7 @@ describe('buildSetting', () => {
   });
 
   it('is undefined for a chart type v2 does not build', () => {
-    expect(buildSetting(data('arearange', { columns: [item({})] }), { options: {} })).toBeUndefined();
+    expect(buildSetting(data('scatter', { columns: [item({})] }), { options: {} })).toBeUndefined();
   });
 
   it('builds the stacked charts as series with their breakdown, which is optional', () => {
@@ -60,6 +60,17 @@ describe('buildSetting', () => {
       expect(buildSetting(data(chartType, configs), { options: {} })).toStrictEqual({ ...pie, class_name: className });
     }
     expect(canBuildSetting(data(ChartType.Funnel, { legend: configs.legend }))).toBe(false);
+  });
+
+  it.each([ChartType.AreaRange, ChartType.ColumnRange])('builds %s as generic columns: the x axis, the minimum and the maximum', chartType => {
+    const xAxis = item({});
+    const min = item({ id: 2, name: 'lowest', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Minimum' });
+    const max = item({ id: 3, name: 'highest', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Maximum' });
+    const setting = buildSetting(data(chartType, { max: [max], x_axis: [xAxis], min: [min] }), { options: {} });
+    expect(setting).toMatchObject({ class_name: 'generic_chart_setting' });
+    expect(asArray(setting?.['columns']).map(column => asRecord(column)['name'])).toEqual(['region', 'lowest', 'highest']);
+    expect(canBuildSetting(data(chartType, { x_axis: [xAxis], min: [min] }))).toBe(false);
+    expect(canBuildSetting(data(chartType, { min: [min], max: [max] }))).toBe(false);
   });
 
   it('builds the variable pie as generic columns: the legend, the value and the weight when it has one', () => {

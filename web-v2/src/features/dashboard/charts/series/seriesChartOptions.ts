@@ -6,7 +6,7 @@ import { createNumberFormat } from '../numberFormat';
 import { BASE_CONFIG, HTML_LABEL_FONT_SIZE, axisLabel, chartColors, isInsideCondition, labelFontSize, titleText, type MinMaxCondition } from '../highchartsBase';
 
 /** v1 `SeriesChartOption.DEFAULT_SETTING`. */
-const SERIES_DEFAULTS = {
+export const SERIES_DEFAULTS = {
   chart: { zoomType: 'x' },
   yAxis: [
     { tickLength: 0, opposite: false, tickAmount: undefined },
