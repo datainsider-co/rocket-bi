@@ -57,8 +57,15 @@
   -webkit-line-clamp: 4;
 }
 
-.status-error__retry {
+/* Try Again and the copy button, side by side (v1 gave the copy button 8px on its left). */
+.status-error__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-top: 24px;
+}
+
+.status-error__retry {
   padding: 2px 17px;
   border: none;
   border-radius: 4px;
@@ -74,6 +81,26 @@
 
 .status-error__retry:hover {
   background: var(--accent-hover-color, #3463ff);
+}
+
+/* v1 `DiButton` with only an icon. */
+.status-error__copy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--secondary-text-color, #5f6368);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.status-error__copy:hover {
+  background: var(--hover-color, rgba(0, 0, 0, 0.06));
+  color: var(--text-color, #4f4f4f);
 }
 
 .status-empty {
