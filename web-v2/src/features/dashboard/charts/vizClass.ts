@@ -14,6 +14,9 @@ export const ChartVizClass = {
   VariablePie: 'variablepie_chart_setting',
   /** Area Range and Column Range (v1 `GenericChartOption`), told apart by `chart.type`; read from a generic response. */
   Generic: 'generic_chart_setting',
+  /** Drilldown column and bar (v1 `DrilldownChartOption`), told apart by `chart.type`; read from a drilldown response. */
+  Drilldown: 'highcharts_drilldown_chart_setting',
+  DrilldownPie: 'highcharts_drilldown_pie_chart_setting',
   Scatter: 'highcharts_scatter_chart_setting',
   Bubble: 'highcharts_bubble_chart_setting',
   Funnel: 'highcharts_funnel_chart_setting',

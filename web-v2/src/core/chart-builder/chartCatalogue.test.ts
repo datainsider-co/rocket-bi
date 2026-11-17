@@ -45,6 +45,18 @@ describe('CHART_TYPES', () => {
     expect(chartTypeInfoOf(ChartType.Funnel)?.zones).toEqual(chartTypeInfoOf(ChartType.Pie)?.zones);
   });
 
+  it('gives the drilldown charts any number of legends and one value, like v1', () => {
+    for (const chartType of [ChartType.ColumnDrilldown, ChartType.BarDrilldown, ChartType.PieDrilldown]) {
+      expect(chartTypeInfoOf(chartType)?.zones.map(zone => [zone.key, zone.title, zone.maxItems, zone.optional])).toEqual([
+        ['legends', 'Legends', undefined, false],
+        ['value', 'Values', 1, false]
+      ]);
+      expect(chartTypeInfoOf(chartType)?.extraZones).toBe(true);
+    }
+    expect(zoneOf(ChartType.ColumnDrilldown, 'legends').families).toEqual(['Group By', 'Date histogram']);
+    expect(zoneOf(ChartType.PieDrilldown, 'value').families).toEqual(['Aggregation']);
+  });
+
   it('shows the bar zones as Y-Axis then X-Axis, stored as x_axis and y_axis', () => {
     expect(chartTypeInfoOf(ChartType.Bar)?.zones.map(zone => [zone.key, zone.title])).toEqual([
       ['x_axis', 'Y-Axis'],
@@ -105,6 +117,10 @@ describe('defaultFunctionOf', () => {
     [ChartType.AreaRange, 'max', 'double', 'Aggregation', 'Maximum'],
     [ChartType.ColumnRange, 'min', 'string', 'Aggregation', 'Count all'],
     [ChartType.ColumnRange, 'max', 'int32', 'Aggregation', 'Maximum'],
+    [ChartType.ColumnDrilldown, 'legends', 'int32', 'Group By', ''],
+    [ChartType.BarDrilldown, 'legends', 'datetime', 'Date histogram', 'Year'],
+    [ChartType.PieDrilldown, 'value', 'double', 'Aggregation', 'Sum'],
+    [ChartType.PieDrilldown, 'value', 'string', 'Aggregation', 'Count all'],
     [ChartType.WordCloud, 'legend', 'datetime', 'Date histogram', 'Year'],
     [ChartType.WordCloud, 'value', 'string', 'Aggregation', 'Count all'],
     [ChartType.WindRose, 'breakdown_optional', 'string', 'Group By', ''],
@@ -183,12 +199,18 @@ describe('newFunctionData', () => {
 describe('pickerItemsOf', () => {
   it("lists v1's charts then the filter widgets, the ones v2 doesn't build disabled", () => {
     const items = pickerItemsOf(ChartKind.Chart);
-    expect(items).toHaveLength(39 + 9);
+    expect(items).toHaveLength(42 + 9);
     expect(items[0]).toEqual({ type: 'flatten_table', title: 'Table', icon: 'ic_table.svg', buildable: true });
     expect(items[1]).toEqual({ type: 'table', title: 'Collapse Table', icon: 'ic_collapse_table.svg', buildable: true });
     expect(items[2]).toEqual({ type: 'pivot_table', title: 'Pivot Table', icon: 'ic_pivot_table.svg', buildable: true });
     expect(items.find(item => item.type === 'gauge')).toMatchObject({ buildable: false });
     expect(items.find(item => item.type === 'Parliament')).toEqual({ type: 'Parliament', title: 'Parliament', icon: 'ic_parliament.svg', buildable: true });
+    expect(items.slice(19, 23).map(item => [item.type, item.title, item.icon, item.buildable])).toEqual([
+      ['column_drilldown', 'Drilldown Column', 'ic_column.svg', true],
+      ['bar_drilldown', 'Drilldown Bar', 'ic_bar.svg', true],
+      ['pie_drilldown', 'Drilldown Pie', 'ic_pie.svg', true],
+      ['scatter', 'Scatter', 'ic_scatter.svg', true]
+    ]);
     expect(items.at(-1)).toMatchObject({ type: 'multi_tree_filter', buildable: true });
     expect(items.filter(item => item.buildable)).toHaveLength(CHART_TYPES.length - 2);
   });

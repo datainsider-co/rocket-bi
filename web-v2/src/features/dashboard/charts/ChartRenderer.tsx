@@ -23,6 +23,8 @@ import { columnDecorationsOf } from './table/columnDecorations';
 import { isCollapseTableSetting } from './table/collapseTable.utils';
 import { CollapseTable } from './table/CollapseTable';
 import { PivotTable } from './table/PivotTable';
+import { DrilldownChart } from './drilldown/DrilldownChart';
+import { drilldownChartTypeOf } from './drilldown/drilldownChartOptions';
 import { buildFunnelChartOptions, type FunnelType } from './funnel/funnelChartOptions';
 import { buildParliamentChartOptions, parliamentLimitError } from './parliament/parliamentChartOptions';
 import { buildPieChartOptions } from './pie/pieChartOptions';
@@ -151,6 +153,19 @@ export function ChartRenderer({ widget, viz, response, themeColors, table, cross
       <div role="presentation" className="size-full" onClick={event => back(event.target)} onKeyDown={event => event.key === 'Enter' && back(event.target)}>
         <HighchartsChart options={chartOptions} fill onPointContextMenu={(point, position) => onPointMenu(pointValue(point), position)} />
       </div>
+    );
+  }
+  const drilldownType = drilldownChartTypeOf(viz);
+  if (drilldownType && response.kind === 'drilldown') {
+    return (
+      <DrilldownChart
+        type={drilldownType}
+        options={viz.options}
+        response={response}
+        themeColors={themeColors}
+        setting={widget.setting}
+        onPointContextMenu={(point, position) => onPointMenu(pointValue(point), position)}
+      />
     );
   }
   if (viz.className === ChartVizClass.Number && response.kind === 'series_one') {

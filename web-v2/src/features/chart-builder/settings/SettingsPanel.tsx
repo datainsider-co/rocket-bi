@@ -7,6 +7,7 @@ import { filterControlKindOf } from './filter/filterTabs.utils';
 import { dateFieldChoicesOf } from './number/comparisonTab.utils';
 import { formattingChoicesOf } from './table/formattingTabs.utils';
 import { hasCollapseTab } from './table/tableTabs.utils';
+import { DrilldownSettingsView } from './DrilldownSettingsView';
 import { FilterSettingsView } from './FilterSettingsView';
 import { NumberSettingsView } from './NumberSettingsView';
 import { ParliamentSettingsView } from './ParliamentSettingsView';
@@ -57,6 +58,8 @@ export function SettingsPanel({ response, themeColors, filterEntry }: SettingsPa
         return <ParliamentSettingsView {...tab} themeColors={themeColors} />;
       case 'wordCloud':
         return <WordCloudSettingsView {...tab} themeColors={themeColors} />;
+      case 'drilldown':
+        return <DrilldownSettingsView {...tab} themeColors={themeColors} />;
       case 'number':
         return <NumberSettingsView {...tab} dateFields={dateFields} />;
       case 'table':

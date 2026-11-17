@@ -237,6 +237,33 @@ const variablePie = () => ({
   tooltip: seriesTooltip
 });
 
+/**
+ * v1 `DrilldownChartOption.getDefaultChartOption(chartType)` and `DrilldownPieChartOption.getDefaultChartOption`, as the
+ * GitLab source builds them: the series options with a bare `legend` and a `textColor`, the same for the pie (axes
+ * included, which it never draws).
+ */
+const drilldown = (type: string) => ({
+  chart: { type },
+  legend: { enabled: false },
+  textColor: TEXT_COLOR,
+  title: title(),
+  subtitle: subtitle(),
+  affectedByFilter: true,
+  themeColor: { enabled: true },
+  background: BACKGROUND,
+  plotOptions: {
+    series: {
+      lineWidth: 2,
+      dashStyle: 'Solid',
+      marker: { enabled: false },
+      dataLabels: { enabled: false, style: { ...secondaryStyle(), color: TEXT_COLOR, textOutline: 0 } }
+    }
+  },
+  xAxis: [axis('0')],
+  yAxis: [axis('0.5'), axis('0.5', 'Dual axis title', false)],
+  tooltip: seriesTooltip
+});
+
 /** v1 `WordCloudChartOption.getDefaultChartOption`. */
 const wordCloud = () => ({
   chart: { type: 'wordcloud' },
@@ -523,6 +550,9 @@ const DEFAULTS: Readonly<Record<ChartType, Defaults>> = {
   [T.SemiPie]: { className: 'highcharts_pie_chart_setting', options: () => pie(true) },
   [T.Donut]: { className: 'donut_chart_setting', options: donut },
   [T.VariablePie]: { className: 'variablepie_chart_setting', options: variablePie },
+  [T.ColumnDrilldown]: { className: 'highcharts_drilldown_chart_setting', options: () => drilldown('column') },
+  [T.BarDrilldown]: { className: 'highcharts_drilldown_chart_setting', options: () => drilldown('bar') },
+  [T.PieDrilldown]: { className: 'highcharts_drilldown_pie_chart_setting', options: () => drilldown('pie') },
   [T.Scatter]: { className: 'highcharts_scatter_chart_setting', options: scatter },
   [T.Bubble]: { className: 'highcharts_bubble_chart_setting', options: bubble },
   [T.Funnel]: { className: 'highcharts_funnel_chart_setting', options: funnel },

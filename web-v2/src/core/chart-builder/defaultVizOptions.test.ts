@@ -80,6 +80,67 @@ describe('defaultVizOptions', () => {
     expect(defaultVizOptions(ChartType.Parliament)).toMatchObject({ class_name: 'parliament_setting', options: { max_data_point: 1000, plot_options: { item: { data_labels: { enabled: false } } } } });
   });
 
+  it.each([
+    [ChartType.ColumnDrilldown, 'highcharts_drilldown_chart_setting', 'column'],
+    [ChartType.BarDrilldown, 'highcharts_drilldown_chart_setting', 'bar'],
+    [ChartType.PieDrilldown, 'highcharts_drilldown_pie_chart_setting', 'pie']
+  ])("gives %s the options of v1's GitLab source, key for key", (chartType, className, type) => {
+    const text = 'var(--text-color)';
+    const axis = (gridLineWidth: string, title: string, visible: boolean) => ({
+      visible,
+      labels: { style: { color: text } },
+      title: { enabled: true, style: { color: text }, text: title },
+      grid_line_width: gridLineWidth,
+      grid_line_color: 'var(--grid-line-color)'
+    });
+    const secondary = {
+      font_family: 'var(--widget-secondary-font-family, Roboto)',
+      font_size: '11px',
+      font_weight: 'var(--widget-secondary-font-weight, 400)',
+      font_style: 'var(--widget-secondary-font-style, normal)'
+    };
+    expect(defaultVizOptions(chartType)).toStrictEqual({
+      class_name: className,
+      options: {
+        chart: { type },
+        legend: { enabled: false },
+        text_color: text,
+        title: {
+          align: 'center',
+          enabled: true,
+          text: 'Untitled chart',
+          style: {
+            color: text,
+            font_family: 'var(--widget-primary-font-family, Roboto)',
+            font_size: '20px',
+            font_weight: 'var(--widget-primary-font-weight, 500)',
+            font_style: 'var(--widget-primary-font-style, normal)'
+          }
+        },
+        subtitle: {
+          align: 'center',
+          enabled: true,
+          text: '',
+          style: { color: 'var(--secondary-text-color)', ...secondary, text_decoration: 'var(--widget-secondary-font-underlined, underline)' }
+        },
+        affected_by_filter: true,
+        theme_color: { enabled: true },
+        background: 'var(--chart-background-color)',
+        plot_options: {
+          series: {
+            line_width: 2,
+            dash_style: 'Solid',
+            marker: { enabled: false },
+            data_labels: { enabled: false, style: { ...secondary, color: text, text_outline: 0 } }
+          }
+        },
+        x_axis: [axis('0', '', true)],
+        y_axis: [axis('0.5', '', true), axis('0.5', 'Dual axis title', false)],
+        tooltip: { background_color: 'var(--tooltip-background-color)', style: { color: text, font_family: 'var(--widget-secondary-font-family, Roboto)' } }
+      }
+    });
+  });
+
   it('gives a fresh object each time', () => {
     const first = defaultVizOptions(ChartType.Column);
     expect(first).not.toBe(defaultVizOptions(ChartType.Column));

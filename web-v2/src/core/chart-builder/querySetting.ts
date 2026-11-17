@@ -65,6 +65,16 @@ const range: SettingBuilder = {
   build: configs => ({ columns: ['x_axis', 'min', 'max'].flatMap(key => columns(configs, key).slice(0, 1)) })
 };
 
+/**
+ * Drilldown column, bar and pie (v1 `DrilldownQuerySettingHandler`, `DrilldownPieQuerySettingHandler`, the same class):
+ * every legend, each a level under the one before, and one value.
+ */
+const drilldown: SettingBuilder = {
+  className: 'drilldown_chart_setting',
+  canBuild: configs => filled(configs, 'legends') && filled(configs, 'value'),
+  build: configs => ({ legends: columns(configs, 'legends'), value: firstColumn(configs, 'value') })
+};
+
 /** v1 `ScatterQuerySettingHandler`: two axes, each one column, and a legend when there is one. */
 const scatter: SettingBuilder = {
   className: 'scatter_chart_setting',
@@ -182,6 +192,9 @@ const BUILDERS: Readonly<Record<ChartType, SettingBuilder>> = {
   [T.SemiPie]: pie,
   [T.Donut]: pie,
   [T.VariablePie]: variablePie,
+  [T.ColumnDrilldown]: drilldown,
+  [T.BarDrilldown]: drilldown,
+  [T.PieDrilldown]: drilldown,
   [T.Scatter]: scatter,
   [T.Bubble]: bubble,
   [T.Funnel]: legendValue('funnel_chart_setting'),
