@@ -10,6 +10,7 @@ import co.datainsider.bi.domain.request.{
   CreateWidgetRequest,
   DeleteDashboardRequest,
   DeleteWidgetRequest,
+  EditMultiWidgetRequest,
   EditWidgetRequest,
   FilterRequest,
   ForceBoostRequest,
@@ -142,6 +143,8 @@ class MockDashboardService extends DashboardService {
 
   override def editWidget(request: EditWidgetRequest): Future[Boolean] = ???
 
+  override def editMultiWidgets(request: EditMultiWidgetRequest): Future[Boolean] = ???
+
   override def deleteWidget(request: DeleteWidgetRequest): Future[Boolean] = ???
 
   override def resizeWidgets(request: ResizeWidgetsRequest): Future[Boolean] = ???
@@ -158,5 +161,6 @@ class MockDashboardService extends DashboardService {
     Future.True
 
   override def cleanup(orgId: DashboardId): Future[Boolean] = Future.True
-  override def updateDashboard(orgId: DashboardId, dashboardId: DashboardId, newDashboard: Dashboard): Future[Boolean] = ???
+  override def updateDashboard(orgId: DashboardId, dashboardId: DashboardId, newDashboard: Dashboard): Future[Boolean] =
+    ???
 }

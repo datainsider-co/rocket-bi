@@ -102,6 +102,12 @@ case class EditWidgetRequest(
     @Inject request: Request = null
 ) extends LoggedInRequest
 
+case class EditMultiWidgetRequest(
+    @RouteParam dashboardId: DashboardId,
+    widgets: Array[Widget],
+    @Inject request: Request = null
+) extends LoggedInRequest
+
 case class ResizeWidgetsRequest(
     @RouteParam dashboardId: DashboardId,
     positions: Option[Map[WidgetId, Position]],

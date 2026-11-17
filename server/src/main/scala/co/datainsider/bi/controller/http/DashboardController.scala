@@ -227,6 +227,29 @@ class DashboardController @Inject() (
       }
     }
 
+  filter[ShareTokenParser]
+    .filter(
+      OrFilter(
+        dashboardFilter.requireDirectoryOwner(dashboardParamName = "dashboard_id"),
+        dashboardFilter.requireUserPermission(action = "edit", dashboardParamName = "dashboard_id"),
+        dashboardFilter.requireTokenPermission(action = "edit", dashboardParamName = "dashboard_id")
+      )
+    )
+    .put(s"/dashboards/:dashboard_id/widgets/edit") { request: EditMultiWidgetRequest =>
+      Profiler(s"/dashboards/:dashboard_id/widgets/edit")
+      UserActivityTracker(
+        request = request.request,
+        actionName = request.getClass.getSimpleName,
+        actionType = ActionType.Update,
+        resourceType = ResourceType.Widget,
+        resourceId = request.widgets.map(_.id).mkString("Array(", ", ", ")"),
+        description =
+          s"edit widgets ${request.widgets.map(_.name.mkString("Array(", ", ", ")")).mkString("Array(", ", ", ")")} in dashboard ${request.dashboardId}"
+      ) {
+        dashboardService.editMultiWidgets(request).map(toResponse)
+      }
+    }
+
   filter(
     OrFilter(
       dashboardFilter.requireDirectoryOwner(dashboardParamName = "dashboard_id"),
