@@ -820,6 +820,80 @@ Funnel, Pyramid, Variable Pie và Parliament (họ pie, chọn làm trước tro
 - **Đã kiểm trên app thật** (Playwright, backend local): dashboard tạm có cả 4 loại vẽ đúng, Parliament vượt giới hạn
   hiện thông báo, builder mở từng chart với preview và tab Settings, đổi Layout sang Circle thì preview vẽ lại.
 
+## Quyết định ở CB7g (2026-11-17)
+
+Drilldown Column, Drilldown Bar và Drilldown Pie (v1 `ChartType.ColumnDrillDown`, `BarDrillDown`, `PieDrillDown`). Spec
+là bản GitLab của v1 (`rocket-bi-web`, nhánh `dev`, commit `baf21e068`), mới hơn `../web/` ở đúng phần này: `../web/`
+còn comment ba loại trong picker và default options của chúng rỗng.
+
+- **Builder** (v1 `TREE_MAP_CONFIGS`, ba loại dùng chung):
+  - Zone Legends (`legends`, không giới hạn số item, Group By / Date histogram) và Values (`value`, một item,
+    Aggregation), cùng Sorting và Filters. Mỗi legend là một level nằm dưới legend đứng trước.
+  - Query setting `drilldown_chart_setting` gồm `legends` (theo thứ tự) và `value`, chung cho cả ba loại (v1
+    `DrilldownQuerySettingHandler`, `DrilldownPieQuerySettingHandler`). Cần cả hai zone mới build.
+  - `ChartType`: `column_drilldown`, `bar_drilldown`, `pie_drilldown`. Trong picker đứng sau Donut, icon `ic_column.svg`,
+    `ic_bar.svg`, `ic_pie.svg` như GitLab.
+  - Viz options mặc định theo source GitLab (`DrilldownChartOption.getDefaultChartOption(chartType)`,
+    `DrilldownPieChartOption.getDefaultChartOption`): class `highcharts_drilldown_chart_setting` với `chart.type` là
+    `column` / `bar`, và `highcharts_drilldown_pie_chart_setting` với `pie`. `legend` chỉ có `enabled: false`, có
+    `text_color`, trục X / Y như series (pie cũng lưu, không dùng). Test so từng key (`toStrictEqual`). Chưa so được
+    với một bản v1 đang chạy: v1 trên docker build từ `../web/`, không có ba loại này.
+  - Kích thước mặc định khi thêm chart: `DefaultSize`. Hint của ba loại đã có sẵn trong `chartHints.json`.
+- **Response:** `drilldown_response` gồm `name` (tên legend đầu), `series` (`name`, `y`, `drilldown`) và `drilldown`
+  (`id`, `name`, `data`). Đã kiểm trên backend local; fixture ở `queryResponses.fixture.json`
+  (`drilldown_chart_setting`: 3 legend, cắt còn 4 level). Khác type của v1: `id` là chuỗi (các giá trị nối bằng dấu
+  chấm, v1 khai là số), và điểm của legend cuối vẫn mang `drilldown` dù không có level nào bên dưới.
+- **Renderer** (`features/dashboard/charts/drilldown`):
+  - Level đang xem là state của React (`useDrilldownLevels`), không dùng module drilldown của Highcharts.
+    `HighchartsChart` gọi `chart.update` ở mỗi lần render (mở menu của điểm, đổi kích thước); khi đó chart của module
+    quay về level đầu trong khi vẫn tự coi là đang drill (đã thử trong jsdom). Options là hàm thuần của response và
+    level (`buildDrilldownChartOptions`), nên vẽ lại bao nhiêu lần cũng như nhau.
+  - Click vào điểm có level bên dưới thì xuống level đó. Đường dẫn hiện ở subtitle như drill down của dashboard
+    (`withDrillPath`): các giá trị đã click, rồi tên legend đang xem; click một giá trị để quay lại trước nó. Response
+    mới không còn level đang xem thì chart về level sâu nhất còn có (`validLevelSteps`).
+  - Một series, mỗi điểm một màu. Tên series là tên value ở level đầu (v1 sau commit trên; pie của v1 để trống), và
+    tên level của server ở các level dưới. Tooltip ghi tên series, rồi điểm và giá trị.
+  - Chuột phải vào điểm mở menu như mọi chart Highcharts.
+- **Tab Settings** (v1 `DrilldownSetting`): Title & Subtitle, Data Color, Data Label, Background, Tooltip, Other.
+  - Data Label chỉ có On, font, màu và cỡ chữ (v1 truyền `widget-type="drilldown"`).
+  - Other có display unit, precision, decimal point, thousand separator và external filter. Không có drilldown, zoom,
+    cross filter: ba loại không nằm trong `VisualHeaderConfigs`.
+  - Bật / tắt và màu của Data Label được ghi thêm dưới `plot_options.series.levels[0].data_labels` như v1
+    (`withLevelLabels`).
+- **Khác v1:**
+  - `DrilldownSetting.vue` có trong GitLab nhưng không nằm trong map `components` của `ChartSettingModal`, nên v1 chưa
+    mở được panel này cho ba loại. v2 dùng nó.
+  - `levels[0]`: Highcharts chỉ đọc `levels` cho tree map, sunburst, sankey (v1 copy từ `TreeMapSetting`), nên key này
+    không có tác dụng với column / bar / pie. v2 vẫn ghi để options giống v1, và ghi cả khi Revert (v1 bỏ sót, hai nơi
+    lệch nhau).
+  - Số trong tooltip, data label và trục giá trị theo display unit, precision và dấu phân cách của tab Other. v1 không
+    đọc các key này (nó đọc `metric_numbers`, không tab nào ghi) và hiện số thô.
+  - Data label của pie: tab ghi dưới `series`, nhưng `ChartOption.CONFIG` của v1 tắt `plot_options.pie.data_labels`, nên
+    v1 không bao giờ hiện. v2 bật theo `series`, nội dung là tên và giá trị.
+  - Điểm không có level bên dưới thì không click được (con trỏ thường). v1 đưa nguyên `drilldown` của server cho
+    Highcharts, nên điểm ở level cuối trông như click được mà không làm gì.
+  - Bỏ `threshold: null` của `DrilldownChartOption.DEFAULT_SETTING`: với nó trục giá trị không bắt đầu từ 0, hai cột
+    lệch nhau 1% trông gấp nhiều lần. Cột và thanh bắt đầu từ 0 như các chart khác của v2.
+  - Pie: click là drill, không kéo lát ra (`allowPointSelect`).
+  - Không có hiệu ứng zoom vào cột và breadcrumb của Highcharts. Nhãn trục của điểm drill được không gạch chân và
+    không click được (v1 `activeAxisLabelStyle`).
+- **Sửa kèm** (`charts/drillPath.ts`): Highcharts 13 bỏ khỏi HTML của label những attribute không có trong
+  `AST.allowedAttributes`, trong đó có `data-drill-index`. Vì vậy các giá trị trong đường dẫn không mang số bước, click
+  vào không quay lại được; đường dẫn của drill down dashboard (M4a) dùng chung hàm này nên cũng bị. Đã thêm attribute
+  vào danh sách, test vẽ thật bằng Highcharts.
+- **Nợ backend:**
+  - Có sort và từ 3 legend trở lên thì các level ở giữa (không phải level đầu và cuối) bị lặp điểm (cùng tên, giá trị,
+    `drilldown`), số lần không đều, và thứ tự không theo sort. v2 bỏ điểm lặp theo `drilldown` (`drilldownLevelOf`),
+    không sửa thứ tự. v1 vẽ cả các điểm lặp, pie vì thế sai tỉ lệ.
+  - Setting không có legend thì server trả 500; builder không gửi setting như vậy.
+- **Chưa làm:** drill through từ giá trị được click. Setting này không có một dimension duy nhất (`drillColumnOf`), nên
+  mục Drill through trong menu chỉ mang filter của dashboard. Drill down và đổi date function của dashboard không áp
+  dụng cho setting này, như v1.
+- **Đã kiểm trên app thật** (Chromium headless qua Playwright, bản build, backend local): dashboard tạm có cả 3 loại vẽ
+  đúng; drill 2 level rồi quay lại bằng đường dẫn; level giữ nguyên khi mở menu của điểm và khi đổi kích thước; builder
+  mở chart đã lưu; picker tạo Drilldown Pie mới bằng "click here", preview drill được, bật Data Label rồi Add; widget
+  lưu trên server đúng setting và options. Chưa kiểm: mở chart do v2 tạo bằng builder của v1 GitLab (không có bản chạy).
+
 ## Các bước
 
 | Bước | Phạm vi | Trạng thái |
@@ -831,7 +905,7 @@ Funnel, Pyramid, Variable Pie và Parliament (họ pie, chọn làm trước tro
 | CB4 | **Config panel.** Zone theo loại chart (luật của `shared/field-dnd`). Menu của item (function family và type, sorting, display name, top N, display as column). Zone Sorting. Zone Filter có nhóm AND/OR và trình sửa condition (giá trị cột lấy từ server, chế độ Manual Input hoặc Chart Control). Display as column để lại CB7 | Xong |
 | CB5 | **Ghép lại.** `ChartBuilderModal` (Cancel / Add / Update, tab Builder và Settings), picker loại chart, preview (`ChartRenderer` / `FilterRenderer`). Lưu: tạo mới đặt ở -1/-1 như M6, cập nhật, cache qua `useDashboardEditor`. Hỏi xác nhận khi rời. Truyền `ChartBuilderBridge` cho route dashboard. Inner filter thêm / sửa / xoá trong menu của chart. Chọn field bằng menu bảng / cột ("click here", click tên để đổi field). So với v1 bằng screenshot Playwright | Xong |
 | CB6 | **Tab Settings**, ghi vào `setting.options` qua `vizOptions`. (a) Các tab chung (Title, Background, Tooltip, Visual header, Color) và series (General, Display, Legend, trục X / Y, dual axis, Data label). (b) Pie, number, table. (c) Filter widget và giá trị mặc định của chúng | Xong. Tab style của table và tab Comparison của Number làm ở CB7a / CB7b |
-| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Chia theo thứ tự của `MIGRATION.md` (chọn 2026-10-28): **CB7a** Number: comparison, trend line (tab Comparison), dropdown date range cho người xem, cột ngày nested, xong. **CB7b** Tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer, Collapse Table, Pivot Table: CB7b1 (style), CB7b2 (field và conditional formatting), CB7b3 (Collapse Table), CB7b4 (Pivot Table) xong. **CB7c** Stacked Column / Bar, Circular Bar, Lollipop, xong. **CB7d** Area Range, Column Range (CB7d1, xong 2026-11-12: generic setting gồm X-Axis, Min Value, Max Value; renderer `charts/range`; không có tab Settings như v1), Scatter, Bubble (CB7d2, xong 2026-11-12: `scatter_chart_setting` / `bubble_chart_setting`, response `series_two` giữ nguyên điểm `[x, y(, size)]`; renderer `charts/point`; query `from 0` với `size` = Maximum data point (`pagingOf`); Legend của Scatter đổi giữa None và group thì hai trục đổi theo (`convertScatterAxes`), convertor của Bubble ở v1 không bao giờ chạy nên bỏ; tab Settings: Title, General, Legend, X / Y Axis, Data Color, Background, Tooltip, Other. Server trên MySQL trả 400 "need 3 numeric columns" khi Bubble dùng Sum / Average, là hàm mặc định cho cột số; Maximum, Count và None chạy). **CB7e** Funnel, Pyramid, Variable Pie, Parliament (CB7e1, xong), Word Cloud (CB7e2, xong 2026-11-13: `word_cloud_chart_setting` gồm Legend và Value, response `word_cloud_response`; renderer `charts/word-cloud`, màu chữ theo Data Color, v1 đặt nhầm vào `chart.colors` nên tab đó không có tác dụng; tab Settings: Title, Data Color, Background, Tooltip, Other. Chưa có drilldown và cross filter như v1. Server trên MySQL trả 400 khi Value là Sum / Average, như Bubble), Tree map, Heat map, Gauges, Bullet. **CB7f** Wind rose (CB7f1, xong 2026-11-13: dùng lại setting, zone và renderer của stacked, options `wind_rose_setting` với `chart.polar`; tab Settings như stacked nhưng không có Display, trục X / Y không có title, trục Y không có min / max, như `WindRoseSetting` của v1), Pareto, Bell curve, Histogram, Spider web, Sankey, Line stock. Map có thiết kế riêng | Đang làm: xong CB7a, CB7b, CB7c, CB7d, CB7e1, CB7e2, CB7f1 |
+| CB7 | **Các loại chart khác.** Mỗi loại gồm renderer, builder handler và settings, làm cùng các loại chart của Phase 3. Chia theo thứ tự của `MIGRATION.md` (chọn 2026-10-28): **CB7a** Number: comparison, trend line (tab Comparison), dropdown date range cho người xem, cột ngày nested, xong. **CB7b** Tab style của table (Style, Grid, Header, Values, Field formatting, Conditional formatting, Tooltip) cùng renderer, Collapse Table, Pivot Table: CB7b1 (style), CB7b2 (field và conditional formatting), CB7b3 (Collapse Table), CB7b4 (Pivot Table) xong. **CB7c** Stacked Column / Bar, Circular Bar, Lollipop, xong. **CB7d** Area Range, Column Range (CB7d1, xong 2026-11-12: generic setting gồm X-Axis, Min Value, Max Value; renderer `charts/range`; không có tab Settings như v1), Scatter, Bubble (CB7d2, xong 2026-11-12: `scatter_chart_setting` / `bubble_chart_setting`, response `series_two` giữ nguyên điểm `[x, y(, size)]`; renderer `charts/point`; query `from 0` với `size` = Maximum data point (`pagingOf`); Legend của Scatter đổi giữa None và group thì hai trục đổi theo (`convertScatterAxes`), convertor của Bubble ở v1 không bao giờ chạy nên bỏ; tab Settings: Title, General, Legend, X / Y Axis, Data Color, Background, Tooltip, Other. Server trên MySQL trả 400 "need 3 numeric columns" khi Bubble dùng Sum / Average, là hàm mặc định cho cột số; Maximum, Count và None chạy). **CB7e** Funnel, Pyramid, Variable Pie, Parliament (CB7e1, xong), Word Cloud (CB7e2, xong 2026-11-13: `word_cloud_chart_setting` gồm Legend và Value, response `word_cloud_response`; renderer `charts/word-cloud`, màu chữ theo Data Color, v1 đặt nhầm vào `chart.colors` nên tab đó không có tác dụng; tab Settings: Title, Data Color, Background, Tooltip, Other. Chưa có drilldown và cross filter như v1. Server trên MySQL trả 400 khi Value là Sum / Average, như Bubble), Tree map, Heat map, Gauges, Bullet. **CB7f** Wind rose (CB7f1, xong 2026-11-13: dùng lại setting, zone và renderer của stacked, options `wind_rose_setting` với `chart.polar`; tab Settings như stacked nhưng không có Display, trục X / Y không có title, trục Y không có min / max, như `WindRoseSetting` của v1), Pareto, Bell curve, Histogram, Spider web, Sankey, Line stock. **CB7g** Drilldown Column / Bar / Pie (xong 2026-11-17: `drilldown_chart_setting` gồm Legends (nhiều legend, mỗi legend một level) và Values, response `drilldown_response`; renderer `charts/drilldown`, level đang xem là state của React thay cho module drilldown của Highcharts, đường dẫn quay lại ở subtitle; default options theo source GitLab; tab Settings: Title, Data Color, Data Label, Background, Tooltip, Other. Server lặp điểm ở các level giữa khi có sort và từ 3 legend, v2 bỏ điểm lặp). Map có thiết kế riêng | Đang làm: xong CB7a, CB7b, CB7c, CB7d, CB7e1, CB7e2, CB7f1, CB7g |
 | CB8 | **Action trên cây field.** Calculated field và measure (Monaco formula editor, gợi ý hàm theo connector), Update Table By Query. Delete table thuộc Data Management, như v1 | Xong |
 
 ## Ghi chú về field drag and drop

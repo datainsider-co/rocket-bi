@@ -65,7 +65,7 @@ Approach: port `di-core` **per feature**, into `web-v2/src/core/<module>/`, only
 ## Current status (2026-10-27)
 
 - **Done**: most of the foundation (left: feature flags, parts of the app header), login and forgot password (left:
-  Google login, Register), the directory listings (left: Duplicate, Copy), the first-run data source setup,
+  Google login, Register), the directory listings, the first-run data source setup,
   and the dashboard through M7: every filter widget, header filters, drilldown, drill through, downloads, permissions,
   password, full screen and TV mode, auto refresh, View As, embedded route, edit mode without ChartBuilder, Share, Relationship (React Flow), and
   header, settings and widgets that look like v1 (checked with Playwright screenshots against v1).
@@ -118,7 +118,7 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
-| My Data, Shared with me, Recent, Starred, Trash | `screens/directory` (routes `/mydata`, `/shared`, `/recent`, `/starred`, `/trash`) | 12 | In progress. Done (`features/directory`, `core/directory`, `core/dashboard`): the five listings at v1's paths (`/` redirects to `/mydata`), folders by `<slug>-<id>`, breadcrumbs, name sort, refresh; New folder/dashboard (in the open My Data folder, otherwise the root; v1 sent the section's virtual id, which the server rejects); rename (dashboards and queries through `dashboards/{id}/rename`), move (folder picker), star, move to trash; restore and delete forever in Trash. Left: Duplicate and Copy (the dashboard model and the password check now exist, in `core/dashboard` and `features/dashboard/access`), share-token (`?token=`) access, which v1 allowed without login (see Phase 3 M5b). Share: done (M7b), row share button (`row-actions/ShareButton`, hidden below sm) |
+| My Data, Shared with me, Recent, Starred, Trash | `screens/directory` (routes `/mydata`, `/shared`, `/recent`, `/starred`, `/trash`) | 12 | In progress. Done (`features/directory`, `core/directory`, `core/dashboard`): the five listings at v1's paths (`/` redirects to `/mydata`), folders by `<slug>-<id>`, breadcrumbs, name sort, refresh; New folder/dashboard (in the open My Data folder, otherwise the root; v1 sent the section's virtual id, which the server rejects); rename (dashboards and queries through `dashboards/{id}/rename`), move (folder picker), star, move to trash; restore and delete forever in Trash. Duplicate and Copy of dashboards and saved queries (M8). Left: share-token (`?token=`) access, which v1 allowed without login (see Phase 3 M5b). Share: done (M7b), row share button (`row-actions/ShareButton`, hidden below sm) |
 | Share and permission dialogs | `src/shared/components/SharePermissionManager.vue`, `di-core/share` | – | Done (M7b): `core/share` (`ShareService`, levels), `features/share` (`ShareModal`: people and groups, Get link, password protection, embed code), used by the directory rows and the dashboard's Options (`features/dashboard/share/useDashboardShare`). Password through `DirectoryService.setPassword` (the whole directory is put back with `data.config` set or dropped). Left: databases and ETL (v1 `ShareDatabaseHandler`, `DataCookShareHandler`) come with their features |
 
 ### Phase 3: Dashboard (view)
@@ -127,7 +127,7 @@ Size is the number of source files in v1 (`.vue`/`.ts`/`.tsx`), a rough measure 
 |---|---|---|---|
 | Building blocks: widget grid, field drag and drop | `shared/components/gridstack`, `shared/components/DropArea.vue`, `DropItem.vue`, `chart-builder/config-builder/*Draggable` | – | Done, not yet used by a page (see notes below) |
 | Dashboard viewer | `screens/dashboard-detail` (route `/dashboard/:name`) | 129* | Done (plan below): M0 to M6; share token blocked by the server |
-| Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI (with comparison and trend line, CB7a), flat table (styled by its options and per-column formatting, CB7b1, CB7b2) with server sort (M2, M4a), collapse table (rows expanding into their groups, CB7b3), pivot table (columns across, rows expanding into the next row group, total row, CB7b4), stacked column / bar and circular bar (series in the server's stacks or the ones picked in settings, CB7c), lollipop (CB7c), funnel, pyramid, variable pie and parliament (CB7e1), area range and column range (CB7d1, from a generic response; both name their categories and show "low - high" in the tooltip, which v1 did for columns only), scatter and bubble (CB7d2; **blocked by the server** on MySQL: a bubble whose values are Sum or Average, the default for numbers, gets 400 "need 3 numeric columns"), wind rose (CB7f1, the stacked chart on a polar pane), word cloud (CB7e2; drilldown and cross filter on it are left, and a Sum or Average value hits the same server error as the bubble's); drilldown, date function and export work on them (M4a). Next: tree map, heat map, gauges, bullet, the rest |
+| Chart rendering | `src/shared/components/charts`; query → series response → Highcharts options | – | In progress: series (column/bar/line/area), pie, KPI (with comparison and trend line, CB7a), flat table (styled by its options and per-column formatting, CB7b1, CB7b2) with server sort (M2, M4a), collapse table (rows expanding into their groups, CB7b3), pivot table (columns across, rows expanding into the next row group, total row, CB7b4), stacked column / bar and circular bar (series in the server's stacks or the ones picked in settings, CB7c), lollipop (CB7c), funnel, pyramid, variable pie and parliament (CB7e1), area range and column range (CB7d1, from a generic response; both name their categories and show "low - high" in the tooltip, which v1 did for columns only), scatter and bubble (CB7d2; **blocked by the server** on MySQL: a bubble whose values are Sum or Average, the default for numbers, gets 400 "need 3 numeric columns"), wind rose (CB7f1, the stacked chart on a polar pane), word cloud (CB7e2; drilldown and cross filter on it are left, and a Sum or Average value hits the same server error as the bubble's), drilldown column / bar / pie (CB7g, from a drilldown response: a click on a point shows the next legend's values under it, the path back in the subtitle; the level is React state, not Highcharts' drilldown module; the dashboard's own drill down and date function don't apply to them); drilldown, date function and export work on them (M4a). Next: tree map, heat map, gauges, bullet, the rest |
 | Filters (tab, dropdown, slicer, date, input, tree) | `src/shared/components/filters`, `widget-container/filters` | – | Done (M3a, M3b): every filter widget, main date filter, filter panel, inner filter, tab control, query parameters, pie and series cross filter. Title style, choice colours and v1's sizes done in M7e. Left: the filter panel's vertical header, the date select's min/max dates as calendar bounds |
 | Drilldown and drill-through | `stores/widget/DrilldownDataStore.ts`, `components/drill-through` | – | Done (M4a, M4b). Left: maps |
 | Embedded dashboard | route `/embedded/dashboard/:name` | – | Done (M5b) with the session cookie; with a share token once the server allows it |
@@ -205,6 +205,7 @@ Decisions (M3b):
 | M7c | Relationship (`features/dashboard/relationship`, `core/relationship`) with React Flow (`@xyflow/react` 12, its own lazy chunk loaded on first open): `GET/POST relationships/{dashboard_id}`, a node per view (sql views under `adhoc_analysis`, columns from `databases/adhoc/tables`), collapsed nodes show id-like and joined columns, drag a column onto another table's column to join, click a line to remove it, positions in `extra_data.table_positions` under v1's keys, zoom / Fit content / Full screen, Discard Changes and Save in edit mode. Options → Relationship in every mode; edits only in edit mode | Done |
 | M7d | Settings split back into v1's entry points (`edit/settings`): Options → Settings (edit mode) opens Themes (v1's thumbnails, Reset to default, Overlap mode); a gear at the canvas corner in edit mode opens Edit Dashboard (Size / Background / Color), Edit Widgets (Primary Text / Secondary Text / Padding and Border / Background color), Themes and Auto Refresh Data (submenu, saved at once). Replaces M6c's single dialog; saving is unchanged (whole stored setting, unknown keys kept). Every key v1 writes was already mapped in `DashboardSetting` | Done |
 | M7e | Widgets and canvas like v1 (measured within 1px on both test dashboards): v1's grid gaps (20px, 16px in tabs and panels), chart background default `#FAFAFB`, widget menu on hover in view mode and v1's gear in edit mode (`widgets/menu`), tab widget with boxed tab headers and per-tab menus (`TabNavView`, no antd Tabs), filter panel without a card, KPI without a theme in v1's plain layout, flat table look (48px rows, sticky header, footer, v1 number format), HTML x-axis labels, resize handles on hover; filter widgets' title style, search box, tab filter boxes and choice colours, slicer, input, date select (opening the main date calendar) and tree filter sizes | Done |
+| M8 | Dashboard features of the GitLab copy of v1 (`rocket-bi-web`, branch `dev`, which is ahead of `web/`): the dashboard's own padding (`setting.padding`, edited in Edit Dashboard → Size), "Disable Responsive" for a width in pixels (`setting.enable_freeze`: the phone layout is skipped, grids in tabs and panels included), Duplicate and Copy in the directory listing with the copy's tab widgets pointed at the copied widgets (`core/dashboard/dashboardCopy`, `features/directory/listing/row-actions/useCopyActions`), and a button on the error state that copies the message (`shared/status/ErrorState`) | Done |
 
 Order: M7a, M7b and M7c in parallel (separate folders; M7b and M7c are wired into the header after M7a), then M7d and
 M7e (both touch the header and the canvas). Each step is checked against v1 with Playwright screenshots of the same
@@ -355,6 +356,32 @@ Decisions (M7e):
   Revenue by region), table per-field formatting, conditional colours and totals; a dashboard saved with a dark theme
   was not checked end to end.
 
+Decisions (M8, 2026-11-17, checked in headless Chromium against the local backend):
+
+- **Source**: the GitLab copy of v1 (`rocket-bi-web`, `dev` at `381ba9337`), not `web/`. Its AI features (chatbot,
+  forecast, AI chart / AI builder) and the template dashboards, which it has commented out, are not ported.
+- **Padding**: a setting without `padding` keeps v1's `25px 30px` (`22px 20px` on a phone) through the stylesheet;
+  a stored one applies on every side at every width (`--dashboard-padding`). GitLab falls back to 25px on every side
+  and creates dashboards with 0, a transparent background and a 4px radius; v2 still creates dashboards without a
+  setting, so nothing saved before looks different. GitLab has no input for the padding; v2 adds one (empty = unset).
+- **Disable Responsive** (`DashboardSetting.isFrozen`): only with a width in pixels, like GitLab. The content keeps
+  its width and the page body scrolls sideways; every grid keeps its columns (GitLab froze the top grid only, so tabs
+  and filter panels still stacked). The page is still a phone otherwise: no edit mode, no header filters.
+- **Duplicate and Copy**: `dashboards/create` with the source as the server sent it. The server gives the widgets new
+  ids in **no particular order** and moves the positions, but leaves `tab_items[].widget_ids` on the source's ids, so
+  the copy's tabs were empty in v1. Each widget is sent with its id in `extra_data.origin` (GitLab's marker, stored as
+  sent); the tabs are then rewritten. GitLab saves them with `PUT dashboards/{id}/widgets/edit`, which replaces the
+  dashboard's whole widget list and swallowed its failure. That endpoint is in `server/` only since 2026-11-17
+  (GitLab server commit `9438f521`), so not in the published image; v2 uses `widgets/{id}/edit` per tab, which every
+  server has, one at a time, because the server rewrites the whole widget list on each edit. A tab that can't be saved is reported; the copy
+  stays. Duplicate goes into the folder the listing creates in, Copy into a picked folder, which then opens. A source
+  with a password asks for it first, of everyone but the owner. Folders can't be copied (v1).
+- **Not ported**: GitLab's 20% white hover on the widget menu button (invisible on a light card) and its
+  `setOwner` move (a Vuex detail; v2 reads the owner from the dashboard query). Other references between widgets
+  (chart controls, relationships) are copied as they are, as in v1 and GitLab.
+- **Local stack**: after a MySQL restart the server can hand a new directory the id of an item in Trash; moving that
+  directory to Trash then fails with 500 (`Duplicate entry ... for key 'PRIMARY'`). A server issue, seen while testing.
+
 Fixes after an audit of tabs and filter panels (2026-11-12, checked in headless Chromium against the local backend):
 
 - **Resize handles above the card** (`grid/DashboardGrid.css`): a card's body (`z-index` 2) covered the handles of
@@ -381,6 +408,7 @@ Column, ColumnRange, ColumnDrillDown, BarDrillDown, PieDrillDown, Funnel, Gauges
 Spline, LineInverted, Pareto, Pie, SemiPie, Pyramid, Scatter, Table, Kpi, WordCloud, StackedColumn, StackedBar,
 StackedLine, Map, PivotTable, Parliament, SpiderWeb, Sankey, FlattenTable, FlattenPivotTable. The filter widgets
 (TabFilter, SingleChoice, MultiChoice, DropDown, SlicerFilter, DateSelectFilter, InputFilter, TreeFilter) are done.
+ColumnDrillDown, BarDrillDown and PieDrillDown are done too (CB7g).
 
 Suggested order: the common series charts (Column/Bar/Line/Area/Pie) and Kpi, then Table/Pivot, then the rest.
 
@@ -389,7 +417,7 @@ Suggested order: the common series charts (Column/Bar/Line/Area/Pie) and Kpi, th
 | Feature | v1 location | Size | Status |
 |---|---|---|---|
 | Dashboard edit mode (layout, add/remove/resize widgets, settings) | `screens/dashboard-detail` | (see above) | Done (M6); adding or configuring a chart and its inner filter with ChartBuilder (CB5) |
-| Chart builder | `screens/chart-builder`, `screens/dashboard-detail/components/data-builder-modal` | 53 | In progress: plan, decisions and steps (CB0 to CB8) in [`CHART_BUILDER.md`](CHART_BUILDER.md); CB0 to CB6, CB7a, CB7b1 to CB7b4, CB7c, CB7e1 (Funnel, Pyramid, Variable Pie, Parliament) and CB8 done |
+| Chart builder | `screens/chart-builder`, `screens/dashboard-detail/components/data-builder-modal` | 53 | In progress: plan, decisions and steps (CB0 to CB8) in [`CHART_BUILDER.md`](CHART_BUILDER.md); CB0 to CB6, CB7a, CB7b1 to CB7b4, CB7c, CB7e1 (Funnel, Pyramid, Variable Pie, Parliament), CB7g (Drilldown Column, Bar, Pie) and CB8 done |
 | Query/Viz setting resolvers and handlers | `src/shared/resolver`, `src/shared/module/ChartBuilderModule.ts`, `web/docs/CREATE_CHART_FLOW.md` | – | Done for the chart types in scope (CB1, `core/chart-builder`) |
 | Chart settings (Settings tab) | `src/shared/settings` | 140 | Done with ChartBuilder (CB6) for the chart types it builds; the table's style tabs, field and conditional formatting done (CB7b1, CB7b2), the collapse table's (CB7b3) and the pivot table's, with its Total tab (CB7b4); the stacked charts' (series names, Stack tab) and the lollipop's (series tabs) (CB7c) |
 
