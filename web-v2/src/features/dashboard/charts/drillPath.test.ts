@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import Highcharts from 'highcharts';
 import { drillIndexOf, drillPathHtml, withDrillPath } from './drillPath';
 
 const steps = [
@@ -31,6 +32,19 @@ describe('withDrillPath', () => {
     expect(subtitle?.useHTML).toBe(true);
     expect(subtitle?.style).toEqual({ color: 'red' });
     expect(subtitle?.text).toMatch(/^<div class="drilldown-subtitle"><div>Sub<\/div><div class="drilldown-path">/);
+  });
+});
+
+describe('the path inside a chart', () => {
+  it('keeps the step of each value once Highcharts has drawn the subtitle, so a click on one is found', () => {
+    const container = document.createElement('div');
+    document.body.append(container);
+    const chart = Highcharts.chart(container, withDrillPath({ chart: { width: 400, height: 300 }, subtitle: { text: 'Sub' }, series: [{ type: 'line', data: [1, 2] }] }, steps));
+    const values = [...container.querySelectorAll('.drilldown-path__value')];
+    expect(values.map(value => value.textContent)).toEqual(['Asia', '<b>Laos</b>']);
+    expect(values.map(drillIndexOf)).toEqual([0, 1]);
+    chart.destroy();
+    container.remove();
   });
 });
 

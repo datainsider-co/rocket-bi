@@ -1,10 +1,14 @@
-import type Highcharts from 'highcharts';
+import Highcharts from 'highcharts';
 import type { DrilldownStep } from '@/core/query/drilldown';
 
-/** Marks a clickable value of the path; the chart's wrapper reads it on click (`drillIndexOf`). */
 type PathStep = Pick<DrilldownStep, 'value' | 'name'>;
 
+/** Marks a clickable value of the path; the chart's wrapper reads it on click (`drillIndexOf`). */
 const INDEX_ATTRIBUTE = 'data-drill-index';
+
+// Highcharts drops the attributes it does not list from a label's HTML (`AST`), this one included: the values were
+// drawn without their step, and a click on them went nowhere.
+if (!Highcharts.AST.allowedAttributes.includes(INDEX_ATTRIBUTE)) Highcharts.AST.allowedAttributes.push(INDEX_ATTRIBUTE);
 
 const ARROW = '<img class="drilldown-path__arrow" src="/icons/ic-16-arrow-right.svg" alt="">';
 
