@@ -1,7 +1,8 @@
 import { Alert, Button } from 'antd';
 import { ShareModal } from '@/features/share/ShareModal';
 import { directoryShare } from '@/features/share/share.utils';
-import { DirectorySection, menuActions } from '../directory.utils';
+import { PasswordGateView } from '@/features/dashboard/access/PasswordGateView';
+import { createParentId, DirectorySection, menuActions } from '../directory.utils';
 import { MoveDirectoryModal } from '../dialogs/MoveDirectoryModal';
 import { NameModal } from '../dialogs/NameModal';
 import { ListingHeader } from './header/ListingHeader';
@@ -19,7 +20,7 @@ const RENAME_COPY = { title: 'Rename', label: 'Name', placeholder: 'Type new nam
 export function DirectoryListingPage() {
   const listing = useDirectoryListing();
   const section = listing.section.key;
-  const rows = useRowActions(section);
+  const rows = useRowActions(section, createParentId(section, listing.folderId));
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -72,6 +73,10 @@ export function DirectoryListingPage() {
       {rows.move.target && (
         <MoveDirectoryModal directory={rows.move.target} onSelect={rows.move.submit} onCancel={rows.move.cancel} />
       )}
+      {rows.copy.target && (
+        <MoveDirectoryModal directory={rows.copy.target} verb="Copy" onSelect={rows.copy.submit} onCancel={rows.copy.cancel} />
+      )}
+      {rows.password.target && <PasswordGateView onUnlock={rows.password.unlock} onCancel={rows.password.cancel} />}
     </div>
   );
 }

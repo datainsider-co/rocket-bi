@@ -14,7 +14,8 @@ export function useDirectoryListing() {
   const { pathname } = useLocation();
   const { name } = useParams();
   const section = getSection(sectionFromPath(pathname));
-  const directoryId = parseIdParam(name) ?? section.rootId;
+  const folderId = parseIdParam(name);
+  const directoryId = folderId ?? section.rootId;
   const [sort, setSort] = useState<DirectorySort>(DEFAULT_SORT);
 
   const listing = useQuery(listingQueryOptions(service, section.key, directoryId, sort));
@@ -22,6 +23,8 @@ export function useDirectoryListing() {
 
   return {
     section,
+    /** The open folder; undefined at a section's root. */
+    folderId,
     items: listing.data ?? [],
     isLoading: listing.isPending,
     isRefreshing: listing.isFetching && !listing.isPending,

@@ -53,6 +53,26 @@ describe('HttpDashboardService', () => {
     expect(dashboard).toMatchObject({ id: 5, name: 'Sales', widgets: [{ id: 9, kind: 'text' }] });
   });
 
+  it('gets a dashboard as the server sent it', async () => {
+    const body = { id: 5, name: 'Sales', owner_id: 'root', boost_info: { enable: false }, widgets: [{ class_name: 'text_widget', id: 9 }] };
+    const { service, requests } = setup(body);
+
+    expect(await service.getJson(5)).toEqual(body);
+    expect(requests[0]).toMatchObject({ method: 'GET', url: 'http://api.test/dashboards/5' });
+  });
+
+  it('creates a dashboard from a whole body and reads the one the server stored', async () => {
+    // The local backend's reply to a copy: new widget ids, `extra_data` kept.
+    const { service, requests, sent } = setup({ id: 16, name: 'Sales copy', owner_id: 'root', widgets: [{ class_name: 'text_widget', id: 104, extra_data: { origin: 9 } }], widget_positions: {} });
+    const body = { name: 'Sales copy', parent_directory_id: -1, directory_type: 'dashboard', widgets: [{ class_name: 'text_widget', id: 9, extra_data: { origin: 9 } }], widget_positions: {} };
+
+    const dashboard = await service.createFrom(body);
+
+    expect(requests[0]).toMatchObject({ method: 'POST', url: 'http://api.test/dashboards/create' });
+    expect(sent()).toEqual(body);
+    expect(dashboard).toMatchObject({ id: 16, name: 'Sales copy', widgets: [{ id: 104, kind: 'text' }] });
+  });
+
   it('renames with to_name', async () => {
     const { service, requests, sent } = setup({ success: true });
 

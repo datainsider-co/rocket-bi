@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDi } from '@/app/di/DiContext';
+import { copyDashboard } from '@/core/dashboard/dashboardCopy';
 import { DashboardService } from '@/core/dashboard/DashboardService';
 import type { Directory } from '@/core/directory/Directory';
 import { DirectoryService } from '@/core/directory/DirectoryService';
@@ -25,6 +26,12 @@ export function useDirectoryMutations() {
     rename: useMutation({
       mutationFn: ({ directory, name }: { directory: Directory; name: string }) =>
         directory.isFolder ? directories.rename(directory.id, name) : dashboards.rename(directory.dashboardId, name),
+      onSettled
+    }),
+    // v1 "Duplicate" (into the open folder) and "Copy" (into a picked one), for dashboards and saved queries.
+    copy: useMutation({
+      mutationFn: ({ directory, parentId }: { directory: Directory; parentId: number }) =>
+        copyDashboard(dashboards, { dashboardId: directory.dashboardId, directoryType: directory.directoryType }, parentId),
       onSettled
     }),
     move: useMutation({

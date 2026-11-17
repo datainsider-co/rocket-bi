@@ -4,6 +4,8 @@ import { DirectoryAction } from '../../directory.utils';
 
 const ACTION_MENU: Record<DirectoryAction, { label: string; icon: string }> = {
   [DirectoryAction.Rename]: { label: 'Rename', icon: 'di-icon-rename' },
+  [DirectoryAction.Duplicate]: { label: 'Duplicate', icon: 'di-icon-duplicate' },
+  [DirectoryAction.Copy]: { label: 'Copy', icon: 'di-icon-copy-2' },
   [DirectoryAction.Move]: { label: 'Move to', icon: 'di-icon-move-folder' },
   [DirectoryAction.Star]: { label: 'Add to starred', icon: 'di-icon-add-to-star-converted' },
   [DirectoryAction.Unstar]: { label: 'Remove from starred', icon: 'di-icon-add-to-star-converted' },

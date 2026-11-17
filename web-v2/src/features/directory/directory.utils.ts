@@ -89,6 +89,11 @@ export function folderPath(id: number, name: string): string {
   return `/mydata/${toIdParam(id, name)}`;
 }
 
+/** Where a copy made into the folder `id` shows up: the folder, or All Data for the root. */
+export function copyDestinationPath(id: number, name: string): string {
+  return id === DefaultDirectoryId.MyData ? '/mydata' : folderPath(id, name);
+}
+
 
 /**
  * Where clicking a row goes. Folders always open under My Data, whatever the section, as in v1. Saved queries open in
@@ -151,6 +156,8 @@ export function createParentId(section: DirectorySection, folderId: number | und
 
 export const DirectoryAction = {
   Rename: 'rename',
+  Duplicate: 'duplicate',
+  Copy: 'copy',
   Move: 'move',
   Star: 'star',
   Unstar: 'unstar',
@@ -159,9 +166,10 @@ export const DirectoryAction = {
 
 export type DirectoryAction = (typeof DirectoryAction)[keyof typeof DirectoryAction];
 
-/** v1's settings menu, without Duplicate and Copy (they need the dashboard model and its password check). */
-export function menuActions(directory: Pick<Directory, 'isStarred'>, section: DirectorySection): DirectoryAction[] {
+/** v1's settings menu, in its order. Duplicate and Copy are for dashboards and saved queries: v1 can't copy a folder. */
+export function menuActions(directory: Pick<Directory, 'isStarred' | 'isFolder'>, section: DirectorySection): DirectoryAction[] {
   const actions: DirectoryAction[] = [DirectoryAction.Rename];
+  if (!directory.isFolder) actions.push(DirectoryAction.Duplicate, DirectoryAction.Copy);
   if (section === DirectorySection.MyData) actions.push(DirectoryAction.Move);
   actions.push(directory.isStarred ? DirectoryAction.Unstar : DirectoryAction.Star, DirectoryAction.Remove);
   return actions;
