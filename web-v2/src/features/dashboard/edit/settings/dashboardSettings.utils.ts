@@ -1,5 +1,5 @@
 import type { Dashboard } from '@/core/dashboard/Dashboard';
-import { MainDateFilterSetting } from '@/core/dashboard/DashboardSetting';
+import { MainDateFilterSetting, SizeUnit } from '@/core/dashboard/DashboardSetting';
 import { asRecord, getPath, isRecord, type JsonObject } from '@/core/json/json';
 import { DashboardThemeType } from '../../theme/dashboardThemes';
 
@@ -97,6 +97,23 @@ export function sharedRadius(draft: JsonObject, path: readonly string[], fallbac
 export function toPixels(text: string): number {
   const value = Number(text.trim());
   return text.trim() !== '' && Number.isFinite(value) && value >= 0 ? value : 0;
+}
+
+/** The dashboard's own padding, or undefined when the setting stores none and the page keeps v1's. */
+export function paddingOf(draft: JsonObject): number | undefined {
+  const value = draft['padding'];
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : undefined;
+}
+
+/** Sets the dashboard's padding; `null` (the input emptied) removes it, back to v1's. */
+export function withPadding(draft: JsonObject, padding: number | null): JsonObject {
+  const { padding: _removed, ...rest } = draft;
+  return padding === null ? rest : { ...rest, padding };
+}
+
+/** Whether the dashboard's width is in pixels, the only width "Disable Responsive" applies to. */
+export function isPixelWidth(draft: JsonObject): boolean {
+  return stringAt(draft, ['size', 'width_unit'], SizeUnit.Percent) === SizeUnit.Px;
 }
 
 /** v1 `DashboardDetail.onClickDashboardSetting` "Auto Refresh Data", in its order; 0 is Off. */

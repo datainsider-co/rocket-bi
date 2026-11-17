@@ -48,6 +48,12 @@ describe('dashboardCssVars', () => {
     });
   });
 
+  it('sets the padding only when the setting stores one, zero included', () => {
+    expect('--dashboard-padding' in dashboardCssVars(new DashboardSetting({}))).toBe(false);
+    expect(dashboardCssVars(new DashboardSetting({ padding: 0 }))).toMatchObject({ '--dashboard-padding': '0px' });
+    expect(dashboardCssVars(new DashboardSetting({ padding: 12 }))).toMatchObject({ '--dashboard-padding': '12px' });
+  });
+
   it('quotes the background image and uses fixed widths', () => {
     const vars = dashboardCssVars(
       new DashboardSetting({ background_image: { path: '/a b.png' }, size: { width: 1200, width_unit: 'px' } })

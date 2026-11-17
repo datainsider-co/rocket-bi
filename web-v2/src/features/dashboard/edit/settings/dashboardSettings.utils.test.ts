@@ -8,14 +8,17 @@ import {
   booleanAt,
   DARK_THEMES,
   errorMessage,
+  isPixelWidth,
   LIGHT_THEMES,
   numberAt,
+  paddingOf,
   settingDraft,
   sharedRadius,
   stringAt,
   toPixels,
   withAutoRefresh,
   withMainDate,
+  withPadding,
   withPath,
   withRadius,
   withTheme
@@ -168,5 +171,51 @@ describe('errorMessage', () => {
     expect(errorMessage(new Error('Dashboard not found'))).toBe('Dashboard not found');
     expect(errorMessage(new Error(''))).toBe('Cannot save the setting, please try again.');
     expect(errorMessage('boom')).toBe('Cannot save the setting, please try again.');
+  });
+});
+
+describe('paddingOf', () => {
+  it('reads a stored padding, zero included', () => {
+    expect(paddingOf({ padding: 12 })).toBe(12);
+    expect(paddingOf({ padding: 0 })).toBe(0);
+  });
+
+  it.each([[{}], [{ padding: null }], [{ padding: '12' }], [{ padding: -1 }], [{ padding: Number.NaN }]])('is undefined for %j', draft => {
+    expect(paddingOf(draft)).toBeUndefined();
+  });
+
+  it('is undefined for a dashboard saved without one, so its draft has no padding either', () => {
+    expect(paddingOf(settingDraft(dashboard))).toBeUndefined();
+  });
+});
+
+describe('withPadding', () => {
+  it('sets the padding and keeps the other keys', () => {
+    expect(withPadding({ theme_name: 'light_default' }, 8)).toEqual({ theme_name: 'light_default', padding: 8 });
+    expect(withPadding({ padding: 8 }, 0)).toEqual({ padding: 0 });
+  });
+
+  it('removes the padding when the input is emptied', () => {
+    expect(withPadding({ theme_name: 'light_default', padding: 8 }, null)).toEqual({ theme_name: 'light_default' });
+    expect(withPadding({}, null)).toEqual({});
+  });
+
+  it('does not change the draft it is given', () => {
+    const draft = { padding: 8 };
+    withPadding(draft, 20);
+    withPadding(draft, null);
+    expect(draft).toEqual({ padding: 8 });
+  });
+});
+
+describe('isPixelWidth', () => {
+  it('tells a width in pixels from a share of the page', () => {
+    expect(isPixelWidth({ size: { width: 1200, width_unit: 'px' } })).toBe(true);
+    expect(isPixelWidth({ size: { width: 100, width_unit: '%' } })).toBe(false);
+  });
+
+  it('is false without a stored size, which is 100%', () => {
+    expect(isPixelWidth({})).toBe(false);
+    expect(isPixelWidth(settingDraft(dashboard))).toBe(false);
   });
 });

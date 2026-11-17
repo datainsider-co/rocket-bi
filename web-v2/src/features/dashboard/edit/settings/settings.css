@@ -229,6 +229,24 @@
   line-height: 18px;
 }
 
+/* A switch with its label on the left and a hint below (v1 `.freeze-setting-block`). */
+.setting-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.setting-toggle > label {
+  font-size: 14px;
+}
+
+.setting-toggle__hint {
+  margin: 12px 0 0;
+  color: #8e8e93;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .setting-slider {
   margin-bottom: 8px;
 }

@@ -5,6 +5,8 @@ import { DashboardSetting, MainDateFilterSetting } from './DashboardSetting';
 const STORED = {
   version: '1',
   enable_overlap: true,
+  enable_freeze: true,
+  padding: 12,
   theme_name: 'dark_theme1',
   main_date_filter: { id: -99887766, mode: 'last_30_days' },
   border: {
@@ -59,6 +61,8 @@ describe('DashboardSetting', () => {
   it('uses v1 defaults when the server sends no setting', () => {
     const setting = new DashboardSetting(undefined);
     expect(setting.enableOverlap).toBe(false);
+    expect(setting.enableFreeze).toBe(false);
+    expect(setting.padding).toBeUndefined();
     expect(setting.themeName).toBe('light_default');
     expect(setting.mainDateFilter).toBeUndefined();
     expect(setting.border).toMatchObject({ width: 1, color: '#f2f2f7', colorOpacity: 100 });
@@ -91,6 +95,8 @@ describe('DashboardSetting', () => {
   it('reads every stored field', () => {
     const setting = new DashboardSetting(STORED);
     expect(setting.enableOverlap).toBe(true);
+    expect(setting.enableFreeze).toBe(true);
+    expect(setting.padding).toBe(12);
     expect(setting.themeName).toBe('dark_theme1');
     expect(setting.mainDateFilter).toMatchObject({ id: MainDateFilterSetting.ID, mode: 'last_30_days' });
     expect(setting.border.radius).toMatchObject({ topLeft: 1, topRight: 2, bottomRight: 3, bottomLeft: 4 });
@@ -104,5 +110,23 @@ describe('DashboardSetting', () => {
 
   it('writes back what it read', () => {
     expect(new DashboardSetting(STORED).toJson()).toEqual(STORED);
+  });
+
+  it('keeps a padding of zero and leaves an unset one out of the JSON', () => {
+    expect(new DashboardSetting({ padding: 0 }).padding).toBe(0);
+    expect(new DashboardSetting({ padding: 0 }).toJson()).toMatchObject({ padding: 0 });
+    expect('padding' in new DashboardSetting({}).toJson()).toBe(false);
+  });
+
+  it.each([[-5], ['12'], [null], [Number.NaN]])('treats the padding %j as unset', padding => {
+    expect(new DashboardSetting({ padding }).padding).toBeUndefined();
+  });
+
+  it('is frozen only when asked for on a width in pixels', () => {
+    const pixels = { width: 1200, width_unit: 'px' };
+    expect(new DashboardSetting({ enable_freeze: true, size: pixels }).isFrozen).toBe(true);
+    expect(new DashboardSetting({ enable_freeze: false, size: pixels }).isFrozen).toBe(false);
+    expect(new DashboardSetting({ enable_freeze: true, size: { width: 100, width_unit: '%' } }).isFrozen).toBe(false);
+    expect(new DashboardSetting({ enable_freeze: true }).isFrozen).toBe(false);
   });
 });

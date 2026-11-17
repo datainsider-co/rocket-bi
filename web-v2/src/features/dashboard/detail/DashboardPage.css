@@ -106,7 +106,10 @@ body.dashboard-theme .dashboard-page[data-mode='view'] {
   width: var(--dashboard-content-width, 1024px);
   min-height: 100%;
   margin: 0 auto;
-  padding: 25px 30px;
+  /* `--dashboard-padding` is the setting's padding, on every side; a setting without one keeps v1's. */
+  --dashboard-padding-y: var(--dashboard-padding, 25px);
+  --dashboard-padding-x: var(--dashboard-padding, 30px);
+  padding: var(--dashboard-padding-y) var(--dashboard-padding-x);
 }
 
 /*
@@ -116,16 +119,17 @@ body.dashboard-theme .dashboard-page[data-mode='view'] {
 .dashboard-content__corner {
   position: sticky;
   /* Where it sits unscrolled: the content's top padding, below the body's (sticky offsets start inside it). */
-  top: 25px;
+  top: var(--dashboard-padding-y);
   z-index: 1000;
   align-self: flex-end;
   height: 0;
 }
 
+/* 6px below the content's top edge and 16px inside its right one, whatever the padding (v1's -19px and -14px). */
 .dashboard-content__corner > * {
   position: absolute;
-  top: -19px;
-  right: -14px;
+  top: calc(6px - var(--dashboard-padding-y));
+  right: calc(16px - var(--dashboard-padding-x));
 }
 
 /* Loading and the load error, in the middle of the content box (v1 `.dashboard--content--loading`, `--error`). */
@@ -229,10 +233,12 @@ body.dashboard-theme .dashboard-page[data-mode='view'] {
   background: none;
 }
 
+/* The phone layout. A frozen dashboard ("Disable Responsive") keeps its width in pixels and scrolls sideways. */
 @media (max-width: 768px) {
-  .dashboard-content {
+  .dashboard-content:not([data-frozen]) {
+    --dashboard-padding-y: var(--dashboard-padding, 22px);
+    --dashboard-padding-x: var(--dashboard-padding, 20px);
     width: 100%;
-    padding: 22px 20px;
   }
 }
 
