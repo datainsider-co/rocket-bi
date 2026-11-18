@@ -6,16 +6,21 @@ import type { Directory } from '@/core/directory/Directory';
 import { DirectoryAction, DirectorySection, itemPath, typeLabel } from '../../directory.utils';
 import { directoryKeys } from '../../directoryQueries';
 import { useDirectoryMutations } from '../../useDirectoryMutations';
+import { useCopyActions } from './useCopyActions';
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Something went wrong';
 }
 
-/** What a row can do: open it, share it, the settings menu, and Trash's restore and delete. */
-export function useRowActions(section: DirectorySection) {
+/**
+ * What a row can do: open it, share it, the settings menu, and Trash's restore and delete. `parentId` is the folder
+ * the listing creates in, where Duplicate puts its copy.
+ */
+export function useRowActions(section: DirectorySection, parentId: number) {
   const { message, modal } = App.useApp();
   const navigate = useNavigate();
   const mutations = useDirectoryMutations();
+  const copies = useCopyActions(parentId);
   const [renaming, setRenaming] = useState<Directory | null>(null);
   const [moving, setMoving] = useState<Directory | null>(null);
   const [sharing, setSharing] = useState<Directory | null>(null);
@@ -44,6 +49,12 @@ export function useRowActions(section: DirectorySection) {
       case DirectoryAction.Rename:
         mutations.rename.reset();
         setRenaming(directory);
+        break;
+      case DirectoryAction.Duplicate:
+        copies.duplicate(directory);
+        break;
+      case DirectoryAction.Copy:
+        copies.picker.open(directory);
         break;
       case DirectoryAction.Move:
         setMoving(directory);
@@ -88,6 +99,8 @@ export function useRowActions(section: DirectorySection) {
       // v1 reloaded the listing after sharing.
       onShared: () => void queryClient.invalidateQueries({ queryKey: directoryKeys.all })
     },
+    copy: copies.picker,
+    password: copies.password,
     move: {
       target: moving,
       submit: (toParentId: number) => {

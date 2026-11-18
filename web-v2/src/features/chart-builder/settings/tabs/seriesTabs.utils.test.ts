@@ -242,6 +242,13 @@ describe('dataLabelPath / dataLabelSettingsOf', () => {
   });
 });
 
+describe('dataLabelPath / dataLabelSettingsOf for drilldown charts', () => {
+  it.each([ChartType.ColumnDrilldown, ChartType.BarDrilldown, ChartType.PieDrilldown])('puts %s labels under series, with the switch and the font only, like v1', chartType => {
+    expect(dataLabelPath(chartType)).toBe('plotOptions.series.dataLabels');
+    expect(dataLabelSettingsOf(chartType)).toEqual({ labelFormat: false, distance: false, position: false, condition: false });
+  });
+});
+
 describe('labelPositionOf', () => {
   it('reads the boolean v1 stored as inside or outside', () => {
     const viz = (inside: unknown) => ({ plotOptions: { funnel: { dataLabels: { inside } } } }) as VizOptions;
@@ -260,6 +267,16 @@ describe('dataLabelRevert', () => {
       'plotOptions.series.dataLabels.condition.max': { enabled: false, value: 100 }
     });
     expect(changes).not.toHaveProperty(['plotOptions.series.dataLabels.labelFormat']);
+  });
+
+  it('resets drilldown labels without a condition, a format or a distance', () => {
+    expect(dataLabelRevert(ChartType.PieDrilldown)).toEqual({
+      'plotOptions.series.dataLabels.enabled': false,
+      'plotOptions.series.dataLabels.style.fontSize': '12px',
+      'plotOptions.series.dataLabels.style.color': 'var(--text-color)',
+      'plotOptions.series.dataLabels.style.fontFamily': 'var(--widget-secondary-font-family, Roboto)',
+      'plotOptions.series.dataLabels.displayUnit': 'default'
+    });
   });
 
   it('resets pie labels with their format and distance', () => {

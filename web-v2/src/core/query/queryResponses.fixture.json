@@ -412,5 +412,119 @@
   ],
   "last_query_time": 2,
   "last_processing_time": 0
+ },
+ "drilldown_chart_setting": {
+  "class_name": "drilldown_response",
+  "name": "sales_channel",
+  "series": [
+   {
+    "name": "Offline",
+    "y": 127922581.88999999,
+    "drilldown": "Offline"
+   },
+   {
+    "name": "Online",
+    "y": 122848776.47999996,
+    "drilldown": "Online"
+   }
+  ],
+  "drilldown": [
+   {
+    "name": "Offline.C",
+    "id": "Offline.C",
+    "data": [
+     {
+      "name": "Asia",
+      "y": 2192780.31,
+      "drilldown": "Offline.C.Asia"
+     },
+     {
+      "name": "Australia and Oceania",
+      "y": 424435.3,
+      "drilldown": "Offline.C.Australia and Oceania"
+     },
+     {
+      "name": "Central America and the Caribbean",
+      "y": 256609.6,
+      "drilldown": "Offline.C.Central America and the Caribbean"
+     }
+    ]
+   },
+   {
+    "name": "Online",
+    "id": "Online",
+    "data": [
+     {
+      "name": "C",
+      "y": 19777009.72,
+      "drilldown": "Online.C"
+     },
+     {
+      "name": "H",
+      "y": 29771689.330000002,
+      "drilldown": "Online.H"
+     },
+     {
+      "name": "L",
+      "y": 36926333.349999994,
+      "drilldown": "Online.L"
+     },
+     {
+      "name": "M",
+      "y": 36373744.08,
+      "drilldown": "Online.M"
+     }
+    ]
+   },
+   {
+    "name": "Offline.H",
+    "id": "Offline.H",
+    "data": [
+     {
+      "name": "Asia",
+      "y": 2516005.77,
+      "drilldown": "Offline.H.Asia"
+     },
+     {
+      "name": "Australia and Oceania",
+      "y": 888563.52,
+      "drilldown": "Offline.H.Australia and Oceania"
+     },
+     {
+      "name": "Central America and the Caribbean",
+      "y": 6180780.8,
+      "drilldown": "Offline.H.Central America and the Caribbean"
+     }
+    ]
+   },
+   {
+    "name": "Offline",
+    "id": "Offline",
+    "data": [
+     {
+      "name": "C",
+      "y": 21043499.960000005,
+      "drilldown": "Offline.C"
+     },
+     {
+      "name": "H",
+      "y": 37934585.38999999,
+      "drilldown": "Offline.H"
+     },
+     {
+      "name": "L",
+      "y": 36436588.51,
+      "drilldown": "Offline.L"
+     },
+     {
+      "name": "M",
+      "y": 32507908.03,
+      "drilldown": "Offline.M"
+     }
+    ]
+   }
+  ],
+  "last_query_time": 0,
+  "last_processing_time": 0
  }
 }

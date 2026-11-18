@@ -30,10 +30,14 @@ function sizeCss(size: number, unit: string): string {
   return unit === SizeUnit.Auto ? 'auto' : `${size}${unit}`;
 }
 
-/** The variables `DashboardPage.css` reads (v1 `DashboardDetail.dashboardCssStyle`). */
+/**
+ * The variables `DashboardPage.css` reads (v1 `DashboardDetail.dashboardCssStyle`). `--dashboard-padding` is set only
+ * when the setting stores a padding; without it the stylesheet's own padding applies.
+ */
 export function dashboardCssVars(setting: DashboardSetting): CSSProperties {
-  const { background, backgroundImage: image, border, size } = setting;
+  const { background, backgroundImage: image, border, size, padding } = setting;
   return {
+    ...(padding !== undefined && { '--dashboard-padding': `${padding}px` }),
     '--dashboard-background-color': withAlpha(background.color, background.opacity),
     '--dashboard-background-image': image.path ? `url(${JSON.stringify(image.path)})` : 'none',
     '--dashboard-background-filter': `brightness(${image.brightness}%) contrast(${image.contrast}%) grayscale(${image.grayscale}%) opacity(${image.opacity}%)`,

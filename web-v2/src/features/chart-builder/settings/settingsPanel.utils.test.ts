@@ -20,6 +20,10 @@ describe('settingsKindOf', () => {
     expect(settingsKindOf(chartType)).toBe('point');
   });
 
+  it.each([ChartType.ColumnDrilldown, ChartType.BarDrilldown, ChartType.PieDrilldown])('gives %s the drilldown settings', chartType => {
+    expect(settingsKindOf(chartType)).toBe('drilldown');
+  });
+
   it('gives the parliament and the word cloud their own settings', () => {
     expect(settingsKindOf(ChartType.Parliament)).toBe('parliament');
     expect(settingsKindOf(ChartType.WordCloud)).toBe('wordCloud');

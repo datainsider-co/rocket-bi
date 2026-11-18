@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { dashboardFromJson } from '@/core/dashboard/Dashboard';
 import { DashboardService } from '@/core/dashboard/DashboardService';
 import { DefaultDirectoryId, Directory, DirectoryParents } from '@/core/directory/Directory';
 import { DirectoryService } from '@/core/directory/DirectoryService';
@@ -8,6 +9,7 @@ import { ShareService } from '@/core/share/ShareService';
 import { clearSession, saveSession } from '@/core/session/session';
 import { fakeAuthenticationService, renderAppAt } from '@/features/auth/testing';
 import { fakeShareService } from '@/features/share/testing';
+import { hashPassword } from '@/shared/security/hashPassword';
 import { fakeDashboardService, fakeDirectoryService } from '../testing';
 
 const OWNER = { username: 'root', full_name: 'Root User' };
@@ -22,6 +24,35 @@ const KPI = new Directory({
   is_starred: true,
   owner: OWNER
 });
+
+/** A dashboard with a tab holding one widget, and the copy the server makes of it: new ids, the tab still on the old one. */
+const KPI_SOURCE = {
+  id: 9,
+  name: 'KPI',
+  owner_id: 'root',
+  widgets: [
+    { class_name: 'text_widget', id: 3, content: 'a' },
+    { class_name: 'tab_widget', id: 12, tab_items: [{ name: 'Tab', widget_ids: [3] }] }
+  ],
+  widget_positions: {}
+};
+const KPI_COPY = {
+  id: 16,
+  name: 'KPI copy',
+  owner_id: 'root',
+  widgets: [
+    { class_name: 'tab_widget', id: 111, tab_items: [{ name: 'Tab', widget_ids: [3] }], extra_data: { origin: 12 } },
+    { class_name: 'text_widget', id: 104, content: 'a', extra_data: { origin: 3 } }
+  ],
+  widget_positions: {}
+};
+
+function copyingDashboards() {
+  return fakeDashboardService({
+    getJson: vi.fn<DashboardService['getJson']>(async () => KPI_SOURCE),
+    createFrom: vi.fn<DashboardService['createFrom']>(async () => dashboardFromJson(KPI_COPY))
+  });
+}
 
 function renderAt(path: string, directories: DirectoryService, dashboards = fakeDashboardService(), share = fakeShareService()) {
   return renderAppAt(path, fakeAuthenticationService(), [
@@ -161,6 +192,83 @@ describe('directory listing', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: 'Select' }));
 
     await waitFor(() => expect(service.move).toHaveBeenCalledWith(2, 5));
+  });
+
+  it('duplicates a dashboard into the open folder and points its tabs at the copied widgets', async () => {
+    const service = fakeDirectoryService({ list: vi.fn<DirectoryService['list']>(async () => [KPI, SALES]) });
+    const dashboards = copyingDashboards();
+    renderAt('/mydata', service, dashboards);
+
+    await openSettings('Sales');
+    // v1 can't copy a folder.
+    expect(await screen.findByText('Rename')).toBeInTheDocument();
+    expect(screen.queryByText('Duplicate')).not.toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+
+    await openSettings('KPI');
+    await userEvent.click(await screen.findByText('Duplicate'));
+
+    await waitFor(() => expect(dashboards.editWidget).toHaveBeenCalledTimes(1));
+    expect(dashboards.getJson).toHaveBeenCalledWith(9);
+    expect(dashboards.createFrom).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'KPI copy', parent_directory_id: DefaultDirectoryId.MyData, directory_type: 'dashboard' })
+    );
+    expect(dashboards.editWidget).toHaveBeenCalledWith(16, expect.objectContaining({ id: 111, tab_items: [{ name: 'Tab', widget_ids: [104] }] }));
+    // The listing is read again, so the copy shows.
+    await waitFor(() => expect(vi.mocked(service.list).mock.calls.length).toBeGreaterThan(1));
+  });
+
+  it('copies a dashboard into a picked folder and opens that folder', async () => {
+    const service = fakeDirectoryService({
+      list: vi.fn<DirectoryService['list']>(async id => (id === 5 ? [] : [ARCHIVE, KPI])),
+      getParents: vi.fn<DirectoryService['getParents']>(
+        async () => new DirectoryParents({ root_directory: { id: 1, parent_id: -1 }, is_all: true, parent_directories: [{ id: 1, parent_id: -1 }, { id: 5, name: 'Archive', parent_id: 1 }] })
+      )
+    });
+    const dashboards = copyingDashboards();
+    renderAt('/mydata', service, dashboards);
+
+    await openSettings('KPI');
+    await userEvent.click(await screen.findByText('Copy'));
+    const dialog = await screen.findByRole('dialog', { name: 'Copy "KPI" to' });
+    await userEvent.click(await within(dialog).findByText('Archive'));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Select' }));
+
+    await waitFor(() => expect(dashboards.createFrom).toHaveBeenCalledWith(expect.objectContaining({ name: 'KPI copy', parent_directory_id: 5 })));
+    // It then shows the folder the copy went into (the picker never asks for a folder's parents).
+    await waitFor(() => expect(service.getParents).toHaveBeenCalledWith(5));
+  });
+
+  it('asks for the password of a protected dashboard before copying it', async () => {
+    const locked = new Directory({ ...KPI.toJson(), data: { config: { enabled: true, hashed_password: hashPassword('s3cret') } } });
+    const service = fakeDirectoryService({ list: vi.fn<DirectoryService['list']>(async () => [locked]) });
+    const dashboards = copyingDashboards();
+    renderAt('/mydata', service, dashboards);
+
+    await openSettings('KPI');
+    await userEvent.click(await screen.findByText('Duplicate'));
+    const dialog = await screen.findByRole('dialog', { name: 'Password Validation' });
+    await userEvent.type(within(dialog).getByLabelText('Password'), 'wrong');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Access' }));
+    expect(await within(dialog).findByText('Password is incorrect!')).toBeInTheDocument();
+    expect(dashboards.getJson).not.toHaveBeenCalled();
+
+    await userEvent.clear(within(dialog).getByLabelText('Password'));
+    await userEvent.type(within(dialog).getByLabelText('Password'), 's3cret');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Access' }));
+    await waitFor(() => expect(dashboards.createFrom).toHaveBeenCalled());
+  });
+
+  it('says so when the copy was made but its tabs could not be saved', async () => {
+    const service = fakeDirectoryService({ list: vi.fn<DirectoryService['list']>(async () => [KPI]) });
+    const dashboards = copyingDashboards();
+    vi.mocked(dashboards.editWidget).mockRejectedValue(new Error('boom'));
+    renderAt('/mydata', service, dashboards);
+
+    await openSettings('KPI');
+    await userEvent.click(await screen.findByText('Duplicate'));
+
+    expect(await screen.findByText('"KPI copy" was created, but its tabs could not be updated. Please try again.')).toBeInTheDocument();
   });
 
   it('stars and removes from the settings menu', async () => {

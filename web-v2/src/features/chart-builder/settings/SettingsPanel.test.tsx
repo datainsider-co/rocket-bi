@@ -67,6 +67,29 @@ describe('SettingsPanel', () => {
     expect(screen.getByText('Label style')).toBeInTheDocument();
   });
 
+  it.each([ChartType.ColumnDrilldown, ChartType.BarDrilldown, ChartType.PieDrilldown])("gives %s v1's drilldown tabs, its labels a switch and a font only", async chartType => {
+    renderPanel(chartType);
+    const tabs = ['Title & Subtitle', 'Data Color', 'Data Label', 'Background', 'Tooltip', 'Other'];
+    for (const tab of tabs) expect(screen.getByText(tab)).toBeInTheDocument();
+    for (const absent of ['Legend', 'X Axis', 'Y Axis', 'General']) expect(screen.queryByText(absent)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByText('Data Label'));
+    expect(screen.queryByText('Label style')).not.toBeInTheDocument();
+    expect(screen.queryByText('Label position')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByText('Other'));
+    expect(screen.getByText('Enable external filter')).toBeInTheDocument();
+    expect(screen.queryByText('Enable drilldown')).not.toBeInTheDocument();
+    expect(screen.queryByText('Enable cross filter')).not.toBeInTheDocument();
+  });
+
+  it("stores a drilldown chart's label switch under the series and its first level, as v1 did", async () => {
+    renderPanel(ChartType.PieDrilldown);
+    await userEvent.click(screen.getByText('Data Label'));
+    await userEvent.click(screen.getByRole('switch', { name: 'On' }));
+    expect(options()['plot_options']).toMatchObject({ series: { data_labels: { enabled: true }, levels: [{ data_labels: { enabled: true } }] } });
+    await userEvent.click(screen.getAllByRole('button', { name: /revert/i }).at(-1)!);
+    expect(options()['plot_options']).toMatchObject({ series: { data_labels: { enabled: false }, levels: [{ data_labels: { enabled: false, style: { color: 'var(--text-color)' } } }] } });
+  });
+
   it('lets tables turn their title off', async () => {
     renderPanel(ChartType.Table);
     await userEvent.click(screen.getByRole('switch', { name: 'Title' }));

@@ -91,6 +91,30 @@ export interface WordCloudResponse {
   readonly data: readonly { readonly name: string; readonly weight: number }[];
 }
 
+/** One point of a drilldown chart: a value of a legend and what it sums to. */
+export interface DrilldownPoint {
+  readonly name: string;
+  readonly y: number | null;
+  /** The id of the level under the point; the server sets one on every point, the last legend's included. */
+  readonly drilldown?: string;
+}
+
+/** The points under one point of the level above; `id` is the path to it, legend values joined by dots. */
+export interface DrilldownLevel {
+  readonly id: string;
+  readonly name: string;
+  readonly data: readonly DrilldownPoint[];
+}
+
+/** The first legend's points and every level under them (`drilldown_response`): drilldown column, bar and pie. */
+export interface DrilldownResponse {
+  readonly kind: 'drilldown';
+  /** The first legend's name. */
+  readonly name: string;
+  readonly series: readonly DrilldownPoint[];
+  readonly drilldown: readonly DrilldownLevel[];
+}
+
 export interface UnsupportedResponse {
   readonly kind: 'unsupported';
   readonly className: string;
@@ -103,6 +127,7 @@ export type VisualizationResponse =
   | JsonTableResponse
   | GenericResponse
   | WordCloudResponse
+  | DrilldownResponse
   | UnsupportedResponse;
 
 function toNullableNumber(value: unknown): number | null {
@@ -148,6 +173,16 @@ function minMaxValuesOf(value: unknown): { minMaxValues?: MinMaxValue[] } {
       return min === null || max === null ? [] : [{ valueName: asString(item['value_name']), min, max }];
     });
   return values.length > 0 ? { minMaxValues: values } : {};
+}
+
+function drilldownPointFromJson(value: unknown): DrilldownPoint {
+  const json = asRecord(value);
+  const drilldown = json['drilldown'];
+  return {
+    name: String(json['name'] ?? ''),
+    y: toNullableNumber(json['y']),
+    ...(drilldown !== undefined && drilldown !== null && { drilldown: String(drilldown) })
+  };
 }
 
 function stringList(value: unknown): string[] {
@@ -206,6 +241,16 @@ export function visualizationResponseFromJson(value: unknown): VisualizationResp
           return { name: asString(word['name']), weight: asNumber(word['weight']) };
         })
       };
+    case 'drilldown_response':
+      return {
+        kind: 'drilldown',
+        name: asString(json['name']),
+        series: asArray(json['series']).map(drilldownPointFromJson),
+        drilldown: asArray(json['drilldown']).map(item => {
+          const level = asRecord(item);
+          return { id: String(level['id'] ?? ''), name: asString(level['name']), data: asArray(level['data']).map(drilldownPointFromJson) };
+        })
+      };
     default:
       return { kind: 'unsupported', className };
   }
@@ -224,6 +269,8 @@ export function responseHasData(response: VisualizationResponse): boolean {
       return response.records.length > 0;
     case 'word_cloud':
       return response.data.length > 0;
+    case 'drilldown':
+      return response.series.length > 0;
     case 'unsupported':
       return true;
   }

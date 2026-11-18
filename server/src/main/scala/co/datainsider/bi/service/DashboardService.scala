@@ -69,6 +69,8 @@ trait DashboardService {
   def updateDashboard(orgId: Long, dashboardId: Long, newDashboard: Dashboard): Future[Boolean]
 
   def cleanup(orgId: Long): Future[Boolean]
+
+  def editMultiWidgets(request: EditMultiWidgetRequest): Future[Boolean]
 }
 
 class DashboardServiceImpl @Inject() (
@@ -80,7 +82,7 @@ class DashboardServiceImpl @Inject() (
     shareService: ShareService,
     drillThroughService: DrillThroughService,
     boostScheduleService: BoostScheduleService,
-    chartResponseRepository: ChartResponseRepository,
+    chartResponseRepository: ChartResponseRepository
 ) extends DashboardService {
   private val idGenerator = I32IdGenerator("bi-service", "widget_id", ssdb)
 
@@ -239,6 +241,24 @@ class DashboardServiceImpl @Inject() (
     } yield response
   }
 
+  override def editMultiWidgets(request: EditMultiWidgetRequest): Future[Boolean] = {
+    val orgId: Long = getOrgId(request.currentOrganizationId)
+    for {
+      dashboard <- fetch(orgId, request.dashboardId)
+      directoryId <- getDirectoryId(orgId, request.dashboardId)
+      _ <- directoryService.updateUpdatedDate(orgId, directoryId)
+      newDashboard = dashboard.copy(widgets = Some(copyWidgetsInfo(dashboard, request.widgets)))
+      response <- dashboardRepository.updateWidgets(
+        orgId,
+        request.dashboardId,
+        newDashboard.widgets,
+        newDashboard.widgetPositions
+      )
+      // from the widgets just saved, as editWidget does: the fetched dashboard still holds the old ones
+      _ <- drillThroughService.updateDrillThroughFields(newDashboard)
+    } yield response
+  }
+
   override def deleteWidget(request: DeleteWidgetRequest): Future[Boolean] = {
     val orgId: Long = getOrgId(request.currentOrganizationId)
 
@@ -314,6 +334,16 @@ class DashboardServiceImpl @Inject() (
     val updatedWidget: Widget = newWidget.copyInfo(oldWidget)
     dashboard.widgets.get.update(index, updatedWidget)
     dashboard
+  }
+
+  /**
+    * widgets of an edit request with the id, creator and owner of the stored widget each one replaces, as editWidget
+    * does through updateWidgetInfo. A widget the dashboard does not have yet is kept as sent.
+    */
+  private def copyWidgetsInfo(dashboard: Dashboard, newWidgets: Array[Widget]): Array[Widget] = {
+    val oldWidgets: Map[WidgetId, Widget] =
+      dashboard.widgets.getOrElse(Array.empty[Widget]).map(widget => widget.id -> widget).toMap
+    newWidgets.map(newWidget => oldWidgets.get(newWidget.id).map(newWidget.copyInfo).getOrElse(newWidget))
   }
 
   private def updatePositionsInfo(dashboard: Dashboard, positions: Option[Map[WidgetId, Position]]): Dashboard = {
@@ -454,7 +484,8 @@ class DashboardServiceImpl @Inject() (
       )
       newPositions: Map[WidgetId, Position] =
         // workaround for avoid java.lang.ClassCastException: java.lang.String cannot be cast to java.lang.Long
-        Serializer.fromJson[Map[WidgetId, Position]](Serializer.toJson(request.widgetPositions))
+        Serializer
+          .fromJson[Map[WidgetId, Position]](Serializer.toJson(request.widgetPositions))
           .map {
             case (oldId: WidgetId, position: Position) => {
               val newId: Option[WidgetId] = newWidgetAsMap.get(oldId).map(_.id)
@@ -474,10 +505,15 @@ class DashboardServiceImpl @Inject() (
     )
   }
 
-  override def updateDashboard(orgId: DashboardId, dashboardId: DashboardId, newDashboard: Dashboard): Future[Boolean] = {
+  override def updateDashboard(
+      orgId: DashboardId,
+      dashboardId: DashboardId,
+      newDashboard: Dashboard
+  ): Future[Boolean] = {
     for {
       isUpdatedDashboard <- dashboardRepository.update(orgId, dashboardId, newDashboard)
-      isUpdatedWidget <- dashboardRepository.updateWidgets(orgId, dashboardId, newDashboard.widgets, newDashboard.widgetPositions)
+      isUpdatedWidget <-
+        dashboardRepository.updateWidgets(orgId, dashboardId, newDashboard.widgets, newDashboard.widgetPositions)
       _ <- setupPerformanceBoost(newDashboard.boostInfo, newDashboard)
     } yield isUpdatedDashboard && isUpdatedWidget
   }

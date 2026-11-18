@@ -116,6 +116,10 @@ describe('otherSettingsOf', () => {
     expect(otherSettingsOf(ChartType.Lollipop)).toMatchObject({ drilldown: false, zoom: false });
   });
 
+  it.each([ChartType.ColumnDrilldown, ChartType.BarDrilldown, ChartType.PieDrilldown])('gives %s number formats and nothing to switch but the external filter, like v1', chartType => {
+    expect(otherSettingsOf(chartType)).toEqual({ numberFormat: true, thousandSeparator: true, crossFilter: false, drilldown: false, zoom: false });
+  });
+
   it('gives a spline no drilldown or zoom, like v1', () => {
     expect(otherSettingsOf(ChartType.Spline)).toMatchObject({ drilldown: false, zoom: false });
   });
@@ -128,6 +132,8 @@ describe('displayUnitPath', () => {
     [ChartType.Funnel, 'plotOptions.funnel.dataLabels.displayUnit'],
     [ChartType.Pyramid, 'plotOptions.pyramid.dataLabels.displayUnit'],
     [ChartType.VariablePie, 'plotOptions.series.dataLabels.displayUnit'],
+    [ChartType.BarDrilldown, 'plotOptions.series.dataLabels.displayUnit'],
+    [ChartType.PieDrilldown, 'plotOptions.series.dataLabels.displayUnit'],
     [ChartType.Table, 'plotOptions.table.dataLabels.displayUnit'],
     [ChartType.CollapseTable, 'plotOptions.table.dataLabels.displayUnit'],
     [ChartType.Number, 'plotOptions.kpi.dataLabels.displayUnit']

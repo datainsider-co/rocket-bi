@@ -6,7 +6,9 @@ import {
   DirectoryAction,
   DirectorySection,
   buildSorts,
+  copyDestinationPath,
   createParentId,
+  folderPath,
   formatDateTime,
   getSection,
   itemPath,
@@ -147,20 +149,51 @@ describe('createParentId', () => {
 });
 
 describe('menuActions', () => {
+  const folderRow = { isStarred: false, isFolder: true };
+  const dashboardRow = { isStarred: false, isFolder: false };
+
   it('offers move only in My Data', () => {
-    expect(menuActions({ isStarred: false }, DirectorySection.MyData)).toEqual([
+    expect(menuActions(folderRow, DirectorySection.MyData)).toEqual([
       DirectoryAction.Rename,
       DirectoryAction.Move,
       DirectoryAction.Star,
       DirectoryAction.Remove
     ]);
-    expect(menuActions({ isStarred: false }, DirectorySection.Recent)).not.toContain(DirectoryAction.Move);
+    expect(menuActions(folderRow, DirectorySection.Recent)).not.toContain(DirectoryAction.Move);
+  });
+
+  it('offers duplicate and copy for dashboards and saved queries, in v1 order, in every section', () => {
+    expect(menuActions(dashboardRow, DirectorySection.MyData)).toEqual([
+      DirectoryAction.Rename,
+      DirectoryAction.Duplicate,
+      DirectoryAction.Copy,
+      DirectoryAction.Move,
+      DirectoryAction.Star,
+      DirectoryAction.Remove
+    ]);
+    expect(menuActions(dashboardRow, DirectorySection.Shared)).toEqual([
+      DirectoryAction.Rename,
+      DirectoryAction.Duplicate,
+      DirectoryAction.Copy,
+      DirectoryAction.Star,
+      DirectoryAction.Remove
+    ]);
   });
 
   it('offers unstar for a starred item', () => {
-    const actions = menuActions({ isStarred: true }, DirectorySection.Starred);
+    const actions = menuActions({ isStarred: true, isFolder: true }, DirectorySection.Starred);
     expect(actions).toContain(DirectoryAction.Unstar);
     expect(actions).not.toContain(DirectoryAction.Star);
+  });
+});
+
+describe('copyDestinationPath', () => {
+  it('is the folder the copy went into', () => {
+    expect(copyDestinationPath(12, 'Q3 Reports')).toBe(folderPath(12, 'Q3 Reports'));
+  });
+
+  it('is All Data for the root', () => {
+    expect(copyDestinationPath(DefaultDirectoryId.MyData, 'My Data')).toBe('/mydata');
   });
 });
 

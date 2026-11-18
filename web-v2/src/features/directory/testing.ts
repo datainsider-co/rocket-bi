@@ -40,6 +40,10 @@ export function fakeDashboardService(overrides: Partial<DashboardService> = {}):
     get: vi.fn<DashboardService['get']>(async () => {
       throw new Error('not stubbed');
     }),
+    getJson: vi.fn<DashboardService['getJson']>(async () => {
+      throw new Error('not stubbed');
+    }),
+    createFrom: vi.fn<DashboardService['createFrom']>(async body => dashboardFromJson({ ...body, id: 52, owner_id: 'root' })),
     create: vi.fn<DashboardService['create']>(async name => new DashboardSummary({ id: 50, name })),
     // Ids from 300 on, in order, as the server gives them.
     createQuery: vi.fn<DashboardService['createQuery']>(async (name, _parentId, widgets) =>

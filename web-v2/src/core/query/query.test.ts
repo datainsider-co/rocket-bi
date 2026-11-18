@@ -62,6 +62,36 @@ describe('visualizationResponseFromJson', () => {
     expect(responseHasData(visualizationResponseFromJson({ class_name: 'word_cloud_response', data: [] }))).toBe(false);
   });
 
+  it('reads a drilldown response: the first level, and the levels under its points by id', () => {
+    // Legends sales_channel, order_priority, region on the local backend; levels cut to four, the last ones to 3 points.
+    const response = visualizationResponseFromJson(responses.drilldown_chart_setting);
+    expect(response).toMatchObject({
+      kind: 'drilldown',
+      name: 'sales_channel',
+      series: [
+        { name: 'Offline', y: 127922581.88999999, drilldown: 'Offline' },
+        { name: 'Online', y: 122848776.47999996, drilldown: 'Online' }
+      ]
+    });
+    const levels = response.kind === 'drilldown' ? response.drilldown : [];
+    expect(levels.map(level => level.id)).toEqual(['Offline.C', 'Online', 'Offline.H', 'Offline']);
+    expect(levels[0]).toMatchObject({ name: 'Offline.C', data: [{ name: 'Asia', y: 2192780.31, drilldown: 'Offline.C.Asia' }, {}, {}] });
+    expect(responseHasData(response)).toBe(true);
+  });
+
+  it('reads a drilldown response with nothing in it, ids that are numbers and values that are not', () => {
+    const empty = visualizationResponseFromJson({ class_name: 'drilldown_response', name: 'region', series: [], drilldown: [] });
+    expect(empty).toEqual({ kind: 'drilldown', name: 'region', series: [], drilldown: [] });
+    expect(responseHasData(empty)).toBe(false);
+    const odd = { class_name: 'drilldown_response', series: [{ name: 2019, y: null, drilldown: 2019 }, { name: 'x', y: 1 }], drilldown: [{ id: 2019, data: [{ y: 'n/a' }] }] };
+    expect(visualizationResponseFromJson(odd)).toEqual({
+      kind: 'drilldown',
+      name: '',
+      series: [{ name: '2019', y: null, drilldown: '2019' }, { name: 'x', y: 1 }],
+      drilldown: [{ id: '2019', name: '', data: [{ name: '', y: null }] }]
+    });
+  });
+
   it("keeps a scatter's and a bubble's points as the server sent them", () => {
     const json = { class_name: 'series_two_response', series: [{ name: 'Online', data: [[651.21, 9247, 3.5]] }] };
     const response = visualizationResponseFromJson(json);

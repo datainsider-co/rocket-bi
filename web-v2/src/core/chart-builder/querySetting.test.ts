@@ -66,6 +66,33 @@ describe('buildSetting', () => {
     expect(canBuildSetting(data(ChartType.Funnel, { legend: configs.legend }))).toBe(false);
   });
 
+  it.each([ChartType.ColumnDrilldown, ChartType.BarDrilldown, ChartType.PieDrilldown])('builds %s from every legend, in order, and its value', chartType => {
+    const legends = [item({}), item({ id: 2, name: 'channel', field: field('sales_channel', 'string') })];
+    const value = item({ id: 3, name: 'revenue', field: field('total_revenue', 'double'), function_family: 'Aggregation', function_type: 'Sum', sorting: 'Descending' });
+    const setting = buildSetting(data(chartType, { legends, value: [value] }), { options: { class_name: 'x' } });
+    expect(setting).toMatchObject({
+      class_name: 'drilldown_chart_setting',
+      legends: [
+        { name: 'region', function: { class_name: 'group', field: field('region', 'string') } },
+        { name: 'channel', function: { class_name: 'group', field: field('sales_channel', 'string') } }
+      ],
+      value: { name: 'revenue', function: { class_name: 'sum', field: field('total_revenue', 'double') } },
+      filters: [],
+      sorts: [{ function: { class_name: 'sum' }, order: 'DESC' }],
+      options: { class_name: 'x' }
+    });
+    expect(Object.keys(setting ?? {}).sort()).toEqual(['class_name', 'filters', 'legends', 'options', 'parameters', 'sorts', 'sql_views', 'value']);
+  });
+
+  it('needs a legend and a value for a drilldown chart', () => {
+    const legends = [item({})];
+    const value = [item({ id: 2, name: 'n', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Sum' })];
+    expect(canBuildSetting(data(ChartType.ColumnDrilldown, { legends, value }))).toBe(true);
+    expect(canBuildSetting(data(ChartType.ColumnDrilldown, { legends }))).toBe(false);
+    expect(canBuildSetting(data(ChartType.PieDrilldown, { value }))).toBe(false);
+    expect(canBuildSetting(data(ChartType.BarDrilldown, { legends: [], value }))).toBe(false);
+  });
+
   it('builds the word cloud from its legend and its value', () => {
     const value = item({ id: 2, name: 'units', field: field('units_sold', 'int32'), function_family: 'Aggregation', function_type: 'Maximum' });
     const setting = buildSetting(data(ChartType.WordCloud, { legend: [item({})], value: [value] }), { options: {} });

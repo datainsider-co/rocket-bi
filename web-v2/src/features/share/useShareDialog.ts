@@ -9,7 +9,7 @@ import { useUserSearch } from '@/shared/user/useUserSearch';
 import type { ShareOptions, ShareTarget } from './share.utils';
 import { embedCode, levelOptions, peopleResourceOf, shareLink, sharedSummary } from './share.utils';
 import { useApplyShare } from './useApplyShare';
-import { useCopyText } from './useCopyText';
+import { useCopyText } from '@/shared/hooks/useCopyText';
 
 /** The two sections are never open together (v1). */
 type Section = 'people' | 'link';

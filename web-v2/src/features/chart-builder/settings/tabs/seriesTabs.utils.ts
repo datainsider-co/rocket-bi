@@ -239,6 +239,7 @@ export const DATA_LABEL_DEFAULTS = {
 
 const PIES = new Set<string>([ChartType.Pie, ChartType.SemiPie, ChartType.Donut]);
 const FUNNELS = new Set<string>([ChartType.Funnel, ChartType.Pyramid]);
+const DRILLDOWNS = new Set<string>([ChartType.ColumnDrilldown, ChartType.BarDrilldown, ChartType.PieDrilldown]);
 
 /**
  * Where the chart's data labels live (v1 `DataLabelTab.seriesKey`): under its own Highcharts type, a series' and the
@@ -253,12 +254,14 @@ export function dataLabelPath(chartType: string): string {
 
 /**
  * Which data label settings a chart has (v1 `DataLabelTab`): label format on pies, funnels and pyramids, distance on
- * pies, inside or outside on funnels and pyramids, a min / max condition on series.
+ * pies, inside or outside on funnels and pyramids, a min / max condition on series. The variable pie and the drilldown
+ * charts have the switch and the font only.
  */
 export function dataLabelSettingsOf(chartType: string) {
   const pie = PIES.has(chartType);
   const funnel = FUNNELS.has(chartType);
-  return { labelFormat: pie || funnel, distance: pie, position: funnel, condition: !pie && !funnel && chartType !== ChartType.VariablePie };
+  const plain = chartType === ChartType.VariablePie || DRILLDOWNS.has(chartType);
+  return { labelFormat: pie || funnel, distance: pie, position: funnel, condition: !pie && !funnel && !plain };
 }
 
 /** v1 stored the position as `inside`, a boolean. */

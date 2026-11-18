@@ -100,6 +100,11 @@ export class SizeInfo extends Deneric {
   widthUnit: string = SizeUnit.Percent;
   heightUnit: string = SizeUnit.Auto;
 
+  /** A fixed width in pixels, as opposed to a share of the page. */
+  get isPixelMode(): boolean {
+    return this.widthUnit === SizeUnit.Px;
+  }
+
   constructor(json?: unknown) {
     super({
       width: ['width', Number],
@@ -211,6 +216,16 @@ export class MainDateFilterSetting extends Deneric {
 export class DashboardSetting extends Deneric {
   version = '1';
   enableOverlap = false;
+  /**
+   * "Disable Responsive": a dashboard with a width in pixels keeps that width and its columns on a phone. Read it
+   * through `isFrozen`, which also checks the width's unit.
+   */
+  enableFreeze = false;
+  /**
+   * Px between the dashboard's edge and its widgets, on every side. Undefined when the stored setting has none: the
+   * page then keeps v1's `25px 30px` (`22px 20px` on a phone).
+   */
+  padding?: number;
   /** A `DashboardThemeType` value; v1 fell back to the app's light/dark default. */
   themeName = 'light_default';
   mainDateFilter?: MainDateFilterSetting;
@@ -225,6 +240,7 @@ export class DashboardSetting extends Deneric {
     super({
       version: ['version', String],
       enableOverlap: ['enable_overlap', Boolean],
+      enableFreeze: ['enable_freeze', Boolean],
       themeName: ['theme_name', String],
       border: ['border', BorderInfo],
       size: ['size', SizeInfo],
@@ -236,6 +252,14 @@ export class DashboardSetting extends Deneric {
     const mainDate = field(json, 'main_date_filter');
     this.mainDateFilter = mainDate ? new MainDateFilterSetting(mainDate) : undefined;
     this.fromJson(json);
+    // After `fromJson`, which knows no optional number: a padding that isn't a size of zero or more counts as unset.
+    const padding = field(json, 'padding');
+    this.padding = typeof padding === 'number' && Number.isFinite(padding) && padding >= 0 ? padding : undefined;
+  }
+
+  /** Whether the dashboard ignores the phone layout: asked for, and only with a width in pixels. */
+  get isFrozen(): boolean {
+    return this.enableFreeze && this.size.isPixelMode;
   }
 
   /**
@@ -252,7 +276,8 @@ export class DashboardSetting extends Deneric {
     return {
       ...(super.toJson() as Record<string, unknown>),
       widget_setting: this.widgetSetting.toJson(),
-      main_date_filter: this.mainDateFilter?.toJson()
+      main_date_filter: this.mainDateFilter?.toJson(),
+      ...(this.padding !== undefined && { padding: this.padding })
     };
   }
 }

@@ -42,6 +42,8 @@ export interface DrillThroughRequest {
 
 export interface DashboardService {
   get(id: number): Promise<Dashboard>;
+  /** `GET dashboards/{id}` as the server sent it: what a copy is made from, keys v2 doesn't model included. */
+  getJson(id: number): Promise<JsonObject>;
   /**
    * Creates an empty dashboard. v1 also sent a default `setting`; the server accepts none and v1 falls back to the
    * default setting when it reads one without it.
@@ -52,6 +54,11 @@ export interface DashboardService {
    * gives the widgets their ids, in order.
    */
   createQuery(name: string, parentDirectoryId: number, widgets: readonly JsonObject[]): Promise<Dashboard>;
+  /**
+   * Creates a dashboard or saved query from a whole `dashboards/create` body, widgets, positions and setting included
+   * (see `copyRequest`). The server gives the widgets new ids, in no particular order.
+   */
+  createFrom(body: JsonObject): Promise<Dashboard>;
   rename(id: number, name: string): Promise<void>;
   /**
    * Saves widget positions. The server rejects the request unless `positions` has exactly one entry per widget of
@@ -80,6 +87,14 @@ export class HttpDashboardService implements DashboardService {
 
   async get(id: number): Promise<Dashboard> {
     return dashboardFromJson(await this.http.get(`dashboards/${id}`).json());
+  }
+
+  async getJson(id: number): Promise<JsonObject> {
+    return asRecord(await this.http.get(`dashboards/${id}`).json());
+  }
+
+  async createFrom(body: JsonObject): Promise<Dashboard> {
+    return dashboardFromJson(await this.http.post('dashboards/create', { json: body }).json());
   }
 
   async create(name: string, parentDirectoryId: number): Promise<DashboardSummary> {

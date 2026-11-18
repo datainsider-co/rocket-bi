@@ -34,6 +34,13 @@ export const ChartType = {
   Donut: 'Donut',
   /** A pie whose slices also differ in depth, by an optional Weight (v1 `VariablepieChartOption`). */
   VariablePie: 'variablepie',
+  /**
+   * A column, bar or pie per value of the first legend; a click on one shows the next legend's values under it
+   * (v1 `DrilldownChartOption`, `DrilldownPieChartOption`).
+   */
+  ColumnDrilldown: 'column_drilldown',
+  BarDrilldown: 'bar_drilldown',
+  PieDrilldown: 'pie_drilldown',
   /** One dot per row, or per group once its Legend groups (v1 `ScatterChartOption`). */
   Scatter: 'scatter',
   /** Scatter with a third value as each dot's size (v1 `BubbleChartOption`). */

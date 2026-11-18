@@ -21,15 +21,19 @@ const PIES = new Set<string>([ChartType.Pie, ChartType.SemiPie, ChartType.Donut,
 /** Scatter and bubble (v1 `ScatterSetting`, `BubbleSetting`). */
 const POINTS = new Set<string>([ChartType.Scatter, ChartType.Bubble]);
 
+/** Drilldown column, bar and pie (v1 `DrilldownSetting`). */
+const DRILLDOWNS = new Set<string>([ChartType.ColumnDrilldown, ChartType.BarDrilldown, ChartType.PieDrilldown]);
+
 const TABLES = new Set<string>([ChartType.Table, ChartType.CollapseTable, ChartType.PivotTable]);
 
-export type SettingsKind = 'series' | 'stacked' | 'point' | 'wordCloud' | 'pie' | 'parliament' | 'number' | 'table' | 'filter';
+export type SettingsKind = 'series' | 'stacked' | 'point' | 'wordCloud' | 'drilldown' | 'pie' | 'parliament' | 'number' | 'table' | 'filter';
 
 /** Which settings a chart type has (v1 picked the component by viz option class); `undefined` while v2 has none. */
 export function settingsKindOf(chartType: string): SettingsKind | undefined {
   if (SERIES.has(chartType)) return 'series';
   if (STACKED.has(chartType)) return 'stacked';
   if (POINTS.has(chartType)) return 'point';
+  if (DRILLDOWNS.has(chartType)) return 'drilldown';
   if (PIES.has(chartType)) return 'pie';
   if (chartType === ChartType.Parliament) return 'parliament';
   if (chartType === ChartType.WordCloud) return 'wordCloud';

@@ -4,20 +4,26 @@ import { useFolderPicker } from './useFolderPicker';
 
 interface MoveDirectoryModalProps {
   directory: Directory;
-  onSelect: (toParentId: number) => void;
+  /** What happens to `directory` in the picked folder: `Move` by default, `Copy` for a copy. */
+  verb?: string;
+  /** The picked folder; its name is `My Data` for the root. */
+  onSelect: (toParentId: number, folderName: string) => void;
   onCancel: () => void;
 }
 
-/** Picks the folder to move `directory` into. Mount it only while moving, so each move starts at My Data. */
-export function MoveDirectoryModal({ directory, onSelect, onCancel }: MoveDirectoryModalProps) {
+/**
+ * Picks the folder to move or copy `directory` into (v1 `MyDataPickDirectory`). Mount it only while picking, so each
+ * time starts at My Data.
+ */
+export function MoveDirectoryModal({ directory, verb = 'Move', onSelect, onCancel }: MoveDirectoryModalProps) {
   const picker = useFolderPicker(directory.id);
 
   return (
     <Modal
       open
-      title={`Move "${directory.name}" to`}
+      title={`${verb} "${directory.name}" to`}
       okText="Select"
-      onOk={() => onSelect(picker.current.id)}
+      onOk={() => onSelect(picker.current.id, picker.current.name)}
       onCancel={onCancel}
     >
       <div className="mb-2 flex items-center gap-2">

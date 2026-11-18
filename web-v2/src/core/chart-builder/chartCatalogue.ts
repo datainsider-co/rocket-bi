@@ -99,6 +99,11 @@ const PARLIAMENT_ZONES = [
   groupZone('legend', 'Legend'),
   zone('value', 'Value', [F.Aggregation], { text: countDistinct, number: countDistinct, date: countDistinct }, { maxItems: 1 })
 ];
+/**
+ * v1 `TREE_MAP_CONFIGS`, which the drilldown charts use: any number of legends, each a level under the one before, and
+ * one value.
+ */
+const DRILLDOWN_ZONES = [zone('legends', 'Legends', [F.GroupBy, F.DateHistogram], GROUP_DEFAULTS), aggregationZone('value', 'Values', { maxItems: 1 })];
 const NUMBER_ZONES = [aggregationZone('value', 'Value', { maxItems: 1 })];
 const TABLE_ZONES = [zone('columns', 'Columns', [F.GroupBy, F.DateHistogram, F.Aggregation, F.None], NONE_DEFAULTS)];
 /** v1 `COLLAPSE_TABLE_CONFIGS`: the same zone, grouping text and dates and summing numbers by default. */
@@ -168,6 +173,9 @@ export const CHART_TYPES: readonly ChartTypeInfo[] = [
   chart(T.SemiPie, 'Semi Pie', 'ic_pie.svg', PIE_ZONES),
   chart(T.VariablePie, 'Variable Pie', 'ic_variable_pie.svg', VARIABLE_PIE_ZONES),
   chart(T.Donut, 'Donut', 'ic_donut.svg', PIE_ZONES),
+  chart(T.ColumnDrilldown, 'Drilldown Column', 'ic_column.svg', DRILLDOWN_ZONES),
+  chart(T.BarDrilldown, 'Drilldown Bar', 'ic_bar.svg', DRILLDOWN_ZONES),
+  chart(T.PieDrilldown, 'Drilldown Pie', 'ic_pie.svg', DRILLDOWN_ZONES),
   chart(T.Scatter, 'Scatter', 'ic_scatter.svg', SCATTER_ZONES),
   chart(T.Bubble, 'Bubble', 'ic_bubble.svg', BUBBLE_ZONES),
   chart(T.Funnel, 'Funnel', 'ic_funnel.svg', PIE_ZONES),
@@ -241,6 +249,9 @@ const V1_CHARTS: readonly (readonly [type: string, title: string])[] = [
   [T.SemiPie, 'Semi Pie'],
   [T.VariablePie, 'Variable Pie'],
   [T.Donut, 'Donut'],
+  [T.ColumnDrilldown, 'Drilldown Column'],
+  [T.BarDrilldown, 'Drilldown Bar'],
+  [T.PieDrilldown, 'Drilldown Pie'],
   [T.Scatter, 'Scatter'],
   [T.Bubble, 'Bubble'],
   [T.Funnel, 'Funnel'],
